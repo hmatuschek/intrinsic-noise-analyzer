@@ -1,0 +1,5 @@
+libsbml-cppnamespace (5.0.0-1) unstable; urgency=low
+
+  * Initial release 
+
+ -- Hannes Matuschek <hmatuschek@gmail.com>  Tue, 07 Feb 2012 18:03:03 +0100

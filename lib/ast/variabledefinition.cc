@@ -1,0 +1,141 @@
+#include "variabledefinition.hh"
+
+using namespace Fluc::Ast;
+
+
+VariableDefinition::VariableDefinition(Node::NodeType type, const std::string &id,
+                                       const Unit &unit, bool is_const)
+  : Definition(id, type), has_value(false), is_const(is_const), symbol(id),
+    value(), rule(0), unit(unit)
+{
+  // Done
+}
+
+
+VariableDefinition::VariableDefinition(Node::NodeType type, const std::string &id, GiNaC::ex value,
+                                       const Unit &unit, const std::string &name, bool is_const)
+  : Definition(id, name, type), has_value(true), is_const(is_const), symbol(id),
+    value(value), rule(0), unit(unit)
+{
+  // Done.
+}
+
+
+VariableDefinition::VariableDefinition(Node::NodeType type, const std::string &id, GiNaC::ex value, Rule *rule,
+                                       const Unit &unit, bool is_const)
+  : Definition(id, type), has_value(true), is_const(is_const), symbol(id),
+    value(value), rule(rule), unit(unit)
+{
+  // Done.
+}
+
+
+VariableDefinition::~VariableDefinition()
+{
+  // Free attached rule if there is one:
+  if (0 != this->rule)
+  {
+      delete this->rule;
+  }
+}
+
+
+bool
+VariableDefinition::isConst()
+{
+  return this->is_const;
+}
+
+
+bool
+VariableDefinition::hasValue()
+{
+  return this->has_value;
+}
+
+
+GiNaC::ex
+VariableDefinition::getValue()
+{
+  return this->value;
+}
+
+
+void
+VariableDefinition::setValue(GiNaC::ex value)
+{
+  this->value = value;
+}
+
+
+const GiNaC::symbol &
+VariableDefinition::getSymbol() const
+{
+  return this->symbol;
+}
+
+
+bool
+VariableDefinition::hasRule()
+{
+  return 0 != this->rule;
+}
+
+
+Rule *
+VariableDefinition::getRule()
+{
+  return this->rule;
+}
+
+
+void
+VariableDefinition::setRule(Rule *rule)
+{
+  this->rule = rule;
+}
+
+
+bool
+VariableDefinition::isDimensionLess() const
+{
+  return this->unit.isDimensionless();
+}
+
+
+const Unit &
+VariableDefinition::getUnit() const
+{
+  return this->unit;
+}
+
+
+void
+VariableDefinition::setUnit(const Unit &unit)
+{
+  this->unit = unit;
+}
+
+
+void
+VariableDefinition::dump(std::ostream &str)
+{
+  if (this->is_const)
+  {
+    str << "const " << this->getIdentifier();
+  }
+  else
+  {
+    str << "var " << this->getIdentifier();
+  }
+
+  if (this->hasValue())
+  {
+    str << " = " << this->value;
+  }
+
+  if (this->hasRule())
+  {
+    this->rule->dump(str);
+  }
+}

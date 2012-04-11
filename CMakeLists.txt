@@ -1,0 +1,197 @@
+cmake_minimum_required(VERSION 2.6)
+PROJECT(intrinsic-noise-analyzer)
+
+#
+# Register own CMake extensions:
+#
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
+
+
+#
+# Get default directories under Linux
+#
+IF(UNIX AND NOT APPLE)
+INCLUDE(GNUInstallDirs)
+ELSE()
+SET(CMAKE_INSTALL_LIBDIR "lib")
+ENDIF(UNIX AND NOT APPLE)
+
+
+#
+# Define Options:
+#
+OPTION(LLVM_ENGINE_ENABLED "Specifies if LLVM execution engine is enabled." OFF)
+
+
+#
+# Handle command line options/definitions:
+#
+if(EXECUTION_ENGINE STREQUAL "DIRECT")
+set(EXECUTION_ENGINE_DIRECT ON)
+add_definitions(-DEXECUTION_ENGINE=1)
+message(STATUS "Execution engine: direct evaluation (slow)")
+
+elseif(EXECUTION_ENGINE STREQUAL "BYTECODE_MP")
+set(EXECUTION_ENGINE_BYTECODE_MP ON)
+add_definitions(-DEXECUTION_ENGINE=3)
+message(STATUS "Execution engine: bytecode (OpenMP)")
+
+elseif(EXECUTION_ENGINE STREQUAL "LIBJIT")
+set(EXECUTION_ENGINE_LIBJIT ON)
+add_definitions(-DEXECUTION_ENGINE=4)
+message(STATUS "Execution engine: libjit (experimental)")
+
+elseif(EXECUTION_ENGINE STREQUAL "LLVM")
+set(EXECUTION_ENGINE_LLVM ON)
+add_definitions(-DEXECUTION_ENGINE=5)
+message(STATUS "Execution engine: LLVM (experimental)")
+
+else()
+set(EXECUTION_ENGINE_BYTECODE ON)
+add_definitions(-DEXECUTION_ENGINE=2)
+message(STATUS "Execution engine: bytecode")
+endif()
+
+
+#
+# MacOS X specific stuff:
+#
+IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+SET(CMAKE_OSX_DEPLOYMENT_TARGET 10.5)
+ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+
+
+#
+# Search for libraries
+#
+FIND_PACKAGE(Qt4 REQUIRED)
+INCLUDE(${QT_USE_FILE})
+ADD_DEFINITIONS(${QT_DEFINITIONS})
+INCLUDE_DIRECTORIES(${QT_QTCORE_INCLUDE_DIR} ${QT_QTGUI_INCLUDE_DIR})
+
+FIND_PACKAGE(Ginac REQUIRED)
+FIND_PACKAGE(LibSBML REQUIRED)
+FIND_PACKAGE(OpenMP REQUIRED)
+
+
+# If libjit is the default execution-engine -> libjit is required
+if(EXECUTION_ENGINE_LIBJIT)
+FIND_PACKAGE(LibJIT REQUIRED)
+# Otherwise, libjit is optional
+else(EXECUTION_ENGINE_LIBJIT)
+FIND_PACKAGE(LibJIT)
+endif(EXECUTION_ENGINE_LIBJIT)
+
+IF(LLVM_ENGINE_ENABLED)
+FIND_PACKAGE(LLVM)
+ENDIF(LLVM_ENGINE_ENABLED)
+
+
+#
+# Disable OpenMP on MacOSX.
+#
+IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+SET(OpenMP_CXX_FLAGS "")
+SET(OpenMP_C_FLAGS "")
+ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+
+
+#
+# Make sure libina can be found
+#
+LINK_DIRECTORIES(${PROJECT_BINARY_DIR}/lib)
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/lib)
+
+
+#
+# Used libaries:
+#
+set(LIBS ${LIBS} ${GINAC_LIBRARIES} ${LIBSBML_LIBRARIES} m pthread)
+
+#
+# Used headers:
+#
+INCLUDE_DIRECTORIES(${EIGEN3_INCLUDE_DIRS} ${GINAC_INCLUDE_DIRS} ${LIBSBML_INCLUDE_DIRS})
+
+#
+# Compiler flags:
+#
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -Wall -frtti -fexceptions")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${OpenMP_CXX_FLAGS} -O0 -ggdb")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${OpenMP_CXX_FLAGS} -O2")
+
+set(CMAKE_EXE_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS_INIT} ${OpenMP_CXX_FLAGS})
+set(CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS_INIT} ${OpenMP_CXX_FLAGS})
+set(CMAKE_MODULE_LINKER_FLAGS ${CMAKE_MODULE_LINKER_FLAGS_INIT} ${OpenMP_CXX_FLAGS})
+
+
+#
+# Define flags, libs etc. if libjit is present:
+#
+if(LIBJIT_FOUND)
+MESSAGE(STATUS "libjit support: yes")
+SET(WITH_EXECUTION_ENGINE_LIBJIT ON)
+SET(LIBS ${LIBS} ${LIBJIT_LIBRARIES})
+INCLUDE_DIRECTORIES(${LIBJIT_INCLUDE_DIRECTORIES})
+ADD_DEFINITIONS(-DWITH_EXECUTION_ENGINE_LIBJIT=1)
+else()
+MESSAGE(STATUS "libjit support: no")
+SET(WITH_EXECUTION_ENGINE_LIBJIT OFF)
+ADD_DEFINITIONS(-DWITH_EXECUTION_ENGINE_LIBJIT=0)
+endif()
+
+#
+# Define flags, libs etc if LLVM is present:
+#
+IF(LLVM_FOUND)
+MESSAGE(STATUS "LLVM support: yes")
+SET(WITH_EXECUTION_ENGINE_LLVM ON)
+ADD_DEFINITIONS(-DWITH_EXECUTION_ENGINE_LLVM=1)
+SET(LIBS ${LIBS} ${LLVM_LIBRARIES})
+INCLUDE_DIRECTORIES(${LLVM_INCLUDE_DIRS})
+ADD_DEFINITIONS(-D_DEBUG -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS)
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS_INIT} ${LLVM_LD_FLAGS}")
+set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS_INIT} ${LLVM_LD_FLAGS}")
+set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS_INIT} ${LLVM_LD_FLAGS}")
+else(LLVM_FOUND)
+MESSAGE(STATUS "LLVM support: no")
+SET(WITH_EXECUTION_ENGINE_LLVM OFF)
+ADD_DEFINITIONS(-DWITH_EXECUTION_ENGINE_LLVM=0)
+ENDIF(LLVM_FOUND)
+
+
+#
+# traverse into source tree:
+#
+add_subdirectory(lib)
+add_subdirectory(cli)
+add_subdirectory(app)
+add_subdirectory(test)
+#add_subdirectory(benchmarks)
+#add_subdirectory(extrinsic)
+
+#
+# Source distribution packages:
+#
+set(CPACK_PACKAGE_VERSION_MAJOR "0")
+set(CPACK_PACKAGE_VERSION_MINOR "2")
+set(CPACK_PACKAGE_VERSION_PATCH "0")
+set(CPACK_SOURCE_GENERATOR "TGZ")
+set(CPACK_SOURCE_PACKAGE_FILE_NAME
+  "${CMAKE_PROJECT_NAME}-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
+set(CPACK_SOURCE_IGNORE_FILES
+  "/build/;/doc/;/dist/;/.svn/;~$;${CPACK_SOURCE_IGNORE_FILES}")
+include(CPack)
+
+
+#
+# Install logo and .desktop file under Linux:
+#
+IF(UNIX AND NOT APPLE)
+  INSTALL(FILES shared/IntrinsicNoiseAnalyzer.png
+          DESTINATION share/icons)
+  INSTALL(FILES shared/IntrinsicNoiseAnalyzer.desktop
+          DESTINATION share/applications)
+ENDIF(UNIX AND NOT APPLE)
+
+

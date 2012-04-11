@@ -1,0 +1,59 @@
+# -*- coding: utf-8; mode: tcl; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- vim:fenc=utf-8:ft=tcl:et:sw=4:ts=4:sts=4
+# $Id$
+
+PortSystem 1.0
+
+name IntrinsicNoiseAnalyzer
+version 0.2.0
+categories science
+platforms darwin
+
+maintainers hmatuschek \
+            gmail.com:hmatuschek
+
+description The intrinsic noise analyzer for biochemical networks.
+long_description The intrinsic noise analyzer for biochemical networks.
+
+license           GPL-2
+
+homepage http://code.google.com/p/intrinsic-noise-analyzer
+
+master_sites http://dl.dropbox.com/u/17326152/
+
+checksums md5    58822206db41271b043594bf08c6e67f \
+          sha1   76e9b0713787d465109f7b806cf886f434d413cb \
+          rmd160 092cface69722453799c88c31d2dd417d7668f69
+
+# We depend on libsbml with cppnamespace
+depends_lib  port:libsbml-cppnamespace \
+             port:qt4-mac \
+             port:GiNaC
+
+depends_build port:cmake
+
+configure.cmd       cmake
+configure.pre_args  -DCMAKE_INSTALL_PREFIX=${prefix}
+configure.args      -DCMAKE_VERBOSE_MAKEFILE=ON \
+                    -DCMAKE_COLOR_MAKEFILE=ON \
+                    -DCMAKE_BUILD_TYPE=Debug \
+                    -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON \
+                    -DCMAKE_INSTALL_NAME_DIR=${prefix}/lib \
+                    -DCMAKE_SYSTEM_PREFIX_PATH=\"${prefix}\;/usr\" 
+
+configure.args-append ../ina_src
+
+if {${configure.compiler} == "clang"} {
+    configure.compiler llvm-gcc-4.2
+}
+
+
+# Phase modifications
+# Move source into eigen_src; configure & build (out-of-source) in ${worksrcpath}
+post-extract {
+  # Rename extracted directory
+    move ${workpath}/${name}-${version} ${workpath}/ina_src
+}
+
+post-patch {
+    file mkdir ${workpath}/${name}-${version}
+}

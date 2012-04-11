@@ -1,0 +1,38 @@
+# -*- coding: utf-8; mode: tcl; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- vim:fenc=utf-8:ft=tcl:et:sw=4:ts=4:sts=4
+# $Id$
+
+PortSystem          1.0
+
+name                libsbml
+version             5.0.0
+categories          science
+platforms           darwin
+maintainers         nomaintainer
+
+description         Systems Biology Markup Language library
+
+long_description    LibSBML is a free, open-source programming library to \
+                    help you read, write, manipulate, translate, and validate \
+                    SBML files and data streams. It is not an application \
+                    itself (though it does come with example programs), but \
+                    rather a library you can embed in your own applications.
+
+homepage            http://sbml.org/Software/libSBML
+master_sites        sourceforge:sbml
+
+distname            libSBML-${version}-src
+worksrcdir          libSBML-${version}
+
+checksums           md5     dd6937fb9ede3d3b916a8f8bbd5333a0 \
+                    sha1    867dbebba8d160db5f06454a143a5356ceff0acd \
+                    rmd160  68a22f92313268fa6a5139fba3f95ce8a7fa8312
+
+depends_lib         port:libxml2 \
+                    port:bzip2
+
+conflicts           libsbml-cppnamespace
+
+configure.pre_args  --prefix=${prefix}
+
+
+use_parallel_build  no

@@ -1,0 +1,71 @@
+#ifndef __FLUC_AST_COMPARTMENT_HH__
+#define __FLUC_AST_COMPARTMENT_HH__
+
+#include "variabledefinition.hh"
+
+namespace Fluc {
+namespace Ast {
+
+
+/**
+ * Represents a compartment, that may hold @c Ast::Species. "Holding" a species does not imply any
+ * ownership but defines a semantic relationship between species and compartments.
+ *
+ * @ingroup ast
+ */
+class Compartment : public VariableDefinition
+{
+public:
+  /**
+   * Defines the possible spacial dimensions of a compartment.
+   */
+  typedef enum {
+    POINT,         /// < dimension 0
+    LINE,          /// < dimension 1
+    AREA,          /// < dimension 2
+    VOLUME         /// < dimension 3
+  } SpatialDimension;
+
+
+protected:
+  /**
+   * Holds the spatial dimension of the compartment.
+   */
+  SpatialDimension dimension;
+
+public:
+  /**
+   * Minimal constructor for a compartment.
+   *
+   * @param id Specifies the unique identifier of the compartment.
+   * @param unit Specifies the unit of the compartment, must fit to the spatial dimension and must
+   *             be a length, area or volume unit.
+   * @param dim Specifies the spacial dimension of the compartment.
+   * @param is_const Specifies if the compartment size is constant or not.
+   */
+  Compartment(const std::string &id, const Unit &unit, SpatialDimension dim, bool is_const=false);
+
+  /**
+   * Constructor for a compartment.
+   *
+   * @param id Specifies the unique identifier of the compartment.
+   * @param init_val Specifies the initial volume of the compartment.
+   * @param unit Specifies the unit of the compartment, must fit to the spatial dimension and must
+   *             be a length, area or volume unit.
+   * @param dim Specifies the spatial dimension of the compartment.
+   * @param is_const Specifies if the compartment size is constant or not.
+   */
+  Compartment(const std::string &id, const GiNaC::ex &init_val, const Unit &unit,
+              SpatialDimension dim, bool is_const=false);
+
+  /**
+   * Returns the spacial dimension of the compartment.
+   */
+  SpatialDimension getDimension() const;
+};
+
+
+}
+}
+
+#endif // COMPARTMENT_HH

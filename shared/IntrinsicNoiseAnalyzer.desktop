@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Intrinsic Noise Analyzer	
+Comment=Analyzes chemical networks.
+Exec=ina
+Icon=/usr/share/icons/IntrinsicNoiseAnalyzer.png
+Type=Application
+Categories=Education;Science;
+Terminal=false
+Encoding=UTF-8

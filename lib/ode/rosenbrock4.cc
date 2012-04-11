@@ -1,0 +1,41 @@
+#include "rosenbrock4.hh"
+
+using namespace Fluc::ODE;
+
+const double Rosenbrock4Constants::c2=0.386;
+const double Rosenbrock4Constants::c3=0.21;
+const double Rosenbrock4Constants::c4=0.63;
+const double Rosenbrock4Constants::bet2p=0.0317;
+const double Rosenbrock4Constants::bet3p=0.0635;
+const double Rosenbrock4Constants::bet4p=0.3438;
+const double Rosenbrock4Constants::d1= 0.2500000000000000e+00;
+const double Rosenbrock4Constants::d2=-0.1043000000000000e+00;
+const double Rosenbrock4Constants::d3= 0.1035000000000000e+00;
+const double Rosenbrock4Constants::d4=-0.3620000000000023e-01;
+const double Rosenbrock4Constants::a21= 0.1544000000000000e+01;
+const double Rosenbrock4Constants::a31= 0.9466785280815826e+00;
+const double Rosenbrock4Constants::a32= 0.2557011698983284e+00;
+const double Rosenbrock4Constants::a41= 0.3314825187068521e+01;
+const double Rosenbrock4Constants::a42= 0.2896124015972201e+01;
+const double Rosenbrock4Constants::a43= 0.9986419139977817e+00;
+const double Rosenbrock4Constants::a51= 0.1221224509226641e+01;
+const double Rosenbrock4Constants::a52= 0.6019134481288629e+01;
+const double Rosenbrock4Constants::a53= 0.1253708332932087e+02;
+const double Rosenbrock4Constants::a54=-0.6878860361058950e+00;
+const double Rosenbrock4Constants::c21=-0.5668800000000000e+01;
+const double Rosenbrock4Constants::c31=-0.2430093356833875e+01;
+const double Rosenbrock4Constants::c32=-0.2063599157091915e+00;
+const double Rosenbrock4Constants::c41=-0.1073529058151375e+00;
+const double Rosenbrock4Constants::c42=-0.9594562251023355e+01;
+const double Rosenbrock4Constants::c43=-0.2047028614809616e+02;
+const double Rosenbrock4Constants::c51= 0.7496443313967647e+01;
+const double Rosenbrock4Constants::c52=-0.1024680431464352e+02;
+const double Rosenbrock4Constants::c53=-0.3399990352819905e+02;
+const double Rosenbrock4Constants::c54= 0.1170890893206160e+02;
+const double Rosenbrock4Constants::c61= 0.8083246795921522e+01;
+const double Rosenbrock4Constants::c62=-0.7981132988064893e+01;
+const double Rosenbrock4Constants::c63=-0.3152159432874371e+02;
+const double Rosenbrock4Constants::c64= 0.1631930543123136e+02;
+const double Rosenbrock4Constants::c65=-0.6058818238834054e+01;
+const double Rosenbrock4Constants::gamma= 0.2500000000000000e+00;
+const double Rosenbrock4Constants::d21= 0.1012623508344586e+02;

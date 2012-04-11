@@ -1,0 +1,14 @@
+Source: intrinsic-noise-analyzer
+Priority: extra
+Maintainer: Hannes Matuschek <hmatuschek@gmail.com>
+Build-Depends: cdbs (>= 0.4.51), debhelper (>= 8.0.0), cmake, libsbml-cppnamespace-dev (= 5.0.0-1), libqt4-dev (>= 4.5), libqtcore4 (>= 4.5), libqtgui4 (>= 4.5), libginac-dev
+Standards-Version: 3.9.2
+Section: science
+Homepage: http://www.googlecode.com/p/intrinsic-noise-analyzer
+
+Package: intrinsic-noise-analyzer
+Section: science
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: The Intrinsic Noise Analyzer
+ An application to analyze biological systems.

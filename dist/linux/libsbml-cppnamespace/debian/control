@@ -1,0 +1,21 @@
+Source: libsbml-cppnamespace
+Priority: extra
+Maintainer: Hannes Matuschek <hmatuschek@gmail.com>
+Build-Depends: cdbs (>= 0.4.51), debhelper (>= 8.0.0), cmake, libxml2-dev, libbz2-dev, zlib1g-dev|libz-dev
+Standards-Version: 3.9.2
+Section: libs
+Homepage: http://sbml.org/
+
+Package: libsbml-cppnamespace-dev
+Section: libdevel
+Architecture: any
+Depends: libsbml-cppnamespace5 (= ${binary:Version}), libxml2-dev, libbz2-dev, zlib1g-dev|libz-dev
+Description: libSBML with C++ namespace
+ Just libSBML with C++ namespace enabled.
+
+Package: libsbml-cppnamespace5
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: libSBML with C++ namespace
+ Just libSBML with C++ namespace enabled.
