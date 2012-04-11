@@ -104,24 +104,8 @@ SET(libina_models_HEADERS models/models.hh
 # some unsupported things
 
 SET(libina_unsupported_SOURCES
-    models/unsupported/spectralanalysis.cc
-    models/unsupported/spectrumrecorder.cc
-    models/unsupported/partialsumSSA.cc
-    models/unsupported/optimizedSSAginac.cc
-    models/unsupported/gillespieSSAginac.cc
-    models/unsupported/gillespieCLE.cc
-    models/unsupported/fspbase.cc
-    models/unsupported/fsp.cc
 )
 SET(libina_unsupported_HEADERS
-    models/unsupported/spectralanalysis.hh
-    models/unsupported/spectrumrecorder.hh
-    models/unsupported/partialsumSSA.hh
-    models/unsupported/optimizedSSAginac.hh
-    models/unsupported/gillespieSSAginac.hh
-    models/unsupported/gillespieCLE.hh
-    models/unsupported/fspbase.hh
-    models/unsupported/fsp.hh
 )
 
 # Add source for nonlinear solvers
