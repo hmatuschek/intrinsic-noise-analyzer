@@ -1,4 +1,4 @@
-[home_hannesmatuschek_IntrinsicNoiseAnalyzer]
+[intrinsic Noise Analyzer]
 name=Intrinsic Noise Analyzer (Fedora_16)
 type=rpm-md
 baseurl=http://download.opensuse.org/repositories/home:/hannesmatuschek:/IntrinsicNoiseAnalyzer/Fedora_16/
