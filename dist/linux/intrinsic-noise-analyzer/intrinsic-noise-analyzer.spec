@@ -52,11 +52,11 @@ make
 %install
 make install
 
-%clean
-rm -rf $RPM_BUILD_ROOT
-
 %post
 /sbin/ldconfig
+
+%clean
+rm -rf $RPM_BUILD_ROOT
 
 %postun
 /sbin/ldconfig
