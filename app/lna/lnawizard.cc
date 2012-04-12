@@ -220,9 +220,10 @@ LNAIntegratorConfigPage::LNAIntegratorConfigPage(QWidget *parent)
   this->registerField("n", n);
 
   intermediateSteps = new QLineEdit("0");
+  this->intermediateSteps->setEnabled(false);
   intermediateSteps->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
-  QIntValidator *immediateSteps_val = new QIntValidator(0);
-  immediateSteps_val->setBottom(0); intermediateSteps->setValidator(immediateSteps_val);
+  QIntValidator *intermediateSteps_val = new QIntValidator();
+  intermediateSteps_val->setBottom(0); intermediateSteps->setValidator(intermediateSteps_val);
   this->registerField("n_imm", intermediateSteps);
 
   this->integrator = new QComboBox();
@@ -235,7 +236,7 @@ LNAIntegratorConfigPage::LNAIntegratorConfigPage(QWidget *parent)
   QObject::connect(this->integrator, SIGNAL(currentIndexChanged(int)),
                    this, SLOT(onIntegratorSelected(int)));
 
-  this->ep_abs = new QLineEdit("1e-6");
+  this->ep_abs = new QLineEdit("1e-10");
   ep_abs->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
   QDoubleValidator *ep_abs_val = new QDoubleValidator(0);
   ep_abs_val->setBottom(0); ep_abs->setValidator(ep_abs_val);
