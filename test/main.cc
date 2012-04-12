@@ -11,6 +11,7 @@
 #include "sbmlshparsertest.hh"
 #include "optionparsertest.hh"
 #include "odetest.hh"
+#include "modelcopytest.hh"
 
 #if WITH_EXECUTION_ENGINE_LIBJIT
 #include "libjitinterpretertest.hh"
@@ -32,6 +33,7 @@ int main(int argc, char *argv[])
   runner.addSuite(InterpreterTest::suite());
   runner.addSuite(MathTest::suite());
   runner.addSuite(ODETest::suite());
+  runner.addSuite(ModelCopyTest::suite());
   runner.addSuite(LNATest::suite());
   runner.addSuite(MersenneTwisterTest::suite());
   runner.addSuite(RegressionTest::suite());
