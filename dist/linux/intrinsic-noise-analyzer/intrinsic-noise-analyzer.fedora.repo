@@ -1,0 +1,6 @@
+[iNA]
+name=intrinsic Noise Analyzer
+baseurl=http://download.opensuse.org/repositories/home:/hannesmatuschek:/IntrinsicNoiseAnalyzer/Fedora_16/
+enabled=1
+gpgcheck=1
+
