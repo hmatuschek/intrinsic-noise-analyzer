@@ -12,6 +12,8 @@
 #include "optionparsertest.hh"
 #include "odetest.hh"
 #include "modelcopytest.hh"
+#include "utils/option_parser.hh"
+
 
 #if WITH_EXECUTION_ENGINE_LIBJIT
 #include "libjitinterpretertest.hh"
@@ -24,24 +26,60 @@ using namespace Fluc::UnitTest;
 
 int main(int argc, char *argv[])
 {
+  // Assemble option-grammar:
+  Utils::Opt::Parser parser(
+        ( Utils::Opt::Parser::zeroOrMore( Utils::Opt::Parser::Option("skip") ) |
+          Utils::Opt::Parser::Flag("help")) );
+
+  // Parse flags.
+  if (! parser.parse((const char **)argv, argc)) {
+    std::cerr << "Invalid arguments." << std::endl;
+    std::cerr << parser.format_help(argv[0]) << std::endl;
+    return 1;
+  }
+
+  // If --help is present:
+  if (parser.has_flag("help")) {
+    std::cerr << parser.format_help(argv[0]) << std::endl;
+    return 0;
+  }
+
+
+  // Extract skipped tests:
+  std::set<std::string> skipped_tests;
+  if (parser.has_option("skip")) {
+    const std::list<std::string> &names = parser.get_option("skip");
+    skipped_tests.insert(names.begin(), names.end());
+  }
 
   // Construct test-runner
   TestRunner runner(std::cout);
 
   // Add test suites:
-  runner.addSuite(GinacForEigenTest::suite());
-  runner.addSuite(InterpreterTest::suite());
-  runner.addSuite(MathTest::suite());
-  runner.addSuite(ODETest::suite());
-  runner.addSuite(ModelCopyTest::suite());
-  runner.addSuite(LNATest::suite());
-  runner.addSuite(MersenneTwisterTest::suite());
-  runner.addSuite(RegressionTest::suite());
-  runner.addSuite(SBMLSHParserTest::suite());
-  runner.addSuite(OptionParserTest::suite());
+  if (0 == skipped_tests.count("GinacForEigen"))
+    runner.addSuite(GinacForEigenTest::suite());
+  if (0 == skipped_tests.count("Interpreter"))
+    runner.addSuite(InterpreterTest::suite());
+  if (0 == skipped_tests.count("Math"))
+    runner.addSuite(MathTest::suite());
+  if (0 == skipped_tests.count("ODE"))
+    runner.addSuite(ODETest::suite());
+  if (0 == skipped_tests.count("ModelCopy"))
+    runner.addSuite(ModelCopyTest::suite());
+  if (0 == skipped_tests.count("LNA"))
+    runner.addSuite(LNATest::suite());
+  if (0 == skipped_tests.count("MersenneTwister"))
+    runner.addSuite(MersenneTwisterTest::suite());
+  if (0 == skipped_tests.count("Regression"))
+    runner.addSuite(RegressionTest::suite());
+  if (0 == skipped_tests.count("SBMLSH"))
+    runner.addSuite(SBMLSHParserTest::suite());
+  if (0 == skipped_tests.count("OptionParser"))
+    runner.addSuite(OptionParserTest::suite());
 
 #if WITH_EXECUTION_ENGINE_LIBJIT
-  runner.addSuite(LibJitInterpreterTest::suite());
+  if (0 == skipped_tests.count("LibJitInterpreter"))
+    runner.addSuite(LibJitInterpreterTest::suite());
 #endif
 
   // Exec tests:

@@ -5,70 +5,124 @@ using namespace Fluc;
 
 
 
+void
+ModelCopyTest::testVariableEqual(Ast::VariableDefinition *A, Ast::VariableDefinition *B,
+                                 GiNaC::exmap &symbol_table)
+{
+  // Check name:
+  UT_ASSERT(A->hasName() == B->hasName());
+  if (A->hasName()) {
+    UT_ASSERT(A->getName() == B->getName());
+  }
+
+  // Check if variables has initial value:
+  UT_ASSERT(A->hasValue() == B->hasValue());
+  if (A->hasValue()) {
+    A->getValue() == B->getValue().subs(symbol_table);
+  }
+
+  // Check if variables has rules:
+  UT_ASSERT(A->hasRule() == A->hasRule());
+  /// \todo Implement comparison of rules.
+}
+
+
+void
+ModelCopyTest::testReactionEqual(Ast::Reaction *A, Ast::Reaction *B, GiNaC::exmap &symbol_table)
+{
+  // Check name
+  UT_ASSERT(A->hasName() == B->hasName());
+  if (A->hasName()) {
+    UT_ASSERT(A->getName() == B->getName());
+  }
+
+  // Check reversible flag:
+  UT_ASSERT(A->isReversible() == B->isReversible());
+
+  /// \todo Test stoichiometry
+
+  /// \todo Test kinetic law:
+}
+
+
+
+void
+ModelCopyTest::testScopeEqual(Ast::Scope &A, Ast::Scope &B, GiNaC::exmap &symbol_table)
+{
+  // Iterate over all definitions in A:
+  for (Ast::Scope::iterator item = A.begin(); item != A.end(); item++) {
+    Ast::Definition *def_a = *item;
+    // Check if model B has this definition:
+    UT_ASSERT(B.hasDefinition(def_a->getIdentifier()));
+    Ast::Definition *def_b = B.getDefinition(def_a->getIdentifier());
+    // Check pointers:
+    UT_ASSERT(def_a != def_b);
+    // Check if both definitions have the same type-id:
+    UT_ASSERT(def_a->getNodeType() == def_b->getNodeType());
+    // Check if identifiers are identical
+    UT_ASSERT(def_a->getIdentifier() == def_b->getIdentifier());
+
+    if (Ast::Node::isVariableDefinition(def_a)) {
+      Ast::VariableDefinition *var_a = dynamic_cast<Ast::VariableDefinition *>(def_a);
+      Ast::VariableDefinition *var_b = dynamic_cast<Ast::VariableDefinition *>(def_b);
+      // Check symbols
+      UT_ASSERT(var_a->getSymbol() != var_b->getSymbol());
+      // Populate symbol-table:
+      symbol_table[var_b->getSymbol()] = var_a->getSymbol();
+    }
+  }
+}
+
+
+
+void
+ModelCopyTest::testModelEqual(Ast::Model &A, Ast::Model &B)
+{
+  GiNaC::exmap symbol_table;
+  // First perform basic checks and populate symbol-table:
+  testScopeEqual(A,B, symbol_table);
+
+  // Then, iterate over definitions in A and compare with definitions in B
+  for (Ast::Model::iterator item=A.begin(); item != A.end(); item++)
+  {
+    Ast::Definition *def_a = *item;
+    Ast::Definition *def_b = B.getDefinition(def_a->getIdentifier());
+
+    if (Ast::Node::isVariableDefinition(*item)) {
+      this->testVariableEqual(
+            dynamic_cast<Ast::VariableDefinition *>(def_a),
+            dynamic_cast<Ast::VariableDefinition *>(def_b), symbol_table);
+    } else if (Ast::Node::isReactionDefinition(*item)) {
+      this->testReactionEqual(
+            dynamic_cast<Ast::Reaction *>(def_a),
+            dynamic_cast<Ast::Reaction *>(def_b), symbol_table);
+    }
+  }
+}
+
+
 
 void
 ModelCopyTest::testCopy(const std::string &file)
 {
   // Load SBML...
   libsbml::SBMLDocument *document = libsbml::readSBMLFromFile(file.c_str());
-  UT_ASSERT(0 != document);
+  UT_ASSERT(0 == document->getNumErrors());
+
   // Construct model from SBML
   Ast::Model modelA(document->getModel());
   Ast::Model modelB(modelA);  // Copy model
-  // will hold symbol table to translate symbols of model B -> symbols of model A.
-  GiNaC::exmap symbol_table;
 
-  // Iterate over all definitions of model A
-  for (Ast::Model::iterator def = modelA.begin(); def != modelA.end(); def++) {
-    Ast::Definition *def_a = *def;
-    // Check if model B has this definition:
-    UT_ASSERT(modelB.hasDefinition(def_a->getIdentifier()));
-    Ast::Definition *def_b = modelB.getDefinition(def_a->getIdentifier());
-    // Check if both definitions have the same type-id:
-    UT_ASSERT(def_a->getNodeType() == def_b->getNodeType());
-    // Check if identifiers are identical
-    UT_ASSERT(def_a->getIdentifier() == def_b->getIdentifier());
-
-    if (Ast::Node::isVariableDefinition(*def)) {
-      // Check variable definition:
-      Ast::VariableDefinition *var_def_a = dynamic_cast<Ast::VariableDefinition *>(def_a);
-      Ast::VariableDefinition *var_def_b = dynamic_cast<Ast::VariableDefinition *>(def_b);
-      // Check if copy is also a variable definition:
-      UT_ASSERT(0 != var_def_b);
-      // Check name:
-      UT_ASSERT(var_def_a->hasName() == var_def_b->hasName());
-      if (var_def_a->hasName()) {
-        UT_ASSERT(var_def_a->getName() == var_def_b->getName());
-      }
-      // Check if variables has initial value:
-      UT_ASSERT(var_def_a->hasValue() == var_def_b->hasValue());
-      // Check if variables has rules:
-      UT_ASSERT(var_def_a->hasRule() == var_def_b->hasRule());
-      // Populate symbol table:
-      symbol_table[var_def_b->getSymbol()] = var_def_a->getSymbol();
-
-    } else if (Ast::Node::isReactionDefinition(*def)) {
-      // Check reaction definitions
-      Ast::Reaction *reac_a = dynamic_cast<Ast::Reaction *>(def_a);
-      Ast::Reaction *reac_b = dynamic_cast<Ast::Reaction *>(def_b);
-      // Check type:
-      UT_ASSERT(0 != reac_b);
-      // Check name
-      UT_ASSERT(reac_a->hasName() == reac_b->hasName());
-      if (reac_a->hasName()) {
-        UT_ASSERT(reac_a->getName() == reac_b->getName());
-      }
-      // Check reversible flag:
-      UT_ASSERT(reac_a->isReversible() == reac_b->isReversible());
-    }
-  }
+  testModelEqual(modelA, modelB);
+  testModelEqual(modelB, modelA);
 }
+
 
 
 void
 ModelCopyTest::testCoopKinetics1()
 {
-  this->testCopy("./test/regression-tests/coopkinetics1.xml");
+  this->testCopy("test/regression-tests/coopkinetics1.xml");
 }
 
 

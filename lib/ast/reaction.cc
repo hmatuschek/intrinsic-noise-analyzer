@@ -293,6 +293,20 @@ Reaction::prodEnd()
 }
 
 
+Reaction::mod_iterator
+Reaction::modBegin()
+{
+  return this->modifiers.begin();
+}
+
+
+Reaction::mod_iterator
+Reaction::modEnd()
+{
+  return this->modifiers.end();
+}
+
+
 void
 Reaction::dump(std::ostream &str)
 {

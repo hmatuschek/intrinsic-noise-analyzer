@@ -11,6 +11,7 @@ void
 RegressionTest::testConstSpecies()
 {
   libsbml::SBMLDocument *doc = libsbml::readSBMLFromFile("test/regression-tests/const_species.xml");
+  UT_ASSERT(0 == doc->getNumErrors());
 
   UT_ASSERT_THROW(Models::LinearNoiseApproximation(doc->getModel()),
                   Fluc::SBMLFeatureNotSupported);
@@ -23,6 +24,7 @@ void
 RegressionTest::testSpeciesByAssignmentRule()
 {
   libsbml::SBMLDocument *doc = libsbml::readSBMLFromFile("test/regression-tests/species_by_assignment_rule.xml");
+  UT_ASSERT(0 == doc->getNumErrors());
 
   UT_ASSERT_THROW(Models::LinearNoiseApproximation(doc->getModel()),
                   Fluc::SBMLFeatureNotSupported);
@@ -35,6 +37,7 @@ void
 RegressionTest::testNonConstantParameter()
 {
   libsbml::SBMLDocument *doc = libsbml::readSBMLFromFile("test/regression-tests/non_const_parameter.xml");
+  UT_ASSERT(0 == doc->getNumErrors());
 
   UT_ASSERT_THROW(Models::LinearNoiseApproximation(doc->getModel()),
                   Fluc::SBMLFeatureNotSupported);
@@ -47,6 +50,7 @@ void
 RegressionTest::testNonConstantCompartment()
 {
   libsbml::SBMLDocument *doc = libsbml::readSBMLFromFile("test/regression-tests/non_const_compartment.xml");
+  UT_ASSERT(0 == doc->getNumErrors());
 
   UT_ASSERT_THROW(Models::LinearNoiseApproximation(doc->getModel()),
                   Fluc::SBMLFeatureNotSupported);
@@ -59,6 +63,7 @@ void
 RegressionTest::testAlgebraicConstraint()
 {
   libsbml::SBMLDocument *doc = libsbml::readSBMLFromFile("test/regression-tests/algebraicrules.xml");
+  UT_ASSERT(0 == doc->getNumErrors());
 
   UT_ASSERT_THROW(Models::LinearNoiseApproximation(doc->getModel()),
                   Fluc::SBMLFeatureNotSupported);
@@ -71,11 +76,7 @@ void
 RegressionTest::testSpeciesByRateRule()
 {
   libsbml::SBMLDocument *doc = libsbml::readSBMLFromFile("test/regression-tests/rate_rules.xml");
-
-  if (0 != doc->getNumErrors())
-  {
-    std::cerr << doc->getError(0)->getMessage() << std::endl;
-  }
+  UT_ASSERT(0 == doc->getNumErrors());
 
   UT_ASSERT_THROW(Models::LinearNoiseApproximation(doc->getModel()),
                   Fluc::SBMLFeatureNotSupported);

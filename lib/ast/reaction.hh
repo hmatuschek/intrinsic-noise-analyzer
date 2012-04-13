@@ -98,6 +98,11 @@ public:
    */
   typedef std::map<Species *, GiNaC::ex>::iterator iterator;
 
+  /**
+   * Defines the iterator over reaction modifier.
+   */
+  typedef std::set<Species *>::iterator mod_iterator;
+
 
 protected:
   /**
@@ -289,6 +294,16 @@ public:
    * Returns an iterator pointing right after the last product of the reaction.
    */
   iterator prodEnd();
+
+  /**
+   * Retunrs an interator pointing to first modifier of the species.
+   */
+  mod_iterator modBegin();
+
+  /**
+   * Returns an iterator pointing right after the last modifier of the reaction.
+   */
+  mod_iterator modEnd();
 
   /**
    * Dumps a string representation of the reaction into the given stream.

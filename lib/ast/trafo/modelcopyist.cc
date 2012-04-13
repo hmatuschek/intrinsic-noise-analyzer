@@ -92,9 +92,11 @@ ModelCopyist::copy(Ast::Model *src, Ast::Model *dest, GiNaC::exmap &translation_
   // Copy reactions:
   for (Ast::Model::iterator iter = src->begin(); iter != src->end(); iter++)
   {
-    dest->addDefinition(ModelCopyist::copyReaction(
-                          static_cast<Ast::Reaction *>(*iter), translation_table,
-                          species_table));
+    if (Ast::Node::isReactionDefinition(*iter)) {
+      dest->addDefinition(ModelCopyist::copyReaction(
+                            static_cast<Ast::Reaction *>(*iter), translation_table,
+                            species_table));
+    }
   }
 }
 
@@ -128,6 +130,10 @@ ModelCopyist::copyParameterDefinition(Ast::Parameter *node, GiNaC::exmap &transl
   Ast::Parameter *param = new Ast::Parameter(node->getIdentifier(),
                                              node->getValue().subs(translation_table),
                                              node->getUnit(), node->isConst());
+  // If parameter has a name:
+  if (node->hasName()) {
+    param->setName(node->getName());
+  }
 
   // If parameter as a rule:
   if (node->hasRule())
@@ -151,6 +157,11 @@ ModelCopyist::copyCompartmentDefinition(Ast::Compartment *node, GiNaC::exmap &tr
                                                        node->getValue().subs(translation_table),
                                                        node->getUnit(), node->getDimension(),
                                                        node->isConst());
+
+  // If compartment has a name:
+  if (node->hasName()) {
+    compartment->setName(node->getName());
+  }
 
   // copy optional rules:
   if (node->hasRule())
@@ -233,6 +244,11 @@ ModelCopyist::copyReaction(Ast::Reaction *node, GiNaC::exmap &translation_table,
   Ast::Reaction *reaction = new Ast::Reaction(
         node->getIdentifier(), kinetic_law, node->isReversible());
 
+  // If reaction has a name:
+  if (node->hasName()) {
+    reaction->setName(node->getName());
+  }
+
   // Copy reactants stoichiometry:
   for (Ast::Reaction::iterator iter = node->reacBegin(); iter != node->reacEnd(); iter++)
   {
@@ -263,6 +279,17 @@ ModelCopyist::copyReaction(Ast::Reaction *node, GiNaC::exmap &translation_table,
 
     reaction->setProductStoichiometry(
           species_table[iter->first], iter->second.subs(translation_table));
+  }
+
+  // Copy reaction modifiers:
+  for (Ast::Reaction::mod_iterator iter = node->modBegin(); iter != node->modEnd(); iter++) {
+    // Check if there is a replacement for the modifier in species_table:
+    if (species_table.end() == species_table.find(*iter)) {
+      SymbolError err;
+      err << "Can not copy reaction " << node->getIdentifier()
+          << " there is no copy of species: " << (*iter)->getIdentifier();
+    }
+    reaction->addModifier(species_table[(*iter)]);
   }
 
   // Done

@@ -12,6 +12,12 @@ namespace Fluc {
 class ModelCopyTest : public UnitTest::TestCase
 {
 protected:
+  void testVariableEqual(Ast::VariableDefinition *A, Ast::VariableDefinition *B, GiNaC::exmap &symbol_table);
+  void testReactionEqual(Ast::Reaction *A, Ast::Reaction *b, GiNaC::exmap &symbol_table);
+
+  void testModelEqual(Ast::Model &A, Ast::Model &B);
+  void testScopeEqual(Ast::Scope &A, Ast::Scope &B, GiNaC::exmap &symbol_table);
+
   // Performs the test:
   void testCopy(const std::string &file);
 
