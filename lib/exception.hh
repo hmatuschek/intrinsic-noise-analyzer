@@ -3,6 +3,7 @@
 
 #include <exception>
 #include <sstream>
+#include <ginac/ginac.h>
 
 
 namespace Fluc
@@ -17,8 +18,14 @@ namespace Fluc
  * This class is also derived from std::ostringstream, this allows to append text to the message
  * of the exception once an instance is created.
  */
-class Exception: public std::exception, public std::ostringstream
+class Exception: public std::exception
 {
+protected:
+  /**
+   * Buffer for the message.
+   */
+  std::string message;
+
 protected:
   /**
    * Constructs a base exception without a message.
@@ -51,6 +58,11 @@ public:
    * Returns the message of the exception. This method is needed by the std::exception interface.
    */
   virtual const char *what() const throw();
+
+  Exception &operator<< (const char *text);
+  Exception &operator<< (const std::string &text);
+  Exception &operator<< (unsigned int value);
+  Exception &operator<< (const GiNaC::ex &expression);
 };
 
 

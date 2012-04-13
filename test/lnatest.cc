@@ -61,6 +61,8 @@ LNATest::compareIntegrators(const std::string &file, double final_time)
     UT_ASSERT(abs(final_state_intpr(i) - final_state_ginac(i))
               < err_rel*abs(final_state_ginac(i)) + err_abs);
   }
+
+  delete doc;
 }
 
 

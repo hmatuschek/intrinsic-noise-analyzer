@@ -13,9 +13,9 @@ Species::Species(const std::string &id, const Unit &unit, Compartment *compartme
   if (! unit.isConcentrationUnit() && ! unit.isSubstanceUnit())
   {
     SemanticError err;
-    err << "Can not define species " << id << " unit ";
-    unit.dump(err);
-    err << " which is not a substance or density unit.";
+    std::stringstream str; unit.dump(str);
+    err << "Can not define species " << id << " unit "
+        << str.str() << " which is not a substance or density unit.";
     throw err;
   }
 
@@ -37,17 +37,17 @@ Species::Species(const std::string &id, const GiNaC::ex &init_val, const Unit &u
   if (! unit.isConcentrationUnit() && ! unit.isSubstanceUnit())
   {
     SemanticError err;
-    err << "Can not define species " << id << " unit ";
-    unit.dump(err);
-    err << " which is not a substance or density unit.";
+    std::stringstream str; unit.dump(str);
+    err << "Can not define species " << id << " unit "
+        << str.str() << " which is not a substance or density unit.";
     throw err;
   }
 
   if (substance_units && ! (unit.isDimensionless() || unit.isSubstanceUnit())) {
     SemanticError err;
-    err << "Can not define species " << id << " with unit ";
-    unit.dump(err);
-    err << " and define the species to have only substance units.";
+    std::stringstream str; unit.dump(str);
+    err << "Can not define species " << id << " with unit "
+        << str.str() << " and define the species to have only substance units.";
     throw err;
   }
 }

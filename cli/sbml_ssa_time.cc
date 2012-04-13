@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
   }
   catch (Exception err)
   {
-    std::cerr << "Can not perform SSA: " << err.str() << std::endl;
+    std::cerr << "Can not perform SSA: " << err.what() << std::endl;
     return -1;
   }
 }

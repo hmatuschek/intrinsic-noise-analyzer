@@ -53,9 +53,9 @@ ExtensiveSpeciesMixin::ExtensiveSpeciesMixin(BaseModel &base)
     else
     {
       SemanticError err;
-      err << "Can not convert species " << species->getName() << " with unit ";
-      species->getUnit().dump(err);
-      err << " into extensive units";
+      std::stringstream str; species->getUnit().dump(str);
+      err << "Can not convert species " << species->getName() << " with unit "
+          << str.str() << " into extensive units";
       throw err;
     }
   }

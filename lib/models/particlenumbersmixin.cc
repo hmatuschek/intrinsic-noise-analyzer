@@ -69,9 +69,10 @@ ParticleNumbersMixin::ParticleNumbersMixin(BaseModel &base)
         else
         {
             SemanticError err;
-            err << "Can not convert amount of " << species->getName() << " with unit ";
-            species->getUnit().dump(err);
-            err << " into particle numbers";
+            std::stringstream str; species->getUnit().dump(str);
+            err << "Can not convert amount of " << species->getName()
+                << " with unit " << str.str()
+                << " into particle numbers";
             throw err;
         }
 

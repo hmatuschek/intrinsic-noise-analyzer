@@ -12,10 +12,10 @@ Compartment::Compartment(const std::string &id, const Unit &unit, SpatialDimensi
   if (Compartment::POINT == dim && ! unit.isDimensionless())
   {
     SemanticError err;
+    std::stringstream str; unit.dump(str);
     err << "Can not construct compartment " << id
-        << ": Spatial dimension is 0 but unit is ";
-    unit.dump(err);
-    err << ", which is not dimensionless.";
+        << ": Spatial dimension is 0 but unit is " << str.str()
+        << ", which is not dimensionless.";
     throw err;
   }
 }
@@ -29,10 +29,10 @@ Compartment::Compartment(const std::string &id, const GiNaC::ex &init_val, const
   if (Compartment::POINT == dim && ! unit.isDimensionless())
   {
     SemanticError err;
+    std::stringstream str; unit.dump(str);
     err << "Can not construct compartment " << id
-        << ": Spatial dimension is 0 but unit is ";
-    unit.dump(err);
-    err << ", which is not dimensionless.";
+        << ": Spatial dimension is 0 but unit is " << str.str()
+        << ", which is not dimensionless.";
     throw err;
   }
 }

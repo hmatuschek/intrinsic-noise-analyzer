@@ -237,8 +237,9 @@ Unit::asScaledBaseUnit() const
   if (1 != this->units.size())
   {
     InternalError err;
-    err << "Cannot construct a scaled base-unit from non-atomic unit: ";
-    this->dump(err);
+    std::stringstream str; this->dump(str);
+    err << "Cannot construct a scaled base-unit from non-atomic unit: "
+        << str.str();
     throw err;
   }
 

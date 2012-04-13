@@ -322,6 +322,15 @@ TestSuite::TestSuite(const std::string &desc)
   // pass...
 }
 
+TestSuite::~TestSuite()
+{
+  for(std::list<TestCallerInterface *>::iterator item = this->tests.begin();
+      item != this->tests.end(); item++)
+  {
+    delete *item;
+  }
+}
+
 
 void
 TestSuite::addTest(TestCallerInterface *test)
@@ -360,6 +369,16 @@ TestRunner::TestRunner(std::ostream &stream)
   : stream(stream), suites()
 {
   // Pass...
+}
+
+
+TestRunner::~TestRunner()
+{
+  for (std::list<TestSuite *>::iterator item = this->suites.begin();
+       item != this->suites.end(); item++)
+  {
+    delete *item;
+  }
 }
 
 

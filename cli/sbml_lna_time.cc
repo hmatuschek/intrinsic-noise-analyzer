@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
   }
   catch (Exception err)
   {
-    std::cerr << "Can not perform LNA: " << err.str() << std::endl;
+    std::cerr << "Can not perform LNA: " << err.what() << std::endl;
     return -1;
   }
 }

@@ -115,6 +115,8 @@ ModelCopyTest::testCopy(const std::string &file)
 
   testModelEqual(modelA, modelB);
   testModelEqual(modelB, modelA);
+
+  delete document;
 }
 
 

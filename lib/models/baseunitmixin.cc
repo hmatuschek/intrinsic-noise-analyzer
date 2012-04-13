@@ -43,11 +43,12 @@ BaseUnitMixin::BaseUnitMixin(BaseModel &base)
     if (!(base.getSpecies(i)->getUnit()==this->substanceUnit))
     {
       SemanticError err;
+      std::stringstream str; this->substanceUnit.dump(str);
       err << "All species must be defined within either substance or concentration units:"
-          << " Common unit of model is ";
-      this->substanceUnit.dump(err);
-      err << " But species " << base.getSpecies(i)->getIdentifier() << " has unit ";
-      base.getSpecies(i)->getUnit().dump(err); err << ".";
+          << " Common unit of model is " << str.str()
+          << " But species " << base.getSpecies(i)->getIdentifier() << " has unit ";
+      str.str(""); base.getSpecies(i)->getUnit().dump(str);
+      err << str.str() << ".";
       throw err;
     }
   }

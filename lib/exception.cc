@@ -4,27 +4,29 @@ using namespace Fluc;
 
 
 Exception::Exception()
-  : std::exception(), std::ostringstream()
+  : std::exception(), message()
 {
+  // Pass...
 }
 
 
 Exception::Exception(const std::string &message)
-  : std::exception(), std::ostringstream()
+  : std::exception(), message(message)
 {
-  (*this) << message;
+  // Pass...
 }
 
 
 Exception::Exception(const Exception &other)
-  : std::exception(), std::ostringstream()
+  : std::exception(), message(other.message)
 {
-  (*this) << other.what();
+  // Pass...
 }
 
 
 Exception::~Exception() throw ()
 {
+
 }
 
 
@@ -32,7 +34,41 @@ const char *
 Exception::what() const throw()
 {
   // Return C string of string representation.
-  return this->str().c_str();
+  return this->message.c_str();
+}
+
+
+Exception &
+Exception::operator <<(const char *text)
+{
+  this->message.append(text);
+  return *this;
+}
+
+
+Exception &
+Exception::operator <<(const std::string &text)
+{
+  this->message.append(text);
+  return *this;
+}
+
+
+Exception &
+Exception::operator <<(unsigned int value)
+{
+  std::stringstream str; str << value;
+  this->message.append(str.str());
+  return *this;
+}
+
+
+Exception &
+Exception::operator <<(const GiNaC::ex &expression)
+{
+  std::stringstream str; str << expression;
+  this->message.append(str.str());
+  return *this;
 }
 
 
