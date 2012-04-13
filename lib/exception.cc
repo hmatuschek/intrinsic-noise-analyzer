@@ -25,26 +25,14 @@ Exception::Exception(const Exception &other)
 
 Exception::~Exception() throw ()
 {
-  // pass
 }
 
 
 const char *
 Exception::what() const throw()
 {
-  const std::string *message = 0;
-
-  if(0 != message)
-  {
-    delete message;
-    message = 0;
-  }
-
-  // Create string representation:
-  message = new std::string(this->str());
-
   // Return C string of string representation.
-  return message->c_str();
+  return this->str().c_str();
 }
 
 
