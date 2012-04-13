@@ -53,30 +53,30 @@ OptionRule::operator()(const char *argv[], int argc, size_t &idx, Parser &parser
 
   // handle short option
   if(this->short_name == str[1])
-    {
-      if(2 != str.size())
-  return false;
-
-      if(not this->is_flag)
   {
-    // consume option:
-    idx++;
-
-    // get value:
-    // if there is no value
-    if(idx == (size_t)argc)
+    if(2 != str.size())
       return false;
-    this->value = argv[idx];
-    idx++;
-    parser.set_option(this->long_name, this->value);
-  }
-      else
-  {
-    parser.set_flag(this->long_name);
-  }
 
-      return true;
+    if(not this->is_flag)
+    {
+      // consume option:
+      idx++;
+
+      // get value:
+      // if there is no value
+      if(idx == (size_t)argc)
+        return false;
+
+      this->value = argv[idx]; idx++;
+      parser.set_option(this->long_name, this->value);
     }
+    else
+    {
+      parser.set_flag(this->long_name);
+    }
+
+    return true;
+  }
 
   // Handle long option:
   if('-' != str[1])
@@ -84,20 +84,20 @@ OptionRule::operator()(const char *argv[], int argc, size_t &idx, Parser &parser
 
   // handle flag;
   if(this->is_flag)
-    {
-      if(0 != str.substr(2).compare(this->long_name))
-  return false;
-      // consume option:
-      idx++;
-      parser.set_flag(this->long_name);
-      return true;
-    }
+  {
+    if(0 != str.substr(2).compare(this->long_name))
+      return false;
+    // consume option:
+    idx++;
+    parser.set_flag(this->long_name);
+    return true;
+  }
 
   // handle value option
   size_t name_end;
   // If VALUE is missing:
   if(str.npos == (name_end = str.find("=")))
-     return false;
+    return false;
 
   // Check option name
   if(str.substr(2, name_end-2) != this->long_name)
@@ -377,7 +377,10 @@ Parser::has_flag(std::string name)
 void
 Parser::set_option(std::string name, std::string value)
 {
-  this->present_options[name] = value;
+  if (0 == this->present_options.count(name)) {
+    this->present_options[name] = std::list<std::string>();
+  }
+  this->present_options[name].push_back(value);
 }
 
 bool
@@ -386,13 +389,13 @@ Parser::has_option(std::string name)
   return 0 != this->present_options.count(name);
 }
 
-std::string
+const std::list<std::string> &
 Parser::get_option(std::string name)
 {
   return this->present_options[name];
 }
 
-std::list<string>
+const std::list<string> &
 Parser::get_values()
 {
   return this->given_values;

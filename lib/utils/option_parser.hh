@@ -349,9 +349,9 @@ protected:
   std::set<std::string> present_flags;
 
   /**
-   * A map "long name" -> "value" of all present options.
+   * A map "long name" -> "values" of all present options.
    */
-  std::map<std::string, std::string> present_options;
+  std::map<std::string, std::list<std::string> > present_options;
 
   /**
    * A list holding all arguments present.
@@ -404,7 +404,7 @@ public:
   /**
    * Returns the value of the option.
    */
-  std::string get_option(std::string name);
+  const std::list<std::string> &get_option(std::string name);
 
   /**
    * Adds a argument.
@@ -414,7 +414,7 @@ public:
   /**
    * Returns the list of arguments found while parsing.
    */
-  std::list<std::string> get_values();
+  const std::list<std::string> &get_values();
 
 
 public:
@@ -429,7 +429,7 @@ public:
    * Constructs a @c OptionRule as an option.
    */
   static RuleInterface &Option(const std::string &name, char short_name=0) {
-    return *(new OptionRule(name, true, short_name));
+    return *(new OptionRule(name, false, short_name));
   }
 
   /**
