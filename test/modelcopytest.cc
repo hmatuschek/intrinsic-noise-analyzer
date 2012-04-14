@@ -284,6 +284,10 @@ ModelCopyTest::testModelEqual(Ast::Model &A, Ast::Model &B)
   }
 
   // Compare default units:
+  std::cerr << "Test: "; A.getDefaultAreaUnit().dump(std::cerr);
+  std::cerr << " == "; B.getDefaultAreaUnit().dump(std::cerr); std::cerr << std::endl;
+  std::cerr << " <=> "; A.getDefaultAreaUnit().asScaledBaseUnit().dump(std::cerr); std::cerr << std::endl;
+
   UT_ASSERT(A.getDefaultAreaUnit() == B.getDefaultAreaUnit());
   UT_ASSERT(A.getDefaultLengthUnit() == B.getDefaultLengthUnit());
   UT_ASSERT(A.getDefaultSubstanceUnit() == B.getDefaultSubstanceUnit());

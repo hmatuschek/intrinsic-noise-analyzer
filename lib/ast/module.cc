@@ -190,7 +190,7 @@ Module::setDefaultAreaUnit(const ScaledBaseUnit &unit)
     throw err;
   }
 
-  this->area_unit = area_unit;
+  this->area_unit = unit;
 }
 
 
