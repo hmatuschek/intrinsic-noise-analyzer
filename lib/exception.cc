@@ -39,6 +39,16 @@ Exception::what() const throw()
 
 
 Exception &
+Exception::operator <<(unsigned char c)
+{
+  std::stringstream str; str << c;
+  this->message.append(str.str());
+
+  return *this;
+}
+
+
+Exception &
 Exception::operator <<(const char *text)
 {
   this->message.append(text);
@@ -56,6 +66,24 @@ Exception::operator <<(const std::string &text)
 
 Exception &
 Exception::operator <<(unsigned int value)
+{
+  std::stringstream str; str << value;
+  this->message.append(str.str());
+  return *this;
+}
+
+
+Exception &
+Exception::operator <<(size_t value)
+{
+  std::stringstream str; str << value;
+  this->message.append(str.str());
+  return *this;
+}
+
+
+Exception &
+Exception::operator <<(double value)
 {
   std::stringstream str; str << value;
   this->message.append(str.str());

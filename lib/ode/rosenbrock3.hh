@@ -142,7 +142,7 @@ protected:
   {
     if (dt <= t*std::numeric_limits<double>::epsilon()) {
       RuntimeError err;
-      err << __FILE__ << " at line " << __LINE__ << ": "
+      err << __FILE__ << " at line " << (unsigned int) __LINE__ << ": "
           << "Step-size unterflow in Rosenbrock3 stepper.";
       throw err;
     }

@@ -107,13 +107,24 @@ protected:
     */
     GiNaC::ex vertex(std::list<size_t> &lower, std::list<size_t> &upper, size_t order=0);
 
+
+private:
+    /**
+     * Performs a common construction part, shared between all constructors.
+     */
+    void postConstructor();
+
+
 public:
+    /**
+     * Constructor from SBML model.
+     */
+    LNABaseModel(libsbml::Model *model);
 
-  /**
-   * Constructor...
-   */
-  LNABaseModel(libsbml::Model *model);
-
+    /**
+     * Constructor from @c Ast::Model.
+     */
+    explicit LNABaseModel(const Ast::Model &model);
 };
 
 }

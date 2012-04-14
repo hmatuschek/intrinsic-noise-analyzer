@@ -22,13 +22,13 @@ public:
   /**
    * Simply copies the model @c src and stores the copy in @c dest.
    */
-  static void copy(Ast::Model *src, Ast::Model *dest);
+  static void copy(const Ast::Model *src, Ast::Model *dest);
 
   /**
    * Copies the model @c src into @c dest but populates the given translation table
    * mapping "old" symbols to their copies.
    */
-  static void copy(Ast::Model *src, Ast::Model *dest, GiNaC::exmap &translation_table);
+  static void copy(const Ast::Model *src, Ast::Model *dest, GiNaC::exmap &translation_table);
 
 
 protected:

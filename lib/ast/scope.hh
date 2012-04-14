@@ -76,6 +76,51 @@ public:
     bool operator!=(const iterator &other);
   };
 
+  /**
+   * Iterator class over all definititions in the scope. The order of definition is not conserved,
+   * @c Ast::Model for the order of species and paramter definition.
+   */
+  class const_iterator
+  {
+  protected:
+    /**
+     * Holds an instance of the map iterator.
+     */
+    std::map<std::string, Definition *>::const_iterator inner_iter;
+
+
+  public:
+    /**
+     * Constructs a new iterator over the definitions held by the scope.
+     */
+    const_iterator(std::map<std::string, Definition *>::const_iterator inner_iter);
+
+    /**
+     * Retunrs the referenced definition.
+     */
+    Definition * const operator->();
+
+    /**
+     * Returns the referenced definition.
+     */
+    Definition * const& operator*();
+
+    /**
+     * Shifts the iterator to the next definition.
+     */
+    const_iterator const operator++(int);
+
+    /**
+     * Iterator comparison.
+     */
+    bool operator==(const const_iterator &other);
+
+    /**
+     * Iterator comparison.
+     */
+    bool operator!=(const const_iterator &other);
+  };
+
 
 protected:
   /**
@@ -120,11 +165,10 @@ public:
 
   /**
    * Returns the definition given by the name.
-   *
-   * Is equivalent to call @c getDefinition(getSymbol(const std::string &identifier)).
    */
   Definition *getDefinition(const std::string &name);
 
+  Definition * const getDefinition(const std::string &name) const;
 
   /**
    * Returns true, if the scope is closed. This means if references within the scope can not access
@@ -137,10 +181,14 @@ public:
    */
   iterator begin();
 
+  const_iterator begin() const;
+
   /**
    * Returns an @c iterator pointing right after the last element in the scope.
    */
   iterator end();
+
+  const_iterator end() const;
 
   /**
    * Dumps a simple string representation of the scope into the given stream.

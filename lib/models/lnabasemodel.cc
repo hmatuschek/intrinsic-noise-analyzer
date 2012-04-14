@@ -19,13 +19,39 @@ LNABaseModel::LNABaseModel(libsbml::Model *model)
     DiffusionVec(numIndSpecies()*numIndSpecies()),
     conservationConstants(this->numDepSpecies())
 {
-    /* @todo conservationConstants should be have a seperate class */
+  postConstructor();
+}
 
-    /* @todo all LNA coeff should be calculated in unconstrained base */
 
-    // initalize symbols as placeholders for constants arising from conservation laws
-    for(size_t i=0;i<numDepSpecies();i++)
-        conservationConstants(i) = GiNaC::symbol();
+LNABaseModel::LNABaseModel(const Ast::Model &model)
+  : BaseModel(model), LNAMixin((BaseModel &)(*this)),
+    rate_expressions(this->numReactions()),
+    rate_corrections(this->numReactions()),
+    rates_gradient(this->numReactions(),this->numSpecies()),
+    rates_hessian(this->numReactions(),this->numSpecies()*(this->numSpecies()+1)/2),
+    Link0CMatrix(this->numDepSpecies(),this->numIndSpecies()),
+    LinkCMatrix(this->numSpecies(),this->numIndSpecies()),
+    REs(this->numIndSpecies()), REcorrections(this->numIndSpecies()),
+    JacobianM(this->numIndSpecies(),this->numIndSpecies()),
+    Hessian(this->numSpecies(), (this->numSpecies()*(this->numSpecies()+1))/2),
+    DiffusionMatrix(this->numIndSpecies(),this->numIndSpecies()),
+    DiffusionVec(numIndSpecies()*numIndSpecies()),
+    conservationConstants(this->numDepSpecies())
+{
+  postConstructor();
+}
+
+
+void
+LNABaseModel::postConstructor()
+{
+  /* @todo conservationConstants should be have a seperate class */
+
+  /* @todo all LNA coeff should be calculated in unconstrained base */
+
+  // initalize symbols as placeholders for constants arising from conservation laws
+  for(size_t i=0;i<numDepSpecies();i++)
+    conservationConstants(i) = GiNaC::symbol();
 
     // construct Link zero matrix for concentrations
     this->Link0CMatrix = this->Omega_dep.asDiagonal().inverse()*this->link_zero_matrix.cast<GiNaC::ex>()*this->Omega_ind.asDiagonal();
@@ -141,14 +167,8 @@ LNABaseModel::LNABaseModel(libsbml::Model *model)
     Eigen::MatrixXex mapRed = (this->PermutationM.transpose()).cast<GiNaC::ex>()*this->LinkCMatrix;
 
     fHessian = mapRed.transpose()*HessianTemp*mapRed + this->JacobianM.transpose()*this->JacobianM;
+}
 
-
-
-
-
-
-
-};
 
 void
 LNABaseModel::foldConservationConstants(const Eigen::VectorXd &conserved_cycles)

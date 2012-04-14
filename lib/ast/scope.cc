@@ -50,6 +50,47 @@ Scope::iterator::operator !=(const Scope::iterator &other)
 
 
 /*
+ * Implementation of Scope::const_iterator
+ */
+Scope::const_iterator::const_iterator(std::map<std::string, Definition *>::const_iterator inner_iter)
+  : inner_iter(inner_iter)
+{
+  // Done.
+}
+
+Definition * const
+Scope::const_iterator::operator ->()
+{
+  return this->inner_iter->second;
+}
+
+Definition * const&
+Scope::const_iterator::operator *()
+{
+  return this->inner_iter->second;
+}
+
+Scope::const_iterator const
+Scope::const_iterator::operator ++(int)
+{
+  return this->inner_iter++;
+}
+
+bool
+Scope::const_iterator::operator ==(const Scope::const_iterator &other)
+{
+  return this->inner_iter == other.inner_iter;
+}
+
+bool
+Scope::const_iterator::operator !=(const Scope::const_iterator &other)
+{
+  return this->inner_iter != other.inner_iter;
+}
+
+
+
+/*
  * Implementation of Scope.
  */
 Scope::Scope(bool is_closed)
@@ -107,6 +148,21 @@ Scope::getDefinition(const std::string &name)
 }
 
 
+Definition * const
+Scope::getDefinition(const std::string &name) const
+{
+  std::map<std::string, Definition *>::const_iterator item = this->definitions.find(name);
+
+  if (this->definitions.end() == item) {
+    SymbolError err;
+    err << "Symbol " << name << " not found in scope.";
+    throw err;
+  }
+
+  return item->second;
+}
+
+
 bool
 Scope::isClosed()
 {
@@ -121,10 +177,24 @@ Scope::begin()
 }
 
 
+Scope::const_iterator
+Scope::begin() const
+{
+  return Scope::const_iterator(this->definitions.begin());
+}
+
+
 Scope::iterator
 Scope::end()
 {
   return Scope::iterator(this->definitions.end());
+}
+
+
+Scope::const_iterator
+Scope::end() const
+{
+  return Scope::const_iterator(this->definitions.end());
 }
 
 

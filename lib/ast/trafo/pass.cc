@@ -69,7 +69,8 @@ Pass::cleanupModule(Module *node)
     if (! Node::isConstraint(item->second))
     {
       InternalError err;
-      err << "Can not replace constraint with none: " << item->second->getNodeType();
+      err << "Can not replace constraint with none: "
+          << (unsigned int) item->second->getNodeType();
       throw err;
     }
 
@@ -128,7 +129,7 @@ Pass::cleanupScope(Scope *node)
       {
         InternalError err;
         err << "Can not replace a Definition with: "
-            << item->second->getNodeType();
+            << (unsigned int) item->second->getNodeType();
         throw err;
       }
 
@@ -201,7 +202,7 @@ Pass::cleanupReaction(Reaction *node)
     if (! Node::isKineticLaw(item->second))
     {
       InternalError err;
-      err << "Can not replace kinetic law with: " << item->second->getNodeType();
+      err << "Can not replace kinetic law with: " << (unsigned int) item->second->getNodeType();
       throw err;
     }
 
@@ -268,7 +269,7 @@ Pass::cleanupVariableDefinition(VariableDefinition *node)
       if (! Node::isRule(item->second))
       {
         InternalError err;
-        err << "Can not replace rule with none: " << item->second->getNodeType();
+        err << "Can not replace rule with none: " << (unsigned int) item->second->getNodeType();
         throw err;
       }
 

@@ -59,9 +59,12 @@ public:
    */
   virtual const char *what() const throw();
 
+  Exception &operator<< (unsigned char c);
   Exception &operator<< (const char *text);
   Exception &operator<< (const std::string &text);
+  Exception &operator<< (size_t value);
   Exception &operator<< (unsigned int value);
+  Exception &operator<< (double value);
   Exception &operator<< (const GiNaC::ex &expression);
 };
 

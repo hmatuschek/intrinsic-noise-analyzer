@@ -121,11 +121,24 @@ protected:
   */
   void constructCovarianceMatrix(Eigen::MatrixXex &cov);
 
+
+private:
+  /**
+   * Performs the common construction part, shared between all constructors.
+   */
+  void postConstructor();
+
+
 public:
   /**
    * Constructor...
    */
   LinearNoiseApproximation(libsbml::Model *model);
+
+  /**
+   * Constructor.
+   */
+  explicit LinearNoiseApproximation(const Ast::Model &model);
 
   /**
    * Maps a symbol (species) to an index in the state vector.

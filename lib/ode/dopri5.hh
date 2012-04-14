@@ -106,7 +106,7 @@ protected:
     // Check step-size:
     if (std::abs(dt) <= std::abs(t)*std::numeric_limits<double>::epsilon()) {
       RuntimeError err;
-      err << __FILE__ << "(" << __LINE__ << "): " << "Stepsize underflow in Dopri5Stepper.";
+      err << __FILE__ << "(" << (unsigned int) __LINE__ << "): " << "Stepsize underflow in Dopri5Stepper.";
       throw err;
     }
 

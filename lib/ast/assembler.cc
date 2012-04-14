@@ -689,7 +689,7 @@ Assembler::processUnit(libsbml::Unit *unit)
   }
 
   InternalError err;
-  err << "Unknown UNIT KIND: " << unit->getKind();
+  err << "Unknown UNIT KIND: " << (unsigned int) unit->getKind();
   throw err;
 }
 
@@ -938,7 +938,7 @@ Assembler::processExpression(const libsbml::ASTNode *node)
   }
 
   InternalError err;
-  err << "Unhandled SBML AST node type: " << node->getType();
+  err << "Unhandled SBML AST node type: " << (unsigned int) node->getType();
   throw err;
 }
 
@@ -960,7 +960,7 @@ Assembler::processConstBoolean(const libsbml::ASTNode *node)
 
   default:
     InternalError err;
-    err << "Unknown SBML boolean expression: " << node->getType();
+    err << "Unknown SBML boolean expression: " << (unsigned int) node->getType();
     return 0;
   }
 
@@ -975,7 +975,7 @@ Assembler::processConstInteger(const libsbml::ASTNode *node)
   if (libsbml::AST_INTEGER != node->getType())
   {
     InternalError err;
-    err << "Unknown SBML integer type: " << node->getType();
+    err << "Unknown SBML integer type: " << (unsigned int) node->getType();
     throw err;
   }
 
@@ -995,7 +995,7 @@ Assembler::processConstFloat(const libsbml::ASTNode *node)
 
   default:
     InternalError err;
-    err << "Unknown SBML float type: " << node->getType();
+    err << "Unknown SBML float type: " << (unsigned int) node->getType();
     throw err;
   }
 
@@ -1033,7 +1033,7 @@ Assembler::processArithmeticOperator(const libsbml::ASTNode *node)
   }
 
   InternalError err;
-  err << "Unknown SBML arithmetic operator: " << node->getType();
+  err << "Unknown SBML arithmetic operator: " << (unsigned int) node->getType();
   throw err;
 }
 
@@ -1045,7 +1045,7 @@ Assembler::processSymbol(const libsbml::ASTNode *node)
   if (libsbml::AST_NAME != node->getType())
   {
     InternalError err;
-    err << "Unknown SBML symbol type: " << node->getType();
+    err << "Unknown SBML symbol type: " << (unsigned int) node->getType();
     throw err;
   }
 
@@ -1060,7 +1060,7 @@ Assembler::processFunctionCall(const libsbml::ASTNode *node)
   if (libsbml::AST_FUNCTION != node->getType())
   {
     InternalError err;
-    err << "Unknwon SBML function call type: " << node->getType();
+    err << "Unknwon SBML function call type: " << (unsigned int) node->getType();
     throw err;
   }
 

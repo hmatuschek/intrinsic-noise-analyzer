@@ -100,7 +100,7 @@ Module::addDefinition(Definition *def)
 
 
 size_t
-Module::getNumConstraints()
+Module::getNumConstraints() const
 {
   return this->constraints.size();
 }
@@ -122,6 +122,20 @@ Module::constraintBegin()
 
 Module::constraintIterator
 Module::constraintEnd()
+{
+  return this->constraints.end();
+}
+
+
+Module::const_constraintIterator
+Module::constraintBegin() const
+{
+  return this->constraints.begin();
+}
+
+
+Module::const_constraintIterator
+Module::constraintEnd() const
 {
   return this->constraints.end();
 }
@@ -235,7 +249,7 @@ Module::setDefaultTimeUnit(const ScaledBaseUnit &unit)
 
 
 const Unit &
-Module::getUnit(const std::string &name)
+Module::getUnit(const std::string &name) const
 {
   // Check if name is one of the defaults:
   if ("substance" == name) {
@@ -251,7 +265,7 @@ Module::getUnit(const std::string &name)
   }
 
   // Check if name is one of the pre-defined units:
-  std::map<std::string, Unit>::iterator item;
+  std::map<std::string, Unit>::const_iterator item;
   if (this->predefined_units.end() != (item  = this->predefined_units.find(name)))
   {
     return item->second;
@@ -278,15 +292,31 @@ Module::getUnitDefinition(const std::string &identifier)
 }
 
 
+UnitDefinition * const
+Module::getUnitDefinition(const std::string &identifier) const
+{
+  Definition * const def = this->getDefinition(identifier);
+
+  if (! Node::isUnitDefinition(def))
+  {
+    SymbolError err;
+    err << "Symbol " << identifier << " does not name a unit-definition in this module.";
+    throw err;
+  }
+
+  return static_cast<Ast::UnitDefinition * const>(def);
+}
+
+
 bool
-Module::hasVariable(const GiNaC::symbol &symbol)
+Module::hasVariable(const GiNaC::symbol &symbol) const
 {
   return this->symbol_table.end() != this->symbol_table.find(symbol);
 }
 
 
 bool
-Module::hasVariable(const std::string &identifier)
+Module::hasVariable(const std::string &identifier) const
 {
   return this->hasDefinition(identifier) && Node::isVariableDefinition(this->getDefinition(identifier));
 }
@@ -294,6 +324,22 @@ Module::hasVariable(const std::string &identifier)
 
 VariableDefinition *
 Module::getVariable(const std::string &identifier)
+{
+  Ast::Definition *def = this->getDefinition(identifier);
+
+  if (! Node::isVariableDefinition(def))
+  {
+    SymbolError err;
+    err << "Symbol " << identifier << " does not name a variable.";
+    throw err;
+  }
+
+  return static_cast<Ast::VariableDefinition *>(def);
+}
+
+
+VariableDefinition * const
+Module::getVariable(const std::string &identifier) const
 {
   Ast::Definition *def = this->getDefinition(identifier);
 
@@ -325,6 +371,23 @@ Module::getVariable(const GiNaC::symbol &symbol)
 }
 
 
+VariableDefinition * const
+Module::getVariable(const GiNaC::symbol &symbol) const
+{
+  std::map<GiNaC::symbol, VariableDefinition *, GiNaC::ex_is_less>::const_iterator item
+      = this->symbol_table.find(symbol);
+
+  if (this->symbol_table.end() == item)
+  {
+    SymbolError err;
+    err << "Symbol " << symbol << " does not name a variable.";
+    throw err;
+  }
+
+  return item->second;
+}
+
+
 Reaction *
 Module::getReaction(const std::string &identifier)
 {
@@ -338,6 +401,21 @@ Module::getReaction(const std::string &identifier)
   }
 
   return static_cast<Ast::Reaction *>(def);
+}
+
+Reaction * const
+Module::getReaction(const std::string &identifier) const
+{
+  Ast::Definition * const def = this->getDefinition(identifier);
+
+  if (! Node::isReactionDefinition(def))
+  {
+    SymbolError err;
+    err << "There is no reaction with identifier " << identifier << " defined in this module.";
+    throw err;
+  }
+
+  return static_cast<Ast::Reaction * const>(def);
 }
 
 
@@ -359,7 +437,7 @@ Module::getFunction(const std::string &identifier)
 
 
 bool
-Module::isExplTimeDep(const GiNaC::ex &expression)
+Module::isExplTimeDep(const GiNaC::ex &expression) const
 {
   //fixed this todo: return 0 != GiNaC::diff(expression, this->time_symbol, 1);
   return expression.has(this->time_symbol);

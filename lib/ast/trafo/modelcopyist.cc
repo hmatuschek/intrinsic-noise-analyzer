@@ -9,7 +9,7 @@ using namespace Fluc::Ast::Trafo;
 
 
 void
-ModelCopyist::copy(Ast::Model *src, Ast::Model *dest)
+ModelCopyist::copy(const Ast::Model *src, Ast::Model *dest)
 {
   GiNaC::exmap translation_table;
 
@@ -18,7 +18,7 @@ ModelCopyist::copy(Ast::Model *src, Ast::Model *dest)
 
 
 void
-ModelCopyist::copy(Ast::Model *src, Ast::Model *dest, GiNaC::exmap &translation_table)
+ModelCopyist::copy(const Ast::Model *src, Ast::Model *dest, GiNaC::exmap &translation_table)
 {
   // Table of species copies:
   std::map<Species *, Species *> species_table;
@@ -26,7 +26,7 @@ ModelCopyist::copy(Ast::Model *src, Ast::Model *dest, GiNaC::exmap &translation_
   // Sorry, iteration is quiet in-efficient, however:
 
   // Copy function definitions:
-  for (Ast::Model::iterator iter = src->begin(); iter != src->end(); iter++)
+  for (Ast::Model::const_iterator iter = src->begin(); iter != src->end(); iter++)
   {
     if (Ast::Node::isFunctionDefinition(*iter)) {
       dest->addDefinition(ModelCopyist::copyFunctionDefinition(
@@ -42,7 +42,7 @@ ModelCopyist::copy(Ast::Model *src, Ast::Model *dest, GiNaC::exmap &translation_
   dest->setDefaultTimeUnit(src->getDefaultTimeUnit().asScaledBaseUnit());
 
   // Copy user defined "specialized" units:
-  for (Ast::Model::iterator iter = src->begin(); iter != src->end(); iter++)
+  for (Ast::Model::const_iterator iter = src->begin(); iter != src->end(); iter++)
   {
     if (Ast::Node::isUnitDefinition(*iter))
     {
@@ -73,7 +73,7 @@ ModelCopyist::copy(Ast::Model *src, Ast::Model *dest, GiNaC::exmap &translation_
   }
 
   // Copy constraints:
-  for (Ast::Model::constraintIterator iter = src->constraintBegin();
+  for (Ast::Model::const_constraintIterator iter = src->constraintBegin();
        iter != src->constraintEnd(); iter++)
   {
     dest->addConstraint(ModelCopyist::copyConstraint(*iter, translation_table));
@@ -207,7 +207,7 @@ ModelCopyist::copyConstraint(Ast::Constraint *node, GiNaC::exmap &translation_ta
   }
 
   InternalError err;
-  err << "Can not copy constraint, unkown constraint type: " << node->getNodeType();
+  err << "Can not copy constraint, unkown constraint type: " << (unsigned int) node->getNodeType();
   throw err;
 }
 
@@ -331,7 +331,7 @@ ModelCopyist::copyRule(Ast::Rule *node, GiNaC::exmap &translation_table)
   }
 
   InternalError err;
-  err << "Can not copy rule: Unknown rule type: " << node->getNodeType();
+  err << "Can not copy rule: Unknown rule type: " << (unsigned int) node->getNodeType();
   throw err;
 }
 

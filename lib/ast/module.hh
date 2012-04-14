@@ -27,6 +27,11 @@ public:
    */
   typedef std::list<Constraint *>::iterator constraintIterator;
 
+  /**
+   * Defines the const iterator type over all global constraints.
+   */
+  typedef std::list<Constraint *>::const_iterator const_constraintIterator;
+
 
 protected:
   /**
@@ -116,7 +121,7 @@ public:
   /**
    * Retunrs the number of constaints applied to this module.
    */
-  size_t getNumConstraints();
+  size_t getNumConstraints() const;
 
   /**
    * Adds a cosntraint to the module.
@@ -132,6 +137,16 @@ public:
    * Returns a constraintIterator pointing right after the last constraint of the module.
    */
   constraintIterator constraintEnd();
+
+  /**
+   * Retunrs a constraintIterator pointing to the first constraint of the module.
+   */
+  const_constraintIterator constraintBegin() const;
+
+  /**
+   * Returns a constraintIterator pointing right after the last constraint of the module.
+   */
+  const_constraintIterator constraintEnd() const;
 
   /**
    * Returns the module-global unique time symbol.
@@ -191,7 +206,7 @@ public:
   /**
    * Returns the given unit or throws an exception if unknwon.
    */
-  const Unit &getUnit(const std::string &name);
+  const Unit &getUnit(const std::string &name) const;
 
   /**
    * Returns the unit definition by identifier.
@@ -203,14 +218,23 @@ public:
   UnitDefinition *getUnitDefinition(const std::string &identifier);
 
   /**
+   * Returns the unit definition by identifier.
+   *
+   * Equivalent to call @c getUnitDefinition(getSymbol(const std::string &identifier)).
+   *
+   * @throws SymbolError If the identifier is not associated with a unit definition.
+   */
+  UnitDefinition * const getUnitDefinition(const std::string &identifier) const;
+
+  /**
    * Returns true, if the given identifier names a @c VariableDefinition.
    */
-  bool hasVariable(const std::string &identifier);
+  bool hasVariable(const std::string &identifier) const;
 
   /**
    * Returns true, if the given symbol belongs to a variable definition.
    */
-  bool hasVariable(const GiNaC::symbol &symbol);
+  bool hasVariable(const GiNaC::symbol &symbol) const;
 
   /**
    * Returns the variable definition by name.
@@ -222,11 +246,27 @@ public:
   VariableDefinition *getVariable(const std::string &identifier);
 
   /**
+   * Returns the variable definition by name.
+   *
+   * Is equivalent to call @c getVariable(getSymbol(const std::string &identifier).
+   *
+   * @throws SymbolError If identifier is not associated with a variable.
+   */
+  VariableDefinition * const getVariable(const std::string &identifier) const;
+
+  /**
    * Returns the variable definition associated with the given symbol.
    *
    * @throws SymbolError If the symbol is not associated with a variable definition.
    */
   VariableDefinition *getVariable(const GiNaC::symbol &symbol);
+
+  /**
+   * Returns the variable definition associated with the given symbol.
+   *
+   * @throws SymbolError If the symbol is not associated with a variable definition.
+   */
+  VariableDefinition * const getVariable(const GiNaC::symbol &symbol) const;
 
   /**
    * Returns the reaction definition by identifier.
@@ -236,6 +276,15 @@ public:
    * @throws SymbolError If the identifier is not associated with a reaction definition.
    */
   Reaction *getReaction(const std::string &identifier);
+
+  /**
+   * Returns the reaction definition by identifier.
+   *
+   * Is equivalent to call @c getReaction(getSymbol(const std::string &identifier)).
+   *
+   * @throws SymbolError If the identifier is not associated with a reaction definition.
+   */
+  Reaction * const getReaction(const std::string &identifier) const;
 
   /**
    * Returns the function definition by identifier.
@@ -249,7 +298,7 @@ public:
   /**
    * Returns true, if the given expression is explicitly time dependent.
    */
-  bool isExplTimeDep(const GiNaC::ex &expression);
+  bool isExplTimeDep(const GiNaC::ex &expression) const;
 };
 
 

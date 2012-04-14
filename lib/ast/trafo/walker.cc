@@ -84,7 +84,7 @@ Walker::handleDefinition(Definition *node)
 
   default:
     InternalError err;
-    err << "Unknwon definition: " << node->getNodeType();
+    err << "Unknwon definition: " << (unsigned int) node->getNodeType();
     throw err;
   }
 }
@@ -121,7 +121,7 @@ Walker::handleRule(Rule *node)
 
   default:
     InternalError err;
-    err << "Unknown rule type: " << node->getNodeType();
+    err << "Unknown rule type: " << (unsigned int) node->getNodeType();
     throw err;
   }
 }

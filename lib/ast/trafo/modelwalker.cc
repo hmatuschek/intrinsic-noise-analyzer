@@ -39,7 +39,7 @@ ModelWalker::handleVariableDefinition(Ast::VariableDefinition *node)
 
   default:
     InternalError err;
-    err << "Unknown variable definition type: " << node->getNodeType();
+    err << "Unknown variable definition type: " << (unsigned int) node->getNodeType();
     throw err;
   }
 }

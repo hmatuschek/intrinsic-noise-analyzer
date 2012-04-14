@@ -13,7 +13,26 @@ LinearNoiseApproximation::LinearNoiseApproximation(libsbml::Model *model)
     updateVector(getDimension()),
     interpreter(*this)
 {
+  postConstructor();
+}
 
+
+LinearNoiseApproximation::LinearNoiseApproximation(const Ast::Model &model)
+  : LNABaseModel(model),
+    Link0CMatrixNumeric(numDepSpecies(), numIndSpecies()),
+    LinkCMatrixNumeric(numSpecies(), numIndSpecies()),
+    Omega(numSpecies()),
+    stateVariables(getDimension()-numIndSpecies()),
+    updateVector(getDimension()),
+    interpreter(*this)
+{
+  postConstructor();
+}
+
+
+void
+LinearNoiseApproximation::postConstructor()
+{
     // setup index table
 
     // get symbols of species
@@ -172,8 +191,7 @@ LinearNoiseApproximation::LinearNoiseApproximation(libsbml::Model *model)
 
     // and combine to update vector
     this->updateVector << this->REs,CovUpdate,EMREUpdate;
-
-};
+}
 
 
 

@@ -204,7 +204,7 @@ Lexer::parseToken()
   if (! this->reader.inFinalState()) {
     LexerError err;
     err << "@line: ???"
-        << "Lexer: unexpected char: " << this->input.peek() << std::endl;
+        << "Lexer: unexpected char: " << (unsigned char)(this->input.peek());
     return;
   }
 

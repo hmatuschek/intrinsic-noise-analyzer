@@ -25,14 +25,6 @@ class BaseModel : public Ast::Model
 {
 protected:
   /**
-   * Holds the SBML model being processed.
-   *
-   * @deprecated This property will be fully repalaced by the @c Ast::Model class, @c BaseMode is
-   * derived from.
-   */
-  libsbml::Model *model;
-
-  /**
    * Maps the index back to a species-symbol.
    *
    * @deprecated Use the @c getSpecies(size_t)->getSymbol() combination.
@@ -65,6 +57,13 @@ public:
    * It also constructs the species <-> index tables.
    */
   BaseModel(libsbml::Model *sbml_model);
+
+  /**
+   * Constructor.
+   *
+   * Constructs a @c Model::BaseModel as copy of the given @c Ast::Model.
+   */
+  explicit BaseModel(const Ast::Model &model);
 
   /**
    * Base virtual destructor. Don't mind.
