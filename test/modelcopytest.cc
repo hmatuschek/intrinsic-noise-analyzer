@@ -6,6 +6,46 @@ using namespace Fluc;
 
 
 void
+ModelCopyTest::testRuleEqual(Ast::Rule *A, Ast::Rule *B,
+                             GiNaC::exmap &symbol_table)
+{
+  // Check pointer:
+  UT_ASSERT(A != B);
+
+  // Check node-type:
+  UT_ASSERT(A->getNodeType() == A->getNodeType());
+
+  // Check rule-expression:
+  UT_ASSERT(A->getRule() == B->getRule().subs(symbol_table));
+}
+
+
+void
+ModelCopyTest::testParameterEqual(Ast::Parameter *A, Ast::Parameter *B,
+                                  GiNaC::exmap &symbol_table)
+{
+  // Pass...
+}
+
+
+void
+ModelCopyTest::testSpeciesEqual(Ast::Species *A, Ast::Species *B,
+                                GiNaC::exmap &symbol_table)
+{
+  // Check compartments
+  testVariableEqual(A->getCompartment(), B->getCompartment(), symbol_table);
+}
+
+
+void
+ModelCopyTest::testCompartmentEqual(Ast::Compartment *A, Ast::Compartment *B,
+                                    GiNaC::exmap &symbol_table)
+{
+  // Pass...
+}
+
+
+void
 ModelCopyTest::testVariableEqual(Ast::VariableDefinition *A, Ast::VariableDefinition *B,
                                  GiNaC::exmap &symbol_table)
 {
@@ -21,9 +61,48 @@ ModelCopyTest::testVariableEqual(Ast::VariableDefinition *A, Ast::VariableDefini
     A->getValue() == B->getValue().subs(symbol_table);
   }
 
+  // Check if variable is constant.
+  UT_ASSERT(A->isConst() == B->isConst());
+
+  // Compare units:
+  UT_ASSERT(A->getUnit() == B->getUnit());
+
   // Check if variables has rules:
   UT_ASSERT(A->hasRule() == A->hasRule());
-  /// \todo Implement comparison of rules.
+  if (A->hasRule()) {
+    testRuleEqual(A->getRule(), B->getRule(), symbol_table);
+  }
+
+  if (Ast::Node::isSpecies(A)) {
+    testSpeciesEqual(
+          dynamic_cast<Ast::Species *>(A),
+          dynamic_cast<Ast::Species *>(B),
+          symbol_table);
+  } else if (Ast::Node::isParameter(A)) {
+    testParameterEqual(
+          dynamic_cast<Ast::Parameter *>(A),
+          dynamic_cast<Ast::Parameter *>(B),
+          symbol_table);
+  } else if (Ast::Node::isCompartment(A)) {
+    testCompartmentEqual(
+          dynamic_cast<Ast::Compartment *>(A),
+          dynamic_cast<Ast::Compartment *>(B),
+          symbol_table);
+  }
+}
+
+
+void
+ModelCopyTest::testKineticLaw(Ast::KineticLaw *A, Ast::KineticLaw *B, GiNaC::exmap &symbol_table)
+{
+  // Strore copy of symbol_table
+  GiNaC::exmap temp_table(symbol_table);
+
+  // Process local parameters:
+  testScopeEqual(*A, *B, temp_table);
+
+  // compare law:
+  UT_ASSERT(A->getRateLaw() == B->getRateLaw().subs(temp_table));
 }
 
 
@@ -39,9 +118,33 @@ ModelCopyTest::testReactionEqual(Ast::Reaction *A, Ast::Reaction *B, GiNaC::exma
   // Check reversible flag:
   UT_ASSERT(A->isReversible() == B->isReversible());
 
-  /// \todo Test stoichiometry
+  // Test reactant stoichiometry
+  for (Ast::Reaction::iterator reac = B->reacBegin(); reac != B->reacEnd(); reac++) {
+    GiNaC::symbol reac_sym = GiNaC::ex_to<GiNaC::symbol>(symbol_table[reac->first->getSymbol()]);
+    // Check if reactant is in A:
+    UT_ASSERT(A->hasReactant(reac_sym));
+    // Check stoichiometry:
+    UT_ASSERT(reac->second == A->getReactantStoichiometry(reac_sym).subs(symbol_table));
+  }
 
-  /// \todo Test kinetic law:
+  // Test product stoichiometry
+  for (Ast::Reaction::iterator prod = B->prodBegin(); prod != B->prodEnd(); prod++) {
+    GiNaC::symbol prod_sym = GiNaC::ex_to<GiNaC::symbol>(symbol_table[prod->first->getSymbol()]);
+    // Check if product is in A:
+    UT_ASSERT(A->hasProduct(prod_sym));
+    // Check stoichiometry:
+    UT_ASSERT(prod->second == A->getProductStoichiometry(prod_sym).subs(symbol_table));
+  }
+
+  // Test modifier.
+  for (Ast::Reaction::mod_iterator mod = B->modBegin(); mod != B->modEnd(); mod++) {
+    GiNaC::symbol mod_sym = GiNaC::ex_to<GiNaC::symbol>(symbol_table[(*mod)->getSymbol()]);
+    // Check if A has modifier:
+    UT_ASSERT(A->isModifier(mod_sym));
+  }
+
+  // Test kinetic law:
+  testKineticLaw(A->getKineticLaw(), B->getKineticLaw(), symbol_table);
 }
 
 
