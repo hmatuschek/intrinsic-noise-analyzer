@@ -6,6 +6,50 @@ using namespace Fluc;
 
 
 void
+ModelCopyTest::testUnitEqual(Ast::UnitDefinition *A, Ast::UnitDefinition *B)
+{
+  // Simply test if units are equal:
+  UT_ASSERT(A->getUnit() == B->getUnit());
+}
+
+
+void
+ModelCopyTest::testConstraint(Ast::Constraint *A, Ast::Constraint *B, GiNaC::exmap &symbol_table)
+{
+  if (Ast::Node::isAlgebraicConstraint(A)) {
+    testAlgebraicConstraint(
+          dynamic_cast<Ast::AlgebraicConstraint *>(A),
+          dynamic_cast<Ast::AlgebraicConstraint *>(B),
+          symbol_table);
+  }
+}
+
+
+void
+ModelCopyTest::testAlgebraicConstraint(Ast::AlgebraicConstraint *A, Ast::AlgebraicConstraint *B,
+                                       GiNaC::exmap &symbol_table)
+{
+  // Just test if expressions are different
+  UT_ASSERT(A->getConstraint() != B->getConstraint());
+  // and compare subs. expressions
+  UT_ASSERT(A->getConstraint() == B->getConstraint().subs(symbol_table));
+}
+
+
+void
+ModelCopyTest::testFunctionDefinition(Ast::FunctionDefinition *A, Ast::FunctionDefinition *B)
+{
+  // Perform simple tests on local variables and populate scope:
+  GiNaC::exmap symbol_table;
+  testScopeEqual(*A, *B, symbol_table);
+
+  // Check function expression:
+  UT_ASSERT(A->getBody() != B->getBody());
+  UT_ASSERT(A->getBody() == B->getBody().subs(symbol_table));
+}
+
+
+void
 ModelCopyTest::testRuleEqual(Ast::Rule *A, Ast::Rule *B,
                              GiNaC::exmap &symbol_table)
 {
@@ -191,6 +235,8 @@ ModelCopyTest::testModelEqual(Ast::Model &A, Ast::Model &B)
     Ast::Definition *def_a = *item;
     Ast::Definition *def_b = B.getDefinition(def_a->getIdentifier());
 
+    UT_ASSERT(B.hasDefinition(def_a->getIdentifier()));
+
     if (Ast::Node::isVariableDefinition(*item)) {
       this->testVariableEqual(
             dynamic_cast<Ast::VariableDefinition *>(def_a),
@@ -199,8 +245,50 @@ ModelCopyTest::testModelEqual(Ast::Model &A, Ast::Model &B)
       this->testReactionEqual(
             dynamic_cast<Ast::Reaction *>(def_a),
             dynamic_cast<Ast::Reaction *>(def_b), symbol_table);
+    } else if (Ast::Node::isFunctionDefinition(*item)) {
+      this->testFunctionDefinition(
+            dynamic_cast<Ast::FunctionDefinition *>(def_a),
+            dynamic_cast<Ast::FunctionDefinition *>(def_b));
+    } else if (Ast::Node::isConstraint(*item)) {
+      this->testConstraint(
+            dynamic_cast<Ast::Constraint *>(def_a),
+            dynamic_cast<Ast::Constraint *>(def_b),
+            symbol_table);
+    } else if (Ast::Node::isUnitDefinition(*item)) {
+      this->testUnitEqual(
+            dynamic_cast<Ast::UnitDefinition *>(def_a),
+            dynamic_cast<Ast::UnitDefinition *>(def_b));
     }
   }
+
+  //Compare parameter, species, compartment idxs:
+  UT_ASSERT(A.numSpecies() == B.numSpecies());
+  for (size_t i=0; i<A.numSpecies(); i++) {
+    UT_ASSERT(A.getSpecies(i) != B.getSpecies(i));
+    UT_ASSERT_EQUAL(A.getSpecies(i)->getIdentifier(), B.getSpecies(i)->getIdentifier());
+  }
+  UT_ASSERT(A.numParameters() == B.numParameters());
+  for (size_t i=0; i<A.numParameters(); i++) {
+    UT_ASSERT(A.getParameter(i) != B.getParameter(i));
+    UT_ASSERT_EQUAL(A.getParameter(i)->getIdentifier(), B.getParameter(i)->getIdentifier());
+  }
+  UT_ASSERT(A.numCompartments() == B.numCompartments());
+  for (size_t i=0; i<A.numCompartments(); i++) {
+    UT_ASSERT(A.getCompartment(i) != B.getCompartment(i));
+    UT_ASSERT_EQUAL(A.getCompartment(i)->getIdentifier(), B.getCompartment(i)->getIdentifier());
+  }
+  UT_ASSERT(A.numReactions() == B.numReactions());
+  for (size_t i=0; i<A.numReactions(); i++) {
+    UT_ASSERT(A.getReaction(i) != B.getReaction(i));
+    UT_ASSERT_EQUAL(A.getReaction(i)->getIdentifier(), B.getReaction(i)->getIdentifier());
+  }
+
+  // Compare default units:
+  UT_ASSERT(A.getDefaultAreaUnit() == B.getDefaultAreaUnit());
+  UT_ASSERT(A.getDefaultLengthUnit() == B.getDefaultLengthUnit());
+  UT_ASSERT(A.getDefaultSubstanceUnit() == B.getDefaultSubstanceUnit());
+  UT_ASSERT(A.getDefaultTimeUnit() == B.getDefaultTimeUnit());
+  UT_ASSERT(A.getDefaultVolumeUnit() == B.getDefaultVolumeUnit());
 }
 
 

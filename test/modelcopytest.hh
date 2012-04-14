@@ -12,6 +12,14 @@ namespace Fluc {
 class ModelCopyTest : public UnitTest::TestCase
 {
 protected:
+  void testUnitEqual(Ast::UnitDefinition *A, Ast::UnitDefinition *B);
+
+  void testConstraint(Ast::Constraint *A, Ast::Constraint *B, GiNaC::exmap &symbol_table);
+  void testAlgebraicConstraint(Ast::AlgebraicConstraint *A, Ast::AlgebraicConstraint *B,
+                               GiNaC::exmap &symbol_table);
+
+  void testFunctionDefinition(Ast::FunctionDefinition *A, Ast::FunctionDefinition *B);
+
   void testVariableEqual(Ast::VariableDefinition *A, Ast::VariableDefinition *B, GiNaC::exmap &symbol_table);
   void testRuleEqual(Ast::Rule *A, Ast::Rule *B, GiNaC::exmap &symbol_table);
   void testParameterEqual(Ast::Parameter *A, Ast::Parameter *B, GiNaC::exmap &symbol_table);

@@ -52,34 +52,24 @@ ModelCopyist::copy(Ast::Model *src, Ast::Model *dest, GiNaC::exmap &translation_
   }
 
   // Copy all parameter definitions:
-  for (Ast::Model::iterator iter = src->begin(); iter != src->end(); iter++)
-  {
-    if (Ast::Node::isParameter(*iter))
-    {
-      dest->addDefinition(ModelCopyist::copyParameterDefinition(
-                            static_cast<Ast::Parameter *>(*iter), translation_table));
-    }
+  for (size_t i=0; i<src->numParameters(); i++) {
+    dest->addDefinition(ModelCopyist::copyParameterDefinition(
+                          static_cast<Ast::Parameter *>(src->getParameter(i)),
+                          translation_table));
   }
 
   // Copy all compartments:
-  for (Ast::Model::iterator iter = src->begin(); iter != src->end(); iter++)
-  {
-    if (Ast::Node::isCompartment(*iter))
-    {
-      dest->addDefinition(ModelCopyist::copyCompartmentDefinition(
-                            static_cast<Ast::Compartment *>(*iter), translation_table));
-    }
+  for (size_t i=0; i<src->numCompartments(); i++) {
+    dest->addDefinition(ModelCopyist::copyCompartmentDefinition(
+                          static_cast<Ast::Compartment *>(src->getCompartment(i)),
+                          translation_table));
   }
 
   // Copy all species definition:
-  for (Ast::Model::iterator iter = src->begin(); iter != src->end(); iter++)
-  {
-    if (Ast::Node::isSpecies(*iter))
-    {
-      dest->addDefinition(ModelCopyist::copySpeciesDefinition(
-                            static_cast<Ast::Species *>(*iter), translation_table,
-                            species_table, dest));
-    }
+  for (size_t i=0; i<src->numSpecies(); i++) {
+    dest->addDefinition(ModelCopyist::copySpeciesDefinition(
+                          static_cast<Ast::Species *>(src->getSpecies(i)),
+                          translation_table, species_table, dest));
   }
 
   // Copy constraints:
@@ -90,13 +80,10 @@ ModelCopyist::copy(Ast::Model *src, Ast::Model *dest, GiNaC::exmap &translation_
   }
 
   // Copy reactions:
-  for (Ast::Model::iterator iter = src->begin(); iter != src->end(); iter++)
-  {
-    if (Ast::Node::isReactionDefinition(*iter)) {
-      dest->addDefinition(ModelCopyist::copyReaction(
-                            static_cast<Ast::Reaction *>(*iter), translation_table,
-                            species_table));
-    }
+  for (size_t i=0; i<src->numReactions(); i++) {
+    dest->addDefinition(ModelCopyist::copyReaction(
+                          static_cast<Ast::Reaction *>(src->getReaction(i)),
+                          translation_table, species_table));
   }
 }
 
