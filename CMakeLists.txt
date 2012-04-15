@@ -164,7 +164,7 @@ ENDIF(LLVM_FOUND)
 # traverse into source tree:
 #
 add_subdirectory(lib)
-add_subdirectory(cli)
+#add_subdirectory(cli)
 add_subdirectory(app)
 add_subdirectory(test)
 #add_subdirectory(benchmarks)
