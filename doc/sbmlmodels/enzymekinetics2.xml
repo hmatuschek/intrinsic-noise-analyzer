@@ -34,11 +34,11 @@
             <apply>
               <times/>
               <ci> compartment </ci>
-              <ci> v </ci>
+              <ci> kin </ci>
             </apply>
           </math>
           <listOfParameters>
-            <parameter id="v" name="v" value="1.8e-05"/>
+            <parameter id="kin" name="kin" value="1.8e-05"/>
           </listOfParameters>
         </kineticLaw>
       </reaction>
@@ -100,12 +100,12 @@
             <apply>
               <times/>
               <ci> compartment </ci>
-              <ci> kcat </ci>
+              <ci> k2 </ci>
               <ci> species_ES </ci>
             </apply>
           </math>
           <listOfParameters>
-            <parameter id="kcat" name="kcat" value="5"/>
+            <parameter id="k2" name="k2" value="5"/>
           </listOfParameters>
         </kineticLaw>
       </reaction>

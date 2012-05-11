@@ -149,7 +149,7 @@ public:
     // Check for errors:
     if (0 == load) {
       InternalError err;
-      err << "Can not compile load instruction." << std::endl;
+      err << "Can not compile load instruction.";
       throw err;
     }
 
@@ -172,7 +172,7 @@ public:
     // Check for errors:
     if (0 == load) {
       InternalError err;
-      err << "Can not compile load instruction." << std::endl;
+      err << "Can not compile load instruction.";
       throw err;
     }
 

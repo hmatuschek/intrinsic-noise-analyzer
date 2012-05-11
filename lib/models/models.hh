@@ -25,6 +25,7 @@
 
 #include "steadystateanalysis.hh"
 #include "lnainterpreter.hh"
+#include "lnaevaluator.hh"
 
 #include "stochasticsimulator.hh"
 #include "gillespieSSA.hh"

@@ -1,16 +1,13 @@
 #include "steadystateanalysis.hh"
 
-
 using namespace Fluc;
 using namespace Fluc::Models;
-
 
 SteadyStateAnalysis::SteadyStateAnalysis(LinearNoiseApproximation &model)
     : lnaModel(model), solver(model)
 {
   // Pass...
 }
-
 
 SteadyStateAnalysis::SteadyStateAnalysis(LinearNoiseApproximation &model,const size_t &iter,const double &epsilon)
     : lnaModel(model), solver(model)
@@ -193,13 +190,6 @@ SteadyStateAnalysis::calcSteadyState(Eigen::VectorXd &x)
 
     Eigen::VectorXd Delta(lnaModel.numIndSpecies());
 
-    // get full covariance
-    Eigen::MatrixXd cov_full(lnaModel.numSpecies(), lnaModel.numSpecies());
-    cov_full.noalias()=lnaModel.LinkCMatrixNumeric*cov*lnaModel.LinkCMatrixNumeric.transpose();
-
-    // restore native permutation of covariance
-    cov_full=(lnaModel.PermutationM.transpose()*cov_full)*lnaModel.PermutationM;
-
     // get Rate corrections
     Eigen::VectorXd REcorr;
     lnaModel.getRateCorrections(REcorr);
@@ -212,18 +202,18 @@ SteadyStateAnalysis::calcSteadyState(Eigen::VectorXd &x)
     {
       Delta(i)=0.;
       idx=0;
-      for (size_t j=0; j<lnaModel.numSpecies(); j++)
+      for (size_t j=0; j<lnaModel.numIndSpecies(); j++)
       {
         for (size_t k=0; k<=j; k++)
         {
 
             if(k==j)
             {
-                Delta(i) += HessianM(i,idx)*cov_full(j,k);
+                Delta(i) += HessianM(i,idx)*cov(j,k);
             }
             else
             {
-                Delta(i) += 2.*HessianM(i,idx)*cov_full(j,k);
+                Delta(i) += 2.*HessianM(i,idx)*cov(j,k);
             }
             idx++;
 
@@ -244,7 +234,7 @@ SteadyStateAnalysis::calcSteadyState(Eigen::VectorXd &x)
     // and emre
 
     x.resize(lnaModel.getDimension());
-    x << conc, covVec, emre;
+    x << conc, covVec, emre, Eigen::VectorXd::Zero(covVec.size()*(lnaModel.numIndSpecies()+2)/3),Eigen::VectorXd::Zero(covVec.size());
 
     return iter;
 

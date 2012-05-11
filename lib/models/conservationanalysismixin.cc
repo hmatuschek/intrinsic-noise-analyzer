@@ -21,6 +21,8 @@ ConservationAnalysisMixin::ConservationAnalysisMixin(BaseModel &base)
     //get permutation matrix
     this->PermutationM = LU.permutationQ().transpose();
 
+    this->PermutationVec = LU.permutationQ().indices();
+
     //evaluate dim of kernel and image, ie., number of dependent and independent species
 
     int ndep= LU.dimensionOfKernel();

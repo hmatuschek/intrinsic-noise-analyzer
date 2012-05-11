@@ -8,15 +8,19 @@ LNABaseModel::LNABaseModel(libsbml::Model *model)
   : BaseModel(model), LNAMixin((BaseModel &)(*this)),
     rate_expressions(this->numReactions()),
     rate_corrections(this->numReactions()),
-    rates_gradient(this->numReactions(),this->numSpecies()),
-    rates_hessian(this->numReactions(),this->numSpecies()*(this->numSpecies()+1)/2),
+    rates_gradient(this->numReactions(),this->numIndSpecies()),
+    rates_hessian(this->numReactions(),this->numIndSpecies()*(this->numIndSpecies()+1)/2),
     Link0CMatrix(this->numDepSpecies(),this->numIndSpecies()),
     LinkCMatrix(this->numSpecies(),this->numIndSpecies()),
     REs(this->numIndSpecies()), REcorrections(this->numIndSpecies()),
     JacobianM(this->numIndSpecies(),this->numIndSpecies()),
-    Hessian(this->numSpecies(), (this->numSpecies()*(this->numSpecies()+1))/2),
+    Hessian(this->numIndSpecies(), (this->numIndSpecies()*(this->numIndSpecies()+1))/2),
     DiffusionMatrix(this->numIndSpecies(),this->numIndSpecies()),
     DiffusionVec(numIndSpecies()*numIndSpecies()),
+    DiffusionJacM(numIndSpecies()*(numIndSpecies()+1)/2,numIndSpecies()),
+    Diffusion3Tensor(numIndSpecies()*(numIndSpecies()+1)*(numIndSpecies()+2)/6),
+    DiffusionHessianM(numIndSpecies()*(numIndSpecies()+1)/2,numIndSpecies()*(numIndSpecies()+1)/2),
+    PhilippianM(numIndSpecies()*(numIndSpecies()+1)*(numIndSpecies()+2)/6,numIndSpecies()*(numIndSpecies()+1)*(numIndSpecies()+2)/6),
     conservationConstants(this->numDepSpecies())
 {
   postConstructor();
@@ -27,15 +31,19 @@ LNABaseModel::LNABaseModel(const Ast::Model &model)
   : BaseModel(model), LNAMixin((BaseModel &)(*this)),
     rate_expressions(this->numReactions()),
     rate_corrections(this->numReactions()),
-    rates_gradient(this->numReactions(),this->numSpecies()),
-    rates_hessian(this->numReactions(),this->numSpecies()*(this->numSpecies()+1)/2),
+    rates_gradient(this->numReactions(),this->numIndSpecies()),
+    rates_hessian(this->numReactions(),this->numIndSpecies()*(this->numIndSpecies()+1)/2),
     Link0CMatrix(this->numDepSpecies(),this->numIndSpecies()),
     LinkCMatrix(this->numSpecies(),this->numIndSpecies()),
     REs(this->numIndSpecies()), REcorrections(this->numIndSpecies()),
     JacobianM(this->numIndSpecies(),this->numIndSpecies()),
-    Hessian(this->numSpecies(), (this->numSpecies()*(this->numSpecies()+1))/2),
+    Hessian(this->numIndSpecies(), (this->numIndSpecies()*(this->numIndSpecies()+1))/2),
     DiffusionMatrix(this->numIndSpecies(),this->numIndSpecies()),
     DiffusionVec(numIndSpecies()*numIndSpecies()),
+    DiffusionJacM(numIndSpecies()*(numIndSpecies()+1)/2,numIndSpecies()),
+    Diffusion3Tensor(numIndSpecies()*(numIndSpecies()+1)*(numIndSpecies()+2)/6),
+    DiffusionHessianM(numIndSpecies()*(numIndSpecies()+1)/2,numIndSpecies()*(numIndSpecies()+1)/2),
+    PhilippianM(numIndSpecies()*(numIndSpecies()+1)*(numIndSpecies()+2)/6,numIndSpecies()*(numIndSpecies()+1)*(numIndSpecies()+2)/6),
     conservationConstants(this->numDepSpecies())
 {
   postConstructor();
@@ -65,9 +73,7 @@ LNABaseModel::postConstructor()
     Eigen::VectorXex ind_species(this->numIndSpecies());
 
     for(size_t j=0; j<this->species.size(); j++)
-    {
         spec(j) = this->species[j];
-    }
 
     ind_species = (this->PermutationM.cast<GiNaC::ex>() * spec).head(this->numIndSpecies());
     dep_species = (this->PermutationM.cast<GiNaC::ex>() * spec).tail(this->numDepSpecies());
@@ -92,25 +98,20 @@ LNABaseModel::postConstructor()
       rate_corrections(i) = this->rates1[i].subs(subs_table);
 
       int idx=0;
-      for (size_t j=0; j<this->numSpecies(); j++)
+      for (size_t j=0; j<this->numIndSpecies(); j++)
       {
 
         // differentiate
-        rates_gradient(i,j) = GiNaC::diff(this->rates[i], this->species[j]);
+        rates_gradient(i,j) = GiNaC::diff(rate_expressions(i), species[PermutationVec(j)]);
 
         for (size_t k=0; k<=j; k++)
         {
             // differentiate again
-            rates_hessian(i,idx) = GiNaC::diff(rates_gradient(i,j), this->species[k]);
-
+            rates_hessian(i,idx) = GiNaC::diff(rates_gradient(i,j), species[PermutationVec(k)]);
             // substitute conservation relations
             rates_hessian(i,idx) = rates_hessian(i,idx).subs(subs_table);
-
             idx++;
         }
-
-        // and now substitute conservation relations
-        rates_gradient(i,j) = rates_gradient(i,j).subs(subs_table);
 
       }
     }
@@ -118,9 +119,7 @@ LNABaseModel::postConstructor()
     // write rate equation vector and reduced Jacobian matrix
     this->REs = this->reduced_stoichiometry.cast< GiNaC::ex >()*rate_expressions;
     this->REcorrections = this->reduced_stoichiometry.cast< GiNaC::ex >()*rate_corrections;
-    this->JacobianM = this->reduced_stoichiometry.cast< GiNaC::ex >()*
-            rates_gradient *
-            (this->PermutationM.transpose()).cast<GiNaC::ex>()*this->LinkCMatrix;
+    this->JacobianM = this->reduced_stoichiometry.cast< GiNaC::ex >()*rates_gradient;
     this->Hessian = this->reduced_stoichiometry.cast< GiNaC::ex >()*rates_hessian;
 
     // divide by volume
@@ -129,6 +128,8 @@ LNABaseModel::postConstructor()
     this->JacobianM = this->Omega_ind.asDiagonal().inverse()*this->JacobianM;
     this->Hessian = this->Omega_ind.asDiagonal().inverse()*this->Hessian;
 
+    size_t idy = 0;
+    size_t idz = 0;
     // construct diffusion matrix in vectorized and matrix form
     for(size_t i=0;i<this->numIndSpecies();i++)
     {
@@ -145,28 +146,71 @@ LNABaseModel::postConstructor()
            this->DiffusionVec(idx) = this->DiffusionVec(idx)/this->Omega_ind(i)/this->Omega_ind(j);
            //store also in matrix form
            this->DiffusionMatrix(i,j) = this->DiffusionVec(idx);
-        }
+
+       }
+
+       for(size_t j=0;j<=i;j++)
+       {
+           for(size_t k=0;k<numIndSpecies();k++)
+           {
+               for(size_t m=0;m<this->numReactions();m++)
+               {
+                    this->DiffusionJacM(idy,k)+=rates_gradient(m,k)
+                      *this->reduced_stoichiometry.cast< GiNaC::ex >()(i,m)
+                      *this->reduced_stoichiometry.cast< GiNaC::ex >()(j,m);
+                }
+               this->DiffusionJacM(idy,k)/=this->Omega_ind(i)*this->Omega_ind(j);
+
+           }
+           idy++;
+
+           for(size_t k=0;k<=j;k++)
+           {
+
+               for(size_t m=0;m<this->numReactions();m++)
+               {
+
+                    this->Diffusion3Tensor(idz)+=
+                         rate_expressions(m)
+                         *this->reduced_stoichiometry.cast< GiNaC::ex >()(i,m)
+                         *this->reduced_stoichiometry.cast< GiNaC::ex >()(j,m)
+                         *this->reduced_stoichiometry.cast< GiNaC::ex >()(k,m);
+
+               }
+
+               this->Diffusion3Tensor(idz++) /= this->Omega_ind(i)*this->Omega_ind(j)*this->Omega_ind(k);
+           }
+       }
+
+
+
     }
 
-    // assemble Hessian of objective function
-    Eigen::VectorXex fh = REs.transpose()*Hessian;
-    Eigen::MatrixXex HessianTemp(this->numSpecies(),this->numSpecies());
+    size_t idx = 0;
+    for(size_t i=0;i<this->numIndSpecies();i++)
+       for(size_t j=0;j<=i;j++)
+       {
 
-    size_t idx=0;
-    for (size_t j=0; j<this->numSpecies(); j++)
-    {
-      for (size_t k=0; k<=j; k++)
-      {
-            HessianTemp(j,k)=fh(idx);
-            HessianTemp(k,j)=fh(idx);
-            idx++;
-      }
-    }
+           idy = 0;
+           for(size_t k=0;k<this->numIndSpecies();k++)
+              for(size_t l=0;l<=k;l++)
+              {
+                  for(size_t m=0;m<this->numReactions();m++)
+                      this->DiffusionHessianM(idx,idy)+=
+                           rates_hessian(m,idy)
+                           *this->reduced_stoichiometry.cast< GiNaC::ex >()(i,m)
+                           *this->reduced_stoichiometry.cast< GiNaC::ex >()(j,m);
+
+                  this->DiffusionHessianM(idx,idy) /= this->Omega_ind(i)*this->Omega_ind(j);
+                  idy++;
+              } // end idy
+
+           idx++;
+
+       } // end idx
 
 
-    Eigen::MatrixXex mapRed = (this->PermutationM.transpose()).cast<GiNaC::ex>()*this->LinkCMatrix;
 
-    fHessian = mapRed.transpose()*HessianTemp*mapRed + this->JacobianM.transpose()*this->JacobianM;
 }
 
 
@@ -192,45 +236,59 @@ LNABaseModel::foldConservationConstants(const Eigen::VectorXd &conserved_cycles)
         this->REs(i)=this->REs(i).subs(subs_table);        
         this->REcorrections(i)=this->REcorrections(i).subs(subs_table);
 
+        int idy=0;
+        size_t idz=0;
         for (size_t j=0; j<this->numIndSpecies(); j++)
         {
-            this->JacobianM(i,j)=this->JacobianM(i,j).subs(subs_table);
-            this->DiffusionMatrix(i,j)=this->DiffusionMatrix(i,j).subs(subs_table);
+            this->JacobianM(i,j) = this->JacobianM(i,j).subs(subs_table);
+            this->DiffusionMatrix(i,j) = this->DiffusionMatrix(i,j).subs(subs_table);
             this->DiffusionVec(idx) = this->DiffusionVec(idx).subs(subs_table);
             idx++;
-
-        }
-    }
-
-    // ... the same thing is still a bit special for the Hessian.
-    for (size_t i=0; i<this->numIndSpecies(); i++)
-    {
-
-        int idy=0;
-        for (size_t j=0; j<this->numSpecies(); j++)
-        {
 
             for (size_t k=0; k<=j; k++)
             {
                 this->Hessian(i,idy) = this->Hessian(i,idy).subs(subs_table);
+                this->DiffusionJacM(idy,i) = DiffusionJacM(idy,i).subs(subs_table);
                 idy++;
-            }
-        }
+                this->Diffusion3Tensor(idz++)=this->Diffusion3Tensor(idz).subs(subs_table);
 
-        for (size_t j=0; j<this->numIndSpecies(); j++)
-        {
-            this->fHessian(i,j) = this->fHessian(i,j).subs(subs_table);
+            }
+            for (size_t k=j+1; k<this->numIndSpecies(); k++)
+            {
+                this->Diffusion3Tensor(idz++)=this->Diffusion3Tensor(idz).subs(subs_table);
+            }
+
+
         }
     }
 
+
+    idx = 0;
+    for(size_t i=0;i<this->numIndSpecies();i++)
+       for(size_t j=0;j<=i;j++)
+       {
+
+           size_t idy = 0;
+           for(size_t k=0;k<this->numIndSpecies();k++)
+              for(size_t l=0;l<=k;l++)
+              {
+                  this->DiffusionHessianM(idx,idy)=this->DiffusionHessianM(idx,idy).subs(subs_table);
+                  idy++;
+              }
+
+           idx++;
+       }
+
+
+
+    //...done
 }
 
 void
 LNABaseModel::foldConservationConstants(const Eigen::VectorXd &conserved_cycles, Eigen::VectorXex &vec)
 {
 
-//    // generate substitution table
-
+    // generate substitution table
     GiNaC::exmap subs_table = generateConservationConstantsTable(conserved_cycles);
 
     // ... and fold all constants due to conservation laws

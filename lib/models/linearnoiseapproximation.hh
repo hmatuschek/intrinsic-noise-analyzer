@@ -146,11 +146,6 @@ public:
   std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> stateIndex;
 
   /**
-   * Interface for the integrator: update function.
-   */
-  void evaluate(const Eigen::VectorXd &state, double t, Eigen::VectorXd &dx);  
-
-  /**
    * Interface for the integrator: Size of the state vector.
    */
   size_t getDimension();
@@ -188,6 +183,19 @@ public:
   void fullState(const Eigen::VectorXd &state, Eigen::VectorXd &concentrations, Eigen::MatrixXd &covariance, Eigen::VectorXd &emre);
 
   /**
+   * Reconstruct concentration vector, covariance matrix and EMRE & IOS correction vector from state vector.
+   *
+   * input:
+   * @param state
+   * output:
+   * @param concentrations vector, @param covariance matrix and @param emre correction vector.
+   * @param IOS correction to covariance matrix, @param vector of third moments of fluctuations
+   */
+  void fullState(const Eigen::VectorXd &state, Eigen::VectorXd &concentrations,
+                 Eigen::MatrixXd &cov, Eigen::VectorXd &emre,  Eigen::MatrixXd &iosCov, Eigen::VectorXd &thirdMoment);
+
+
+  /**
    * Evaluate the full Omega (volumes) vector.
    */
   void getOmega(Eigen::VectorXd &om);
@@ -211,6 +219,7 @@ public:
   virtual void dump(std::ostream &str);
 
   friend class LNAinterpreter;
+  friend class LNAevaluator;
   friend class SteadyStateAnalysis;
   friend class SpectralAnalysis;
   friend class SpectralAnalysisBase;

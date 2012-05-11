@@ -1,8 +1,8 @@
 #include "lnatest.hh"
 #include "exception.hh"
 #include "utils/cputime.hh"
-#include "models/linearnoiseapproximation.hh"
 #include "models/lnainterpreter.hh"
+#include "models/lnaevaluator.hh"
 #include "ode/ode.hh"
 
 using namespace Fluc;
@@ -75,7 +75,8 @@ LNATest::integrateViaGiNaC(Models::LinearNoiseApproximation &model,
   size_t N = 100;
   double dt=final_time/N;
 
-  ODE::RKF45<Models::LinearNoiseApproximation> integrator(model, dt, err_abs, err_rel);
+  Models::LNAevaluator evaluator(model);
+  ODE::RKF45<Models::LNAevaluator> integrator(evaluator, dt, err_abs, err_rel);
 
   // state vector (deterministic concentrations + covariances)
   Eigen::VectorXd x(init_state);

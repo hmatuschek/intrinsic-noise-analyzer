@@ -23,7 +23,8 @@ SET(libina_ast_SOURCES
     ast/reaction.cc ast/scope.cc ast/variabledefinition.cc ast/constraint.cc ast/module.cc
     ast/evaluate.cc ast/unitdefinition.cc ast/species.cc ast/compartment.cc ast/parameter.cc
     ast/model.cc)
-SET(libina_ast_HEADERS ast/ast.hh
+SET(libina_ast_HEADERS
+    ast/ast.hh
     ast/definition.hh ast/assembler.hh ast/functiondefinition.hh ast/node.hh ast/rule.hh
     ast/reaction.hh ast/scope.hh ast/variabledefinition.hh ast/constraint.hh ast/module.hh
     ast/evaluate.hh ast/unitdefinition.hh ast/species.hh ast/compartment.hh ast/parameter.hh
@@ -71,6 +72,7 @@ SET(libina_models_SOURCES
     models/baseunitmixin.cc
     models/particlenumbersmixin.cc
     models/lnainterpreter.cc
+    models/lnaevaluator.cc
     models/steadystateanalysis.cc
 )
 
@@ -98,14 +100,19 @@ SET(libina_models_HEADERS models/models.hh
     models/baseunitmin.hh
     models/particlenumbersmixin.hh
     models/lnainterpreter.hh
+    models/lnaevaluator.hh
     models/steadystateanalysis.hh
 )
 
 # some unsupported things
 
 SET(libina_unsupported_SOURCES
+    models/unsupported/spectrumrecorder.cc
+    models/unsupported/spectralanalysis.cc
 )
 SET(libina_unsupported_HEADERS
+    models/unsupported/spectrumrecorder.hh
+    models/unsupported/spectralanalysis.hh
 )
 
 # Add source for nonlinear solvers

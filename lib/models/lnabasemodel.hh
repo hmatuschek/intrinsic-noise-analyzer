@@ -78,6 +78,26 @@ protected:
     Eigen::VectorXex DiffusionVec;
 
     /**
+    * Expressions for 3-tensor matrix \f$ D_{i}^{jk} \f$ in unconstrained base.
+    */
+    Eigen::MatrixXex DiffusionJacM;  
+
+    /**
+    * Expressions for 3-tensor matrix \f$ D_{ijk} \f$ in unconstrained base.
+    */
+    Eigen::VectorXex Diffusion3Tensor;
+
+    /**
+    * Expressions for 4-tensor matrix \f$ D_{ij}^{kl} \f$ in unconstrained base.
+    */
+    Eigen::MatrixXex DiffusionHessianM;
+
+    /**
+    * Expressions for 4-tensor matrix \f$ D_{i}^{jkl} \f$ in unconstrained base.
+    */
+    Eigen::MatrixXex PhilippianM;
+
+    /**
     * holds symbols of constants arising from conservation laws
     */
     Eigen::VectorXex conservationConstants;

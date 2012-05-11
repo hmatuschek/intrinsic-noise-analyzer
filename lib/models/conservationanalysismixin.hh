@@ -38,6 +38,11 @@ protected:
     Eigen::MatrixXd  PermutationM;
 
     /**
+    * @todo: implement PermutationM as proper permutation matrix from which the index vector can be accessed.
+    **/
+    Eigen::VectorXi  PermutationVec;
+
+    /**
     * this is the kernel of the stoichiometric matrix in the permutated base
     **/
     Eigen::MatrixXd  conservation_matrix;

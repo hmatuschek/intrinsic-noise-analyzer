@@ -61,6 +61,7 @@ public:
 
   Exception &operator<< (unsigned char c);
   Exception &operator<< (const char *text);
+  //Exception operator<< (const char *text);
   Exception &operator<< (const std::string &text);
   Exception &operator<< (size_t value);
   Exception &operator<< (unsigned int value);

@@ -1,5 +1,5 @@
 #include "sbml_fft.hh"
-//#include "models/unsupported.hh"
+#include "models/unsupported.hh"
 #include "math.hh"
 #include <fstream>
 
@@ -29,10 +29,10 @@ int main(int argc, char *argv[])
   try
   {
 
-    size_t steps = 500;
+    size_t steps = 5000;
 
-    double transientTime = 500;
-    size_t realizations=10;
+    double transientTime = 100;
+    size_t realizations=4;
     // Construct SSA model from SBML model
 
     Models::LinearNoiseApproximation lna(doc->getModel());
@@ -40,8 +40,8 @@ int main(int argc, char *argv[])
 
     Models::SpectralAnalysis specA(lna);
 
-    const double fMax   = 2*specA.getMaxFrequency(0.01)*10;//20*0.75/(3.14);
-    const double deltaf = 0.0002;
+    const double fMax   = 2*specA.getMaxFrequency(0.01)*10;
+    const double deltaf = 0.0001;
 
     Models::SpectrumRecorder<Models::OptimizedSSA,libsbml::Model> specEval(doc->getModel(),realizations,fMax,deltaf);
 
@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
   }
   catch (Exception err)
   {
-    std::cerr << "Can not perform SSA: " << err.str() << std::endl;
+    std::cerr << "Can not perform SSA." << std::endl;
     return -1;
   }
 }

@@ -47,25 +47,45 @@ LinearNoiseApproximation::postConstructor()
     }
 
     // assign a set of new symbols
-    for(size_t i=0;i<stateVariables.size();i++)
-        stateVariables[i] = GiNaC::symbol();
-
-    // and add them to index table
-    for(size_t i = 0 ; i<this->stateVariables.size(); i++)
+    // ... and add them to index table
+    for(size_t i = 0; i<this->stateVariables.size(); i++)
     {
+        stateVariables[i] = GiNaC::symbol();
         this->stateIndex.insert(std::make_pair(this->stateVariables[i],this->numIndSpecies()+i));
     }
 
     // form expressions with new symbols for remaining state variables
     size_t dimCOV = this->numIndSpecies()*(this->numIndSpecies()+1)/2;
+    size_t dimSkew = this->numIndSpecies()*(this->numIndSpecies()+1)*(this->numIndSpecies()+2)/6;
 
     Eigen::VectorXex covVariables(dimCOV);
     Eigen::VectorXex emreVariables(this->numIndSpecies());
+    Eigen::VectorXex iosVariables(dimCOV);
+    std::vector< Eigen::MatrixXex > skewnessVariables(this->numIndSpecies());
+
+    size_t idx = 0;
+    for(size_t i = 0 ; i<dimCOV; i++)
+        covVariables(i) = stateVariables[idx++];
+    for(size_t i = 0 ; i<this->numIndSpecies(); i++)
+        emreVariables(i) = stateVariables[idx++];
+
+    for(size_t i=0;i<this->numIndSpecies();i++)
+    {
+        skewnessVariables[i].resize(this->numIndSpecies(),this->numIndSpecies());
+        for(size_t j=0;j<=i;j++)
+            for(size_t k=0;k<=j;k++)
+            {
+                skewnessVariables[i](j,k)=stateVariables[idx];
+                skewnessVariables[j](i,k)=stateVariables[idx];
+                skewnessVariables[k](i,j)=stateVariables[idx];
+                idx++;
+            }
+    }
 
     for(size_t i = 0 ; i<dimCOV; i++)
-        covVariables(i) = stateVariables[i];
-    for(size_t i = 0 ; i<this->numIndSpecies(); i++)
-        emreVariables(i) = stateVariables[dimCOV+i];
+        iosVariables(i) = stateVariables[idx++];
+
+        //emreVariables(i) = stateVariables[dimCOV+i];
 
     // Evaluate initial concentrations and evaluate volumes:
     Ast::EvaluateInitialValue evICs(*this);
@@ -112,9 +132,9 @@ LinearNoiseApproximation::postConstructor()
 
     }
 
-    ///////////////////////////////////////////
-    // construct update vector for covariances
-    ///////////////////////////////////////////
+    /////////////////////////////////////////////
+    // construct update vector for covariances //
+    /////////////////////////////////////////////
 
     // construct a covariance matrix
 
@@ -128,7 +148,7 @@ LinearNoiseApproximation::postConstructor()
     // take only lower triangular and stack up to vector
     Eigen::VectorXex CovUpdate(dimCOV);
 
-    size_t idx=0;
+    idx=0;
     for(size_t i=0;i<this->numIndSpecies();i++)
     {
       for(size_t j=0;j<=i;j++)
@@ -140,35 +160,28 @@ LinearNoiseApproximation::postConstructor()
 
     // done with CovUpdate
 
-    ///////////////////////
-    // now calculate EMRE
-    ///////////////////////
+    ////////////////////////
+    // now calculate EMRE //
+    ////////////////////////
 
     Eigen::VectorXex Delta(this->numIndSpecies());
-
-    // get full covariance in permuted base
-    Eigen::MatrixXex cov_full(this->numSpecies(),this->numSpecies());
-    cov_full=this->LinkCMatrix*cov*(this->LinkCMatrix).transpose();
-
-    // restore native permutation of covariance
-    cov_full=this->PermutationM.transpose().cast<GiNaC::ex>()*cov_full*this->PermutationM.cast<GiNaC::ex>();
 
     for (size_t i=0; i<this->numIndSpecies(); i++)
     {
       Delta(i)=0.;
       idx=0;
-      for (size_t j=0; j<this->numSpecies(); j++)
+      for (size_t j=0; j<this->numIndSpecies(); j++)
       {
         for (size_t k=0; k<=j; k++)
         {
             if(k==j)
             {
-                Delta(i) += this->Hessian(i,idx)*cov_full(j,k);
+                Delta(i) += this->Hessian(i,idx)*cov(j,k);
             }
             else
             {
-                // fac 2 by symmetry, saves summing over strictly upper cov_full matrix
-                Delta(i) += 2.*this->Hessian(i,idx)*cov_full(j,k);
+                // fac 2 by symmetry, saves summing over strictly upper cov matrix
+                Delta(i) += 2.*this->Hessian(i,idx)*cov(j,k);
             }
 
             idx++;
@@ -181,7 +194,6 @@ LinearNoiseApproximation::postConstructor()
       Delta(i)+=this->REcorrections(i);
     }
 
-
     /////////////////////////
     // calculate EMRE update
     /////////////////////////
@@ -189,8 +201,103 @@ LinearNoiseApproximation::postConstructor()
     Eigen::VectorXex EMREUpdate;
     EMREUpdate = ((this->JacobianM*emreVariables)+Delta);
 
+    /////////////////////////
+    // calculate third moment
+    /////////////////////////
+
+    Eigen::VectorXex ThirdMomentUpdate(dimSkew);
+
+    size_t idh=0;
+    size_t ids=0;
+    for(size_t i=0;i<this->numIndSpecies();i++)
+        for(size_t j=0;j<=i;j++)
+            for(size_t k=0;k<=j;k++)
+            {
+                ThirdMomentUpdate(idx)+=this->Diffusion3Tensor(idx);
+
+                ThirdMomentUpdate(idx)+=2*this->DiffusionMatrix(i,j)*emreVariables(k);
+                ThirdMomentUpdate(idx)+=this->DiffusionMatrix(i,k)*emreVariables(j);
+
+                for(size_t r=0; r<this->numIndSpecies(); r++)
+                {
+
+                    //ThirdMomentUpdate(idx)+=2*this->DiffusionJacM(ids,r)*cov(r,k);
+                    // another symmetrization is missing here!
+
+                    ThirdMomentUpdate(idx) += this->JacobianM(i,r)*skewnessVariables[r](j,k);
+                    ThirdMomentUpdate(idx) += this->JacobianM(j,r)*skewnessVariables[r](i,k);
+                    ThirdMomentUpdate(idx) += this->JacobianM(k,r)*skewnessVariables[r](i,j);
+
+                    idh = 0;
+                    for (size_t s=0; s<=r; s++)
+                    {
+                        // use Wick's theorem to calculate 4-th moment
+                        GiNaC::ex wick1 = (cov(s,r)*cov(j,k)+cov(s,j)*cov(r,k)+cov(s,k)*cov(r,j));
+                        // i -> j
+                        GiNaC::ex wick2 = (cov(s,r)*cov(i,k)+cov(s,i)*cov(r,k)+cov(s,k)*cov(r,i));
+                        // j -> k
+                        GiNaC::ex wick3 = (cov(s,r)*cov(i,j)+cov(s,i)*cov(r,j)+cov(s,j)*cov(r,i));
+
+                        if(s==r)
+                        {
+                            ThirdMomentUpdate(idx)+=this->Hessian(i,idh)*wick1/2;
+                            ThirdMomentUpdate(idx)+=this->Hessian(j,idh)*wick2/2;
+                            ThirdMomentUpdate(idx)+=this->Hessian(k,idh)*wick3/2;
+                        }
+                        else
+                        {
+                            // fac 2 by symmetry, saves summing over symmetric indices of Hessian
+                            ThirdMomentUpdate(idx)+=this->Hessian(i,idh)*wick1;
+                            ThirdMomentUpdate(idx)+=this->Hessian(j,idh)*wick2;
+                            ThirdMomentUpdate(idx)+=this->Hessian(k,idh)*wick3;
+                        }
+
+                        idh++;
+                    } //end s
+                    ids++;
+                }
+            }
+
+    ///////////////////////////////////////
+    // calculate update for LNA correction
+    ///////////////////////////////////////
+
+    Eigen::VectorXex IOSUpdate(dimCOV);
+
+    idx=0;
+    size_t idy;
+    for(size_t i=0;i<this->numIndSpecies();i++)
+    for(size_t j=0;j<=i;j++)
+    {
+
+
+        idy=0;
+
+        for(size_t k=0; k<this->numIndSpecies(); k++)
+             {
+
+                IOSUpdate(idx) += this->DiffusionJacM(idx,k)*emreVariables(k);
+
+                IOSUpdate(idx) += this->JacobianM(i,k)*cov(k,j)+this->JacobianM(j,k)*cov(k,i);
+
+                for(size_t l=0; l<k; l++)
+                {
+                    IOSUpdate(idx) += this->Hessian(i,idy)*skewnessVariables[j](k,l)+this->Hessian(j,idy)*skewnessVariables[i](k,l);
+                    IOSUpdate(idx) += this->DiffusionHessianM(idx,idy)*iosVariables(idy);
+                    idy++;
+                }
+
+                // same for l=k appears only once in sum
+                IOSUpdate(idx) += (this->Hessian(i,idy)+this->Hessian(j,idy))*skewnessVariables[j](k,k)/2;
+                IOSUpdate(idx) += this->DiffusionHessianM(idx,idy)*cov(k,k)/2;
+             }
+
+     }
+
+
+
     // and combine to update vector
-    this->updateVector << this->REs,CovUpdate,EMREUpdate;
+    this->updateVector << this->REs,CovUpdate,EMREUpdate,ThirdMomentUpdate,IOSUpdate;
 }
 
 
@@ -283,6 +390,79 @@ LinearNoiseApproximation::fullState(const Eigen::VectorXd &state, Eigen::VectorX
 
     // construct full emre vector, restore original order and return
     emre = this->PermutationM.transpose()*this->LinkCMatrixNumeric*tail;
+
+}
+
+void
+LinearNoiseApproximation::fullState(const Eigen::VectorXd &state, Eigen::VectorXd &concentrations,
+                                     Eigen::MatrixXd &cov, Eigen::VectorXd &emre, Eigen::MatrixXd &iosCov, Eigen::VectorXd &thirdMoment)
+
+{
+
+    // reconstruct full concentration vector and covariances in original permutation order
+    fullState(state,concentrations,cov,emre);
+
+    // reconstruct thirdmoments
+
+
+    // dim of reduced covariance vector
+    int dimCOV=(this->numIndSpecies()*(this->numIndSpecies()+1))/2;
+    // dim of reduced covariance vector
+    int dimThird=(this->numIndSpecies()*(this->numIndSpecies()+1)*(this->numIndSpecies()+2))/6;
+
+    // get reduced skewness vector (should better be a view rather then a copy)
+    Eigen::VectorXd tail = state.segment(this->numIndSpecies()+dimCOV+dimThird,this->numIndSpecies());
+
+    std::vector< Eigen::MatrixXd > thirdMomVariables(this->numIndSpecies());
+
+    size_t idx = 0;
+    for(size_t i=0;i<this->numIndSpecies();i++)
+    {
+        thirdMomVariables[i].resize(this->numIndSpecies(),this->numIndSpecies());
+        for(size_t j=0;j<=i;j++)
+            for(size_t k=0;k<=j;k++)
+            {
+                thirdMomVariables[i](j,k)=tail[idx];
+                thirdMomVariables[j](i,k)=tail[idx];
+                thirdMomVariables[k](i,j)=tail[idx];
+                idx++;
+            }
+    }
+
+    Eigen::VectorXd cmat = this->PermutationM.transpose()*this->LinkCMatrixNumeric;
+
+    // construct full third moment vector, restore original order and return
+    for(size_t i=0; i<(unsigned)cmat.rows(); i++)
+        for(size_t j=0; j<(unsigned)cmat.cols(); j++)
+            for(size_t k=0; k<(unsigned)cmat.cols(); k++)
+                for(size_t l=0; l<(unsigned)cmat.cols(); l++)
+                    thirdMoment(i) += cmat(i,j) * cmat(i,k) * cmat(i,l) *thirdMomVariables[j](k,l);
+
+    // get reduced covariance vector
+    Eigen::VectorXd covvec = state.segment(2*this->numIndSpecies()+dimCOV+dimThird,dimCOV);
+    // full cov permutated
+    Eigen::MatrixXd cov_all(this->numSpecies(),this->numSpecies());
+    // red cov permutated
+    Eigen::MatrixXd cov_ind(this->numIndSpecies(),this->numIndSpecies());
+
+   // fill upper triangular
+   idx=0;
+   for(size_t i=0;i<this->numIndSpecies();i++)
+   {
+       for(size_t j=0;j<=i;j++)
+       {
+           cov_ind(i,j) = covvec(idx);
+           // fill rest by symmetry
+           cov_ind(j,i) = cov_ind(i,j);
+           idx++;
+       }
+   }
+
+   // so here it is:
+   cov_all = this->LinkCMatrixNumeric*cov_ind*this->LinkCMatrixNumeric.transpose();
+
+   // restore native permutation of covariance
+   iosCov = (this->PermutationM.transpose()*cov_all)*this->PermutationM;
 
 }
 
@@ -437,13 +617,13 @@ LinearNoiseApproximation::getHessian(Eigen::MatrixXd &HessianM)
 {
 
     // make sure the matrix is big enough
-    HessianM.resize(this->numIndSpecies(),this->numSpecies()*(this->numSpecies()+1)/2);
+    HessianM.resize(this->numIndSpecies(),this->numIndSpecies()*(this->numIndSpecies()+1)/2);
 
     // and evaluate this:
     for (size_t i=0; i<this->numIndSpecies(); i++)
     {
         int idx=0;
-        for (size_t j=0; j<this->numSpecies(); j++)
+        for (size_t j=0; j<this->numIndSpecies(); j++)
         {
             for(size_t k=0;k<=j;k++)
             {
@@ -458,177 +638,12 @@ LinearNoiseApproximation::getHessian(Eigen::MatrixXd &HessianM)
 }
 
 void
-LinearNoiseApproximation::getfHessianM(Eigen::MatrixXd &fHessianM)
-{
-
-    // make sure the matrix is big enough
-    fHessianM.resize(this->numIndSpecies(),this->numIndSpecies());
-
-    // and evaluate this:
-    for (size_t i=0; i<this->numIndSpecies(); i++)
-    {
-        for (size_t j=0; j<this->numIndSpecies(); j++)
-        {
-           fHessianM(i,j) = this->interpreter.evaluate(this->fHessian(i,j));
-        }
-    }
-
-    // ... done.
-
-}
-
-void
-LinearNoiseApproximation::getfHessianM(const Eigen::VectorXd &state, Eigen::MatrixXd &fHessianM)
-{
-    // set state
-    this->setState(state);
-    // and get the Hessian of objective function in matrix matrix form
-    this->getfHessianM(fHessianM);
-}
-
-void
 LinearNoiseApproximation::getHessian(const Eigen::VectorXd &state, Eigen::MatrixXd &HessianM)
 {
     // set state
     this->setState(state);
     // and get the Hessian in matrix matrix form
     this->getHessian(HessianM);
-}
-
-void
-LinearNoiseApproximation::evaluate(const Eigen::VectorXd &state, double t, Eigen::VectorXd &dx)
-{
-
-  int dimCOV = (this->numIndSpecies()*(this->numIndSpecies()+1))/2;
-
-  // first split state vector
-
-  // ... in concentrations,
-  Eigen::VectorXd conc(this->numIndSpecies());
-  conc=state.head(this->numIndSpecies());
-  // ... covariances,
-  Eigen::VectorXd tail(dimCOV);
-  tail=state.segment(this->numIndSpecies(),dimCOV);
-  // ... and EMRE
-  Eigen::VectorXd emre(this->numIndSpecies());
-  emre=state.segment(this->numIndSpecies()+dimCOV,this->numIndSpecies());
-
-  Eigen::MatrixXd cov(this->numIndSpecies(),this->numIndSpecies());
-  Eigen::MatrixXd cov_update(this->numIndSpecies(),this->numIndSpecies());
-
-
-  ////////////////////////////
-  // get old covariance matrix
-  ////////////////////////////
-
-  // fill symmetric covariance of independent species
-  size_t idx=0;
-  for(size_t i=0;i<this->numIndSpecies();i++)
-  {
-    for(size_t j=0;j<=i;j++)
-    {
-      cov(i,j)=tail(idx);
-      cov(j,i)=cov(i,j); //< fill rest by symmetry
-      idx++;
-    }
-  }
-
-
-  ////////////////////////
-  // get all coefficients
-  ////////////////////////
-
-  Eigen::VectorXd REs(this->numIndSpecies());
-  Eigen::VectorXd REcorr(this->numIndSpecies());
-  Eigen::MatrixXd JacobianM(this->numIndSpecies(),this->numIndSpecies());
-  Eigen::MatrixXd DiffusionM(this->numIndSpecies(),this->numIndSpecies());
-
-  // construct REs & set interpreter state
-  this->getREs(conc,REs);
-
-  // construct RE corrections
-  this->getRateCorrections(REcorr);
-
-  // construct Jacobian matrix
-  this->getJacobianMatrix(JacobianM);
-
-  // construct Diffusion matrix
-  this->getDiffusionMatrix(DiffusionM);
-
-
-  ////////////////////////////////////
-  // compute update for covariances
-  ////////////////////////////////////
-
-  // update for covariances
-  cov_update = (JacobianM*cov)+(cov*JacobianM.transpose())+DiffusionM;
-
-  // take only lower triangular and stack up to vector
-  idx=0;
-  for(size_t i=0;i<this->numIndSpecies();i++)
-  {
-    for(size_t j=0;j<=i;j++)
-    {
-      tail(idx)=cov_update(i,j);
-      idx++;
-    }
-  }
-
-  ///////////////////////
-  // now calculate EMRE
-  ///////////////////////
-
-  Eigen::VectorXd Delta(this->numIndSpecies());
-
-  // get full covariance in permuted base
-  Eigen::MatrixXd cov_full(this->numSpecies(),this->numSpecies());
-  cov_full=this->LinkCMatrixNumeric*cov*(this->LinkCMatrixNumeric).transpose();
-
-  // restore native permutation of covariance
-  cov_full = (this->PermutationM.transpose()*cov_full)*this->PermutationM;
-
-  // get stacked up Hessian
-  Eigen::MatrixXd HessianM;
-  this->getHessian(HessianM);
-
-  for (size_t i=0; i<this->numIndSpecies(); i++)
-  {
-    Delta(i)=0.;
-    idx=0;
-    for (size_t j=0; j<this->numSpecies(); j++)
-    {
-      for (size_t k=0; k<=j; k++)
-      {
-          if(k==j)
-          {
-              Delta(i) += HessianM(i,idx)*cov_full(j,k);
-          }
-          else
-          {
-              // fac 2 by symmetry, saves summing over strictly upper cov_full matrix
-              Delta(i) += 2.*HessianM(i,idx)*cov_full(j,k);
-          }
-
-          idx++;
-
-      }
-    }
-    // divide by 2
-    Delta(i)/=2.;
-    // now add rate corrections
-    Delta(i)+=REcorr(i);
-  }
-
-
-  /////////////////////////
-  // update state vector
-  /////////////////////////
-
-  Eigen::VectorXd emre_update(this->numIndSpecies());
-  emre_update = ((JacobianM*emre)+Delta);
-
-  dx << REs,tail,emre_update;
-
 }
 
 size_t
@@ -643,21 +658,32 @@ LinearNoiseApproximation::getDimension()
   // add dimension of EMRE
   dim+= this->numIndSpecies();
 
+  // add dimension of third moments
+  dim+= (this->numIndSpecies()*(this->numIndSpecies()+1)*(this->numIndSpecies()+2))/6;
+
+  // add dimension of second moment correction
+  dim+= (this->numIndSpecies()*(this->numIndSpecies()+1))/2;
+
   return dim;
 }
-
 
 void
 LinearNoiseApproximation::getInitialState(Eigen::VectorXd &x)
 {
-  int dimCov=(this->numIndSpecies()*(this->numIndSpecies()+1))/2;
+  int dimCov=(this->numIndSpecies()*(this->numIndSpecies()+1))/2; 
+  int dimThird=(this->numIndSpecies()*(this->numIndSpecies()+1)*(this->numIndSpecies()+2))/6;
 
   // deterministic initial conditions for state
   x<<(this->ICsPermuted).head(this->numIndSpecies()),
      // zero covariance
      Eigen::VectorXd::Zero(dimCov),
      // zero EMRE
-     Eigen::VectorXd::Zero(this->numIndSpecies());
+     Eigen::VectorXd::Zero(this->numIndSpecies()),
+     // zero third moment
+     Eigen::VectorXd::Zero(dimThird),
+     // zero second moment correction
+     Eigen::VectorXd::Zero(dimCov);
+
 }
 
 void
@@ -701,7 +727,7 @@ LinearNoiseApproximation::getConservedCycles(std::vector<GiNaC::ex> &cLaw)
       }
     }
 
-    cLaw=cand;
+    cLaw = cand;
   }
 
 }
