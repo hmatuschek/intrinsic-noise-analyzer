@@ -69,6 +69,8 @@ IOSEMRETimeSeriesPlot::IOSEMRETimeSeriesPlot(size_t num_species, Table *series,
   this->setYLabel(tr("concentrations [%1]").arg(species_unit));
 
   QVector<Plot::VarianceLineGraph *> graphs(num_species);
+  size_t N = num_species;
+  size_t offset_mean = 1+N+(N*(N+1))/2;
 
   // Allocate a graph for each colum in time-series:
   for (size_t i=0; i<num_species; i++)
@@ -76,7 +78,7 @@ IOSEMRETimeSeriesPlot::IOSEMRETimeSeriesPlot(size_t num_species, Table *series,
     Plot::GraphStyle style = this->getStyle(i);
     graphs[i] = new Plot::VarianceLineGraph(style);
     this->axis->addGraph(graphs[i]);
-    this->addToLegend(series->getColumnName(i+1), graphs[i]);
+    this->addToLegend(series->getColumnName(i+offset_mean), graphs[i]);
   }
 
   // Do not plot all
@@ -89,12 +91,11 @@ IOSEMRETimeSeriesPlot::IOSEMRETimeSeriesPlot(size_t num_species, Table *series,
   // Plot time-series:
   for (size_t j=0; j<series->getNumRows(); j+=idx_incr)
   {
-    size_t N = graphs.size();
-    size_t offset_mean = 1+N+(N*(N+1))/2;
-    size_t offset_cov  = offset_mean+N; size_t increment = N;
+    size_t increment = N;
+    size_t offset_cov  = offset_mean + N;
     for (size_t i=0; i<num_species; i++)
     {
-      graphs[i]->addPoint((*series)(j, 0), (*series)(j, 1+i), sqrt((*series)(j, offset_cov)));
+      graphs[i]->addPoint((*series)(j, 0), (*series)(j, offset_mean+i), sqrt((*series)(j, offset_cov)));
       offset_cov += increment; increment -= 1;
     }
   }
@@ -171,6 +172,164 @@ IOSEMREComparePlot::IOSEMREComparePlot(size_t num_species, Table *series,
   {
     emre_graphs[i]->commit();
     ios_graphs[i]->commit();
+  }
+
+  this->updateAxes();
+}
+
+
+
+/* ********************************************************************************************* *
+ * Implementation of correlation plot.
+ * ********************************************************************************************* */
+IOSLNACorrelationPlot::IOSLNACorrelationPlot(size_t num_species, Table *data,
+                                             const QString &time_unit,
+                                             QObject *parent)
+  : Figure("Correlation Coefficients (LNA)", parent)
+{
+  this->setXLabel(tr("time [%1]").arg(time_unit));
+  this->setYLabel(tr("correlation coefficient"));
+
+  size_t N_cov = (num_species*(num_species-1))/2;
+  QVector<Plot::LineGraph *> graphs(N_cov);
+
+  // Allocate a graph for each colum in time-series:
+  size_t graph_idx = 0;
+  size_t column_idx = 1+num_species;
+  Eigen::MatrixXi index_table(num_species, num_species);
+  for (size_t i=0; i<num_species; i++)
+  {
+    index_table(i,i) = column_idx; column_idx++;
+    for (size_t j=i+1; j<num_species; j++, graph_idx++, column_idx++)
+    {
+      Plot::GraphStyle style = this->getStyle(graph_idx);
+      graphs[graph_idx] = new Plot::LineGraph(style);
+      this->axis->addGraph(graphs[graph_idx]);
+      this->addToLegend(
+            QString("corr(%1, %2)").arg(data->getColumnName(1+i)).arg(data->getColumnName(1+j)),
+            graphs[graph_idx]);
+      index_table(i,j) = index_table(j,i) = column_idx;
+    }
+  }
+
+  // Do not plot all
+  int idx_incr ;
+  if (0 == (idx_incr = data->getNumRows()/100))
+  {
+    idx_incr = 1;
+  }
+
+  // Plot time-series:
+  for (size_t k=0; k<data->getNumRows(); k+=idx_incr)
+  {
+    size_t idx = 0;
+    for (size_t i=0; i<num_species; i++)
+    {
+      for (size_t j=i+1; j<num_species; j++, idx++)
+      {
+        double x = (*data)(k, 0);
+        double y = 0.0;
+
+        if ((0.0 != (*data)(k, index_table(i,i))) && (0.0 != (*data)(k, index_table(j,j))))
+        {
+          y = (*data)(k, index_table(i,j)) /
+              (std::sqrt((*data)(k, index_table(i,i))) *
+               std::sqrt((*data)(k, index_table(j,j))));
+        }
+
+        graphs[idx]->addPoint(x, y);
+      }
+    }
+  }
+
+  // Force y plot-range to be [-1, 1]:
+  this->getAxis()->setYRangePolicy(
+        Plot::RangePolicy(Plot::RangePolicy::FIXED, Plot::RangePolicy::FIXED));
+  this->getAxis()->setYRange(-1.1, 1.1);
+
+  // Finally commit changes:
+  for (size_t i=0; i<N_cov; i++)
+  {
+    graphs[i]->commit();
+  }
+
+  this->updateAxes();
+}
+
+
+
+/* ********************************************************************************************* *
+ * Implementation of correlation plot.
+ * ********************************************************************************************* */
+IOSEMRECorrelationPlot::IOSEMRECorrelationPlot(size_t num_species, Table *data,
+                                               const QString &time_unit,
+                                               QObject *parent)
+  : Figure("Correlation Coefficients (EMRE+IOS)", parent)
+{
+  this->setXLabel(tr("time [%1]").arg(time_unit));
+  this->setYLabel(tr("correlation coefficient"));
+
+  size_t N_cov = (num_species*(num_species-1))/2;
+  QVector<Plot::LineGraph *> graphs(N_cov);
+
+  // Allocate a graph for each colum in time-series:
+  size_t graph_idx = 0;
+  size_t column_idx = 1+2*num_species+(num_species*(num_species+1))/2;
+  Eigen::MatrixXi index_table(num_species, num_species);
+  for (size_t i=0; i<num_species; i++)
+  {
+    index_table(i,i) = column_idx; column_idx++;
+    for (size_t j=i+1; j<num_species; j++, graph_idx++, column_idx++)
+    {
+      Plot::GraphStyle style = this->getStyle(graph_idx);
+      graphs[graph_idx] = new Plot::LineGraph(style);
+      this->axis->addGraph(graphs[graph_idx]);
+      this->addToLegend(
+            QString("corr(%1, %2)").arg(data->getColumnName(1+i)).arg(data->getColumnName(1+j)),
+            graphs[graph_idx]);
+      index_table(i,j) = index_table(j,i) = column_idx;
+    }
+  }
+
+  // Do not plot all
+  int idx_incr ;
+  if (0 == (idx_incr = data->getNumRows()/100))
+  {
+    idx_incr = 1;
+  }
+
+  // Plot time-series:
+  for (size_t k=0; k<data->getNumRows(); k+=idx_incr)
+  {
+    size_t idx = 0;
+    for (size_t i=0; i<num_species; i++)
+    {
+      for (size_t j=i+1; j<num_species; j++, idx++)
+      {
+        double x = (*data)(k, 0);
+        double y = 0.0;
+
+        if ((0.0 != (*data)(k, index_table(i,i))) && (0.0 != (*data)(k, index_table(j,j))))
+        {
+          y = (*data)(k, index_table(i,j)) /
+              (std::sqrt((*data)(k, index_table(i,i))) *
+               std::sqrt((*data)(k, index_table(j,j))));
+        }
+
+        graphs[idx]->addPoint(x, y);
+      }
+    }
+  }
+
+  // Force y plot-range to be [-1, 1]:
+  this->getAxis()->setYRangePolicy(
+        Plot::RangePolicy(Plot::RangePolicy::FIXED, Plot::RangePolicy::FIXED));
+  this->getAxis()->setYRange(-1.1, 1.1);
+
+  // Finally commit changes:
+  for (size_t i=0; i<N_cov; i++)
+  {
+    graphs[i]->commit();
   }
 
   this->updateAxes();

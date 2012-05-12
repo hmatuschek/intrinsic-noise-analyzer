@@ -39,4 +39,25 @@ public:
 };
 
 
+class IOSLNACorrelationPlot : public Plot::Figure
+{
+  Q_OBJECT
+
+public:
+  explicit IOSLNACorrelationPlot(size_t num_species, Table *data,
+                                 const QString &time_unit,
+                                 QObject *parent=0);
+};
+
+
+class IOSEMRECorrelationPlot : public Plot::Figure
+{
+  Q_OBJECT
+
+public:
+  explicit IOSEMRECorrelationPlot(size_t num_species, Table *data,
+                                  const QString &time_unit,
+                                  QObject *parent=0);
+};
+
 #endif // LINESGRAPHADAPTOR_HH
