@@ -79,30 +79,34 @@ protected:
    * This table will hold the results of the integration as a time-series.
    *
    * Lets assume there are N species selected for the analysis, then this table will have
-   * 1 + 2*N + (N*(N+1)) columns. The first column holds the integration time,
+   * 1 + 3*N + (N*(N+1)) columns. The first column holds the integration time,
    * the next N columns hold the mean for the N selected species (RE) for each time-step. The next
    * N*(N+1)/2 columns hold the vectorized upper-triangular part of the LNA covariance matrix.
    * The triangular covariance matrix is vectorized row-by-row. The next N columns hold the EMRE
-   * corrections + RE means and the last N*(N+1)/2 column holds the LNA+IOS covariance.
+   * corrections + RE means and the next N*(N+1)/2 column holds the LNA+IOS covariance. Finally,
+   * the last N columns holds the EMRE-IOS mean corrections.
    */
   Table timeseries;
 
-  /** Index table for RE means. Mapps the i-th selected species to the corresponding
+  /** Index table for RE means. Maps the i-th selected species to the corresponding
    * column in the timeseries table. */
   Eigen::VectorXi re_index_table;
 
-  /** Index table for the LNA covariance matrix. Mapps the i,j-th entry to the corresponding
+  /** Index table for the LNA covariance matrix. Maps the i,j-th entry to the corresponding
    * column in the timeseries table. */
   Eigen::MatrixXi lna_index_table;
 
-  /** Index table for the RE+EMRE means. Mapps the i-th selected species to the corresponding
+  /** Index table for the RE+EMRE means. Maps the i-th selected species to the corresponding
    * column in the timeseries table. */
   Eigen::VectorXi emre_index_table;
 
-  /** Index table for the IOS covariance matrix. Mapps the i,j-th entry to the corresponding
+  /** Index table for the IOS covariance matrix. Maps the i,j-th entry to the corresponding
    * column in the timeseries table. */
   Eigen::MatrixXi ios_index_table;
 
+  /** Index table for the IOS-EMRE mean corrections. Maps the i-th selected species to the
+   *  corresponding index in the timeseries table. */
+  Eigen::VectorXi ios_emre_index_table;
 
 public:
   /**

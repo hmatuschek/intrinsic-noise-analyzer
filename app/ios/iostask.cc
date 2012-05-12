@@ -41,12 +41,13 @@ IOSTask::IOSTask(const Config &config, QObject *parent) :
   Task(parent), config(config),
   interpreter(*(config.model), config.getOptLevel(), config.getNumThreads(), false),
   timeseries(
-    1 + 2*config.getNumSpecies() + config.getNumSpecies()*(config.getNumSpecies()+1),
+    1 + 3*config.getNumSpecies() + config.getNumSpecies()*(config.getNumSpecies()+1),
     1+config.getIntegrationRange().getSteps()/(1+config.getIntermediateSteps())),
   re_index_table(config.getNumSpecies()),
   lna_index_table(config.getNumSpecies(), config.getNumSpecies()),
   emre_index_table(config.getNumSpecies()),
-  ios_index_table(config.getNumSpecies(), config.getNumSpecies())
+  ios_index_table(config.getNumSpecies(), config.getNumSpecies()),
+  ios_emre_index_table(config.getNumSpecies())
 {
   // Assemble index tables and assign column names to time-series table:
   size_t column = 0;
@@ -95,6 +96,13 @@ IOSTask::IOSTask(const Config &config, QObject *parent) :
       this->ios_index_table(i,j) = column;
       this->ios_index_table(j,i) = column;
     }
+  }
+
+  // IOS EMRE Mean corrections
+  for (int i=0; i<(int)config.getNumSpecies(); i++, column++) {
+    this->timeseries.setColumnName(
+          column, QString("IOS-EMRE %1").arg(species_names[i]));
+    this->ios_emre_index_table(i) = column;
   }
 
   /*
@@ -166,7 +174,7 @@ IOSTask::process()
   Eigen::VectorXd iosemre(config.model->numSpecies());
 
   // Holds a row of the output-table:
-  Eigen::VectorXd output_vector(1 + 2*config.getNumSpecies() +
+  Eigen::VectorXd output_vector(1 + 3*config.getNumSpecies() +
                                 config.getNumSpecies()*(config.getNumSpecies()+1));
 
   // Maps the i-th selected species to an index in the concentrations vector:
@@ -198,6 +206,7 @@ IOSTask::process()
     size_t index_i = species_index[i];
     output_vector(re_index_table(i)) = concentrations(index_i);
     output_vector(emre_index_table(i)) = concentrations(index_i);
+    output_vector(ios_emre_index_table(i)) = concentrations(index_i);
     for (size_t j=i; j<N_sel_species; j++){
       output_vector(lna_index_table(i,j)) = 0.0;
       output_vector(ios_index_table(i,j)) = 0.0;
@@ -240,6 +249,7 @@ IOSTask::process()
       size_t index_i = species_index[i];
       output_vector(re_index_table(i)) = concentrations(index_i);
       output_vector(emre_index_table(i)) = emre(index_i) + concentrations(index_i);
+      output_vector(ios_emre_index_table(i)) = emre(index_i) + concentrations(index_i) + iosemre(index_i);
       for (size_t j=i; j<N_sel_species; j++){
         size_t index_j = species_index[j];
         output_vector(lna_index_table(i,j)) = lna(index_i, index_j);
