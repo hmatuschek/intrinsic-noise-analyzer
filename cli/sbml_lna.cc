@@ -45,6 +45,10 @@ int main(int argc, char *argv[])
     Eigen::MatrixXd cov(model.numSpecies(),model.numSpecies());
     Eigen::VectorXd emre(model.numSpecies());
 
+    Eigen::VectorXd thirdmoment(model.numSpecies());
+    Eigen::MatrixXd ioscov(model.numSpecies(),model.numSpecies());
+    Eigen::VectorXd iosemre(model.numSpecies());
+
     // initialize state
     interpreter.getInitialState(x);
     // get full initial concentrations and covariance and emre
@@ -144,17 +148,22 @@ int main(int argc, char *argv[])
        integrator.step(x,t,dx);
        x += dx; t += dt;
 
+
+       model.fullState(x,concentrations,cov,emre,ioscov,thirdmoment,iosemre);
+
+       std::cout<< t <<std::endl;
+
+       // output mean concentrations
+       for(size_t i=0; i<model.numSpecies(); i++)
+       {
+          std::cout<< ioscov(i,i) <<"\t";
+       }
+
+
+       std::cout<<std::endl;
+
      }
 
-    model.fullState(x,concentrations,cov,emre);
-
-    std::cout<< t <<"\t";
-
-    // output mean concentrations
-    for(size_t i=0; i<model.numSpecies(); i++)
-    {
-       std::cout<< concentrations(i) <<"\t";
-    }
 
   }
   //catch (Exception err)

@@ -228,8 +228,8 @@ LNABaseModel::foldConservationConstants(const Eigen::VectorXd &conserved_cycles)
     }
 
 
-    int idx=0;
-
+    size_t idx=0;
+    size_t idz=0;
     // ... and fold all constants due to conservation laws
     for (size_t i=0; i<this->numIndSpecies(); i++)
     {
@@ -237,7 +237,6 @@ LNABaseModel::foldConservationConstants(const Eigen::VectorXd &conserved_cycles)
         this->REcorrections(i)=this->REcorrections(i).subs(subs_table);
 
         int idy=0;
-        size_t idz=0;
         for (size_t j=0; j<this->numIndSpecies(); j++)
         {
             this->JacobianM(i,j) = this->JacobianM(i,j).subs(subs_table);
@@ -249,17 +248,19 @@ LNABaseModel::foldConservationConstants(const Eigen::VectorXd &conserved_cycles)
             {
                 this->Hessian(i,idy) = this->Hessian(i,idy).subs(subs_table);
                 this->DiffusionJacM(idy,i) = DiffusionJacM(idy,i).subs(subs_table);
-                idy++;
-                this->Diffusion3Tensor(idz++)=this->Diffusion3Tensor(idz).subs(subs_table);
-
-            }
-            for (size_t k=j+1; k<this->numIndSpecies(); k++)
-            {
-                this->Diffusion3Tensor(idz++)=this->Diffusion3Tensor(idz).subs(subs_table);
+                idy++;               
             }
 
 
         }
+
+        for (size_t j=0; j<=i; j++)
+            for (size_t k=0; k<=j; k++)
+            {
+                this->Diffusion3Tensor(idz)=this->Diffusion3Tensor(idz).subs(subs_table);
+                idz++;
+            }
+
     }
 
 

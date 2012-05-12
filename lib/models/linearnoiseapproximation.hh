@@ -121,6 +121,9 @@ protected:
   */
   void constructCovarianceMatrix(Eigen::MatrixXex &cov);
 
+  void
+  constructSymmetricMatrix(Eigen::VectorXex covVec,Eigen::MatrixXex &cov);
+
 
 private:
   /**
