@@ -208,22 +208,23 @@ LinearNoiseApproximation::postConstructor()
 
     Eigen::VectorXex ThirdMomentUpdate(dimSkew);
 
+    size_t ids = 0;
     idx=0;
     size_t idy;
     for(size_t i=0;i<this->numIndSpecies();i++)
         for(size_t j=0;j<=i;j++)
+        {
             for(size_t k=0;k<=j;k++)
             {
                 ThirdMomentUpdate(idx)+=this->Diffusion3Tensor(idx);
 
-                ThirdMomentUpdate(idx)+=2*this->DiffusionMatrix(i,j)*emreVariables(k);
-                ThirdMomentUpdate(idx)+=this->DiffusionMatrix(i,k)*emreVariables(j);
+                ThirdMomentUpdate(idx)+=2*this->DiffusionMatrix(i,j)*emreVariables(k)+this->DiffusionMatrix(i,k)*emreVariables(j);
 
                 idy = 0;
                 for(size_t r=0; r<this->numIndSpecies(); r++)
                 {
 
-                    //ThirdMomentUpdate(idx)+=2*this->DiffusionJacM(ids,r)*cov(r,k);
+                    //ThirdMomentUpdate(idx) += this->DiffusionJacM(ids,r)*cov(r,k);
                     // another symmetrization is missing here!
 
                     ThirdMomentUpdate(idx) += this->JacobianM(i,r)*thirdmomentVariables[r](j,k);
@@ -256,14 +257,17 @@ LinearNoiseApproximation::postConstructor()
                     } //end s
                     idy++;
                 } // end r loop
+
                 idx++;
+            } // end k loop
+
             } // end i,j,k loop
 
     ///////////////////////////////////////
     // calculate update for LNA correction
     ///////////////////////////////////////
 
-    Eigen::VectorXex IOSUpdate(dimCOV);
+    Eigen::VectorXex iosUpdate(dimCOV);
 
     Eigen::MatrixXex iosCov;
     constructSymmetricMatrix(iosVariables,iosCov);
@@ -273,28 +277,29 @@ LinearNoiseApproximation::postConstructor()
     for(size_t i=0;i<this->numIndSpecies();i++)
     for(size_t j=0;j<=i;j++)
     {
+        iosUpdate(idx)=0;
 
-        //IOSUpdate(idx)=0;
         idy=0;
 
         for(size_t k=0; k<this->numIndSpecies(); k++)
              {
 
-                IOSUpdate(idx) += this->DiffusionJacM(idx,k)*emreVariables(k);
+                iosUpdate(idx) += this->DiffusionJacM(idx,k)*emreVariables(k);
 
-                IOSUpdate(idx) += this->JacobianM(i,k)*iosCov(k,j)+this->JacobianM(j,k)*iosCov(k,i);
+                iosUpdate(idx) += this->JacobianM(i,k)*iosCov(k,j)+this->JacobianM(j,k)*iosCov(k,i);
 
                 for(size_t l=0; l<k; l++)
                 {
-                    IOSUpdate(idx) += this->Hessian(i,idy)*thirdmomentVariables[j](k,l)+this->Hessian(j,idy)*thirdmomentVariables[i](k,l);
-                    IOSUpdate(idx) += this->DiffusionHessianM(idx,idy)*iosVariables(idy);
+                    iosUpdate(idx) += this->Hessian(i,idy)*thirdmomentVariables[j](k,l)+this->Hessian(j,idy)*thirdmomentVariables[i](k,l);
+                    iosUpdate(idx) += this->DiffusionHessianM(idx,idy)*iosVariables(idy);
                     idy++;
                 }
 
                 // same for l=k appears only once in sum
-                IOSUpdate(idx) += (this->Hessian(i,idy)+this->Hessian(j,idy))*thirdmomentVariables[j](k,k)/2;
-                IOSUpdate(idx) += this->DiffusionHessianM(idx,idy)*cov(k,k)/2;
+                iosUpdate(idx) += (this->Hessian(i,idy)+this->Hessian(j,idy))*thirdmomentVariables[j](k,k)/2;
+                iosUpdate(idx) += this->DiffusionHessianM(idx,idy)*cov(k,k)/2;
              }
+
 
         idx++;
      }
@@ -336,7 +341,7 @@ LinearNoiseApproximation::postConstructor()
     Eigen::VectorXex EMREiosUpdate = ((this->JacobianM*iosemreVariables)+Delta);
 
     // and combine to update vector
-    this->updateVector << this->REs,CovUpdate,EMREUpdate,ThirdMomentUpdate,IOSUpdate,EMREiosUpdate;
+    this->updateVector << this->REs,CovUpdate,EMREUpdate,ThirdMomentUpdate,iosUpdate,EMREiosUpdate;
 }
 
 

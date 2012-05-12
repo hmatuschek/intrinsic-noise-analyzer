@@ -229,6 +229,7 @@ LNABaseModel::foldConservationConstants(const Eigen::VectorXd &conserved_cycles)
 
 
     size_t idx=0;
+    size_t idh=0;
     size_t idz=0;
     // ... and fold all constants due to conservation laws
     for (size_t i=0; i<this->numIndSpecies(); i++)
@@ -255,11 +256,23 @@ LNABaseModel::foldConservationConstants(const Eigen::VectorXd &conserved_cycles)
         }
 
         for (size_t j=0; j<=i; j++)
+        {
+
+            size_t idy = 0;
+            for(size_t k=0;k<this->numIndSpecies();k++)
+               for(size_t l=0;l<=k;l++)
+               {
+                   this->DiffusionHessianM(idh,idy)=this->DiffusionHessianM(idh,idy).subs(subs_table);
+                   idy++;
+               }
+            idh++;
+
             for (size_t k=0; k<=j; k++)
             {
                 this->Diffusion3Tensor(idz)=this->Diffusion3Tensor(idz).subs(subs_table);
                 idz++;
             }
+         }
 
     }
 
