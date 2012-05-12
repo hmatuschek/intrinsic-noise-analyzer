@@ -411,7 +411,7 @@ LinearNoiseApproximation::fullState(const Eigen::VectorXd &state, Eigen::VectorX
     int dimThird=(this->numIndSpecies()*(this->numIndSpecies()+1)*(this->numIndSpecies()+2))/6;
 
     // get reduced skewness vector (should better be a view rather then a copy)
-    Eigen::VectorXd tail = state.segment(this->numIndSpecies()+dimCOV+dimThird,this->numIndSpecies());
+    Eigen::VectorXd tail = state.segment(2*this->numIndSpecies()+dimCOV,dimThird);
 
     std::vector< Eigen::MatrixXd > thirdMomVariables(this->numIndSpecies());
 
