@@ -4,7 +4,9 @@
 #include "steadystate/lnasteadystatemodule.hh"
 #include "ssa/ssamodule.hh"
 #include "re/remodule.hh"
+#include "ios/iosmodule.hh"
 #include "doctree/documentitem.hh"
+
 
 using namespace std;
 
@@ -27,6 +29,8 @@ int main(int argc, char *argv[])
   app->addModule(new REModule(app));
   // Load LNA module
   app->addModule(new LNAModule(app));
+  // Load IOS module
+  app->addModule(new IOSModule(app));
   // Load SSA module:
   app->addModule(new SSAModule(app));
 
