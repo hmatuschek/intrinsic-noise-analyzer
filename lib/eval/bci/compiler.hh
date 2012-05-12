@@ -8,7 +8,7 @@
 #include "ast/model.hh"
 #include "assembler.hh"
 #include "pass.hh"
-
+#include "utils/cputime.hh"
 
 namespace Fluc {
 namespace Evaluate {
@@ -136,7 +136,7 @@ public:
   void finalize(size_t level=0)
   {
     this->code->check();
-
+    Utils::CpuTime clock; clock.start();
     /*
      * In general, for the byte-code interpreter: The shortest code is the fastest!
      *
@@ -151,7 +151,7 @@ public:
       /* The first pass does not optimize any code here, it just pepares the representation for
        * the second pass.
        *
-       * The first pass (ImmediateValueRHSPass) tryes to swap the operands of kommutative operations
+       * The first pass (ImmediateValueRHSPass) tries to swap the operands of kommutative operations
        * like ADD and MUL if the LHS (left) operand is a constant (a PUSH instruction) and the RHS
        * value is not. */
       imm_rhs_pass.apply(*code);
@@ -171,6 +171,8 @@ public:
       // Update stack-size:
       this->code->check();
     }
+
+    std::cerr << "Optimized byte-code in " << clock.stop() << "s" << std::endl;
   }
 };
 

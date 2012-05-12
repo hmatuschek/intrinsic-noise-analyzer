@@ -94,7 +94,7 @@ IOSEMRETimeSeriesPlot::IOSEMRETimeSeriesPlot(size_t num_species, Table *series,
     size_t offset_cov  = offset_mean+N; size_t increment = N;
     for (size_t i=0; i<num_species; i++)
     {
-      graphs[i]->addPoint((*series)(j, 0), (*series)(j, 1+i), sqrt((*series)(j, offset_cov)));
+      graphs[i]->addPoint((*series)(j, 0), (*series)(j, offset_mean+i), sqrt((*series)(j, offset_cov)));
       offset_cov += increment; increment -= 1;
     }
   }
