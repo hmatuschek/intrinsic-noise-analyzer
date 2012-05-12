@@ -16,6 +16,11 @@ SET(ina_app_plot_HEADERS
     plot/variancelinegraph.hh plot/mapping.hh plot/figure.hh plot/linegraph.hh plot/savedialog.hh
     plot/boxplot.hh plot/plotrangedialog.hh)
 
+SET(ina_app_re_SOURCES
+    re/remodule.cc re/retask.cc re/retaskwrapper.cc re/retaskview.cc re/rewizard.cc re/replot.cc)
+SET(ina_app_re_HEADERS
+    re/remodule.hh re/retask.hh re/retaskwrapper.hh re/retaskview.hh re/rewizard.hh re/replot.hh)
+
 SET(ina_app_lna_SOURCES
     lna/lnawizard.cc lna/lnatask.cc lna/lnataskwrapper.cc lna/lnataskview.cc
     lna/lnaplot.cc lna/lnamodule.cc)
@@ -52,21 +57,23 @@ SET(ina_app_doctree_HEADERS
 
 SET(ina_app_models_SOURCES
     models/parameterlist.cc models/specieslist.cc models/compartmentlist.cc
-    models/reactionparameterlist.cc models/taskerror.cc models/tablewrapper.cc)
+    models/reactionparameterlist.cc models/taskerror.cc models/tablewrapper.cc
+    models/generaltaskconfig.cc)
 SET(ina_app_models_HEADERS
     models/parameterlist.hh models/specieslist.hh models/compartmentlist.hh
-    models/reactionparameterlist.hh models/taskerror.hh models/tablewrapper.hh)
+    models/reactionparameterlist.hh models/taskerror.hh models/tablewrapper.hh
+    models/generaltaskconfig.hh)
 
 SET(ina_app_views_SOURCES
     views/documentsview.cc views/parameterview.cc views/reactionview.cc
     views/reactionequationrenderer.cc views/compartmentview.cc views/speciesview.cc
     views/plotview.cc views/taskerrorwidget.cc views/aboutdialog.cc
-    views/taskview.cc)
+    views/taskview.cc views/generaltaskwizard.cc)
 SET(ina_app_views_HEADERS
     views/documentsview.hh views/parameterview.hh views/reactionview.hh
     views/reactionequationrenderer.hh views/compartmentview.hh views/speciesview.hh
     views/plotview.hh views/taskerrorwidget.hh views/aboutdialog.hh
-    views/taskview.hh)
+    views/taskview.hh views/generaltaskwizard.hh)
 
 
 SET(ina_app_SOURCES
@@ -75,6 +82,7 @@ SET(ina_app_SOURCES
     ${ina_app_models_SOURCES}
     ${ina_app_views_SOURCES}
     ${ina_app_plot_SOURCES}
+    ${ina_app_re_SOURCES}
     ${ina_app_lna_SOURCES}
     ${ina_app_steadystate_SOURCES}
     ${ina_app_ssa_SOURCES})
@@ -84,6 +92,7 @@ SET(ina_app_HEADERS
     ${ina_app_models_HEADERS}
     ${ina_app_views_HEADERS}
     ${ina_app_plot_HEADERS}
+    ${ina_app_re_HEADERS}
     ${ina_app_lna_HEADERS}
     ${ina_app_steadystate_HEADERS}
     ${ina_app_ssa_HEADERS})

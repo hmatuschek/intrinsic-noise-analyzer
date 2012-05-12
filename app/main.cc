@@ -3,7 +3,7 @@
 #include "lna/lnamodule.hh"
 #include "steadystate/lnasteadystatemodule.hh"
 #include "ssa/ssamodule.hh"
-
+#include "re/remodule.hh"
 #include "doctree/documentitem.hh"
 
 using namespace std;
@@ -23,6 +23,8 @@ int main(int argc, char *argv[])
 
   // Load SteadyState module:
   app->addModule(new LNASteadyStateModule(app));
+  // Load RE module
+  app->addModule(new REModule(app));
   // Load LNA module
   app->addModule(new LNAModule(app));
   // Load SSA module:

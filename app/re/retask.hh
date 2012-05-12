@@ -1,10 +1,11 @@
-#ifndef LNATASK_HH
-#define LNATASK_HH
+#ifndef RETASK_HH
+#define RETASK_HH
 
 #include <QObject>
 #include <QStringList>
 
 #include "../task.hh"
+#include "../models/generaltaskconfig.hh"
 #include "models/lnainterpreter.hh"
 #include "models/linearnoiseapproximation.hh"
 #include "ode/integrationrange.hh"
@@ -13,11 +14,11 @@
 
 
 /**
- * Represents a Linear Noise Approximation and EMRE correction task.
+ * Represents a task for the deterministic time-course analysis.
  *
  * @ingroup gui
  */
-class LNATask : public Task
+class RETask : public Task
 {
   Q_OBJECT
 
@@ -25,30 +26,35 @@ public:
   /**
    * Holds the complete configuration for the LNA task.
    */
-  class Config {
+  class Config :
+      public GeneralTaskConfig,
+      public ModelSelectionTaskConfig,
+      public SpeciesSelectionTaskConfig,
+      public ODEIntTaskConfig
+  {
   public:
-    typedef enum {
-      RungeKutta4,
-      RungeKuttaFehlberg45,
-      DormandPrince5,
-      Rosenbrock4
-    } Integrator;
-
-  public:
+    /**
+     * Default constructor.
+     */
     Config();
 
+    /**
+     * Copy constructor.
+     */
     Config(const Config &other);
 
+    /** Overrides the default implenentation of @c ModelSelectionTaskConfig and checks if
+     * the selected model can be used to instantiate a LNAModel. The LNA model instance is then
+     * stored in model. */
+    virtual void setModelDocument(DocumentItem *document);
+
+    /** Implements the @c SpeciesSelectionTaskConfig interface, and returns the LNA model instance. */
+    virtual Fluc::Ast::Model *getModel() const;
+
+
   public:
+    /** The model to be analyzed. */
     Fluc::Models::LinearNoiseApproximation *model;
-    QStringList selected_species;
-    Integrator integrator;
-    Fluc::ODE::IntegrationRange integration_range;
-    size_t immediate_steps;
-    size_t numThreads;
-    size_t optLevel;
-    double epsilon_abs;
-    double epsilon_rel;
   };
 
 
@@ -86,12 +92,12 @@ public:
   /**
    * Constructs a Task.
    */
-  explicit LNATask(const Config &config, QObject *parent = 0);
+  explicit RETask(const Config &config, QObject *parent = 0);
 
   /**
    * Destructor.
    */
-  virtual ~LNATask();
+  virtual ~RETask();
 
   /**
    * Returns the list of selected species.
@@ -126,4 +132,4 @@ protected:
   virtual void process();
 };
 
-#endif // LNATASK_HH
+#endif // RETASK_HH
