@@ -83,6 +83,14 @@ IOSResultWidget::plotButtonPressed()
           new IOSEMRETimeSeriesPlot(this->ios_task_wrapper->getIOSTask()->getSelectedSpecies().size(),
                                     this->ios_task_wrapper->getIOSTask()->getTimeSeries(),
                                     concentration_unit, time_unit)));
+
+  Application::getApp()->docTree()->addPlot(
+        this->ios_task_wrapper,
+        new PlotItem(
+          new IOSEMREComparePlot(this->ios_task_wrapper->getIOSTask()->getSelectedSpecies().size(),
+                                 this->ios_task_wrapper->getIOSTask()->getTimeSeries(),
+                                 concentration_unit, time_unit)));
+
 }
 
 

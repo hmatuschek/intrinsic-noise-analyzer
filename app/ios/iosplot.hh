@@ -16,6 +16,7 @@ public:
                              QObject *parent=0);
 };
 
+
 class IOSEMRETimeSeriesPlot : public Plot::Figure
 {
   Q_OBJECT
@@ -25,5 +26,17 @@ public:
                                  const QString &species_unit, const QString &time_unit,
                                  QObject *parent=0);
 };
+
+
+class IOSEMREComparePlot : public Plot::Figure
+{
+  Q_OBJECT
+
+public:
+  explicit IOSEMREComparePlot(size_t num_species, Table *data,
+                              const QString &species_unit, const QString &time_unit,
+                              QObject *parent=0);
+};
+
 
 #endif // LINESGRAPHADAPTOR_HH
