@@ -42,9 +42,6 @@ int main(int argc, char *argv[])
     app->docTree()->addDocument(new DocumentItem(argv[1]));
   }
 
-  // Now, explicitly enable nested threads for OpenMP:
-  //omp_set_nested(true);
-
   // run.
   qapp.exec();
 

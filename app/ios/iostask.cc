@@ -92,8 +92,8 @@ IOSTask::IOSTask(const Config &config, QObject *parent) :
     for (int j=i; j<(int)config.getNumSpecies(); j++, column++) {
       this->timeseries.setColumnName(
             column, QString("IOS cov(%1,%2)").arg(species_names[i]).arg(species_names[j]));
-      this->lna_index_table(i,j) = column;
-      this->lna_index_table(j,i) = column;
+      this->ios_index_table(i,j) = column;
+      this->ios_index_table(j,i) = column;
     }
   }
 
@@ -174,7 +174,8 @@ IOSTask::process()
   std::vector<size_t> species_index(N_sel_species);
   for (size_t i=0; i<N_sel_species; i++)
   {
-    species_index[i] = this->config.model->getSpeciesIdx(this->config.getSelectedSpecies().value(i).toStdString());
+    species_index[i] = this->config.model->getSpeciesIdx(
+          this->config.getSelectedSpecies().value(i).toStdString());
   }
 
   // initialize (reduced) state

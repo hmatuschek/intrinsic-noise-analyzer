@@ -6,15 +6,24 @@
 #include "../timeseries.hh"
 
 
-class IOSTimeSeriesPlot : public Plot::Figure
+class IOSLNATimeSeriesPlot : public Plot::Figure
 {
   Q_OBJECT
 
 public:
-  explicit IOSTimeSeriesPlot(size_t num_species, Table *data,
+  explicit IOSLNATimeSeriesPlot(size_t num_species, Table *data,
                              const QString &species_unit, const QString &time_unit,
                              QObject *parent=0);
 };
 
+class IOSEMRETimeSeriesPlot : public Plot::Figure
+{
+  Q_OBJECT
+
+public:
+  explicit IOSEMRETimeSeriesPlot(size_t num_species, Table *data,
+                                 const QString &species_unit, const QString &time_unit,
+                                 QObject *parent=0);
+};
 
 #endif // LINESGRAPHADAPTOR_HH
