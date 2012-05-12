@@ -429,7 +429,7 @@ LinearNoiseApproximation::fullState(const Eigen::VectorXd &state, Eigen::VectorX
             }
     }
 
-    Eigen::VectorXd cmat = this->PermutationM.transpose()*this->LinkCMatrixNumeric;
+    Eigen::MatrixXd cmat = this->PermutationM.transpose()*this->LinkCMatrixNumeric;
 
     // construct full third moment vector, restore original order and return
     for(size_t i=0; i<(unsigned)cmat.rows(); i++)
