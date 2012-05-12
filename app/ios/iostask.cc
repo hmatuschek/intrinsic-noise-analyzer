@@ -162,6 +162,9 @@ IOSTask::process()
   // Holds the 3rd moment for each species.
   Eigen::VectorXd thirdMoment(config.model->numSpecies());
 
+  // Holds the iosemre for each species.
+  Eigen::VectorXd iosemre(config.model->numSpecies());
+
   // Holds a row of the output-table:
   Eigen::VectorXd output_vector(1 + 2*config.getNumSpecies() +
                                 config.getNumSpecies()*(config.getNumSpecies()+1));
@@ -227,7 +230,7 @@ IOSTask::process()
       continue;
 
     // Get full state:
-    config.model->fullState(x, concentrations, lna, emre, ios, thirdMoment);
+    config.model->fullState(x, concentrations, lna, emre, ios, thirdMoment, iosemre);
 
     // store state and time:
     output_vector(0) = t;

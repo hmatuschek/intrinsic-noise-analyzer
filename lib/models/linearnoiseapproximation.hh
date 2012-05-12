@@ -192,7 +192,7 @@ public:
    * @param IOS correction to covariance matrix, @param vector of third moments of fluctuations
    */
   void fullState(const Eigen::VectorXd &state, Eigen::VectorXd &concentrations,
-                 Eigen::MatrixXd &cov, Eigen::VectorXd &emre,  Eigen::MatrixXd &iosCov, Eigen::VectorXd &thirdMoment);
+                 Eigen::MatrixXd &cov, Eigen::VectorXd &emre,  Eigen::MatrixXd &iosCov, Eigen::VectorXd &thirdMoment, Eigen::VectorXd &iosemre);
 
 
   /**

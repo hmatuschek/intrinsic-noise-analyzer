@@ -61,6 +61,7 @@ LinearNoiseApproximation::postConstructor()
     Eigen::VectorXex covVariables(dimCOV);
     Eigen::VectorXex emreVariables(this->numIndSpecies());
     Eigen::VectorXex iosVariables(dimCOV);
+    Eigen::VectorXex emreiosVariables(this->numIndSpecies());
     std::vector< Eigen::MatrixXex > skewnessVariables(this->numIndSpecies());
 
     size_t idx = 0;
@@ -84,6 +85,8 @@ LinearNoiseApproximation::postConstructor()
 
     for(size_t i = 0 ; i<dimCOV; i++)
         iosVariables(i) = stateVariables[idx++];
+    for(size_t i = 0 ; i<this->numIndSpecies(); i++)
+        emreiosVariables(i) = stateVariables[idx++];
 
         //emreVariables(i) = stateVariables[dimCOV+i];
 
@@ -294,10 +297,44 @@ LinearNoiseApproximation::postConstructor()
 
      }
 
+    ////////////////////////
+    // now calculate IOS-EMRE //
+    ////////////////////////
 
+    //Eigen::VectorXex Delta(this->numIndSpecies());
+
+    for (size_t i=0; i<this->numIndSpecies(); i++)
+    {
+      Delta(i)=0.;
+      idx=0;
+      for (size_t j=0; j<this->numIndSpecies(); j++)
+      {
+        for (size_t k=0; k<=j; k++)
+        {
+            if(k==j)
+            {
+                Delta(i) += this->Hessian(i,idx)*iosVariables(idx);
+            }
+            else
+            {
+                // fac 2 by symmetry, saves summing over strictly upper cov matrix
+                Delta(i) += 2.*this->Hessian(i,idx)*iosVariables(idx);
+            }
+
+            idx++;
+
+        }
+      }
+      // divide by 2
+      Delta(i)/=2.;
+    }
+
+    // @todo add philippian!
+
+    Eigen::VectorXex EMREiosUpdate = ((this->JacobianM*emreiosVariables)+Delta);
 
     // and combine to update vector
-    this->updateVector << this->REs,CovUpdate,EMREUpdate,ThirdMomentUpdate,IOSUpdate;
+    this->updateVector << this->REs,CovUpdate,EMREUpdate,ThirdMomentUpdate,IOSUpdate,EMREiosUpdate;
 }
 
 
@@ -395,7 +432,7 @@ LinearNoiseApproximation::fullState(const Eigen::VectorXd &state, Eigen::VectorX
 
 void
 LinearNoiseApproximation::fullState(const Eigen::VectorXd &state, Eigen::VectorXd &concentrations,
-                                     Eigen::MatrixXd &cov, Eigen::VectorXd &emre, Eigen::MatrixXd &iosCov, Eigen::VectorXd &thirdMoment)
+                                     Eigen::MatrixXd &cov, Eigen::VectorXd &emre, Eigen::MatrixXd &iosCov, Eigen::VectorXd &thirdMoment, Eigen::VectorXd &iosemre)
 
 {
 
@@ -463,6 +500,12 @@ LinearNoiseApproximation::fullState(const Eigen::VectorXd &state, Eigen::VectorX
 
    // restore native permutation of covariance
    iosCov = (this->PermutationM.transpose()*cov_all)*this->PermutationM;
+
+   tail = state.segment(2*this->numIndSpecies()+2*dimCOV+dimThird,this->numIndSpecies());
+
+   // construct full iosemre vector, restore original order and return
+   iosemre = cmat*tail;
+
 
 }
 
@@ -664,6 +707,9 @@ LinearNoiseApproximation::getDimension()
   // add dimension of second moment correction
   dim+= (this->numIndSpecies()*(this->numIndSpecies()+1))/2;
 
+  // add dimension of IOS-EMRE
+  dim+= this->numIndSpecies();
+
   return dim;
 }
 
@@ -682,7 +728,9 @@ LinearNoiseApproximation::getInitialState(Eigen::VectorXd &x)
      // zero third moment
      Eigen::VectorXd::Zero(dimThird),
      // zero second moment correction
-     Eigen::VectorXd::Zero(dimCov);
+     Eigen::VectorXd::Zero(dimCov),
+     // zero IOS-EMRE
+     Eigen::VectorXd::Zero(this->numIndSpecies());
 
 }
 

@@ -234,7 +234,7 @@ SteadyStateAnalysis::calcSteadyState(Eigen::VectorXd &x)
     // and emre
 
     x.resize(lnaModel.getDimension());
-    x << conc, covVec, emre, Eigen::VectorXd::Zero(covVec.size()*(lnaModel.numIndSpecies()+2)/3),Eigen::VectorXd::Zero(covVec.size());
+    x << conc, covVec, emre, Eigen::VectorXd::Zero(covVec.size()*(lnaModel.numIndSpecies()+2)/3),Eigen::VectorXd::Zero(covVec.size()),Eigen::VectorXd::Zero(lnaModel.numIndSpecies());
 
     return iter;
 
