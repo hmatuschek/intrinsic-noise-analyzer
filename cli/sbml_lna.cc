@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
     // output mean concentrations
     for(size_t i=0; i<model.numSpecies(); i++)
     {
-       //std::cout<< x(2*model.numSpecies()+i) <<"\t";
+        std::cout<< iosemre(i) <<"\t"<<std::endl;
     }
     //std::cerr<<model.getTimeUnit().getMultiplier();
 
@@ -157,14 +157,14 @@ int main(int argc, char *argv[])
        x += dx; t += dt;
 
 
-//       model.fullState(x,concentrations,cov,emre,ioscov,thirdmoment,iosemre);
+       model.fullState(x,concentrations,cov,emre,ioscov,thirdmoment,iosemre);
 
        std::cout<< t <<std::endl;
 
        // output mean concentrations
        for(size_t i=0; i<model.numSpecies(); i++)
        {
-          std::cout<< ioscov(i,i) <<"\t";
+          std::cout<< iosemre(i) <<"\t";
        }
 
 

@@ -228,7 +228,7 @@ LinearNoiseApproximation::postConstructor()
 
     Eigen::VectorXex ThirdMomentUpdate(dimSkew);
 
-    size_t ids = 0;
+    //size_t ids = 0;
     idx=0;
     size_t idy;
     for(size_t i=0;i<this->numIndSpecies();i++)
@@ -310,12 +310,12 @@ LinearNoiseApproximation::postConstructor()
                 for(size_t l=0; l<k; l++)
                 {
                     iosUpdate(idx) += this->Hessian(i,idy)*thirdmomentVariables[j](k,l)+this->Hessian(j,idy)*thirdmomentVariables[i](k,l);
-                    iosUpdate(idx) += this->DiffusionHessianM(idx,idy)*iosVariables(idy);
+                    iosUpdate(idx) += this->DiffusionHessianM(idx,idy)*cov(k,k);
                     idy++;
                 }
 
                 // same for l=k appears only once in sum
-                iosUpdate(idx) += (this->Hessian(i,idy)+this->Hessian(j,idy))*thirdmomentVariables[j](k,k)/2;
+                iosUpdate(idx) += (this->Hessian(i,idy)*thirdmomentVariables[j](k,k)/2+this->Hessian(j,idy)*thirdmomentVariables[i](k,k)/2);
                 iosUpdate(idx) += this->DiffusionHessianM(idx,idy)*cov(k,k)/2;
                 idy++;
              }
@@ -335,7 +335,7 @@ LinearNoiseApproximation::postConstructor()
       idx=0;
       for (size_t j=0; j<this->numIndSpecies(); j++)
       {
-        for (size_t k=0; k<j; k++)
+        for (size_t k=0; k<=j; k++)
         {
             if(k==j)
             {
@@ -467,7 +467,6 @@ LinearNoiseApproximation::fullState(const Eigen::VectorXd &state, Eigen::VectorX
 
     // reconstruct thirdmoments
 
-
     // dim of reduced covariance vector
     int dimCOV=(this->numIndSpecies()*(this->numIndSpecies()+1))/2;
     // dim of reduced covariance vector
@@ -503,9 +502,7 @@ LinearNoiseApproximation::fullState(const Eigen::VectorXd &state, Eigen::VectorX
 
     // get reduced covariance vector
     Eigen::VectorXd covvec = state.segment(2*this->numIndSpecies()+dimCOV+dimThird,dimCOV);
-    // full cov permutated
-    Eigen::MatrixXd cov_all(this->numSpecies(),this->numSpecies());
-    // red cov permutated
+    // reduced covariance
     Eigen::MatrixXd cov_ind(this->numIndSpecies(),this->numIndSpecies());
 
    // fill upper triangular
@@ -521,11 +518,8 @@ LinearNoiseApproximation::fullState(const Eigen::VectorXd &state, Eigen::VectorX
        }
    }
 
-   // so here it is:
-   cov_all = this->LinkCMatrixNumeric*cov_ind*this->LinkCMatrixNumeric.transpose();
-
-   // restore native permutation of covariance
-   iosCov = (this->PermutationM.transpose()*cov_all)*this->PermutationM;
+   // restore full covariance in native permutation
+   iosCov = cmat*cov_ind*cmat.transpose();
 
    tail = state.segment(2*this->numIndSpecies()+2*dimCOV+dimThird,this->numIndSpecies());
 
@@ -810,7 +804,7 @@ void
 LinearNoiseApproximation::constructCovarianceMatrix(Eigen::MatrixXex &cov)
 {
 
-    // make sure it is big enough
+    // make space
     cov.resize(this->numIndSpecies(),this->numIndSpecies());
 
     // fill symmetric covariance of independent species
@@ -834,7 +828,7 @@ void
 LinearNoiseApproximation::constructSymmetricMatrix(Eigen::VectorXex covVec,Eigen::MatrixXex &cov)
 {
 
-    // make sure it is big enough
+    // make space
     cov.resize(this->numIndSpecies(),this->numIndSpecies());
 
     // fill symmetric covariance of independent species
