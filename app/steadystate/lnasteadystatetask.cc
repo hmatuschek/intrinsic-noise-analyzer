@@ -120,7 +120,7 @@ LNASteadyStateTask::process()
   this->setState(Task::RUNNING);
 
   // Calc steadystate:
-  this->steady_state.calcSteadyState(reduced_state);
+  this->steady_state.calcIOS(reduced_state);
 
   // Check if task shall terminate:
   if (Task::TERMINATING == this->getState())

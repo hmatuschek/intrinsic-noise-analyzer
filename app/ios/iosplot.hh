@@ -4,16 +4,24 @@
 #include "../plot/plot.hh"
 #include "../plot/graph.hh"
 #include "../timeseries.hh"
+#include "../views/varianceplot.hh"
 
 
-class IOSLNATimeSeriesPlot : public Plot::Figure
+
+/**
+ * Trivial specialization to the variance plot.
+ *
+ * This class plots the mean and std.dev. determined by the LNA.
+ */
+class IOSLNATimeSeriesPlot : public VariancePlot
 {
   Q_OBJECT
 
 public:
+  /** Constructor. */
   explicit IOSLNATimeSeriesPlot(size_t num_species, Table *data,
-                             const QString &species_unit, const QString &time_unit,
-                             QObject *parent=0);
+                                const QString &species_unit, const QString &time_unit,
+                                QObject *parent=0);
 };
 
 
