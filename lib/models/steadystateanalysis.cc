@@ -240,6 +240,49 @@ SteadyStateAnalysis::calcSteadyState(Eigen::VectorXd &x)
 
 }
 
+void SteadyStateAnalysis::calcIOS(Eigen::VectorXd &x)
+{
+
+    size_t dimCov = lnaModel.numIndSpecies()*(lnaModel.numIndSpecies()+1)/2;
+    size_t dimThree = dimCov*(lnaModel.numIndSpecies()+2)/3;
+
+    this->calcSteadyState(x);
+
+    size_t offset = 2*lnaModel.numIndSpecies()+dimCov;
+    size_t iosLength = lnaModel.numIndSpecies()+dimCov+dimThree;
+
+    Eigen::VectorXex iosUpdate = lnaModel.updateVector.segment(offset,iosLength);
+
+    Eigen::VectorXd A(iosLength);
+    Eigen::MatrixXd B(iosLength,iosLength);
+
+    // substitution table for lna
+    GiNaC::exmap subs_table;
+    for (size_t s=0; s<(lnaModel.numIndSpecies()); s++)
+        subs_table.insert( std::pair<GiNaC::ex,GiNaC::ex>( lnaModel.species[lnaModel.PermutationVec(s)], x(s) ) );
+    for (size_t s=0; s<(dimCov+lnaModel.numIndSpecies()); s++)
+        subs_table.insert( std::pair<GiNaC::ex,GiNaC::ex>( lnaModel.stateVariables[s], x(lnaModel.numIndSpecies()+s) ) );
+    // substitute lna result
+    for(int i=0; i<iosUpdate.size(); i++)
+        iosUpdate(i)=iosUpdate(i).subs(subs_table);
+
+    // generate zero
+    subs_table.clear();
+    for (int i=0; i<iosUpdate.size(); i++)
+        subs_table.insert( std::pair<GiNaC::ex,GiNaC::ex>( lnaModel.stateVariables[lnaModel.numIndSpecies()+dimCov+i], 0 ) );
+    // obtain result
+    for(size_t i=0; i<iosLength; i++)
+    {
+        A(i)=GiNaC::ex_to<GiNaC::numeric>( iosUpdate(i).subs(subs_table) ).to_double();
+        for(size_t j=0; j<iosLength; j++)
+            B(i,j) = GiNaC::ex_to<GiNaC::numeric>( iosUpdate(i).diff(lnaModel.stateVariables[lnaModel.numIndSpecies()+dimCov+i]) ).to_double();
+    }
+
+    // solve IOS
+    x.tail(iosLength)=B.lu().solve(-A);
+
+}
+
 void SteadyStateAnalysis::dump(std::ostream &str)
 {
 

@@ -78,6 +78,9 @@ public:
    */
   int calcSteadyState(Eigen::VectorXd &x);
 
+
+  void calcIOS(Eigen::VectorXd &x);
+
   /**
    * Samples the frequencies [0, f_max], where f_max is dertermined by the eigen values of the
    * Jacobian.

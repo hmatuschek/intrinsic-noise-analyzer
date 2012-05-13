@@ -206,6 +206,25 @@ LinearNoiseApproximation::postConstructor()
     // calculate third moment
     /////////////////////////
 
+
+    std::vector< Eigen::MatrixXex > diffjac(this->numIndSpecies());
+
+    for(size_t i=0;i<this->numIndSpecies();i++)
+    {
+
+        idx=0;
+        diffjac[i].resize(this->numIndSpecies(),this->numIndSpecies());
+        for(size_t j=0;j<this->numIndSpecies();j++)
+        {
+            for(size_t k=0;k<=j;k++)
+            {
+                diffjac[i](j,k)=this->DiffusionJacM(idx,i);
+                diffjac[i](k,j)=this->DiffusionJacM(idx,i);
+                idx++;
+            }
+        }
+
+    }
     Eigen::VectorXex ThirdMomentUpdate(dimSkew);
 
     size_t ids = 0;
@@ -224,8 +243,7 @@ LinearNoiseApproximation::postConstructor()
                 for(size_t r=0; r<this->numIndSpecies(); r++)
                 {
 
-                    //ThirdMomentUpdate(idx) += this->DiffusionJacM(ids,r)*cov(r,k);
-                    // another symmetrization is missing here!
+                    ThirdMomentUpdate(idx) += diffjac[r](i,j)*cov(r,k)+diffjac[r](i,k)*cov(r,j)+diffjac[r](j,k)*cov(r,i);
 
                     ThirdMomentUpdate(idx) += this->JacobianM(i,r)*thirdmomentVariables[r](j,k);
                     ThirdMomentUpdate(idx) += this->JacobianM(j,r)*thirdmomentVariables[r](i,k);
