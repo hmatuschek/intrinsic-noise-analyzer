@@ -275,7 +275,7 @@ void SteadyStateAnalysis::calcIOS(Eigen::VectorXd &x)
     {
         A(i)=GiNaC::ex_to<GiNaC::numeric>( iosUpdate(i).subs(subs_table) ).to_double();
         for(size_t j=0; j<iosLength; j++)
-            B(i,j) = GiNaC::ex_to<GiNaC::numeric>( iosUpdate(i).diff(lnaModel.stateVariables[lnaModel.numIndSpecies()+dimCov+i]) ).to_double();
+            B(i,j) = GiNaC::ex_to<GiNaC::numeric>( iosUpdate(i).diff(lnaModel.stateVariables[lnaModel.numIndSpecies()+dimCov+j]) ).to_double();
     }
 
     // solve IOS

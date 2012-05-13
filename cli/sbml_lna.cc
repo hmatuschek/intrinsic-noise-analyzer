@@ -53,13 +53,21 @@ int main(int argc, char *argv[])
     interpreter.getInitialState(x);
     // get full initial concentrations and covariance and emre
 
-    interpreter.full_state(x, concentrations, cov, emre);
 
  //    Just dump all the nice expressions and values:
     steadyState.calcSteadyState(x);
 
+    steadyState.calcIOS(x);
+    model.fullState(x, concentrations, cov, emre, ioscov, thirdmoment, iosemre);
+
     steadyState.dump(std::cerr);
 
+
+    // output mean concentrations
+    for(size_t i=0; i<model.numSpecies(); i++)
+    {
+       //std::cout<< x(2*model.numSpecies()+i) <<"\t";
+    }
     //std::cerr<<model.getTimeUnit().getMultiplier();
 
 //    std::cout<<"Initial concentrations:"<<std::endl;
@@ -149,7 +157,7 @@ int main(int argc, char *argv[])
        x += dx; t += dt;
 
 
-       model.fullState(x,concentrations,cov,emre,ioscov,thirdmoment,iosemre);
+//       model.fullState(x,concentrations,cov,emre,ioscov,thirdmoment,iosemre);
 
        std::cout<< t <<std::endl;
 
