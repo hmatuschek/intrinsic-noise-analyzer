@@ -9,127 +9,29 @@
 #include <QCheckBox>
 
 
+#include "models/linearnoiseapproximation.hh"
+
 using namespace Fluc;
 
 
 
 
 LNASteadyStateWizard::LNASteadyStateWizard(QWidget *parent) :
-  QWizard(parent), frequency_min(0), frequency_max(1), num_frequencies(0)
+  GeneralTaskWizard(parent), config()
 {
   this->setWindowTitle("System Size Expansion");
 
-  this->setPage(LNASteadyStateWizard::MODEL_SELECTION_PAGE, new LNASteadyStateModelSelectionPage());
-  this->setPage(LNASteadyStateWizard::SPECIES_SELECTION_PAGE, new LNASteadyStateSpeciesSelectionPage());
-  this->setPage(LNASteadyStateWizard::FREQUENCY_RANGE_PAGE, new LNASteadyStateSpectrumConfigPage());
-  this->setPage(LNASteadyStateWizard::SUMMARY_PAGE, new LNASteadyStateSummaryPage());
+  this->setPage(LNASteadyStateWizard::MODEL_SELECTION_PAGE, new LNASteadyStateModelSelectionPage(this));
+  this->setPage(LNASteadyStateWizard::SPECIES_SELECTION_PAGE, new LNASteadyStateSpeciesSelectionPage(this));
+  this->setPage(LNASteadyStateWizard::FREQUENCY_RANGE_PAGE, new LNASteadyStateSpectrumConfigPage(this));
+  this->setPage(LNASteadyStateWizard::SUMMARY_PAGE, new LNASteadyStateSummaryPage(this));
   this->page(LNASteadyStateWizard::SUMMARY_PAGE)->setFinalPage(true);
 }
 
-
-Models::LinearNoiseApproximation *
-LNASteadyStateWizard::getLNAModel()
+GeneralTaskConfig &
+LNASteadyStateWizard::getConfig()
 {
-  return this->lna_model;
-}
-
-
-void
-LNASteadyStateWizard::setDocument(DocumentItem *doc)
-{
-  this->document = doc;
-  this->lna_model = new Models::LinearNoiseApproximation(doc->getSBMLModel());
-}
-
-
-DocumentItem *
-LNASteadyStateWizard::getDocument() const
-{
-  return this->document;
-}
-
-
-void
-LNASteadyStateWizard::setSelectedSpecies(const QList<QString> &species)
-{
-  this->selected_species = species;
-}
-
-const QList<QString> &
-LNASteadyStateWizard::getSelectedSpecies()
-{
-  return this->selected_species;
-}
-
-
-void
-LNASteadyStateWizard::setFrequencyAutoRange(bool automatic)
-{
-  this->frequency_auto_range = automatic;
-}
-
-
-void
-LNASteadyStateWizard::setFrequencyRange(double min, double max, size_t num)
-{
-  this->frequency_min = min;
-  this->frequency_max = max;
-  this->num_frequencies = num;
-}
-
-
-bool
-LNASteadyStateWizard::getAutomaticFrequencies()
-{
-  return this->frequency_auto_range;
-}
-
-
-size_t
-LNASteadyStateWizard::getNumFrequencies()
-{
-  return this->num_frequencies;
-}
-
-
-double
-LNASteadyStateWizard::getMinFrequency()
-{
-  return this->frequency_min;
-}
-
-
-double
-LNASteadyStateWizard::getMaxFrequency()
-{
-  return this->frequency_max;
-}
-
-
-void
-LNASteadyStateWizard::setNumIterations(size_t num)
-{
-  this->num_iterations = num;
-}
-
-size_t
-LNASteadyStateWizard::getNumIterations()
-{
-  return this->num_iterations;
-}
-
-
-void
-LNASteadyStateWizard::setEpsilon(double eps)
-{
-  this->epsilon = eps;
-}
-
-
-double
-LNASteadyStateWizard::getEpsilon()
-{
-  return this->epsilon;
+  return this->config;
 }
 
 
@@ -137,36 +39,22 @@ LNASteadyStateWizard::getEpsilon()
 /* ********************************************************************************************* *
  * Implementation of model selection page:
  * ********************************************************************************************* */
-LNASteadyStateModelSelectionPage::LNASteadyStateModelSelectionPage(QWidget *parent)
-  : QWizardPage(parent)
+LNASteadyStateModelSelectionPage::LNASteadyStateModelSelectionPage(GeneralTaskWizard *parent)
+  : ModelSelectionWizardPage(parent)
 {
   this->setTitle(tr("Steady State Analysis"));
   this->setSubTitle(tr("Select a model to analyze."));
-
-  QVBoxLayout *layout = new QVBoxLayout();
-  this->modelSelection = new QComboBox();
-  this->modelSelection->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
-  this->modelSelection->setFixedWidth(400);
-  this->modelSelection->setModel(Application::getApp()->docTree());
-  this->registerField("Model*", this->modelSelection);
-
-  layout->addWidget(this->modelSelection);
-  this->setLayout(layout);
 }
 
 
 bool
 LNASteadyStateModelSelectionPage::validatePage()
 {
-  // Get the wizard:
-  LNASteadyStateWizard *wizard = static_cast<LNASteadyStateWizard *>(this->wizard());
-
   // Try to create LNA model from SBML document
   try {
-    DocumentTree *docs = Application::getApp()->docTree();
-    TreeItem *item = static_cast<TreeItem *>(
-          docs->index(this->modelSelection->currentIndex(),0).internalPointer());
-    wizard->setDocument(static_cast<DocumentItem *>(item));
+    // Forward call to parent implementation:
+    if (! ModelSelectionWizardPage::validatePage())
+      return false;
   } catch (Exception err) {
     // Simply show a warning and done.
     QMessageBox::warning(0, tr("Can not construct LNA anlysis from model: "), err.what());
@@ -181,83 +69,11 @@ LNASteadyStateModelSelectionPage::validatePage()
 /* ********************************************************************************************* *
  * Implementation of species selection page:
  * ********************************************************************************************* */
-LNASteadyStateSpeciesSelectionPage::LNASteadyStateSpeciesSelectionPage(QWidget *parent)
-  : QWizardPage(parent)
+LNASteadyStateSpeciesSelectionPage::LNASteadyStateSpeciesSelectionPage(GeneralTaskWizard *parent)
+  : SpeciesSelectionWizardPage(parent)
 {
   this->setTitle(tr("Steady State Analysis"));
   this->setSubTitle(tr("Select some species for analysis."));
-
-  this->speciesList = new QListWidget();
-  this->registerField("Species*", this->speciesList);
-
-  QVBoxLayout *layout = new QVBoxLayout();
-  layout->addWidget(this->speciesList);
-  this->setLayout(layout);
-}
-
-
-void
-LNASteadyStateSpeciesSelectionPage::initializePage()
-{
-  // First cleanup list of species:
-  while(this->speciesList->count())
-  {
-    delete this->speciesList->takeItem(0);
-  }
-
-  // Get list of species from selected model:
-  LNASteadyStateWizard *wizard = static_cast<LNASteadyStateWizard *>(this->wizard());
-  for (size_t i=0; i<wizard->getLNAModel()->numSpecies(); i++)
-  {
-    QString species_name;
-    QString species_id;
-
-    if (wizard->getLNAModel()->getSpecies(i)->hasName())
-    {
-      species_id   = wizard->getLNAModel()->getSpecies(i)->getIdentifier().c_str();
-      species_name = wizard->getLNAModel()->getSpecies(i)->getName().c_str();
-    }
-    else
-    {
-      species_id   = wizard->getLNAModel()->getSpecies(i)->getIdentifier().c_str();
-      species_name = species_id;
-    }
-
-    QListWidgetItem *item = new QListWidgetItem(species_name);
-    item->setData(Qt::UserRole, species_id);
-    item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
-    item->setCheckState(Qt::Unchecked);
-    this->speciesList->addItem(item);
-  }
-}
-
-
-bool
-LNASteadyStateSpeciesSelectionPage::validatePage()
-{
-  // Just collect the species to plot:
-  LNASteadyStateWizard *wizard = static_cast<LNASteadyStateWizard *>(this->wizard());
-
-  QList<QString> list_of_species;
-  for (int i=0; i<this->speciesList->count(); i++)
-  {
-    if (Qt::Checked == this->speciesList->item(i)->checkState())
-    {
-      list_of_species.append(this->speciesList->item(i)->data(Qt::UserRole).toString());
-    }
-  }
-
-  // There should be at least one species selected
-  if (0 == list_of_species.size())
-  {
-    return false;
-  }
-
-  // Set list of selected species:
-  wizard->setSelectedSpecies(list_of_species);
-
-  // Done.
-  return true;
 }
 
 
@@ -265,7 +81,7 @@ LNASteadyStateSpeciesSelectionPage::validatePage()
 /* ********************************************************************************************* *
  * Implementation of frequency range page:
  * ********************************************************************************************* */
-LNASteadyStateSpectrumConfigPage::LNASteadyStateSpectrumConfigPage(QWidget *parent)
+LNASteadyStateSpectrumConfigPage::LNASteadyStateSpectrumConfigPage(GeneralTaskWizard *parent)
   : QWizardPage(parent)
 {
   this->setTitle(tr("Steady State Analysis"));
@@ -328,13 +144,14 @@ LNASteadyStateSpectrumConfigPage::validatePage()
 {
   // Get the wizard:
   LNASteadyStateWizard *wizard = static_cast<LNASteadyStateWizard *>(this->wizard());
+  LNASteadyStateTask::Config &config = wizard->getConfigCast<LNASteadyStateTask::Config>();
 
 //  wizard->setFrequencyAutoRange(this->field("f_automatic").toBool());
 //  wizard->setFrequencyRange(this->field("f_min").toDouble(),
 //                            this->field("f_max").toDouble(),
 //                            this->field("f_num").toUInt());
-  wizard->setNumIterations(this->field("n_iter").toInt());
-  wizard->setEpsilon(this->field("epsilon").toDouble());
+  config.setMaxIterations(this->field("n_iter").toInt());
+  config.setEpsilon(this->field("epsilon").toDouble());
 
   return true;
 }
@@ -385,10 +202,10 @@ void
 LNASteadyStateSummaryPage::initializePage()
 {
   LNASteadyStateWizard *wizard = static_cast<LNASteadyStateWizard *>(this->wizard());
+  LNASteadyStateTask::Config &config = wizard->getConfigCast<LNASteadyStateTask::Config>();
 
-  this->model_name->setText(wizard->getDocument()->getSBMLModel()->getName().c_str());
-
-  QStringList species(wizard->getSelectedSpecies());
+  this->model_name->setText(config.getModelDocument()->getSBMLModel()->getName().c_str());
+  QStringList species(config.getSelectedSpecies());
   this->species->setText(species.join(", "));
 
 //  QString spectrum("From %1 to %2 in %3 steps");
@@ -399,7 +216,7 @@ LNASteadyStateSummaryPage::initializePage()
 //    this->spectrum->setText("automatic");
 
   QString mem_str("%1 MB");
-  int N = wizard->getDocument()->getSBMLModel()->getNumSpecies();
+  int N = config.getNumSpecies();
   this->memory->setText(mem_str.arg(double(8*(2*N+N*N))/126976.));
 }
 

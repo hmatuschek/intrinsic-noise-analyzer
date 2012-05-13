@@ -5,45 +5,90 @@
 #include "models/linearnoiseapproximation.hh"
 #include "models/steadystateanalysis.hh"
 #include "../timeseries.hh"
+#include "../models/generaltaskconfig.hh"
 
 
 class LNASteadyStateTask : public Task
 {
   Q_OBJECT
 
+public:
+  /**
+   * This class assembles all parameters needed to configure a SteadyStateTask.
+   */
+  class Config :
+      public GeneralTaskConfig,
+      public ModelSelectionTaskConfig,
+      public SpeciesSelectionTaskConfig
+  {
+  protected:
+    Fluc::Models::LinearNoiseApproximation *model;
+
+    int max_iterations;
+    double epsilon;
+
+    bool auto_frequencies;
+    double min_frequency;
+    double max_frequency;
+    size_t num_frequency;
+
+  public:
+    /** Default constructor. */
+    Config();
+
+    /** Copy constructor. */
+    Config(const Config &other);
+
+    /** Overrides the default implenentation of @c ModelSelectionTaskConfig and checks if
+     * the selected model can be used to instantiate a LNAModel. The LNA model instance is then
+     * stored in model. */
+    virtual void setModelDocument(DocumentItem *document);
+
+    /** Implements the @c SpeciesSelectionTaskConfig interface, and returns the LNA model instance. */
+    virtual Fluc::Ast::Model *getModel() const;
+
+    /** Returns the max number of iterations.*/
+    size_t getMaxIterations() const;
+    /** Resets the max number of iterations. */
+    void setMaxIterations(size_t num);
+
+    /** Returns epsilon. */
+    double getEpsilon() const;
+    void setEpsilon(double eps);
+  };
+
 
 protected:
-  Fluc::Models::LinearNoiseApproximation *model;
+  /** Holds the task configuration. */
+  Config config;
+  /** Holds an instance of the analysis. */
   Fluc::Models::SteadyStateAnalysis steady_state;
-  int max_iterations;
-  double epsilon;
-
   Eigen::VectorXd concentrations;
   Eigen::VectorXd emre_corrections;
-  Eigen::MatrixXd covariances;
-
-  bool auto_frequencies;
-  Eigen::VectorXd frequencies;
-  Table spectrum;
-
+  Eigen::VectorXd ios_corrections;
+  Eigen::MatrixXd lna_covariances;
+  Eigen::MatrixXd ios_covariances;
   QVector<QString> species;
   QVector<QString> species_name;
+
+  //Eigen::VectorXd frequencies;
+  Table spectrum;
 
   QVector<size_t> index_table;
 
 
 public:
-  explicit LNASteadyStateTask(Fluc::Models::LinearNoiseApproximation *model,
-                              const QList<QString> &selected_species,
-                              bool auto_frequencies,
-                              size_t num_freqs, double min_freq, double max_freq,
-                              size_t max_iterations, double epsilon, QObject *parent=0);
+  explicit LNASteadyStateTask(const Config &config, QObject *parent=0);
 
   Eigen::VectorXd &getConcentrations();
 
   Eigen::VectorXd &getEMRECorrections();
 
-  Eigen::MatrixXd &getCovariances();
+  Eigen::VectorXd &getIOSCorrections();
+
+  Eigen::MatrixXd &getLNACovariances();
+
+  Eigen::MatrixXd &getIOSCovariances();
 
   Table &getSpectrum();
 
@@ -52,8 +97,6 @@ public:
   const QString &getSpeciesName(int i);
 
   const Fluc::Ast::Unit &getSpeciesUnit() const;
-
-  Fluc::Models::LinearNoiseApproximation *getModel();
 
   virtual QString getLabel();
 

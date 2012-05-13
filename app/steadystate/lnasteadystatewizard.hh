@@ -9,14 +9,16 @@
 
 #include "models/linearnoiseapproximation.hh"
 #include "../doctree/documentitem.hh"
+#include "lnasteadystatetask.hh"
+#include "../views/generaltaskwizard.hh"
 
 
-
-class LNASteadyStateWizard : public QWizard
+class LNASteadyStateWizard : public GeneralTaskWizard
 {
   Q_OBJECT
 
 public:
+  /** This enumarates the available wizard pages. */
   typedef enum {
     MODEL_SELECTION_PAGE,
     SPECIES_SELECTION_PAGE,
@@ -24,75 +26,36 @@ public:
     SUMMARY_PAGE
   } PageId;
 
-
 protected:
-  DocumentItem *document;
-  Fluc::Models::LinearNoiseApproximation *lna_model;
-  QList<QString> selected_species;
-  bool frequency_auto_range;
-  double frequency_min;
-  double frequency_max;
-  size_t num_frequencies;
-  size_t num_iterations;
-  double epsilon;
-
+  /** The task configuration. This instance will be populated by the wizzard. */
+  LNASteadyStateTask::Config config;
 
 public:
+  /** Default constructor. */
   explicit LNASteadyStateWizard(QWidget *parent = 0);
-
-  Fluc::Models::LinearNoiseApproximation *getLNAModel();
-  void setDocument(DocumentItem *doc);
-  DocumentItem *getDocument() const;
-
-  void setSelectedSpecies(const QList<QString> &species);
-  const QList<QString> &getSelectedSpecies();
-
-  void setFrequencyAutoRange(bool automatic);
-  void setFrequencyRange(double min, double max, size_t num);
-
-  bool getAutomaticFrequencies();
-  size_t getNumFrequencies();
-  double getMinFrequency();
-  double getMaxFrequency();
-
-  void setNumIterations(size_t num);
-  size_t getNumIterations();
-
-  void setEpsilon(double eps);
-  double getEpsilon();
+  /** Implements GeneralTaskWizard interface. */
+  virtual GeneralTaskConfig &getConfig();
 };
 
 
 
-class LNASteadyStateModelSelectionPage : public QWizardPage
+class LNASteadyStateModelSelectionPage : public ModelSelectionWizardPage
 {
   Q_OBJECT
 
 public:
-  explicit LNASteadyStateModelSelectionPage(QWidget *parent=0);
-
+  explicit LNASteadyStateModelSelectionPage(GeneralTaskWizard *parent);
   virtual bool validatePage();
-
-
-private:
-  QComboBox *modelSelection;
 };
 
 
 
-class LNASteadyStateSpeciesSelectionPage : public QWizardPage
+class LNASteadyStateSpeciesSelectionPage : public SpeciesSelectionWizardPage
 {
   Q_OBJECT
 
 public:
-  explicit LNASteadyStateSpeciesSelectionPage(QWidget *parent=0);
-
-  virtual void initializePage();
-
-  virtual bool validatePage();
-
-private:
-  QListWidget *speciesList;
+  explicit LNASteadyStateSpeciesSelectionPage(GeneralTaskWizard *parent);
 };
 
 
@@ -102,7 +65,7 @@ class LNASteadyStateSpectrumConfigPage : public QWizardPage
   Q_OBJECT
 
 public:
-  explicit LNASteadyStateSpectrumConfigPage(QWidget *parent=0);
+  explicit LNASteadyStateSpectrumConfigPage(GeneralTaskWizard *parent);
 
   virtual bool validatePage();
 

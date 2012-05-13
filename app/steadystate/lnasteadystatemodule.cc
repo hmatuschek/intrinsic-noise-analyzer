@@ -37,12 +37,7 @@ LNASteadyStateModule::configSteadyState()
   LNASteadyStateTask *task = 0;
 
   try {
-    task = new LNASteadyStateTask(
-          this->wizard->getLNAModel(), this->wizard->getSelectedSpecies(),
-          this->wizard->getAutomaticFrequencies(),
-          this->wizard->getNumFrequencies(),
-          this->wizard->getMinFrequency(), this->wizard->getMaxFrequency(),
-          this->wizard->getNumIterations(), this->wizard->getEpsilon());
+    task = new LNASteadyStateTask(this->wizard->getConfigCast<LNASteadyStateTask::Config>());
   } catch (Fluc::Exception &err) {
     QMessageBox::warning(
           0, tr("Can not construct stochastic simulation analysis from model: "), err.what());
@@ -51,7 +46,7 @@ LNASteadyStateModule::configSteadyState()
 
   // Add task to application and run it:
   Application::getApp()->docTree()->addTask(
-        this->wizard->getDocument(),
+        this->wizard->getConfigCast<LNASteadyStateTask::Config>().getModelDocument(),
         new LNASteadyStateTaskWrapper(task));
 
   task->start();

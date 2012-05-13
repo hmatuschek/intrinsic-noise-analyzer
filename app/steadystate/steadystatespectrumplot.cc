@@ -51,8 +51,9 @@ SteadyStatePlot::SteadyStatePlot(LNASteadyStateTask *task, QObject *parent)
 
   this->getAxis()->showXZero(false);
 
-  Plot::BoxPlot *lna  = new Plot::BoxPlot(this->getStyle(0), 0, 2);
-  Plot::BoxPlot *emre = new Plot::BoxPlot(this->getStyle(1), 1, 2);
+  Plot::BoxPlot *lna  = new Plot::BoxPlot(this->getStyle(0), 0, 3);
+  Plot::BoxPlot *emre = new Plot::BoxPlot(this->getStyle(1), 1, 3);
+  Plot::BoxPlot *ios  = new Plot::BoxPlot(this->getStyle(2), 2, 3);
   Plot::AxisTicks *ticks = new Plot::AxisTicks(this->getAxis()->getMapping(),
                                                Plot::AxisTick::BOTTOM);
   ticks->setLabel(tr("species"));
@@ -60,18 +61,23 @@ SteadyStatePlot::SteadyStatePlot(LNASteadyStateTask *task, QObject *parent)
   this->getAxis()->setXTicks(ticks);
   this->getAxis()->addGraph(lna);
   this->getAxis()->addGraph(emre);
+  this->getAxis()->addGraph(ios);
 
-  this->addToLegend("REs & LNA", lna);
-  this->addToLegend("EMRE", emre);
+  this->addToLegend("REs & LNA Cov.", lna);
+  this->addToLegend("EMRE & IOS Cov.", emre);
+  this->addToLegend("EMRE/IOS", ios);
 
-  Eigen::VectorXd &c = task->getConcentrations();
-  Eigen::VectorXd &e = task->getEMRECorrections();
-  Eigen::MatrixXd &v = task->getCovariances();
+  Eigen::VectorXd &mean     = task->getConcentrations();
+  Eigen::VectorXd &emre_cor = task->getEMRECorrections();
+  Eigen::VectorXd &ios_cor  = task->getIOSCorrections();
+  Eigen::MatrixXd &lna_cov  = task->getLNACovariances();
+  Eigen::MatrixXd &ios_cov  = task->getIOSCovariances();
 
-  for (int i=0; i<c.rows(); i++)
+  for (int i=0; i<mean.rows(); i++)
   {
-    lna->addBox(c(i), std::sqrt(v(i,i)));
-    emre->addBox(c(i)+e(i));
+    lna->addBox(mean(i), std::sqrt(lna_cov(i,i)));
+    emre->addBox(mean(i)+emre_cor(i), sqrt(lna_cov(i,i)+ios_cov(i,i)));
+    ios->addBox(mean(i)+emre_cor(i)+ios_cor(i));
     ticks->addTick(new Plot::AxisTick(i+0.5, task->getSpeciesName(i), Plot::AxisTick::BOTTOM));
   }
 
