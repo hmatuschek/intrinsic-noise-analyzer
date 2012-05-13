@@ -225,6 +225,7 @@ LinearNoiseApproximation::postConstructor()
         }
 
     }
+
     Eigen::VectorXex ThirdMomentUpdate(dimSkew);
 
     size_t ids = 0;
@@ -316,8 +317,8 @@ LinearNoiseApproximation::postConstructor()
                 // same for l=k appears only once in sum
                 iosUpdate(idx) += (this->Hessian(i,idy)+this->Hessian(j,idy))*thirdmomentVariables[j](k,k)/2;
                 iosUpdate(idx) += this->DiffusionHessianM(idx,idy)*cov(k,k)/2;
+                idy++;
              }
-
 
         idx++;
      }
@@ -334,7 +335,7 @@ LinearNoiseApproximation::postConstructor()
       idx=0;
       for (size_t j=0; j<this->numIndSpecies(); j++)
       {
-        for (size_t k=0; k<=j; k++)
+        for (size_t k=0; k<j; k++)
         {
             if(k==j)
             {
