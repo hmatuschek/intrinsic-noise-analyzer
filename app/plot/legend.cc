@@ -1,6 +1,7 @@
 #include "legend.hh"
 #include "plot.hh"
 #include "configuration.hh"
+#include <iostream>
 
 using namespace Plot;
 

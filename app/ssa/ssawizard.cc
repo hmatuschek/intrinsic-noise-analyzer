@@ -18,7 +18,7 @@
 SSAWizard::SSAWizard(QWidget *parent) :
     QWizard(parent)
 {
-  this->setWindowTitle("Stochastic Simulation Algorihtm");
+  this->setWindowTitle("Stochastic Simulation Algorithm");
 
   this->setPage(SSAWizard::MODEL_SELECTION_PAGE, new SSAModelSelectionPage());
   this->setPage(SSAWizard::SPECIES_SELECTION_PAGE, new SSASpeciesSelectionPage());

@@ -144,7 +144,7 @@ protected:
 
 
   /**
-   * Implements the actual single-step algorihtm.
+   * Implements the actual single-step algorithm.
    */
   inline double _step(const Eigen::VectorXd &state, double t, Eigen::VectorXd &delta, double dt)
   {
