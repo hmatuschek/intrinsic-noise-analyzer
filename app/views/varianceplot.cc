@@ -14,6 +14,7 @@ VariancePlot::addVarianceGraph(const Eigen::VectorXd &x, const Eigen::VectorXd &
   // Determins style and create graph:
   Plot::GraphStyle style = this->getStyle(this->axis->getNumGraphs());
   Plot::VarianceLineGraph *graph = new Plot::VarianceLineGraph(style);
+  this->axis->addGraph(graph);
 
   // Add graph to legent if label is given:
   if(0 != label.size()) {

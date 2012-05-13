@@ -25,6 +25,7 @@ IOSLNATimeSeriesPlot::IOSLNATimeSeriesPlot(size_t num_species, Table *series,
   this->getAxis()->setYRangePolicy(
         Plot::RangePolicy(Plot::RangePolicy::FIXED, Plot::RangePolicy::AUTOMATIC));
   this->getAxis()->setYRange(0, 1);
+  this->updateAxes();
 }
 
 
@@ -33,53 +34,25 @@ IOSLNATimeSeriesPlot::IOSLNATimeSeriesPlot(size_t num_species, Table *series,
 IOSEMRETimeSeriesPlot::IOSEMRETimeSeriesPlot(size_t num_species, Table *series,
                                              const QString &species_unit, const QString &time_unit,
                                              QObject *parent)
-  : Plot::Figure("Mean concentrations (EMRE & IOS)", parent)
+  : VariancePlot("Mean concentrations (EMRE & IOS)", parent)
 {
   // Create a plot:
   this->setXLabel(tr("time [%1]").arg(time_unit));
   this->setYLabel(tr("concentrations [%1]").arg(species_unit));
 
-  QVector<Plot::VarianceLineGraph *> graphs(num_species);
-  size_t N = num_species;
-  size_t offset_mean = 1+N+(N*(N+1))/2;
-
-  // Allocate a graph for each colum in time-series:
+  size_t offset_mean = 1+num_species+(num_species*(num_species+1))/2;
+  size_t offset_cov  = offset_mean+num_species;
   for (size_t i=0; i<num_species; i++)
   {
-    Plot::GraphStyle style = this->getStyle(i);
-    graphs[i] = new Plot::VarianceLineGraph(style);
-    this->axis->addGraph(graphs[i]);
-    this->addToLegend(series->getColumnName(i+offset_mean), graphs[i]);
-  }
-
-  // Do not plot all point, limited to 100 points:
-  int idx_incr = 0;
-  if (0 == (idx_incr = series->getNumRows()/100)) {
-    idx_incr = 1;
-  }
-
-  // Plot time-series:
-  for (size_t j=0; j<series->getNumRows(); j+=idx_incr)
-  {
-    size_t increment = N;
-    size_t offset_cov = offset_mean + N;
-    for (size_t i=0; i<num_species; i++)
-    {
-      graphs[i]->addPoint((*series)(j, 0), (*series)(j, offset_mean+i), sqrt((*series)(j, offset_cov)));
-      offset_cov += increment; increment -= 1;
-    }
+    this->addVarianceGraph(series->getColumn(0), series->getColumn(i+offset_mean),
+                           series->getColumn(offset_cov), series->getColumnName(i+offset_mean));
+    offset_cov += num_species-i;
   }
 
   // Force y plot-range to be [0, AUTO]:
   this->getAxis()->setYRangePolicy(
         Plot::RangePolicy(Plot::RangePolicy::FIXED, Plot::RangePolicy::AUTOMATIC));
   this->getAxis()->setYRange(0, 1);
-
-  for (size_t i=0; i<num_species; i++)
-  {
-    graphs[i]->commit();
-  }
-
   this->updateAxes();
 }
 
