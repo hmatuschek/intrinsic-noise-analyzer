@@ -42,30 +42,46 @@ LNASteadyStateResultWidget::LNASteadyStateResultWidget(LNASteadyStateTaskWrapper
 
   this->state_view = new QTableWidget();
   this->state_view->setColumnCount(this->ss_task_wrapper->getSteadyStateTask()->getConcentrations().rows());
-  this->state_view->setRowCount(2);
+  this->state_view->setRowCount(3);
   this->state_view->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
   this->state_view->setHorizontalHeaderLabels(headers);
   this->state_view->setVerticalHeaderItem(0, new QTableWidgetItem("RE"));
   this->state_view->setVerticalHeaderItem(1, new QTableWidgetItem("EMRE"));
+  this->state_view->setVerticalHeaderItem(2, new QTableWidgetItem("IOS"));
 
-  this->cov_label = new QLabel("Covariance matrix (LNA)");
-  this->cov_label->setFont(Application::getApp()->getH2Font());
-  this->cov_label->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
-  this->cov_label->setAlignment(Qt::AlignLeft | Qt::AlignTop);
+  this->lna_cov_label = new QLabel("Covariance matrix (LNA)");
+  this->lna_cov_label->setFont(Application::getApp()->getH2Font());
+  this->lna_cov_label->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
+  this->lna_cov_label->setAlignment(Qt::AlignLeft | Qt::AlignTop);
 
-  // Create covariance table:
-  this->covariance_view = new QTableWidget();
-  this->covariance_view->setColumnCount(this->ss_task_wrapper->getSteadyStateTask()->getCovariances().cols());
-  this->covariance_view->setRowCount(this->ss_task_wrapper->getSteadyStateTask()->getCovariances().rows());
-  this->covariance_view->setHorizontalHeaderLabels(headers);
-  this->covariance_view->setVerticalHeaderLabels(headers);
-  this->covariance_view->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
+  // Create LNA covariance table:
+  this->lna_covariance_view = new QTableWidget();
+  this->lna_covariance_view->setColumnCount(this->ss_task_wrapper->getSteadyStateTask()->getLNACovariances().cols());
+  this->lna_covariance_view->setRowCount(this->ss_task_wrapper->getSteadyStateTask()->getLNACovariances().rows());
+  this->lna_covariance_view->setHorizontalHeaderLabels(headers);
+  this->lna_covariance_view->setVerticalHeaderLabels(headers);
+  this->lna_covariance_view->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
+
+  this->ios_cov_label = new QLabel("Covariance matrix (IOS)");
+  this->ios_cov_label->setFont(Application::getApp()->getH2Font());
+  this->ios_cov_label->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
+  this->ios_cov_label->setAlignment(Qt::AlignLeft | Qt::AlignTop);
+
+  // Create IOS covariance table:
+  this->ios_covariance_view = new QTableWidget();
+  this->ios_covariance_view->setColumnCount(this->ss_task_wrapper->getSteadyStateTask()->getIOSCovariances().cols());
+  this->ios_covariance_view->setRowCount(this->ss_task_wrapper->getSteadyStateTask()->getIOSCovariances().rows());
+  this->ios_covariance_view->setHorizontalHeaderLabels(headers);
+  this->ios_covariance_view->setVerticalHeaderLabels(headers);
+  this->ios_covariance_view->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
 
   QVBoxLayout *state_layout = new QVBoxLayout();
   state_layout->addWidget(this->state_label);
   state_layout->addWidget(this->state_view);
-  state_layout->addWidget(this->cov_label);
-  state_layout->addWidget(this->covariance_view);
+  state_layout->addWidget(this->lna_cov_label);
+  state_layout->addWidget(this->lna_covariance_view);
+  state_layout->addWidget(this->ios_cov_label);
+  state_layout->addWidget(this->ios_covariance_view);
 
   this->spec_label = new QLabel("Power spectrum (LNA)");
   this->spec_label->setFont(Application::getApp()->getH2Font());
@@ -177,14 +193,15 @@ LNASteadyStateResultWidget::saveData()
   LNASteadyStateTask *task = this->ss_task_wrapper->getSteadyStateTask();
   Eigen::VectorXd conc = task->getConcentrations();
   Eigen::VectorXd emre = task->getEMRECorrections();
-  Eigen::MatrixXd cov  = task->getCovariances();
-
+  Eigen::VectorXd ios  = task->getIOSCorrections();
+  Eigen::MatrixXd lna_cov  = task->getLNACovariances();
+  Eigen::MatrixXd ios_cov  = task->getIOSCovariances();
   QTextStream out(&file);
 
   // Dump header:
   out << "# First line: REs steady state.\n"
       << "# Second line: EMRE steady state.\n"
-      << "# Remaining: LNA steady state covariance matrix.\n"
+      << "# Remaining: IOS steady state covariance matrix.\n"
       << "\n";
 
   // Dump Species names/IDs:
@@ -209,10 +226,17 @@ LNASteadyStateResultWidget::saveData()
   }
   out << "\n";
 
+  // Dump IOS:
+  for (int i=0; i<emre.size(); i++)
+  {
+    out << emre(i) + conc(i)  + ios(i) << "\t";
+  }
+  out << "\n";
+
   // Dump covariance:
-  for(int i=0; i<cov.rows(); i++) {
-    for (int j=0; j<cov.cols(); j++) {
-      out << cov(i,j) << "\t";
+  for(int i=0; i<lna_cov.rows(); i++) {
+    for (int j=0; j<lna_cov.cols(); j++) {
+      out << lna_cov(i,j) + ios_cov(i,j)<< "\t";
     }
     out << "\n";
   }
@@ -228,8 +252,9 @@ LNASteadyStateResultWidget::setValues()
   LNASteadyStateTask *task = this->ss_task_wrapper->getSteadyStateTask();
   Eigen::VectorXd conc = task->getConcentrations();
   Eigen::VectorXd emre = task->getEMRECorrections();
-  Eigen::MatrixXd cov  = task->getCovariances();
-
+  Eigen::VectorXd iosemre = task->getIOSCorrections();
+  Eigen::MatrixXd lna_cov  = task->getLNACovariances();
+  Eigen::MatrixXd ios_cov  = task->getIOSCovariances();
   // Update state table:
   for (int i=0; i<conc.size(); i++)
   {
@@ -243,11 +268,19 @@ LNASteadyStateResultWidget::setValues()
     item->setFlags(Qt::ItemIsSelectable);
     this->state_view->setItem(1, i, item);
 
+    item = new QTableWidgetItem(QString("%1").arg(conc(i) + emre(i) + iosemre(i)));
+    item->setFlags(Qt::ItemIsSelectable);
+    this->state_view->setItem(2, i, item);
+
     for (int j=0; j<conc.size(); j++)
     {
-      item = new QTableWidgetItem(QString("%1").arg(cov(j,i)));
+      item = new QTableWidgetItem(QString("%1").arg(lna_cov(j,i)));
       item->setFlags(Qt::ItemIsSelectable);
-      this->covariance_view->setItem(j,i, item);
+      this->lna_covariance_view->setItem(j,i, item);
+
+      item = new QTableWidgetItem(QString("%1").arg(lna_cov(j,i) + ios_cov(j,i)));
+      item->setFlags(Qt::ItemIsSelectable);
+      this->ios_covariance_view->setItem(j,i, item);
     }
   }
 }

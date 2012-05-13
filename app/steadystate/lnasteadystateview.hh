@@ -44,8 +44,10 @@ private:
 private:
   QLabel       *state_label;
   QTableWidget *state_view;
-  QLabel       *cov_label;
-  QTableWidget *covariance_view;
+  QLabel       *lna_cov_label;
+  QTableWidget *lna_covariance_view;
+  QLabel       *ios_cov_label;
+  QTableWidget *ios_covariance_view;
   QLabel       *spec_label;
   QTableView   *spectrum_view;
   QPushButton  *spec_plot_button;

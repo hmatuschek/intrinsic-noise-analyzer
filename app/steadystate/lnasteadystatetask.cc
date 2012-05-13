@@ -2,47 +2,105 @@
 
 
 
-LNASteadyStateTask::LNASteadyStateTask(Fluc::Models::LinearNoiseApproximation *model,
-                                       const QList<QString> &selected_species,
-                                       bool auto_frequencies,
-                                       size_t num_freq, double min_freq, double max_freq,
-                                       size_t max_iterations, double epsilon, QObject *parent)
-  : Task(parent), model(model), steady_state(*model, max_iterations, epsilon),
-    concentrations(selected_species.size()), emre_corrections(selected_species.size()),
-    covariances(selected_species.size(), selected_species.size()),
-    auto_frequencies(auto_frequencies),
-    frequencies(num_freq), spectrum(selected_species.size()+1, num_freq),
-    species(selected_species.size()), species_name(selected_species.size()),
-    index_table(selected_species.size())
+/* ******************************************************************************************* *
+ * Implementation of LNASteadyStateTask::Config, the task configuration.
+ * ******************************************************************************************* */
+LNASteadyStateTask::Config::Config()
+  : GeneralTaskConfig(), ModelSelectionTaskConfig(), SpeciesSelectionTaskConfig(),
+    model(0), max_iterations(0), epsilon(0), auto_frequencies(false),
+    min_frequency(0), max_frequency(0), num_frequency(0)
 {
-  this->spectrum.setColumnName(0, "freq");
+  // Pass...
+}
+
+LNASteadyStateTask::Config::Config(const Config &other)
+  : GeneralTaskConfig(), ModelSelectionTaskConfig(other), SpeciesSelectionTaskConfig(other),
+    model(other.model), max_iterations(other.max_iterations), epsilon(other.epsilon),
+    auto_frequencies(other.auto_frequencies), min_frequency(other.min_frequency),
+    max_frequency(other.max_frequency), num_frequency(other.num_frequency)
+{
+  // Pass...
+}
+
+void
+LNASteadyStateTask::Config::setModelDocument(DocumentItem *document)
+{
+  ModelSelectionTaskConfig::setModelDocument(document);
+  // Construct LNA model from SBML model associated with the selected document
+  this->model = new Fluc::Models::LinearNoiseApproximation(document->getSBMLModel());
+}
+
+Fluc::Ast::Model *
+LNASteadyStateTask::Config::getModel() const
+{
+  return this->model;
+}
+
+
+size_t
+LNASteadyStateTask::Config::getMaxIterations() const
+{
+  return this->max_iterations;
+}
+
+void
+LNASteadyStateTask::Config::setMaxIterations(size_t num)
+{
+  this->max_iterations = num;
+}
+
+double
+LNASteadyStateTask::Config::getEpsilon() const
+{
+  return this->epsilon;
+}
+
+void
+LNASteadyStateTask::Config::setEpsilon(double eps)
+{
+  this->epsilon = eps;
+}
+
+
+
+/* ******************************************************************************************* *
+ * Implementation of LNASteadyStateTask::Config, the task configuration.
+ * ******************************************************************************************* */
+LNASteadyStateTask::LNASteadyStateTask(const Config &config, QObject *parent)
+  : Task(parent), config(config),
+    steady_state(dynamic_cast<Fluc::Models::LinearNoiseApproximation &>(*config.getModel()),
+      config.getMaxIterations(), config.getEpsilon()),
+    concentrations(config.getNumSpecies()), emre_corrections(config.getNumSpecies()),
+    ios_corrections(config.getNumSpecies()),
+    lna_covariances(config.getNumSpecies(), config.getNumSpecies()),
+    ios_covariances(config.getNumSpecies(), config.getNumSpecies()),
+    species(config.getNumSpecies()), species_name(config.getNumSpecies()),
+    spectrum(1, config.getNumSpecies()+1),
+    index_table(config.getNumSpecies())
+{
+  //this->spectrum.setColumnName(0, "freq");
 
   // Assign species identifier:
   for (int i=0; i<this->species.size(); i++)
   {
-    this->species[i] = selected_species.at(i);
-    std::cerr << "Index of species: " << this->species[i].toStdString()
-              << " = " << this->model->getSpeciesIdx(this->species[i].toStdString()) << std::endl;
-    this->index_table[i] = this->model->getSpeciesIdx(this->species[i].toStdString());
+    this->species[i] = config.getSelectedSpecies().at(i);
+    this->index_table[i] = config.getModel()->getSpeciesIdx(this->species[i].toStdString());
 
-    if (model->getSpecies(this->species[i].toStdString())->hasName())
-    {
-      this->species_name[i] = model->getSpecies(this->species[i].toStdString())->getName().c_str();
-    }
-    else
-    {
+    if (config.getModel()->getSpecies(this->species[i].toStdString())->hasName()) {
+      this->species_name[i] = config.getModel()->getSpecies(this->species[i].toStdString())->getName().c_str();
+    } else {
       this->species_name[i] = this->species[i];
     }
 
-    this->spectrum.setColumnName(i+1, this->species_name[i]);
+    //this->spectrum.setColumnName(i+1, this->species_name[i]);
   }
 
   // Create frequency vector:
-  double df = (max_freq-min_freq)/num_freq;
+  /*double df = (max_freq-min_freq)/num_freq;
   for (size_t i=0; i<num_freq; i++)
   {
     this->frequencies(i) = min_freq+i*df;
-  }
+  }*/
 }
 
 
@@ -52,16 +110,17 @@ LNASteadyStateTask::process()
 {
   this->setState(Task::INITIALIZED);
 
+  Fluc::Models::LinearNoiseApproximation *lna_model
+      = dynamic_cast<Fluc::Models::LinearNoiseApproximation *>(config.getModel());
+
   // Allocate reduced state vector (independent species)
-  Eigen::VectorXd reduced_state(this->model->getDimension());
+  Eigen::VectorXd reduced_state(lna_model->getDimension());
 
   // signal running:
   this->setState(Task::RUNNING);
 
-  std::cerr << "Calc steady state..." << std::endl;
   // Calc steadystate:
   this->steady_state.calcSteadyState(reduced_state);
-  std::cerr << "   ... done." << std::endl;
 
   // Check if task shall terminate:
   if (Task::TERMINATING == this->getState())
@@ -71,10 +130,14 @@ LNASteadyStateTask::process()
   }
 
   // Get full state and covariance and EMRE corrections for steady state;
-  Eigen::VectorXd concentrations(this->model->numSpecies());
-  Eigen::VectorXd emre_corrections(this->model->numSpecies());
-  Eigen::MatrixXd covariances(this->model->numSpecies(), this->model->numSpecies());
-  this->model->fullState(reduced_state, concentrations, covariances, emre_corrections);
+  Eigen::VectorXd concentrations(config.getModel()->numSpecies());
+  Eigen::VectorXd emre_corrections(config.getModel()->numSpecies());
+  Eigen::VectorXd iosemre_corrections(config.getModel()->numSpecies());
+  Eigen::MatrixXd lna_covariances(config.getModel()->numSpecies(), config.getModel()->numSpecies());
+  Eigen::MatrixXd ios_covariances(config.getModel()->numSpecies(), config.getModel()->numSpecies());
+  Eigen::VectorXd thirdOrder(config.getModel()->numSpecies());
+  lna_model->fullState(reduced_state, concentrations, lna_covariances, emre_corrections,
+                       ios_covariances, thirdOrder, iosemre_corrections);
 
 //  // Get steadystate spectrum:
 //  Eigen::MatrixXd spectrum(this->frequencies.size(), this->model->numSpecies());
@@ -89,15 +152,17 @@ LNASteadyStateTask::process()
   {
     this->concentrations(i) = concentrations(index_table[i]);
     this->emre_corrections(i) = emre_corrections(index_table[i]);
+    this->ios_corrections(i) = iosemre_corrections(index_table[i]);
 
     for (int j=0; j<this->species.size(); j++)
     {
-      this->covariances(i, j) = covariances(index_table[i], index_table[j]);
+      this->lna_covariances(i, j) = lna_covariances(index_table[i], index_table[j]);
+      this->ios_covariances(i, j) = ios_covariances(index_table[i], index_table[j]);
     }
   }
 
   // Copy spectrum into table
-  for (int i=0; i<this->frequencies.size(); i++)
+  /*for (int i=0; i<this->frequencies.size(); i++)
   {
     this->spectrum.matrix()(i,0) = this->frequencies(i);
 
@@ -106,7 +171,7 @@ LNASteadyStateTask::process()
       size_t idx = this->index_table[j];
       this->spectrum.matrix()(i,j+1) = spectrum(i, idx);
     }
-  }
+  }*/
 
   // Done...
   this->setProgress(1);
@@ -123,17 +188,10 @@ LNASteadyStateTask::getLabel()
 }
 
 
-Fluc::Models::LinearNoiseApproximation *
-LNASteadyStateTask::getModel()
-{
-  return this->model;
-}
-
-
 const Fluc::Ast::Unit &
 LNASteadyStateTask::getSpeciesUnit() const
 {
-  return this->model->getSpecies(0)->getUnit();
+  return config.getModel()->getSpecies(0)->getUnit();
 }
 
 Eigen::VectorXd &
@@ -149,13 +207,23 @@ LNASteadyStateTask::getEMRECorrections()
   return this->emre_corrections;
 }
 
-
-Eigen::MatrixXd &
-LNASteadyStateTask::getCovariances()
+Eigen::VectorXd &
+LNASteadyStateTask::getIOSCorrections()
 {
-  return this->covariances;
+  return this->ios_corrections;
 }
 
+Eigen::MatrixXd &
+LNASteadyStateTask::getLNACovariances()
+{
+  return this->lna_covariances;
+}
+
+Eigen::MatrixXd &
+LNASteadyStateTask::getIOSCovariances()
+{
+  return this->ios_covariances;
+}
 
 Table &
 LNASteadyStateTask::getSpectrum()
