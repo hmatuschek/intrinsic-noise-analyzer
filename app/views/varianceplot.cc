@@ -32,6 +32,4 @@ VariancePlot::addVarianceGraph(const Eigen::VectorXd &x, const Eigen::VectorXd &
     graph->addPoint(x(i), mean(i), std::sqrt(var(i)));
   }
   graph->commit();
-  // Update axis:
-  this->updateAxes();
 }

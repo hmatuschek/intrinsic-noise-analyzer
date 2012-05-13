@@ -20,11 +20,13 @@ LegendItem::LegendItem(const QString &label, Graph *graph, QObject *parent)
   this->line = new QGraphicsLineItem(0,0, this->sample_length, 0);
   this->line->setPen(this->graph->getStyle().getPen());
   this->addToGroup(this->line);
+  this->line->setPos(0,0);
 
   this->label = new QGraphicsTextItem(label);
   this->label->setFont(
         Configuration::getConfig()->getScheme(Configuration::DISPLAY_SCHEME).legentFont());
   this->addToGroup(this->label);
+  this->label->setPos(0,0);
 
   this->updateLayout();
 }
@@ -117,9 +119,8 @@ Legend::addGraph(const QString &label, Graph *graph)
 
   this->items.append(item);
   this->addToGroup(item);
-
   item->setPos(x,y);
-
+  std::cerr << "Put legend item " << label.toStdString() << " @ " << x << ", " << y << std::endl;
   // Update bounding box:
   this->updateBB();
 }
@@ -148,9 +149,10 @@ Legend::updateBB()
 {
   QRectF box(0,0,0,0);
 
-  for (QList<LegendItem *>::const_iterator item = this->items.begin();
+  for (QList<LegendItem *>::iterator item = this->items.begin();
        item != this->items.end(); item++)
   {
+    (*item)->updateLayout();
     box = box.united(
           QRectF((*item)->boundingRect().x() + (*item)->pos().x(),
                  (*item)->boundingRect().y() + (*item)->pos().y(),

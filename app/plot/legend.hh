@@ -64,19 +64,17 @@ public:
    */
   virtual QRectF boundingRect() const;
 
+  /**
+   * Updates the legend-item.
+   */
+  void updateLayout();
+
 
 public slots:
   /**
    * (Re-) Sets the plot-scheme.
    */
   void setScheme(Configuration::Scheme scheme);
-
-
-protected:
-  /**
-   * Updates the legend-item.
-   */
-  void updateLayout();
 };
 
 
