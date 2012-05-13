@@ -25,7 +25,7 @@ public:
 };
 
 
-class IOSEMRETimeSeriesPlot : public Plot::Figure
+class IOSEMRETimeSeriesPlot : public VariancePlot
 {
   Q_OBJECT
 
