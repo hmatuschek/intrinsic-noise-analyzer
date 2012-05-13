@@ -49,7 +49,6 @@ TimeSeries::getColumnName(size_t idx) const
   return this->columns[idx];
 }
 
-
 DataQueue *
 TimeSeries::getQueue()
 {
@@ -197,6 +196,18 @@ Eigen::MatrixXd &
 Table::matrix()
 {
   return this->data;
+}
+
+Eigen::VectorXd
+Table::getRow(size_t i)
+{
+  return this->data.row(i);
+}
+
+Eigen::VectorXd
+Table::getColumn(size_t i)
+{
+  return this->data.col(i);
 }
 
 

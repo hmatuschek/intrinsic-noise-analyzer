@@ -168,6 +168,16 @@ public:
   virtual void append(Eigen::VectorXd &values);
 
   /**
+   * Returns a certain row of the time-series.
+   */
+  Eigen::VectorXd getRow(size_t i);
+
+  /**
+   * Returns a certain column of the time-series.
+   */
+  Eigen::VectorXd getColumn(size_t i);
+
+  /**
    * Returns a new queue, connected to the time-series.
    */
   DataQueue *getQueue();
@@ -260,6 +270,16 @@ public:
    * Returns the matrix, holding the data.
    */
   Eigen::MatrixXd &matrix();
+
+  /**
+   * Returns a certain row as a @c Eigen::VectorXd.
+   */
+  Eigen::VectorXd getRow(size_t i);
+
+  /**
+   * Returns a certain column as a @c Eigen::VectorXd.
+   */
+  Eigen::VectorXd getColumn(size_t i);
 };
 
 
