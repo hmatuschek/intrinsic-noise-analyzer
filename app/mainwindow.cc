@@ -44,6 +44,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
   // Ensure window has minimum size:
   this->setMinimumSize(810, 500);
+
+  this->logWindow = new LogWindow();
+  this->logWindow->setVisible(false);
 }
 
 
@@ -73,11 +76,15 @@ MainWindow::createActions()
   this->onlineHelp->setShortcuts(QKeySequence::HelpContents);
   this->onlineHelp->setStatusTip(tr("Opens the onlin-help."));
 
+  this->showLogsAct = new QAction(tr("Show log"), this);
+  this->showLogsAct->setStatusTip(tr("Shows the log window."));
+
   // Connect signals:
   connect(this->openModelAct, SIGNAL(triggered()), this, SLOT(openModel()));
   connect(this->quitAct, SIGNAL(triggered()), this, SLOT(quit()));
   connect(this->aboutAct, SIGNAL(triggered()), this, SLOT(about()));
   connect(this->onlineHelp, SIGNAL(triggered()), this, SLOT(openTutorial()));
+  connect(this->showLogsAct, SIGNAL(triggered()), this, SLOT(showLogs()));
 }
 
 
@@ -94,6 +101,7 @@ MainWindow::createMenus()
   this->helpMenu = this->menuBar()->addMenu(tr("&Help"));
   this->helpMenu->addAction(this->onlineHelp);
   this->helpMenu->addAction(this->aboutAct);
+  this->helpMenu->addAction(this->showLogsAct);
 }
 
 
@@ -153,4 +161,11 @@ void
 MainWindow::openTutorial()
 {
   QDesktopServices::openUrl(QUrl("http://code.google.com/p/intrinsic-noise-analyzer"));
+}
+
+
+void
+MainWindow::showLogs()
+{
+  this->logWindow->setVisible(true);
 }

@@ -3,6 +3,7 @@
 
 #include <sstream>
 #include <list>
+#include <ctime>
 
 
 namespace Fluc {
@@ -30,6 +31,7 @@ protected:
   Level _level;
   size_t _line;
   std::string _file;
+  time_t _time;
 
 public:
   Message(Level level);
@@ -41,6 +43,7 @@ public:
   const std::string &getFileName() const;
   size_t getLineNo() const;
   Level getLevel() const;
+  const time_t &getTime() const;
 
   Message &operator =(const Message &other);
 };

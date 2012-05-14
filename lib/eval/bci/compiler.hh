@@ -9,6 +9,8 @@
 #include "assembler.hh"
 #include "pass.hh"
 #include "utils/cputime.hh"
+#include "utils/logger.hh"
+
 
 namespace Fluc {
 namespace Evaluate {
@@ -172,7 +174,9 @@ public:
       this->code->check();
     }
 
-    std::cerr << "Optimized byte-code in " << clock.stop() << "s" << std::endl;
+    Utils::Message message(LOG_MESSAGE(Utils::Message::DEBUG));
+    message << "Optimized byte-code in " << clock.stop() << "s.";
+    Utils::Logger::get().log(message);
   }
 };
 

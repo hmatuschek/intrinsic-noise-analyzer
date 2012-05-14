@@ -4,25 +4,26 @@ using namespace Fluc::Utils;
 
 
 Message::Message(Level level)
-  : std::stringstream(), _level(level), _line(0), _file("")
+  : std::stringstream(), _level(level), _line(0), _file(""), _time(time(0))
 {
   // Pass...
 }
 
 Message::Message(Level level, const std::string &file, size_t line)
-  : std::stringstream(), _level(level), _line(line), _file(file)
+  : std::stringstream(), _level(level), _line(line), _file(file), _time(time(0))
 {
   // Pass...
 }
 
 Message::Message(Level level, const std::string &file, size_t line, const std::string &message)
-  : std::stringstream(), _level(level), _line(line), _file(file)
+  : std::stringstream(), _level(level), _line(line), _file(file), _time(time(0))
 {
   (*this) << message;
 }
 
 Message::Message(const Message &other)
-  : std::stringstream(), _level(other._level), _line(other._line), _file(other._file)
+  : std::stringstream(), _level(other._level), _line(other._line), _file(other._file),
+    _time(other._time)
 {
   (*this) << other.str();
 }
@@ -51,11 +52,18 @@ Message::getLevel() const
   return this->_level;
 }
 
+const time_t &
+Message::getTime() const
+{
+  return this->_time;
+}
+
 Message &
 Message::operator =(const Message &other) {
   this->_level = other._level;
   this->_line = other._line;
   this->_file = other._file;
+  this->_time = other._time;
   this->str(""); (*this) << other.str();
 
   return *this;
@@ -71,13 +79,16 @@ Logger::Logger()
   // pass...
 }
 
+
 Logger::~Logger()
 {
   for(std::list<MessageHandler *>::iterator it = this->_handlers.begin();
-      it != this->_handlers.end(); it++) {
-    delete *it;
+      it != this->_handlers.end(); it++)
+  {
+    //delete *it;
   }
 }
+
 
 Logger &
 Logger::get()
@@ -147,9 +158,16 @@ TextMessageHandler::TextMessageHandler(std::ostream &stream, Message::Level leve
 void
 TextMessageHandler::handleMessage(const Message &message)
 {
+  // Filter messages by level
   if (message.getLevel() < this->_level)
     return;
 
+  // Dump date-time
+  char time_buffer[256];
+  strftime(time_buffer, 256, "%Y-%m-%d %H:%M:%s", localtime(&message.getTime()));
+  _stream << time_buffer << " ";
+
+  // Dump level:
   switch (message.getLevel()) {
   case Message::DEBUG:
     _stream << "DEBUG: ";

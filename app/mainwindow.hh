@@ -9,6 +9,7 @@
 
 #include "application.hh"
 #include "views/documentsview.hh"
+#include "views/logwindow.hh"
 
 
 
@@ -62,6 +63,8 @@ private slots:
    */
   void openTutorial();
 
+  void showLogs();
+
 
 private:
   /**
@@ -111,6 +114,8 @@ private:
    */
    QAction *onlineHelp;
 
+   QAction *showLogsAct;
+
   /**
    * Holds the splitter, that splits the main window into a left and right half.
    */
@@ -125,6 +130,11 @@ private:
    * Holds a QScrollArea, holding the main-widget of the right-pane.
    */
    QScrollArea *mainPane;
+
+   /**
+    * Holds the (initially invisible) log-window.
+    */
+   LogWindow *logWindow;
 };
 
 
