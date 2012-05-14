@@ -1,5 +1,8 @@
 #include "iostask.hh"
 #include "ode/ode.hh"
+#include "utils/logger.hh"
+
+using namespace Fluc;
 
 
 IOSTask::Config::Config()
@@ -150,6 +153,10 @@ IOSTask::~IOSTask()
 void
 IOSTask::process()
 {
+  Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
+  message << "Start analysis.";
+  Utils::Logger::get().log(message);
+
   // Holds the current system state (reduced state)
   Eigen::VectorXd x(config.model->getDimension());
   // Holds the update to the next state (reduced state)
@@ -262,6 +269,10 @@ IOSTask::process()
   // Finally send last progress event:
   this->setProgress(1.0);
   this->setState(Task::DONE);
+
+  message = LOG_MESSAGE(Utils::Message::INFO);
+  message << "Analysis successful.";
+  Utils::Logger::get().log(message);
 }
 
 

@@ -2,8 +2,11 @@
 #include "../application.hh"
 #include "ioswizard.hh"
 #include "iostaskwrapper.hh"
+#include "utils/logger.hh"
 
 #include <QMessageBox>
+
+using namespace Fluc;
 
 
 IOSModule::IOSModule(QObject *parent) :
@@ -34,6 +37,10 @@ IOSModule::configIOS()
 
   // Construct a task from configuration:
   IOSTask *task = 0;
+
+  Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
+  message << "Create analysis.";
+  Utils::Logger::get().log(message);
 
   try {
     task = new IOSTask(this->wizard->getConfigCast<IOSTask::Config>());

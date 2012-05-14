@@ -1,7 +1,6 @@
 #include "legend.hh"
 #include "plot.hh"
 #include "configuration.hh"
-#include <iostream>
 
 using namespace Plot;
 
@@ -121,7 +120,6 @@ Legend::addGraph(const QString &label, Graph *graph)
   this->items.append(item);
   this->addToGroup(item);
   item->setPos(x,y);
-  std::cerr << "Put legend item " << label.toStdString() << " @ " << x << ", " << y << std::endl;
   // Update bounding box:
   this->updateBB();
 }

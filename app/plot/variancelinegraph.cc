@@ -1,5 +1,7 @@
 #include "variancelinegraph.hh"
-#include <iostream>
+#include "utils/logger.hh"
+
+
 using namespace Plot;
 
 
@@ -45,8 +47,10 @@ VarianceLineGraph::addPoint(double x, double y, double s)
 {
   // Check for NaNs:
   if (x != x || y != y || s != s) {
-    std::cerr << __FILE__ << ":" << __LINE__
-              << ": NaN occured in plot." << std::endl;
+    Fluc::Utils::Message message = LOG_MESSAGE(Fluc::Utils::Message::WARN);
+    message << __FILE__ << ":" << __LINE__
+            << ": NaN occured in plot." << std::endl;
+    Fluc::Utils::Logger::get().log(message);
     return;
   }
 

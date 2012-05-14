@@ -46,10 +46,10 @@ SET(libina_sbmlsh_HEADERS
 
 SET(libina_utils_SOURCES
     utils/exception.cc utils/automata.cc utils/lexer.cc utils/tokenrules.cc utils/parser.cc
-    utils/unittest.cc utils/option_parser.cc utils/cputime.cc)
+    utils/unittest.cc utils/option_parser.cc utils/cputime.cc utils/logger.cc)
 SET(libina_utils_HEADERS
     utils/exception.hh utils/automata.hh utils/lexer.hh utils/tokenrules.hh utils/parser.hh
-    utils/unittest.hh utils/option_parser.hh utils/cputime.hh)
+    utils/unittest.hh utils/option_parser.hh utils/cputime.hh utils/logger.hh)
 
 # Add sources for BaseModel and derived classes.
 SET(libina_models_SOURCES
