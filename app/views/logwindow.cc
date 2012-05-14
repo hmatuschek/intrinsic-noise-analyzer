@@ -65,7 +65,7 @@ LogWindowMessageHandler::LogWindowMessageHandler()
 void
 LogWindowMessageHandler::handleMessage(const Fluc::Utils::Message &message)
 {
-  emit newMessage(new MessageWrapper(message, this));
+  emit newMessage(new MessageWrapper(message));
 }
 
 
@@ -73,12 +73,14 @@ LogWindowMessageHandler::handleMessage(const Fluc::Utils::Message &message)
 LogWindow::LogWindow(QWidget *parent) :
     QTableWidget(parent)
 {
+  this->setWindowTitle("log");
   this->setColumnCount(2);
   QStringList labels; labels.append("time"); labels.append("message");
   this->setHorizontalHeaderLabels(labels);
   this->horizontalHeader()->setStretchLastSection(true);
 
   this->setShowGrid(false); this->verticalHeader()->setVisible(false);
+  this->setMinimumSize(640, 100);
 
   // Install message handler:
   LogWindowMessageHandler *handler = new LogWindowMessageHandler();
@@ -94,6 +96,7 @@ LogWindow::onMessage(MessageWrapper *message)
   QTableWidgetItem *time_item  = new QTableWidgetItem(message->getTime().time().toString());
   QTableWidgetItem *text_item  = new QTableWidgetItem(message->getText());
   this->setItem(i, 0, time_item); this->setItem(i, 1, text_item);
+  time_item->setFlags(Qt::NoItemFlags); text_item->setFlags(Qt::NoItemFlags);
 
   switch(message->getLevel()) {
   case Fluc::Utils::Message::DEBUG:

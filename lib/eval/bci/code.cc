@@ -114,6 +114,11 @@ Code::getMinStackSize() const
   return this->max_stack_size;
 }
 
+size_t
+Code::getCodeSize() const
+{
+  return this->code.size();
+}
 
 void
 Code::dump(std::ostream &str)

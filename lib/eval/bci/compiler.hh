@@ -138,7 +138,6 @@ public:
   void finalize(size_t level=0)
   {
     this->code->check();
-    Utils::CpuTime clock; clock.start();
     /*
      * In general, for the byte-code interpreter: The shortest code is the fastest!
      *
@@ -150,6 +149,10 @@ public:
     ConstantFoldingPass   const_pass;
 
     if (level >= 1) {
+      Utils::CpuTime clock; clock.start();
+      size_t old_code_size  = code->getCodeSize();
+      size_t old_stack_size = code->getMinStackSize();
+
       /* The first pass does not optimize any code here, it just pepares the representation for
        * the second pass.
        *
@@ -172,11 +175,14 @@ public:
 
       // Update stack-size:
       this->code->check();
+
+      Utils::Message message(LOG_MESSAGE(Utils::Message::DEBUG));
+      message << "Optimized byte-code in " << clock.stop() << "s: "
+              << "code-size: " << old_code_size << " -> " << code->getCodeSize() << " ("
+              << int(100*(double(old_code_size)-code->getCodeSize())/old_code_size) << "%)";
+      Utils::Logger::get().log(message);
     }
 
-    Utils::Message message(LOG_MESSAGE(Utils::Message::DEBUG));
-    message << "Optimized byte-code in " << clock.stop() << "s.";
-    Utils::Logger::get().log(message);
   }
 };
 

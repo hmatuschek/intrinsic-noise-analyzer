@@ -190,6 +190,7 @@ public:
    */
   size_t getMinStackSize() const;
 
+  size_t getCodeSize() const;
 
   /**
    * Returns an iterator to the first instruction of the bytecode.

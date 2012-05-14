@@ -164,7 +164,7 @@ TextMessageHandler::handleMessage(const Message &message)
 
   // Dump date-time
   char time_buffer[256];
-  strftime(time_buffer, 256, "%Y-%m-%d %H:%M:%s", localtime(&message.getTime()));
+  strftime(time_buffer, 256, "%Y-%m-%d %H:%M:%S", localtime(&message.getTime()));
   _stream << time_buffer << " ";
 
   // Dump level:

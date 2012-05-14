@@ -15,8 +15,8 @@ using namespace std;
 int main(int argc, char *argv[])
 {
   // Instantiate Logger and handler:
-  Fluc::Utils::Logger::get().addHandler(
-        new Fluc::Utils::TextMessageHandler(std::cerr, Fluc::Utils::Message::DEBUG));
+  //Fluc::Utils::Logger::get().addHandler(
+  //      new Fluc::Utils::TextMessageHandler(std::cerr, Fluc::Utils::Message::DEBUG));
 
   // Instantiate a QApplication
   QApplication qapp(argc, argv);
