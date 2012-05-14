@@ -6,15 +6,21 @@ using namespace Fluc::Evaluate::bci;
 
 
 void
-Pass::apply(Code &code)
+PassManager::addPass(Pass *pass)
+{
+  this->_passes.push_back(pass);
+}
+
+
+void
+PassManager::apply(Code &code)
 {
   DependenceTree module(code);
 
   for (size_t i=0; i<module.numArguments(); i++)
   {
     // Apply rules on expression until they do not apply anymore
-    while(this->handleValue(module.argument(i))) {
-    }
+    this->handleValue(module.argument(i));
   }
 
   // Serialize optimized dependence-tree into byte-code:
@@ -26,19 +32,42 @@ Pass::apply(Code &code)
 
 
 bool
-Pass::handleValue(SmartPtr<Value> &value)
+PassManager::handleValue(SmartPtr<Value> &value)
 {
-  // First, traverse into child-nodes:
+  // First, apply passes
+  bool matched = this->applyOnValue(value);
+
+  // then, traverse into child-nodes:
+  bool child_matched = false;
   for (size_t i=0; i<value->numArguments(); i++)
   {
-    // If there matched a rule down there, restart:
-    if (this->handleValue(value->argument(i)))
-      return true;
+    child_matched = this->handleValue(value->argument(i));
   }
 
-  // If none of any rule applied to the node -> done:
-  return false;
+  // If one of the child nodes was modified, re-run passes on this node:
+  if (child_matched)
+    matched |= this->applyOnValue(value);
+
+  return matched | child_matched;
 }
+
+
+bool
+PassManager::applyOnValue(SmartPtr<Value> &value)
+{
+  bool matched = false;
+
+rerun:
+  for (std::list<Pass *>::iterator pass = this->_passes.begin(); pass != this->_passes.end(); pass++)
+  {
+    if ((*pass)->handleValue(value)) {
+      matched = true; goto rerun;
+    }
+  }
+
+  return matched;
+}
+
 
 
 
@@ -48,10 +77,6 @@ Pass::handleValue(SmartPtr<Value> &value)
 bool
 ImmediateValueRHSPass::handleValue(SmartPtr<Value> &value)
 {
-  // First, process children, if successfull return true:
-  if (Pass::handleValue(value))
-    return true;
-
   // can only be applied on ADD and MUL operations:
   if ((Instruction::ADD!=value->opCode()) && (Instruction::MUL!=value->opCode()))
     return false;
@@ -84,10 +109,6 @@ ImmediateValueRHSPass::handleValue(SmartPtr<Value> &value)
 bool
 ImmediateValuePass::handleValue(SmartPtr<Value> &value)
 {
-  // First, process children, if successfull return true:
-  if (Pass::handleValue(value))
-    return true;
-
   // Can only be applied on ADD, SUB, MUL, DIV, POW:
   switch (value->opCode())
   {
@@ -124,10 +145,6 @@ ImmediateValuePass::handleValue(SmartPtr<Value> &value)
 bool
 RemoveUnitsPass::handleValue(SmartPtr<Value> &value)
 {
-  // First, process children, if successfull return true:
-  if (Pass::handleValue(value))
-    return true;
-
   // Can only be applied on ADD and MUL where RHS is immediate Constant:
   if (! value->hasImmediateValue())
     return false;
@@ -159,10 +176,6 @@ RemoveUnitsPass::handleValue(SmartPtr<Value> &value)
 bool
 ConstantFoldingPass::handleValue(SmartPtr<Value> &value)
 {
-  // First, process children, if successfull return true:
-  if (Pass::handleValue(value))
-    return true;
-
   // If not a function call -> false:
   if (Instruction::CALL != value->opCode()) {
     return false;
@@ -186,6 +199,28 @@ ConstantFoldingPass::handleValue(SmartPtr<Value> &value)
     value = Value::createPush(std::exp(arg));
     break;
   }
+
+  return true;
+}
+
+
+/* ********************************************************************************************* *
+ * Implementation of ZeroStorePass
+ * ********************************************************************************************* */
+bool
+ZeroStorePass::handleValue(SmartPtr<Value> &value)
+{
+  if (Instruction::STORE != value->opCode())
+    return false;
+
+  if (Instruction::PUSH != value->argument(0)->opCode())
+    return false;
+
+  std::complex<double> arg = value->argument(0)->immediateValue();
+  if (0 != arg.real() || 0 != arg.imag())
+    return false;
+
+  value = Value::createStoreZero(value->immediateIndex());
 
   return true;
 }

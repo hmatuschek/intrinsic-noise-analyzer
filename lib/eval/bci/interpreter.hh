@@ -159,6 +159,10 @@ public:
       stack.pop_back();
       break;
 
+    case Instruction::STORE_ZERO:
+      output[inst.value.asIndex] = 0.0;
+      break;
+
     case Instruction::PUSH:
       stack.push_back(InterpreterValue(inst.value.asComplex.real));
       break;
@@ -252,6 +256,10 @@ public:
     case Instruction::STORE:
       output[inst.value.asIndex] = stack.back().asComplex();
       stack.pop_back();
+      break;
+
+    case Instruction::STORE_ZERO:
+      output[inst.value.asIndex] = std::complex<double>(0.0);
       break;
 
     case Instruction::PUSH:

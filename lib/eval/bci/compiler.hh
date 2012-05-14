@@ -147,31 +147,38 @@ public:
     ImmediateValuePass    imm_pass;
     RemoveUnitsPass       units_pass;
     ConstantFoldingPass   const_pass;
+    ZeroStorePass         zero_pass;
+
+    PassManager manager;
+    /* The first pass does not optimize any code here, it just pepares the representation for
+     * the second pass.
+     *
+     * The first pass (ImmediateValueRHSPass) tries to swap the operands of kommutative operations
+     * like ADD and MUL if the LHS (left) operand is a constant (a PUSH instruction) and the RHS
+     * value is not. */
+    manager.addPass(&imm_rhs_pass);
+
+    /* The second pass (ImmediatValuePass) encodes the RHS operand as an immediate value
+     * (a value passed along with the instruction itself) if it is a constant (a PUSH instruction).
+     * This pass reduces the number of instructions and the number of stack operations, since
+     * operations with immediate values are performed in-place on the stack. */
+    manager.addPass(&imm_pass);
+
+    /* This pass removes unit-operations like X*1 or X+0 etc. */
+    manager.addPass(&units_pass);
+
+    /* This pass evaluates function calls of constant values like ln(2) etc. */
+    manager.addPass(&const_pass);
+
+    /* This pass replaces "PUSH 0, STORE IDX" with "STORE_ZERO IDX" */
+    manager.addPass(&zero_pass);
 
     if (level >= 1) {
       Utils::CpuTime clock; clock.start();
       size_t old_code_size  = code->getCodeSize();
-      size_t old_stack_size = code->getMinStackSize();
 
-      /* The first pass does not optimize any code here, it just pepares the representation for
-       * the second pass.
-       *
-       * The first pass (ImmediateValueRHSPass) tries to swap the operands of kommutative operations
-       * like ADD and MUL if the LHS (left) operand is a constant (a PUSH instruction) and the RHS
-       * value is not. */
-      imm_rhs_pass.apply(*code);
-
-      /* The second pass (ImmediatValuePass) encodes the RHS operand as an immediate value
-       * (a value passed along with the instruction itself) if it is a constant (a PUSH instruction).
-       * This pass reduces the number of instructions and the number of stack operations, since
-       * operations with immediate values are performed in-place on the stack. */
-      imm_pass.apply(*code);
-
-      /* This pass removes unit-operations like X*1 or X+0 etc. */
-      units_pass.apply(*code);
-
-      /* This pass evaluates function calls of constant values like ln(2) etc. */
-      const_pass.apply(*code);
+      // Apply passes.
+      manager.apply(*code);
 
       // Update stack-size:
       this->code->check();

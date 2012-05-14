@@ -28,6 +28,7 @@ public:
     POW,    ///< Pops rhs & lhs values from stack and pushes the back the result.
     LOAD,   ///< Loads a value from the input vector and pushes it on the stack.
     STORE,  ///< Pops a value from the stack and stores it into the output vector.
+    STORE_ZERO, ///< Stores a zero into the output vector.
     PUSH,   ///< Pushes an immediate value on the stack.
     CALL    ///< Calls a built-in function. @c FunctionCode.
   } OpCode;

@@ -155,7 +155,7 @@ IOSTask::process()
 {
   {
     Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
-    message << "Start analysis.";
+    message << "Start IOS analysis.";
     Utils::Logger::get().log(message);
   }
 
@@ -274,7 +274,7 @@ IOSTask::process()
 
   {
     Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
-    message << "Analysis successful.";
+    message << "IOS analysis successful.";
     Utils::Logger::get().log(message);
   }
 }

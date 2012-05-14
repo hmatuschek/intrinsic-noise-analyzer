@@ -209,6 +209,14 @@ Value::createStore(SmartPtr<Value> value, size_t index)
 
 
 SmartPtr<Value>
+Value::createStoreZero(size_t index)
+{
+  std::vector< SmartPtr<Value> > args;
+  return SmartPtr<Value>(new Value(Instruction(Instruction::STORE_ZERO, index), args));
+}
+
+
+SmartPtr<Value>
 Value::createPush(std::complex<double> value)
 {
   std::vector< SmartPtr<Value> > args;

@@ -97,6 +97,10 @@ Code::check()
       }
       // Call instructions do not change the stack-size.
       break;
+
+    case Instruction::STORE_ZERO:
+      // Does not alter stack size.
+      break;
     }
   }
 
@@ -173,6 +177,10 @@ Code::dump(std::ostream &str)
 
     case Instruction::STORE:
       str << "   STORE " << inst->value.asIndex << std::endl;
+      break;
+
+    case Instruction::STORE_ZERO:
+      str << "   STORE 0 -> " << inst->value.asIndex << std::endl;
       break;
 
     case Instruction::PUSH:

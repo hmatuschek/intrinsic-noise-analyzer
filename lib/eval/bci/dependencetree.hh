@@ -191,6 +191,12 @@ public:
   static SmartPtr<Value> createStore(SmartPtr<Value> value, size_t index);
 
   /**
+   * Constructs a STORE_ZERO instruction, that stores an 0 into the output vector at the given
+   * index.
+   */
+  static SmartPtr<Value> createStoreZero(size_t index);
+
+  /**
    * Creates a PUSH instruction, pushing the given immediate value on the stack.
    */
   static SmartPtr<Value> createPush(std::complex<double> value);

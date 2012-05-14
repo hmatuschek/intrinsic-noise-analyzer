@@ -22,20 +22,46 @@ class Pass
 {
 public:
   /**
-   * Entry point.
-   */
-  void apply(Code &bytecode);
-
-
-protected:
-  /**
    * This method may be overridden by any implementation of a @c Pass to perform the actual
    * transformation.
    *
    * By default this method terverses recursively the dependence-tree and returns true immediately,
    * once a pass applied on a value.
    */
-  virtual bool handleValue(SmartPtr<Value> &value);
+  virtual bool handleValue(SmartPtr<Value> &value) = 0;
+};
+
+
+class PassManager
+{
+protected:
+  /** Holds the list of passes to apply. */
+  std::list<Pass *> _passes;
+
+
+public:
+  /**
+   * Entry point.
+   */
+  void apply(Code &bytecode);
+
+  /**
+   * Adds a pass to the manager.
+   */
+  void addPass(Pass *pass);
+
+
+protected:
+  /**
+   * Traverses the dependence tree.
+   */
+  bool handleValue(SmartPtr<Value> &value);
+
+  /**
+   * Applies all passes on the given value unless they can not be applied anymore. If a pass applied
+   * on that value, the function returns true.
+   */
+  bool applyOnValue(SmartPtr<Value> &value);
 };
 
 
@@ -45,7 +71,7 @@ protected:
  * on the RHS expression side.
  */
 class ImmediateValueRHSPass : public Pass {
-protected:
+public:
   /**
    * Implements the actual pass.
    */
@@ -86,6 +112,19 @@ public:
  * Performs simple constant folding on functions called with constants.
  */
 class ConstantFoldingPass : public Pass
+{
+public:
+  /**
+   * Implements the actual pass.
+   */
+  virtual bool handleValue(SmartPtr<Value> &value);
+};
+
+
+/**
+ * Replaces "PUSH 0; STORE X" with "STORE_ZERO X".
+ */
+class ZeroStorePass : public Pass
 {
 public:
   /**

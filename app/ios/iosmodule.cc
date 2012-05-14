@@ -39,7 +39,7 @@ IOSModule::configIOS()
   IOSTask *task = 0;
 
   Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
-  message << "Create analysis.";
+  message << "Create IOS analysis.";
   Utils::Logger::get().log(message);
 
   try {
