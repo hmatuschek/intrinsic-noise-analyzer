@@ -311,6 +311,10 @@ DependenceTree::DependenceTree(const Code &code)
       stack.push_back(Value::createStore(rhs, item->value.asIndex));
       break;
 
+    case Instruction::STORE_ZERO:
+      stack.push_back(Value::createStoreZero(item->value.asIndex));
+      break;
+
     case Instruction::PUSH:
       stack.push_back(Value::createPush(item->immediateComplex()));
       break;
