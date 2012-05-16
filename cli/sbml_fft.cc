@@ -31,17 +31,17 @@ int main(int argc, char *argv[])
 
     size_t steps = 5000;
 
-    double transientTime = 100;
+    double transientTime = 200;
     size_t realizations=4;
     // Construct SSA model from SBML model
 
     Models::LinearNoiseApproximation lna(doc->getModel());
-    Models::SteadyStateAnalysis steadyState(lna);
+    //Models::SteadyStateAnalysis steadyState(lna);
 
-    Models::SpectralAnalysis specA(lna);
+    //Models::SpectralAnalysis specA(lna);
 
-    const double fMax   = 2*specA.getMaxFrequency(0.01)*10;
-    const double deltaf = 0.0001;
+    const double fMax   = 2*0.1*10;
+    const double deltaf = 0.001;
 
     Models::SpectrumRecorder<Models::OptimizedSSA,libsbml::Model> specEval(doc->getModel(),realizations,fMax,deltaf);
 
@@ -50,11 +50,11 @@ int main(int argc, char *argv[])
 
     Eigen::VectorXd freq = specEval.getFrequencies();
 
-    Eigen::MatrixXd specCorr(lna.numSpecies(),freq.size());
+    //Eigen::MatrixXd specCorr(lna.numSpecies(),freq.size());
 
-    steadyState.calcSteadyState(x);
-    steadyState.calcSpectrum(freq,LNAspec,false);
-    specA.spectrum(freq,specCorr);
+    //steadyState.calcSteadyState(x);
+    //steadyState.calcSpectrum(freq,LNAspec,false);
+    //specA.spectrum(freq,specCorr);
 
     specEval.advance(transientTime);
     std::cerr << "Transients passed..." << std::endl;
@@ -82,9 +82,7 @@ int main(int argc, char *argv[])
             for(int fs=0;fs<freq.size()/2;fs++)
             {
                 myfile << freq(fs) << "\t"
-                       << spec(fs) << "\t"
-                       << LNAspec(fs,specId) << "\t"
-                       << LNAspec(fs,specId)+specCorr(specId,fs) << "\n";
+                       << spec(fs) << "\n";
             }
             myfile.close();
         }

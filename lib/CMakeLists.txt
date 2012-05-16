@@ -123,10 +123,14 @@ SET(libina_nlesolve_HEADERS
 
 # Add sources for ODE solvers etc.
 SET(libina_ode_SOURCES
+    ode/lsodadriver.cc
+    ode/lsoda.cc
     ode/rungekutta4.cc ode/eulerdriver.cc ode/integrationrange.cc ode/rkf45.cc
     ode/semiimpliciteuler.cc ode/rosenbrock3.cc ode/rosenbrock4.cc ode/odemodel.cc ode/dopri5.cc
     ode/dopri853.cc ode/stepper.cc)
 SET(libina_ode_HEADERS ode/ode.hh
+    ode/lsodadriver.hh
+    ode/lsoda.hh
     ode/rungekutta4.hh ode/eulerdriver.hh ode/integrationrange.hh ode/rkf45.hh
     ode/semiimpliciteuler.hh ode/rosenbrock3.hh ode/rosenbrock4.hh ode/odemodel.hh ode/dopri5.hh
     ode/dopri853.hh ode/stepper.hh)
