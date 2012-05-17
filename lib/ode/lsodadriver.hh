@@ -59,6 +59,7 @@ public:
     rtolwork = atolwork + getDimension() + 1;
 
     //init=0;
+    /* @todo use to define staged errors using the system size */
     for (size_t i = 1; i <= getDimension(); ++i)
     {
         rtolwork[i] = err_rel;
@@ -71,11 +72,9 @@ public:
    */
   virtual void step(const Eigen::VectorXd &state, double t, Eigen::VectorXd &delta)
   {
-
       for (size_t i = 1; i <= getDimension(); ++i) ywork[i] = state[i-1];
       lsoda(getDimension(), ywork, &t, t+step_size, 2, rtolwork, atolwork, 1, &istate, 0, 2);
       for (size_t i = 1; i <= getDimension(); ++i) delta[i-1] = ywork[i]-state[i-1];
-
   }
 
   virtual void evalODE(double t, double y[], double yd[], int nsize)
