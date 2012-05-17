@@ -1,14 +1,55 @@
+double vmnorm (int n, double *v, double *w)
+
+/*
+   This function routine computes the weighted max-norm
+   of the vector of length n contained in the array v, with weights
+   contained in the array w of length n.
+
+   vmnorm = std::max( i = 1, ..., n ) fabs( v[i] ) * w[i].
+*/
+
+{
+        int             i;
+        double          vm;
+
+        vm = 0.;
+        for (i = 1; i <= n; i++)
+                vm = std::max(vm, fabs(v[i]) * w[i]);
+        return vm;
+
+}
+
+double fnorm (int n, double **a, double *w)
+
+/*
+   This subroutine computes the norm of a full n by n matrix,
+   stored in the array a, that is consistent with the weighted max-norm
+   on vectors, with weights stored in the array w.
+
+      fnorm = std::max(i=1,...,n) ( w[i] * sum(j=1,...,n) fabs( a[i][j] ) / w[j] )
+*/
+
+{
+        int             i, j;
+        double          an, sum, *ap1;
+
+        an = 0.;
+        for (i = 1; i <= n; i++) {
+                sum = 0.;
+                ap1 = a[i];
+                for (j = 1; j <= n; j++)
+                        sum += fabs(ap1[j]) / w[j];
+                an = std::max(an, sum * w[i]);
+        }
+        return an;
+
+}
 
 /************
  * idamax.c *
  ************/
 
-//void fevaldgl (double x, double y[], double yd[],
-//	int n, char *fname, int argn, header *args, long size,
-//	int columns);
-
-
-static int idamax(int n, double *dx, int incx)
+int idamax(int n, double *dx, int incx)
 
 /* Purpose : Find largest component of double vector dx
 
@@ -138,7 +179,7 @@ void dscal (int n, double da, double *dx, int incx)
  * ddot.c *
  **********/
 
-static double ddot (int n, double *dx, int incx, double *dy, int incy)
+double ddot (int n, double *dx, int incx, double *dy, int incy)
 
 /*
    Purpose : Inner product dx . dy
@@ -227,7 +268,7 @@ From: tam@dragonfly.wri.com
 To: whitbeck@sanjuan.wrc.unr.edu
 */
 
-static void daxpy (int n, double da, double *dx, int incx, double *dy, int incy)
+void daxpy (int n, double da, double *dx, int incx, double *dy, int incy)
 
 /*
    Purpose : To compute
@@ -311,7 +352,7 @@ static void daxpy (int n, double da, double *dx, int incx, double *dy, int incy)
  * dgesl.c *
  ***********/
 
-static void dgesl (double **a, int n, int *ipvt, double *b, int job)
+void dgesl (double **a, int n, int *ipvt, double *b, int job)
 
 /*
    Purpose : dgesl solves the linear system

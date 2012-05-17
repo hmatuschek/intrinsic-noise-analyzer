@@ -1,9 +1,6 @@
 #include <math.h>
 #include <iostream>
 #include <cstdio>
-//#include <cstdlib>
-
-//using namespace std;
 
 namespace Fluc {
 namespace ODE {
@@ -12,7 +9,7 @@ namespace ODE {
  * @cond 0
  * (exclude from docs)
  *
- * Defines the constants for the @c LSODA stepper.
+ * Defines the constants for @c LSODA.
  */
 class LsodaConstants
 {
@@ -25,7 +22,7 @@ public:
 /// @endcond
 
 /**
-* LSODA C++ tanslation
+* Repack of LSODA c from fortran tanslation
 * @todo convert all printf to exceptions
 * @todo incoorporate analytical Jacobian
 */
@@ -145,8 +142,6 @@ private:
  void     methodswitch(double dsm, double pnorm, double *pdh, double *rh);
  void     cfode(int meth);
  void     scaleh(double *rh, double *pdh);
- double   fnorm(int n, double **a, double *w);
- double   vmnorm(int n, double *v, double *w);
 
  int      g_nyh, g_lenyh;
 
