@@ -229,6 +229,7 @@ LNAIntegratorConfigPage::LNAIntegratorConfigPage(QWidget *parent)
   this->integrator = new QComboBox();
   this->integrator->addItem("RKF45 (adaptive)", QVariant("rkf45"));
   this->integrator->addItem("Dopri5 (adaptive)", QVariant("dopr5"));
+  this->integrator->addItem("LSODA", QVariant("lsoda"));
   this->integrator->addItem("Rosenbrock4 (stiff)", QVariant("ros4"));
   this->integrator->addItem("RK4", QVariant("rk4"));
   this->integrator->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
@@ -328,6 +329,8 @@ LNAIntegratorConfigPage::validatePage()
     wizard->getTaskConfig().integrator = LNATask::Config::RungeKutta4;
   } else if ("rkf45" == this->integrator->itemData(this->integrator->currentIndex()).toString()) {
     wizard->getTaskConfig().integrator = LNATask::Config::RungeKuttaFehlberg45;
+  } else if ("lsoda" == this->integrator->itemData(this->integrator->currentIndex()).toString()) {
+    wizard->getTaskConfig().integrator = LNATask::Config::LSODA;
   } else if ("dopr5" == this->integrator->itemData(this->integrator->currentIndex()).toString()) {
     wizard->getTaskConfig().integrator = LNATask::Config::DormandPrince5;
   } else if ("ros4" == this->integrator->itemData(this->integrator->currentIndex()).toString()) {

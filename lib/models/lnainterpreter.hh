@@ -75,7 +75,8 @@ public:
   /**
    * Evaluates the joint ODE of the system size expansion.
    */
-  inline void evaluate(const Eigen::VectorXd &state, double t, Eigen::VectorXd &dx)
+  template <class T, class U>
+  inline void evaluate(const T &state, double t, U &dx)
   {
     this->interpreter.run(state, dx);
   }

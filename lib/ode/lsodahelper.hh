@@ -350,10 +350,10 @@ static void dgesl (double **a, int n, int *ipvt, double *b, int job)
 */
 
 {
-        int             nm1, k, j;
+        int             k, j;
         double          t;
 
-        nm1 = n - 1;
+        //int nm1 = n - 1;
 
         /*
         Job = 0, solve a * x = b.

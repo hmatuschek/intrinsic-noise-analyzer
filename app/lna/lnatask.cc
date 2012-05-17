@@ -75,7 +75,13 @@ LNATask::LNATask(const Config &config, QObject *parent) :
     break;
 
   case Config::DormandPrince5:
-    this->stepper = new Fluc::ODE::Dopri5Stepper<Fluc::Models::LNAinterpreter>(
+    this->stepper = new Fluc::ODE::Dopri853Stepper<Fluc::Models::LNAinterpreter>(
+          this->interpreter, config.integration_range.getStepSize(),
+          config.epsilon_abs, config.epsilon_rel);
+    break;
+
+  case Config::LSODA:
+    this->stepper = new Fluc::ODE::LsodaDriver<Fluc::Models::LNAinterpreter>(
           this->interpreter, config.integration_range.getStepSize(),
           config.epsilon_abs, config.epsilon_rel);
     break;

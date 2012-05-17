@@ -89,6 +89,7 @@ public:
   typedef enum {
     RungeKutta4,           ///< The non-adaptive RK4 integrator.
     RungeKuttaFehlberg45,  ///< The adaptive RKF45 integrator.
+    LSODA,                 ///< Lsoda integrator.
     DormandPrince5,        ///< Precise Dopri integrator.
     Rosenbrock4            ///< Implicit integrator for stiff systems.
   } Integrator;

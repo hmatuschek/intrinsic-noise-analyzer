@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
     double dt=0.01;
     //ODE::RKF45<Models::LNAinterpreter> integrator(interpreter,dt,1e-5,1e-5);
     //ODE::RKF45<Models::LinearNoiseApproximation> integrator(model,dt,1e-9,1e-5);
-    ODE::Rosenbrock4TimeInd<Models::LNAinterpreter> integrator(interpreter,dt,1e-9,1e-5);
+    ODE::LsodaDriver<Models::LNAinterpreter> integrator(interpreter,dt,1e-9,1e-5);
 
     // state vector (deterministic concentrations + covariances)
     Eigen::VectorXd x(interpreter.getDimension());
@@ -54,19 +54,12 @@ int main(int argc, char *argv[])
     // get full initial concentrations and covariance and emre
 
 
- //    Just dump all the nice expressions and values:
-    steadyState.calcSteadyState(x);
-
-    steadyState.calcIOS(x);
-    model.fullState(x, concentrations, cov, emre, ioscov, thirdmoment, iosemre);
-
-    steadyState.dump(std::cerr);
 
 
     // output mean concentrations
     for(size_t i=0; i<model.numSpecies(); i++)
     {
-        std::cout<< iosemre(i) <<"\t"<<std::endl;
+        std::cout<< concentrations(i) <<"\t"<<std::endl;
     }
     //std::cerr<<model.getTimeUnit().getMultiplier();
 
@@ -112,7 +105,7 @@ int main(int argc, char *argv[])
     //std::cout<< std::endl;
 
     double t=0;
-    for(int i=0; i<10000; i++){
+    for(int i=0; i<100; i++){
 
 
        //model.full_state(x,concentrations,cov,emre);
@@ -164,7 +157,7 @@ int main(int argc, char *argv[])
        // output mean concentrations
        for(size_t i=0; i<model.numSpecies(); i++)
        {
-          std::cout<< iosemre(i) <<"\t";
+          std::cout<<concentrations(i) <<"\t";
        }
 
 

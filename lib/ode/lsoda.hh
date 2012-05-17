@@ -3,9 +3,32 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define ETA 2.2204460492503131e-16
-
 using namespace std;
+
+namespace Fluc {
+namespace ODE {
+
+/**
+ * @cond 0
+ * (exclude from docs)
+ *
+ * Defines the constants for the @c LSODA stepper.
+ */
+class LsodaConstants
+{
+public:
+    static const double   ETA;
+    static const int      mord[3];
+    static const double   sm1[13];
+
+};
+/// @endcond
+
+/**
+* LSODA C++ tanslation
+* @todo convert all printf to exceptions
+*/
+
 
 /*
   This is a C version of the LSODA library. I acquired the original
@@ -24,6 +47,8 @@ using namespace std;
 
   - Heng Li <lh3lh3@gmail.com>
  */
+
+
 
 /* The MIT License
 
@@ -79,17 +104,24 @@ Wolfram Research, Inc.
 tam@wri.com
 */
 
-class LSODEA {
 
- LSODEA();
+class LSODA : public LsodaConstants {
 
+public:
+ LSODA();
 
- virtual void fevaldgl (double x, double y[], double yd[],
+ int istate;
+
+ virtual void evalODE (double x, double y[], double yd[],
          int n)=0;
+
+ void f_lsoda (double t, double dt, double y[], int n, double eps);
 
  void lsoda (int neq, double *y, double *t, double tout,
                     int itol, double *rtol, double *atol,
                     int itask, int *istate, int iopt, int jt   );
+
+private:
 
  void     stoda(int neq, double *y);
  void     correction(int neq, double *y, 
@@ -120,9 +152,7 @@ class LSODEA {
 /* newly added static variables */
 
  int      ml, mu, imxer;
- int      mord[3];
  double   sqrteta, *yp1, *yp2;
- double   sm1[13];
 
 /* static variables for lsoda() */
 
@@ -150,3 +180,6 @@ class LSODEA {
 
 };
 
+
+}
+}

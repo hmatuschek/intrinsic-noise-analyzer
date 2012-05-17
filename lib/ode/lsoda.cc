@@ -1,45 +1,27 @@
 #include "lsoda.hh"
 #include "lsodahelper.hh"
 
-LSODEA::LSODEA()
+using namespace Fluc;
+using namespace Fluc::ODE;
+
+const int    LsodaConstants::mord[3] = {0, 12, 5};
+const double LsodaConstants::sm1[13] = {0., 0.5, 0.575, 0.55, 0.45, 0.35, 0.25, 0.2, 0.15, 0.1, 0.075, 0.05, 0.025};
+const double LsodaConstants:: ETA = 2.2204460492503131e-16;
+
+LSODA::LSODA()
+ : g_nyh(0), g_lenyh(0),
+   illin(0), init(0), ntrep(0), ixpr(0), //< variables for lsoda()
+   lsoda_warning(1)
+
 {
-	
-    g_nyh = 0;
-    g_lenyh = 0;
-
-    /* newly added static variables */
-
-    mord[0] = 0;
-    mord[1] = 12;
-    mord[2] = 5;
-
-    sm1[0] = 0.;
-    sm1[1] = 0.5;
-    sm1[2] = 0.575;
-    sm1[3] = 0.55;
-    sm1[4] = 0.45;
-    sm1[5] = 0.35;
-    sm1[6] = 0.25;
-    sm1[7] = 0.2;
-    sm1[8] = 0.15;
-    sm1[9] = 0.1;
-    sm1[10] = 0.075;
-    sm1[11] = 0.05;
-    sm1[12] = 0.025;
-
-    /* static variables for lsoda() */
-
-    illin = 0; init = 0; ntrep = 0;
-    ixpr = 0;
-
-    lsoda_warning=1;
+    // pass...
 
 }
 
 
 /* Terminate lsoda due to illegal input. */
 void
-LSODEA::terminate(int *istate)
+LSODA::terminate(int *istate)
 {
         if (illin == 5)
         {
@@ -57,7 +39,7 @@ LSODEA::terminate(int *istate)
 
 /* Terminate lsoda due to various error conditions. */
 void
-LSODEA::terminate2(double *y, double *t)
+LSODA::terminate2(double *y, double *t)
 {
         int             i;
         yp1 = yh[1];
@@ -69,7 +51,6 @@ LSODEA::terminate2(double *y, double *t)
         return;
 
 }
-
 
 
 /*
@@ -213,21 +194,14 @@ c
 c-----------------------------------------------------------------------
 */
 
-// old header:
-//void lsoda (int neq, double *y, double *t, double tout,
-//		   int itol, double *rtol, double *atol,
-//		   int itask, int *istate, int iopt, int jt,
-//		   char *fname, int argn, header *args, long argsize, int columns)
-
 void
-LSODEA::lsoda (int neq, double *y, double *t, double tout,
+LSODA::lsoda (int neq, double *y, double *t, double tout,
                    int itol, double *rtol, double *atol,
                    int itask, int *istate, int iopt, int jt
             )
 
 {
-        int             mxstp0 = 500, mxhnl0 = 10;
-
+        int             mxstp0 = 500, mxhnl0 = 10; //maxsteps
         int             i, iflag, lenyh, ihit=0;
         double          atoli, ayi, big, h0, hmax, hmx, rh, rtoli, tcrit, tdist, tnext, tol,
                 tolsf, tp, size, sum, w0;
@@ -281,7 +255,7 @@ LSODEA::lsoda (int neq, double *y, double *t, double tout,
         if (*istate == 1 || *istate == 3) {
                 ntrep = 0;
                 if (neq <= 0) {
-                        printf("[lsoda] neq = %d is less than 1\n");
+                        printf("[lsoda] neq = %d is less than 1\n",neq);
                         terminate(istate);
                         return;
                 }
@@ -412,7 +386,7 @@ LSODEA::lsoda (int neq, double *y, double *t, double tout,
                 g_lenyh = lenyh = 1 + max(mxordn, mxords);
 
                 yh = new double * [1 + lenyh];
-                //if (error) return;
+
                 for (i = 1; i <= lenyh; i++)
                 {
                         yh[i] = new double [1 + nyh];
@@ -420,7 +394,7 @@ LSODEA::lsoda (int neq, double *y, double *t, double tout,
                 }
 
                 wm = new double * [1 + nyh];
-                //if (error) return;
+
                 for (i = 1; i <= nyh; i++)
                 {
                         wm[i] = new double [1 + nyh];
@@ -428,16 +402,12 @@ LSODEA::lsoda (int neq, double *y, double *t, double tout,
                 }
 
                 ewt = new double [1 + nyh];
-                //if (error) return;
 
                 savf = new double [1 + nyh];
-                //if (error) return;
 
                 acor = new double [1 + nyh];
-                //if (error) return;
 
                 ipvt = new int [1 + nyh];
-                //if (error) return;
         }
         /*
         Check rtol and atol for legality.
@@ -509,7 +479,7 @@ LSODEA::lsoda (int neq, double *y, double *t, double tout,
                 /*
                 Initial call to f.
                 */
-                fevaldgl(*t, y+1, yh[2]+1, neq);
+                evalODE(*t, y+1, yh[2]+1, neq);
                 // (*f) (*t, y + 1, yh[2] + 1, _data);
                 nfe = 1;
                 /*
@@ -936,12 +906,8 @@ LSODEA::lsoda (int neq, double *y, double *t, double tout,
 
 
 
-// old interface:
-//static void stoda(int neq, double *y,
-//		   char *fname, int argn, header *args, long argsize, int columns)
-
 void
-LSODEA::stoda(int neq, double *y)
+LSODA::stoda(int neq, double *y)
 {
         int             corflag, orderflag;
         int             i, i1, j, m, ncf;
@@ -1262,7 +1228,7 @@ LSODEA::stoda(int neq, double *y)
                                         yp1 = yh[1];
                                         for (i = 1; i <= n; i++)
                                                 y[i] = yp1[i];
-                                        fevaldgl(tn, y+1, savf+1, neq);
+                                        evalODE(tn, y+1, savf+1, neq);
                                         // (*f) (tn, y + 1, savf + 1, _data);
                                         nfe++;
                                         yp1 = yh[2];
@@ -1284,7 +1250,7 @@ LSODEA::stoda(int neq, double *y)
 }				/* end stoda   */
 
 void
-LSODEA::ewset (int itol, double *rtol, double *atol, double *ycur)
+LSODA::ewset (int itol, double *rtol, double *atol, double *ycur)
 {
         int             i;
 
@@ -1310,7 +1276,7 @@ LSODEA::ewset (int itol, double *rtol, double *atol, double *ycur)
 }				/* end ewset   */
 
 void
-LSODEA::intdy (double t, int k, double *dky, int *iflag)
+LSODA::intdy (double t, int k, double *dky, int *iflag)
 
 /*
    Intdy computes interpolated values of the k-th derivative of the
@@ -1381,7 +1347,7 @@ LSODEA::intdy (double t, int k, double *dky, int *iflag)
 }				/* end intdy   */
 
 void
-LSODEA::cfode(int meth)
+LSODA::cfode(int meth)
 {
         int             i, nq, nqm1, nqp1;
         double          agamq, fnq, fnqm1, pc[13], pint, ragq, rqfac, rq1fac, tsign, xpin;
@@ -1511,7 +1477,7 @@ LSODEA::cfode(int meth)
 }				/* end cfode   */
 
 void
-LSODEA::scaleh (double *rh, double *pdh)
+LSODA::scaleh (double *rh, double *pdh)
 {
         double          r;
         int             j, i;
@@ -1551,7 +1517,7 @@ LSODEA::scaleh (double *rh, double *pdh)
 
 
 void
-LSODEA::prja (int neq, double *y)
+LSODA::prja (int neq, double *y)
 {
         int             i, ier, j;
         double          fac, hl0, r, r0, yj;
@@ -1587,7 +1553,7 @@ LSODEA::prja (int neq, double *y)
                         r = max(sqrteta * fabs(yj), r0 / ewt[j]);
                         y[j] += r;
                         fac = -hl0 / r;
-                        fevaldgl(tn, y+1, acor+1, neq);
+                        evalODE(tn, y+1, acor+1, neq);
                         for (i = 1; i <= n; i++)
                                 wm[i][j] = (acor[i] - savf[i]) * fac;
                         y[j] = yj;
@@ -1613,7 +1579,7 @@ LSODEA::prja (int neq, double *y)
 }				/* end prja   */
 
 double
-LSODEA::vmnorm (int n, double *v, double *w)
+LSODA::vmnorm (int n, double *v, double *w)
 
 /*
    This function routine computes the weighted max-norm
@@ -1635,7 +1601,7 @@ LSODEA::vmnorm (int n, double *v, double *w)
 }
 
 double
-LSODEA::fnorm (int n, double **a, double *w)
+LSODA::fnorm (int n, double **a, double *w)
 
 /*
    This subroutine computes the norm of a full n by n matrix,
@@ -1662,7 +1628,7 @@ LSODEA::fnorm (int n, double **a, double *w)
 }
 
 void
-LSODEA::correction(int neq, double *y, int *corflag,
+LSODA::correction(int neq, double *y, int *corflag,
                                            double pnorm, double *del, double *delp, double *told,
                                            int *ncf, double *rh, int *m)
 /*
@@ -1689,7 +1655,7 @@ LSODEA::correction(int neq, double *y, int *corflag,
         yp1 = yh[1];
         for (i = 1; i <= n; i++)
                 y[i] = yp1[i];
-        fevaldgl(tn, y+1, savf+1, neq);
+        evalODE(tn, y+1, savf+1, neq);
         nfe++;
         /*
         If indicated, the matrix P = I - h * el[1] * J is reevaluated and
@@ -1801,7 +1767,7 @@ LSODEA::correction(int neq, double *y, int *corflag,
                         yp1 = yh[1];
                         for (i = 1; i <= n; i++)
                                 y[i] = yp1[i];
-                        fevaldgl(tn, y+1, savf+1, neq);
+                        evalODE(tn, y+1, savf+1, neq);
                         nfe++;
                 }
                 /*
@@ -1809,14 +1775,14 @@ LSODEA::correction(int neq, double *y, int *corflag,
                 */
                 else {
                         *delp = *del;
-                        fevaldgl(tn, y+1, savf+1, neq);
+                        evalODE(tn, y+1, savf+1, neq);
                         nfe++;
                 }
         }			/* end while   */
 }				/* end correction   */
 
 void
-LSODEA::corfailure (double *told, double *rh, int *ncf, int *corflag)
+LSODA::corfailure (double *told, double *rh, int *ncf, int *corflag)
 {
         int             j, i1, i;
 
@@ -1841,7 +1807,7 @@ LSODEA::corfailure (double *told, double *rh, int *ncf, int *corflag)
 }
 
 void
-LSODEA::solsy (double *y)
+LSODA::solsy (double *y)
 
 /*
    This routine manages the solution of the linear system arising from
@@ -1866,7 +1832,7 @@ LSODEA::solsy (double *y)
 }
 
 void
-LSODEA::methodswitch (double dsm, double pnorm, double *pdh, double *rh)
+LSODA::methodswitch (double dsm, double pnorm, double *pdh, double *rh)
 {
         int             lm1, lm1p1, lm2, lm2p1, nqm1, nqm2;
         double          rh1, rh2, rh1it, exm2, dm2, exm1, dm1, alpha, exsm;
@@ -1987,7 +1953,7 @@ LSODEA::methodswitch (double dsm, double pnorm, double *pdh, double *rh)
    not executed.
 */
 void
-LSODEA::endstoda()
+LSODA::endstoda()
 {
         double          r;
         int             i;
@@ -2001,7 +1967,7 @@ LSODEA::endstoda()
 }
 
 void
-LSODEA::orderswitch (double *rhup, double dsm, double *pdh,
+LSODA::orderswitch (double *rhup, double dsm, double *pdh,
                                                  double *rh, int *orderflag)
 
 /*
@@ -2111,7 +2077,7 @@ LSODEA::orderswitch (double *rhup, double dsm, double *pdh,
 }				/* end orderswitch   */
 
 
-void LSODEA::resetcoeff()
+void LSODA::resetcoeff()
 /*
    The el vector and related constants are reset
    whenever the order nq is changed, or at the start of the problem.
@@ -2132,7 +2098,7 @@ void LSODEA::resetcoeff()
 
 
 void
-LSODEA::successreturn (double *y, double *t, int itask, int ihit, double tcrit, int *istate)
+LSODA::successreturn (double *y, double *t, int itask, int ihit, double tcrit, int *istate)
 {
         int i;
         yp1 = yh[1];
@@ -2149,12 +2115,12 @@ LSODEA::successreturn (double *y, double *t, int itask, int ihit, double tcrit, 
 
 /* this function does nothing. */
 void
-LSODEA::freevectors(void)
+LSODA::freevectors(void)
 {
 }
 
 void
-LSODEA::_freevectors(void)
+LSODA::_freevectors(void)
 {
         g_nyh = g_lenyh = 0;
         yh = 0; wm = 0;

@@ -31,6 +31,7 @@ public:
       RungeKutta4,
       RungeKuttaFehlberg45,
       DormandPrince5,
+      LSODA,
       Rosenbrock4
     } Integrator;
 

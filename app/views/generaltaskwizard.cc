@@ -170,6 +170,7 @@ IntegratorWizardPage::IntegratorWizardPage(QWidget *parent)
   this->integrator = new QComboBox();
   this->integrator->addItem("RKF45 (adaptive)", QVariant("rkf45"));
   this->integrator->addItem("Dopri5 (adaptive)", QVariant("dopr5"));
+  this->integrator->addItem("LSODA (stiff)", QVariant("lsoda"));
   this->integrator->addItem("Rosenbrock4 (stiff)", QVariant("ros4"));
   this->integrator->addItem("RK4", QVariant("rk4"));
   this->integrator->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
@@ -271,6 +272,8 @@ IntegratorWizardPage::validatePage()
     config.setIntegrator(ODEIntTaskConfig::RungeKuttaFehlberg45);
   } else if ("dopr5" == this->integrator->itemData(this->integrator->currentIndex()).toString()) {
     config.setIntegrator(ODEIntTaskConfig::DormandPrince5);
+  }  else if ("lsoda" == this->integrator->itemData(this->integrator->currentIndex()).toString()) {
+        config.setIntegrator(ODEIntTaskConfig::LSODA);
   } else if ("ros4" == this->integrator->itemData(this->integrator->currentIndex()).toString()) {
     config.setIntegrator(ODEIntTaskConfig::Rosenbrock4);
   } else {

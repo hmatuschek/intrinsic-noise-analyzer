@@ -27,6 +27,7 @@
 #include "rkf45.hh"
 #include "dopri5.hh"
 #include "dopri853.hh"
+#include "lsodadriver.hh"
 
 #include "semiimpliciteuler.hh"
 #include "rosenbrock3.hh"
