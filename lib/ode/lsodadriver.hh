@@ -58,7 +58,6 @@ public:
     atolwork = ywork + getDimension() + 1;
     rtolwork = atolwork + getDimension() + 1;
 
-    //init=0;
     /* @todo use to define staged errors using the system size */
     for (size_t i = 1; i <= getDimension(); ++i)
     {

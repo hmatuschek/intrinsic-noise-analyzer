@@ -1,9 +1,9 @@
 #include <math.h>
 #include <iostream>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+//#include <cstdlib>
 
-using namespace std;
+//using namespace std;
 
 namespace Fluc {
 namespace ODE {
@@ -27,6 +27,7 @@ public:
 /**
 * LSODA C++ tanslation
 * @todo convert all printf to exceptions
+* @todo incoorporate analytical Jacobian
 */
 
 

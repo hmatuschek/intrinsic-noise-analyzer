@@ -150,7 +150,7 @@ c itask  = 1 for normal computation of output values of y at t = tout.
 c istate = integer flag (input and output).  set istate = 1.
 c iopt   = 0 to indicate no optional inputs used.
 c rwork  = real work array of length at least..
-c             22 + neq * max(16, neq + 9).
+c             22 + neq * std::max(16, neq + 9).
 c          see also paragraph e below.
 c lrw    = declared length of rwork (in user-s dimension).
 c iwork  = integer work array of length at least  20 + neq.
@@ -333,7 +333,7 @@ LSODA::lsoda (int neq, double *y, double *t, double tout,
                                         return;
                                 }
                                 if (mxordn == 0) mxordn = 100;
-                                mxordn = min(mxordn, mord[1]);
+                                mxordn = std::min(mxordn, mord[1]);
                                 mxords = 0;
                                 if (mxords < 0) {
                                         printf("[lsoda] mxords = %d is less than 0\n", mxords);
@@ -341,7 +341,7 @@ LSODA::lsoda (int neq, double *y, double *t, double tout,
                                         return;
                                 }
                                 if (mxords == 0) mxords = 100;
-                                mxords = min(mxords, mord[2]);
+                                mxords = std::min(mxords, mord[2]);
                                 if ((tout - *t) * h0 < 0.) {
                                         printf("[lsoda] tout = %g behind t = %g.\n"
                                                 "integration direction is given by %g\n",
@@ -383,7 +383,7 @@ LSODA::lsoda (int neq, double *y, double *t, double tout,
                 sqrteta = sqrt(ETA);
                 meth = 1;
                 g_nyh = nyh = n;
-                g_lenyh = lenyh = 1 + max(mxordn, mxords);
+                g_lenyh = lenyh = 1 + std::max(mxordn, mxords);
 
                 yh = new double * [1 + lenyh];
 
@@ -509,14 +509,14 @@ LSODA::lsoda (int neq, double *y, double *t, double tout,
                 The coding below computes the step size, h0, to be attempted on the
                 first step, unless the user has supplied a value for this.
                 First check that tout - *t differs significantly from zero.
-                A scalar tolerance quantity tol is computed, as max(rtol[i])
-                if this is positive, or max(atol[i]/fabs(y[i])) otherwise, adjusted
+                A scalar tolerance quantity tol is computed, as std::max(rtol[i])
+                if this is positive, or std::max(atol[i]/fabs(y[i])) otherwise, adjusted
                 so as to be between 100*ETA and 0.001.
                 Then the computed value h0 is given by
 
                 h0^(-2) = 1. / ( tol * w0^2 ) + tol * ( norm(f) )^2
 
-                where   w0     = max( fabs(*t), fabs(tout) ),
+                where   w0     = std::max( fabs(*t), fabs(tout) ),
                 f      = the initial value of the vector f(t,y), and
                 norm() = the weighted vector norm used throughout, given by
                 the vmnorm function routine, and weighted by the
@@ -528,7 +528,7 @@ LSODA::lsoda (int neq, double *y, double *t, double tout,
                 if (h0 == 0.)
                 {
                         tdist = fabs(tout - *t);
-                        w0 = max(fabs(*t), fabs(tout));
+                        w0 = std::max(fabs(*t), fabs(tout));
                         if (tdist < 2. * ETA * w0) {
                                 printf("[lsoda] tout too close to t to start integration\n ");
                                 terminate(istate);
@@ -539,7 +539,7 @@ LSODA::lsoda (int neq, double *y, double *t, double tout,
                         if (itol > 2)
                         {
                                 for (i = 2; i <= n; i++)
-                                        tol = max(tol, rtol[i]);
+                                        tol = std::max(tol, rtol[i]);
                         }
                         if (tol <= 0.)
                         {
@@ -550,15 +550,15 @@ LSODA::lsoda (int neq, double *y, double *t, double tout,
                                                 atoli = atol[i];
                                         ayi = fabs(y[i]);
                                         if (ayi != 0.)
-                                                tol = max(tol, atoli / ayi);
+                                                tol = std::max(tol, atoli / ayi);
                                 }
                         }
-                        tol = max(tol, 100. * ETA);
-                        tol = min(tol, 0.001);
+                        tol = std::max(tol, 100. * ETA);
+                        tol = std::min(tol, 0.001);
                         sum = vmnorm(n, yh[2], ewt);
                         sum = 1. / (tol * w0 * w0) + tol * sum * sum;
                         h0 = 1. / sqrt(sum);
-                        h0 = min(h0, tdist);
+                        h0 = std::min(h0, tdist);
                         h0 = h0 * ((tout - *t >= 0.) ? 1. : -1.);
                 }		/* end if ( h0 == 0. )   */
                 /*
@@ -1053,7 +1053,7 @@ LSODA::stoda(int neq, double *y)
                         if (corflag == 0)
                                 break;
                         if (corflag == 1) {
-                                rh = max(rh, hmin / fabs(h));
+                                rh = std::max(rh, hmin / fabs(h));
                                 scaleh(&rh, &pdh);
                                 continue;
                         }
@@ -1103,7 +1103,7 @@ LSODA::stoda(int neq, double *y)
                         if (icount < 0) {
                                 methodswitch(dsm, pnorm, &pdh, &rh);
                                 if (meth != mused) {
-                                        rh = max(rh, hmin / fabs(h));
+                                        rh = std::max(rh, hmin / fabs(h));
                                         scaleh(&rh, &pdh);
                                         rmax = 10.;
                                         endstoda();
@@ -1136,7 +1136,7 @@ LSODA::stoda(int neq, double *y)
                                 h is changed, but not nq.
                                 */
                                 if (orderflag == 1) {
-                                        rh = max(rh, hmin / fabs(h));
+                                        rh = std::max(rh, hmin / fabs(h));
                                         scaleh(&rh, &pdh);
                                         rmax = 10.;
                                         endstoda();
@@ -1147,7 +1147,7 @@ LSODA::stoda(int neq, double *y)
                                 */
                                 if (orderflag == 2) {
                                         resetcoeff();
-                                        rh = max(rh, hmin / fabs(h));
+                                        rh = std::max(rh, hmin / fabs(h));
                                         scaleh(&rh, &pdh);
                                         rmax = 10.;
                                         endstoda();
@@ -1194,13 +1194,13 @@ LSODA::stoda(int neq, double *y)
                                 orderswitch(&rhup, dsm, &pdh, &rh, &orderflag);
                                 if (orderflag == 1 || orderflag == 0) {
                                         if (orderflag == 0)
-                                                rh = min(rh, 0.2);
-                                        rh = max(rh, hmin / fabs(h));
+                                                rh = std::min(rh, 0.2);
+                                        rh = std::max(rh, hmin / fabs(h));
                                         scaleh(&rh, &pdh);
                                 }
                                 if (orderflag == 2) {
                                         resetcoeff();
-                                        rh = max(rh, hmin / fabs(h));
+                                        rh = std::max(rh, hmin / fabs(h));
                                         scaleh(&rh, &pdh);
                                 }
                                 continue;
@@ -1223,7 +1223,7 @@ LSODA::stoda(int neq, double *y)
                                         break;
                                 } else {
                                         rh = 0.1;
-                                        rh = max(hmin / fabs(h), rh);
+                                        rh = std::max(hmin / fabs(h), rh);
                                         h *= rh;
                                         yp1 = yh[1];
                                         for (i = 1; i <= n; i++)
@@ -1487,8 +1487,8 @@ LSODA::scaleh (double *rh, double *pdh)
         to prevent a change of h for that many steps, unless forced by a
         convergence or error test failure.
         */
-        *rh = min(*rh, rmax);
-        *rh = *rh / max(1., fabs(h) * hmxi * *rh);
+        *rh = std::min(*rh, rmax);
+        *rh = *rh / std::max(1., fabs(h) * hmxi * *rh);
         /*
         If meth = 1, also restrict the new step size by the stability region.
         If this reduces h, set irflag to 1 so that if there are roundoff
@@ -1496,7 +1496,7 @@ LSODA::scaleh (double *rh, double *pdh)
         */
         if (meth == 1) {
                 irflag = 0;
-                *pdh = max(fabs(h) * pdlast, 0.000001);
+                *pdh = std::max(fabs(h) * pdlast, 0.000001);
                 if ((*rh * *pdh * 1.00001) >= sm1[nq]) {
                         *rh = sm1[nq] / *pdh;
                         irflag = 1;
@@ -1550,7 +1550,7 @@ LSODA::prja (int neq, double *y)
                         r0 = 1.;
                 for (j = 1; j <= n; j++) {
                         yj = y[j];
-                        r = max(sqrteta * fabs(yj), r0 / ewt[j]);
+                        r = std::max(sqrteta * fabs(yj), r0 / ewt[j]);
                         y[j] += r;
                         fac = -hl0 / r;
                         evalODE(tn, y+1, acor+1, neq);
@@ -1586,7 +1586,7 @@ LSODA::vmnorm (int n, double *v, double *w)
    of the vector of length n contained in the array v, with weights
    contained in the array w of length n.
 
-   vmnorm = max( i = 1, ..., n ) fabs( v[i] ) * w[i].
+   vmnorm = std::max( i = 1, ..., n ) fabs( v[i] ) * w[i].
 */
 
 {
@@ -1595,7 +1595,7 @@ LSODA::vmnorm (int n, double *v, double *w)
 
         vm = 0.;
         for (i = 1; i <= n; i++)
-                vm = max(vm, fabs(v[i]) * w[i]);
+                vm = std::max(vm, fabs(v[i]) * w[i]);
         return vm;
 
 }
@@ -1608,7 +1608,7 @@ LSODA::fnorm (int n, double **a, double *w)
    stored in the array a, that is consistent with the weighted max-norm
    on vectors, with weights stored in the array w.
 
-      fnorm = max(i=1,...,n) ( w[i] * sum(j=1,...,n) fabs( a[i][j] ) / w[j] )
+      fnorm = std::max(i=1,...,n) ( w[i] * sum(j=1,...,n) fabs( a[i][j] ) / w[j] )
 */
 
 {
@@ -1621,7 +1621,7 @@ LSODA::fnorm (int n, double **a, double *w)
                 ap1 = a[i];
                 for (j = 1; j <= n; j++)
                         sum += fabs(ap1[j]) / w[j];
-                an = max(an, sum * w[i]);
+                an = std::max(an, sum * w[i]);
         }
         return an;
 
@@ -1733,12 +1733,12 @@ LSODA::correction(int neq, double *y, int *corflag,
                                 rm = 1024.0;
                                 if (*del <= (1024. * *delp))
                                         rm = *del / *delp;
-                                rate = max(rate, rm);
-                                crate = max(0.2 * crate, rm);
+                                rate = std::max(rate, rm);
+                                crate = std::max(0.2 * crate, rm);
                         }
-                        dcon = *del * min(1., 1.5 * crate) / (tesco[nq][2] * conit);
+                        dcon = *del * std::min(1., 1.5 * crate) / (tesco[nq][2] * conit);
                         if (dcon <= 1.) {
-                                pdest = max(pdest, rate / fabs(h * el[1]));
+                                pdest = std::max(pdest, rate / fabs(h * el[1]));
                                 if (pdest != 0.)
                                         pdlast = pdest;
                                 break;
@@ -1862,7 +1862,7 @@ LSODA::methodswitch (double dsm, double pnorm, double *pdh, double *rh)
                         if (irflag == 0)
                                 return;
                         rh2 = 2.;
-                        nqm2 = min(nq, mxords);
+                        nqm2 = std::min(nq, mxords);
                 } else {
                         exsm = 1. / (double) l;
                         rh1 = 1. / (1.2 * pow(dsm, exsm) + 0.0000012);
@@ -1870,7 +1870,7 @@ LSODA::methodswitch (double dsm, double pnorm, double *pdh, double *rh)
                         *pdh = pdlast * fabs(h);
                         if ((*pdh * rh1) > 0.00001)
                                 rh1it = sm1[nq] / *pdh;
-                        rh1 = min(rh1, rh1it);
+                        rh1 = std::min(rh1, rh1it);
                         if (nq > mxords) {
                                 nqm2 = mxords;
                                 lm2 = mxords + 1;
@@ -1926,11 +1926,11 @@ LSODA::methodswitch (double dsm, double pnorm, double *pdh, double *rh)
         *pdh = pdnorm * fabs(h);
         if ((*pdh * rh1) > 0.00001)
                 rh1it = sm1[nqm1] / *pdh;
-        rh1 = min(rh1, rh1it);
+        rh1 = std::min(rh1, rh1it);
         rh2 = 1. / (1.2 * pow(dsm, exsm) + 0.0000012);
         if ((rh1 * ratio) < (5. * rh2))
                 return;
-        alpha = max(0.001, rh1);
+        alpha = std::max(0.001, rh1);
         dm1 *= pow(alpha, exm1);
         if (dm1 <= 1000. * ETA * pnorm)
                 return;
@@ -2003,12 +2003,12 @@ LSODA::orderswitch (double *rhup, double dsm, double *pdh,
         If meth = 1, limit rh accordinfg to the stability region also.
         */
         if (meth == 1) {
-                *pdh = max(fabs(h) * pdlast, 0.000001);
+                *pdh = std::max(fabs(h) * pdlast, 0.000001);
                 if (l < lmax)
-                        *rhup = min(*rhup, sm1[l] / *pdh);
-                rhsm = min(rhsm, sm1[nq] / *pdh);
+                        *rhup = std::min(*rhup, sm1[l] / *pdh);
+                rhsm = std::min(rhsm, sm1[nq] / *pdh);
                 if (nq > 1)
-                        rhdn = min(rhdn, sm1[nq - 1] / *pdh);
+                        rhdn = std::min(rhdn, sm1[nq - 1] / *pdh);
                 pdest = 0.;
         }
         if (rhsm >= *rhup) {
@@ -2060,7 +2060,7 @@ LSODA::orderswitch (double *rhup, double dsm, double *pdh,
                 }
         }
         if (kflag <= -2)
-                *rh = min(*rh, 0.2);
+                *rh = std::min(*rh, 0.2);
         /*
         If there is a change of order, reset nq, l, and the coefficients.
         In any case h is reset according to rh and the yh array is rescaled.
