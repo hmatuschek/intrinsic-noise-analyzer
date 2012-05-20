@@ -122,8 +122,10 @@ protected:
   void constructCovarianceMatrix(Eigen::MatrixXex &cov);
 
   void
-  constructSymmetricMatrix(Eigen::VectorXex covVec,Eigen::MatrixXex &cov);
+  constructSymmetricMatrix(const Eigen::VectorXex &covVec,Eigen::MatrixXex &cov);
 
+  void
+  flattenSymmetricMatrix(const Eigen::MatrixXex &mat,Eigen::VectorXex &vec);
 
 private:
   /**

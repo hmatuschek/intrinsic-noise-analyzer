@@ -113,7 +113,7 @@ public:
   *  @param covariance the lower diagonal covariance matrix
   **/
 
-  void stats(Eigen::VectorXd &mean, Eigen::MatrixXd &covariance);
+  void stats(Eigen::VectorXd &mean, Eigen::MatrixXd &covariance, Eigen::VectorXd &skewness);
 
   /**
   *  Evaluates the histogram of a species from current state

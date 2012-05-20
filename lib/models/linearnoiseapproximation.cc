@@ -37,14 +37,7 @@ LinearNoiseApproximation::postConstructor()
 
     // get symbols of species
     for(size_t i = 0; i<this->numIndSpecies(); i++)
-    {
-        for(size_t j = 0; j<this->numSpecies(); j++)
-        {
-            // apply the permutation
-            if(this->PermutationM(i,j)==1)
-                this->stateIndex.insert(std::make_pair(this->getSpecies(j)->getSymbol(),i));
-        }
-    }
+                this->stateIndex.insert(std::make_pair(this->species[PermutationVec(i)],i));
 
     // assign a set of new symbols
     // ... and add them to index table
@@ -149,15 +142,7 @@ LinearNoiseApproximation::postConstructor()
     // take only lower triangular and stack up to vector
     Eigen::VectorXex CovUpdate(dimCOV);
 
-    idx=0;
-    for(size_t i=0;i<this->numIndSpecies();i++)
-    {
-      for(size_t j=0;j<=i;j++)
-      {
-        CovUpdate(idx)=cov_update(i,j);
-        idx++;
-      }
-    }
+    flattenSymmetricMatrix(cov_update,CovUpdate);
 
     // done with CovUpdate
 
@@ -173,24 +158,15 @@ LinearNoiseApproximation::postConstructor()
       idx=0;
       for (size_t j=0; j<this->numIndSpecies(); j++)
       {
-        for (size_t k=0; k<=j; k++)
+        for (size_t k=0; k<j; k++)
         {
-            if(k==j)
-            {
-                Delta(i) += this->Hessian(i,idx)*cov(j,k);
-            }
-            else
-            {
-                // fac 2 by symmetry, saves summing over strictly upper cov matrix
-                Delta(i) += 2.*this->Hessian(i,idx)*cov(j,k);
-            }
-
+            // fac 2 by symmetry, saves summing over strictly upper cov matrix
+            Delta(i) += this->Hessian(i,idx)*cov(j,k);
             idx++;
-
         }
+        Delta(i) += this->Hessian(i,idx)*cov(j,j)/2.;
+        idx++;
       }
-      // divide by 2
-      Delta(i)/=2.;
       // now add rate corrections
       Delta(i)+=this->REcorrections(i);
     }
@@ -223,12 +199,10 @@ LinearNoiseApproximation::postConstructor()
                 idx++;
             }
         }
-
     }
 
     Eigen::VectorXex ThirdMomentUpdate(dimSkew);
 
-    //size_t ids = 0;
     idx=0;
     size_t idy;
     for(size_t i=0;i<this->numIndSpecies();i++)
@@ -335,24 +309,15 @@ LinearNoiseApproximation::postConstructor()
       idx=0;
       for (size_t j=0; j<this->numIndSpecies(); j++)
       {
-        for (size_t k=0; k<=j; k++)
+        for (size_t k=0; k<j; k++)
         {
-            if(k==j)
-            {
-                Delta(i) += this->Hessian(i,idx)*iosVariables(idx);
-            }
-            else
-            {
-                // fac 2 by symmetry, saves summing over strictly upper cov matrix
-                Delta(i) += 2.*this->Hessian(i,idx)*iosVariables(idx);
-            }
-
+            // factor 2 is used to sum over strictly upper cov matrix
+            Delta(i) += this->Hessian(i,idx)*iosVariables(idx);
             idx++;
-
         }
+        Delta(i) += this->Hessian(i,idx)*iosVariables(idx)/2.;
+        idx++;
       }
-      // divide by 2
-      Delta(i)/=2.;
     }
 
     // @todo add philippian!
@@ -500,10 +465,12 @@ LinearNoiseApproximation::fullState(const Eigen::VectorXd &state, Eigen::VectorX
                 for(size_t l=0; l<(unsigned)cmat.cols(); l++)
                     thirdMoment(i) += cmat(i,j) * cmat(i,k) * cmat(i,l) *thirdMomVariables[j](k,l);
 
-    // get reduced covariance vector
-    Eigen::VectorXd covvec = state.segment(2*this->numIndSpecies()+dimCOV+dimThird,dimCOV);
-    // reduced covariance
-    Eigen::MatrixXd cov_ind(this->numIndSpecies(),this->numIndSpecies());
+   // get reduced covariance vector
+   Eigen::VectorXd covvec = state.segment(2*this->numIndSpecies()+dimCOV+dimThird,dimCOV);
+   // reduced covariance
+   Eigen::MatrixXd cov_ind(this->numIndSpecies(),this->numIndSpecies());
+
+   tail = state.segment(this->numIndSpecies()+dimCOV,this->numIndSpecies());
 
    // fill upper triangular
    idx=0;
@@ -511,7 +478,7 @@ LinearNoiseApproximation::fullState(const Eigen::VectorXd &state, Eigen::VectorX
    {
        for(size_t j=0;j<=i;j++)
        {
-           cov_ind(i,j) = covvec(idx);
+           cov_ind(i,j) = covvec(idx)-tail(i)*tail(j);
            // fill rest by symmetry
            cov_ind(j,i) = cov_ind(i,j);
            idx++;
@@ -559,12 +526,9 @@ LinearNoiseApproximation::getREs(Eigen::VectorXd &REs)
 {
     // make sure vector is big enough
     REs.resize(this->numIndSpecies());
-
     // and evaluate:
     for (size_t i=0; i<this->numIndSpecies(); i++)
-    {
         REs(i) = this->interpreter.evaluate(this->REs(i));
-    }
     // ... done.
 }
 
@@ -573,12 +537,9 @@ LinearNoiseApproximation::getRateCorrections(Eigen::VectorXd &REcorr)
 {
     // make sure vector is big enough
     REcorr.resize(this->numIndSpecies());
-
     // and evaluate:
     for (size_t i=0; i<this->numIndSpecies(); i++)
-    {
         REcorr(i) = this->interpreter.evaluate(this->REcorrections(i));
-    }
     // ... done.
 }
 
@@ -825,7 +786,7 @@ LinearNoiseApproximation::constructCovarianceMatrix(Eigen::MatrixXex &cov)
 
 
 void
-LinearNoiseApproximation::constructSymmetricMatrix(Eigen::VectorXex covVec,Eigen::MatrixXex &cov)
+LinearNoiseApproximation::constructSymmetricMatrix(const Eigen::VectorXex &covVec,Eigen::MatrixXex &cov)
 {
 
     // make space
@@ -843,15 +804,29 @@ LinearNoiseApproximation::constructSymmetricMatrix(Eigen::VectorXex covVec,Eigen
       }
     }
 
-    return;
+}
 
+
+void
+LinearNoiseApproximation::flattenSymmetricMatrix(const Eigen::MatrixXex &mat,Eigen::VectorXex &vec)
+{
+    // @todo add static assertions here
+    size_t idx=0;
+    for(size_t i=0;i<this->numIndSpecies();i++)
+    {
+      for(size_t j=0;j<=i;j++)
+      {
+        vec(idx)=mat(i,j);
+        idx++;
+      }
+    }
 }
 
 void
 LinearNoiseApproximation::dump(std::ostream &str)
 {
 
-    str << std::endl << std::endl;
+  str << std::endl << std::endl;
 
   str << "Species (" << this->species.size() << "):\t ";
   for (size_t i=0; i<this->species.size(); i++)

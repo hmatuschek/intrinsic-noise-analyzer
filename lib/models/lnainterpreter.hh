@@ -75,7 +75,7 @@ public:
   /**
    * Evaluates the joint ODE of the system size expansion.
    */
-  template <class T, class U>
+  template <typename T, typename U>
   inline void evaluate(const T &state, double t, U &dx)
   {
     this->interpreter.run(state, dx);

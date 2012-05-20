@@ -127,12 +127,13 @@ StochasticSimulator::getHistogram(size_t speciesId,std::map<double,double> &hist
 
 
 void
-StochasticSimulator::stats(Eigen::VectorXd &mean, Eigen::MatrixXd &covariance)
+StochasticSimulator::stats(Eigen::VectorXd &mean, Eigen::MatrixXd &covariance, Eigen::VectorXd &skewness)
 
 {
 
-  mean = Eigen::MatrixXd::Zero(this->numSpecies(),1);
+  mean = Eigen::VectorXd::Zero(this->numSpecies());
   covariance = Eigen::MatrixXd::Zero(this->numSpecies(),this->numSpecies());
+  skewness = Eigen::VectorXd::Zero(this->numSpecies());
 
   // calculate mean numbers
   for(int ids=0;ids<this->ensembleSize;ids++){
@@ -170,12 +171,28 @@ StochasticSimulator::stats(Eigen::VectorXd &mean, Eigen::MatrixXd &covariance)
       idx++;
 
     }
-
   }
 
-  // make concentrations
+  // a factor which corrects the estimator of the skewness.
+  double skewEstFac = 0;
+  if (this->ensembleSize>2) skewEstFac = std::sqrt(this->ensembleSize*(this->ensembleSize-1))/(this->ensembleSize-2)/this->ensembleSize;
+
   for(size_t i=0; i<this->numSpecies(); i++)
+  {
+    // third moment
+    for(int ids=0;ids<this->ensembleSize;ids++)
+    {
+        double t = this->observationMatrix.row(ids)(i)-mean(i);
+        skewness(i) += t*t*t;
+    }
+
+    //make concentrations
     mean(i)/=this->Omega(i);
+
+   // compute skewness from third moment
+   skewness(i)=skewEstFac*skewness(i)/covariance(i)/sqrt(covariance(i))/(this->Omega(i)*this->Omega(i)*this->Omega(i));
+
+  }
 
 }
 

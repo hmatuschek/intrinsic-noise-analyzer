@@ -31,6 +31,8 @@ int main(int argc, char *argv[])
     double dt=0.1;
 
     Eigen::VectorXd state;
+
+    Eigen::VectorXd skewness;
     Eigen::MatrixXd variance;
 
     Eigen::MatrixXd cov(model.numSpecies(),model.numSpecies());
@@ -38,7 +40,7 @@ int main(int argc, char *argv[])
     for(double t=0.; t<10.; t+=dt)
     {
 
-       model.stats(state,variance);
+       model.stats(state,variance,skewness);
        std::cout <<t<< "\t" << state.transpose() << "\t";
        std::cout << variance.diagonal().transpose() << "\t";
 

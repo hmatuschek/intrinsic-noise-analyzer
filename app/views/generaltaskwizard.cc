@@ -168,11 +168,11 @@ IntegratorWizardPage::IntegratorWizardPage(QWidget *parent)
   this->registerField("n_imm", intermediateSteps);
 
   this->integrator = new QComboBox();
+  this->integrator->addItem("LSODA", QVariant("lsoda"));
   this->integrator->addItem("RKF45 (adaptive)", QVariant("rkf45"));
   this->integrator->addItem("Dopri5 (adaptive)", QVariant("dopr5"));
-  this->integrator->addItem("LSODA (stiff)", QVariant("lsoda"));
   this->integrator->addItem("Rosenbrock4 (stiff)", QVariant("ros4"));
-  this->integrator->addItem("RK4", QVariant("rk4"));
+//  this->integrator->addItem("RK4", QVariant("rk4"));
   this->integrator->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
   this->registerField("integrator", this->integrator);
   QObject::connect(this->integrator, SIGNAL(currentIndexChanged(int)),

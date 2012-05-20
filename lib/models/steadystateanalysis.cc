@@ -240,13 +240,56 @@ SteadyStateAnalysis::calcSteadyState(Eigen::VectorXd &x)
 
 }
 
-void SteadyStateAnalysis::calcIOS(Eigen::VectorXd &x)
+int SteadyStateAnalysis::calcLNA(Eigen::VectorXd &x)
+{
+
+    size_t dimCov = lnaModel.numIndSpecies()*(lnaModel.numIndSpecies()+1)/2;
+
+    // calculate concentrations
+    Eigen::VectorXd conc(lnaModel.numIndSpecies());
+    int iter=this->calcConcentrations(conc);
+
+    size_t offset = lnaModel.numIndSpecies();
+    size_t lnaLength = lnaModel.numIndSpecies()+dimCov;
+
+    Eigen::VectorXex lnaUpdate = lnaModel.updateVector.segment(offset,lnaLength);
+
+    Eigen::VectorXd A(lnaLength);
+    Eigen::MatrixXd B(lnaLength,lnaLength);
+
+    // substitution table for concentrations
+    GiNaC::exmap subs_table;
+    for (size_t s=0; s<(lnaModel.numIndSpecies()); s++)
+        subs_table.insert( std::pair<GiNaC::ex,GiNaC::ex>( lnaModel.species[lnaModel.PermutationVec(s)], conc(s) ) );
+    // substitute concentration
+    for(int i=0; i<lnaUpdate.size(); i++)
+        lnaUpdate(i)=lnaUpdate(i).subs(subs_table);
+
+    // generate zero
+    subs_table.clear();
+    for (int i=0; i<lnaUpdate.size(); i++)
+        subs_table.insert( std::pair<GiNaC::ex,GiNaC::ex>( lnaModel.stateVariables[offset+i], 0 ) );
+    // obtain result
+    for(size_t i=0; i<lnaLength; i++)
+    {
+        A(i)=GiNaC::ex_to<GiNaC::numeric>( lnaUpdate(i).subs(subs_table) ).to_double();
+        for(size_t j=0; j<lnaLength; j++)
+            B(i,j) = GiNaC::ex_to<GiNaC::numeric>( lnaUpdate(i).diff(lnaModel.stateVariables[offset+j]) ).to_double();
+    }
+
+    // solve LNA
+    x.tail(lnaLength)=B.lu().solve(-A);
+
+    return iter;
+}
+
+int SteadyStateAnalysis::calcIOS(Eigen::VectorXd &x)
 {
 
     size_t dimCov = lnaModel.numIndSpecies()*(lnaModel.numIndSpecies()+1)/2;
     size_t dimThree = dimCov*(lnaModel.numIndSpecies()+2)/3;
 
-    this->calcSteadyState(x);
+    int iter = this->calcSteadyState(x);
 
     size_t offset = 2*lnaModel.numIndSpecies()+dimCov;
     size_t iosLength = lnaModel.numIndSpecies()+dimCov+dimThree;
@@ -281,6 +324,7 @@ void SteadyStateAnalysis::calcIOS(Eigen::VectorXd &x)
     // solve IOS
     x.tail(iosLength)=B.lu().solve(-A);
 
+    return iter;
 }
 
 void SteadyStateAnalysis::dump(std::ostream &str)

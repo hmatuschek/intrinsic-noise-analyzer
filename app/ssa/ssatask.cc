@@ -53,6 +53,7 @@ SSATask::process()
 
   Eigen::VectorXd mean(this->simulator->numSpecies());
   Eigen::MatrixXd cov(this->simulator->numSpecies(), this->simulator->numSpecies());
+  Eigen::VectorXd skewness(this->simulator->numSpecies());
 
   this->setState(Task::RUNNING);
   this->setProgress(0.0);
@@ -67,7 +68,7 @@ SSATask::process()
     }
 
     // Set current simulation statistics:
-    this->simulator->stats(mean, cov);
+    this->simulator->stats(mean, cov, skewness);
 
     // Store data in table:
     this->time_series.matrix()(i, 0) = i*dt;

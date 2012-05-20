@@ -78,8 +78,25 @@ public:
    */
   int calcSteadyState(Eigen::VectorXd &x);
 
+  /**
+   * Solves for LNA steady state of the reduced state vector and returns number of function evaluations
+   * used.
+   *
+   * @param x: Outputs the steady state concentrations, covariance and EMRE vector in reduced
+   *        coordinates. Contents of x will be overwritten.
+   */
 
-  void calcIOS(Eigen::VectorXd &x);
+  int calcLNA(Eigen::VectorXd &x);
+
+  /**
+   * Solves for IOS steady state of the reduced state vector and returns number of function evaluations
+   * used.
+   *
+   * @param x: Outputs the steady state concentrations, covariance and EMRE vector, the IOS covariance corrections and the IOS emre corrections in reduced
+   *        coordinates. Contents of x will be overwritten.
+   */
+
+  int calcIOS(Eigen::VectorXd &x);
 
   /**
    * Samples the frequencies [0, f_max], where f_max is dertermined by the eigen values of the
