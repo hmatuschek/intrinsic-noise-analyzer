@@ -108,8 +108,6 @@ LNABaseModel::postConstructor()
         {
             // differentiate again
             rates_hessian(i,idx) = GiNaC::diff(rates_gradient(i,j), species[PermutationVec(k)]);
-            // substitute conservation relations
-            rates_hessian(i,idx) = rates_hessian(i,idx).subs(subs_table);
             idx++;
         }
 
@@ -143,7 +141,7 @@ LNABaseModel::postConstructor()
                        (this->reduced_stoichiometry.cast< GiNaC::ex >()(i,m)*rate_expressions(m)*this->reduced_stoichiometry.transpose().cast< GiNaC::ex >()(m,j));
            }
            //divide by volume squared
-           this->DiffusionVec(idx) = this->DiffusionVec(idx)/this->Omega_ind(i)/this->Omega_ind(j);
+           this->DiffusionVec(idx)/=this->Omega_ind(i)*this->Omega_ind(j);
            //store also in matrix form
            this->DiffusionMatrix(i,j) = this->DiffusionVec(idx);
 
@@ -158,27 +156,23 @@ LNABaseModel::postConstructor()
                     this->DiffusionJacM(idy,k)+=rates_gradient(m,k)
                       *this->reduced_stoichiometry.cast< GiNaC::ex >()(i,m)
                       *this->reduced_stoichiometry.cast< GiNaC::ex >()(j,m);
-                }
+               }
                this->DiffusionJacM(idy,k)/=this->Omega_ind(i)*this->Omega_ind(j);
-
            }
            idy++;
 
            for(size_t k=0;k<=j;k++)
            {
-
                for(size_t m=0;m<this->numReactions();m++)
                {
-
                     this->Diffusion3Tensor(idz)+=
                          rate_expressions(m)
                          *this->reduced_stoichiometry.cast< GiNaC::ex >()(i,m)
                          *this->reduced_stoichiometry.cast< GiNaC::ex >()(j,m)
                          *this->reduced_stoichiometry.cast< GiNaC::ex >()(k,m);
-
                }
-
-               this->Diffusion3Tensor(idz++) /= this->Omega_ind(i)*this->Omega_ind(j)*this->Omega_ind(k);
+               this->Diffusion3Tensor(idz) /= this->Omega_ind(i)*this->Omega_ind(j)*this->Omega_ind(k);
+               idz++;
            }
        }
 
@@ -223,9 +217,7 @@ LNABaseModel::foldConservationConstants(const Eigen::VectorXd &conserved_cycles)
     GiNaC::exmap subs_table;
 
     for (size_t s=0; s<this->numDepSpecies(); s++)
-    {
         subs_table.insert( std::pair<GiNaC::ex,GiNaC::ex>( this->conservationConstants(s), conserved_cycles(s) ) );
-    }
 
 
     size_t idx=0;

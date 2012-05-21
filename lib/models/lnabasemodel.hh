@@ -108,11 +108,13 @@ protected:
     Eigen::MatrixXex fHessian;
 
     /**
+    * THIS FUNCTION CALL IS REDUNDANT NOW!
     * A method that folds all constants arising from conservation laws
     */
     void foldConservationConstants(const Eigen::VectorXd &conserved_cycles);
 
     /**
+    * THIS FUNCTION CALL IS REDUNDANT NOW!
     * A method that folds all constants arising from conservation laws in a given expression
     */
     void foldConservationConstants(const Eigen::VectorXd &conserved_cycles, Eigen::VectorXex &vec);

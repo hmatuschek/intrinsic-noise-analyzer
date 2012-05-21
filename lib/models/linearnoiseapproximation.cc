@@ -34,11 +34,9 @@ void
 LinearNoiseApproximation::postConstructor()
 {
     // setup index table
-
     // get symbols of species
     for(size_t i = 0; i<this->numIndSpecies(); i++)
-                this->stateIndex.insert(std::make_pair(this->species[PermutationVec(i)],i));
-
+        this->stateIndex.insert(std::make_pair(this->species[PermutationVec(i)],i));
     // assign a set of new symbols
     // ... and add them to index table
     for(size_t i = 0; i<this->stateVariables.size(); i++)
@@ -65,20 +63,33 @@ LinearNoiseApproximation::postConstructor()
 
     for(size_t i=0;i<this->numIndSpecies();i++)
     {
-        thirdmomentVariables[i].resize(this->numIndSpecies(),this->numIndSpecies());
+        thirdmomentVariables[i]=Eigen::MatrixXex::Zero(this->numIndSpecies(),this->numIndSpecies());
         for(size_t j=0;j<=i;j++)
             for(size_t k=0;k<=j;k++)
             {
                 thirdmomentVariables[i](j,k)=stateVariables[idx];
+                thirdmomentVariables[i](k,j)=stateVariables[idx];
+
                 thirdmomentVariables[j](i,k)=stateVariables[idx];
+                thirdmomentVariables[j](k,i)=stateVariables[idx];
+
                 thirdmomentVariables[k](i,j)=stateVariables[idx];
-                idx++;
+                thirdmomentVariables[k](j,i)=stateVariables[idx];
+
+                idx++; // counts i,j,k loop
             }
     }
 
+    /* @todo remove this */
+    // check matrix is nonzero
+    for(size_t i=0;i<numIndSpecies();i++)
+    for(size_t j=0;j<numIndSpecies();j++)
+    for(size_t k=0;k<numIndSpecies();k++)
+        if(thirdmomentVariables[i](j,k)==0) throw("oops");
+
     for(size_t i = 0 ; i<dimCOV; i++)
         iosVariables(i) = stateVariables[idx++];
-    for(size_t i = 0 ; i<this->numIndSpecies(); i++)
+    for(size_t i = 0 ; i<numIndSpecies(); i++)
         iosemreVariables(i) = stateVariables[idx++];
 
     // Evaluate initial concentrations and evaluate volumes:
@@ -94,18 +105,12 @@ LinearNoiseApproximation::postConstructor()
     this->ICsPermuted = this->PermutationM*ICs;
 
     for(size_t i=0;i<this->numSpecies();i++)
-    {
         for(size_t j=0;j<this->numIndSpecies();j++)
             this->LinkCMatrixNumeric(i,j) = GiNaC::ex_to<GiNaC::numeric>( this->LinkCMatrix(i,j) ).to_double();
-    }
 
     for(size_t i=0;i<this->numDepSpecies();i++)
-    {
         for(size_t j=0;j<this->numIndSpecies();j++)
             this->Link0CMatrixNumeric(i,j) = GiNaC::ex_to<GiNaC::numeric>( this->Link0CMatrix(i,j) ).to_double();
-    }
-
-
 
     /**
     * @todo the omega business is ugly and workaround at the moment
@@ -121,9 +126,6 @@ LinearNoiseApproximation::postConstructor()
         // now fold coverservation constants for all coefficients
         this->foldConservationConstants(this->conserved_cycles);
 
-        // fold also conservation constants in updateVector
-        this->foldConservationConstants(this->conserved_cycles,this->updateVector);
-
     }
 
     /////////////////////////////////////////////
@@ -136,13 +138,9 @@ LinearNoiseApproximation::postConstructor()
     constructCovarianceMatrix(cov);
 
     // determine update for covariances
-    Eigen::MatrixXex cov_update;
-    cov_update = (this->JacobianM*cov)+(cov*this->JacobianM.transpose())+this->DiffusionMatrix;
-
     // take only lower triangular and stack up to vector
     Eigen::VectorXex CovUpdate(dimCOV);
-
-    flattenSymmetricMatrix(cov_update,CovUpdate);
+    flattenSymmetricMatrix( (this->JacobianM*cov)+(cov*this->JacobianM.transpose())+this->DiffusionMatrix ,CovUpdate);
 
     // done with CovUpdate
 
@@ -162,8 +160,9 @@ LinearNoiseApproximation::postConstructor()
         {
             // fac 2 by symmetry, saves summing over strictly upper cov matrix
             Delta(i) += this->Hessian(i,idx)*cov(j,k);
-            idx++;
+            idx++; // counts k,j loop
         }
+        // j==k
         Delta(i) += this->Hessian(i,idx)*cov(j,j)/2.;
         idx++;
       }
@@ -182,24 +181,9 @@ LinearNoiseApproximation::postConstructor()
     // calculate third moment
     /////////////////////////
 
-
     std::vector< Eigen::MatrixXex > diffjac(this->numIndSpecies());
-
     for(size_t i=0;i<this->numIndSpecies();i++)
-    {
-
-        idx=0;
-        diffjac[i].resize(this->numIndSpecies(),this->numIndSpecies());
-        for(size_t j=0;j<this->numIndSpecies();j++)
-        {
-            for(size_t k=0;k<=j;k++)
-            {
-                diffjac[i](j,k)=this->DiffusionJacM(idx,i);
-                diffjac[i](k,j)=this->DiffusionJacM(idx,i);
-                idx++;
-            }
-        }
-    }
+        constructSymmetricMatrix(this->DiffusionJacM.col(i),diffjac[i]);
 
     Eigen::VectorXex ThirdMomentUpdate(dimSkew);
 
@@ -210,9 +194,9 @@ LinearNoiseApproximation::postConstructor()
         {
             for(size_t k=0;k<=j;k++)
             {
-                ThirdMomentUpdate(idx)+=this->Diffusion3Tensor(idx);
+                ThirdMomentUpdate(idx)=this->Diffusion3Tensor(idx);
 
-                ThirdMomentUpdate(idx)+=2*this->DiffusionMatrix(i,j)*emreVariables(k)+this->DiffusionMatrix(i,k)*emreVariables(j);
+                ThirdMomentUpdate(idx)+=this->DiffusionMatrix(k,j)*emreVariables(i)+this->DiffusionMatrix(i,j)*emreVariables(k)+this->DiffusionMatrix(i,k)*emreVariables(j);
 
                 idy = 0;
                 for(size_t r=0; r<this->numIndSpecies(); r++)
@@ -247,14 +231,13 @@ LinearNoiseApproximation::postConstructor()
                             ThirdMomentUpdate(idx)+=this->Hessian(k,idy)*wick3;
                         }
 
-                    } //end s
-                    idy++;
+                        idy++; // counts the r,s loop
+                    } //end s loop
                 } // end r loop
 
-                idx++;
+                idx++; // counts i,j,k
             } // end k loop
-
-            } // end i,j,k loop
+            } // end i,j loop
 
     ///////////////////////////////////////
     // calculate update for LNA correction
@@ -277,29 +260,29 @@ LinearNoiseApproximation::postConstructor()
         for(size_t k=0; k<this->numIndSpecies(); k++)
              {
 
-                iosUpdate(idx) += this->DiffusionJacM(idx,k)*emreVariables(k);
-
+                iosUpdate(idx) += diffjac[k](i,j)*emreVariables(k);//this->DiffusionJacM(idx,k)*emreVariables(k);
                 iosUpdate(idx) += this->JacobianM(i,k)*iosCov(k,j)+this->JacobianM(j,k)*iosCov(k,i);
 
                 for(size_t l=0; l<k; l++)
                 {
                     iosUpdate(idx) += this->Hessian(i,idy)*thirdmomentVariables[j](k,l)+this->Hessian(j,idy)*thirdmomentVariables[i](k,l);
-                    iosUpdate(idx) += this->DiffusionHessianM(idx,idy)*cov(k,k);
-                    idy++;
+                    iosUpdate(idx) += this->DiffusionHessianM(idx,idy)*cov(k,l);
+                    idy++; //counts l,k loop
                 }
 
                 // same for l=k appears only once in sum
                 iosUpdate(idx) += (this->Hessian(i,idy)*thirdmomentVariables[j](k,k)/2+this->Hessian(j,idy)*thirdmomentVariables[i](k,k)/2);
                 iosUpdate(idx) += this->DiffusionHessianM(idx,idy)*cov(k,k)/2;
                 idy++;
+
              }
 
-        idx++;
+        idx++; // counts i,j loop
      }
 
-    ////////////////////////
+    ////////////////////////////
     // now calculate IOS-EMRE //
-    ////////////////////////
+    ////////////////////////////
 
     //Eigen::VectorXex Delta(this->numIndSpecies());
 
@@ -313,7 +296,7 @@ LinearNoiseApproximation::postConstructor()
         {
             // factor 2 is used to sum over strictly upper cov matrix
             Delta(i) += this->Hessian(i,idx)*iosVariables(idx);
-            idx++;
+            idx++; // counts j,k loop
         }
         Delta(i) += this->Hessian(i,idx)*iosVariables(idx)/2.;
         idx++;
@@ -440,7 +423,11 @@ LinearNoiseApproximation::fullState(const Eigen::VectorXd &state, Eigen::VectorX
     // get reduced skewness vector (should better be a view rather then a copy)
     Eigen::VectorXd tail = state.segment(2*this->numIndSpecies()+dimCOV,dimThird);
 
+    Eigen::VectorXd emreVal = state.segment(this->numIndSpecies()+dimCOV,this->numIndSpecies());
+
     std::vector< Eigen::MatrixXd > thirdMomVariables(this->numIndSpecies());
+
+    double val = 0;
 
     size_t idx = 0;
     for(size_t i=0;i<this->numIndSpecies();i++)
@@ -449,10 +436,18 @@ LinearNoiseApproximation::fullState(const Eigen::VectorXd &state, Eigen::VectorX
         for(size_t j=0;j<=i;j++)
             for(size_t k=0;k<=j;k++)
             {
-                thirdMomVariables[i](j,k)=tail[idx];
-                thirdMomVariables[j](i,k)=tail[idx];
-                thirdMomVariables[k](i,j)=tail[idx];
-                idx++;
+                val = tail[idx]-emreVal(i)*emreVal(j)*emreVal(k);
+
+                thirdMomVariables[i](j,k)=val;
+                thirdMomVariables[i](k,j)=val;
+
+                thirdMomVariables[j](i,k)=val;
+                thirdMomVariables[j](k,i)=val;
+
+                thirdMomVariables[k](i,j)=val;
+                thirdMomVariables[k](j,i)=val;
+
+                idx++; // counts i,j,k loop
             }
     }
 
@@ -470,15 +465,13 @@ LinearNoiseApproximation::fullState(const Eigen::VectorXd &state, Eigen::VectorX
    // reduced covariance
    Eigen::MatrixXd cov_ind(this->numIndSpecies(),this->numIndSpecies());
 
-   tail = state.segment(this->numIndSpecies()+dimCOV,this->numIndSpecies());
-
    // fill upper triangular
    idx=0;
    for(size_t i=0;i<this->numIndSpecies();i++)
    {
        for(size_t j=0;j<=i;j++)
        {
-           cov_ind(i,j) = covvec(idx)-tail(i)*tail(j);
+           cov_ind(i,j) = covvec(idx)-emreVal(i)*emreVal(j);
            // fill rest by symmetry
            cov_ind(j,i) = cov_ind(i,j);
            idx++;
@@ -492,7 +485,6 @@ LinearNoiseApproximation::fullState(const Eigen::VectorXd &state, Eigen::VectorX
 
    // construct full iosemre vector, restore original order and return
    iosemre = cmat*tail;
-
 
 }
 
@@ -519,7 +511,6 @@ LinearNoiseApproximation::getREs(const Eigen::VectorXd &state, Eigen::VectorXd &
     // and get rate equations
     this->getREs(REs);
 }
-
 
 void
 LinearNoiseApproximation::getREs(Eigen::VectorXd &REs)
