@@ -14,8 +14,10 @@ using namespace Fluc::Evaluate::LLVM;
 
 
 Code::Code()
-  : context(), module("system", context), builder(context), function(0), input(0), output(0),
-    complex_t(0), real_pow(0), complex_pow(0), engine(0), function_ptr(0)
+  : context(llvm::getGlobalContext()), module("system", context), builder(context),
+    function(0), input(0), output(0), complex_t(0),
+    real_pow(0), complex_pow(0), real_abs(0), real_log(0), real_exp(0),
+    engine(0), function_ptr(0)
 {
   // Init target and create module:
   llvm::InitializeNativeTarget();
