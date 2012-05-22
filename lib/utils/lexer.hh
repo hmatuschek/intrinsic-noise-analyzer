@@ -62,7 +62,7 @@ public:
   /**
    * Returns the line of the token.
    */
-  size_t getLine() const;
+  unsigned int getLine() const;
 
   /**
    * Returns the value of the token.

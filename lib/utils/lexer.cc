@@ -27,7 +27,7 @@ Token::getId() const
   return this->id;
 }
 
-size_t
+unsigned int
 Token::getLine() const
 {
   return this->line;

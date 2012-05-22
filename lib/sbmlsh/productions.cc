@@ -358,7 +358,7 @@ ScaledUnitIdentifierProduction::parse(Utils::Lexer &lexer, Utils::ConcreteSyntax
 {
   // Get value of current token.
   std::string id = lexer.current().getValue();
-  size_t line = lexer.current().getLine();
+  unsigned int line = lexer.current().getLine();
 
   // Parse identifier:
   TokenProduction::parse(lexer, element);
@@ -407,7 +407,7 @@ ScaledUnitModifierProduction::parse(Utils::Lexer &lexer, Utils::ConcreteSyntaxTr
 {
   // Get identifier
   std::string id = lexer.current().getValue();
-  size_t line = lexer.current().getLine();
+  unsigned int line = lexer.current().getLine();
 
   // Parse identifier:
   TokenProduction::parse(lexer, element);
@@ -638,7 +638,7 @@ void
 SpeciesModifierProduction::parse(Utils::Lexer &lexer, Utils::ConcreteSyntaxTree &element)
 {
   std::string id = lexer.current().getValue();
-  size_t line    = lexer.current().getLine();
+  unsigned int line    = lexer.current().getLine();
 
   Utils::TokenProduction::parse(lexer, element);
 
@@ -742,7 +742,7 @@ void
 ParameterModifierProduction::parse(Utils::Lexer &lexer, Utils::ConcreteSyntaxTree &element)
 {
   std::string id = lexer.current().getValue();
-  size_t    line = lexer.current().getLine();
+  unsigned int    line = lexer.current().getLine();
 
   // Parse token:
   TokenProduction::parse(lexer, element);
