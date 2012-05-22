@@ -26,10 +26,6 @@ public:
 private:
   void compareIntegrators(const std::string &file, double final_time);
 
-  void integrateViaGiNaC(Models::LinearNoiseApproximation &model,
-                         const Eigen::VectorXd &init_state, Eigen::VectorXd &final_state,
-                         double final_time, double err_abs, double err_rel);
-
   void integrateViaByteCode(Models::LinearNoiseApproximation &model,
                             const Eigen::VectorXd &init_state, Eigen::VectorXd &final_state,
                             double final_time, double err_abs, double err_rel);

@@ -48,49 +48,15 @@ LNATest::compareIntegrators(const std::string &file, double final_time)
   Models::LinearNoiseApproximation model(doc->getModel());
 
   Eigen::VectorXd initial_state(model.getDimension());
-  Eigen::VectorXd final_state_ginac(model.getDimension());
   Eigen::VectorXd final_state_intpr(model.getDimension());
 
   model.getInitialState(initial_state);
 
-  this->integrateViaGiNaC(model, initial_state, final_state_ginac, final_time, err_abs, err_rel);
   this->integrateViaByteCode(model, initial_state, final_state_intpr, final_time, err_abs, err_rel);
-
-  for (size_t i=0; i<model.getDimension(); i++)
-  {
-    UT_ASSERT(abs(final_state_intpr(i) - final_state_ginac(i))
-              < err_rel*abs(final_state_ginac(i)) + err_abs);
-  }
 
   delete doc;
 }
 
-
-
-void
-LNATest::integrateViaGiNaC(Models::LinearNoiseApproximation &model,
-                           const Eigen::VectorXd &init_state, Eigen::VectorXd &final_state,
-                           double final_time, double err_abs, double err_rel)
-{
-  size_t N = 100;
-  double dt=final_time/N;
-
-  Models::LNAevaluator evaluator(model);
-  ODE::RKF45<Models::LNAevaluator> integrator(evaluator, dt, err_abs, err_rel);
-
-  // state vector (deterministic concentrations + covariances)
-  Eigen::VectorXd x(init_state);
-  Eigen::VectorXd dx(integrator.getDimension());
-
-  double t = 0.0;
-  for(size_t i=0; i<N; i++,t+=dt)
-  {
-    integrator.step(x,t,dx);
-    x += dx; t += dt;
-  }
-
-  final_state.noalias() = x;
-}
 
 
 void

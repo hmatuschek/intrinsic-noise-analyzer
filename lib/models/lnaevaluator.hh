@@ -9,7 +9,9 @@ namespace Models {
 /**
  * Wraps an instance of LinearNoiseApproximation and gives a basic interface for the ODE integration via Ginac.
  *
- * This class is only here for test purposes USE Fluc::LNAinterpreter INSTEAD.
+ * @deprecated This class is only here for test purposes USE Fluc::LNAinterpreter INSTEAD.
+ *
+ * @todo Remove this class, it is not needed anymore.
  *
  * @ingroup models
  */

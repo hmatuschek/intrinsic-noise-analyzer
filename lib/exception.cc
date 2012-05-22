@@ -73,13 +73,13 @@ Exception::operator <<(unsigned int value)
 }
 
 
-Exception &
+/*Exception &
 Exception::operator <<(size_t value)
 {
   std::stringstream str; str << value;
   this->message.append(str.str());
   return *this;
-}
+}*/
 
 
 Exception &
