@@ -14,9 +14,7 @@ namespace ODE {
 
 
 /**
- * Drives the LSODA integrator *
- * In contrast to the implementation shown in @cite press2007, this implementation uses the maximum
- * norm to estimate the truncation-error of the integration-step.
+ * Drives the LSODA integrator
  *
  * @ingroup ode
  */
