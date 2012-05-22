@@ -62,7 +62,7 @@ public:
   {
     if (1 != this->stack.size()) {
       InternalError err;
-      err << "Invalid stack size: Expected 1 got: " << this->stack.size();
+      err << "Invalid stack size: Expected 1 got: " << (unsigned) this->stack.size();
       throw err;
     }
 
@@ -111,7 +111,8 @@ public:
     {
       if (2 > this->stack.size()) {
         InternalError err;
-        err << "Can not assemble value: Not enougth values on stack: " << this->stack.size();
+        err << "Can not assemble value: Not enougth values on stack: "
+            << (unsigned) this->stack.size();
         throw err;
       }
 
@@ -137,7 +138,8 @@ public:
     {
       if (2 > this->stack.size()) {
         InternalError err;
-        err << "Can not assemble value: Not enougth values on stack: " << this->stack.size();
+        err << "Can not assemble value: Not enougth values on stack: "
+            << (unsigned) this->stack.size();
         throw err;
       }
 
@@ -159,7 +161,8 @@ public:
 
     if (2 > this->stack.size()) {
       InternalError err;
-      err << "Can not assemble value: Not enougth values on stack: " << this->stack.size();
+      err << "Can not assemble value: Not enougth values on stack: "
+          << (unsigned) this->stack.size();
       throw err;
     }
 
@@ -187,7 +190,8 @@ public:
 
         if (1 > this->stack.size()) {
             InternalError err;
-            err << "Can not assemble value: Not enough values on stack: " << this->stack.size();
+            err << "Can not assemble value: Not enough values on stack: "
+                << (unsigned) this->stack.size();
             throw err;
         }
 
@@ -203,7 +207,8 @@ public:
 
         if (1 > this->stack.size()) {
             InternalError err;
-            err << "Can not assemble value: Not enough values on stack: " << this->stack.size();
+            err << "Can not assemble value: Not enough values on stack: "
+                << (unsigned) this->stack.size();
             throw err;
         }
 
@@ -219,7 +224,8 @@ public:
 
         if (1 > this->stack.size()) {
             InternalError err;
-            err << "Can not assemble value: Not enough values on stack: " << this->stack.size();
+            err << "Can not assemble value: Not enough values on stack: "
+                << (unsigned) this->stack.size();
             throw err;
         }
 
