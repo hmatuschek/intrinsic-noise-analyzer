@@ -81,6 +81,12 @@ RETask::RETask(const Config &config, QObject *parent) :
           config.getEpsilonAbs(), config.getEpsilonRel());
     break;
 
+  case Config::LSODA:
+    this->stepper = new Fluc::ODE::LsodaDriver<Fluc::Models::LNAinterpreter>(
+          this->interpreter, config.getIntegrationRange().getStepSize(),
+          config.getEpsilonAbs(), config.getEpsilonRel());
+    break;
+
   case Config::Rosenbrock4:
     // First, let LNA Interpreter compile the jacobian
     this->interpreter.compileJacobian();
