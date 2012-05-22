@@ -244,9 +244,12 @@ IOSTask::process()
     this->setProgress(double(s)/N_steps);
 
     // Determine update:
-    this->stepper->step(x, t, dx);
+    //this->stepper->step(x, t, dx);
     // Update state:
-    x+=dx;
+    //x+=dx;
+
+    // Update state:
+    this->stepper->step(x, t);
     // Update time
     t += dt;
 

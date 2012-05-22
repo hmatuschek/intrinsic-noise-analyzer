@@ -26,83 +26,59 @@ int main(int argc, char *argv[])
   // Do the work:
   //try
   {
-    // Construct LNA model from SBML model
-    Models::LinearNoiseApproximation model(doc->getModel());
 
-    Models::LNAinterpreter interpreter(model, 2, 1);
-    Models::SteadyStateAnalysis steadyState(model);
+      // state vector (deterministic concentrations + covariances)
 
-    double dt=0.01;
-    //ODE::RKF45<Models::LNAinterpreter> integrator(interpreter,dt,1e-5,1e-5);
-    //ODE::RKF45<Models::LinearNoiseApproximation> integrator(model,dt,1e-9,1e-5);
-    ODE::LsodaDriver<Models::LNAinterpreter> integrator(interpreter,dt,1e-9,1e-5);
 
-    // state vector (deterministic concentrations + covariances)
-    Eigen::VectorXd x(interpreter.getDimension());
-    Eigen::VectorXd dx(interpreter.getDimension());
 
-    Eigen::VectorXd concentrations(model.numSpecies());
-    Eigen::MatrixXd cov(model.numSpecies(),model.numSpecies());
-    Eigen::VectorXd emre(model.numSpecies());
+    Models::BaseModel base(doc->getModel());
 
-    Eigen::VectorXd thirdmoment(model.numSpecies());
-    Eigen::MatrixXd ioscov(model.numSpecies(),model.numSpecies());
-    Eigen::VectorXd iosemre(model.numSpecies());
+    std::cerr << "List of parameters:"<<std::endl;
+    for(size_t i =0; i<base.numParameters(); i++)
+        std::cerr<<i<<"\t"<<base.getParameter(i)->getSymbol()<<"\t"<<base.getParameter(i)->getValue()<<std::endl;
+    std::cerr<<std::endl<<std::endl;
 
-    // initialize state
-    interpreter.getInitialState(x);
+    for(double delta=0.025; delta<0.3; delta+=0.025)
+    {
+        base.getParameter(0)->setValue(GiNaC::ex((1.-delta)/2.));
+
+        // Construct LNA model from SBML model
+        Models::LinearNoiseApproximation model(base);
+        Models::SteadyStateAnalysis steadyState(model);
+
+        Eigen::VectorXd x(model.getDimension());
+
+        Eigen::VectorXd concentrations(model.numSpecies());
+        Eigen::MatrixXd cov(model.numSpecies(),model.numSpecies());
+        Eigen::VectorXd emre(model.numSpecies());
+
+        Eigen::VectorXd thirdmoment(model.numSpecies());
+        Eigen::MatrixXd ioscov(model.numSpecies(),model.numSpecies());
+        Eigen::VectorXd iosemre(model.numSpecies());
+
+        // initialize state
+        model.getInitialState(x);
+
+        steadyState.calcIOS(x);
+
+        model.fullState(x,concentrations,cov,emre,ioscov,thirdmoment,iosemre);
+
+        double theta = (cov(0,0)+ioscov(0,0))/cov(0,0);
+
+        std::cout<<delta <<"\t"<<theta<<std::endl;
+
+    }
+
+//    Models::LNAinterpreter interpreter(model, 2, 1);
+
+//    double dt=0.01;
+//    ODE::LsodaDriver<Models::LNAinterpreter> integrator(interpreter,dt,1e-9,1e-5);
+
+
     // get full initial concentrations and covariance and emre
 
 
 
-
-    // output mean concentrations
-    for(size_t i=0; i<model.numSpecies(); i++)
-    {
-        std::cout<< concentrations(i) <<"\t"<<std::endl;
-    }
-    //std::cerr<<model.getTimeUnit().getMultiplier();
-
-//    std::cout<<"Initial concentrations:"<<std::endl;
-//    std::cout<<concentrations.transpose()<<std::endl;
-
-//   std::cout<<"Initial covariance:"<<std::endl;
-//   std::cout<<cov<<std::endl;
-
-//    // header for output
-//    std::cout<< "# t" <<"\t";
-
-//    // mean concentrations
-//    for(size_t i=0; i<model.numSpecies(); i++)
-//    {
-//        std::cout<< doc->getModel()->getSpecies(i)->getName() <<"\t";
-//    }
-
-//    // emre concentrations
-//    for(size_t i=0; i<model.numSpecies(); i++)
-//    {
-//        std::cout<< doc->getModel()->getSpecies(i)->getName() <<"\t";
-//    }
-
-//    // variances
-//    for(size_t i=0; i<model.numSpecies(); i++)
-//    {
-//        std::cout<< "var"<< doc->getModel()->getSpecies(i)->getName() <<"\t";
-//    }
-
-//    // covariances
-
-//    for(size_t i=0; i<model.numSpecies();i++)
-//    {
-//       for(size_t j=0; j<i;j++)
-//       {
-//           std::cout<< "cov"<< doc->getModel()->getSpecies(i)->getName()
-//                    << "-"  << doc->getModel()->getSpecies(j)->getName()
-//                    << "\t";
-//       }
-//    }
-
-    //std::cout<< std::endl;
 
     double t=0;
     for(int i=0; i<100; i++){
@@ -144,7 +120,7 @@ int main(int argc, char *argv[])
            //           }
 
            //std::cout << std::endl;
-       }
+       }/*
 
        integrator.step(x,t,dx);
        x += dx; t += dt;
@@ -152,16 +128,13 @@ int main(int argc, char *argv[])
 
        model.fullState(x,concentrations,cov,emre,ioscov,thirdmoment,iosemre);
 
-       std::cout<< t <<std::endl;
+       //std::cout<< t <<std::endl;
 
        // output mean concentrations
        for(size_t i=0; i<model.numSpecies(); i++)
        {
-          std::cout<<concentrations(i) <<"\t";
-       }
-
-
-       std::cout<<std::endl;
+          //std::cout<<concentrations(i) <<"\t";
+       }*/
 
      }
 

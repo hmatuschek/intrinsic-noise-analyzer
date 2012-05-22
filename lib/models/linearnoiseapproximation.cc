@@ -196,7 +196,7 @@ LinearNoiseApproximation::postConstructor()
             {
                 ThirdMomentUpdate(idx)=this->Diffusion3Tensor(idx);
 
-                ThirdMomentUpdate(idx)+=this->DiffusionMatrix(k,j)*emreVariables(i)+this->DiffusionMatrix(i,j)*emreVariables(k)+this->DiffusionMatrix(i,k)*emreVariables(j);
+                ThirdMomentUpdate(idx)+=this->DiffusionMatrix(j,k)*emreVariables(i)+this->DiffusionMatrix(i,k)*emreVariables(j)+this->DiffusionMatrix(i,j)*emreVariables(k);
 
                 idy = 0;
                 for(size_t r=0; r<this->numIndSpecies(); r++)

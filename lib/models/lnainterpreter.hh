@@ -82,6 +82,15 @@ public:
   }
 
   /**
+   * Evaluates the joint ODE of the system size expansion.
+   */
+  template <typename T, typename U>
+  inline void evaluate(const T* state, double t, U* dx)
+  {
+    this->interpreter.run(state, dx);
+  }
+
+  /**
    * Evaluates the Jacobian of the ODEs at the given state.
    */
   inline void evaluateJacobian(const Eigen::VectorXd &state, double t, Eigen::MatrixXd &jacobian)

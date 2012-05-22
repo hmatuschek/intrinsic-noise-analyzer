@@ -34,7 +34,7 @@ protected:
   /** Holds the maximum relative error. */
   double err_rel;
 
-  Eigen::VectorXd dx;
+  //Eigen::VectorXd dx;
 
   double *ywork;
   double *atolwork;
@@ -50,7 +50,7 @@ public:
    * @param epsilon_rel Specifies the relative error for the step.
    */
   LsodaDriver(Sys &system, double dt, double epsilon_abs, double epsilon_rel)
-      : system(system), step_size(dt), err_abs(epsilon_abs), err_rel(epsilon_rel), dx(getDimension())
+      : system(system), step_size(dt), err_abs(epsilon_abs), err_rel(epsilon_rel)
   {
     istate=1;
 
@@ -76,10 +76,16 @@ public:
       for (size_t i = 1; i <= getDimension(); ++i) delta[i-1] = ywork[i]-state[i-1];
   }
 
+  virtual void step(Eigen::VectorXd &state, double t)
+  {
+      //for (size_t i = 1; i <= getDimension(); ++i) ywork[i] = state[i-1];
+      lsoda(getDimension(), state.data()-1, &t, t+step_size, 2, rtolwork, atolwork, 1, &istate, 0, 2);
+      //for (size_t i = 1; i <= getDimension(); ++i) delta[i-1] = ywork[i]-state[i-1];
+  }
+
   virtual void evalODE(double t, double y[], double yd[], int nsize)
   {
-      system.evaluate(Eigen::Map<Eigen::VectorXd>(y,getDimension()), t, dx);
-      for (size_t i = 0; i < getDimension(); ++i) yd[i] = dx[i];
+      system.evaluate(y, t, yd);
   }
 
 public:
