@@ -44,6 +44,9 @@ protected:
   llvm::Type *complex_t;
   llvm::Function *real_pow;
   llvm::Function *complex_pow;
+  llvm::Function *real_abs;
+  llvm::Function *real_log;
+  llvm::Function *real_exp;
 
   llvm::ExecutionEngine *engine;
   void *function_ptr;
@@ -66,7 +69,11 @@ public:
   llvm::Type     *getComplexTy();
   llvm::Function *getRealPowFunction();
   llvm::Function *getComplexPowFunction();
+  llvm::Function *getRealAbsFunction();
+  llvm::Function *getRealLogFunction();
+  llvm::Function *getRealExpFunction();
 
+  llvm::Module *getModule();
   void compile(size_t opt_level=0);
 
   void exec(const std::vector<llvm::GenericValue> &args);

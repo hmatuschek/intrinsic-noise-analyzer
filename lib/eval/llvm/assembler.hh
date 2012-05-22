@@ -11,11 +11,17 @@ namespace Fluc {
 namespace Evaluate {
 namespace LLVM {
 
+typedef enum {
+    FUNCTION_ABS,  /// < Function code for the absolute value "abs()".
+    FUNCTION_LOG,  /// < Function code for the natural logarithm "log()".
+    FUNCTION_EXP   /// < Function code for the exponential function "exp()".
+} FunctionCode;
 
 template <typename Scalar>
 class Assembler
     : public GiNaC::visitor, public GiNaC::numeric::visitor, public GiNaC::add::visitor,
-    public GiNaC::mul::visitor, public GiNaC::symbol::visitor, public GiNaC::power::visitor
+    public GiNaC::mul::visitor, public GiNaC::symbol::visitor, public GiNaC::power::visitor,
+    public GiNaC::function::visitor
 {
 protected:
   /**
@@ -29,6 +35,11 @@ protected:
   std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> &index_table;
 
   /**
+   * Holds the translation-table GiNaC Function serial -> Function Code:
+   */
+  std::map<unsigned, FunctionCode> function_codes;
+
+  /**
    * The value stack.
    */
   std::list<llvm::Value *> stack;
@@ -38,7 +49,10 @@ public:
   Assembler(Code *code, std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> &index_table)
     : code(code), index_table(index_table)
   {
-    // Pass...
+      // Populate function-code table:
+      this->function_codes[GiNaC::abs_SERIAL::serial] = FUNCTION_ABS;
+      this->function_codes[GiNaC::log_SERIAL::serial] = FUNCTION_LOG;
+      this->function_codes[GiNaC::exp_SERIAL::serial] = FUNCTION_EXP;
   }
 
   /**
@@ -154,6 +168,77 @@ public:
     this->stack.push_back(Builder<Scalar>::createPow(this->code, base, exponent));
   }
 
+
+  virtual void visit(const GiNaC::function &function)
+  {
+    std::map<unsigned, FunctionCode>::iterator item = this->function_codes.find(function.get_serial());
+
+    if (this->function_codes.end() == item) {
+        InternalError err;
+        err << "Can not compile function evaluation " << function << ": unknown function.";
+        throw err;
+    }
+
+    switch(item->second) {
+    case FUNCTION_ABS:
+    {
+        // Handle function argument:
+        function.op(0).accept(*this);
+
+        if (1 > this->stack.size()) {
+            InternalError err;
+            err << "Can not assemble value: Not enough values on stack: " << this->stack.size();
+            throw err;
+        }
+
+        llvm::Value *arg = this->stack.back(); this->stack.pop_back();
+        this->stack.push_back(Builder<Scalar>::createAbs(this->code, arg));
+    }
+    break;
+
+    case FUNCTION_LOG:
+    {
+        // Handle function argument:
+        function.op(0).accept(*this);
+
+        if (1 > this->stack.size()) {
+            InternalError err;
+            err << "Can not assemble value: Not enough values on stack: " << this->stack.size();
+            throw err;
+        }
+
+        llvm::Value *arg = this->stack.back(); this->stack.pop_back();
+        this->stack.push_back(Builder<Scalar>::createLog(this->code, arg));
+    }
+    break;
+
+    case FUNCTION_EXP:
+    {
+        // Handle function argument:
+        function.op(0).accept(*this);
+
+        if (1 > this->stack.size()) {
+            InternalError err;
+            err << "Can not assemble value: Not enough values on stack: " << this->stack.size();
+            throw err;
+        }
+
+        llvm::Value *arg = this->stack.back(); this->stack.pop_back();
+        this->stack.push_back(Builder<Scalar>::createExp(this->code, arg));
+    }
+    break;
+    }
+  }
+
+
+  /**
+   * Handles all unhandled expression parts -> throws an exception.
+   */
+  void visit(const GiNaC::basic &basic) {
+      InternalError err;
+      err << "Can not compile expression " << basic << ": Unknown expression type.";
+      throw err;
+  }
 
 };
 

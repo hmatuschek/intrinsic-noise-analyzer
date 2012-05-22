@@ -55,8 +55,8 @@ public:
     code->getBuilder().CreateRetVoid();
 
     // First, verify function:
-    /*llvm::verifyModule(*this->code->getModule());
-    this->code->getModule()->dump();*/
+    llvm::verifyModule(*this->code->getModule());
+    this->code->getModule()->dump();
 
     // Compile function:
     this->code->compile(level);

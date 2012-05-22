@@ -342,15 +342,19 @@ public:
    */
   inline void run(const InType &input, OutType &output)
   {
-    // Loop through code:
-    for (std::vector<Instruction>::iterator inst=this->code->begin(); inst!=this->code->end(); inst++)
-    {
-      // Evaluate instruction:
-      this->eval(*inst, input.data(), output.data(), this->stack);
-    }
+      this->run(input.data(), output.data());
   }
 
-
+  /** Executes the byte-code in a stack-machine. */
+  inline void run(const typename InType::Scalar *input, typename OutType::Scalar *output)
+  {
+      // Loop through code:
+      for (std::vector<Instruction>::iterator inst=this->code->begin(); inst!=this->code->end(); inst++)
+      {
+        // Evaluate instruction:
+        this->eval(*inst, input, output, this->stack);
+      }
+  }
 };
 
 

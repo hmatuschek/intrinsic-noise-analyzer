@@ -84,6 +84,21 @@ public:
   {
     return code->getBuilder().CreateCall2(code->getRealPowFunction(), lhs, rhs);
   }
+
+  static llvm::Value * createAbs(Code *code, llvm::Value *arg)
+  {
+      return code->getBuilder().CreateCall(code->getRealAbsFunction(), arg);
+  }
+
+  static llvm::Value * createLog(Code *code, llvm::Value *arg)
+  {
+      return code->getBuilder().CreateCall(code->getRealLogFunction(), arg);
+  }
+
+  static llvm::Value * createExp(Code *code, llvm::Value *arg)
+  {
+      return code->getBuilder().CreateCall(code->getRealExpFunction(), arg);
+  }
 };
 
 
