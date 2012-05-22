@@ -4,7 +4,7 @@
 #include "stochasticsimulator.hh"
 #include "constantstoichiometrymixin.hh"
 #include "extensivespeciesmixin.hh"
-#include "intprt/intprt.hh"
+#include "eval/bci/bci.hh"
 #include "openmp.hh"
 
 
@@ -34,12 +34,12 @@ protected:
     /**
     * Holds the dependency graph in terms of bytecode.
     **/
-    std::vector<Intprt::ByteCode> byte_code;
+    std::vector<Evaluate::bci::Code> byte_code;
 
     /**
     * Collects all bytecode to evaluate all propensities.
     **/
-    Intprt::ByteCode all_byte_code;
+    Evaluate::bci::Code all_byte_code;
 
     /**
     * Sparse stoichiometric matrix.
@@ -74,7 +74,7 @@ private:
     /**
     * Interpreter for each thread.
     */
-    std::vector< Intprt::Interpreter< Eigen::VectorXd > > interpreter;
+    std::vector< Evaluate::bci::Interpreter< Eigen::VectorXd > > interpreter;
 
 };
 

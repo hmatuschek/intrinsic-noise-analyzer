@@ -13,42 +13,40 @@ OptimizedSSA::OptimizedSSA(libsbml::Model *model, int size, int seed, size_t opt
     interpreter( this->numThreads() )
 {
 
-    Intprt::Compiler<Eigen::VectorXd> compiler(this->stateIndex);
+    Evaluate::bci::Compiler<Eigen::VectorXd> compiler(this->stateIndex);
 
     // setup the interpreter from a dependency graph
     int d;
     for (size_t j=0;j<this->numReactions();j++)
     {
+        // Set byte-code to compile into:
+        compiler.setCode(&byte_code[j]);
 
         for (size_t i=0;i<this->numReactions();i++)
         {
             d=0;
-            for(size_t k=0;k<this->numSpecies();k++)
+            for(size_t k=0;k<this->numSpecies();k++) {
                 // ask if species k is changed by reaction j
                 // which affects the propensities of reaction i in which species k is a modifier or a reactant
                 d = d || ( (this->reactants_stoichiometry(k,i)!=0 || this->propensities[i].has(this->species[k]) ) && this->stoichiometry(k,j)!=0 ) ;
+            }
 
             if (d!=0){
                 compiler.compileExpressionAndStore(this->propensities[i],i);
             }
         }
 
-        // optimize and store bytecode
-        compiler.optimize(opt_level);
-        this->byte_code[j] = compiler.getCode();
-        //reset compiler
-        compiler.reset();
-
+        // optimize bytecode
+        compiler.finalize(opt_level);
     }
 
-
+    compiler.setCode(&all_byte_code);
     // and compile propensities for byte code evaluation
     for(size_t i=0; i<this->numReactions(); i++)
         compiler.compileExpressionAndStore(this->propensities[i],i);
 
     // optimize and store
-    compiler.optimize(opt_level);
-    this->all_byte_code = compiler.getCode();
+    compiler.finalize(opt_level);
 
     // fill sparse stoichiometry
     for(size_t j=0; j<this->numReactions(); ++j)
