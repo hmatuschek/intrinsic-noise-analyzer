@@ -30,7 +30,7 @@ public:
    * Defines the interface for singe-expression compilation, implemented by the execution-engine
    * specific compiler.
    */
-  virtual void compileExpressionAndStore(GiNaC::ex &expr, size_t index) = 0;
+  virtual void compileExpressionAndStore(const GiNaC::ex &expr, size_t index) = 0;
 
 
   /**
@@ -39,7 +39,7 @@ public:
    * The value of the i-th expression will be stored at the i-th index in the output-vector
    * during evaluation.
    */
-  void compileVector(Eigen::VectorXex &vector)
+  void compileVector(const Eigen::VectorXex &vector)
   {
     for (int index = 0; index < vector.rows(); index++)
     {

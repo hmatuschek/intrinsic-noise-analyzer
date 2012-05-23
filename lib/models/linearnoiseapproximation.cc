@@ -813,6 +813,13 @@ LinearNoiseApproximation::flattenSymmetricMatrix(const Eigen::MatrixXex &mat,Eig
     }
 }
 
+
+const Eigen::VectorXex &
+LinearNoiseApproximation::getUpdateVector() const {
+  return this->updateVector;
+}
+
+
 void
 LinearNoiseApproximation::dump(std::ostream &str)
 {

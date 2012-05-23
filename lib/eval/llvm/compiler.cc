@@ -82,6 +82,8 @@ CompilerCore::finalize(size_t level)
   fpm.doInitialization();
   fpm.run(*code->getSystem());
 
+  //code->getModule()->dump();
+
   // Get function pointer:
   code->setFunctionPtr(engine->getPointerToFunction(code->getSystem()));
 }

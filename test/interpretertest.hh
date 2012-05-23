@@ -60,13 +60,6 @@ protected:
     Eigen::VectorXex &symbols, Eigen::VectorXex &expression, const Eigen::VectorXd &values,
     Eigen::VectorXd &result);
 
-#if WITH_EXECUTION_ENGINE_LIBJIT
-  /* Compiles and runs a vector of expressions using Fluc::Evaluate::libjit interpreter. */
-  void runLibJITReal(
-    Eigen::VectorXex &symbols, Eigen::VectorXex &expression, const Eigen::VectorXd &values,
-    Eigen::VectorXd &result);
-#endif
-
 #if WITH_EXECUTION_ENGINE_LLVM
   /* Compiles and runs a vector of expressions using Fluc::Evaluate::LLVM interpreter. */
   void runLLVMReal(

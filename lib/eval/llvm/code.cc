@@ -1,6 +1,7 @@
 #include "code.hh"
 #include "exception.hh"
 #include <iostream>
+#include <llvm/DerivedTypes.h>
 #include <llvm/PassManager.h>
 #include <llvm/Target/TargetData.h>
 #include <llvm/Analysis/AliasAnalysis.h>
@@ -39,6 +40,12 @@ Code::Code()
     // Assign some names:
     this->input->setName("inptr");
     this->output->setName("outptr");
+  }
+
+  { // Define complex<double> ABI type
+    this->complex_t = llvm::StructType::get(
+          context, llvm::Type::getDoubleTy(context), llvm::Type::getDoubleTy(context),
+          (const llvm::Type *)0);
   }
 
   { // Define extern pow() function from libm:

@@ -147,35 +147,35 @@ SET(libina_intprt_HEADERS
 # Sources for the evaluation sub-system:
 #
 SET(libina_eval_direct_SOURCES
-    eval/direct/code.cc eval/direct/compiler.cc eval/direct/interpreter.cc)
+    eval/direct/code.cc eval/direct/compiler.cc eval/direct/interpreter.cc eval/direct/engine.cc)
 SET(libina_eval_direct_HEADERS
-    eval/direct/code.hh eval/direct/compiler.hh eval/direct/interpreter.hh)
+    eval/direct/code.hh eval/direct/compiler.hh eval/direct/interpreter.hh eval/direct/engine.hh)
 
 SET(libina_eval_bytecode_SOURCES
     eval/bci/code.cc eval/bci/compiler.cc eval/bci/assembler.cc eval/bci/interpreter.cc
-    eval/bci/dependencetree.cc eval/bci/pass.cc)
+    eval/bci/dependencetree.cc eval/bci/pass.cc eval/bci/engine.cc)
 SET(libina_eval_direct_HEADERS
     eval/bci/code.hh eval/bci/compiler.hh eval/bci/assembler.hh eval/bci/interpreter.hh
-    eval/bci/dependencetree.hh eval/bci/pass.hh)
+    eval/bci/dependencetree.hh eval/bci/pass.hh eval/bci/engine.hh)
 
 SET(libina_eval_bytecode_mp_SOURCES
-    eval/bcimp/code.cc eval/bcimp/compiler.cc eval/bcimp/interpreter.cc)
+    eval/bcimp/code.cc eval/bcimp/compiler.cc eval/bcimp/interpreter.cc eval/bcimp/engine.cc)
 SET(libina_eval_bytecode_mp_HEADERS
-    eval/bcimp/code.hh eval/bcimp/compiler.hh eval/bcimp/interpreter.hh)
+    eval/bcimp/code.hh eval/bcimp/compiler.hh eval/bcimp/interpreter.hh eval/bcimp/engine.hh)
 
-SET(libina_eval_libjit_SOURCES
-    eval/libjit/code.cc eval/libjit/builder.cc eval/libjit/assembler.cc eval/libjit/compiler.cc
-    eval/libjit/interpreter.cc)
-SET(libina_eval_libjit_HEADERS
-    eval/libjit/code.hh eval/libjit/builder.hh eval/libjit/assembler.hh eval/libjit/compiler.hh
-    eval/libjit/interpreter.hh)
+#SET(libina_eval_libjit_SOURCES
+#    eval/libjit/code.cc eval/libjit/builder.cc eval/libjit/assembler.cc eval/libjit/compiler.cc
+#    eval/libjit/interpreter.cc)
+#SET(libina_eval_libjit_HEADERS
+#    eval/libjit/code.hh eval/libjit/builder.hh eval/libjit/assembler.hh eval/libjit/compiler.hh
+#    eval/libjit/interpreter.hh)
 
 SET(libina_eval_llvm_SOURCES
     eval/llvm/code.cc eval/llvm/interpreter.cc eval/llvm/compiler.cc eval/llvm/assembler.cc
-    eval/llvm/builder.cc)
+    eval/llvm/builder.cc eval/llvm/engine.cc)
 SET(libina_eval_llvm_HEADERS
     eval/llvm/code.hh eval/llvm/interpreter.hh eval/llvm/compiler.hh eval/llvm/assembler.hh
-    eval/llvm/builder.hh)
+    eval/llvm/builder.hh eval/llvm/engine.hh)
 
 SET(libina_eval_SOURCES
     eval/eval.cc eval/compilercommon.cc

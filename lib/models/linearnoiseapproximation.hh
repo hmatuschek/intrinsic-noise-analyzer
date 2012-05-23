@@ -75,6 +75,8 @@ public:
 
   void getfHessianM(const Eigen::VectorXd &state, Eigen::MatrixXd &fHessianM);
 
+  const Eigen::VectorXex &getUpdateVector() const;
+
 protected:
   /**
   * Sets the state of the interpreter and gives correction terms for macroscopic REs.

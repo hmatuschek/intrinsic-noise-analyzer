@@ -72,7 +72,7 @@ public:
    * Compiles expression, the result of this expression will be stored at the given index in the
    * output vector.
    */
-  virtual void compileExpressionAndStore(GiNaC::ex &expression, size_t index)
+  virtual void compileExpressionAndStore(const GiNaC::ex &expression, size_t index)
   {
     Assembler<typename OutType::Scalar> assembler(this->code, this->index_table);
     expression.accept(assembler);

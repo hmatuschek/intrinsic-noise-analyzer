@@ -87,7 +87,7 @@ public:
    * Compiles expression and creates a STORE instruction, that will store the value of the
    * expression at the given index in the output-vector during evaluation.
    */
-  void compileExpressionAndStore(GiNaC::ex &expression, size_t index)
+  void compileExpressionAndStore(const GiNaC::ex &expression, size_t index)
   {
     Assembler assembler(this->code, this->index_table);
     expression.accept(assembler);

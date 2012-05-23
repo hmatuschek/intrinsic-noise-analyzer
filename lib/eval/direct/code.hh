@@ -70,7 +70,7 @@ public:
    *
    * @note This method is specific to the direct evaluation engine.
    */
-  void addExpression(GiNaC::ex &expression, size_t index);
+  void addExpression(const GiNaC::ex &expression, size_t index);
 
   /**
    * Returns the index-table of the code.
