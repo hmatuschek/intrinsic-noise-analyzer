@@ -55,7 +55,7 @@ protected:
 
 
 public:
-  Code();
+  Code(size_t num_treads=1);
 
   ~Code();
 

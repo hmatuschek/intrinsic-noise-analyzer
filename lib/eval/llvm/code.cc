@@ -14,7 +14,7 @@
 using namespace Fluc::Evaluate::LLVM;
 
 
-Code::Code()
+Code::Code(size_t num_threads)
   : context(llvm::getGlobalContext()), module(0), builder(context),
     function(0), input(0), output(0), complex_t(0),
     real_pow(0), complex_pow(0), real_abs(0), real_log(0), real_exp(0),

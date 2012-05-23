@@ -50,6 +50,14 @@ public:
     this->code = code;
   }
 
+  inline void run(const typename InType::Scalar *input, typename OutType::Scalar *output)
+  {
+    std::vector<llvm::GenericValue> args(2);
+    args[0].PointerVal = (void *)input; args[1].PointerVal = output;
+
+    this->code->exec(args);
+  }
+
   /**
    * Executes the code.
    */
@@ -58,10 +66,7 @@ public:
     const typename InType::Scalar *inptr = (const typename InType::Scalar *)input.data();
     typename OutType::Scalar *outptr = (typename OutType::Scalar *)output.data();
 
-    std::vector<llvm::GenericValue> args(2);
-    args[0].PointerVal = (void *)inptr; args[1].PointerVal = outptr;
-
-    this->code->exec(args);
+    this->run(inptr, outptr);
   }
 };
 

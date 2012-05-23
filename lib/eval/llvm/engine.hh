@@ -14,9 +14,9 @@ template<class InType, class OutType=InType>
 class Engine
 {
 public:
-  typedef Code Code;
-  typedef Compiler<InType, OutType> Compiler;
-  typedef Interpreter<InType, OutType> Interpreter;
+  typedef LLVM::Code Code;
+  typedef LLVM::Compiler<InType, OutType> Compiler;
+  typedef LLVM::Interpreter<InType, OutType> Interpreter;
 };
 
 

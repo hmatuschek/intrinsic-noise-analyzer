@@ -49,13 +49,19 @@ CompilerCore::finalize(size_t level)
     std::string error_string;
     llvm::EngineBuilder builder(code->getModule());
     builder.setErrorStr(&error_string);
+    builder.setEngineKind(llvm::EngineKind::JIT);
 
-    if( 0 == (engine = builder.create()) )
-    {
-      // Free module:
-      InternalError err;
-      err << "Can not create LLVM execution engine: " << error_string;
-      throw err;
+    if (0 == (engine = builder.create())) {
+      std::cerr << "Wraning: LLVM uses interpreter to execute code: " << error_string << std::endl;
+      // Retry with interpreter:
+      builder.setEngineKind(llvm::EngineKind::Interpreter);
+      if( 0 == (engine = builder.create()) )
+      {
+        // Free module:
+        InternalError err;
+        err << "Can not create LLVM execution engine: " << error_string;
+        throw err;
+      }
     }
     code->setEngine(engine);
   }

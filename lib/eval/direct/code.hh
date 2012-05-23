@@ -53,7 +53,7 @@ public:
   /**
    * Constructs some empty code.
    */
-  Code();
+  Code(size_t num_threads=1);
 
   /**
    * Copy constructor.

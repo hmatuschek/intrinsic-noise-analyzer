@@ -8,12 +8,12 @@
 SET(fluctuator_test_SOURCES
     main.cc unittest.cc lnatest.cc interpretertest.cc
     ginacforeigentest.cc regression_test.cc mathtest.cc mersennetwistertest.cc
-    sbmlshparsertest.cc optionparsertest.cc odetest.cc modelcopytest.cc)
+    sbmlshparsertest.cc optionparsertest.cc odetest.cc modelcopytest.cc benchmark.cc)
 
 SET(fluctuator_test_HEADERS
     main.hh unittest.hh lnatest.hh interpretertest.hh
     ginacforeigentest.hh regression_test.hh mathtest.hh mersennewistertest.hh
-    sbmlshparsertest.cc optionparsertest.hh odetest.hh modelcopytest.hh)
+    sbmlshparsertest.cc optionparsertest.hh odetest.hh modelcopytest.hh benchmark.hh)
 
 IF(WITH_EXECUTION_ENGINE_LIBJIT)
 SET(fluctuator_test_SOURCES ${fluctuator_test_SOURCES} libjitinterpretertest.cc)

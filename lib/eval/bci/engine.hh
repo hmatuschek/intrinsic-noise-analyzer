@@ -18,9 +18,9 @@ template<class InType, class OutType = InType>
 class Engine {
 public:
   /** The code class, an instance of this class holds the byte-code to be executed. */
-  typedef Code Code;
-  typedef Compiler<InType, OutType> Compiler;
-  typedef Interpreter<InType, OutType> Interpreter;
+  typedef bci::Code Code;
+  typedef bci::Compiler<InType, OutType> Compiler;
+  typedef bci::Interpreter<InType, OutType> Interpreter;
 };
 
 }

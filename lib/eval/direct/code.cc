@@ -3,7 +3,7 @@
 using namespace Fluc::Evaluate::direct;
 
 
-Code::Code()
+Code::Code(size_t num_threads)
 {
   // Pass...
 }

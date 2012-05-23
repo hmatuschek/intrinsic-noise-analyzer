@@ -12,12 +12,9 @@
 #include "optionparsertest.hh"
 #include "odetest.hh"
 #include "modelcopytest.hh"
+#include "benchmark.hh"
+
 #include "utils/option_parser.hh"
-
-
-#if WITH_EXECUTION_ENGINE_LIBJIT
-#include "libjitinterpretertest.hh"
-#endif
 
 
 using namespace Fluc;
@@ -76,11 +73,8 @@ int main(int argc, char *argv[])
     runner.addSuite(SBMLSHParserTest::suite());
   if (0 == skipped_tests.count("OptionParser"))
     runner.addSuite(OptionParserTest::suite());
-
-#if WITH_EXECUTION_ENGINE_LIBJIT
-  if (0 == skipped_tests.count("LibJitInterpreter"))
-    runner.addSuite(LibJitInterpreterTest::suite());
-#endif
+  if (0 == skipped_tests.count("Benchmark"))
+    runner.addSuite(Benchmark::suite());
 
   // Exec tests:
   runner();
