@@ -115,6 +115,8 @@ Benchmark::integrate_JIT_LSODA(Models::LinearNoiseApproximation *model, double t
   Eigen::VectorXd dx(interpreter.getDimension());
   lna->getInitialState(x);
 
+  integrator.step(x, 0.0, dx);
+
   Utils::CpuTime  cpu_clock; cpu_clock.start();
   Utils::RealTime real_clock; real_clock.start();
 
@@ -208,6 +210,9 @@ Benchmark::integrate_JIT_Rosen4(Models::LinearNoiseApproximation *model, double 
   Eigen::VectorXd dx(interpreter.getDimension());
   lna->getInitialState(x);
 
+  // Force code-emmission:
+  integrator.step(x, 0.0, dx);
+
   Utils::CpuTime  cpu_clock; cpu_clock.start();
   Utils::RealTime real_clock; real_clock.start();
 
@@ -218,7 +223,7 @@ Benchmark::integrate_JIT_Rosen4(Models::LinearNoiseApproximation *model, double 
     x += dx; t += dt;
   }
 
-  std::cout << "Precise execution time (BCIMP): " << std::endl
+  std::cout << "Precise execution time (JIT): " << std::endl
             << "  cpu: " << cpu_clock.stop() << "s." << std::endl
             << " real: " << real_clock.stop() << "s." << std::endl;
 }
