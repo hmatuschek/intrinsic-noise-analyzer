@@ -15,6 +15,7 @@
 #include "benchmark.hh"
 
 #include "utils/option_parser.hh"
+#include "utils/logger.hh"
 
 
 using namespace Fluc;
@@ -48,6 +49,10 @@ int main(int argc, char *argv[])
     const std::list<std::string> &names = parser.get_option("skip");
     skipped_tests.insert(names.begin(), names.end());
   }
+
+  // Assemble logger:
+  Utils::Logger::get().addHandler(
+        new Utils::TextMessageHandler(std::cerr, Utils::Message::DEBUG));
 
   // Construct test-runner
   TestRunner runner(std::cout);

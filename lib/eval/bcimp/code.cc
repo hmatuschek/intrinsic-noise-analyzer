@@ -1,5 +1,5 @@
 #include "code.hh"
-
+#include "utils/logger.hh"
 using namespace Fluc::Evaluate;
 using namespace Fluc::Evaluate::bcimp;
 
@@ -7,7 +7,10 @@ using namespace Fluc::Evaluate::bcimp;
 Code::Code(size_t num_threads)
   : codes(num_threads)
 {
-  // Pass...
+  Utils::Message message = LOG_MESSAGE(Utils::Message::DEBUG);
+  message << "Create byte-code interpreter with " << num_threads
+          << " independent blocks.";
+  Utils::Logger::get().log(message);
 }
 
 
