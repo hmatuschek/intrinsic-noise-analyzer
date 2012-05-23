@@ -1,7 +1,7 @@
 #include "benchmark.hh"
 #include "models/lnainterpreter.hh"
 
-#include "ode/rosenbrock3.hh"
+#include "ode/rosenbrock4.hh"
 #include "ode/lsodadriver.hh"
 
 #include "eval/bci/engine.hh"
@@ -35,12 +35,12 @@ Benchmark::tearDown()
 
 
 void
-Benchmark::testCoremodelBCILSODAOpt()
+Benchmark::integrate_BCI_LSODA(Models::LinearNoiseApproximation *model, double t_end, size_t opt_level)
 {
-  BCIInterpreter interpreter(*this->lna, 1);
+  BCIInterpreter interpreter(*model, opt_level);
 
   size_t N = 100;
-  double dt = 1.0/N;
+  double dt = t_end/N;
   double err_abs = 1e-6;
   double err_rel = 1e-4;
 
@@ -56,131 +56,210 @@ Benchmark::testCoremodelBCILSODAOpt()
     integrator.step(x,t,dx);
     x += dx; t += dt;
   }
+}
+
+void
+Benchmark::integrate_BCIMP_LSODA(Models::LinearNoiseApproximation *model, double t_end, size_t opt_level)
+{
+  BCIMPInterpreter interpreter(*model, opt_level);
+
+  size_t N = 100;
+  double dt = t_end/N;
+  double err_abs = 1e-6;
+  double err_rel = 1e-4;
+
+  ODE::LsodaDriver<BCIMPInterpreter> integrator(interpreter, dt, err_abs, err_rel);
+
+  Eigen::VectorXd x(interpreter.getDimension());
+  Eigen::VectorXd dx(interpreter.getDimension());
+  lna->getInitialState(x);
+
+  double t = 0.0;
+  for(size_t i=0; i<N; i++,t+=dt)
+  {
+    integrator.step(x,t,dx);
+    x += dx; t += dt;
+  }
+}
+
+void
+Benchmark::integrate_JIT_LSODA(Models::LinearNoiseApproximation *model, double t_end, size_t opt_level)
+{
+  LLVMInterpreter interpreter(*model, opt_level);
+
+  size_t N = 100;
+  double dt = t_end/N;
+  double err_abs = 1e-6;
+  double err_rel = 1e-4;
+
+  ODE::LsodaDriver<LLVMInterpreter> integrator(interpreter, dt, err_abs, err_rel);
+
+  Eigen::VectorXd x(interpreter.getDimension());
+  Eigen::VectorXd dx(interpreter.getDimension());
+  lna->getInitialState(x);
+
+  double t = 0.0;
+  for(size_t i=0; i<N; i++,t+=dt)
+  {
+    integrator.step(x,t,dx);
+    x += dx; t += dt;
+  }
+}
+
+void
+Benchmark::integrate_BCI_Rosen4(Models::LinearNoiseApproximation *model, double t_end, size_t opt_level)
+{
+  BCIInterpreter interpreter(*model, opt_level);
+
+  size_t N = 100;
+  double dt = t_end/N;
+  double err_abs = 1e-6;
+  double err_rel = 1e-4;
+
+  ODE::Rosenbrock4TimeInd<BCIInterpreter> integrator(interpreter, dt, err_abs, err_rel);
+
+  Eigen::VectorXd x(interpreter.getDimension());
+  Eigen::VectorXd dx(interpreter.getDimension());
+  lna->getInitialState(x);
+
+  double t = 0.0;
+  for(size_t i=0; i<N; i++,t+=dt)
+  {
+    integrator.step(x,t,dx);
+    x += dx; t += dt;
+  }
+}
+
+void
+Benchmark::integrate_BCIMP_Rosen4(Models::LinearNoiseApproximation *model, double t_end, size_t opt_level)
+{
+  BCIMPInterpreter interpreter(*model, opt_level);
+
+  size_t N = 100;
+  double dt = t_end/N;
+  double err_abs = 1e-6;
+  double err_rel = 1e-4;
+
+  ODE::Rosenbrock4TimeInd<BCIMPInterpreter> integrator(interpreter, dt, err_abs, err_rel);
+
+  Eigen::VectorXd x(interpreter.getDimension());
+  Eigen::VectorXd dx(interpreter.getDimension());
+  lna->getInitialState(x);
+
+  double t = 0.0;
+  for(size_t i=0; i<N; i++,t+=dt)
+  {
+    integrator.step(x,t,dx);
+    x += dx; t += dt;
+  }
+}
+
+void
+Benchmark::integrate_JIT_Rosen4(Models::LinearNoiseApproximation *model, double t_end, size_t opt_level)
+{
+  LLVMInterpreter interpreter(*model, opt_level);
+
+  size_t N = 100;
+  double dt = t_end/N;
+  double err_abs = 1e-6;
+  double err_rel = 1e-4;
+
+  ODE::Rosenbrock4TimeInd<LLVMInterpreter> integrator(interpreter, dt, err_abs, err_rel);
+
+  Eigen::VectorXd x(interpreter.getDimension());
+  Eigen::VectorXd dx(interpreter.getDimension());
+  lna->getInitialState(x);
+
+  double t = 0.0;
+  for(size_t i=0; i<N; i++,t+=dt)
+  {
+    integrator.step(x,t,dx);
+    x += dx; t += dt;
+  }
+}
+
+
+void
+Benchmark::testCoremodelBCILSODAOpt()
+{
+  integrate_BCI_LSODA(this->lna, 1, 1);
 }
 
 
 void
 Benchmark::testCoremodelBCIMPLSODAOpt()
 {
-  BCIMPInterpreter interpreter(*this->lna, 1);
-
-  size_t N = 100;
-  double dt = 1.0/N;
-  double err_abs = 1e-6;
-  double err_rel = 1e-4;
-
-  ODE::LsodaDriver<BCIMPInterpreter> integrator(interpreter, dt, err_abs, err_rel);
-
-  Eigen::VectorXd x(interpreter.getDimension());
-  Eigen::VectorXd dx(interpreter.getDimension());
-  lna->getInitialState(x);
-
-  double t = 0.0;
-  for(size_t i=0; i<N; i++,t+=dt)
-  {
-    integrator.step(x,t,dx);
-    x += dx; t += dt;
-  }
+  integrate_BCIMP_LSODA(this->lna, 1, 1);
 }
 
 
 void
 Benchmark::testCoremodelJITLSODAOpt()
 {
-  LLVMInterpreter interpreter(*this->lna, 1);
-
-  size_t N = 100;
-  double dt = 1.0/N;
-  double err_abs = 1e-6;
-  double err_rel = 1e-4;
-
-  ODE::LsodaDriver<LLVMInterpreter> integrator(interpreter, dt, err_abs, err_rel);
-
-  Eigen::VectorXd x(interpreter.getDimension());
-  Eigen::VectorXd dx(interpreter.getDimension());
-  lna->getInitialState(x);
-
-  double t = 0.0;
-  for(size_t i=0; i<N; i++,t+=dt)
-  {
-    integrator.step(x,t,dx);
-    x += dx; t += dt;
-  }
+  integrate_JIT_LSODA(this->lna, 1, 1);
 }
 
 
 void
 Benchmark::testCoremodelBCILSODANoOpt()
 {
-  BCIInterpreter interpreter(*this->lna, 0);
-
-  size_t N = 100;
-  double dt = 1.0/N;
-  double err_abs = 1e-6;
-  double err_rel = 1e-4;
-
-  ODE::LsodaDriver<BCIInterpreter> integrator(interpreter, dt, err_abs, err_rel);
-
-  Eigen::VectorXd x(interpreter.getDimension());
-  Eigen::VectorXd dx(interpreter.getDimension());
-  lna->getInitialState(x);
-
-  double t = 0.0;
-  for(size_t i=0; i<N; i++,t+=dt)
-  {
-    integrator.step(x,t,dx);
-    x += dx; t += dt;
-  }
+  integrate_BCI_LSODA(this->lna, 1., 0);
 }
 
 
 void
 Benchmark::testCoremodelBCIMPLSODANoOpt()
 {
-  BCIMPInterpreter interpreter(*this->lna, 0);
-
-  size_t N = 100;
-  double dt = 1.0/N;
-  double err_abs = 1e-6;
-  double err_rel = 1e-4;
-
-  ODE::LsodaDriver<BCIMPInterpreter> integrator(interpreter, dt, err_abs, err_rel);
-
-  Eigen::VectorXd x(interpreter.getDimension());
-  Eigen::VectorXd dx(interpreter.getDimension());
-  lna->getInitialState(x);
-
-  double t = 0.0;
-  for(size_t i=0; i<N; i++,t+=dt)
-  {
-    integrator.step(x,t,dx);
-    x += dx; t += dt;
-  }
+  integrate_BCIMP_LSODA(this->lna, 1., 0);
 }
 
 
 void
 Benchmark::testCoremodelJITLSODANoOpt()
 {
-  LLVMInterpreter interpreter(*this->lna, 0);
+  integrate_JIT_LSODA(this->lna, 1., 0);
+}
 
-  size_t N = 100;
-  double dt = 1.0/N;
-  double err_abs = 1e-6;
-  double err_rel = 1e-4;
 
-  ODE::LsodaDriver<LLVMInterpreter> integrator(interpreter, dt, err_abs, err_rel);
+void
+Benchmark::testCoremodelBCIRosen4Opt()
+{
+  integrate_BCI_Rosen4(this->lna, 1, 1);
+}
 
-  Eigen::VectorXd x(interpreter.getDimension());
-  Eigen::VectorXd dx(interpreter.getDimension());
-  lna->getInitialState(x);
 
-  double t = 0.0;
-  for(size_t i=0; i<N; i++,t+=dt)
-  {
-    integrator.step(x,t,dx);
-    x += dx; t += dt;
-  }
+void
+Benchmark::testCoremodelBCIMPRosen4Opt()
+{
+  integrate_BCIMP_Rosen4(this->lna, 1, 1);
+}
+
+
+void
+Benchmark::testCoremodelJITRosen4Opt()
+{
+  integrate_JIT_Rosen4(this->lna, 1, 1);
+}
+
+
+void
+Benchmark::testCoremodelBCIRosen4NoOpt()
+{
+  integrate_BCI_Rosen4(this->lna, 1., 0);
+}
+
+
+void
+Benchmark::testCoremodelBCIMPRosen4NoOpt()
+{
+  integrate_BCIMP_Rosen4(this->lna, 1., 0);
+}
+
+
+void
+Benchmark::testCoremodelJITRosen4NoOpt()
+{
+  integrate_JIT_Rosen4(this->lna, 1., 0);
 }
 
 
@@ -207,5 +286,23 @@ Benchmark::suite()
   s->addTest(new UnitTest::TestCaller<Benchmark>(
                "Coremodel 1 (LSODA, LLVM)", &Benchmark::testCoremodelJITLSODANoOpt));
 
+
+  s->addTest(new UnitTest::TestCaller<Benchmark>(
+               "Coremodel 1 (Rosen4, BCI, Opt)", &Benchmark::testCoremodelBCIRosen4Opt));
+
+  s->addTest(new UnitTest::TestCaller<Benchmark>(
+               "Coremodel 1 (Rosen4, BCIMP, Opt)", &Benchmark::testCoremodelBCIMPRosen4Opt));
+
+  s->addTest(new UnitTest::TestCaller<Benchmark>(
+               "Coremodel 1 (Rosen4, LLVM, Opt)", &Benchmark::testCoremodelJITRosen4Opt));
+
+  s->addTest(new UnitTest::TestCaller<Benchmark>(
+               "Coremodel 1 (Rosen4, BCI)", &Benchmark::testCoremodelBCIRosen4NoOpt));
+
+  s->addTest(new UnitTest::TestCaller<Benchmark>(
+               "Coremodel 1 (Rosen4, BCIMP)", &Benchmark::testCoremodelBCIMPRosen4NoOpt));
+
+  s->addTest(new UnitTest::TestCaller<Benchmark>(
+               "Coremodel 1 (Rosen4, LLVM)", &Benchmark::testCoremodelJITRosen4NoOpt));
   return s;
 }
