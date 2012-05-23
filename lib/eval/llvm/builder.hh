@@ -34,71 +34,27 @@ template<>
 class Builder<double>
 {
 public:
-  static llvm::Value *createIndex(Code *code, size_t index)
-  {
-    return code->getBuilder().getInt64(index);
-  }
+  /** Creates a constant index expression. */
+  static llvm::Value *createIndex(Code *code, size_t index);
 
+  /** Creates a constrant floating-point expression. (in this case, a double). */
+  static llvm::Value *createConstant(Code *code, const GiNaC::numeric &value);
 
-  static llvm::Value *createConstant(Code *code, const GiNaC::numeric &value)
-  {
-    return llvm::ConstantFP::get(code->getBuilder().getDoubleTy(), value.to_double());
-  }
+  static void createStore(Code *code, llvm::Value *value, size_t index);
 
+  static llvm::Value *createLoad(Code *code, size_t index);
 
-  static void createStore(Code *code, llvm::Value *value, size_t index)
-  {
-    // First, get function argument and cast it to double *
-    llvm::Value *arg = code->getBuilder().CreatePointerCast(
-          code->getOutput(), code->getBuilder().getDoubleTy()->getPointerTo(), "outvec");
-    llvm::Value *elm_idx = createIndex(code, index);
-    llvm::Value *elm_ptr = code->getBuilder().CreateGEP(arg, elm_idx, "elm");
-    code->getBuilder().CreateStore(value, elm_ptr, false);
-  }
+  static llvm::Value *createAdd(Code *code, llvm::Value *lhs, llvm::Value *rhs);
 
+  static llvm::Value *createMul(Code *code, llvm::Value *lhs, llvm::Value *rhs);
 
-  static llvm::Value *createLoad(Code *code, size_t index)
-  {
-    // First, get function argument and cast it to double *
-    llvm::Value *arg = code->getBuilder().CreatePointerCast(
-          code->getInput(), code->getBuilder().getDoubleTy()->getPointerTo(), "invec");
-    llvm::Value *elm_idx = createIndex(code, index);
-    llvm::Value *elm_ptr = code->getBuilder().CreateGEP(arg, elm_idx, "elm");
-    return code->getBuilder().CreateLoad(elm_ptr, false, "value");
-  }
+  static llvm::Value *createPow(Code *code, llvm::Value *lhs, llvm::Value *rhs);
 
+  static llvm::Value * createAbs(Code *code, llvm::Value *arg);
 
-  static llvm::Value *createAdd(Code *code, llvm::Value *lhs, llvm::Value *rhs)
-  {
-    // Simply create "+" operation:
-    return code->getBuilder().CreateFAdd(lhs, rhs, "add");
-  }
+  static llvm::Value * createLog(Code *code, llvm::Value *arg);
 
-  static llvm::Value *createMul(Code *code, llvm::Value *lhs, llvm::Value *rhs)
-  {
-    // Simply create "*" operation:
-    return code->getBuilder().CreateFMul(lhs, rhs, "mul");
-  }
-
-  static llvm::Value *createPow(Code *code, llvm::Value *lhs, llvm::Value *rhs)
-  {
-    return code->getBuilder().CreateCall2(code->getRealPowFunction(), lhs, rhs);
-  }
-
-  static llvm::Value * createAbs(Code *code, llvm::Value *arg)
-  {
-      return code->getBuilder().CreateCall(code->getRealAbsFunction(), arg);
-  }
-
-  static llvm::Value * createLog(Code *code, llvm::Value *arg)
-  {
-      return code->getBuilder().CreateCall(code->getRealLogFunction(), arg);
-  }
-
-  static llvm::Value * createExp(Code *code, llvm::Value *arg)
-  {
-      return code->getBuilder().CreateCall(code->getRealExpFunction(), arg);
-  }
+  static llvm::Value * createExp(Code *code, llvm::Value *arg);
 };
 
 

@@ -87,7 +87,7 @@ public:
    * Compiles expression and creates a STORE instruction, that will store the value of the
    * expression at the given index in the output-vector during evaluation.
    */
-  void compileExpressionAndStore(GiNaC::ex &expression, size_t index)
+  void compileExpressionAndStore(const GiNaC::ex &expression, size_t index)
   {
     Assembler assembler(this->code, this->index_table);
     expression.accept(assembler);
@@ -101,7 +101,7 @@ public:
    * The value of the i-th expression will be stored at the i-th index in the output-vector
    * during evaluation.
    */
-  void compileVector(Eigen::VectorXex &vector)
+  void compileVector(const Eigen::VectorXex &vector)
   {
     for (int index = 0; index < vector.rows(); index++)
     {
@@ -114,7 +114,7 @@ public:
    * Compiles a matrix of expressions, that will evaluate to an @c Eigen::MatrixXd of the same
    * shape.
    */
-  void compileMatrix(Eigen::MatrixXex &matrix)
+  void compileMatrix(const Eigen::MatrixXex &matrix)
   {
     for (int i=0; i<matrix.rows(); i++)
     {

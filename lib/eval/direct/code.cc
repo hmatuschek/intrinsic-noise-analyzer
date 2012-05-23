@@ -3,7 +3,7 @@
 using namespace Fluc::Evaluate::direct;
 
 
-Code::Code()
+Code::Code(size_t num_threads)
 {
   // Pass...
 }
@@ -24,7 +24,7 @@ Code::Code(const Code &other)
 
 
 void
-Code::addExpression(GiNaC::ex &expression, size_t index)
+Code::addExpression(const GiNaC::ex &expression, size_t index)
 {
   this->expressions.push_back(std::pair<GiNaC::ex, size_t>(expression, index));
 }

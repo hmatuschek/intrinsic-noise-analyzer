@@ -16,13 +16,32 @@ namespace Evaluate {
 namespace LLVM {
 
 
-template <class InType, class OutType=InType>
-class Compiler
-    : public Evaluate::CompilerCommon<InType, OutType>
+class CompilerCore
 {
 protected:
   Code *code;
 
+public:
+  CompilerCore(Code *code=0);
+
+  /**
+   * Resets the compiler.
+   */
+  void setCode(Code *code);
+
+  /**
+   * Performs some optimizations on the LLVM IR.
+   */
+  void finalize(size_t level);
+};
+
+
+template <class InType, class OutType=InType>
+class Compiler :
+    public CompilerCore,
+    public Evaluate::CompilerCommon<InType, OutType>
+{
+protected:
   /**
    * Maps a GiNaC symbol to an index of the input vector.
    */
@@ -30,36 +49,22 @@ protected:
 
 
 public:
+  /**
+   * Constructs a compiler with the given index-table.
+   *
+   * @param index_table Specifies the mapping from a GiNaC symbol (state-variable) to an index
+   *        of the state-vector (input vector).
+   */
   Compiler(const std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> &index_table)
-    : code(0), index_table(index_table)
+    : CompilerCore(0), index_table(index_table)
   {
     // Pass...
   }
 
 
-  /**
-   * Resets the compiler.
-   */
-  void setCode(Code *code)
-  {
-    this->code = code;
-  }
-
-
-  /**
-   * Performs some optimizations on the LLVM IR.
-   */
   virtual void finalize(size_t level=0)
   {
-    // create "return void" instruction:
-    code->getBuilder().CreateRetVoid();
-
-    // First, verify function:
-    llvm::verifyModule(*this->code->getModule());
-    this->code->getModule()->dump();
-
-    // Compile function:
-    this->code->compile(level);
+    CompilerCore::finalize(level);
   }
 
 
@@ -67,7 +72,7 @@ public:
    * Compiles expression, the result of this expression will be stored at the given index in the
    * output vector.
    */
-  virtual void compileExpressionAndStore(GiNaC::ex &expression, size_t index)
+  virtual void compileExpressionAndStore(const GiNaC::ex &expression, size_t index)
   {
     Assembler<typename OutType::Scalar> assembler(this->code, this->index_table);
     expression.accept(assembler);

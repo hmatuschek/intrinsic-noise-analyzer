@@ -78,7 +78,7 @@ public:
    * "Compiles" the given expression, its result will be stored in the output
    * vector at the given index.
    */
-  void compileExpressionAndStore(GiNaC::ex &expression, size_t index)
+  void compileExpressionAndStore(const GiNaC::ex &expression, size_t index)
   {
     this->code->addExpression(expression, index);
   }

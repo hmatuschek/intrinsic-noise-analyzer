@@ -79,9 +79,9 @@ namespace Eval = Fluc::Evaluate::libjit;
 }
 
 #elif EXECUTION_ENGINE == 5
-#include "llvm/code.hh"
-#include "llvm/compiler.hh"
-#include "llvm/interpreter.hh"
+//#include "llvm/code.hh"
+//#include "llvm/compiler.hh"
+//#include "llvm/interpreter.hh"
 
 #warning "Untested LLVM evaluation is used as default!"
 

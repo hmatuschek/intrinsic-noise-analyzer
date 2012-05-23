@@ -6,9 +6,7 @@
 #include <llvm/DerivedTypes.h>
 #include <llvm/Constants.h>
 #include <llvm/Instructions.h>
-#include <llvm/Analysis/Verifier.h>
-#include <llvm/ExecutionEngine/JIT.h>
-#include <llvm/ExecutionEngine/Interpreter.h>
+#include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/ExecutionEngine/GenericValue.h>
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/Target/TargetSelect.h>
@@ -33,9 +31,13 @@ namespace LLVM {
 class Code
 {
 protected:
-  llvm::LLVMContext context;
-  llvm::Module module;
+  /** Holds a weak reference to the global LLVM context. */
+  llvm::LLVMContext &context;
+  /** A pointer to the LLVM module, holding the IR code. */
+  llvm::Module *module;
+  /** A assistent to assemble LLVM IR. */
   llvm::IRBuilder<> builder;
+  /** A pointer to the function being assembled. */
   llvm::Function *function;
 
   llvm::Value *input;
@@ -53,7 +55,7 @@ protected:
 
 
 public:
-  Code();
+  Code(size_t num_treads=1);
 
   ~Code();
 
@@ -62,6 +64,12 @@ public:
   llvm::LLVMContext &getContext();
 
   void *getFunctionPtr();
+  void setFunctionPtr(void *ptr);
+
+  void setEngine(llvm::ExecutionEngine *engine);
+
+  llvm::Function *getSystem();
+  llvm::Module *getModule();
 
   llvm::Value *getInput();
   llvm::Value *getOutput();
@@ -72,9 +80,6 @@ public:
   llvm::Function *getRealAbsFunction();
   llvm::Function *getRealLogFunction();
   llvm::Function *getRealExpFunction();
-
-  llvm::Module *getModule();
-  void compile(size_t opt_level=0);
 
   void exec(const std::vector<llvm::GenericValue> &args);
 };

@@ -6,7 +6,7 @@ using namespace Fluc::ODE;
 
 const int    LsodaConstants::mord[3] = {0, 12, 5};
 const double LsodaConstants::sm1[13] = {0., 0.5, 0.575, 0.55, 0.45, 0.35, 0.25, 0.2, 0.15, 0.1, 0.075, 0.05, 0.025};
-const double LsodaConstants:: ETA = 2.2204460492503131e-16;
+const double LsodaConstants::ETA = 2.2204460492503131e-16;
 
 LSODA::LSODA()
  : g_nyh(0), g_lenyh(0),

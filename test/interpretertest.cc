@@ -351,23 +351,6 @@ InterpreterTest::testMatrix()
     interpreter.run(values, true_output);
   }
 
-  // Test "old" byte-code interpreter
-  {
-    Intprt::ByteCode byte_code;
-    Intprt::Compiler<Eigen::VectorXd, Eigen::MatrixXd> compiler(symbol_table);
-    Intprt::Interpreter<Eigen::VectorXd, Eigen::MatrixXd> interpreter;
-    compiler.compileMatrix(expr);
-    byte_code = compiler.getCode();
-    interpreter.setCode(&byte_code);
-    output << 0,0,0,0; interpreter.run(values, output);
-
-    for (int i=0; i<output.rows(); i++) {
-      for (int j=0; j<output.cols(); j++) {
-        UT_ASSERT_EQUAL(output(i,j), true_output(i,j));
-      }
-    }
-  }
-
   // Test "new" byte-code interpreter
   {
     Evaluate::bci::Code code;
@@ -606,27 +589,6 @@ InterpreterTest::runBCIMPReal(
   interpreter.run(values, result);
 }
 
-#if WITH_EXECUTION_ENGINE_LIBJIT
-void
-InterpreterTest::runLibJITReal(
-  Eigen::VectorXex &symbols, Eigen::VectorXex &expression,
-  const Eigen::VectorXd &values, Eigen::VectorXd &result)
-{
-  std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> symbol_table;
-  symbolTableFromVector(symbols, symbol_table);
-
-  Evaluate::libjit::Code code;
-  Evaluate::libjit::Compiler<Eigen::VectorXd> compiler(symbol_table);
-  Evaluate::libjit::Interpreter<Eigen::VectorXd> interpreter(&code);
-  compiler.setCode(&code);
-  compiler.compileVector(expression);
-  compiler.finalize();
-
-  interpreter.run(values, result);
-}
-#endif
-
-
 #if WITH_EXECUTION_ENGINE_LLVM
 void
 InterpreterTest::runLLVMReal(
@@ -638,11 +600,10 @@ InterpreterTest::runLLVMReal(
 
   Evaluate::LLVM::Code code;
   Evaluate::LLVM::Compiler<Eigen::VectorXd> compiler(symbol_table);
-  Evaluate::LLVM::Interpreter<Eigen::VectorXd> interpreter(&code);
   compiler.setCode(&code);
   compiler.compileVector(expression);
-  compiler.finalize();
-
+  compiler.finalize(1);
+  Evaluate::LLVM::Interpreter<Eigen::VectorXd> interpreter(&code);
   interpreter.run(values, result);
 }
 #endif
@@ -656,7 +617,7 @@ InterpreterTest::testAllReal(Eigen::VectorXex &symbols, Eigen::VectorXex &expres
   runDirectReal(symbols, expression, values, true_output);
 
   { // Test BCI
-    Eigen::VectorXd output(expression.size());
+    Eigen::VectorXd output = Eigen::VectorXd::Zero(expression.size());
     runBCIReal(symbols, expression, values, output);
     for (int i=0; i<output.size(); i++) {
       UT_ASSERT_NEAR(output(i), true_output(i));
@@ -664,26 +625,16 @@ InterpreterTest::testAllReal(Eigen::VectorXex &symbols, Eigen::VectorXex &expres
   }
 
   { // Test BCI-MP
-    Eigen::VectorXd output(expression.size());
+    Eigen::VectorXd output = Eigen::VectorXd::Zero(expression.size());
     runBCIMPReal(symbols, expression, values, output);
     for (int i=0; i<output.size(); i++) {
       UT_ASSERT_NEAR(output(i), true_output(i));
     }
   }
 
-#if WITH_EXECUTION_ENGINE_LIBJIT
-  { // Test libjit
-    Eigen::VectorXd output(expression.size());
-    runLibJITReal(symbols, expression, values, output);
-    for (int i=0; i<output.size(); i++) {
-      UT_ASSERT_NEAR(output(i), true_output(i));
-    }
-  }
-#endif
-
 #if WITH_EXECUTION_ENGINE_LLVM
   { // Test LLVM
-    Eigen::VectorXd output(expression.size());
+    Eigen::VectorXd output = Eigen::VectorXd::Zero(expression.size());
     runLLVMReal(symbols, expression, values, output);
     for (int i=0; i<output.size(); i++) {
       UT_ASSERT_NEAR(output(i), true_output(i));
@@ -692,7 +643,7 @@ InterpreterTest::testAllReal(Eigen::VectorXex &symbols, Eigen::VectorXex &expres
 #endif
 
   { // Test Default engine
-    Eigen::VectorXd output(expression.size());
+    Eigen::VectorXd output = Eigen::VectorXd::Zero(expression.size());
     runDefaultReal(symbols, expression, values, output);
     for (int i=0; i<output.size(); i++) {
       UT_ASSERT_NEAR(output(i), true_output(i));

@@ -153,7 +153,7 @@ public:
   /**
    * Constructs an empty byte-code container.
    */
-  Code();
+  Code(size_t num_threads=1);
 
   /**
    * Copy constructor.

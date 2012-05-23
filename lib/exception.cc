@@ -74,7 +74,7 @@ Exception::operator <<(unsigned int value)
 
 
 Exception &
-Exception::operator <<(size_t value)
+Exception::operator <<(unsigned long value)
 {
   std::stringstream str; str << value;
   this->message.append(str.str());

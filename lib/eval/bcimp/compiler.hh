@@ -71,7 +71,7 @@ public:
    * This method compiles the expression and ensures that compiled expressions are distributed
    * evenly over all threads.
    */
-  void compileExpressionAndStore(GiNaC::ex &expression, size_t index)
+  void compileExpressionAndStore(const GiNaC::ex &expression, size_t index)
   {
     // Set code-element of inner compiler:
     this->compiler.setCode(&this->code->getCode(this->code_idx));

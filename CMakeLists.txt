@@ -54,14 +54,6 @@ endif()
 
 
 #
-# MacOS X specific stuff:
-#
-IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-SET(CMAKE_OSX_DEPLOYMENT_TARGET 10.5)
-ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-
-
-#
 # Search for libraries
 #
 FIND_PACKAGE(Qt4 REQUIRED)
@@ -90,10 +82,10 @@ FIND_PACKAGE(LLVM)
 #
 # Disable OpenMP on MacOSX.
 #
-IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-SET(OpenMP_CXX_FLAGS "")
-SET(OpenMP_C_FLAGS "")
-ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+#IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+#SET(OpenMP_CXX_FLAGS "")
+#SET(OpenMP_C_FLAGS "")
+#ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
 
 #
