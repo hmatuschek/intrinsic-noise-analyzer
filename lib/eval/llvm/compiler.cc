@@ -9,6 +9,10 @@
 #include <llvm/Analysis/InstructionSimplify.h>
 #include <llvm/Analysis/Dominators.h>
 
+#include "utils/logger.hh"
+#include "utils/cputime.hh"
+
+
 using namespace Fluc::Evaluate::LLVM;
 
 
@@ -52,16 +56,9 @@ CompilerCore::finalize(size_t level)
     builder.setEngineKind(llvm::EngineKind::JIT);
 
     if (0 == (engine = builder.create())) {
-      std::cerr << "Wraning: LLVM uses interpreter to execute code: " << error_string << std::endl;
-      // Retry with interpreter:
-      builder.setEngineKind(llvm::EngineKind::Interpreter);
-      if( 0 == (engine = builder.create()) )
-      {
-        // Free module:
-        InternalError err;
-        err << "Can not create LLVM execution engine: " << error_string;
-        throw err;
-      }
+      InternalError err;
+      err << "Can not create LLVM-JIT execution engine: " << error_string;
+      throw err;
     }
     code->setEngine(engine);
   }
@@ -88,7 +85,12 @@ CompilerCore::finalize(size_t level)
     fpm.add(llvm::createDeadInstEliminationPass());
   }
   fpm.doInitialization();
+
+  Utils::Message msg = LOG_MESSAGE(Utils::Message::DEBUG);
+  Utils::CpuTime clock; clock.start();
   fpm.run(*code->getSystem());
+  msg << "Optimized LLVM IR code in " << clock.stop() << "s.";
+  Utils::Logger::get().log(msg);
 
   //code->getModule()->dump();
 
