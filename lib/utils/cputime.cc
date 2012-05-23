@@ -45,3 +45,55 @@ CpuTime::getTime()
 
   return dt;
 }
+
+
+
+
+RealTime::RealTime()
+{
+  // pass...
+}
+
+
+void
+RealTime::start()
+{
+  struct timeval now; gettimeofday(&now, 0);
+  this->clocks.push_back(now);
+}
+
+
+double
+RealTime::stop()
+{
+  // measure time.
+  struct timeval now; gettimeofday(&now, 0);
+
+  // Get time-diff since start:
+  double dt = ((double)(now.tv_usec - this->clocks.back().tv_usec))/1e6;
+  dt += now.tv_sec-this->clocks.back().tv_sec;
+
+  // Remove start time from stack:
+  this->clocks.pop_back();
+
+  // Return delta t:
+  return dt;
+}
+
+
+double
+RealTime::getTime()
+{
+  // measure time.
+  struct timeval now; gettimeofday(&now, 0);
+
+  // Get time-diff since start:
+  double dt = ((double)(now.tv_usec - this->clocks.back().tv_usec))/1e6;
+  dt += now.tv_sec-this->clocks.back().tv_sec;
+
+  // Remove start time from stack:
+  this->clocks.pop_back();
+
+  // Return delta t:
+  return dt;
+}

@@ -8,6 +8,9 @@
 #include "eval/bcimp/engine.hh"
 #include "eval/llvm/engine.hh"
 
+#include "utils/cputime.hh"
+
+
 using namespace Fluc;
 
 typedef Models::GenericLNAinterpreter< Evaluate::bci::Engine<Eigen::VectorXd>, Evaluate::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd> > BCIInterpreter;
@@ -50,12 +53,19 @@ Benchmark::integrate_BCI_LSODA(Models::LinearNoiseApproximation *model, double t
   Eigen::VectorXd dx(interpreter.getDimension());
   lna->getInitialState(x);
 
+  Utils::CpuTime  cpu_clock; cpu_clock.start();
+  Utils::RealTime real_clock; real_clock.start();
+
   double t = 0.0;
   for(size_t i=0; i<N; i++,t+=dt)
   {
     integrator.step(x,t,dx);
     x += dx; t += dt;
   }
+
+  std::cout << "Precise execution time (BCI): " << std::endl
+            << "  cpu: " << cpu_clock.stop() << "s." << std::endl
+            << " real: " << real_clock.stop() << "s." << std::endl;
 }
 
 void
@@ -74,12 +84,19 @@ Benchmark::integrate_BCIMP_LSODA(Models::LinearNoiseApproximation *model, double
   Eigen::VectorXd dx(interpreter.getDimension());
   lna->getInitialState(x);
 
+  Utils::CpuTime  cpu_clock; cpu_clock.start();
+  Utils::RealTime real_clock; real_clock.start();
+
   double t = 0.0;
   for(size_t i=0; i<N; i++,t+=dt)
   {
     integrator.step(x,t,dx);
     x += dx; t += dt;
   }
+
+  std::cout << "Precise execution time (BCIMP): " << std::endl
+            << "  cpu: " << cpu_clock.stop() << "s." << std::endl
+            << " real: " << real_clock.stop() << "s." << std::endl;
 }
 
 void
@@ -98,12 +115,19 @@ Benchmark::integrate_JIT_LSODA(Models::LinearNoiseApproximation *model, double t
   Eigen::VectorXd dx(interpreter.getDimension());
   lna->getInitialState(x);
 
+  Utils::CpuTime  cpu_clock; cpu_clock.start();
+  Utils::RealTime real_clock; real_clock.start();
+
   double t = 0.0;
   for(size_t i=0; i<N; i++,t+=dt)
   {
     integrator.step(x,t,dx);
     x += dx; t += dt;
   }
+
+  std::cout << "Precise execution time (JIT): " << std::endl
+            << "  cpu: " << cpu_clock.stop() << "s." << std::endl
+            << " real: " << real_clock.stop() << "s." << std::endl;
 }
 
 void
@@ -122,12 +146,19 @@ Benchmark::integrate_BCI_Rosen4(Models::LinearNoiseApproximation *model, double 
   Eigen::VectorXd dx(interpreter.getDimension());
   lna->getInitialState(x);
 
+  Utils::CpuTime  cpu_clock; cpu_clock.start();
+  Utils::RealTime real_clock; real_clock.start();
+
   double t = 0.0;
   for(size_t i=0; i<N; i++,t+=dt)
   {
     integrator.step(x,t,dx);
     x += dx; t += dt;
   }
+
+  std::cout << "Precise execution time (BCI): " << std::endl
+            << "  cpu: " << cpu_clock.stop() << "s." << std::endl
+            << " real: " << real_clock.stop() << "s." << std::endl;
 }
 
 void
@@ -146,12 +177,19 @@ Benchmark::integrate_BCIMP_Rosen4(Models::LinearNoiseApproximation *model, doubl
   Eigen::VectorXd dx(interpreter.getDimension());
   lna->getInitialState(x);
 
+  Utils::CpuTime  cpu_clock; cpu_clock.start();
+  Utils::RealTime real_clock; real_clock.start();
+
   double t = 0.0;
   for(size_t i=0; i<N; i++,t+=dt)
   {
     integrator.step(x,t,dx);
     x += dx; t += dt;
   }
+
+  std::cout << "Precise execution time (BCIMP): " << std::endl
+            << "  cpu: " << cpu_clock.stop() << "s." << std::endl
+            << " real: " << real_clock.stop() << "s." << std::endl;
 }
 
 void
@@ -170,12 +208,19 @@ Benchmark::integrate_JIT_Rosen4(Models::LinearNoiseApproximation *model, double 
   Eigen::VectorXd dx(interpreter.getDimension());
   lna->getInitialState(x);
 
+  Utils::CpuTime  cpu_clock; cpu_clock.start();
+  Utils::RealTime real_clock; real_clock.start();
+
   double t = 0.0;
   for(size_t i=0; i<N; i++,t+=dt)
   {
     integrator.step(x,t,dx);
     x += dx; t += dt;
   }
+
+  std::cout << "Precise execution time (BCIMP): " << std::endl
+            << "  cpu: " << cpu_clock.stop() << "s." << std::endl
+            << " real: " << real_clock.stop() << "s." << std::endl;
 }
 
 

@@ -411,15 +411,12 @@ TestRunner::operator ()()
       try
       {
         tests_run++;
-        Utils::CpuTime clock; clock.start();
-        struct timeval t_start, t_end; double real_time = 0.0;
-        gettimeofday(&t_start, 0);
+        Utils::CpuTime cpu_clock; cpu_clock.start();
+        Utils::RealTime real_clock; real_clock.start();
         // Run test
         (**test)();
-        gettimeofday(&t_end, 0);
-        real_time = t_end.tv_sec - t_start.tv_sec + ((double)(t_end.tv_usec - t_start.tv_usec))/1e6;
-        this->stream << " ok (cpu:" << clock.stop()
-                     << "s, real:" << real_time << "s)" << std::endl;
+        this->stream << " ok (cpu:" << cpu_clock.stop()
+                     << "s, real:" << real_clock.stop() << "s)" << std::endl;
       }
       catch (TestFailure &fail)
       {
