@@ -24,12 +24,15 @@ protected:
    */
   Code *code;
 
+  void (*system_function)(const double *, double *);
+
+
 public:
   /**
    * Default constructor. Call @c setCode to assign a code-instance.
    */
   Interpreter()
-    : code(0)
+    : code(0), system_function(0)
   {
     // Pass...
   }
@@ -38,7 +41,7 @@ public:
    * Constructor with code-object.
    */
   Interpreter(Code *code)
-    : code(0)
+    : code(0), system_function(0)
   {
     setCode(code);
   }
@@ -48,14 +51,16 @@ public:
    */
   void setCode(Code *code) {
     this->code = code;
+    this->system_function = 0;
   }
 
   inline void run(const typename InType::Scalar *input, typename OutType::Scalar *output)
   {
-    std::vector<llvm::GenericValue> args(2);
-    args[0].PointerVal = (void *)input; args[1].PointerVal = output;
-
-    this->code->exec(args);
+    // Ensure, that we have a pointer to the compiled function:
+    if (0 == this->system_function)
+      this->system_function = (void (*)(const double *, double *)) this->code->getFunctionPtr();
+    // Call it:
+    this->system_function(input, output);
   }
 
   /**
@@ -63,9 +68,10 @@ public:
    */
   inline void run(const InType &input, OutType &output)
   {
+    // Unpack pointers
     const typename InType::Scalar *inptr = (const typename InType::Scalar *)input.data();
     typename OutType::Scalar *outptr = (typename OutType::Scalar *)output.data();
-
+    // Forward call:
     this->run(inptr, outptr);
   }
 };
