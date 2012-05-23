@@ -5,6 +5,7 @@
 #include <cmath>
 #include "utils/cputime.hh"
 #include <execinfo.h>
+#include <sys/time.h>
 
 using namespace Fluc::UnitTest;
 
@@ -411,9 +412,14 @@ TestRunner::operator ()()
       {
         tests_run++;
         Utils::CpuTime clock; clock.start();
+        struct timeval t_start, t_end; double real_time = 0.0;
+        gettimeofday(&t_start, 0);
         // Run test
         (**test)();
-        this->stream << " ok (" << clock.stop() << "s)" << std::endl;
+        gettimeofday(&t_end, 0);
+        real_time = t_end.tv_sec - t_start.tv_sec + ((double)(t_end.tv_usec - t_start.tv_usec))/1e6;
+        this->stream << " ok (cpu:" << clock.stop()
+                     << "s, real:" << real_time << "s)" << std::endl;
       }
       catch (TestFailure &fail)
       {
