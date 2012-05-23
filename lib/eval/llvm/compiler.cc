@@ -55,6 +55,11 @@ CompilerCore::finalize(size_t level)
     builder.setErrorStr(&error_string);
     builder.setEngineKind(llvm::EngineKind::JIT);
 
+    if (0 == level)
+      builder.setOptLevel(llvm::CodeGenOpt::None);
+    else
+      builder.setOptLevel(llvm::CodeGenOpt::Default);
+
     if (0 == (engine = builder.create())) {
       InternalError err;
       err << "Can not create LLVM-JIT execution engine: " << error_string;
