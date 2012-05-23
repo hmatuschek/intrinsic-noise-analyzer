@@ -105,6 +105,21 @@ public:
   }
 
   /**
+   * Evaluates the Jacobian of the ODEs at the given state.
+   */
+  template <typename T, typename U>
+  inline void evaluateJacobian(const T* state, double t, U* jac)
+  {
+      // ensures that the Jacobian was compiled
+      if (! hasJacobian) {
+        compileJacobian();
+      }
+
+      // Evaluate the Jacobian
+      this->jacobian_interpreter.run(state, jac);
+  }
+
+  /**
    * Constructs the "full" state from the internal, reduced state.
    */
   void full_state( const Eigen::VectorXd &state, Eigen::VectorXd &concentrations,

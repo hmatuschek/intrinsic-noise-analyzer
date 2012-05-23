@@ -19,8 +19,9 @@ public:
    * Defines the virtual step method needed to be implemented by any stepper algorithm.
    */
   virtual void step(const Eigen::VectorXd &state, double t, Eigen::VectorXd &delta) = 0;
+
   /**
-   * Defines a second virtual step method needed to be implemented by any stepper algorithm.
+   * Defines a second virtual step method that uses the stepper implemented by the algorithm.
    */
   virtual void step(Eigen::VectorXd &state, double t)
   {

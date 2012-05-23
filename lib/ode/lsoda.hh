@@ -112,6 +112,8 @@ public:
 
  virtual void evalODE (double x, double y[], double yd[],
          int n)=0;
+ virtual void evalJac (double x, double *y, double **jac,
+         int n)=0;
 
  void f_lsoda (double t, double dt, double y[], int n, double eps);
 
