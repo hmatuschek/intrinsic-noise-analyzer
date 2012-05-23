@@ -15,9 +15,13 @@ public:
   void setUp();
   void tearDown();
 
-  void testCoremodelBCI();
-  void testCoremodelBCIMP();
-  void testCoremodelJIT();
+  void testCoremodelBCILSODAOpt();
+  void testCoremodelBCIMPLSODAOpt();
+  void testCoremodelJITLSODAOpt();
+
+  void testCoremodelBCILSODANoOpt();
+  void testCoremodelBCIMPLSODANoOpt();
+  void testCoremodelJITLSODANoOpt();
 
 public:
   static UnitTest::TestSuite *suite();

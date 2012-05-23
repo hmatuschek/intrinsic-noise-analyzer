@@ -18,12 +18,6 @@ ENDIF(UNIX AND NOT APPLE)
 
 
 #
-# Define Options:
-#
-OPTION(LLVM_ENGINE_ENABLED "Specifies if LLVM execution engine is enabled." OFF)
-
-
-#
 # Handle command line options/definitions:
 #
 if(EXECUTION_ENGINE STREQUAL "DIRECT")
@@ -35,11 +29,6 @@ elseif(EXECUTION_ENGINE STREQUAL "BYTECODE_MP")
 set(EXECUTION_ENGINE_BYTECODE_MP ON)
 add_definitions(-DEXECUTION_ENGINE=3)
 message(STATUS "Execution engine: bytecode (OpenMP)")
-
-elseif(EXECUTION_ENGINE STREQUAL "LIBJIT")
-set(EXECUTION_ENGINE_LIBJIT ON)
-add_definitions(-DEXECUTION_ENGINE=4)
-message(STATUS "Execution engine: libjit (experimental)")
 
 elseif(EXECUTION_ENGINE STREQUAL "LLVM")
 set(EXECUTION_ENGINE_LLVM ON)
@@ -64,28 +53,16 @@ INCLUDE_DIRECTORIES(${QT_QTCORE_INCLUDE_DIR} ${QT_QTGUI_INCLUDE_DIR})
 FIND_PACKAGE(Ginac REQUIRED)
 FIND_PACKAGE(LibSBML REQUIRED)
 FIND_PACKAGE(OpenMP REQUIRED)
-
-
-# If libjit is the default execution-engine -> libjit is required
-if(EXECUTION_ENGINE_LIBJIT)
-FIND_PACKAGE(LibJIT REQUIRED)
-# Otherwise, libjit is optional
-else(EXECUTION_ENGINE_LIBJIT)
-FIND_PACKAGE(LibJIT)
-endif(EXECUTION_ENGINE_LIBJIT)
-
-#IF(LLVM_ENGINE_ENABLED)
 FIND_PACKAGE(LLVM)
-#ENDIF(LLVM_ENGINE_ENABLED)
 
 
 #
 # Disable OpenMP on MacOSX.
 #
-#IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-#SET(OpenMP_CXX_FLAGS "")
-#SET(OpenMP_C_FLAGS "")
-#ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+SET(OpenMP_CXX_FLAGS "")
+SET(OpenMP_C_FLAGS "")
+ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
 
 #
@@ -118,21 +95,6 @@ set(CMAKE_MODULE_LINKER_FLAGS ${CMAKE_MODULE_LINKER_FLAGS_INIT} ${OpenMP_CXX_FLA
 
 
 #
-# Define flags, libs etc. if libjit is present:
-#
-if(LIBJIT_FOUND)
-MESSAGE(STATUS "libjit support: yes")
-SET(WITH_EXECUTION_ENGINE_LIBJIT ON)
-SET(LIBS ${LIBS} ${LIBJIT_LIBRARIES})
-INCLUDE_DIRECTORIES(${LIBJIT_INCLUDE_DIRECTORIES})
-ADD_DEFINITIONS(-DWITH_EXECUTION_ENGINE_LIBJIT=1)
-else()
-MESSAGE(STATUS "libjit support: no")
-SET(WITH_EXECUTION_ENGINE_LIBJIT OFF)
-ADD_DEFINITIONS(-DWITH_EXECUTION_ENGINE_LIBJIT=0)
-endif()
-
-#
 # Define flags, libs etc if LLVM is present:
 #
 IF(LLVM_FOUND)
@@ -159,8 +121,6 @@ add_subdirectory(lib)
 add_subdirectory(cli)
 add_subdirectory(app)
 add_subdirectory(test)
-#add_subdirectory(benchmarks)
-#add_subdirectory(extrinsic)
 
 #
 # Source distribution packages:

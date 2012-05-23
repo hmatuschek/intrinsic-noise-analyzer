@@ -82,8 +82,10 @@ CompilerCore::finalize(size_t level)
     fpm.add(llvm::createReassociatePass());
     // Eliminate Common SubExpressions.
     fpm.add(llvm::createGVNPass());
-    // Simplify the control flow graph (deleting unreachable blocks, etc).
-    fpm.add(llvm::createCFGSimplificationPass());
+    // Constant propagation
+    fpm.add(llvm::createConstantPropagationPass());
+    // Remove dead instructions
+    fpm.add(llvm::createDeadInstEliminationPass());
   }
   fpm.doInitialization();
   fpm.run(*code->getSystem());
