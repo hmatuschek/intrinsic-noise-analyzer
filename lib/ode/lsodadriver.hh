@@ -76,14 +76,17 @@ public:
 
   virtual void step(Eigen::VectorXd &state, double t)
   {
-      //for (size_t i = 1; i <= getDimension(); ++i) ywork[i] = state[i-1];
       lsoda(getDimension(), state.data()-1, &t, t+step_size, 2, rtolwork, atolwork, 1, &istate, 0, 2);
-      //for (size_t i = 1; i <= getDimension(); ++i) delta[i-1] = ywork[i]-state[i-1];
   }
 
   virtual void evalODE(double t, double y[], double yd[], int nsize)
   {
       system.evaluate(y, t, yd);
+  }
+
+  virtual void evalJac(double t, double *y, double **jac, int nsize)
+  {
+      // @todo implement.
   }
 
 public:
