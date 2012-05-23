@@ -5,26 +5,27 @@
 #include <llvm/Target/TargetData.h>
 #include <llvm/Analysis/AliasAnalysis.h>
 #include <llvm/Analysis/Passes.h>
-#include <llvm/Transforms/Scalar.h>
-#include <llvm/Transforms/Utils/PromoteMemToReg.h>
-#include <llvm/Analysis/InstructionSimplify.h>
+#include <llvm/Analysis/Verifier.h>
+#include <llvm/ExecutionEngine/Jit.h>
+#include <llvm/ExecutionEngine/Interpreter.h>
 
 
 using namespace Fluc::Evaluate::LLVM;
 
 
 Code::Code()
-  : context(llvm::getGlobalContext()), module("system", context), builder(context),
+  : context(llvm::getGlobalContext()), module(0), builder(context),
     function(0), input(0), output(0), complex_t(0),
     real_pow(0), complex_pow(0), real_abs(0), real_log(0), real_exp(0),
     engine(0), function_ptr(0)
 {
   // Init target and create module:
   llvm::InitializeNativeTarget();
+  module = new llvm::Module("system", context);
 
   { // Assemble function interface:
-    function = llvm::cast<llvm::Function>(
-          module.getOrInsertFunction(
+    this->function = llvm::cast<llvm::Function>(
+          module->getOrInsertFunction(
             "system", llvm::Type::getVoidTy(context), llvm::Type::getInt8PtrTy(context),
             llvm::Type::getInt8PtrTy(context), (llvm::Type *)0));
     llvm::BasicBlock *entry = llvm::BasicBlock::Create(context, "entry", function);
@@ -45,7 +46,7 @@ Code::Code()
     llvm::FunctionType *signature = llvm::FunctionType::get(
           llvm::Type::getDoubleTy(context), args, false);
     this->real_pow = llvm::Function::Create(
-          signature, llvm::Function::DLLImportLinkage, "pow", &module);
+          signature, llvm::Function::DLLImportLinkage, "pow", module);
   }
 
   { // Define extern abs() function from libm:
@@ -53,7 +54,7 @@ Code::Code()
     llvm::FunctionType *signature = llvm::FunctionType::get(
           llvm::Type::getDoubleTy(context), args, false);
     this->real_abs = llvm::Function::Create(
-          signature, llvm::Function::DLLImportLinkage, "abs", &module);
+          signature, llvm::Function::DLLImportLinkage, "abs", module);
   }
 
   { // Define extern log() function from libm:
@@ -61,7 +62,7 @@ Code::Code()
     llvm::FunctionType *signature = llvm::FunctionType::get(
           llvm::Type::getDoubleTy(context), args, false);
     this->real_log = llvm::Function::Create(
-          signature, llvm::Function::DLLImportLinkage, "log", &module);
+          signature, llvm::Function::DLLImportLinkage, "log", module);
   }
 
   { // Define extern exp() function from libm:
@@ -69,7 +70,7 @@ Code::Code()
     llvm::FunctionType *signature = llvm::FunctionType::get(
           llvm::Type::getDoubleTy(context), args, false);
     this->real_exp = llvm::Function::Create(
-          signature, llvm::Function::DLLImportLinkage, "exp", &module);
+          signature, llvm::Function::DLLImportLinkage, "exp", module);
   }
 }
 
@@ -77,11 +78,13 @@ Code::Code()
 
 Code::~Code()
 {
-  // Remove module from engine:
-  if (0 != this->engine) {
-    this->engine->removeModule(&module);
+  if (0 != engine) {
+    // Remove module from engine:
+    this->engine->removeModule(module);
     delete this->engine;
   }
+
+  delete module;
 }
 
 
@@ -99,64 +102,11 @@ Code::getContext()
 }
 
 
-void
-Code::compile(size_t opt_level)
+llvm::Function *
+Code::getSystem()
 {
-  // Verify module:
-  {
-    std::string error_string;
-    if(llvm::verifyModule(module, llvm::ReturnStatusAction, &error_string)) {
-      InternalError err;
-      err << "Can not verify LLVM IR module: " << error_string;
-      throw err;
-    }
-  }
-
-  // Create Execution engine:
-  {
-    std::string error_string;
-    llvm::EngineBuilder builder(&module);
-    builder.setErrorStr(&error_string);
-
-    if( 0 == (engine = builder.create()) )
-    {
-      // Free module:
-      InternalError err;
-      err << "Can not create LLVM execution engine: " << error_string;
-      throw err;
-    }
-  }
-
-  // Perform some optimizations:
-  llvm::FunctionPassManager fpm(&module);
-
-  // Set up the optimizer pipeline.  Start with registering info about how the
-  // target lays out data structures.
-  fpm.add(new llvm::TargetData(*engine->getTargetData()));
-  // Provide basic AliasAnalysis support for GVN.
-  fpm.add(llvm::createBasicAliasAnalysisPass());
-
-  if (0 < opt_level) {
-    // Promote allocas to registers.
-    fpm.add(llvm::createPromoteMemoryToRegisterPass());
-    // Do simple "peephole" optimizations and bit-twiddling optzns.
-    fpm.add(llvm::createInstructionCombiningPass());
-    // Reassociate expressions.
-    fpm.add(llvm::createReassociatePass());
-    // Eliminate Common SubExpressions.
-    fpm.add(llvm::createGVNPass());
-    // Simplify the control flow graph (deleting unreachable blocks, etc).
-    fpm.add(llvm::createCFGSimplificationPass());
-  }
-
-  fpm.doInitialization();
-
-  fpm.run(*function);
-
-  // Get function pointer:
-  this->function_ptr = this->engine->getPointerToFunction(function);
+  return this->function;
 }
-
 
 void *
 Code::getFunctionPtr()
@@ -164,6 +114,17 @@ Code::getFunctionPtr()
   return this->function_ptr;
 }
 
+void
+Code::setFunctionPtr(void *ptr)
+{
+  this->function_ptr = ptr;
+}
+
+void
+Code::setEngine(llvm::ExecutionEngine *engine)
+{
+  this->engine = engine;
+}
 
 void
 Code::exec(const std::vector<llvm::GenericValue> &args)
@@ -230,5 +191,5 @@ Code::getRealExpFunction()
 llvm::Module *
 Code::getModule()
 {
-    return &module;
+    return module;
 }

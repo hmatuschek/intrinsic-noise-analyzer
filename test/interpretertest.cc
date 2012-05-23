@@ -638,11 +638,11 @@ InterpreterTest::runLLVMReal(
 
   Evaluate::LLVM::Code code;
   Evaluate::LLVM::Compiler<Eigen::VectorXd> compiler(symbol_table);
-  Evaluate::LLVM::Interpreter<Eigen::VectorXd> interpreter(&code);
   compiler.setCode(&code);
   compiler.compileVector(expression);
-  compiler.finalize();
+  compiler.finalize(1);
 
+  Evaluate::LLVM::Interpreter<Eigen::VectorXd> interpreter(&code);
   interpreter.run(values, result);
 }
 #endif

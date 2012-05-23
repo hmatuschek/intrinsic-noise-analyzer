@@ -54,14 +54,6 @@ endif()
 
 
 #
-# MacOS X specific stuff:
-#
-IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-SET(CMAKE_OSX_DEPLOYMENT_TARGET 10.5)
-ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-
-
-#
 # Search for libraries
 #
 FIND_PACKAGE(Qt4 REQUIRED)
