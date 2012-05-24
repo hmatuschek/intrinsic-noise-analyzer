@@ -201,8 +201,6 @@ public:
               << "code-size: " << old_code_size << " -> " << code->getCodeSize() << " ("
               << int(100*(double(old_code_size)-code->getCodeSize())/old_code_size) << "%)";
       Utils::Logger::get().log(message);
-
-      this->code->dump(std::cerr);
     }
 
     //code->dump(std::cerr);

@@ -8,6 +8,7 @@
 #include "eval/bci/engine.hh"
 #include "eval/bcimp/engine.hh"
 #include "eval/llvm/engine.hh"
+#include "eval/direct/engine.hh"
 
 #include "utils/cputime.hh"
 
@@ -17,15 +18,18 @@ using namespace Fluc;
 typedef Models::GenericLNAinterpreter< Evaluate::bci::Engine<Eigen::VectorXd>, Evaluate::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd> > BCIInterpreter;
 typedef Models::GenericLNAinterpreter< Evaluate::bcimp::Engine<Eigen::VectorXd>, Evaluate::bcimp::Engine<Eigen::VectorXd, Eigen::MatrixXd> > BCIMPInterpreter;
 typedef Models::GenericLNAinterpreter< Evaluate::LLVM::Engine<Eigen::VectorXd>, Evaluate::LLVM::Engine<Eigen::VectorXd, Eigen::MatrixXd> > LLVMInterpreter;
+typedef Models::GenericLNAinterpreter< Evaluate::direct::Engine<Eigen::VectorXd>, Evaluate::direct::Engine<Eigen::VectorXd, Eigen::MatrixXd> > GiNaCInterpreter;
+
 typedef Models::GenericGillespieSSA< Evaluate::bci::Engine<Eigen::VectorXd> > GillespieBCI;
 typedef Models::GenericGillespieSSA< Evaluate::LLVM::Engine<Eigen::VectorXd> > GillespieJIT;
+typedef Models::GenericGillespieSSA< Evaluate::direct::Engine<Eigen::VectorXd> > GillespieGiNaC;
 
 
 size_t Benchmark::N_steps = 100;
 double Benchmark::eps_abs = 1e-10;
 double Benchmark::eps_rel = 1e-6;
 double Benchmark::t_end   = 5.0;
-size_t Benchmark::ensemble_size = 3000;
+size_t Benchmark::ensemble_size = 300;
 
 
 void
@@ -129,6 +133,37 @@ Benchmark::integrate_JIT_LSODA(Models::LinearNoiseApproximation *model, double t
             << "  cpu: " << cpu_clock.stop() << "s." << std::endl
             << " real: " << real_clock.stop() << "s." << std::endl;
 }
+
+
+void
+Benchmark::integrate_GiNaC_LSODA(Models::LinearNoiseApproximation *model, double t_end, size_t opt_level)
+{
+  double dt = t_end/N_steps;
+
+  GiNaCInterpreter interpreter(*model, opt_level);
+  ODE::LsodaDriver<GiNaCInterpreter> integrator(interpreter, dt, eps_abs, eps_rel);
+
+  Eigen::VectorXd x(interpreter.getDimension());
+  Eigen::VectorXd dx(interpreter.getDimension());
+  lna->getInitialState(x);
+
+  integrator.step(x, 0.0, dx);
+
+  Utils::CpuTime  cpu_clock; cpu_clock.start();
+  Utils::RealTime real_clock; real_clock.start();
+
+  double t = 0.0;
+  for(size_t i=0; i<N_steps; i++,t+=dt)
+  {
+    integrator.step(x,t,dx);
+    x += dx; t += dt;
+  }
+
+  std::cout << "Precise execution time (GiNaC): " << std::endl
+            << "  cpu: " << cpu_clock.stop() << "s." << std::endl
+            << " real: " << real_clock.stop() << "s." << std::endl;
+}
+
 
 void
 Benchmark::integrate_BCI_Rosen4(Models::LinearNoiseApproximation *model, double t_end, size_t opt_level)
@@ -253,6 +288,25 @@ Benchmark::simulate_JIT_gillespie(libsbml::Model *model, double t, size_t opt_le
 
 
 void
+Benchmark::simulate_GiNaC_gillespie(libsbml::Model *model, double t, size_t opt_level)
+{
+  GillespieGiNaC simulator(model, ensemble_size, 1234, opt_level, OpenMP::getMaxThreads());
+  double dt=t/N_steps;
+
+  Utils::CpuTime  cpu_clock; cpu_clock.start();
+  Utils::RealTime real_clock; real_clock.start();
+
+  for (size_t i=0; i<N_steps; i++) {
+    simulator.run(dt);
+  }
+
+  std::cout << "Precise execution time (JIT): " << std::endl
+            << "  cpu: " << cpu_clock.stop() << "s." << std::endl
+            << " real: " << real_clock.stop() << "s." << std::endl;
+}
+
+
+void
 Benchmark::testCoremodelBCILSODAOpt()
 {
   integrate_BCI_LSODA(this->lna, t_end, 1);
@@ -270,6 +324,13 @@ void
 Benchmark::testCoremodelJITLSODAOpt()
 {
   integrate_JIT_LSODA(this->lna, t_end, 1);
+}
+
+
+void
+Benchmark::testCoremodelGiNaCLSODA()
+{
+  integrate_GiNaC_LSODA(this->lna, t_end, 0);
 }
 
 
@@ -360,6 +421,12 @@ Benchmark::testCoremodelJITGillespieNoOpt()
   simulate_JIT_gillespie(this->document->getModel(), t_end, 0);
 }
 
+void
+Benchmark::testCoremodelGiNaCGillespie()
+{
+  simulate_GiNaC_gillespie(this->document->getModel(), t_end, 0);
+}
+
 
 
 UnitTest::TestSuite *
@@ -385,8 +452,11 @@ Benchmark::suite()
   s->addTest(new UnitTest::TestCaller<Benchmark>(
                "Coremodel 1 (LSODA, LLVM)", &Benchmark::testCoremodelJITLSODANoOpt));
 
-
   s->addTest(new UnitTest::TestCaller<Benchmark>(
+               "Coremodel 1 (LSODA, GiNaC)", &Benchmark::testCoremodelGiNaCLSODA));
+
+
+  /*s->addTest(new UnitTest::TestCaller<Benchmark>(
                "Coremodel 1 (Rosen4, BCI, Opt)", &Benchmark::testCoremodelBCIRosen4Opt));
 
   s->addTest(new UnitTest::TestCaller<Benchmark>(
@@ -402,7 +472,7 @@ Benchmark::suite()
                "Coremodel 1 (Rosen4, BCIMP)", &Benchmark::testCoremodelBCIMPRosen4NoOpt));
 
   s->addTest(new UnitTest::TestCaller<Benchmark>(
-               "Coremodel 1 (Rosen4, LLVM)", &Benchmark::testCoremodelJITRosen4NoOpt));
+               "Coremodel 1 (Rosen4, LLVM)", &Benchmark::testCoremodelJITRosen4NoOpt));*/
 
   s->addTest(new UnitTest::TestCaller<Benchmark>(
                "Coremodel 1 (Gillespie, BCI, Opt)", &Benchmark::testCoremodelBCIGillespieOpt));
@@ -415,6 +485,9 @@ Benchmark::suite()
 
   s->addTest(new UnitTest::TestCaller<Benchmark>(
                "Coremodel 1 (Gillespie, JIT)", &Benchmark::testCoremodelJITGillespieNoOpt));
+
+  s->addTest(new UnitTest::TestCaller<Benchmark>(
+               "Coremodel 1 (Gillespie, GiNaC)", &Benchmark::testCoremodelGiNaCGillespie));
 
   return s;
 }
