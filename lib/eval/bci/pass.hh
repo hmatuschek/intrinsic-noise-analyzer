@@ -32,6 +32,9 @@ public:
 };
 
 
+/**
+ * A pass manager collect passes and applies them on the dependence tree of a byte-code.
+ */
 class PassManager
 {
 protected:
@@ -130,6 +133,26 @@ public:
   /**
    * Implements the actual pass.
    */
+  virtual bool handleValue(SmartPtr<Value> &value);
+};
+
+
+/**
+ * Propergates constants to the outermost right position.
+ */
+class ConstantPropagation : public Pass
+{
+public:
+  virtual bool handleValue(SmartPtr<Value> &value);
+};
+
+
+/**
+ * Instruction canonization. X; Y; MUL -1; ADD; -> X; Y; SUB;
+ */
+class InstructionCanonization : public Pass
+{
+public:
   virtual bool handleValue(SmartPtr<Value> &value);
 };
 

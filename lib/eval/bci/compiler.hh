@@ -143,11 +143,13 @@ public:
      *
      * There some simple passes, trying to optimize the byte-code for a faster execution.
      */
-    ImmediateValueRHSPass imm_rhs_pass;
-    ImmediateValuePass    imm_pass;
-    RemoveUnitsPass       units_pass;
-    ConstantFoldingPass   const_pass;
-    ZeroStorePass         zero_pass;
+    ImmediateValueRHSPass   imm_rhs_pass;
+    ImmediateValuePass      imm_pass;
+    ConstantPropagation     const_prop;
+    RemoveUnitsPass         units_pass;
+    ConstantFoldingPass     const_pass;
+    ZeroStorePass           zero_pass;
+    InstructionCanonization canon_pass;
 
     PassManager manager;
     /* The first pass does not optimize any code here, it just pepares the representation for
@@ -164,6 +166,9 @@ public:
      * operations with immediate values are performed in-place on the stack. */
     manager.addPass(&imm_pass);
 
+    /* This pass propagates constants to the outermost left position. */
+    manager.addPass(&const_prop);
+
     /* This pass removes unit-operations like X*1 or X+0 etc. */
     manager.addPass(&units_pass);
 
@@ -172,6 +177,9 @@ public:
 
     /* This pass replaces "PUSH 0, STORE IDX" with "STORE_ZERO IDX" */
     manager.addPass(&zero_pass);
+
+    /* Canonizes instructions. */
+    manager.addPass(&canon_pass);
 
     if (level >= 1) {
       Utils::CpuTime clock; clock.start();
@@ -188,6 +196,8 @@ public:
               << "code-size: " << old_code_size << " -> " << code->getCodeSize() << " ("
               << int(100*(double(old_code_size)-code->getCodeSize())/old_code_size) << "%)";
       Utils::Logger::get().log(message);
+
+      this->code->dump(std::cerr);
     }
 
   }
