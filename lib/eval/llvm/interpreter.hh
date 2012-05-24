@@ -24,6 +24,9 @@ protected:
    */
   Code *code;
 
+  /**
+   * Holds a weak reference to the compiled function implementing the system.
+   */
   void (*system_function)(const double *, double *);
 
 
@@ -54,6 +57,10 @@ public:
     this->system_function = 0;
   }
 
+  /**
+   * Runs the compiled system. Firstly, checks if the system was allready compiled. If not,
+   * the function is requested from the @c Code object. Then executes the function directly.
+   */
   inline void run(const typename InType::Scalar *input, typename OutType::Scalar *output)
   {
     // Ensure, that we have a pointer to the compiled function:
@@ -64,7 +71,7 @@ public:
   }
 
   /**
-   * Executes the code.
+   * Executes the code using Eigen vectors or matrices.
    */
   inline void run(const InType &input, OutType &output)
   {

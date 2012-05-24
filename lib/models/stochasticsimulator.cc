@@ -1,4 +1,5 @@
 #include "stochasticsimulator.hh"
+#include "utils/logger.hh"
 
 using namespace Fluc;
 
@@ -67,8 +68,9 @@ StochasticSimulator::StochasticSimulator(libsbml::Model *model, int size, int se
      this->Omega(i)=evICs.evaluate(this->volumes(i));
   }
 
-  std::cerr<<"Initial conditions:"<<std::endl;
-  std::cerr<<ics.transpose()<<std::endl<<std::endl;
+  Utils::Message msg = LOG_MESSAGE(Utils::Message::DEBUG);
+  msg << "Initial conditions:" << ics.transpose();
+  Utils::Logger::get().log(msg);
 
   // initialize ensemble
   for(int i=0; i<this->ensembleSize;i++)

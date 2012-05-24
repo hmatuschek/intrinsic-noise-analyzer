@@ -1,5 +1,6 @@
 #include "benchmark.hh"
 #include "models/lnainterpreter.hh"
+#include "models/gillespieSSA.hh"
 
 #include "ode/rosenbrock4.hh"
 #include "ode/lsodadriver.hh"
@@ -16,6 +17,15 @@ using namespace Fluc;
 typedef Models::GenericLNAinterpreter< Evaluate::bci::Engine<Eigen::VectorXd>, Evaluate::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd> > BCIInterpreter;
 typedef Models::GenericLNAinterpreter< Evaluate::bcimp::Engine<Eigen::VectorXd>, Evaluate::bcimp::Engine<Eigen::VectorXd, Eigen::MatrixXd> > BCIMPInterpreter;
 typedef Models::GenericLNAinterpreter< Evaluate::LLVM::Engine<Eigen::VectorXd>, Evaluate::LLVM::Engine<Eigen::VectorXd, Eigen::MatrixXd> > LLVMInterpreter;
+typedef Models::GenericGillespieSSA< Evaluate::bci::Engine<Eigen::VectorXd> > GillespieBCI;
+typedef Models::GenericGillespieSSA< Evaluate::LLVM::Engine<Eigen::VectorXd> > GillespieJIT;
+
+
+size_t Benchmark::N_steps = 100;
+double Benchmark::eps_abs = 1e-10;
+double Benchmark::eps_rel = 1e-6;
+double Benchmark::t_end   = 1.0;
+size_t Benchmark::ensemble_size = 100;
 
 
 void
@@ -25,8 +35,7 @@ Benchmark::setUp()
   UT_ASSERT(0 == doc->getNumErrors());
 
   this->lna = new Models::LinearNoiseApproximation(doc->getModel());
-
-  delete doc;
+  this->document = doc;
 }
 
 
@@ -34,20 +43,17 @@ void
 Benchmark::tearDown()
 {
   delete this->lna;
+  delete this->document;
 }
 
 
 void
 Benchmark::integrate_BCI_LSODA(Models::LinearNoiseApproximation *model, double t_end, size_t opt_level)
 {
+  double dt = t_end/N_steps;
+
   BCIInterpreter interpreter(*model, opt_level);
-
-  size_t N = 100;
-  double dt = t_end/N;
-  double err_abs = 1e-6;
-  double err_rel = 1e-4;
-
-  ODE::LsodaDriver<BCIInterpreter> integrator(interpreter, dt, err_abs, err_rel);
+  ODE::LsodaDriver<BCIInterpreter> integrator(interpreter, dt, eps_abs, eps_rel);
 
   Eigen::VectorXd x(interpreter.getDimension());
   Eigen::VectorXd dx(interpreter.getDimension());
@@ -57,7 +63,7 @@ Benchmark::integrate_BCI_LSODA(Models::LinearNoiseApproximation *model, double t
   Utils::RealTime real_clock; real_clock.start();
 
   double t = 0.0;
-  for(size_t i=0; i<N; i++,t+=dt)
+  for(size_t i=0; i<N_steps; i++,t+=dt)
   {
     integrator.step(x,t,dx);
     x += dx; t += dt;
@@ -71,14 +77,10 @@ Benchmark::integrate_BCI_LSODA(Models::LinearNoiseApproximation *model, double t
 void
 Benchmark::integrate_BCIMP_LSODA(Models::LinearNoiseApproximation *model, double t_end, size_t opt_level)
 {
+  double dt = t_end/N_steps;
+
   BCIMPInterpreter interpreter(*model, opt_level);
-
-  size_t N = 100;
-  double dt = t_end/N;
-  double err_abs = 1e-6;
-  double err_rel = 1e-4;
-
-  ODE::LsodaDriver<BCIMPInterpreter> integrator(interpreter, dt, err_abs, err_rel);
+  ODE::LsodaDriver<BCIMPInterpreter> integrator(interpreter, dt, eps_abs, eps_rel);
 
   Eigen::VectorXd x(interpreter.getDimension());
   Eigen::VectorXd dx(interpreter.getDimension());
@@ -88,7 +90,7 @@ Benchmark::integrate_BCIMP_LSODA(Models::LinearNoiseApproximation *model, double
   Utils::RealTime real_clock; real_clock.start();
 
   double t = 0.0;
-  for(size_t i=0; i<N; i++,t+=dt)
+  for(size_t i=0; i<N_steps; i++,t+=dt)
   {
     integrator.step(x,t,dx);
     x += dx; t += dt;
@@ -102,14 +104,10 @@ Benchmark::integrate_BCIMP_LSODA(Models::LinearNoiseApproximation *model, double
 void
 Benchmark::integrate_JIT_LSODA(Models::LinearNoiseApproximation *model, double t_end, size_t opt_level)
 {
+  double dt = t_end/N_steps;
+
   LLVMInterpreter interpreter(*model, opt_level);
-
-  size_t N = 100;
-  double dt = t_end/N;
-  double err_abs = 1e-6;
-  double err_rel = 1e-4;
-
-  ODE::LsodaDriver<LLVMInterpreter> integrator(interpreter, dt, err_abs, err_rel);
+  ODE::LsodaDriver<LLVMInterpreter> integrator(interpreter, dt, eps_abs, eps_rel);
 
   Eigen::VectorXd x(interpreter.getDimension());
   Eigen::VectorXd dx(interpreter.getDimension());
@@ -121,7 +119,7 @@ Benchmark::integrate_JIT_LSODA(Models::LinearNoiseApproximation *model, double t
   Utils::RealTime real_clock; real_clock.start();
 
   double t = 0.0;
-  for(size_t i=0; i<N; i++,t+=dt)
+  for(size_t i=0; i<N_steps; i++,t+=dt)
   {
     integrator.step(x,t,dx);
     x += dx; t += dt;
@@ -135,14 +133,10 @@ Benchmark::integrate_JIT_LSODA(Models::LinearNoiseApproximation *model, double t
 void
 Benchmark::integrate_BCI_Rosen4(Models::LinearNoiseApproximation *model, double t_end, size_t opt_level)
 {
+  double dt = t_end/N_steps;
+
   BCIInterpreter interpreter(*model, opt_level);
-
-  size_t N = 100;
-  double dt = t_end/N;
-  double err_abs = 1e-6;
-  double err_rel = 1e-4;
-
-  ODE::Rosenbrock4TimeInd<BCIInterpreter> integrator(interpreter, dt, err_abs, err_rel);
+  ODE::Rosenbrock4TimeInd<BCIInterpreter> integrator(interpreter, dt, eps_abs, eps_rel);
 
   Eigen::VectorXd x(interpreter.getDimension());
   Eigen::VectorXd dx(interpreter.getDimension());
@@ -152,7 +146,7 @@ Benchmark::integrate_BCI_Rosen4(Models::LinearNoiseApproximation *model, double 
   Utils::RealTime real_clock; real_clock.start();
 
   double t = 0.0;
-  for(size_t i=0; i<N; i++,t+=dt)
+  for(size_t i=0; i<N_steps; i++,t+=dt)
   {
     integrator.step(x,t,dx);
     x += dx; t += dt;
@@ -166,14 +160,10 @@ Benchmark::integrate_BCI_Rosen4(Models::LinearNoiseApproximation *model, double 
 void
 Benchmark::integrate_BCIMP_Rosen4(Models::LinearNoiseApproximation *model, double t_end, size_t opt_level)
 {
+  double dt = t_end/N_steps;
+
   BCIMPInterpreter interpreter(*model, opt_level);
-
-  size_t N = 100;
-  double dt = t_end/N;
-  double err_abs = 1e-6;
-  double err_rel = 1e-4;
-
-  ODE::Rosenbrock4TimeInd<BCIMPInterpreter> integrator(interpreter, dt, err_abs, err_rel);
+  ODE::Rosenbrock4TimeInd<BCIMPInterpreter> integrator(interpreter, dt, eps_abs, eps_rel);
 
   Eigen::VectorXd x(interpreter.getDimension());
   Eigen::VectorXd dx(interpreter.getDimension());
@@ -183,7 +173,7 @@ Benchmark::integrate_BCIMP_Rosen4(Models::LinearNoiseApproximation *model, doubl
   Utils::RealTime real_clock; real_clock.start();
 
   double t = 0.0;
-  for(size_t i=0; i<N; i++,t+=dt)
+  for(size_t i=0; i<N_steps; i++,t+=dt)
   {
     integrator.step(x,t,dx);
     x += dx; t += dt;
@@ -197,14 +187,10 @@ Benchmark::integrate_BCIMP_Rosen4(Models::LinearNoiseApproximation *model, doubl
 void
 Benchmark::integrate_JIT_Rosen4(Models::LinearNoiseApproximation *model, double t_end, size_t opt_level)
 {
+  double dt = t_end/N_steps;
+
   LLVMInterpreter interpreter(*model, opt_level);
-
-  size_t N = 100;
-  double dt = t_end/N;
-  double err_abs = 1e-6;
-  double err_rel = 1e-4;
-
-  ODE::Rosenbrock4TimeInd<LLVMInterpreter> integrator(interpreter, dt, err_abs, err_rel);
+  ODE::Rosenbrock4TimeInd<LLVMInterpreter> integrator(interpreter, dt, eps_abs, eps_rel);
 
   Eigen::VectorXd x(interpreter.getDimension());
   Eigen::VectorXd dx(interpreter.getDimension());
@@ -217,7 +203,7 @@ Benchmark::integrate_JIT_Rosen4(Models::LinearNoiseApproximation *model, double 
   Utils::RealTime real_clock; real_clock.start();
 
   double t = 0.0;
-  for(size_t i=0; i<N; i++,t+=dt)
+  for(size_t i=0; i<N_steps; i++,t+=dt)
   {
     integrator.step(x,t,dx);
     x += dx; t += dt;
@@ -230,87 +216,150 @@ Benchmark::integrate_JIT_Rosen4(Models::LinearNoiseApproximation *model, double 
 
 
 void
+Benchmark::simulate_BCI_gillespie(libsbml::Model *model, double t, size_t opt_level)
+{
+  GillespieBCI simulator(model, ensemble_size, 1234, opt_level, OpenMP::getMaxThreads());
+  double dt=t/N_steps;
+
+  Utils::CpuTime  cpu_clock; cpu_clock.start();
+  Utils::RealTime real_clock; real_clock.start();
+
+  for (size_t i=0; i<N_steps; i++) {
+    simulator.run(dt);
+  }
+
+  std::cout << "Precise execution time (BCI): " << std::endl
+            << "  cpu: " << cpu_clock.stop() << "s." << std::endl
+            << " real: " << real_clock.stop() << "s." << std::endl;
+}
+
+void
+Benchmark::simulate_JIT_gillespie(libsbml::Model *model, double t, size_t opt_level)
+{
+  GillespieJIT simulator(model, ensemble_size, 1234, opt_level, OpenMP::getMaxThreads());
+  double dt=t/N_steps;
+
+  Utils::CpuTime  cpu_clock; cpu_clock.start();
+  Utils::RealTime real_clock; real_clock.start();
+
+  for (size_t i=0; i<N_steps; i++) {
+    simulator.run(dt);
+  }
+
+  std::cout << "Precise execution time (JIT): " << std::endl
+            << "  cpu: " << cpu_clock.stop() << "s." << std::endl
+            << " real: " << real_clock.stop() << "s." << std::endl;
+}
+
+
+void
 Benchmark::testCoremodelBCILSODAOpt()
 {
-  integrate_BCI_LSODA(this->lna, 1, 1);
+  integrate_BCI_LSODA(this->lna, t_end, 1);
 }
 
 
 void
 Benchmark::testCoremodelBCIMPLSODAOpt()
 {
-  integrate_BCIMP_LSODA(this->lna, 1, 1);
+  integrate_BCIMP_LSODA(this->lna, t_end, 1);
 }
 
 
 void
 Benchmark::testCoremodelJITLSODAOpt()
 {
-  integrate_JIT_LSODA(this->lna, 1, 1);
+  integrate_JIT_LSODA(this->lna, t_end, 1);
 }
 
 
 void
 Benchmark::testCoremodelBCILSODANoOpt()
 {
-  integrate_BCI_LSODA(this->lna, 1., 0);
+  integrate_BCI_LSODA(this->lna, t_end, 0);
 }
 
 
 void
 Benchmark::testCoremodelBCIMPLSODANoOpt()
 {
-  integrate_BCIMP_LSODA(this->lna, 1., 0);
+  integrate_BCIMP_LSODA(this->lna, t_end, 0);
 }
 
 
 void
 Benchmark::testCoremodelJITLSODANoOpt()
 {
-  integrate_JIT_LSODA(this->lna, 1., 0);
+  integrate_JIT_LSODA(this->lna, t_end, 0);
 }
 
 
 void
 Benchmark::testCoremodelBCIRosen4Opt()
 {
-  integrate_BCI_Rosen4(this->lna, 1, 1);
+  integrate_BCI_Rosen4(this->lna, t_end, 1);
 }
 
 
 void
 Benchmark::testCoremodelBCIMPRosen4Opt()
 {
-  integrate_BCIMP_Rosen4(this->lna, 1, 1);
+  integrate_BCIMP_Rosen4(this->lna, t_end, 1);
 }
 
 
 void
 Benchmark::testCoremodelJITRosen4Opt()
 {
-  integrate_JIT_Rosen4(this->lna, 1, 1);
+  integrate_JIT_Rosen4(this->lna, t_end, 1);
 }
 
 
 void
 Benchmark::testCoremodelBCIRosen4NoOpt()
 {
-  integrate_BCI_Rosen4(this->lna, 1., 0);
+  integrate_BCI_Rosen4(this->lna, t_end, 0);
 }
 
 
 void
 Benchmark::testCoremodelBCIMPRosen4NoOpt()
 {
-  integrate_BCIMP_Rosen4(this->lna, 1., 0);
+  integrate_BCIMP_Rosen4(this->lna, t_end, 0);
 }
 
 
 void
 Benchmark::testCoremodelJITRosen4NoOpt()
 {
-  integrate_JIT_Rosen4(this->lna, 1., 0);
+  integrate_JIT_Rosen4(this->lna, t_end, 0);
 }
+
+
+void
+Benchmark::testCoremodelBCIGillespieOpt()
+{
+  simulate_BCI_gillespie(this->document->getModel(), t_end, 1);
+}
+
+void
+Benchmark::testCoremodelBCIGillespieNoOpt()
+{
+  simulate_BCI_gillespie(this->document->getModel(), t_end, 0);
+}
+
+void
+Benchmark::testCoremodelJITGillespieOpt()
+{
+  simulate_JIT_gillespie(this->document->getModel(), t_end, 1);
+}
+
+void
+Benchmark::testCoremodelJITGillespieNoOpt()
+{
+  simulate_JIT_gillespie(this->document->getModel(), t_end, 0);
+}
+
 
 
 UnitTest::TestSuite *
@@ -354,5 +403,18 @@ Benchmark::suite()
 
   s->addTest(new UnitTest::TestCaller<Benchmark>(
                "Coremodel 1 (Rosen4, LLVM)", &Benchmark::testCoremodelJITRosen4NoOpt));
+
+  s->addTest(new UnitTest::TestCaller<Benchmark>(
+               "Coremodel 1 (Gillespie, BCI, Opt)", &Benchmark::testCoremodelBCIGillespieOpt));
+
+  s->addTest(new UnitTest::TestCaller<Benchmark>(
+               "Coremodel 1 (Gillespie, BCI)", &Benchmark::testCoremodelBCIGillespieNoOpt));
+
+  s->addTest(new UnitTest::TestCaller<Benchmark>(
+               "Coremodel 1 (Gillespie, JIT, Opt)", &Benchmark::testCoremodelJITGillespieOpt));
+
+  s->addTest(new UnitTest::TestCaller<Benchmark>(
+               "Coremodel 1 (Gillespie, JIT)", &Benchmark::testCoremodelJITGillespieNoOpt));
+
   return s;
 }

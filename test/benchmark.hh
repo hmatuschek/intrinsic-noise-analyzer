@@ -9,6 +9,7 @@ namespace Fluc {
 class Benchmark : public UnitTest::TestCase
 {
 protected:
+  libsbml::SBMLDocument *document;
   Models::LinearNoiseApproximation *lna;
 
   void integrate_BCI_LSODA(Models::LinearNoiseApproximation *model,
@@ -29,6 +30,17 @@ protected:
   void integrate_JIT_Rosen4(Models::LinearNoiseApproximation *model,
                            double t, size_t opt_level);
 
+  void simulate_BCI_gillespie(libsbml::Model *model, double t, size_t opt_level);
+  void simulate_JIT_gillespie(libsbml::Model *model, double t, size_t opt_level);
+
+
+protected:
+  static size_t N_steps;
+  static double eps_abs;
+  static double eps_rel;
+  static double t_end;
+  static size_t ensemble_size;
+
 public:
   void setUp();
   void tearDown();
@@ -48,6 +60,12 @@ public:
   void testCoremodelBCIRosen4NoOpt();
   void testCoremodelBCIMPRosen4NoOpt();
   void testCoremodelJITRosen4NoOpt();
+
+  void testCoremodelBCIGillespieOpt();
+  void testCoremodelBCIGillespieNoOpt();
+
+  void testCoremodelJITGillespieOpt();
+  void testCoremodelJITGillespieNoOpt();
 
 public:
   static UnitTest::TestSuite *suite();
