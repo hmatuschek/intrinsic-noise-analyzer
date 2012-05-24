@@ -99,6 +99,7 @@ Code::check()
       break;
 
     case Instruction::STORE_ZERO:
+    case Instruction::IPOW:
       // Does not alter stack size.
       break;
     }
@@ -169,6 +170,10 @@ Code::dump(std::ostream &str)
         str << "   " << inst->value.asComplex.real
             << " + " << inst->value.asComplex.imag << "j";
       str << std::endl;
+      break;
+
+    case Instruction::IPOW:
+      str << "  IPOW   " << inst->value.asIndex << std::endl;
       break;
 
     case Instruction::LOAD:

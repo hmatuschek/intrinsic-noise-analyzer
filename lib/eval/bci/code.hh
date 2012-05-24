@@ -26,6 +26,7 @@ public:
     MUL,    ///< Pops rhs & lhs values from stack and pushes the back the product.
     DIV,    ///< Pops rhs & lhs values from stack and pushes the back the quotient.
     POW,    ///< Pops rhs & lhs values from stack and pushes the back the result.
+    IPOW,   ///< Pops lhs value from stack and takes the integer exponent stored as index immediate value.
     LOAD,   ///< Loads a value from the input vector and pushes it on the stack.
     STORE,  ///< Pops a value from the stack and stores it into the output vector.
     STORE_ZERO, ///< Stores a zero into the output vector.

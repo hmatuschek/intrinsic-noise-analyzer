@@ -150,6 +150,15 @@ public:
       stack.back().asValue() = std::pow(stack.back().asValue(), rhs);
       break;
 
+    case Instruction::IPOW:
+    {
+      double x = stack.back().asValue();
+      for (size_t i=1; i<inst.value.asIndex; i++) {
+        stack.back().asValue() *= x;
+      }
+    }
+      break;
+
     case Instruction::LOAD:
       stack.push_back(InterpreterValue(input[inst.value.asIndex]));
       break;
@@ -247,6 +256,15 @@ public:
         rhs = stack.back().asComplex(); stack.pop_back();
       }
       stack.back().asComplex() = std::pow(stack.back().asComplex(), rhs);
+      break;
+
+    case Instruction::IPOW:
+    {
+      std::complex<double> x = stack.back().asComplex();
+      for (size_t i=1; i<inst.value.asIndex; i++) {
+        stack.back().asComplex() *= x;
+      }
+    }
       break;
 
     case Instruction::LOAD:

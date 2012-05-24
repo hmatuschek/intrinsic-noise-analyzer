@@ -148,10 +148,12 @@ public:
     ConstantPropagation     const_prop;
     RemoveUnitsPass         units_pass;
     ConstantFoldingPass     const_pass;
+    IPowPass              ipow_pass;
     ZeroStorePass           zero_pass;
     InstructionCanonization canon_pass;
 
     PassManager manager;
+
     /* The first pass does not optimize any code here, it just pepares the representation for
      * the second pass.
      *
@@ -174,6 +176,9 @@ public:
 
     /* This pass evaluates function calls of constant values like ln(2) etc. */
     manager.addPass(&const_pass);
+
+    /* This pass replaces POW instructions with IPOW if latter is more efficient. */
+    manager.addPass(&ipow_pass);
 
     /* This pass replaces "PUSH 0, STORE IDX" with "STORE_ZERO IDX" */
     manager.addPass(&zero_pass);
@@ -200,6 +205,7 @@ public:
       this->code->dump(std::cerr);
     }
 
+    //code->dump(std::cerr);
   }
 };
 
