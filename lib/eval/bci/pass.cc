@@ -145,7 +145,7 @@ ImmediateValuePass::handleValue(SmartPtr<Value> &value)
 bool
 RemoveUnitsPass::handleValue(SmartPtr<Value> &value)
 {
-  // Can only be applied on ADD and MUL where RHS is immediate Constant:
+  // Can only be applied on ADD, MUL and POW where RHS is immediate Constant:
   if (! value->hasImmediateValue())
     return false;
 
@@ -162,6 +162,18 @@ RemoveUnitsPass::handleValue(SmartPtr<Value> &value)
     SmartPtr<Value> arg0 = value->argument(0);
     value = arg0;
     return true;
+  }
+
+  if (Instruction::POW == value->opCode()) {
+      if (value->immediateValue() == 1.0) {
+          SmartPtr<Value> arg0 = value->argument(0);
+          value = arg0;
+          return true;
+      }
+      if (value->immediateValue() == 0.0) {
+          value = Value::createPush(1.0);
+          return true;
+      }
   }
 
   // nop, did not fit:
@@ -203,6 +215,29 @@ ConstantFoldingPass::handleValue(SmartPtr<Value> &value)
   return true;
 }
 
+
+/* ********************************************************************************************* *
+ * Implementation of IPowPass
+ * ********************************************************************************************* */
+bool
+IPowPass::handleValue(SmartPtr<Value> &value)
+{
+    if (Instruction::POW != value->opCode())
+        return false;
+    if (! value->hasImmediateValue())
+        return false;
+
+    // check if exponent is integer and 0 < exponent <= 5
+    std::complex<double> exponent = value->immediateValue();
+    if (exponent.real() != (unsigned)exponent.real()|| 0 != exponent.imag() ||
+            0 >= exponent.real() || exponent.real() > 8)
+        return false;
+
+    SmartPtr<Value> arg0 = value->argument(0);
+    value = Value::createIPow(arg0, (unsigned)exponent.real());
+
+    return true;
+}
 
 /* ********************************************************************************************* *
  * Implementation of ZeroStorePass

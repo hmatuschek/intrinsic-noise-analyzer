@@ -120,6 +120,15 @@ public:
   virtual bool handleValue(SmartPtr<Value> &value);
 };
 
+/**
+ * Replaces POW instructions with integer exponent < 5 by product.
+ */
+class IPowPass : public Pass
+{
+public:
+    /** Implements the actual pass. */
+    virtual bool handleValue(SmartPtr<Value> &value);
+};
 
 /**
  * Replaces "PUSH 0; STORE X" with "STORE_ZERO X".

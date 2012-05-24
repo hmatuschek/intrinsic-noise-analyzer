@@ -147,6 +147,7 @@ public:
     ImmediateValuePass    imm_pass;
     RemoveUnitsPass       units_pass;
     ConstantFoldingPass   const_pass;
+    IPowPass              ipow_pass;
     ZeroStorePass         zero_pass;
 
     PassManager manager;
@@ -170,6 +171,9 @@ public:
     /* This pass evaluates function calls of constant values like ln(2) etc. */
     manager.addPass(&const_pass);
 
+    /* This pass replaces POW instructions with IPOW if latter is more efficient. */
+    manager.addPass(&ipow_pass);
+
     /* This pass replaces "PUSH 0, STORE IDX" with "STORE_ZERO IDX" */
     manager.addPass(&zero_pass);
 
@@ -190,6 +194,7 @@ public:
       Utils::Logger::get().log(message);
     }
 
+    //code->dump(std::cerr);
   }
 };
 

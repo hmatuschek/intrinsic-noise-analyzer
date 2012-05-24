@@ -179,6 +179,12 @@ public:
   static SmartPtr<Value> createPow(SmartPtr<Value> lhs, std::complex<double> rhs);
 
   /**
+   * Constructs a IPOW instruction depending on the given LHS value and the
+   * immediate RHS value.
+   */
+  static SmartPtr<Value> createIPow(SmartPtr<Value> lhs, size_t rhs);
+
+  /**
    * Constructs a LOAD instruction, pushing a value from the input vector at index @c index
    * on the internal stack.
    */
