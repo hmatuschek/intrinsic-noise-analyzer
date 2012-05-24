@@ -24,14 +24,14 @@ typedef Models::GenericGillespieSSA< Evaluate::LLVM::Engine<Eigen::VectorXd> > G
 size_t Benchmark::N_steps = 100;
 double Benchmark::eps_abs = 1e-10;
 double Benchmark::eps_rel = 1e-6;
-double Benchmark::t_end   = 1.0;
-size_t Benchmark::ensemble_size = 100;
+double Benchmark::t_end   = 5.0;
+size_t Benchmark::ensemble_size = 3000;
 
 
 void
 Benchmark::setUp()
 {
-  libsbml::SBMLDocument *doc = libsbml::readSBMLFromFile("test/regression-tests/coremodel1.xml");
+  libsbml::SBMLDocument *doc = libsbml::readSBMLFromFile("test/regression-tests/coremodel2.xml");
   UT_ASSERT(0 == doc->getNumErrors());
 
   this->lna = new Models::LinearNoiseApproximation(doc->getModel());
