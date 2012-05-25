@@ -34,8 +34,7 @@ size_t Benchmark::N_steps = 100;
 double Benchmark::eps_abs = 1e-10;
 double Benchmark::eps_rel = 1e-6;
 double Benchmark::t_end   = 5.0;
-size_t Benchmark::ensemble_size = 300;
-
+size_t Benchmark::ensemble_size = 3; // 300 // 3000
 
 void
 Benchmark::setUp()
@@ -526,6 +525,21 @@ Benchmark::suite()
   UnitTest::TestSuite *s = new UnitTest::TestSuite("Engine benchmark");
 
   s->addTest(new UnitTest::TestCaller<Benchmark>(
+               "Coremodel 1 (OptSSA, JIT, Opt)", &Benchmark::testCoremodelJITOptSSAOpt));
+
+  s->addTest(new UnitTest::TestCaller<Benchmark>(
+               "Coremodel 1 (OptSSA, JIT)", &Benchmark::testCoremodelJITOptSSANoOpt));
+
+  s->addTest(new UnitTest::TestCaller<Benchmark>(
+               "Coremodel 1 (OptSSA, BCI, Opt)", &Benchmark::testCoremodelBCIOptSSAOpt));
+
+  s->addTest(new UnitTest::TestCaller<Benchmark>(
+               "Coremodel 1 (OptSSA, BCI)", &Benchmark::testCoremodelBCIOptSSANoOpt));
+
+  s->addTest(new UnitTest::TestCaller<Benchmark>(
+               "Coremodel 1 (OptSSA, GiNaC)", &Benchmark::testCoremodelGiNaCOptSSA));
+
+  s->addTest(new UnitTest::TestCaller<Benchmark>(
                "Coremodel 1 (LSODA, BCI, Opt)", &Benchmark::testCoremodelBCILSODAOpt));
 
   s->addTest(new UnitTest::TestCaller<Benchmark>(
@@ -560,21 +574,6 @@ Benchmark::suite()
 
   s->addTest(new UnitTest::TestCaller<Benchmark>(
                "Coremodel 1 (Rosen4, LLVM)", &Benchmark::testCoremodelJITRosen4NoOpt));*/
-
-  s->addTest(new UnitTest::TestCaller<Benchmark>(
-               "Coremodel 1 (OptSSA, BCI, Opt)", &Benchmark::testCoremodelBCIOptSSAOpt));
-
-  s->addTest(new UnitTest::TestCaller<Benchmark>(
-               "Coremodel 1 (OptSSA, BCI)", &Benchmark::testCoremodelBCIOptSSANoOpt));
-
-  s->addTest(new UnitTest::TestCaller<Benchmark>(
-               "Coremodel 1 (OptSSA, JIT, Opt)", &Benchmark::testCoremodelJITOptSSAOpt));
-
-  s->addTest(new UnitTest::TestCaller<Benchmark>(
-               "Coremodel 1 (OptSSA, JIT)", &Benchmark::testCoremodelJITOptSSANoOpt));
-
-  s->addTest(new UnitTest::TestCaller<Benchmark>(
-               "Coremodel 1 (OptSSA, GiNaC)", &Benchmark::testCoremodelGiNaCOptSSA));
 
   s->addTest(new UnitTest::TestCaller<Benchmark>(
                "Coremodel 1 (Gillespie, BCI, Opt)", &Benchmark::testCoremodelBCIGillespieOpt));

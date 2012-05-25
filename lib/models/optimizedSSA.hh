@@ -50,7 +50,7 @@ public:
    */
   GenericOptimizedSSA(libsbml::Model *model, int ensembleSize, int seed,
                size_t opt_level=0, size_t num_threads=OpenMP::getMaxThreads())
-    : StochasticSimulator(model, ensembleSize, seed,num_threads),
+    : StochasticSimulator(model, ensembleSize, seed, num_threads),
       ConstantStoichiometryMixin((BaseModel &)(*this)),
       byte_code(this->numReactions()), all_byte_code(),
       sparseStoichiometry(numSpecies(),numReactions()),
@@ -111,7 +111,7 @@ public:
   /** Destructor, also frees byte-code instances. */
   ~GenericOptimizedSSA()
   {
-    for (size_t i=0; this->byte_code.size(); i++) {
+    for (size_t i=0; i < this->byte_code.size(); i++) {
       delete byte_code[i];
     }
   }
