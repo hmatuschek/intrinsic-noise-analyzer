@@ -67,9 +67,11 @@ IOSEMREComparePlot::IOSEMREComparePlot(size_t num_species, Table *series,
   this->setXLabel(tr("time [%1]").arg(time_unit));
   this->setYLabel(tr("concentrations [%1]").arg(species_unit));
 
+  QVector<Plot::LineGraph *> re_graphs(num_species);
   QVector<Plot::LineGraph *> emre_graphs(num_species);
   QVector<Plot::LineGraph *> ios_graphs(num_species);
 
+  size_t off_re   = 1;
   size_t off_emre = 1 + num_species + (num_species*(num_species+1))/2;
   size_t off_ios  = off_emre + num_species + (num_species*(num_species+1))/2;
 
@@ -83,10 +85,18 @@ IOSEMREComparePlot::IOSEMREComparePlot(size_t num_species, Table *series,
     style.setLineColor(line_color);
     emre_graphs[i] = new Plot::LineGraph(style);
 
-    this->axis->addGraph(emre_graphs[i]);
+    line_color.setAlpha(64);
+    style.setLineColor(line_color);
+    re_graphs[i] = new Plot::LineGraph(style);
+
     this->axis->addGraph(ios_graphs[i]);
-    this->addToLegend(series->getColumnName(i+off_emre), emre_graphs[i]);
+    this->axis->addGraph(emre_graphs[i]);
+    this->axis->addGraph(re_graphs[i]);
+
     this->addToLegend(series->getColumnName(i+off_ios),  ios_graphs[i]);
+    this->addToLegend(series->getColumnName(i+off_emre), emre_graphs[i]);
+    this->addToLegend(series->getColumnName(i+off_re), re_graphs[i]);
+
   }
 
   // Do not plot all
@@ -101,6 +111,7 @@ IOSEMREComparePlot::IOSEMREComparePlot(size_t num_species, Table *series,
   {
     for (size_t i=0; i<num_species; i++)
     {
+      re_graphs[i]->addPoint((*series)(j,0), (*series)(j, i+off_re));
       emre_graphs[i]->addPoint((*series)(j, 0), (*series)(j, i+off_emre));
       ios_graphs[i]->addPoint((*series)(j, 0), (*series)(j, i+off_ios));
     }
@@ -113,6 +124,7 @@ IOSEMREComparePlot::IOSEMREComparePlot(size_t num_species, Table *series,
 
   for (size_t i=0; i<num_species; i++)
   {
+    re_graphs[i]->commit();
     emre_graphs[i]->commit();
     ios_graphs[i]->commit();
   }
