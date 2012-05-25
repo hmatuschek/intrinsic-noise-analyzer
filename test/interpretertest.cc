@@ -15,12 +15,6 @@
 
 #include "eval/eval.hh"
 
-#if WITH_EXECUTION_ENGINE_LIBJIT
-#include "eval/libjit/code.hh"
-#include "eval/libjit/compiler.hh"
-#include "eval/libjit/interpreter.hh"
-#endif
-
 #if WITH_EXECUTION_ENGINE_LLVM
 #include "eval/llvm/code.hh"
 #include "eval/llvm/compiler.hh"
@@ -368,12 +362,11 @@ InterpreterTest::testMatrix()
     }
   }
 
-  // Test JIT compilers (if enabled)
-#if WITH_EXECUTION_ENGINE_LIBJIT
-  {
-    Evaluate::libjit::Code code;
-    Evaluate::libjit::Compiler<Eigen::VectorXd, Eigen::MatrixXd> compiler(symbol_table);
-    Evaluate::libjit::Interpreter<Eigen::VectorXd, Eigen::MatrixXd> interpreter(&code);
+#if WITH_EXECUTION_ENGINE_LLVM
+  { // Test LLVM JIT
+    Evaluate::LLVM::Code code;
+    Evaluate::LLVM::Compiler<Eigen::VectorXd, Eigen::MatrixXd> compiler(symbol_table);
+    Evaluate::LLVM::Interpreter<Eigen::VectorXd, Eigen::MatrixXd> interpreter(&code);
     compiler.setCode(&code);
     compiler.compileMatrix(expr);
     compiler.finalize();
@@ -472,21 +465,6 @@ InterpreterTest::testComplexPolynomial()
 
     assertNear(output(0), true_output(0), 1e-10, __FILE__, __LINE__);
   }
-
-  // Test JIT compilers (if enabled)
-#if WITH_EXECUTION_ENGINE_LIBJIT
-  {
-    Evaluate::libjit::Code code;
-    Evaluate::libjit::Compiler<Eigen::VectorXc> compiler(symbol_table);
-    Evaluate::libjit::Interpreter<Eigen::VectorXc> interpreter(&code);
-    compiler.setCode(&code);
-    compiler.compileExpressionAndStore(expr, 0);
-    compiler.finalize();
-    output(0) = 0; interpreter.run(values, output);
-
-    UT_ASSERT_NEAR(output(0), true_output(0));
-  }
-#endif
 
   // Test default compiler:
   {

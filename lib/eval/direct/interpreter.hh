@@ -130,7 +130,12 @@ public:
   /**
    * Evaluates the "code".
    */
-  inline void run(const InType &input, OutType &output)
+  inline void run(const InType &input, OutType &output) {
+    this->run(input.data(), output.data());
+  }
+
+
+  inline void run(const typename InType::Scalar *input, typename OutType::Scalar *output)
   {
     GiNaC::exmap values;
 
@@ -138,7 +143,7 @@ public:
     for(Code::IndexTable::iterator item = this->code->getIndexTable().begin();
         item != this->code->getIndexTable().end(); item++)
     {
-      values[item->first] = GiNaCValuePacker<typename OutType::Scalar>::pack(input(item->second));
+      values[item->first] = GiNaCValuePacker<typename OutType::Scalar>::pack(input[item->second]);
     }
 
     // Evaluate expressions
@@ -148,7 +153,7 @@ public:
 
       // First, try to evaluate the ginac expression
       try {
-        value = GiNaC::evalf(item->first.subs(values));
+        value = item->first.subs(values).evalf();
       } catch (std::runtime_error &err) {
         NumericError new_err;
         new_err << "Cannot evaluate expression " << item->first
@@ -170,7 +175,7 @@ public:
       }
 
       // Get value as what ever is requested by output type:
-      output(item->second) = GiNaCValuePacker<typename OutType::Scalar>::unpack(value);
+      output[item->second] = GiNaCValuePacker<typename OutType::Scalar>::unpack(value);
     }
   }
 };

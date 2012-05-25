@@ -14,9 +14,9 @@ template<class InType, class OutType=InType>
 class Engine
 {
 public:
-  typedef Code Code;
-  typedef Compiler<InType, OutType> Compiler;
-  typedef Interpreter<InType, OutType> Interpreter;
+  typedef direct::Code Code;
+  typedef direct::Compiler<InType, OutType> Compiler;
+  typedef direct::Interpreter<InType, OutType> Interpreter;
 };
 
 

@@ -102,7 +102,6 @@ ImmediateValueRHSPass::handleValue(SmartPtr<Value> &value)
 }
 
 
-
 /* ********************************************************************************************* *
  * Implementation of ImmediateValuePass
  * ********************************************************************************************* */
@@ -145,7 +144,7 @@ ImmediateValuePass::handleValue(SmartPtr<Value> &value)
 bool
 RemoveUnitsPass::handleValue(SmartPtr<Value> &value)
 {
-  // Can only be applied on ADD and MUL where RHS is immediate Constant:
+  // Can only be applied on ADD, MUL and POW where RHS is immediate Constant:
   if (! value->hasImmediateValue())
     return false;
 
@@ -162,6 +161,18 @@ RemoveUnitsPass::handleValue(SmartPtr<Value> &value)
     SmartPtr<Value> arg0 = value->argument(0);
     value = arg0;
     return true;
+  }
+
+  if (Instruction::POW == value->opCode()) {
+      if (value->immediateValue() == 1.0) {
+          SmartPtr<Value> arg0 = value->argument(0);
+          value = arg0;
+          return true;
+      }
+      if (value->immediateValue() == 0.0) {
+          value = Value::createPush(1.0);
+          return true;
+      }
   }
 
   // nop, did not fit:
@@ -205,6 +216,29 @@ ConstantFoldingPass::handleValue(SmartPtr<Value> &value)
 
 
 /* ********************************************************************************************* *
+ * Implementation of IPowPass
+ * ********************************************************************************************* */
+bool
+IPowPass::handleValue(SmartPtr<Value> &value)
+{
+    if (Instruction::POW != value->opCode())
+        return false;
+    if (! value->hasImmediateValue())
+        return false;
+
+    // check if exponent is integer and 0 < exponent <= 5
+    std::complex<double> exponent = value->immediateValue();
+    if (exponent.real() != (unsigned)exponent.real()|| 0 != exponent.imag() ||
+            0 >= exponent.real() || exponent.real() > 8)
+        return false;
+
+    SmartPtr<Value> arg0 = value->argument(0);
+    value = Value::createIPow(arg0, (unsigned)exponent.real());
+
+    return true;
+}
+
+/* ********************************************************************************************* *
  * Implementation of ZeroStorePass
  * ********************************************************************************************* */
 bool
@@ -223,4 +257,88 @@ ZeroStorePass::handleValue(SmartPtr<Value> &value)
   value = Value::createStoreZero(value->immediateIndex());
 
   return true;
+}
+
+
+/* ********************************************************************************************* *
+ * Implementation of ConstantPropagation
+ * ********************************************************************************************* */
+bool
+ConstantPropagation::handleValue(SmartPtr<Value> &value)
+{
+  if (Instruction::MUL != value->opCode() || value->hasImmediateValue())
+    return false;
+
+  SmartPtr<Value> lhs = value->argument(0);
+  SmartPtr<Value> rhs = value->argument(1);
+
+  // Check if form is ((x * c) * rhs)
+  if (Instruction::MUL == lhs->opCode() && lhs->hasImmediateValue()) {
+    SmartPtr<Value> x = lhs->argument(0);
+    std::complex<double> c = lhs->immediateValue();
+
+    // Replace value with ((x * rhs) * c)
+    lhs = Value::createMul(x, rhs);
+    value = Value::createMul(lhs, c);
+    return true;
+  }
+
+  // or if form is (lhs * (x * c))
+  if (Instruction::MUL == rhs->opCode() && rhs->hasImmediateValue()) {
+    SmartPtr<Value> x = rhs->argument(0);
+    std::complex<double> c = rhs->immediateValue();
+
+    // Replace value with ((lhs * x) * c)
+    lhs = Value::createMul(lhs, x);
+    value = Value::createMul(lhs, c);
+    return true;
+  }
+
+  return false;
+}
+
+
+/* ********************************************************************************************* *
+ * Implementation of InstructionCanonization
+ * ********************************************************************************************* */
+bool
+InstructionCanonization::handleValue(SmartPtr<Value> &value)
+{
+  if (Instruction::ADD != value->opCode() || value->hasImmediateValue())
+    return false;
+
+  SmartPtr<Value> lhs = value->argument(0);
+  SmartPtr<Value> rhs = value->argument(1);
+  bool lhs_is_neg = (Instruction::MUL == lhs->opCode()) && lhs->hasImmediateValue()
+      && (-1 == lhs->immediateValue().real()) && (0 == lhs->immediateValue().imag());
+  bool rhs_is_neg = (Instruction::MUL == rhs->opCode()) && rhs->hasImmediateValue()
+      && (-1 == rhs->immediateValue().real()) && (0 == rhs->immediateValue().imag());
+
+  // Shortcut:
+  if ( (! lhs_is_neg) && (! rhs_is_neg) )
+    return false;
+
+  // (x * -1) + rhs -> rhs - x
+  if ( lhs_is_neg && (! rhs_is_neg)) {
+    SmartPtr<Value> x = lhs->argument(0);
+    value = Value::createSub(rhs, x);
+    return true;
+  }
+
+  // lhs + (x * -1) -> lhs - x:
+  if ( (! lhs_is_neg) && rhs_is_neg) {
+    SmartPtr<Value> x = rhs->argument(0);
+    value = Value::createSub(lhs, x);
+    return true;
+  }
+
+  // ((x * -1) + (y * -1)) -> ((x + y) * -1)
+  if (lhs_is_neg && rhs_is_neg) {
+    SmartPtr<Value> x = lhs->argument(0);
+    SmartPtr<Value> y = rhs->argument(0);
+    value = Value::createMul(Value::createAdd(x, y), -1.0);
+    return true;
+  }
+
+  return false;
 }

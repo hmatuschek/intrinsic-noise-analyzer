@@ -32,6 +32,9 @@ public:
 };
 
 
+/**
+ * A pass manager collect passes and applies them on the dependence tree of a byte-code.
+ */
 class PassManager
 {
 protected:
@@ -120,6 +123,15 @@ public:
   virtual bool handleValue(SmartPtr<Value> &value);
 };
 
+/**
+ * Replaces POW instructions with integer exponent < 5 by product.
+ */
+class IPowPass : public Pass
+{
+public:
+    /** Implements the actual pass. */
+    virtual bool handleValue(SmartPtr<Value> &value);
+};
 
 /**
  * Replaces "PUSH 0; STORE X" with "STORE_ZERO X".
@@ -130,6 +142,26 @@ public:
   /**
    * Implements the actual pass.
    */
+  virtual bool handleValue(SmartPtr<Value> &value);
+};
+
+
+/**
+ * Propergates constants to the outermost right position.
+ */
+class ConstantPropagation : public Pass
+{
+public:
+  virtual bool handleValue(SmartPtr<Value> &value);
+};
+
+
+/**
+ * Instruction canonization. X; Y; MUL -1; ADD; -> X; Y; SUB;
+ */
+class InstructionCanonization : public Pass
+{
+public:
   virtual bool handleValue(SmartPtr<Value> &value);
 };
 

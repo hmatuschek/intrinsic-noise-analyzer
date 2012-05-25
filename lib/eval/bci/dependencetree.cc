@@ -191,6 +191,12 @@ Value::createPow(SmartPtr<Value> lhs, SmartPtr<Value> rhs)
   return SmartPtr<Value>(new Value(Instruction(Instruction::POW), args));
 }
 
+SmartPtr<Value>
+Value::createIPow(SmartPtr<Value> lhs, size_t exponent)
+{
+    std::vector< SmartPtr<Value> > args(1); args[0] = lhs;
+    return SmartPtr<Value>(new Value(Instruction(Instruction::IPOW, exponent), args));
+}
 
 SmartPtr<Value>
 Value::createLoad(size_t index)
@@ -300,6 +306,11 @@ DependenceTree::DependenceTree(const Code &code)
         lhs = stack.back(); stack.pop_back();
         stack.push_back(Value::createPow(lhs, rhs));
       }
+      break;
+
+    case Instruction::IPOW:
+      lhs = stack.back(); stack.pop_back();
+      stack.push_back(Value::createIPow(lhs, item->value.asIndex));
       break;
 
     case Instruction::LOAD:
