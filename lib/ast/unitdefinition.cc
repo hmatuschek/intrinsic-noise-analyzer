@@ -295,7 +295,7 @@ Unit::dump(std::ostream &str, bool html) const
   // catch arbitrary units
   if(this->units.size()==0) str<<"a.u.";
 
-  // catch times which refer explictly to units of hours or days
+  // catch times which refer explictly to units of minutes, hours or days
   if (this->isVariantOf(ScaledBaseUnit::SECOND) && this->units.size()==1)
   {
       double fac = this->common_multiplier*std::pow(10.,this->common_scale);
@@ -310,6 +310,12 @@ Unit::dump(std::ostream &str, bool html) const
           str << "h";
           return;
       }
+      else if ( fac==60 )
+      {
+          str << "min";
+          return;
+      }
+
   }
 
   // first dump the scale

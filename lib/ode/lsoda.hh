@@ -161,6 +161,9 @@ private:
  double   tsw, pdnorm;
  int      ixpr, jtyp, mused, mxordn, mxords;
 
+ int      mxstp0, mxhnl0;
+
+
 /* no static variable for prja(), solsy() */
 /* static variables for stoda() */
 
