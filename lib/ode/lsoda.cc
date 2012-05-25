@@ -14,6 +14,8 @@ LSODA::LSODA()
    lsoda_warning(1)
 
 {
+    // some parameters
+    mxstp0 = 500; mxhnl0 = 10;
     // pass...
 
 }
@@ -201,7 +203,6 @@ LSODA::lsoda (int neq, double *y, double *t, double tout,
             )
 
 {
-        int             mxstp0 = 500, mxhnl0 = 10; //maxsteps
         int             i, iflag, lenyh, ihit=0;
         double          atoli, ayi, big, h0, hmax, hmx, rh, rtoli, tcrit, tdist, tnext, tol,
                 tolsf, tp, size, sum, w0;
