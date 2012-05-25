@@ -452,10 +452,6 @@ Benchmark::suite()
   s->addTest(new UnitTest::TestCaller<Benchmark>(
                "Coremodel 1 (LSODA, LLVM)", &Benchmark::testCoremodelJITLSODANoOpt));
 
-  s->addTest(new UnitTest::TestCaller<Benchmark>(
-               "Coremodel 1 (LSODA, GiNaC)", &Benchmark::testCoremodelGiNaCLSODA));
-
-
   /*s->addTest(new UnitTest::TestCaller<Benchmark>(
                "Coremodel 1 (Rosen4, BCI, Opt)", &Benchmark::testCoremodelBCIRosen4Opt));
 
@@ -488,6 +484,10 @@ Benchmark::suite()
 
   s->addTest(new UnitTest::TestCaller<Benchmark>(
                "Coremodel 1 (Gillespie, GiNaC)", &Benchmark::testCoremodelGiNaCGillespie));
+
+  s->addTest(new UnitTest::TestCaller<Benchmark>(
+               "Coremodel 1 (LSODA, GiNaC)", &Benchmark::testCoremodelGiNaCLSODA));
+
 
   return s;
 }

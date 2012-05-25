@@ -153,7 +153,7 @@ public:
 
       // First, try to evaluate the ginac expression
       try {
-        value = GiNaC::evalf(item->first.subs(values));
+        value = item->first.subs(values).evalf();
       } catch (std::runtime_error &err) {
         NumericError new_err;
         new_err << "Cannot evaluate expression " << item->first
