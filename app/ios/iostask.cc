@@ -191,14 +191,13 @@ IOSTask::process()
   Eigen::MatrixXd ios(config.model->numSpecies(), config.model->numSpecies());
 
   // Holds the 3rd moment for each species.
-  Eigen::VectorXd thirdMoment(config.model->numSpecies());
+  Eigen::VectorXd thirdMoment = Eigen::VectorXd::Zero(config.model->numSpecies());
 
   // Holds the iosemre for each species.
   Eigen::VectorXd iosemre(config.model->numSpecies());
 
   // Holds a row of the output-table:
-  Eigen::VectorXd output_vector(1 + 3*config.getNumSpecies() +
-                                config.getNumSpecies()*(config.getNumSpecies()+1));
+  Eigen::VectorXd output_vector(timeseries.getNumColumns());
 
   // Maps the i-th selected species to an index in the concentrations vector:
   size_t N_sel_species = this->config.getNumSpecies();
