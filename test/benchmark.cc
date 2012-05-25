@@ -1,6 +1,7 @@
 #include "benchmark.hh"
 #include "models/lnainterpreter.hh"
 #include "models/gillespieSSA.hh"
+#include "models/optimizedSSA.hh"
 
 #include "ode/rosenbrock4.hh"
 #include "ode/lsodadriver.hh"
@@ -23,6 +24,10 @@ typedef Models::GenericLNAinterpreter< Evaluate::direct::Engine<Eigen::VectorXd>
 typedef Models::GenericGillespieSSA< Evaluate::bci::Engine<Eigen::VectorXd> > GillespieBCI;
 typedef Models::GenericGillespieSSA< Evaluate::LLVM::Engine<Eigen::VectorXd> > GillespieJIT;
 typedef Models::GenericGillespieSSA< Evaluate::direct::Engine<Eigen::VectorXd> > GillespieGiNaC;
+
+typedef Models::GenericOptimizedSSA< Evaluate::bci::Engine<Eigen::VectorXd> > OptSSABCI;
+typedef Models::GenericOptimizedSSA< Evaluate::LLVM::Engine<Eigen::VectorXd> > OptSSAJIT;
+typedef Models::GenericOptimizedSSA< Evaluate::direct::Engine<Eigen::VectorXd> > OptSSAGiNaC;
 
 
 size_t Benchmark::N_steps = 100;
@@ -300,7 +305,64 @@ Benchmark::simulate_GiNaC_gillespie(libsbml::Model *model, double t, size_t opt_
     simulator.run(dt);
   }
 
+  std::cout << "Precise execution time (GiNaC): " << std::endl
+            << "  cpu: " << cpu_clock.stop() << "s." << std::endl
+            << " real: " << real_clock.stop() << "s." << std::endl;
+}
+
+
+void
+Benchmark::simulate_BCI_optSSA(libsbml::Model *model, double t, size_t opt_level)
+{
+  OptSSABCI simulator(model, ensemble_size, 1234, opt_level, OpenMP::getMaxThreads());
+  double dt=t/N_steps;
+
+  Utils::CpuTime  cpu_clock; cpu_clock.start();
+  Utils::RealTime real_clock; real_clock.start();
+
+  for (size_t i=0; i<N_steps; i++) {
+    simulator.run(dt);
+  }
+
+  std::cout << "Precise execution time (BCI): " << std::endl
+            << "  cpu: " << cpu_clock.stop() << "s." << std::endl
+            << " real: " << real_clock.stop() << "s." << std::endl;
+}
+
+
+void
+Benchmark::simulate_JIT_optSSA(libsbml::Model *model, double t, size_t opt_level)
+{
+  OptSSAJIT simulator(model, ensemble_size, 1234, opt_level, OpenMP::getMaxThreads());
+  double dt=t/N_steps;
+
+  Utils::CpuTime  cpu_clock; cpu_clock.start();
+  Utils::RealTime real_clock; real_clock.start();
+
+  for (size_t i=0; i<N_steps; i++) {
+    simulator.run(dt);
+  }
+
   std::cout << "Precise execution time (JIT): " << std::endl
+            << "  cpu: " << cpu_clock.stop() << "s." << std::endl
+            << " real: " << real_clock.stop() << "s." << std::endl;
+}
+
+
+void
+Benchmark::simulate_GiNaC_optSSA(libsbml::Model *model, double t, size_t opt_level)
+{
+  OptSSAGiNaC simulator(model, ensemble_size, 1234, opt_level, OpenMP::getMaxThreads());
+  double dt=t/N_steps;
+
+  Utils::CpuTime  cpu_clock; cpu_clock.start();
+  Utils::RealTime real_clock; real_clock.start();
+
+  for (size_t i=0; i<N_steps; i++) {
+    simulator.run(dt);
+  }
+
+  std::cout << "Precise execution time (GiNaC): " << std::endl
             << "  cpu: " << cpu_clock.stop() << "s." << std::endl
             << " real: " << real_clock.stop() << "s." << std::endl;
 }
@@ -427,6 +489,35 @@ Benchmark::testCoremodelGiNaCGillespie()
   simulate_GiNaC_gillespie(this->document->getModel(), t_end, 0);
 }
 
+void
+Benchmark::testCoremodelBCIOptSSAOpt()
+{
+  simulate_BCI_optSSA(this->document->getModel(), t_end, 1);
+}
+
+void
+Benchmark::testCoremodelBCIOptSSANoOpt()
+{
+  simulate_BCI_optSSA(this->document->getModel(), t_end, 0);
+}
+
+void
+Benchmark::testCoremodelJITOptSSAOpt()
+{
+  simulate_JIT_optSSA(this->document->getModel(), t_end, 1);
+}
+
+void
+Benchmark::testCoremodelJITOptSSANoOpt()
+{
+  simulate_JIT_optSSA(this->document->getModel(), t_end, 0);
+}
+
+void
+Benchmark::testCoremodelGiNaCOptSSA()
+{
+  simulate_GiNaC_optSSA(this->document->getModel(), t_end, 0);
+}
 
 
 UnitTest::TestSuite *
@@ -469,6 +560,21 @@ Benchmark::suite()
 
   s->addTest(new UnitTest::TestCaller<Benchmark>(
                "Coremodel 1 (Rosen4, LLVM)", &Benchmark::testCoremodelJITRosen4NoOpt));*/
+
+  s->addTest(new UnitTest::TestCaller<Benchmark>(
+               "Coremodel 1 (OptSSA, BCI, Opt)", &Benchmark::testCoremodelBCIOptSSAOpt));
+
+  s->addTest(new UnitTest::TestCaller<Benchmark>(
+               "Coremodel 1 (OptSSA, BCI)", &Benchmark::testCoremodelBCIOptSSANoOpt));
+
+  s->addTest(new UnitTest::TestCaller<Benchmark>(
+               "Coremodel 1 (OptSSA, JIT, Opt)", &Benchmark::testCoremodelJITOptSSAOpt));
+
+  s->addTest(new UnitTest::TestCaller<Benchmark>(
+               "Coremodel 1 (OptSSA, JIT)", &Benchmark::testCoremodelJITOptSSANoOpt));
+
+  s->addTest(new UnitTest::TestCaller<Benchmark>(
+               "Coremodel 1 (OptSSA, GiNaC)", &Benchmark::testCoremodelGiNaCOptSSA));
 
   s->addTest(new UnitTest::TestCaller<Benchmark>(
                "Coremodel 1 (Gillespie, BCI, Opt)", &Benchmark::testCoremodelBCIGillespieOpt));

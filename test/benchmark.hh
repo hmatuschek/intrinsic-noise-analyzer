@@ -36,6 +36,9 @@ protected:
   void simulate_BCI_gillespie(libsbml::Model *model, double t, size_t opt_level);
   void simulate_JIT_gillespie(libsbml::Model *model, double t, size_t opt_level);
   void simulate_GiNaC_gillespie(libsbml::Model *model, double t, size_t opt_level);
+  void simulate_BCI_optSSA(libsbml::Model *model, double t, size_t opt_level);
+  void simulate_JIT_optSSA(libsbml::Model *model, double t, size_t opt_level);
+  void simulate_GiNaC_optSSA(libsbml::Model *model, double t, size_t opt_level);
 
 protected:
   static size_t N_steps;
@@ -66,11 +69,15 @@ public:
 
   void testCoremodelBCIGillespieOpt();
   void testCoremodelBCIGillespieNoOpt();
-
   void testCoremodelJITGillespieOpt();
   void testCoremodelJITGillespieNoOpt();
-
   void testCoremodelGiNaCGillespie();
+
+  void testCoremodelBCIOptSSAOpt();
+  void testCoremodelBCIOptSSANoOpt();
+  void testCoremodelJITOptSSAOpt();
+  void testCoremodelJITOptSSANoOpt();
+  void testCoremodelGiNaCOptSSA();
 
 public:
   static UnitTest::TestSuite *suite();
