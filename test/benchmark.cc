@@ -34,7 +34,7 @@ size_t Benchmark::N_steps = 100;
 double Benchmark::eps_abs = 1e-10;
 double Benchmark::eps_rel = 1e-6;
 double Benchmark::t_end   = 5.0;
-size_t Benchmark::ensemble_size = 3; // 300 // 3000
+size_t Benchmark::ensemble_size = 300; // 3000
 
 void
 Benchmark::setUp()
@@ -294,7 +294,7 @@ Benchmark::simulate_JIT_gillespie(libsbml::Model *model, double t, size_t opt_le
 void
 Benchmark::simulate_GiNaC_gillespie(libsbml::Model *model, double t, size_t opt_level)
 {
-  GillespieGiNaC simulator(model, ensemble_size, 1234, opt_level, OpenMP::getMaxThreads());
+  GillespieGiNaC simulator(model, ensemble_size, 1234, opt_level, 1);
   double dt=t/N_steps;
 
   Utils::CpuTime  cpu_clock; cpu_clock.start();
@@ -351,7 +351,7 @@ Benchmark::simulate_JIT_optSSA(libsbml::Model *model, double t, size_t opt_level
 void
 Benchmark::simulate_GiNaC_optSSA(libsbml::Model *model, double t, size_t opt_level)
 {
-  OptSSAGiNaC simulator(model, ensemble_size, 1234, opt_level, OpenMP::getMaxThreads());
+  OptSSAGiNaC simulator(model, ensemble_size, 1234, opt_level, 1);
   double dt=t/N_steps;
 
   Utils::CpuTime  cpu_clock; cpu_clock.start();

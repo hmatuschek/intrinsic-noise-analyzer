@@ -108,6 +108,11 @@ protected:
    *  corresponding index in the timeseries table. */
   Eigen::VectorXi ios_emre_index_table;
 
+  /** Index table for the IOS skewness values. Maps the i-th selected species to the corresponding
+    * index in the timeseries table. */
+  Eigen::VectorXi skewness_index_table;
+
+
 public:
   /**
    * Constructs a Task.
