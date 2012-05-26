@@ -112,6 +112,8 @@ protected:
     * index in the timeseries table. */
   Eigen::VectorXi skewness_index_table;
 
+  /** If true, at least one of the variance estimators is negative. */
+  bool has_negative_variance;
 
 public:
   /**
@@ -148,6 +150,11 @@ public:
    * Returns the task label.
    */
   virtual QString getLabel();
+
+  /**
+   * Returns true, if there was at least one variance element negative.
+   */
+  bool hasNegativeVariance() const;
 
 
 protected:

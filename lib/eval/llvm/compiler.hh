@@ -16,6 +16,11 @@ namespace Evaluate {
 namespace LLVM {
 
 
+/**
+ * Some type-independent parts of the compiler.
+ *
+ * @ingroup jit
+ */
 class CompilerCore
 {
 protected:
@@ -36,6 +41,12 @@ public:
 };
 
 
+/**
+ * This class compiles GiNaC expressions into LLVM IR code, that can then be JIT compiled into
+ * native machine-code to be executed efficiently.
+ *
+ * @ingroup jit
+ */
 template <class InType, class OutType=InType>
 class Compiler :
     public CompilerCore,

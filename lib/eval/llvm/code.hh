@@ -15,18 +15,12 @@
 
 namespace Fluc {
 namespace Evaluate {
-
-/**
- * This namespace holds the classes of the execution engine using the LLVM compiler infrastructure.
- *
- * @ingroup eval
- */
 namespace LLVM {
 
 /**
  * Holds the LLVM IR implementing the expressions.
  *
- * @ingroup eval
+ * @ingroup jit
  */
 class Code
 {
@@ -40,17 +34,28 @@ protected:
   /** A pointer to the function being assembled. */
   llvm::Function *function;
 
+  /** Holds a pointer to the input vector. */
   llvm::Value *input;
+  /** Holds a pointer to the output vector. */
   llvm::Value *output;
 
+  /** The complex type. */
   llvm::Type *complex_t;
+  /** Holds a reference to libm's pow() function. */
   llvm::Function *real_pow;
   llvm::Function *complex_pow;
+  /** Holds a reference to libm's fabs() function. */
   llvm::Function *real_abs;
+  /** Holds a reference to libm's log() function. */
   llvm::Function *real_log;
+  /** Holds a reference to  libm's exp() function. */
   llvm::Function *real_exp;
 
+  /** This will point to the execution engine, the instance will be created by the @c Compiler. */
   llvm::ExecutionEngine *engine;
+
+  /** Once all code is assembles as LLVM IR, this pointer will hold the address of the compiled
+   * funciton. */
   void *function_ptr;
 
 

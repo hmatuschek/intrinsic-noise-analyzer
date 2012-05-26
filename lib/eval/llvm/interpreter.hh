@@ -14,6 +14,8 @@ namespace LLVM {
 /**
  * "Interpreter" for the compiled LLVM IR. This class executes the compiled LLVM IR
  * stored in the associated @c Code instance.
+ *
+ * @ingroup jit
  */
 template <class InType, class OutType=InType>
 class Interpreter

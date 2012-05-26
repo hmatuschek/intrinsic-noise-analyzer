@@ -51,7 +51,8 @@ IOSTask::IOSTask(const Config &config, QObject *parent) :
   emre_index_table(config.getNumSpecies()),
   ios_index_table(config.getNumSpecies(), config.getNumSpecies()),
   ios_emre_index_table(config.getNumSpecies()),
-  skewness_index_table(config.getNumSpecies())
+  skewness_index_table(config.getNumSpecies()),
+  has_negative_variance(false)
 {
   // Assemble index tables and assign column names to time-series table:
   size_t column = 0;
@@ -175,8 +176,6 @@ IOSTask::process()
 
   // Holds the current system state (reduced state)
   Eigen::VectorXd x(config.model->getDimension());
-  // Holds the update to the next state (reduced state)
-  Eigen::VectorXd dx(config.model->getDimension());
 
   // Holds the concentrations for each species (full state)
   Eigen::VectorXd concentrations(config.model->numSpecies());
@@ -250,11 +249,6 @@ IOSTask::process()
 
     this->setProgress(double(s)/N_steps);
 
-    // Determine update:
-    //this->stepper->step(x, t, dx);
-    // Update state:
-    //x+=dx;
-
     // Update state:
     this->stepper->step(x, t);
     // Update time
@@ -280,6 +274,11 @@ IOSTask::process()
         size_t index_j = species_index[j];
         output_vector(lna_index_table(i,j)) = lna(index_i, index_j);
         output_vector(ios_index_table(i,j)) = lna(index_i, index_j) + ios(index_i, index_j);
+
+        // Check if one of the variance elements is negative:
+        if ( (i == j) && (0.0 > output_vector(lna_index_table(i,j), ios_index_table(i,j)))) {
+          this->has_negative_variance = true;
+        }
       }
     }
     this->timeseries.append(output_vector);
@@ -329,4 +328,10 @@ const Fluc::Ast::Unit &
 IOSTask::getTimeUnit() const
 {
   return this->config.model->getTimeUnit();
+}
+
+bool
+IOSTask::hasNegativeVariance() const
+{
+  return this->has_negative_variance;
 }
