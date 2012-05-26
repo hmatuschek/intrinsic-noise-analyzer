@@ -43,8 +43,10 @@ protected:
   size_t time_steps;
   Table time_series;
 
-  QVector<size_t> index_table;
-
+  Eigen::VectorXi mean_index_table;
+  Eigen::MatrixXi cov_index_table;
+  Eigen::VectorXi skew_index_table;
+  Eigen::VectorXi species_index_table;
 
 public:
   SSATask(const SSATaskConfig &config, QObject *parent=0);
