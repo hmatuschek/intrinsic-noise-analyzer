@@ -524,7 +524,7 @@ Benchmark::suite()
 {
   UnitTest::TestSuite *s = new UnitTest::TestSuite("Engine benchmark");
 
-  s->addTest(new UnitTest::TestCaller<Benchmark>(
+  /*s->addTest(new UnitTest::TestCaller<Benchmark>(
                "Coremodel 1 (OptSSA, JIT, Opt)", &Benchmark::testCoremodelJITOptSSAOpt));
 
   s->addTest(new UnitTest::TestCaller<Benchmark>(
@@ -555,27 +555,27 @@ Benchmark::suite()
                "Coremodel 1 (LSODA, BCIMP)", &Benchmark::testCoremodelBCIMPLSODANoOpt));
 
   s->addTest(new UnitTest::TestCaller<Benchmark>(
-               "Coremodel 1 (LSODA, LLVM)", &Benchmark::testCoremodelJITLSODANoOpt));
-
-  /*s->addTest(new UnitTest::TestCaller<Benchmark>(
-               "Coremodel 1 (Rosen4, BCI, Opt)", &Benchmark::testCoremodelBCIRosen4Opt));
-
-  s->addTest(new UnitTest::TestCaller<Benchmark>(
-               "Coremodel 1 (Rosen4, BCIMP, Opt)", &Benchmark::testCoremodelBCIMPRosen4Opt));
-
-  s->addTest(new UnitTest::TestCaller<Benchmark>(
-               "Coremodel 1 (Rosen4, LLVM, Opt)", &Benchmark::testCoremodelJITRosen4Opt));
+               "Coremodel 1 (LSODA, LLVM)", &Benchmark::testCoremodelJITLSODANoOpt)); */
 
   s->addTest(new UnitTest::TestCaller<Benchmark>(
                "Coremodel 1 (Rosen4, BCI)", &Benchmark::testCoremodelBCIRosen4NoOpt));
 
   s->addTest(new UnitTest::TestCaller<Benchmark>(
+               "Coremodel 1 (Rosen4, BCI, Opt)", &Benchmark::testCoremodelBCIRosen4Opt));
+
+  s->addTest(new UnitTest::TestCaller<Benchmark>(
+               "Coremodel 1 (Rosen4, LLVM)", &Benchmark::testCoremodelJITRosen4NoOpt));
+
+  s->addTest(new UnitTest::TestCaller<Benchmark>(
+               "Coremodel 1 (Rosen4, LLVM, Opt)", &Benchmark::testCoremodelJITRosen4Opt));
+
+  s->addTest(new UnitTest::TestCaller<Benchmark>(
+               "Coremodel 1 (Rosen4, BCIMP, Opt)", &Benchmark::testCoremodelBCIMPRosen4Opt));
+
+  s->addTest(new UnitTest::TestCaller<Benchmark>(
                "Coremodel 1 (Rosen4, BCIMP)", &Benchmark::testCoremodelBCIMPRosen4NoOpt));
 
-  s->addTest(new UnitTest::TestCaller<Benchmark>(
-               "Coremodel 1 (Rosen4, LLVM)", &Benchmark::testCoremodelJITRosen4NoOpt));*/
-
-  s->addTest(new UnitTest::TestCaller<Benchmark>(
+  /*s->addTest(new UnitTest::TestCaller<Benchmark>(
                "Coremodel 1 (Gillespie, BCI, Opt)", &Benchmark::testCoremodelBCIGillespieOpt));
 
   s->addTest(new UnitTest::TestCaller<Benchmark>(
@@ -591,7 +591,7 @@ Benchmark::suite()
                "Coremodel 1 (Gillespie, GiNaC)", &Benchmark::testCoremodelGiNaCGillespie));
 
   s->addTest(new UnitTest::TestCaller<Benchmark>(
-               "Coremodel 1 (LSODA, GiNaC)", &Benchmark::testCoremodelGiNaCLSODA));
+               "Coremodel 1 (LSODA, GiNaC)", &Benchmark::testCoremodelGiNaCLSODA));*/
 
 
   return s;

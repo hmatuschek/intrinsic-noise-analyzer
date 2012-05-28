@@ -148,7 +148,7 @@ public:
     ConstantPropagation     const_prop;
     RemoveUnitsPass         units_pass;
     ConstantFoldingPass     const_pass;
-    IPowPass              ipow_pass;
+    //IPowPass              ipow_pass;
     ZeroStorePass           zero_pass;
     InstructionCanonization canon_pass;
 
@@ -169,7 +169,7 @@ public:
     manager.addPass(&imm_pass);
 
     /* This pass propagates constants to the outermost left position. */
-    manager.addPass(&const_prop);
+    //manager.addPass(&const_prop);
 
     /* This pass removes unit-operations like X*1 or X+0 etc. */
     manager.addPass(&units_pass);
@@ -178,13 +178,13 @@ public:
     manager.addPass(&const_pass);
 
     /* This pass replaces POW instructions with IPOW if latter is more efficient. */
-    manager.addPass(&ipow_pass);
+    //manager.addPass(&ipow_pass);
 
     /* This pass replaces "PUSH 0, STORE IDX" with "STORE_ZERO IDX" */
     manager.addPass(&zero_pass);
 
     /* Canonizes instructions. */
-    manager.addPass(&canon_pass);
+    //manager.addPass(&canon_pass);
 
     if (level >= 1) {
       Utils::CpuTime clock; clock.start();
