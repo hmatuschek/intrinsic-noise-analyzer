@@ -106,7 +106,7 @@ IOSTask::IOSTask(const Config &config, QObject *parent) :
   // IOS EMRE Mean corrections
   for (int i=0; i<(int)config.getNumSpecies(); i++, column++) {
     this->timeseries.setColumnName(
-          column, QString("IOS-EMRE %1").arg(species_names[i]));
+          column, QString("IOS mean %1").arg(species_names[i]));
     this->ios_emre_index_table(i) = column;
   }
 
@@ -276,9 +276,9 @@ IOSTask::process()
         output_vector(ios_index_table(i,j)) = lna(index_i, index_j) + ios(index_i, index_j);
 
         // Check if one of the variance elements is negative:
-        if ( (i == j) && (0.0 > output_vector(lna_index_table(i,j), ios_index_table(i,j)))) {
-          this->has_negative_variance = true;
-        }
+        //if ( (i == j) && (0.0 > output_vector(lna_index_table(i,j), ios_index_table(i,j)))) {
+        //  this->has_negative_variance = true;
+        //}
       }
     }
     this->timeseries.append(output_vector);
