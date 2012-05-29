@@ -283,7 +283,7 @@ IOSTask::process()
         }
       }
       // Store skewness:
-      output_vector(skewness_index_table(i)) = thirdMoment(index_i) / std::pow(ios_index_table(i,i), 3./2.);
+      output_vector(skewness_index_table(i)) = thirdMoment(index_i);
     }
     this->timeseries.append(output_vector);
   }
