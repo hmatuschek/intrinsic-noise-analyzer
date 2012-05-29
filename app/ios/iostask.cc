@@ -228,6 +228,7 @@ IOSTask::process()
     output_vector(re_index_table(i)) = concentrations(index_i);
     output_vector(emre_index_table(i)) = concentrations(index_i);
     output_vector(ios_emre_index_table(i)) = concentrations(index_i);
+    output_vector(skewness_index_table(i)) = 0.0;
     for (size_t j=i; j<N_sel_species; j++){
       output_vector(lna_index_table(i,j)) = 0.0;
       output_vector(ios_index_table(i,j)) = 0.0;
@@ -266,20 +267,23 @@ IOSTask::process()
     for (size_t i=0; i<N_sel_species; i++)
     {
       size_t index_i = species_index[i];
+      // Store means
       output_vector(re_index_table(i)) = concentrations(index_i);
       output_vector(emre_index_table(i)) = emre(index_i) + concentrations(index_i);
       output_vector(ios_emre_index_table(i)) = emre(index_i) + concentrations(index_i) + iosemre(index_i);
-      output_vector(skewness_index_table(i)) = thirdMoment(index_i);
+      // Store covariances:
       for (size_t j=i; j<N_sel_species; j++){
         size_t index_j = species_index[j];
         output_vector(lna_index_table(i,j)) = lna(index_i, index_j);
         output_vector(ios_index_table(i,j)) = lna(index_i, index_j) + ios(index_i, index_j);
 
         // Check if one of the variance elements is negative:
-        //if ( (i == j) && (0.0 > output_vector(lna_index_table(i,j), ios_index_table(i,j)))) {
-        //  this->has_negative_variance = true;
-        //}
+        if ( (i == j) && (0.0 > output_vector(lna_index_table(i,i)) || (0.0 > ios_index_table(i,i)))) {
+          this->has_negative_variance = true;
+        }
       }
+      // Store skewness:
+      output_vector(skewness_index_table(i)) = thirdMoment(index_i) / std::pow(ios_index_table(i,i), 3./2.);
     }
     this->timeseries.append(output_vector);
   }
