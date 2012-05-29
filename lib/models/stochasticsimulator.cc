@@ -188,11 +188,14 @@ StochasticSimulator::stats(Eigen::VectorXd &mean, Eigen::MatrixXd &covariance, E
         skewness(i) += t*t*t;
     }
 
-    //make concentrations
-    mean(i)/=this->Omega(i);
+   //make concentrations
+   mean(i)/=this->Omega(i);
 
    // compute skewness from third moment
-   skewness(i)=skewEstFac*skewness(i)/covariance(i)/sqrt(covariance(i))/(this->Omega(i)*this->Omega(i)*this->Omega(i));
+   if(covariance(i,i)>0.)
+       skewness(i)=skewEstFac*skewness(i)/covariance(i,i)/sqrt(covariance(i,i))/(this->Omega(i)*this->Omega(i)*this->Omega(i));
+   else
+       skewness(i)=0.;
 
   }
 

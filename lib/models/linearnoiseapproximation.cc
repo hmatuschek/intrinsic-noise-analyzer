@@ -406,7 +406,7 @@ LinearNoiseApproximation::fullState(const Eigen::VectorXd &state, Eigen::VectorX
 
 void
 LinearNoiseApproximation::fullState(const Eigen::VectorXd &state, Eigen::VectorXd &concentrations,
-                                     Eigen::MatrixXd &cov, Eigen::VectorXd &emre, Eigen::MatrixXd &iosCov, Eigen::VectorXd &thirdMoment, Eigen::VectorXd &iosemre)
+                                     Eigen::MatrixXd &cov, Eigen::VectorXd &emre, Eigen::MatrixXd &iosCov, Eigen::VectorXd &skewness, Eigen::VectorXd &iosemre)
 
 {
 
@@ -455,10 +455,15 @@ LinearNoiseApproximation::fullState(const Eigen::VectorXd &state, Eigen::VectorX
 
     // construct full third moment vector, restore original order and return
     for(size_t i=0; i<(unsigned)cmat.rows(); i++)
+    {
+        skewness(i)=0.;
         for(size_t j=0; j<(unsigned)cmat.cols(); j++)
             for(size_t k=0; k<(unsigned)cmat.cols(); k++)
                 for(size_t l=0; l<(unsigned)cmat.cols(); l++)
-                    thirdMoment(i) += cmat(i,j) * cmat(i,k) * cmat(i,l) *thirdMomVariables[j](k,l);
+                    skewness(i) += cmat(i,j) * cmat(i,k) * cmat(i,l) *thirdMomVariables[j](k,l);
+
+        skewness(i)/=cov(i,i)*sqrt(cov(i,i));
+    }
 
    // get reduced covariance vector
    Eigen::VectorXd covvec = state.segment(2*this->numIndSpecies()+dimCOV+dimThird,dimCOV);

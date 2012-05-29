@@ -196,10 +196,10 @@ public:
    * @param state
    * output:
    * @param concentrations vector, @param covariance matrix and @param emre correction vector.
-   * @param IOS correction to covariance matrix, @param vector of third moments of fluctuations
+   * @param IOS correction to covariance matrix, @param vector of skewness of distribution
    */
   void fullState(const Eigen::VectorXd &state, Eigen::VectorXd &concentrations,
-                 Eigen::MatrixXd &cov, Eigen::VectorXd &emre,  Eigen::MatrixXd &iosCov, Eigen::VectorXd &thirdMoment, Eigen::VectorXd &iosemre);
+                 Eigen::MatrixXd &cov, Eigen::VectorXd &emre,  Eigen::MatrixXd &iosCov, Eigen::VectorXd &skewness, Eigen::VectorXd &iosemre);
 
 
   /**
