@@ -69,6 +69,7 @@ public:
  */
 class MessageHandler {
 public:
+  /** Needs to be implemented by actual message handlers to process a message. */
   virtual void handleMessage(const Message &message) = 0;
 };
 
