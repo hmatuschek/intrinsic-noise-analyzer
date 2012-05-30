@@ -135,14 +135,6 @@ SET(libina_ode_HEADERS ode/ode.hh
     ode/semiimpliciteuler.hh ode/rosenbrock3.hh ode/rosenbrock4.hh ode/odemodel.hh ode/dopri5.hh
     ode/dopri853.hh ode/stepper.hh)
 
-# Simple Stack Machine Interpreter
-SET(libina_intprt_SOURCES
-    intprt/intprt.cc intprt/assembler.cc intprt/interpreter.cc intprt/pass.cc
-    intprt/dependencetree.cc intprt/instruction.cc intprt/codestatistics.cc intprt/compiler.cc)
-SET(libina_intprt_HEADERS
-    intprt/intprt.hh intprt/assembler.hh intprt/interpreter.hh intprt/pass.hh
-    intprt/dependencetree.hh intprt/instruction.hh intprt/codestatistics.hh intprt/compiler.hh)
-
 #
 # Sources for the evaluation sub-system:
 #
@@ -163,13 +155,6 @@ SET(libina_eval_bytecode_mp_SOURCES
 SET(libina_eval_bytecode_mp_HEADERS
     eval/bcimp/code.hh eval/bcimp/compiler.hh eval/bcimp/interpreter.hh eval/bcimp/engine.hh)
 
-#SET(libina_eval_libjit_SOURCES
-#    eval/libjit/code.cc eval/libjit/builder.cc eval/libjit/assembler.cc eval/libjit/compiler.cc
-#    eval/libjit/interpreter.cc)
-#SET(libina_eval_libjit_HEADERS
-#    eval/libjit/code.hh eval/libjit/builder.hh eval/libjit/assembler.hh eval/libjit/compiler.hh
-#    eval/libjit/interpreter.hh)
-
 SET(libina_eval_llvm_SOURCES
     eval/llvm/code.cc eval/llvm/interpreter.cc eval/llvm/compiler.cc eval/llvm/assembler.cc
     eval/llvm/builder.cc eval/llvm/engine.cc)
@@ -188,11 +173,6 @@ SET(libina_eval_HEADERS
     ${libina_eval_bytecode_HEADERS}
     ${libina_eval_bytecode_mp_HEADERS})
 
-IF(WITH_EXECUTION_ENGINE_LIBJIT)
-   SET(libina_eval_SOURCES ${libina_eval_SOURCES} ${libina_eval_libjit_SOURCES})
-   SET(libina_eval_HEADERS ${libina_eval_HEADERS} ${libina_eval_libjit_HEADERS})
-ENDIF(WITH_EXECUTION_ENGINE_LIBJIT)
-
 IF(WITH_EXECUTION_ENGINE_LLVM)
   SET(libina_eval_SOURCES ${libina_eval_SOURCES} ${libina_eval_llvm_SOURCES})
   SET(libina_eval_HEADERS ${libina_eval_HEADERS} ${libina_eval_llvm_HEADERS})
@@ -209,7 +189,6 @@ SET(libina_SOURCES
     ${libina_models_SOURCES}
     ${libina_nlesolve_SOURCES}
     ${libina_ode_SOURCES}
-    ${libina_intprt_SOURCES}
     ${libina_unsupported_SOURCES}
     ${libina_eval_SOURCES})
 
@@ -223,7 +202,6 @@ SET(libina_HEADERS
     ${libina_models_HEADERS}
     ${libina_nlesolve_HEADERS}
     ${libina_ode_HEADERS}
-    ${libina_intprt_HEADERS}
     ${libina_unsupported_HEADERS}
     ${libina_eval_HEADERS})
 

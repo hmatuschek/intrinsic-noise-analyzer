@@ -18,31 +18,6 @@ ENDIF(UNIX AND NOT APPLE)
 
 
 #
-# Handle command line options/definitions:
-#
-if(EXECUTION_ENGINE STREQUAL "DIRECT")
-set(EXECUTION_ENGINE_DIRECT ON)
-add_definitions(-DEXECUTION_ENGINE=1)
-message(STATUS "Execution engine: direct evaluation (slow)")
-
-elseif(EXECUTION_ENGINE STREQUAL "BYTECODE_MP")
-set(EXECUTION_ENGINE_BYTECODE_MP ON)
-add_definitions(-DEXECUTION_ENGINE=3)
-message(STATUS "Execution engine: bytecode (OpenMP)")
-
-elseif(EXECUTION_ENGINE STREQUAL "LLVM")
-set(EXECUTION_ENGINE_LLVM ON)
-add_definitions(-DEXECUTION_ENGINE=5)
-message(STATUS "Execution engine: LLVM (experimental)")
-
-else()
-set(EXECUTION_ENGINE_BYTECODE ON)
-add_definitions(-DEXECUTION_ENGINE=2)
-message(STATUS "Execution engine: bytecode")
-endif()
-
-
-#
 # Search for libraries
 #
 FIND_PACKAGE(Qt4 REQUIRED)

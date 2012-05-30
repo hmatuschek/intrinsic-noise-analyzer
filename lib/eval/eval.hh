@@ -48,56 +48,25 @@
  *
  */
 
-#if EXECUTION_ENGINE == 1
 #include "direct/code.hh"
 #include "direct/compiler.hh"
 #include "direct/interpreter.hh"
 
-#warning "Slow GiNaC evaluation is used as default!"
-
-namespace Fluc {
-namespace Eval = Fluc::Evaluate::direct;
-}
-
-#elif EXECUTION_ENGINE == 3
-#include "bcimp/code.hh"
-#include "bcimp/compiler.hh"
-#include "bcimp/interpreter.hh"
-namespace Fluc {
-namespace Eval = Fluc::Evaluate::bcimp;
-}
-
-#elif EXECUTION_ENGINE == 4
-#include "libjit/code.hh"
-#include "libjit/compiler.hh"
-#include "libjit/interpreter.hh"
-
-#warning "Untested libjit evaluation is used as default!"
-
-namespace Fluc {
-namespace Eval = Fluc::Evaluate::libjit;
-}
-
-#elif EXECUTION_ENGINE == 5
-//#include "llvm/code.hh"
-//#include "llvm/compiler.hh"
-//#include "llvm/interpreter.hh"
-
-#warning "Untested LLVM evaluation is used as default!"
-
-namespace Fluc {
-namespace Eval = Fluc::Evaluate::LLVM;
-}
-
-#else // Use ByteCodeInterpreter (BCI) by default (EXECUTION_ENGINE==2)
 #include "bci/code.hh"
 #include "bci/compiler.hh"
 #include "bci/interpreter.hh"
 
-namespace Fluc {
-namespace Eval = Fluc::Evaluate::bci;
-}
+#include "bcimp/code.hh"
+#include "bcimp/compiler.hh"
+#include "bcimp/interpreter.hh"
+
+#if WITH_EXECUTION_ENGINE_LLVM
+#include "llvm/code.hh"
+#include "llvm/compiler.hh"
+#include "llvm/interpreter.hh"
 #endif
+
+
 
 
 #endif  

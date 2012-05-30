@@ -18,12 +18,15 @@ PartialSumSSA::PartialSumSSA(libsbml::Model *model, int size, int seed, size_t o
     dependencyGraph(numReactions(),numReactions())
 {
 
-    Intprt::Compiler<Eigen::VectorXd> compiler(this->stateIndex);
+    Evaluate::bci::Compiler<Eigen::VectorXd> compiler(this->stateIndex);
 
     // setup the interpreter from a dependency graph
     int d;
     for (size_t j=0;j<this->numReactions();j++)
     {
+        // Assign byte-code object to compiler
+        compiler.setCode(& this->byte_code[j]);
+
         this->dependencyGraph.startVec(j);
         for (size_t i=0;i<this->numReactions();i++)
         {
@@ -41,21 +44,17 @@ PartialSumSSA::PartialSumSSA(libsbml::Model *model, int size, int seed, size_t o
         }
 
         // optimize and store bytecode
-        compiler.optimize(opt_level);
-        this->byte_code[j] = compiler.getCode();
-        //reset compiler
-        compiler.reset();
-
+        compiler.finalize(opt_level);
     }
     this->dependencyGraph.finalize();
 
+    compiler.setCode(& this->all_byte_code);
     // compile all propensities for byte code evaluation
     for(size_t i=0; i<this->numReactions(); i++)
         compiler.compileExpressionAndStore(this->propensities[i],i);
 
     // optimize and store
-    compiler.optimize(opt_level);
-    this->all_byte_code = compiler.getCode();
+    compiler.finalize(opt_level);
 
     // fill sparse stoichiometry
     for(size_t j=0; j<this->numReactions(); ++j)

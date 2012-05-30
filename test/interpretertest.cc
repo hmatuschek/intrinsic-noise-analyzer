@@ -379,23 +379,6 @@ InterpreterTest::testMatrix()
     }
   }
 #endif
-
-  // Test default compiler:
-  {
-    Eval::Code code;
-    Eval::Compiler<Eigen::VectorXd, Eigen::MatrixXd> compiler(symbol_table);
-    Eval::Interpreter<Eigen::VectorXd, Eigen::MatrixXd> interpreter(&code);
-    compiler.setCode(&code);
-    compiler.compileMatrix(expr);
-    compiler.finalize();
-    output << 0,0,0,0; interpreter.run(values, output);
-
-    for (int i=0; i<output.rows(); i++) {
-      for (int j=0; j<output.cols(); j++) {
-        UT_ASSERT_EQUAL(output(i,j), true_output(i,j));
-      }
-    }
-  }
 }
 
 
@@ -466,18 +449,6 @@ InterpreterTest::testComplexPolynomial()
     assertNear(output(0), true_output(0), 1e-10, __FILE__, __LINE__);
   }
 
-  // Test default compiler:
-  {
-    Eval::Code code;
-    Eval::Compiler<Eigen::VectorXc> compiler(symbol_table);
-    Eval::Interpreter<Eigen::VectorXc> interpreter(&code);
-    compiler.setCode(&code);
-    compiler.compileExpressionAndStore(expr, 0);
-    compiler.finalize();
-    output(0) = 0; interpreter.run(values, output);
-
-    UT_ASSERT_NEAR(output(0), true_output(0));
-  }
 }
 
 
@@ -503,25 +474,6 @@ InterpreterTest::runDirectReal(
   Evaluate::direct::Code code;
   Evaluate::direct::Compiler<Eigen::VectorXd> compiler(symbol_table);
   Evaluate::direct::Interpreter<Eigen::VectorXd> interpreter(&code);
-  compiler.setCode(&code);
-  compiler.compileVector(expression);
-  compiler.finalize();
-
-  interpreter.run(values, result);
-}
-
-
-void
-InterpreterTest::runDefaultReal(
-  Eigen::VectorXex &symbols, Eigen::VectorXex &expression,
-  const Eigen::VectorXd &values, Eigen::VectorXd &result)
-{
-  std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> symbol_table;
-  symbolTableFromVector(symbols, symbol_table);
-
-  Eval::Code code;
-  Eval::Compiler<Eigen::VectorXd> compiler(symbol_table);
-  Eval::Interpreter<Eigen::VectorXd> interpreter(&code);
   compiler.setCode(&code);
   compiler.compileVector(expression);
   compiler.finalize();
@@ -619,14 +571,6 @@ InterpreterTest::testAllReal(Eigen::VectorXex &symbols, Eigen::VectorXex &expres
     }
   }
 #endif
-
-  { // Test Default engine
-    Eigen::VectorXd output = Eigen::VectorXd::Zero(expression.size());
-    runDefaultReal(symbols, expression, values, output);
-    for (int i=0; i<output.size(); i++) {
-      UT_ASSERT_NEAR(output(i), true_output(i));
-    }
-  }
 }
 
 

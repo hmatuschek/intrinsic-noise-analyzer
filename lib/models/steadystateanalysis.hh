@@ -3,7 +3,6 @@
 
 #include "nlesolve/nlesolve.hh"
 #include "linearnoiseapproximation.hh"
-#include "intprt/intprt.hh"
 #include "math.hh"
 
 namespace Fluc {

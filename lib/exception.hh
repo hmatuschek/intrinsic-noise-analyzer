@@ -59,13 +59,19 @@ public:
    */
   virtual const char *what() const throw();
 
+  /** Adds a single char to the message. */
   Exception &operator<< (unsigned char c);
+  /** Adds some static text to the message. */
   Exception &operator<< (const char *text);
-  //Exception operator<< (const char *text);
+  /** Adds some text to the message. */
   Exception &operator<< (const std::string &text);
+  /** Adds an integer to the message. */
   Exception &operator<< (unsigned long value);
+  /** Adds an integer to the message. */
   Exception &operator<< (unsigned int value);
+  /** Adds a floating point number to the message. */
   Exception &operator<< (double value);
+  /** Adds a GiNaC expression to the message. */
   Exception &operator<< (const GiNaC::ex &expression);
 };
 

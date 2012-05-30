@@ -4,7 +4,6 @@
 #include "models/stochasticsimulator.hh"
 #include "models/constantstoichiometrymixin.hh"
 #include "models/extensivespeciesmixin.hh"
-#include "intprt/intprt.hh"
 
 #define EIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET
 #include <eigen3/Eigen/Sparse>

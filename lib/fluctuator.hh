@@ -16,14 +16,13 @@
 #define __FLUC_FLUCTUATOR_HH__
 
 /**
- * \mainpage Fluctuator
+ * \mainpage The Intrinsic Noise Analyzer
  *
  */
 
 #include "ast/ast.hh"
 #include "models/models.hh"
 #include "ode/ode.hh"
-#include "intprt/intprt.hh"
 
 #include "utils/cputime.hh"
 #include "exception.hh"

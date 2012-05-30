@@ -15,7 +15,7 @@ TimeIndepODEModel::TimeIndepODEModel(const std::vector<GiNaC::symbol> &symbols,
   }
 
   // Compile ODEs:
-  Eval::Compiler<Eigen::VectorXd, Eigen::VectorXd> ode_compiler(index_table);
+  Evaluate::bci::Compiler<Eigen::VectorXd, Eigen::VectorXd> ode_compiler(index_table);
   ode_compiler.setCode(&ode_code);
   ode_compiler.compileVector(odes);
   ode_compiler.finalize(opt_level);
@@ -31,7 +31,7 @@ TimeIndepODEModel::TimeIndepODEModel(const std::vector<GiNaC::symbol> &symbols,
   }
 
   // Compile jacobian:
-  Eval::Compiler<Eigen::VectorXd, Eigen::MatrixXd> jacobian_compiler(index_table);
+  Evaluate::bci::Compiler<Eigen::VectorXd, Eigen::MatrixXd> jacobian_compiler(index_table);
   jacobian_compiler.setCode(&jacobian_code);
   jacobian_compiler.compileMatrix(jacobian);
   jacobian_compiler.finalize(opt_level);
@@ -51,13 +51,13 @@ TimeIndepODEModel::TimeIndepODEModel(const std::vector<GiNaC::symbol> &symbols,
   }
 
   // Compile ODEs:
-  Eval::Compiler<Eigen::VectorXd, Eigen::VectorXd> ode_compiler(index_table);
+  Evaluate::bci::Compiler<Eigen::VectorXd, Eigen::VectorXd> ode_compiler(index_table);
   ode_compiler.setCode(&ode_code);
   ode_compiler.compileVector(odes);
   ode_compiler.finalize(opt_level);
 
   // Compile jacobian:
-  Eval::Compiler<Eigen::VectorXd, Eigen::MatrixXd> jacobian_compiler(index_table);
+  Evaluate::bci::Compiler<Eigen::VectorXd, Eigen::MatrixXd> jacobian_compiler(index_table);
   jacobian_compiler.setCode(&jacobian_code);
   jacobian_compiler.compileMatrix(jacobian);
   jacobian_compiler.finalize(opt_level);

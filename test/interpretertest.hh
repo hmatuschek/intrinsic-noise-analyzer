@@ -45,11 +45,6 @@ protected:
     Eigen::VectorXex &symbols, Eigen::VectorXex &expression, const Eigen::VectorXd &values,
     Eigen::VectorXd &result);
 
-  /* Compiles and runs a vector of expressions using Fluc::Eval default interpreter. */
-  void runDefaultReal(
-    Eigen::VectorXex &symbols, Eigen::VectorXex &expression, const Eigen::VectorXd &values,
-    Eigen::VectorXd &result);
-
   /* Compiles and runs a vector of expressions using Fluc::Evaluate::bci interpreter. */
   void runBCIReal(
     Eigen::VectorXex &symbols, Eigen::VectorXex &expression, const Eigen::VectorXd &values,
