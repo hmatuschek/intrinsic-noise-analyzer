@@ -116,7 +116,7 @@ public:
 /**
  * Implements the default Gillespie SSA implementation usign the byte-code interpreter.
  */
-typedef GenericGillespieSSA< Evaluate::bci::Engine<Eigen::VectorXd> > GillespieSSA;
+typedef GenericGillespieSSA< Eval::bci::Engine<Eigen::VectorXd> > GillespieSSA;
 
 }
 }

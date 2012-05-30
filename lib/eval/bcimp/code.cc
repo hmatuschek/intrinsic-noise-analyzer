@@ -1,7 +1,7 @@
 #include "code.hh"
 #include "utils/logger.hh"
-using namespace Fluc::Evaluate;
-using namespace Fluc::Evaluate::bcimp;
+using namespace Fluc::Eval;
+using namespace Fluc::Eval::bcimp;
 
 
 Code::Code(size_t num_threads)

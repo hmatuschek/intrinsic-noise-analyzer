@@ -156,11 +156,11 @@ SET(libina_eval_bytecode_mp_HEADERS
     eval/bcimp/code.hh eval/bcimp/compiler.hh eval/bcimp/interpreter.hh eval/bcimp/engine.hh)
 
 SET(libina_eval_llvm_SOURCES
-    eval/llvm/code.cc eval/llvm/interpreter.cc eval/llvm/compiler.cc eval/llvm/assembler.cc
-    eval/llvm/builder.cc eval/llvm/engine.cc)
+    eval/jit/code.cc eval/jit/interpreter.cc eval/jit/compiler.cc eval/jit/assembler.cc
+    eval/jit/builder.cc eval/jit/engine.cc)
 SET(libina_eval_llvm_HEADERS
-    eval/llvm/code.hh eval/llvm/interpreter.hh eval/llvm/compiler.hh eval/llvm/assembler.hh
-    eval/llvm/builder.hh eval/llvm/engine.hh)
+    eval/jit/code.hh eval/jit/interpreter.hh eval/jit/compiler.hh eval/jit/assembler.hh
+    eval/jit/builder.hh eval/jit/engine.hh)
 
 SET(libina_eval_SOURCES
     eval/eval.cc eval/compilercommon.cc

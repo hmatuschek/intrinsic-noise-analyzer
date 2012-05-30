@@ -7,12 +7,14 @@
 
 
 namespace Fluc {
-namespace Evaluate {
+namespace Eval {
 namespace bci {
 
 
 /**
  * Represents a single instance of a ByteCode instruction.
+ *
+ * @inrgoup bci
  */
 class Instruction
 {
@@ -122,7 +124,7 @@ public:
 /**
  * Represents a series of instructions; The byte-code.
  *
- * @ingroup eval
+ * @ingroup bci
  */
 class Code
 {

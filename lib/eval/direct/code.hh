@@ -8,13 +8,13 @@
 
 
 namespace Fluc {
-namespace Evaluate {
+namespace Eval {
 
 
 /**
  * This namespace holds all classes used to evaluate GiNaC expressions directly.
  *
- * @ingroup eval
+ * @ingroup direct
  */
 namespace direct {
 
@@ -22,7 +22,7 @@ namespace direct {
 /**
  * This class implements the "code" for the direct evaluation engine.
  *
- * @ingroup eval
+ * @ingroup direct
  */
 class Code {
 public:

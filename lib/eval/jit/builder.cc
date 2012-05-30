@@ -1,6 +1,6 @@
 #include "builder.hh"
 
-using namespace Fluc::Evaluate::LLVM;
+using namespace Fluc::Eval::jit;
 
 
 llvm::Value *

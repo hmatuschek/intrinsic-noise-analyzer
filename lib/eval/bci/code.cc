@@ -1,7 +1,7 @@
 #include "code.hh"
 
 using namespace Fluc;
-using namespace Fluc::Evaluate::bci;
+using namespace Fluc::Eval::bci;
 
 
 

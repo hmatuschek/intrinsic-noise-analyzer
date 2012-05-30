@@ -181,7 +181,7 @@ private:
 
 
 /** Defines the default implementation of the optimized SSA, using the byte-code interpreter. */
-typedef GenericOptimizedSSA< Evaluate::bci::Engine<Eigen::VectorXd> > OptimizedSSA;
+typedef GenericOptimizedSSA< Eval::bci::Engine<Eigen::VectorXd> > OptimizedSSA;
 
 }
 }

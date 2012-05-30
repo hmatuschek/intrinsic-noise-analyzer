@@ -34,12 +34,12 @@ protected:
     /**
     * Holds the dependency graph in terms of bytecode.
     **/
-    std::vector<Evaluate::bci::Code> byte_code;
+    std::vector<Eval::bci::Code> byte_code;
 
     /**
     * Collects all bytecode to evaluate all propensities.
     **/
-    Evaluate::bci::Code all_byte_code;
+    Eval::bci::Code all_byte_code;
 
     /**
     * Sparse stoichiometric matrix.
@@ -74,7 +74,7 @@ private:
     /**
     * Interpreter for each thread.
     */
-    std::vector< Evaluate::bci::Interpreter< Eigen::VectorXd > > interpreter;
+    std::vector< Eval::bci::Interpreter< Eigen::VectorXd > > interpreter;
 
     /**
     * Sqrt of numReactions().

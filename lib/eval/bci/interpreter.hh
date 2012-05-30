@@ -13,7 +13,7 @@
 
 
 namespace Fluc {
-namespace Evaluate {
+namespace Eval {
 namespace bci {
 
 
@@ -23,6 +23,8 @@ namespace bci {
  *
  * The type of the value is determined by the instruction that processes this
  * value on the stack.
+ *
+ * @ingroup bci
  */
 class InterpreterValue {
 private:
@@ -77,6 +79,8 @@ public:
 
 /**
  * This template defines the core "ALU" of the interpreter.
+ *
+ * @ingroup bci
  */
 template <typename InScalar, typename OutScalar>
 class InterpreterCore
@@ -92,6 +96,8 @@ public:
 
 /**
  * Specialization of InterpreterCore for real (double) values.
+ *
+ * @ingroup bci
  */
 template <typename InScalar>
 class InterpreterCore <InScalar, double>
@@ -194,7 +200,9 @@ public:
 
 
 /**
- * Specialization of InterpreterCore for complex (complex<double>) values.
+ * Specialization of InterpreterCore for complex (complex<double>) values
+ *
+ * @ingroup bci
  */
 template <typename InScalar>
 class InterpreterCore < InScalar, std::complex<double> >
@@ -307,7 +315,7 @@ public:
  *
  * This class implements a simple stack-machine, that interpretes some byte-code efficiently.
  *
- * @ingroup eval
+ * @ingroup bci
  */
 template <class InType, class OutType=InType>
 class Interpreter : public InterpreterCore<typename InType::Scalar, typename OutType::Scalar>

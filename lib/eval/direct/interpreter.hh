@@ -7,12 +7,14 @@
 
 
 namespace Fluc {
-namespace Evaluate {
+namespace Eval {
 namespace direct {
 
 /**
  * This little nasty hack is needed to have some destination-type dependent unpacking
  * of GiNaC values.
+ *
+ * @ingroup direct
  */
 template <typename Scalar>
 class GiNaCValuePacker
@@ -29,6 +31,8 @@ public:
 
 /**
  * Specialized unpacker for real numbers.
+ *
+ * @ingroup direct
  */
 template<>
 class GiNaCValuePacker<double>
@@ -57,6 +61,8 @@ public:
 
 /**
  * Specialized unpacker for complex numbers.
+ *
+ * @ingroup direct
  */
 template<>
 class GiNaCValuePacker< std::complex<double> >
@@ -83,7 +89,7 @@ public:
 /**
  * Interpreter for the direct evaluation engine.
  *
- * @ingroup eval
+ * @ingroup direct
  */
 template <class InType, class OutType=InType>
 class Interpreter

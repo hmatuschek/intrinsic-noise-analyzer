@@ -7,7 +7,7 @@
 
 
 namespace Fluc {
-namespace Evaluate {
+namespace Eval {
 namespace bci {
 
 class Value;
@@ -15,7 +15,10 @@ class Value;
 /**
  * Represents a single node in the dependence graph of values.
  *
- * @ingroup intprt
+ * The dependence graph is a intermediate representation used by the optimisation passes to
+ * perfrom transformations on the code.
+ *
+ * @ingroup bci
  */
 class Node
 {
@@ -76,7 +79,7 @@ public:
 /**
  * Represents a value in the dependence graph.
  *
- * @ingroup intprt
+ * @ingroup bci
  */
 class Value : public Node
 {
@@ -223,6 +226,8 @@ public:
 
 /**
  * Represents the root of the dependence graph.
+ *
+ * @ingroup bci
  */
 class DependenceTree : public Node
 {

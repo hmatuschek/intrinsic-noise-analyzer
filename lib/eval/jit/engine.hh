@@ -1,5 +1,5 @@
 /**
- * @defgroup jit
+ * @defgroup jit JIT Compiler for Expression Evaluation using LLVM.
  * @ingroup eval
  *
  * This module collects all classes used to JIT compile and evaluate expressions using the LLVM
@@ -14,17 +14,8 @@
 #include "interpreter.hh"
 
 namespace Fluc {
-namespace Evaluate {
-/**
- * This namespace collect all classes for the JIT compiler execution engine used for model
- * evaluations.
- *
- * @todo Rename it to Fluc::Evaluate::JTI, as LLVM is the only JIT backend used here, libjit was
- *       dropped.
- *
- * @ingroup jit
- */
-namespace LLVM {
+namespace Eval {
+namespace jit {
 
 
 /**
@@ -40,17 +31,17 @@ public:
   /**
    * Defines the type of the code object, holding the compiled code to be executed.
    */
-  typedef LLVM::Code Code;
+  typedef jit::Code Code;
 
   /**
    * An instance of this class can be used to compile some expressions into code.
    */
-  typedef LLVM::Compiler<InType, OutType> Compiler;
+  typedef jit::Compiler<InType, OutType> Compiler;
 
   /**
    * An instance of this class finally executes the compiled code.
    */
-  typedef LLVM::Interpreter<InType, OutType> Interpreter;
+  typedef jit::Interpreter<InType, OutType> Interpreter;
 };
 
 

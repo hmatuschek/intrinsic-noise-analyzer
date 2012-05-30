@@ -28,23 +28,37 @@ public:
 
 
 protected:
+  /** Holds the log level of the message. */
   Level _level;
+  /** Optionally hods the code-line of origin of the message. */
   size_t _line;
+  /** Optionally hods the code-file of origin of the message. */
   std::string _file;
+  /** Holds the time-stamp of the message. */
   time_t _time;
 
 public:
+  /** Constructor with level. */
   Message(Level level);
+  /** Constructor with level and origin. */
   Message(Level level, const std::string &file, size_t line);
+  /** Constructor with level, origin and message. */
   Message(Level level, const std::string &file, size_t line, const std::string &message);
+  /** Copy constructor. */
   Message(const Message &other);
 
+  /** Returns the message text. */
   std::string getText() const;
+  /** Returns the filename of the origin, or an empty string if not set. */
   const std::string &getFileName() const;
+  /** Returns the line number of the origin, or 0 if not set. */
   size_t getLineNo() const;
+  /** Returns the log level of the message. */
   Level getLevel() const;
+  /** Returns the time stamp. */
   const time_t &getTime() const;
 
+  /** Assignment operator, copies the RHS message. */
   Message &operator =(const Message &other);
 };
 
@@ -112,12 +126,15 @@ private:
 class TextMessageHandler : public MessageHandler
 {
 protected:
+  /** Level of filter. */
   Message::Level _level;
+  /** The ostream to send text to. */
   std::ostream &_stream;
 
 public:
+  /** Constructor. */
   TextMessageHandler(std::ostream &stream, Message::Level level=Message::INFO);
-
+  /** Handles a log message. */
   virtual void handleMessage(const Message &message);
 };
 

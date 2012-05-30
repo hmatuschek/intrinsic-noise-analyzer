@@ -7,13 +7,13 @@
 
 
 namespace Fluc {
-namespace Evaluate {
+namespace Eval {
 namespace bcimp {
 
 /**
  * Implements a vector of @c Fluc::Evaluate::bci::Code byte-codes to be executed in parallel.
  *
- * @ingroup eval
+ * @ingroup bcimp
  */
 class Code
 {

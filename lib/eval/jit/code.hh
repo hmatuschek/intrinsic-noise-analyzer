@@ -14,8 +14,8 @@
 
 
 namespace Fluc {
-namespace Evaluate {
-namespace LLVM {
+namespace Eval {
+namespace jit {
 
 /**
  * Holds the LLVM IR implementing the expressions.

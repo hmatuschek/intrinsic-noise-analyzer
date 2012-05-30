@@ -6,28 +6,28 @@
 #include "ode/rosenbrock4.hh"
 #include "ode/lsodadriver.hh"
 
+#include "eval/direct/engine.hh"
 #include "eval/bci/engine.hh"
 #include "eval/bcimp/engine.hh"
-#include "eval/llvm/engine.hh"
-#include "eval/direct/engine.hh"
+#include "eval/jit/engine.hh"
 
 #include "utils/cputime.hh"
 
 
 using namespace Fluc;
 
-typedef Models::GenericLNAinterpreter< Evaluate::bci::Engine<Eigen::VectorXd>, Evaluate::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd> > BCIInterpreter;
-typedef Models::GenericLNAinterpreter< Evaluate::bcimp::Engine<Eigen::VectorXd>, Evaluate::bcimp::Engine<Eigen::VectorXd, Eigen::MatrixXd> > BCIMPInterpreter;
-typedef Models::GenericLNAinterpreter< Evaluate::LLVM::Engine<Eigen::VectorXd>, Evaluate::LLVM::Engine<Eigen::VectorXd, Eigen::MatrixXd> > LLVMInterpreter;
-typedef Models::GenericLNAinterpreter< Evaluate::direct::Engine<Eigen::VectorXd>, Evaluate::direct::Engine<Eigen::VectorXd, Eigen::MatrixXd> > GiNaCInterpreter;
+typedef Models::GenericLNAinterpreter< Eval::bci::Engine<Eigen::VectorXd>, Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd> > BCIInterpreter;
+typedef Models::GenericLNAinterpreter< Eval::bcimp::Engine<Eigen::VectorXd>, Eval::bcimp::Engine<Eigen::VectorXd, Eigen::MatrixXd> > BCIMPInterpreter;
+typedef Models::GenericLNAinterpreter< Eval::jit::Engine<Eigen::VectorXd>, Eval::jit::Engine<Eigen::VectorXd, Eigen::MatrixXd> > LLVMInterpreter;
+typedef Models::GenericLNAinterpreter< Eval::direct::Engine<Eigen::VectorXd>, Eval::direct::Engine<Eigen::VectorXd, Eigen::MatrixXd> > GiNaCInterpreter;
 
-typedef Models::GenericGillespieSSA< Evaluate::bci::Engine<Eigen::VectorXd> > GillespieBCI;
-typedef Models::GenericGillespieSSA< Evaluate::LLVM::Engine<Eigen::VectorXd> > GillespieJIT;
-typedef Models::GenericGillespieSSA< Evaluate::direct::Engine<Eigen::VectorXd> > GillespieGiNaC;
+typedef Models::GenericGillespieSSA< Eval::bci::Engine<Eigen::VectorXd> > GillespieBCI;
+typedef Models::GenericGillespieSSA< Eval::jit::Engine<Eigen::VectorXd> > GillespieJIT;
+typedef Models::GenericGillespieSSA< Eval::direct::Engine<Eigen::VectorXd> > GillespieGiNaC;
 
-typedef Models::GenericOptimizedSSA< Evaluate::bci::Engine<Eigen::VectorXd> > OptSSABCI;
-typedef Models::GenericOptimizedSSA< Evaluate::LLVM::Engine<Eigen::VectorXd> > OptSSAJIT;
-typedef Models::GenericOptimizedSSA< Evaluate::direct::Engine<Eigen::VectorXd> > OptSSAGiNaC;
+typedef Models::GenericOptimizedSSA< Eval::bci::Engine<Eigen::VectorXd> > OptSSABCI;
+typedef Models::GenericOptimizedSSA< Eval::jit::Engine<Eigen::VectorXd> > OptSSAJIT;
+typedef Models::GenericOptimizedSSA< Eval::direct::Engine<Eigen::VectorXd> > OptSSAGiNaC;
 
 
 size_t Benchmark::N_steps = 100;

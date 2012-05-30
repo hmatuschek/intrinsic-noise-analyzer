@@ -10,10 +10,11 @@
 #include "pass.hh"
 #include "utils/cputime.hh"
 #include "utils/logger.hh"
+#include "eval/compilercommon.hh"
 
 
 namespace Fluc {
-namespace Evaluate {
+namespace Eval {
 namespace bci {
 
 
@@ -21,10 +22,10 @@ namespace bci {
  * Compiles and optimizes some GiNaC expressions into byte-code, that can be evaluated by an
  * @c Interpreter.
  *
- * @ingroup eval
+ * @ingroup bci
  */
 template <class InType, class OutType=InType>
-class Compiler
+class Compiler : public CompilerCommon<InType, OutType>
 {
 protected:
   /**
@@ -87,7 +88,7 @@ public:
    * Compiles expression and creates a STORE instruction, that will store the value of the
    * expression at the given index in the output-vector during evaluation.
    */
-  void compileExpressionAndStore(const GiNaC::ex &expression, size_t index)
+  virtual void compileExpressionAndStore(const GiNaC::ex &expression, size_t index)
   {
     Assembler assembler(this->code, this->index_table);
     expression.accept(assembler);
@@ -96,46 +97,9 @@ public:
 
 
   /**
-   * Compiles a vector of expressions.
-   *
-   * The value of the i-th expression will be stored at the i-th index in the output-vector
-   * during evaluation.
-   */
-  void compileVector(const Eigen::VectorXex &vector)
-  {
-    for (int index = 0; index < vector.rows(); index++)
-    {
-      this->compileExpressionAndStore(vector(index), index);
-    }
-  }
-
-
-  /**
-   * Compiles a matrix of expressions, that will evaluate to an @c Eigen::MatrixXd of the same
-   * shape.
-   */
-  void compileMatrix(const Eigen::MatrixXex &matrix)
-  {
-    for (int i=0; i<matrix.rows(); i++)
-    {
-      for (int j=0; j<matrix.cols(); j++)
-      {
-        size_t index = 0;
-        if (OutType::Flags & Eigen::RowMajorBit)
-          index = j + matrix.cols()*i;
-        else
-          index = i + matrix.rows()*j;
-
-        this->compileExpressionAndStore(matrix(i,j), index);
-      }
-    }
-  }
-
-
-  /**
    * Performs some optimizations on the byte-code.
    */
-  void finalize(size_t level=0)
+  virtual void finalize(size_t level=0)
   {
     this->code->check();
     /*

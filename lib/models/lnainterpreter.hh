@@ -191,14 +191,14 @@ public:
  * Defines the default LNA interpreter using byte-code interpreter with OpenMP support (if enabled).
  */
 class LNAinterpreter :
-    public GenericLNAinterpreter< Evaluate::bcimp::Engine<Eigen::VectorXd, Eigen::VectorXd>,
-    Evaluate::bcimp::Engine<Eigen::VectorXd, Eigen::MatrixXd> >
+    public GenericLNAinterpreter< Eval::bcimp::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+    Eval::bcimp::Engine<Eigen::VectorXd, Eigen::MatrixXd> >
 {
 public:
   LNAinterpreter(LinearNoiseApproximation &model, size_t opt_level,
                  size_t num_threads=OpenMP::getMaxThreads(), bool compileJac = false)
-    : GenericLNAinterpreter< Evaluate::bcimp::Engine<Eigen::VectorXd, Eigen::VectorXd>,
-      Evaluate::bcimp::Engine<Eigen::VectorXd, Eigen::MatrixXd> >(model, opt_level, num_threads, compileJac)
+    : GenericLNAinterpreter< Eval::bcimp::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+      Eval::bcimp::Engine<Eigen::VectorXd, Eigen::MatrixXd> >(model, opt_level, num_threads, compileJac)
   {
     // Pass...
   }

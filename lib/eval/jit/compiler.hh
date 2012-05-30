@@ -12,8 +12,8 @@
 
 
 namespace Fluc {
-namespace Evaluate {
-namespace LLVM {
+namespace Eval {
+namespace jit {
 
 
 /**
@@ -50,7 +50,7 @@ public:
 template <class InType, class OutType=InType>
 class Compiler :
     public CompilerCore,
-    public Evaluate::CompilerCommon<InType, OutType>
+    public Eval::CompilerCommon<InType, OutType>
 {
 protected:
   /**

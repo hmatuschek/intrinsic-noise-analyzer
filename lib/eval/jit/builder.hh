@@ -6,12 +6,16 @@
 
 
 namespace Fluc {
-namespace Evaluate {
-namespace LLVM {
+namespace Eval {
+namespace jit {
 
 
 /**
  * Template interface for all internal used builders.
+ *
+ * @todo Implement LLVM IR builder for complex values.
+ *
+ * @ingroup jit
  */
 template <typename Scalar>
 class Builder
@@ -29,6 +33,8 @@ public:
 
 /**
  * Specialization for real-valued expressions.
+ *
+ * @ingroup jit
  */
 template<>
 class Builder<double>

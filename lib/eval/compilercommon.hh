@@ -6,7 +6,7 @@
 
 
 namespace Fluc {
-namespace Evaluate {
+namespace Eval {
 
 /**
  * This class implements the compilation method for vectors and matrices of GiNaC expressions.

@@ -7,8 +7,8 @@
 
 
 namespace Fluc {
-namespace Evaluate {
-namespace LLVM {
+namespace Eval {
+namespace jit {
 
 
 /**

@@ -630,8 +630,8 @@ WARN_LOGFILE           =
 # with spaces.
 
 INPUT = ../lib ../lib/ast ../lib/ast/trafo ../lib/models ../lib/utils \
-        ../lib/eval ../lib/eval/direct ../lib/eval/bci ../lib/eval/libjit \
-        ../lib/eval/llvm ..lib/eval/bcimp ../lib/intprt ../lib/ode \
+        ../lib/eval ../lib/eval/direct ../lib/eval/bci ../lib/eval/bcimp \
+        ../lib/eval/jit ../lib/intprt ../lib/ode \
         ../lib/models/unsupported ../lib/nlesolve 
 
 # This tag can be used to specify the character encoding of the source files

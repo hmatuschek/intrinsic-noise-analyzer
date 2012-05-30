@@ -52,22 +52,22 @@ protected:
   /**
    * Holds the compiled code of the ODEs.
    */
-  Evaluate::bci::Code ode_code;
+  Eval::bci::Code ode_code;
 
   /**
    * Holds the compiled code of the Jacobian.
    */
-  Evaluate::bci::Code jacobian_code;
+  Eval::bci::Code jacobian_code;
 
   /**
    * Holds the interpreter to evaluate the ODEs.
    */
-  Evaluate::bci::Interpreter<Eigen::VectorXd, Eigen::VectorXd> ode_interpreter;
+  Eval::bci::Interpreter<Eigen::VectorXd, Eigen::VectorXd> ode_interpreter;
 
   /**
    * Holds the interpreter to evaluate the Jacobian.
    */
-  Evaluate::bci::Interpreter<Eigen::VectorXd, Eigen::MatrixXd> jacobian_interpreter;
+  Eval::bci::Interpreter<Eigen::VectorXd, Eigen::MatrixXd> jacobian_interpreter;
 
 
 public:

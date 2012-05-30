@@ -16,9 +16,7 @@
 #include "eval/eval.hh"
 
 #if WITH_EXECUTION_ENGINE_LLVM
-#include "eval/llvm/code.hh"
-#include "eval/llvm/compiler.hh"
-#include "eval/llvm/interpreter.hh"
+#include "eval/jit/engine.hh"
 #endif
 
 
@@ -51,12 +49,12 @@ InterpreterTest::testDirectPolynomial()
   value_map[a] = 2; value_map[b] = 3;
   value_map[c] = 5; value_map[d] = 7;
 
-  Evaluate::direct::Code code;
-  Evaluate::direct::Compiler<Eigen::VectorXd> compiler(symbol_table);
+  Eval::direct::Code code;
+  Eval::direct::Compiler<Eigen::VectorXd> compiler(symbol_table);
   compiler.setCode(&code);
   compiler.compileExpressionAndStore(expr, 0);
 
-  Evaluate::direct::Interpreter<Eigen::VectorXd> interpreter(&code);
+  Eval::direct::Interpreter<Eigen::VectorXd> interpreter(&code);
   interpreter.run(values, output);
 
   // Compare result with true value:
@@ -87,10 +85,10 @@ InterpreterTest::testDirectVector()
   Eigen::VectorXd intprt_values(4);
 
   // "compile" code for interpreter:
-  Evaluate::direct::Code code;
-  Evaluate::direct::Compiler<Eigen::VectorXd> compiler(symbol_table);
+  Eval::direct::Code code;
+  Eval::direct::Compiler<Eigen::VectorXd> compiler(symbol_table);
   compiler.setCode(&code); compiler.compileVector(expr);
-  Evaluate::direct::Interpreter<Eigen::VectorXd> interpreter(&code);
+  Eval::direct::Interpreter<Eigen::VectorXd> interpreter(&code);
   interpreter.run(values, intprt_values);
   for (size_t i=0; i<4; i++) {
     ginac_values(i) = GiNaC::ex_to<GiNaC::numeric>(GiNaC::evalf(expr(i).subs(value_map))).to_double();
@@ -124,9 +122,9 @@ InterpreterTest::testDirectMatrix()
   Eigen::MatrixXd intprt_values(2,2);
 
   // "compile" byte-code for interpreter:
-  Evaluate::direct::Code code;
-  Evaluate::direct::Compiler<Eigen::VectorXd, Eigen::MatrixXd> compiler(symbol_table);
-  Evaluate::direct::Interpreter<Eigen::VectorXd, Eigen::MatrixXd> interpreter(&code);
+  Eval::direct::Code code;
+  Eval::direct::Compiler<Eigen::VectorXd, Eigen::MatrixXd> compiler(symbol_table);
+  Eval::direct::Interpreter<Eigen::VectorXd, Eigen::MatrixXd> interpreter(&code);
 
   compiler.setCode(&code);
   compiler.compileMatrix(expr);
@@ -171,12 +169,12 @@ InterpreterTest::testDirectComplexPolynomial()
   value_map[a] = 2*GiNaC::I; value_map[b] = 3*GiNaC::I;
   value_map[c] = 5*GiNaC::I; value_map[d] = 7*GiNaC::I;
 
-  Evaluate::direct::Code code;
-  Evaluate::direct::Compiler<Eigen::VectorXc> compiler(symbol_table);
+  Eval::direct::Code code;
+  Eval::direct::Compiler<Eigen::VectorXc> compiler(symbol_table);
   compiler.setCode(&code);
   compiler.compileExpressionAndStore(expr, 0);
 
-  Evaluate::direct::Interpreter<Eigen::VectorXc> interpreter(&code);
+  Eval::direct::Interpreter<Eigen::VectorXc> interpreter(&code);
   interpreter.run(values, output);
 
   GiNaC::numeric ginac_value = GiNaC::ex_to<GiNaC::numeric>(GiNaC::evalf(expr.subs(value_map)));
@@ -210,10 +208,10 @@ InterpreterTest::testDirectComplexVector()
   Eigen::VectorXc intprt_values(4);
 
   // "compile" code for interpreter:
-  Evaluate::direct::Code code;
-  Evaluate::direct::Compiler<Eigen::VectorXc> compiler(symbol_table);
+  Eval::direct::Code code;
+  Eval::direct::Compiler<Eigen::VectorXc> compiler(symbol_table);
   compiler.setCode(&code); compiler.compileVector(expr);
-  Evaluate::direct::Interpreter<Eigen::VectorXc> interpreter(&code);
+  Eval::direct::Interpreter<Eigen::VectorXc> interpreter(&code);
   interpreter.run(values, intprt_values);
   for (size_t i=0; i<4; i++) {
     GiNaC::numeric ginac_value = GiNaC::ex_to<GiNaC::numeric>(GiNaC::evalf(expr(i).subs(value_map)));
@@ -336,9 +334,9 @@ InterpreterTest::testMatrix()
 
   // Calculate true value with direct evaluation:
   {
-    Evaluate::direct::Code code;
-    Evaluate::direct::Compiler<Eigen::VectorXd, Eigen::MatrixXd> compiler(symbol_table);
-    Evaluate::direct::Interpreter<Eigen::VectorXd, Eigen::MatrixXd> interpreter(&code);
+    Eval::direct::Code code;
+    Eval::direct::Compiler<Eigen::VectorXd, Eigen::MatrixXd> compiler(symbol_table);
+    Eval::direct::Interpreter<Eigen::VectorXd, Eigen::MatrixXd> interpreter(&code);
     compiler.setCode(&code);
     compiler.compileMatrix(expr);
     compiler.finalize();
@@ -347,9 +345,9 @@ InterpreterTest::testMatrix()
 
   // Test "new" byte-code interpreter
   {
-    Evaluate::bci::Code code;
-    Evaluate::bci::Compiler<Eigen::VectorXd, Eigen::MatrixXd> compiler(symbol_table);
-    Evaluate::bci::Interpreter<Eigen::VectorXd, Eigen::MatrixXd> interpreter(&code);
+    Eval::bci::Code code;
+    Eval::bci::Compiler<Eigen::VectorXd, Eigen::MatrixXd> compiler(symbol_table);
+    Eval::bci::Interpreter<Eigen::VectorXd, Eigen::MatrixXd> interpreter(&code);
     compiler.setCode(&code);
     compiler.compileMatrix(expr);
     compiler.finalize();
@@ -364,9 +362,9 @@ InterpreterTest::testMatrix()
 
 #if WITH_EXECUTION_ENGINE_LLVM
   { // Test LLVM JIT
-    Evaluate::LLVM::Code code;
-    Evaluate::LLVM::Compiler<Eigen::VectorXd, Eigen::MatrixXd> compiler(symbol_table);
-    Evaluate::LLVM::Interpreter<Eigen::VectorXd, Eigen::MatrixXd> interpreter(&code);
+    Eval::jit::Code code;
+    Eval::jit::Compiler<Eigen::VectorXd, Eigen::MatrixXd> compiler(symbol_table);
+    Eval::jit::Interpreter<Eigen::VectorXd, Eigen::MatrixXd> interpreter(&code);
     compiler.setCode(&code);
     compiler.compileMatrix(expr);
     compiler.finalize();
@@ -427,9 +425,9 @@ InterpreterTest::testComplexPolynomial()
   Eigen::VectorXc output(1);
   // Calculate true value with direct evaluation:
   {
-    Evaluate::direct::Code code;
-    Evaluate::direct::Compiler<Eigen::VectorXc> compiler(symbol_table);
-    Evaluate::direct::Interpreter<Eigen::VectorXc> interpreter(&code);
+    Eval::direct::Code code;
+    Eval::direct::Compiler<Eigen::VectorXc> compiler(symbol_table);
+    Eval::direct::Interpreter<Eigen::VectorXc> interpreter(&code);
     compiler.setCode(&code);
     compiler.compileExpressionAndStore(expr, 0);
     compiler.finalize();
@@ -438,9 +436,9 @@ InterpreterTest::testComplexPolynomial()
 
   // Test "new" byte-code interpreter
   {
-    Evaluate::bci::Code code;
-    Evaluate::bci::Compiler<Eigen::VectorXc> compiler(symbol_table);
-    Evaluate::bci::Interpreter<Eigen::VectorXc> interpreter(&code);
+    Eval::bci::Code code;
+    Eval::bci::Compiler<Eigen::VectorXc> compiler(symbol_table);
+    Eval::bci::Interpreter<Eigen::VectorXc> interpreter(&code);
     compiler.setCode(&code);
     compiler.compileExpressionAndStore(expr, 0);
     compiler.finalize();
@@ -471,9 +469,9 @@ InterpreterTest::runDirectReal(
   std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> symbol_table;
   symbolTableFromVector(symbols, symbol_table);
 
-  Evaluate::direct::Code code;
-  Evaluate::direct::Compiler<Eigen::VectorXd> compiler(symbol_table);
-  Evaluate::direct::Interpreter<Eigen::VectorXd> interpreter(&code);
+  Eval::direct::Code code;
+  Eval::direct::Compiler<Eigen::VectorXd> compiler(symbol_table);
+  Eval::direct::Interpreter<Eigen::VectorXd> interpreter(&code);
   compiler.setCode(&code);
   compiler.compileVector(expression);
   compiler.finalize();
@@ -490,9 +488,9 @@ InterpreterTest::runBCIReal(
   std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> symbol_table;
   symbolTableFromVector(symbols, symbol_table);
 
-  Evaluate::bci::Code code;
-  Evaluate::bci::Compiler<Eigen::VectorXd> compiler(symbol_table);
-  Evaluate::bci::Interpreter<Eigen::VectorXd> interpreter(&code);
+  Eval::bci::Code code;
+  Eval::bci::Compiler<Eigen::VectorXd> compiler(symbol_table);
+  Eval::bci::Interpreter<Eigen::VectorXd> interpreter(&code);
   compiler.setCode(&code);
   compiler.compileVector(expression);
   compiler.finalize();
@@ -509,9 +507,9 @@ InterpreterTest::runBCIMPReal(
   std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> symbol_table;
   symbolTableFromVector(symbols, symbol_table);
 
-  Evaluate::bcimp::Code code;
-  Evaluate::bcimp::Compiler<Eigen::VectorXd> compiler(symbol_table);
-  Evaluate::bcimp::Interpreter<Eigen::VectorXd> interpreter(&code);
+  Eval::bcimp::Code code;
+  Eval::bcimp::Compiler<Eigen::VectorXd> compiler(symbol_table);
+  Eval::bcimp::Interpreter<Eigen::VectorXd> interpreter(&code);
   compiler.setCode(&code);
   compiler.compileVector(expression);
   compiler.finalize();
@@ -528,12 +526,12 @@ InterpreterTest::runLLVMReal(
   std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> symbol_table;
   symbolTableFromVector(symbols, symbol_table);
 
-  Evaluate::LLVM::Code code;
-  Evaluate::LLVM::Compiler<Eigen::VectorXd> compiler(symbol_table);
+  Eval::jit::Code code;
+  Eval::jit::Compiler<Eigen::VectorXd> compiler(symbol_table);
   compiler.setCode(&code);
   compiler.compileVector(expression);
   compiler.finalize(1);
-  Evaluate::LLVM::Interpreter<Eigen::VectorXd> interpreter(&code);
+  Eval::jit::Interpreter<Eigen::VectorXd> interpreter(&code);
   interpreter.run(values, result);
 }
 #endif

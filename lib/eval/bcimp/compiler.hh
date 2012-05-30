@@ -11,7 +11,7 @@
 
 
 namespace Fluc {
-namespace Evaluate {
+namespace Eval {
 namespace bcimp {
 
 /**
@@ -20,11 +20,11 @@ namespace bcimp {
  * This class utilizes the @c Fluc::Evaluate::bci::Compiler to perform the actual compilation
  * but distributes the generated code over a vector of byte-codes to be executed in parallel.
  *
- * @ingroup eval
+ * @ingroup bcimp
  */
 template <class InType, class OutType=InType>
 class Compiler
-    : public Evaluate::CompilerCommon<InType, OutType>
+    : public Eval::CompilerCommon<InType, OutType>
 {
 protected:
   /**

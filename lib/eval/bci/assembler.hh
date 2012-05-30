@@ -6,12 +6,16 @@
 
 
 namespace Fluc {
-namespace Evaluate {
+namespace Eval {
 namespace bci {
 
 
 /**
  * Implements the assembler for the ByteCode from GiNaC expressions.
+ *
+ * This class is used by the @c Compiler class to assemble the byte-code from GiNaC expressions.
+ *
+ * @ingroup bci
  */
 class Assembler
     : public GiNaC::visitor, public GiNaC::numeric::visitor, public GiNaC::add::visitor,

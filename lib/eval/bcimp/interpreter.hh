@@ -6,7 +6,7 @@
 
 
 namespace Fluc {
-namespace Evaluate {
+namespace Eval {
 namespace bcimp {
 
 
@@ -14,7 +14,7 @@ namespace bcimp {
  * This class implements the parallel execution of big systems by ditributing the evaluation
  * of a vector of expression over several threads.
  *
- * @ingroup eval
+ * @ingroup bcimp
  */
 template <class InType, class OutType = InType>
 class Interpreter

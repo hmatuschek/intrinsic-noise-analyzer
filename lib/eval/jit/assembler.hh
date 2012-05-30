@@ -8,15 +8,25 @@
 
 
 namespace Fluc {
-namespace Evaluate {
-namespace LLVM {
+namespace Eval {
+namespace jit {
 
+/**
+ * Enumerates the known built-in functions.
+ * @ingroup jit
+ */
 typedef enum {
     FUNCTION_ABS,  /// < Function code for the absolute value "abs()".
     FUNCTION_LOG,  /// < Function code for the natural logarithm "log()".
     FUNCTION_EXP   /// < Function code for the exponential function "exp()".
 } FunctionCode;
 
+
+/**
+ * This class implements the actual translation of GiNaC expressions into LLVM IR.
+ *
+ * @ingroup jit
+ */
 template <typename Scalar>
 class Assembler
     : public GiNaC::visitor, public GiNaC::numeric::visitor, public GiNaC::add::visitor,
