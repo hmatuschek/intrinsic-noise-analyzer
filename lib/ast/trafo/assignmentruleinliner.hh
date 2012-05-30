@@ -13,7 +13,7 @@ namespace Trafo {
  * Replaces all references to variables defined with a @c Ast::AssignmentRule by the
  * assigned expression, that determines the value of the variable.
  *
- * @ingroup trafo
+ * @ingroup ast
  */
 class AssignmentRuleInliner : public Pass
 {

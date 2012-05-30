@@ -12,7 +12,7 @@ namespace Utils {
 /**
  * Represents a single token.
  *
- * @ingroup sbmlsh
+ * @ingroup utils
  */
 class Token
 {
@@ -74,6 +74,8 @@ public:
 
 /**
  * Base class of all token-rules.
+ *
+ * @ingroup utils
  */
 class TokenRule : public DFA
 {
@@ -105,7 +107,7 @@ public:
 /**
  * Implements a general lexer.
  *
- * @ingroup sbmlsh
+ * @ingroup utils
  */
 class Lexer
 {

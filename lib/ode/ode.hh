@@ -1,5 +1,6 @@
 /**
  * @defgroup ode Integrators for Ordinary Differential Equations
+ * @ingroup math
  *
  * This group collects some classes implementing integration methods of ordinary differential
  * equations (ODEs).

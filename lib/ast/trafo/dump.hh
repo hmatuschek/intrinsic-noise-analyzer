@@ -13,7 +13,7 @@ namespace Trafo {
 /**
  * This class creates a string representation of an @c Ast::Module.
  *
- * @ingroup trafo
+ * @ingroup ast
  */
 class Dump : public Walker
 {

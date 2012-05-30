@@ -19,7 +19,7 @@ namespace Models {
  * This is a implementation of the original algorithm as described in \cite gillespie1976 and
  * \cite gillespie1977.
  *
- * @ingroup models
+ * @ingroup ssa
  */
 template <class Engine>
 class GenericGillespieSSA :

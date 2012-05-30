@@ -1,5 +1,6 @@
 /**
  * @defgroup nlesolve Nonlinear solver
+ * @ingroup math
  */
 
 #ifndef __FLUC_MODELS_NLESOLVE_HH
@@ -20,11 +21,10 @@ namespace NLEsolve {
     };
 
 /**
- * @ingroup nlesolve
  * NewtonRaphson solver. This class is a bit more efficient with memory and things
  * over the old function calls.
+ * @ingroup nlesolve
  */
-
 template<typename T>
 class NewtonRaphson
 {

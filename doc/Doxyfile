@@ -32,7 +32,7 @@ PROJECT_NAME           = IntrinsicNoiseAnalyzer
 # This could be handy for archiving the generated documentation or
 # if some version control system is used.
 
-PROJECT_NUMBER         = 0.1
+PROJECT_NUMBER         = 0.3
 
 # Using the PROJECT_BRIEF tag one can provide an optional one line description
 # for a project that appears at the top of each page and should give viewer
@@ -629,8 +629,8 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories
 # with spaces.
 
-INPUT = ../lib ../lib/ast ../lib/ast/trafo ../lib/models ../lib/utils \
-        ../lib/eval ../lib/eval/direct ../lib/eval/bci ../lib/eval/bcimp \
+INPUT = ../lib/ast ../lib/models ../lib/eval ../lib ../lib/ast/trafo ../lib/utils \
+        ../lib/eval/direct ../lib/eval/bci ../lib/eval/bcimp \
         ../lib/eval/jit ../lib/intprt ../lib/ode \
         ../lib/models/unsupported ../lib/nlesolve 
 

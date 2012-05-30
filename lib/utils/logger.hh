@@ -12,6 +12,8 @@ namespace Utils {
 
 /**
  * A simple message class.
+ *
+ * @ingroup utils
  */
 class Message : public std::stringstream
 {
@@ -66,6 +68,8 @@ public:
 
 /**
  * Message handler interface.
+ *
+ * @ingroup utils
  */
 class MessageHandler {
 public:
@@ -76,6 +80,8 @@ public:
 
 /**
  * This class implements a simple message logger.
+ *
+ * @ingroup utils
  */
 class Logger
 {
@@ -123,6 +129,8 @@ private:
 
 /**
  * The default handler class, prints messages into a text stream (i.e. stdout).
+ *
+ * @ingroup utils
  */
 class TextMessageHandler : public MessageHandler
 {

@@ -11,6 +11,8 @@ namespace Utils {
 
 /**
  * A utility class to measure the CPU time used by some algorithms.
+ *
+ * @ingroup utils
  */
 class CpuTime
 {
@@ -45,6 +47,8 @@ public:
 
 /**
  * A utility class to measure the real time used by some algorithms.
+ *
+ * @ingroup utils
  */
 class RealTime
 {

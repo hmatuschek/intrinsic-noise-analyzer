@@ -9,12 +9,6 @@
 
 #include "models/linearnoiseapproximation.hh"
 
-/**
- *
- * This group contains methods for finding roots of simultaneous nonlinear equations.
- */
-
-
 namespace Fluc {
 
 // Vector and Matrix classes from Eigen

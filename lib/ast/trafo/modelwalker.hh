@@ -20,7 +20,7 @@ namespace Trafo {
  * This class extends the @c Ast::Trafo::Walker to provide specialized handler for
  * parameter and species definitions.
  *
- * @ingroup trafo
+ * @ingroup ast
  */
 class ModelWalker : public Walker
 {

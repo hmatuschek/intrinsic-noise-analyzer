@@ -18,7 +18,7 @@ namespace Models {
 /**
  * Base model for all stochastic simulators.
  *
- * @ingroup models
+ * @ingroup ssa
  */
 class StochasticSimulator :
     public BaseModel,

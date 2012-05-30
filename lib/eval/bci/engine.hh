@@ -1,5 +1,5 @@
 /**
- * @defgroup bci The Byte Code Interpreter
+ * @defgroup bci Byte Code Interpreter
  * @ingroup eval
  *
  * This group collects all classes implementing the byte code interpreter. This kind of execution

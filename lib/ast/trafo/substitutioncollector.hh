@@ -14,7 +14,7 @@ namespace Trafo {
  * parameters or species, defined by an assignment-rule. This type of substitutions must be
  * performed before any evaluation or compilation of expressions can be performed.
  *
- * @ingroup trafo
+ * @ingroup ast
  */
 class SubstitutionCollector : public Walker
 {

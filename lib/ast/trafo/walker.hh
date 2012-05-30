@@ -15,7 +15,7 @@ namespace Trafo {
  * This helper class implements the Visitor pattern for the AST. It eases the traversal of the AST
  * a lot. Jut derive from this class an re-implement the required methods.
  *
- * @ingroup trafo
+ * @ingroup ast
  */
 class Walker
 {

@@ -9,13 +9,6 @@
 
 namespace Fluc {
 namespace Eval {
-
-
-/**
- * This namespace holds all classes used to evaluate GiNaC expressions directly.
- *
- * @ingroup direct
- */
 namespace direct {
 
 

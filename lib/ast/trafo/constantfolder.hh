@@ -13,7 +13,7 @@ namespace Trafo {
  * This compiler pass substitues all constant variable references with their value (if they have
  * one).
  *
- * @ingroup trafo
+ * @ingroup ast
  */
 class ConstantSubstitution : public Pass
 {

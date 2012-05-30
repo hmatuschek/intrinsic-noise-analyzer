@@ -1,16 +1,16 @@
 /**
- * @defgroup ast The Abstract Syntax Tree
+ * @defgroup ast Model Representation
+ * @ingroup models
  *
- * The Ast namespace collects all classes representing the abstract syntax tree (AST).
+ * The @c Fluc::Ast namespace collects all classes representing the abstract syntax tree (AST).
+ * This AST is similar to the model repesentation of SBML, but in constrast to SBML, this
+ * representation is closer to the abstract model, while the SBML model is closer to the actual
+ * SBML format. This representation ignores SBML specific meta-information that is not needed to
+ * perform the analyses as SBO terms and RDF meta tags.
  *
- * \section features Supported SBML l2v4 features
- * Beside the commen (base) features of SBML l2v4, the following "extended" features are supported:
- *
- * - User defined functions
- * - Assignment rules
- * - RateLaws
- * - Local parameters for KineticLaw
- * .
+ * The most imporatant class in this module is @c Fluc::Ast::Model, which represents the complete
+ * system with all species, parameters, compartments, units and reactions. Starting from this class,
+ * the various analyses are constructed, as described in @ref models.
  */
 
 #ifndef __FLUC_COMPILER_AST_HH__

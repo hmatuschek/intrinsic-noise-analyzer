@@ -21,7 +21,7 @@ namespace Models {
  *
  * This is an implementation of the algorithm as described in \cite cao2004.
  *
- * @ingroup models
+ * @ingroup ssa
  */
 template <class Engine>
 class GenericOptimizedSSA :

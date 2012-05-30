@@ -14,7 +14,7 @@ namespace Trafo {
  * This class is just a collection of static methods to ease the copying of @c Ast::Model
  * instances.
  *
- * @ingroup trafo
+ * @ingroup ast
  */
 class ModelCopyist
 {

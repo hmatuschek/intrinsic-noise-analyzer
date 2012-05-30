@@ -1,8 +1,15 @@
 /**
- * @defgroup models Component Based Modeling
+ * @defgroup models Models and Analyses
  *
  * This module collects some model-classes and mix-ins, that allows to implement new methods
  * easily.
+ *
+ * @defgroup sse System Size Expansion
+ * @ingroup models
+ *
+ * @defgroup ssa Stochastic Simulation Algorithm
+ * @ingroup models
+ *
  */
 
 

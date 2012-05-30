@@ -20,7 +20,7 @@ namespace Models {
 /**
  * The Linear Noise Approximation model \cite elf2003 and \cite grima2010.
  *
- * @ingroup models
+ * @ingroup sse
  */
 
 class LinearNoiseApproximation :

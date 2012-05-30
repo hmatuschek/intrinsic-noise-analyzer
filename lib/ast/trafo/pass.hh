@@ -12,7 +12,7 @@ namespace Trafo {
 /**
  * A pass extends the @c Walker by performing postponed replacements once a Node was handled.
  *
- * @ingroup trafo
+ * @ingroup ast
  */
 class Pass : public Walker
 {
