@@ -62,7 +62,7 @@ ConstantStoichiometryMixin::ConstantStoichiometryMixin(BaseModel &base)
       }
 
       // Assemble modifier stoichiometry matrix.
-      if (reac->isModifier(spec) && !base.getSpecies(i)->isConst()) {
+      if (reac->isModifier(spec)) {
         this->modifier_stoichiometry(i,j) = 1;
       } else {
         this->modifier_stoichiometry(i,j) = 0;

@@ -4,7 +4,7 @@
 
 #include <sbml/SBMLTypes.h>
 #include "ast/ast.hh"
-
+#include "convert2irreversiblemixin.hh"
 
 namespace Fluc {
 namespace Models {
@@ -21,7 +21,9 @@ namespace Models {
  *
  * @ingroup models
  */
-class BaseModel : public Ast::Model
+class BaseModel
+        : public Ast::Model,
+          public Convert2IrreversibleMixin
 {
 protected:
   /**

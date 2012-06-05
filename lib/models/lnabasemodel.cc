@@ -4,7 +4,7 @@
 using namespace Fluc;
 using namespace Fluc::Models;
 
-LNABaseModel::LNABaseModel(libsbml::Model *model)
+SSEBaseModel::SSEBaseModel(libsbml::Model *model)
   : BaseModel(model), LNAMixin((BaseModel &)(*this)),
     rate_expressions(this->numReactions()),
     rate_corrections(this->numReactions()),
@@ -27,7 +27,7 @@ LNABaseModel::LNABaseModel(libsbml::Model *model)
 }
 
 
-LNABaseModel::LNABaseModel(const Ast::Model &model)
+SSEBaseModel::SSEBaseModel(const Ast::Model &model)
   : BaseModel(model), LNAMixin((BaseModel &)(*this)),
     rate_expressions(this->numReactions()),
     rate_corrections(this->numReactions()),
@@ -51,7 +51,7 @@ LNABaseModel::LNABaseModel(const Ast::Model &model)
 
 
 void
-LNABaseModel::postConstructor()
+SSEBaseModel::postConstructor()
 {
   /* @todo conservationConstants should be have a seperate class */
 
@@ -209,7 +209,7 @@ LNABaseModel::postConstructor()
 
 
 void
-LNABaseModel::foldConservationConstants(const Eigen::VectorXd &conserved_cycles)
+SSEBaseModel::foldConservationConstants(const Eigen::VectorXd &conserved_cycles)
 {
 
     // generate substitution table
@@ -291,7 +291,7 @@ LNABaseModel::foldConservationConstants(const Eigen::VectorXd &conserved_cycles)
 }
 
 void
-LNABaseModel::foldConservationConstants(const Eigen::VectorXd &conserved_cycles, Eigen::VectorXex &vec)
+SSEBaseModel::foldConservationConstants(const Eigen::VectorXd &conserved_cycles, Eigen::VectorXex &vec)
 {
 
     // generate substitution table
@@ -305,7 +305,7 @@ LNABaseModel::foldConservationConstants(const Eigen::VectorXd &conserved_cycles,
 
 
 GiNaC::exmap
-LNABaseModel::generateConservationConstantsTable(const Eigen::VectorXd &conserved_cycles)
+SSEBaseModel::generateConservationConstantsTable(const Eigen::VectorXd &conserved_cycles)
 {
 
     // generate substitution table
@@ -319,7 +319,7 @@ LNABaseModel::generateConservationConstantsTable(const Eigen::VectorXd &conserve
 }
 
 GiNaC::ex
-LNABaseModel::vertex(std::list<size_t> &lower, std::list<size_t> &upper, size_t order)
+SSEBaseModel::vertex(std::list<size_t> &lower, std::list<size_t> &upper, size_t order)
 {
 
     // this is not at all the be best way to do it!!!

@@ -5,7 +5,7 @@ using namespace Fluc::Models;
 
 
 BaseModel::BaseModel(libsbml::Model *sbml_model)
-  : Ast::Model(sbml_model),
+    : Ast::Model(sbml_model), Convert2IrreversibleMixin((Ast::Model &)(*this)),
     species(numSpecies()), reactions(numReactions()),
     propensities(numReactions())
 {
@@ -31,7 +31,8 @@ BaseModel::BaseModel(libsbml::Model *sbml_model)
 
 
 BaseModel::BaseModel(const Ast::Model &model)
-  : Ast::Model(model), species(numSpecies()), reactions(numReactions()),
+  : Ast::Model(model), Convert2IrreversibleMixin((Ast::Model &)(*this)),
+    species(numSpecies()), reactions(numReactions()),
     propensities(numReactions())
 {
   // Collect all constants and assignment rules, that are needed to be substituted

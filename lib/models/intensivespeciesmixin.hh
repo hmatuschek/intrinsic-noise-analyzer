@@ -28,4 +28,4 @@ public:
 }
 }
 
-#endif // EXTENSIVESPECIESMIXIN_HH
+#endif // INTENSIVEPECIESMIXIN_HH

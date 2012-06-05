@@ -157,11 +157,12 @@ private:
  double   ccmax, el0, h, hmin, hmxi, hu, rc, tn;
  int      illin, init, mxstep, mxhnil, nhnil, ntrep, nslast, nyh, ierpj, iersl,
                 jcur, jstart, kflag, l, meth, miter, maxord, maxcor, msbp, mxncf, n, nq, nst,
-                nfe, nje, nqu;
+                nfe, nje, // counts the number of function evaluations
+                nqu;
  double   tsw, pdnorm;
  int      ixpr, jtyp, mused, mxordn, mxords;
 
- int      mxstp0, mxhnl0;
+ int      mxstp0, mxhnl0; // maxstep and ?
 
 
 /* no static variable for prja(), solsy() */

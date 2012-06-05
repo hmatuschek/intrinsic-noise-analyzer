@@ -29,6 +29,9 @@
 
 #include "lnamixin.hh"
 #include "linearnoiseapproximation.hh"
+#include "REmodel.hh"
+#include "LNAmodel.hh"
+#include "IOSmodel.hh"
 
 #include "steadystateanalysis.hh"
 #include "lnainterpreter.hh"

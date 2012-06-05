@@ -99,7 +99,7 @@ public:
   }
 
   /**
-   * Retunrs the dimension of the system.
+   * Returns the dimension of the system.
    */
   inline size_t getDimension()
   {

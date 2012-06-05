@@ -35,11 +35,11 @@ namespace Models {
 class ReasonableModelMixin :
     public AssertNoExplicitTimeDependenceMixin,
     public AssertNoAlgebraicConstraintMixin,
-    public AssertNoConstantSpeciesMixin,
     public AssertConstantParameterMixin,
     public AssertNoAssignmentRule,
     public AssertNoRateRule,
     public AssertIrreversibleReactions
+
 {
 public:
   /**

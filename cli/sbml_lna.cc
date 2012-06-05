@@ -33,15 +33,6 @@ int main(int argc, char *argv[])
 
     Models::BaseModel base(doc->getModel());
 
-    std::cerr << "List of parameters:"<<std::endl;
-    for(size_t i =0; i<base.numParameters(); i++)
-        std::cerr<<i<<"\t"<<base.getParameter(i)->getSymbol()<<"\t"<<base.getParameter(i)->getValue()<<std::endl;
-    std::cerr<<std::endl<<std::endl;
-
-    for(double delta=0.025; delta<0.3; delta+=0.025)
-    {
-        base.getParameter(0)->setValue(GiNaC::ex((1.-delta)/2.));
-
         // Construct LNA model from SBML model
         Models::LinearNoiseApproximation model(base);
         Models::SteadyStateAnalysis steadyState(model);
@@ -59,15 +50,12 @@ int main(int argc, char *argv[])
         // initialize state
         model.getInitialState(x);
 
-        steadyState.calcIOS(x);
+        steadyState.calcSteadyState(x);
 
         model.fullState(x,concentrations,cov,emre,ioscov,thirdmoment,iosemre);
 
-        double theta = (cov(0,0)+ioscov(0,0))/cov(0,0);
+        std::cout<<concentrations<<std::endl;
 
-        std::cout<<delta <<"\t"<<theta<<std::endl;
-
-    }
 
 //    Models::LNAinterpreter interpreter(model, 2, 1);
 
@@ -80,7 +68,7 @@ int main(int argc, char *argv[])
 
 
 
-    double t=0;
+    //double t=0;
     for(int i=0; i<100; i++){
 
 

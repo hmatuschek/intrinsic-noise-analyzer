@@ -1,5 +1,5 @@
-#ifndef __FLUC_MODELS_LNABASEMODEL_HH
-#define __FLUC_MODELS_LNABASEMODEL_HH
+#ifndef __FLUC_MODELS_SSEBASEMODEL_HH
+#define __FLUC_MODELS_SSEBASEMODEL_HH
 
 #include <eigen3/Eigen/Eigen>
 #include <sbml/SBMLTypes.h>
@@ -24,7 +24,7 @@ namespace Models {
  *
  * @ingroup models
  */
-class LNABaseModel :
+class SSEBaseModel :
     public BaseModel,
     public LNAMixin
 {
@@ -141,12 +141,12 @@ public:
     /**
      * Constructor from SBML model.
      */
-    LNABaseModel(libsbml::Model *model);
+    SSEBaseModel(libsbml::Model *model);
 
     /**
      * Constructor from @c Ast::Model.
      */
-    explicit LNABaseModel(const Ast::Model &model);
+    explicit SSEBaseModel(const Ast::Model &model);
 };
 
 }

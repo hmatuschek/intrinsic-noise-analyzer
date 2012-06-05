@@ -2,11 +2,7 @@
 #define __FLUC_LINEARNOISEAPPROXIMATION_HH__
 
 #include <sbml/SBMLTypes.h>
-#include <eigen3/Eigen/Eigen>
-
-//#include <complex>
 #include "kroneckerproduct.hh"
-//#include "nlesolve/newtonraphson.hh"
 
 #include <cln/exception.h>
 #include <ginac/ginac.h>
@@ -24,7 +20,7 @@ namespace Models {
  */
 
 class LinearNoiseApproximation :
-    public LNABaseModel
+    public SSEBaseModel
 {
 protected:
 

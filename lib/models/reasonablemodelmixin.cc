@@ -7,7 +7,6 @@ using namespace Fluc::Models;
 ReasonableModelMixin::ReasonableModelMixin(BaseModel &model) :
   AssertNoExplicitTimeDependenceMixin(model),
   AssertNoAlgebraicConstraintMixin(model),
-  AssertNoConstantSpeciesMixin(model),
   AssertConstantParameterMixin(model),
   AssertNoAssignmentRule(model),
   AssertNoRateRule(model),

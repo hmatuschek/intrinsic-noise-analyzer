@@ -5,7 +5,7 @@ using namespace Fluc;
 using namespace Fluc::Models;
 
 LinearNoiseApproximation::LinearNoiseApproximation(libsbml::Model *model)
-  : LNABaseModel(model),
+  : SSEBaseModel(model),
     Link0CMatrixNumeric(numDepSpecies(), numIndSpecies()),
     LinkCMatrixNumeric(numSpecies(), numIndSpecies()),
     Omega(numSpecies()),
@@ -18,7 +18,7 @@ LinearNoiseApproximation::LinearNoiseApproximation(libsbml::Model *model)
 
 
 LinearNoiseApproximation::LinearNoiseApproximation(const Ast::Model &model)
-  : LNABaseModel(model),
+  : SSEBaseModel(model),
     Link0CMatrixNumeric(numDepSpecies(), numIndSpecies()),
     LinkCMatrixNumeric(numSpecies(), numIndSpecies()),
     Omega(numSpecies()),

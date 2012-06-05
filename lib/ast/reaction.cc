@@ -266,6 +266,12 @@ Reaction::isReversible() const
   return this->is_reversible;
 }
 
+void
+Reaction::setReversible(bool val)
+{
+  this->is_reversible=val;
+}
+
 
 Reaction::iterator
 Reaction::reacBegin()

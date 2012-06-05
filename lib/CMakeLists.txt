@@ -57,7 +57,11 @@ SET(libina_models_SOURCES
     models/conservationanalysismixin.cc
     models/lnamixin.cc models/prelnamixin.cc
     models/lnabasemodel.cc
-    models/linearnoiseapproximation.cc models/extensivespeciesmixin.cc
+    models/linearnoiseapproximation.cc
+    models/REmodel.cc
+    models/LNAmodel.cc
+    models/IOSmodel.cc
+    models/extensivespeciesmixin.cc
     models/intensivespeciesmixin.cc
     models/stochasticsimulator.cc
     models/gillespieSSA.cc
@@ -68,6 +72,7 @@ SET(libina_models_SOURCES
     models/assertconstantparametermixin.cc
     models/assertnoassignmentrule.cc models/assertnoraterule.cc
     models/assertirreversiblereactions.cc
+    models/convert2irreversiblemixin.cc
     models/reasonablemodelmixin.cc
     models/baseunitmixin.cc
     models/particlenumbersmixin.cc
@@ -81,7 +86,11 @@ SET(libina_models_HEADERS models/models.hh
     models/conservationanalysismixin.hh
     models/lnamixin.hh models/prelnamixin.hh
     models/lnabasemodel.hh
-    models/linearnoiseapproximation.hh models/extensivespeciesmixin.hh
+    models/linearnoiseapproximation.hh
+    models/REmodel.hh
+    models/LNAmodel.hh
+    models/IOSmodel.hh
+    models/extensivespeciesmixin.hh
     models/intensivespeciesmixin.hh
     models/stochasticsimulator.hh
     models/gillespieSSA.hh
@@ -96,6 +105,7 @@ SET(libina_models_HEADERS models/models.hh
     models/assertconstantparametermixin.hh
     models/assertnoassignmentrule.hh models/assertnoraterule.hh
     models/assertirreversiblereactions.hh
+    models/convert2irreversiblemixin.hh
     models/reasonablemodelmixin.hh
     models/baseunitmin.hh
     models/particlenumbersmixin.hh

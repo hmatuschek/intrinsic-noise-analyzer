@@ -259,7 +259,7 @@ public:
   bool isModifier(const GiNaC::symbol &id) const;
 
   /**
-   * Retunrs the kinetic law of the reaction.
+   * Returns the kinetic law of the reaction.
    */
   KineticLaw *getKineticLaw();
 
@@ -271,9 +271,15 @@ public:
   void setKineticLaw(KineticLaw *law);
 
   /**
-   * Retrns true, if the reaction is defined to be reversible.
+   * Returns true, if the reaction is defined to be reversible.
    */
   bool isReversible() const;
+
+
+  /**
+   * (Re-) Sets the reversible flag of the reaction.
+   */
+  void setReversible(bool val);
 
   /**
    * Retruns an iterator pointing on the first reactant of the reaction.
