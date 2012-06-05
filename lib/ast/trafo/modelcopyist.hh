@@ -30,6 +30,12 @@ public:
    */
   static void copy(const Ast::Model *src, Ast::Model *dest, GiNaC::exmap &translation_table);
 
+  /**
+   * Function to copy a single reaction of a model, that refers to the original species and global
+   * parameters etc, while owning a fresh copy of the kinetic law (with its own local parameters).
+   */
+  static Ast::Reaction *dupReaction(Reaction *node);
+
 
 protected:
   /**

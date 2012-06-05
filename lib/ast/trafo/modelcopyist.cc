@@ -88,6 +88,19 @@ ModelCopyist::copy(const Ast::Model *src, Ast::Model *dest, GiNaC::exmap &transl
 }
 
 
+Ast::Reaction *
+ModelCopyist::dupReaction(Reaction *node)
+{
+  std::map<Ast::Species *, Ast::Species *> species_table;
+  GiNaC::exmap translation_table;
+
+  return ModelCopyist::copyReaction(node, translation_table, species_table);
+}
+
+
+/* ********************************************************************************************* *
+ * Helper functions...
+ * ********************************************************************************************* */
 Ast::FunctionDefinition *
 ModelCopyist::copyFunctionDefinition(Ast::FunctionDefinition *node, GiNaC::exmap &translation_table)
 {
@@ -239,44 +252,38 @@ ModelCopyist::copyReaction(Ast::Reaction *node, GiNaC::exmap &translation_table,
   // Copy reactants stoichiometry:
   for (Ast::Reaction::iterator iter = node->reacBegin(); iter != node->reacEnd(); iter++)
   {
+    // New species == old_species:
+    Ast::Species *new_species = iter->first;
     // Check if there is a replacement for species in species_table:
-    if (species_table.end() == species_table.find(iter->first))
-    {
-      SymbolError err;
-      err << "Can not copy reaction " << node->getIdentifier()
-          << " there is no copy of species: " << iter->first->getIdentifier();
-      throw err;
+    if (species_table.end() != species_table.find(iter->first)) {
+      new_species = species_table[iter->first];
     }
-
-    reaction->setReactantStoichiometry(
-          species_table[iter->first], iter->second.subs(translation_table));
+    // Copy stoichiometry
+    reaction->setReactantStoichiometry(new_species, iter->second.subs(translation_table));
   }
 
   // Copy products stoichiometry:
   for (Ast::Reaction::iterator iter = node->prodBegin(); iter != node->prodEnd(); iter++)
   {
+    // New species == old_species:
+    Ast::Species *new_species = iter->first;
     // Check if there is a replacement for species in species_table:
-    if (species_table.end() == species_table.find(iter->first))
-    {
-      SymbolError err;
-      err << "Can not copy reaction " << node->getIdentifier()
-          << " there is no copy of species: " << iter->first->getIdentifier();
-      throw err;
+    if (species_table.end() != species_table.find(iter->first)) {
+      new_species = species_table[iter->first];
     }
-
-    reaction->setProductStoichiometry(
-          species_table[iter->first], iter->second.subs(translation_table));
+    // Copy stoichiometry
+    reaction->setProductStoichiometry(new_species, iter->second.subs(translation_table));
   }
 
   // Copy reaction modifiers:
   for (Ast::Reaction::mod_iterator iter = node->modBegin(); iter != node->modEnd(); iter++) {
-    // Check if there is a replacement for the modifier in species_table:
-    if (species_table.end() == species_table.find(*iter)) {
-      SymbolError err;
-      err << "Can not copy reaction " << node->getIdentifier()
-          << " there is no copy of species: " << (*iter)->getIdentifier();
+    // New species == old_species:
+    Ast::Species *new_species = *iter;
+    // Check if there is a replacement for species in species_table:
+    if (species_table.end() != species_table.find(*iter)) {
+      new_species = species_table[*iter];
     }
-    reaction->addModifier(species_table[(*iter)]);
+    reaction->addModifier(new_species);
   }
 
   // Done
