@@ -326,6 +326,13 @@ public:
    * the definition is stored in the corresponding vector.
    */
   virtual void addDefinition(Definition *def);
+
+  /**
+   * Removes a definition (Species, Compartment, Reaction, ...) from the model. The user is
+   * responsible to ensure, that no other element refers to this definition on removal
+   * (also its symbols).
+   */
+  virtual void remDefinition(Definition *def);
 };
 
 

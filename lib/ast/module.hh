@@ -81,7 +81,7 @@ protected:
   std::map<std::string, Unit> predefined_units;
 
   /**
-   * Holds map GiNaC::symbol -> VariableDefinition.
+   * Holds map @c GiNaC::symbol -> @c VariableDefinition.
    */
   std::map<GiNaC::symbol, VariableDefinition *, GiNaC::ex_is_less> symbol_table;
 
@@ -117,6 +117,13 @@ public:
    * variable, it also updates the symbol table.
    */
   virtual void addDefinition(Definition *def);
+
+  /**
+   * Removes the given definition from the module. The ownership of the definition is transferred
+   * to the callee. (The user is responsible to destroy the definition.) If the definition is
+   * a @c VariableDefinition, the associated symbol is removed from the symbol table.
+   */
+  virtual void remDefinition(Definition *def);
 
   /**
    * Retunrs the number of constaints applied to this module.

@@ -99,6 +99,21 @@ Module::addDefinition(Definition *def)
 }
 
 
+void
+Module::remDefinition(Definition *def)
+{
+  // First, add definition to Scope:
+  Scope::remDefinition(def);
+
+  // If definition is a variable definition:
+  if (Node::isVariableDefinition(def))
+  {
+    Ast::VariableDefinition *var = static_cast<Ast::VariableDefinition *>(def);
+    this->symbol_table.erase(var->getSymbol());
+  }
+}
+
+
 size_t
 Module::getNumConstraints() const
 {

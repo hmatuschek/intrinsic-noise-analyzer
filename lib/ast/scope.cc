@@ -126,6 +126,23 @@ Scope::addDefinition(Definition *def)
 }
 
 
+void
+Scope::remDefinition(Definition *def)
+{
+  // Check if the if there is a definition with the same identifier:
+  std::map<std::string, Definition *>::iterator item = this->definitions.find(def->getIdentifier());
+  if (this->definitions.end() == item)
+  {
+    SymbolError err;
+    err << "Can not remove definition " << def->getIdentifier()
+        << " from scope, definition not known.";
+    throw err;
+  }
+
+  this->definitions.erase(def->getIdentifier());
+}
+
+
 bool
 Scope::hasDefinition(const std::string &name) const throw()
 {

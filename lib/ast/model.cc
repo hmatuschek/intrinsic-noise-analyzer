@@ -483,3 +483,37 @@ Model::addDefinition(Definition *def)
     break;
   }
 }
+
+
+void
+Model::remDefinition(Definition *def)
+{
+  // First, call parent method:
+  Module::remDefinition(def);
+
+  // Remove definition from index vectors.
+  switch(def->getNodeType()) {
+  case Node::COMPARTMENT_DEFINITION:
+    this->compartment_vector.erase(
+          compartment_vector.begin()+getCompartmentIdx(static_cast<Compartment *>(def)));
+    break;
+
+  case Node::SPECIES_DEFINITION:
+    this->species_vector.erase(
+          species_vector.begin()+getSpeciesIdx(static_cast<Species *>(def)));
+    break;
+
+  case Node::PARAMETER_DEFINITION:
+    this->parameter_vector.erase(
+          parameter_vector.begin()+getParameterIdx(static_cast<Parameter *>(def)));
+    break;
+
+  case Node::REACTION_DEFINITION:
+    this->reaction_vector.erase(
+          reaction_vector.begin()+getReactionIdx(static_cast<Reaction *>(def)));
+    break;
+
+  default:
+    break;
+  }
+}

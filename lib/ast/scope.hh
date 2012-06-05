@@ -157,6 +157,12 @@ public:
   virtual void addDefinition(Definition *def);
 
   /**
+   * Removes a definition from the scope. The ownership of the definition is transferred to the
+   * callee.
+   */
+  virtual void remDefinition(Definition *def);
+
+  /**
    * Returns true if there is a definition of the given name in the scope.
    *
    * Is equivalent to call @c hasDefinition(getSymbol(const std::string &identifier)).
