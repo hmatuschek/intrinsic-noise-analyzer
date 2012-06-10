@@ -22,7 +22,6 @@ void
 LNAmodel::postConstructor()
 {
 
-
     dimCOV = this->numIndSpecies()*(this->numIndSpecies()+1)/2;
 
     // add dimension of covariances
@@ -30,19 +29,18 @@ LNAmodel::postConstructor()
     // add dimension of EMRE
     dim+= this->numIndSpecies();
     // reserve some space
-    updateVector.resize(dim);
+    updateVector.conservativeResize(dim);
 
-    this->stateVariables.resize(dimCOV+numIndSpecies());
-    // setup index table
     // assign a set of new symbols
     // ... and add them to index table
-    for(size_t i = 0; i<this->stateVariables.size(); i++)
+    this->stateVariables.reserve(dimCOV+numIndSpecies());
+    for(size_t i = 0; i<stateVariables.capacity(); i++)
     {
-        stateVariables[i] = GiNaC::symbol();
+        stateVariables.push_back( GiNaC::symbol() );
         this->stateIndex.insert(std::make_pair(this->stateVariables[i],this->numIndSpecies()+i));
     }
 
-    // form expressions with new symbols for remaining state variables
+    //form expressions with new symbols for remaining state variables
 
     Eigen::VectorXex covVariables(dimCOV);
     Eigen::VectorXex emreVariables(this->numIndSpecies());
@@ -95,9 +93,9 @@ LNAmodel::postConstructor()
       Delta(i)+=this->REcorrections(i);
     }
 
-    /////////////////////////
-    // calculate EMRE update
-    /////////////////////////
+    ///////////////////////////
+    // calculate EMRE update //
+    ///////////////////////////
 
     Eigen::VectorXex EMREUpdate;
     EMREUpdate = ((this->JacobianM*emreVariables)+Delta);
@@ -117,9 +115,6 @@ LNAmodel::fullState(const Eigen::VectorXd &state, Eigen::VectorXd &concentration
     REmodel::fullState(state,concentrations);
 
     // ... then begin reconstruction of covariance matrix
-
-    // dim of reduced covariance vector
-    int dimCOV=(this->numIndSpecies()*(this->numIndSpecies()+1))/2;
 
     // get reduced covariance vector
     Eigen::VectorXd covvec = state.segment(this->numIndSpecies(),dimCOV);
@@ -160,10 +155,6 @@ LNAmodel::fullState(const Eigen::VectorXd &state, Eigen::VectorXd &concentration
     this->fullState(state,concentrations,cov);
 
     // reconstruct emre
-
-    // dim of reduced covariance vector
-    int dimCOV=(this->numIndSpecies()*(this->numIndSpecies()+1))/2;
-
     // get reduced emre vector (should better be a view rather then a copy)
     Eigen::VectorXd tail = state.segment(this->numIndSpecies()+dimCOV,this->numIndSpecies());
 
@@ -175,12 +166,11 @@ LNAmodel::fullState(const Eigen::VectorXd &state, Eigen::VectorXd &concentration
 void
 LNAmodel::getInitialState(Eigen::VectorXd &x)
 {
-  int dimCov=(this->numIndSpecies()*(this->numIndSpecies()+1))/2; 
 
   // deterministic initial conditions for state
   x<<(this->ICsPermuted).head(this->numIndSpecies()),
      // zero covariance
-     Eigen::VectorXd::Zero(dimCov),
+     Eigen::VectorXd::Zero(dimCOV),
      // zero EMRE
      Eigen::VectorXd::Zero(this->numIndSpecies());
 
@@ -233,9 +223,21 @@ LNAmodel::constructSymmetricMatrix(const Eigen::VectorXex &covVec,Eigen::MatrixX
 
 
 void
+LNAmodel::getRateCorrections(Eigen::VectorXd &REcorr)
+{
+    // make sure vector is big enough
+    REcorr.resize(this->numIndSpecies());
+    // and evaluate:
+    for (size_t i=0; i<this->numIndSpecies(); i++)
+        REcorr(i) = this->interpreter.evaluate(this->REcorrections(i));
+    // ... done.
+}
+
+
+
+void
 LNAmodel::flattenSymmetricMatrix(const Eigen::MatrixXex &mat,Eigen::VectorXex &vec)
 {
-    // @todo add static assertions here
     size_t idx=0;
     for(size_t i=0;i<this->numIndSpecies();i++)
     {
@@ -246,3 +248,101 @@ LNAmodel::flattenSymmetricMatrix(const Eigen::MatrixXex &mat,Eigen::VectorXex &v
       }
     }
 }
+
+void
+LNAmodel::getDiffusionVec(Eigen::VectorXd &DiffusionVec)
+{
+
+    // make sure Diffusion vector is big enough
+    DiffusionVec.resize(this->numIndSpecies()*this->numIndSpecies());
+
+    // and evaluate:
+    for (size_t i=0; i<(this->numIndSpecies()*this->numIndSpecies()); i++)
+    {
+        DiffusionVec(i) = this->interpreter.evaluate(this->DiffusionVec(i));
+    }
+
+    // ... done.
+
+}
+
+void
+LNAmodel::getDiffusionVec(const Eigen::VectorXd &state, Eigen::VectorXd &DiffusionVec)
+{
+    // set state
+    this->setState(state);
+    // and get Diffusion vector
+    this->getDiffusionVec(DiffusionVec);
+}
+
+
+void
+LNAmodel::getDiffusionMatrix(Eigen::MatrixXd &DiffusionM)
+{
+
+    // make sure Diffusion vector is big enough
+    DiffusionM.resize(this->numIndSpecies(),this->numIndSpecies());
+
+    // just lower triangular matrix
+    Eigen::MatrixXd lowerTriangD(this->numIndSpecies(),this->numIndSpecies());
+
+    // and evaluate this:
+    for (size_t i=0; i<this->numIndSpecies(); i++)
+    {
+        for(size_t j=0;j<=i;j++)
+        {
+            lowerTriangD(i,j) = this->interpreter.evaluate(this->DiffusionMatrix(i,j));
+        }
+    }
+
+    // conversion to dense matrix
+    DiffusionM = lowerTriangD.selfadjointView<Eigen::Lower>();
+
+    // ... done.
+
+}
+
+void
+LNAmodel::getDiffusionMatrix(const Eigen::VectorXd &state, Eigen::MatrixXd &DiffusionM)
+{
+    // set state
+    this->setState(state);
+    // and get Diffusion matrix
+    this->getDiffusionMatrix(DiffusionM);
+}
+
+
+void
+LNAmodel::getHessian(Eigen::MatrixXd &HessianM)
+{
+
+    // make sure the matrix is big enough
+    HessianM.resize(this->numIndSpecies(),this->numIndSpecies()*(this->numIndSpecies()+1)/2);
+
+    // and evaluate this:
+    for (size_t i=0; i<this->numIndSpecies(); i++)
+    {
+        int idx=0;
+        for (size_t j=0; j<this->numIndSpecies(); j++)
+        {
+            for(size_t k=0;k<=j;k++)
+            {
+                HessianM(i,idx) = this->interpreter.evaluate(this->Hessian(i,idx));
+                idx++;
+            }
+        }
+    }
+
+    // ... done.
+
+}
+
+void
+LNAmodel::getHessian(const Eigen::VectorXd &state, Eigen::MatrixXd &HessianM)
+{
+    // set state
+    this->setState(state);
+    // and get the Hessian in matrix matrix form
+    this->getHessian(HessianM);
+}
+

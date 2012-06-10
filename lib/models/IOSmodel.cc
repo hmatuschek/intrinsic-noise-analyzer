@@ -25,30 +25,30 @@ IOSmodel::postConstructor()
     size_t dimold = dim;
 
     // add dimension of third moment
-    dim+= dim3M;
+    dim += dim3M;
     // add dimension of covariances
-    dim+= dimCOV;
+    dim += dimCOV;
     // add dimension of EMRE
-    dim+= this->numIndSpecies();
+    dim += this->numIndSpecies();
+
     // reserve some space
-    updateVector.resize(dim);
+    updateVector.conservativeResize(dim);
+    stateVariables.reserve(dim-this->numIndSpecies());
 
     // assign a set of new symbols
     // ... and add them to index table
     for(size_t i = dimold; i<this->dim; i++)
     {
-        stateVariables[i-this->numIndSpecies()] = GiNaC::symbol();
-        this->stateIndex.insert(std::make_pair(this->stateVariables[i-this->numIndSpecies()],this->numIndSpecies()+i));
+        stateVariables.push_back( GiNaC::symbol() );
+        this->stateIndex.insert(std::make_pair(this->stateVariables[i-this->numIndSpecies()],i));
     }
 
     // form expressions with new symbols for remaining state variables
-
     Eigen::VectorXex covVariables(dimCOV);
     Eigen::VectorXex emreVariables(this->numIndSpecies());
     Eigen::VectorXex iosVariables(dimCOV);
     Eigen::VectorXex iosemreVariables(this->numIndSpecies());
     std::vector< Eigen::MatrixXex > thirdmomentVariables(this->numIndSpecies());
-
 
     size_t idx = 0;
     for(size_t i = 0 ; i<dimCOV; i++)
@@ -57,7 +57,7 @@ IOSmodel::postConstructor()
         emreVariables(i) = stateVariables[idx++];
     for(size_t i=0;i<this->numIndSpecies();i++)
     {
-        thirdmomentVariables[i]=Eigen::MatrixXex::Zero(this->numIndSpecies(),this->numIndSpecies());
+        thirdmomentVariables[i] = Eigen::MatrixXex::Zero(this->numIndSpecies(),this->numIndSpecies());
         for(size_t j=0;j<=i;j++)
             for(size_t k=0;k<=j;k++)
             {
@@ -75,14 +75,14 @@ IOSmodel::postConstructor()
     }
     for(size_t i = 0 ; i<dimCOV; i++)
         iosVariables(i) = stateVariables[idx++];
-    for(size_t i = 0 ; i<numIndSpecies(); i++)
+    for(size_t i = 0 ; i<this->numIndSpecies(); i++)
         iosemreVariables(i) = stateVariables[idx++];
-
 
     // construct a covariance matrix
 
     Eigen::MatrixXex cov;
     constructCovarianceMatrix(cov);
+
 
     /////////////////////////
     // calculate third moment
@@ -193,7 +193,6 @@ IOSmodel::postConstructor()
 
     Eigen::VectorXex Delta(this->numIndSpecies());
 
-
     for (size_t i=0; i<this->numIndSpecies(); i++)
     {
       Delta(i)=0.;
@@ -216,8 +215,8 @@ IOSmodel::postConstructor()
     Eigen::VectorXex EMREiosUpdate = ((this->JacobianM*iosemreVariables)+Delta);
 
     // and attach to update vector
-    this->updateVector.segment(dimold,dim3M) = ThirdMomentUpdate;
-    this->updateVector.segment(dimold+dim3M,dimCOV) = iosUpdate;
+    this->updateVector.segment(dimold, dim3M) = ThirdMomentUpdate;
+    this->updateVector.segment(dimold+dim3M, dimCOV) = iosUpdate;
     this->updateVector.tail(this->numIndSpecies()) = EMREiosUpdate;
 
 }

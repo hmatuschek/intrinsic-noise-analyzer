@@ -53,7 +53,6 @@ public:
   void fullState(const Eigen::VectorXd &state, Eigen::VectorXd &concentrations,
                  Eigen::MatrixXd &cov, Eigen::VectorXd &emre,  Eigen::MatrixXd &iosCov, Eigen::VectorXd &skewness, Eigen::VectorXd &iosemre);
 
-  friend class LNAinterpreter;
 
 };
 
