@@ -35,12 +35,8 @@ REmodel::postConstructor()
     dim = this->numIndSpecies();
 
     // setup index table
-    // get symbols of species
     for(size_t i = 0; i<this->numIndSpecies(); i++)
         this->stateIndex.insert(std::make_pair(this->species[PermutationVec(i)],i));
-
-    // and combine to update vector
-    this->updateVector = this->REs;
 
     // Evaluate initial concentrations and evaluate volumes:
     Ast::EvaluateInitialValue evICs(*this);
@@ -77,6 +73,10 @@ REmodel::postConstructor()
         this->foldConservationConstants(this->conserved_cycles);
 
     }
+
+
+    // and combine to update vector
+    this->updateVector = this->REs;
 
 }
 
@@ -183,7 +183,6 @@ REmodel::getDimension()
 void
 REmodel::getInitialState(Eigen::VectorXd &x)
 {
-
   // deterministic initial conditions for state
   x<<(this->ICsPermuted).head(this->numIndSpecies());
 
@@ -238,6 +237,16 @@ REmodel::getConservedCycles(std::vector<GiNaC::ex> &cLaw)
 const Eigen::VectorXex &
 REmodel::getUpdateVector() const {
   return this->updateVector;
+}
+
+const GiNaC::symbol &
+REmodel::getREvar(size_t s) const {
+    return this->species[this->PermutationVec(s)];
+}
+
+const GiNaC::symbol &
+REmodel::getSSEvar(size_t index) const {
+    return this->stateVariables[index];
 }
 
 

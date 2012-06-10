@@ -2,7 +2,7 @@
 #define __FLUC_REmodel_HH__
 
 #include "ast/ast.hh"
-#include "lnabasemodel.hh"
+#include "ssebasemodel.hh"
 
 namespace Fluc {
 namespace Models {
@@ -65,6 +65,10 @@ public:
 
   const Eigen::VectorXex &getUpdateVector() const;
 
+  const GiNaC::symbol &getREvar(size_t s) const;
+
+  const GiNaC::symbol &getSSEvar(size_t index) const;
+
 private:
   /**
    * Performs the common construction part, shared between all constructors.
@@ -122,17 +126,15 @@ public:
 
   double foldVertex(std::list<int> lower, std::list<int> upper);
 
-
   /**
-   * Just dumps the LNA internals.
+   * Just dumps the RE internals.
    */
   virtual void dump(std::ostream &str);
 
-  friend class LNAinterpreter;
-  friend class LNAevaluator;
-  friend class SteadyStateAnalysis;
 
-  friend class Steady;
+  // @todo du brauchst keine freunde!!!
+
+  friend class LNAevaluator;
   friend class SpectralAnalysis;
   friend class SpectralAnalysisBase;
 
@@ -142,4 +144,4 @@ public:
 }
 }
 
-#endif // LINEARNOISEAPPROXIMATION_HH
+#endif // REMODEL_HH
