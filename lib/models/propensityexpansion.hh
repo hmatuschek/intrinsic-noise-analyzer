@@ -1,5 +1,5 @@
-#ifndef __FLUC_MODELS_PRELNAMIXIN_HH__
-#define __FLUC_MODELS_PRELNAMIXIN_HH__
+#ifndef __FLUC_MODELS_propensityExpansion_HH__
+#define __FLUC_MODELS_propensityExpansion_HH__
 
 #include "basemodel.hh"
 #include "constcompartmentmixin.hh"
@@ -26,7 +26,7 @@ namespace Models {
  * @ingroup models
  */
 
-class preLNAMixin :
+class propensityExpansion :
     public IntensiveSpeciesMixin,
     public ConstCompartmentMixin,
     public ReasonableModelMixin
@@ -46,7 +46,7 @@ public:
   /**
    * Constructor...
    */
-  preLNAMixin(BaseModel &base);
+  propensityExpansion(BaseModel &base);
 };
 
 

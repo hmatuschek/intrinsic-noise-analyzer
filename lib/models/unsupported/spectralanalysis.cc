@@ -49,7 +49,7 @@ SpectralAnalysis::spectrum(const Eigen::VectorXd &freq, Eigen::MatrixXd &spectru
 
 
 SpectralAnalysisBase::SpectralAnalysisBase(LinearNoiseApproximation &model)
-    : SteadyStateAnalysis(model),
+    : SteadyStateAnalysisOld(model),
       state(model.getDimension()),
       pVars(model.numIndSpecies()*model.numIndSpecies()),
       cov(model.numIndSpecies(),model.numIndSpecies()),

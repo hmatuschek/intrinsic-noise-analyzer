@@ -1,9 +1,9 @@
-#include "prelnamixin.hh"
+#include "propensityexpansion.hh"
 
 using namespace Fluc;
 using namespace Fluc::Models;
 
-preLNAMixin::preLNAMixin(BaseModel &base):
+propensityExpansion::propensityExpansion(BaseModel &base):
   IntensiveSpeciesMixin(base), ConstCompartmentMixin(base), ReasonableModelMixin(base),
   rates(base.numReactions()),rates1(base.numReactions())
 {

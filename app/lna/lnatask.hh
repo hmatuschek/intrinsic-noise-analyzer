@@ -5,8 +5,7 @@
 #include <QStringList>
 
 #include "../task.hh"
-#include "models/lnainterpreter.hh"
-#include "models/linearnoiseapproximation.hh"
+#include "models/sseinterpreter.hh"
 #include "ode/integrationrange.hh"
 #include "ode/stepper.hh"
 #include "../timeseries.hh"
@@ -41,7 +40,7 @@ public:
     Config(const Config &other);
 
   public:
-    Fluc::Models::LinearNoiseApproximation *model;
+    Fluc::Models::LNAmodel *model;
     QStringList selected_species;
     Integrator integrator;
     Fluc::ODE::IntegrationRange integration_range;

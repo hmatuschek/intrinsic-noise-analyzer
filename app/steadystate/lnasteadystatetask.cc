@@ -27,7 +27,7 @@ LNASteadyStateTask::Config::setModelDocument(DocumentItem *document)
 {
   ModelSelectionTaskConfig::setModelDocument(document);
   // Construct LNA model from SBML model associated with the selected document
-  this->model = new Fluc::Models::LinearNoiseApproximation(document->getSBMLModel());
+  this->model = new Fluc::Models::IOSmodel(document->getSBMLModel());
 }
 
 Fluc::Ast::Model *
@@ -68,7 +68,7 @@ LNASteadyStateTask::Config::setEpsilon(double eps)
  * ******************************************************************************************* */
 LNASteadyStateTask::LNASteadyStateTask(const Config &config, QObject *parent)
   : Task(parent), config(config),
-    steady_state(dynamic_cast<Fluc::Models::LinearNoiseApproximation &>(*config.getModel()),
+    steady_state(dynamic_cast<Fluc::Models::IOSmodel &>(*config.getModel()),
       config.getMaxIterations(), config.getEpsilon()),
     concentrations(config.getNumSpecies()), emre_corrections(config.getNumSpecies()),
     ios_corrections(config.getNumSpecies()),
@@ -110,8 +110,8 @@ LNASteadyStateTask::process()
 {
   this->setState(Task::INITIALIZED);
 
-  Fluc::Models::LinearNoiseApproximation *lna_model
-      = dynamic_cast<Fluc::Models::LinearNoiseApproximation *>(config.getModel());
+  Fluc::Models::IOSmodel *lna_model
+      = dynamic_cast<Fluc::Models::IOSmodel *>(config.getModel());
 
   // Allocate reduced state vector (independent species)
   Eigen::VectorXd reduced_state(lna_model->getDimension());
@@ -120,7 +120,7 @@ LNASteadyStateTask::process()
   this->setState(Task::RUNNING);
 
   // Calc steadystate:
-  this->steady_state.calcIOS(reduced_state);
+  this->steady_state.calcSteadyState(reduced_state);
 
   // Check if task shall terminate:
   if (Task::TERMINATING == this->getState())

@@ -7,7 +7,6 @@
 #include <QListWidget>
 
 
-#include "models/linearnoiseapproximation.hh"
 #include "../doctree/documentitem.hh"
 #include "lnasteadystatetask.hh"
 #include "../views/generaltaskwizard.hh"

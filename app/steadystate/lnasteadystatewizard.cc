@@ -9,8 +9,6 @@
 #include <QCheckBox>
 
 
-#include "models/linearnoiseapproximation.hh"
-
 using namespace Fluc;
 
 

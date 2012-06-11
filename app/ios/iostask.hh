@@ -6,8 +6,7 @@
 
 #include "../task.hh"
 #include "../models/generaltaskconfig.hh"
-#include "models/lnainterpreter.hh"
-#include "models/linearnoiseapproximation.hh"
+#include "models/sseinterpreter.hh"
 #include "ode/integrationrange.hh"
 #include "ode/stepper.hh"
 #include "../timeseries.hh"
@@ -54,7 +53,7 @@ public:
 
   public:
     /** The model to be analyzed. */
-    Fluc::Models::LinearNoiseApproximation *model;
+    Fluc::Models::IOSmodel *model;
   };
 
 
@@ -68,7 +67,7 @@ protected:
    * Holds an instance of the bytecode interpreter for the LNA model, this object also implements
    * the @c System interface for the integrators.
    */
-  Fluc::Models::LNAinterpreter interpreter;
+  Fluc::Models::IOSinterpreter interpreter;
 
   /**
    * Holds a weak reference to the stepper being used.

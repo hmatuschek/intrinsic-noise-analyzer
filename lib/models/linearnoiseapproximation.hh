@@ -1,14 +1,8 @@
 #ifndef __FLUC_LINEARNOISEAPPROXIMATION_HH__
 #define __FLUC_LINEARNOISEAPPROXIMATION_HH__
 
-#include <sbml/SBMLTypes.h>
 #include "kroneckerproduct.hh"
-
-#include <cln/exception.h>
-#include <ginac/ginac.h>
-
-#include "ast/ast.hh"
-#include "lnabasemodel.hh"
+#include "ssebasemodel.hh"
 
 namespace Fluc {
 namespace Models {
@@ -221,9 +215,10 @@ public:
    */
   virtual void dump(std::ostream &str);
 
-  friend class LNAinterpreter;
   friend class LNAevaluator;
-  friend class SteadyStateAnalysis;
+
+  friend class SteadyStateAnalysisOld;
+
   friend class SpectralAnalysis;
   friend class SpectralAnalysisBase;
 

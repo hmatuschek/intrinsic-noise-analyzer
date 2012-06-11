@@ -22,7 +22,7 @@ RETask::Config::setModelDocument(DocumentItem *document)
 {
   ModelSelectionTaskConfig::setModelDocument(document);
   // Construct LNA model from SBML model associated with the selected document
-  this->model = new Fluc::Models::LinearNoiseApproximation(document->getSBMLModel());
+  this->model = new Fluc::Models::REmodel(document->getSBMLModel());
 }
 
 
@@ -65,24 +65,24 @@ RETask::RETask(const Config &config, QObject *parent) :
    */
   switch (config.getIntegrator()) {
   case Config::RungeKutta4:
-    this->stepper = new Fluc::ODE::RungeKutta4<Fluc::Models::LNAinterpreter>(
+    this->stepper = new Fluc::ODE::RungeKutta4<Fluc::Models::REinterpreter >(
           this->interpreter, config.getIntegrationRange().getStepSize());
     break;
 
   case Config::RungeKuttaFehlberg45:
-    this->stepper = new Fluc::ODE::RKF45<Fluc::Models::LNAinterpreter>(
+    this->stepper = new Fluc::ODE::RKF45<Fluc::Models::REinterpreter>(
           this->interpreter, config.getIntegrationRange().getStepSize(),
           config.getEpsilonAbs(), config.getEpsilonRel());
     break;
 
   case Config::DormandPrince5:
-    this->stepper = new Fluc::ODE::Dopri5Stepper<Fluc::Models::LNAinterpreter>(
+    this->stepper = new Fluc::ODE::Dopri5Stepper<Fluc::Models::REinterpreter>(
           this->interpreter, config.getIntegrationRange().getStepSize(),
           config.getEpsilonAbs(), config.getEpsilonRel());
     break;
 
   case Config::LSODA:
-    this->stepper = new Fluc::ODE::LsodaDriver<Fluc::Models::LNAinterpreter>(
+    this->stepper = new Fluc::ODE::LsodaDriver<Fluc::Models::REinterpreter>(
           this->interpreter, config.getIntegrationRange().getStepSize(),
           config.getEpsilonAbs(), config.getEpsilonRel());
     break;
@@ -91,7 +91,7 @@ RETask::RETask(const Config &config, QObject *parent) :
     // First, let LNA Interpreter compile the jacobian
     this->interpreter.compileJacobian();
     // Then, setup integrator:
-    this->stepper = new Fluc::ODE::Rosenbrock4TimeInd<Fluc::Models::LNAinterpreter>(
+    this->stepper = new Fluc::ODE::Rosenbrock4TimeInd<Fluc::Models::REinterpreter>(
           this->interpreter, config.getIntegrationRange().getStepSize(),
           config.getEpsilonAbs(), config.getEpsilonRel());
     break;

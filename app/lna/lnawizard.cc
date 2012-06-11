@@ -41,7 +41,7 @@ void
 LNAWizard::setDocument(DocumentItem *doc)
 {
   this->document = doc;
-  this->config.model = new Models::LinearNoiseApproximation(doc->getSBMLModel());
+  this->config.model = new Models::LNAmodel(doc->getSBMLModel());
 }
 
 

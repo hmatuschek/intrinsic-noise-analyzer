@@ -29,10 +29,10 @@ int main(int argc, char *argv[])
     // Construct LNA model from SBML model
     Models::LinearNoiseApproximation model(doc->getModel());
 
-    Models::LNAinterpreter interpreter(model, 0);
+    Models::SSEinterpreter<Models::LinearNoiseApproximation> interpreter(model, 0);
 
     double dt=0.01;
-    ODE::RKF45<Models::LNAinterpreter> integrator(interpreter,dt,1e-5,1e-5);
+    ODE::RKF45<Models::SSEinterpreter<Models::LinearNoiseApproximation> > integrator(interpreter,dt,1e-5,1e-5);
     //ODE::RKF45<Models::LinearNoiseApproximation> integrator(model,dt,1e-5,1e-5);
 
     // state vector (deterministic concentrations + covariances)

@@ -16,13 +16,12 @@ namespace NLEsolve {
         Waiting = 0,
         Success = 1,
         MaxIterationsReached = 2,
-        LineSearchFailed = 3,
+        IterationFailed = 3,
         RoundOffProblem = 4,
     };
 
 /**
- * NewtonRaphson solver. This class is a bit more efficient with memory and things
- * over the old function calls.
+ * NewtonRaphson solver.
  * @ingroup nlesolve
  */
 template<typename T>
@@ -121,7 +120,6 @@ public:
 
           // if linesearch failed try with full pivoting.
           lcheck = this->linesearch(conc_old, conc, dx, fold, f, nablaf, stpmax);
-
           //< returns new conc, f and updates REs with new state
 
           // construct Jacobian matrix
@@ -135,7 +133,7 @@ public:
           }
 
           // check for spurious convergence of nablaf = 0
-          if (lcheck==LineSearchFailed) {
+          if (lcheck==IterationFailed) {
              test = 0.0;
              den = std::max(f,0.5*double(dim));
              for(size_t i=0; i<dim;i++)
@@ -144,9 +142,8 @@ public:
                  if (temp > test) test = temp;
              }
 
-             /* @todo check this return */
              if(test < this->parameters.TOLMIN)
-                 return LineSearchFailed;
+                 return IterationFailed;
              else
              {
                  this->iterations=k+1;
@@ -231,7 +228,7 @@ public:
           if (lambda < lambdamin) {
              // linesearch failed
              x=xold;
-             return LineSearchFailed;
+             return IterationFailed;
           }
           else if (f <= (fold + this->parameters.ALF*lambda*slope) )
           {
@@ -265,116 +262,6 @@ public:
       }
 
   }
-
-  /**
-   * Powell's dogleg method (requires the Hessian of the objective function).
-   *
-   * @param fold : old function value
-   * @param f : new function value
-   * @param xold : start point
-   * @param x : end function arguments
-   * @param dx : the direction
-   *
-   */
-  Status dogleg(const Eigen::VectorXd &xold,
-                double fold, const Eigen::VectorXd &nablaf,
-                Eigen::VectorXd &dx,
-                Eigen::VectorXd &x,
-                double &delta,
-                double &f)
-  {
-
-    bool check;
-
-    const int dim = xold.size();
-    Eigen::VectorXd pB, pU;
-    Eigen::MatrixXd Hessian;
-
-    // evaluate Hessian of objective function.
-    that.getfHessianM(x,Hessian);
-
-    size_t j = 0;
-    do
-    {
-      // compute the Newton point
-      pB = -nablaf;
-      pB = Hessian.lu().solve(pB);
-
-      // compute minimizer of the quadratic
-      // model along the negative gradient
-      pU = (-nablaf.squaredNorm()/( nablaf.transpose()*(Hessian*nablaf)) )*nablaf;
-
-      if(pB.squaredNorm() <= delta)
-      {
-        dx = pB;
-      }
-      else
-      {
-        if(pU.squaredNorm() > delta)
-        {
-          dx = delta * pU / pU.squaredNorm();
-        }
-        else
-        {
-
-          Eigen::VectorXd pB_pU = pB - pU;
-
-          Eigen::VectorXd v = 2.0*pU-pB;
-
-          double a = pB_pU.squaredNorm();
-          double b = 2.0 * v.dot(pB_pU);
-          double c = v.squaredNorm() - delta*delta;
-
-          double tau = (-b + std::sqrt(b*b-4.0*a*c)) / (2.0*a);
-
-          dx = pU + (tau-1.0) * pB_pU;
-
-        }
-      }
-
-      x = xold + dx;
-
-
-      // update f here
-      that.getREs(x,REs);
-      f = 0.5*(REs.squaredNorm());
-
-      // compute reduction
-      double pred = - (nablaf.dot(dx));
-             pred -=  0.5 * (dx.dot(Hessian*dx));
-      double rho = (fold - f) / pred;
-
-      // and check radius
-      if(rho < 0.25)
-          delta = 0.25 * dx.squaredNorm();
-      else
-      {
-          if(rho > 0.75 && std::fabs(dx.squaredNorm() - delta) < 1e-14)
-          delta = std::min(2.0 * delta, 1e6); // also the latter should be parametrized
-      }
-      if(rho <= 0.1) // this should be a parameter of acceptance
-        check = false;
-      else
-        check = true;
-
-
-      j++;
-    }
-    while(!check && j < 100); // the latter should be parametrized
-
-    if(!check)
-    {
-      x = xold;
-      f = fold;
-
-      return LineSearchFailed;
-    }
-
-    return Success;
-  }
-
-
-
 
 };
 

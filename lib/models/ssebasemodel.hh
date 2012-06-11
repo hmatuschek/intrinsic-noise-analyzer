@@ -1,32 +1,25 @@
 #ifndef __FLUC_MODELS_SSEBASEMODEL_HH
 #define __FLUC_MODELS_SSEBASEMODEL_HH
 
-#include <eigen3/Eigen/Eigen>
-#include <sbml/SBMLTypes.h>
-
-#include <cln/exception.h>
-
-#include "ast/ast.hh"
-#include <ginac/ginac.h>
-
 #include "basemodel.hh"
-#include "lnamixin.hh"
-#include "ginacsupportforeigen.hh"
+#include "propensityexpansion.hh"
+#include "conservationanalysismixin.hh"
 
 namespace Fluc {
 namespace Models {
 
 
 /**
- * The Linear Noise Approximation base model.
+ * The System Size Expansion base model.
  *
- * Provides all coefficients of the Linear Noise Approximation in an uncontrained base.
+ * Provides all coefficients of the SSE in an uncontrained base.
  *
- * @ingroup models
+ * @ingroup sse
  */
 class SSEBaseModel :
-    public BaseModel,
-    public LNAMixin
+    public BaseModel,    
+    public propensityExpansion,
+    public ConservationAnalysisMixin
 {
 
 private:
@@ -34,6 +27,18 @@ private:
     Eigen::VectorXex rate_corrections;
     Eigen::MatrixXex rates_gradient;
     Eigen::MatrixXex rates_hessian;
+
+
+    /**
+    *  \f$ \Omega \f$-vector for independent species
+    */
+    Eigen::VectorXex Omega_ind;
+
+    /**
+    *  \f$ \Omega \f$-vector for dependent species
+    */
+    Eigen::VectorXex Omega_dep;
+
 
 protected:
 

@@ -55,8 +55,8 @@ SET(libina_utils_HEADERS
 SET(libina_models_SOURCES
     models/basemodel.cc models/constantstoichiometrymixin.cc models/constcompartmentmixin.cc
     models/conservationanalysismixin.cc
-    models/lnamixin.cc models/prelnamixin.cc
-    models/lnabasemodel.cc
+    models/propensityexpansion.cc
+    models/ssebasemodel.cc
     models/linearnoiseapproximation.cc
     models/REmodel.cc
     models/LNAmodel.cc
@@ -76,7 +76,7 @@ SET(libina_models_SOURCES
     models/reasonablemodelmixin.cc
     models/baseunitmixin.cc
     models/particlenumbersmixin.cc
-    models/lnainterpreter.cc
+    models/sseinterpreter.cc
     models/lnaevaluator.cc
     models/steadystateanalysis.cc
 )
@@ -84,8 +84,8 @@ SET(libina_models_SOURCES
 SET(libina_models_HEADERS models/models.hh
     models/basemodel.hh models/constantstoichiometrymixin.hh models/constcompartmentmixin.hh
     models/conservationanalysismixin.hh
-    models/lnamixin.hh models/prelnamixin.hh
-    models/lnabasemodel.hh
+    models/propensityexpansion.hh
+    models/ssebasemodel.hh
     models/linearnoiseapproximation.hh
     models/REmodel.hh
     models/LNAmodel.hh
@@ -109,7 +109,7 @@ SET(libina_models_HEADERS models/models.hh
     models/reasonablemodelmixin.hh
     models/baseunitmin.hh
     models/particlenumbersmixin.hh
-    models/lnainterpreter.hh
+    models/sseinterpreter.hh
     models/lnaevaluator.hh
     models/steadystateanalysis.hh
 )

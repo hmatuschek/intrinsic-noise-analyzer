@@ -1,7 +1,9 @@
 #ifndef __FLUC_MODELS_LNAINTERPRETER_HH
 #define __FLUC_MODELS_LNAINTERPRETER_HH
 
-#include "linearnoiseapproximation.hh"
+#include "REmodel.hh"
+#include "LNAmodel.hh"
+#include "IOSmodel.hh"
 #include "eval/eval.hh"
 #include "eval/bcimp/engine.hh"
 
@@ -9,18 +11,18 @@ namespace Fluc {
 namespace Models {
 
 /**
- * Wraps an instance of LinearNoiseApproximation and compiles it.
+ * Wraps an instance of SSE model and compiles it.
  *
  * @ingroup models
  */
-template < class SysEngine, class JacEngine>
-class GenericLNAinterpreter
+template <class Sys, class SysEngine, class JacEngine>
+class GenericSSEinterpreter
 {
 protected:
   /**
    * Holds a reference to an instance of LinearNoiseApproximation.
    */
-   LinearNoiseApproximation &lnaModel;
+   Sys &sseModel;
 
    /**
     * The bytecode interpreter instance to evaluate the propensities etc.
@@ -57,22 +59,22 @@ public:
   /**
    * Constructor.
    *
-   * @param model Specifies the LNA model to integrate.
+   * @param model Specifies the SSE model to integrate.
    * @param opt_level Specifies the code-optimization level.
    * @param num_threads Specifies the (optional) number of threads to use to evaluate the
    *        system. By default, @c OpenMP::getMaxThreads will be used.
    * @param compileJac Specifies if the Jacobian should be compiled immediately. If false, it will
    *        be compiled on demand.
    */
-  GenericLNAinterpreter(LinearNoiseApproximation &model, size_t opt_level,
+  GenericSSEinterpreter(Sys &model, size_t opt_level,
                  size_t num_threads=OpenMP::getMaxThreads(), bool compileJac = false)
-    : lnaModel(model), bytecode(num_threads), jacobianCode(num_threads),
+    : sseModel(model), bytecode(num_threads), jacobianCode(num_threads),
       hasJacobian(false), opt_level(opt_level)
   {
     // Compile expressions
     typename SysEngine::Compiler compiler(model.stateIndex);
     compiler.setCode(&this->bytecode);
-    compiler.compileVector(lnaModel.getUpdateVector());
+    compiler.compileVector(sseModel.getUpdateVector());
     compiler.finalize(opt_level);
 
     // Set bytecode for interpreter
@@ -93,18 +95,18 @@ public:
     if(hasJacobian) return;
 
     // Assemble Jacobian
-    Eigen::MatrixXex jacobian(lnaModel.getDimension(), lnaModel.getDimension());
+    Eigen::MatrixXex jacobian(sseModel.getDimension(), sseModel.getDimension());
     {
       std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less>::const_iterator it;
-      for(it = lnaModel.stateIndex.begin(); it != lnaModel.stateIndex.end(); ++it)
+      for(it = sseModel.stateIndex.begin(); it != sseModel.stateIndex.end(); ++it)
       {
-        for (size_t i=0; i<lnaModel.getDimension(); i++)
-          jacobian(i,(*it).second) = lnaModel.getUpdateVector()(i).diff((*it).first);
+        for (size_t i=0; i<sseModel.getDimension(); i++)
+          jacobian(i,(*it).second) = sseModel.getUpdateVector()(i).diff((*it).first);
       }
     }
 
     // Compile jacobian:
-    typename JacEngine::Compiler jacobian_compiler(lnaModel.stateIndex);
+    typename JacEngine::Compiler jacobian_compiler(sseModel.stateIndex);
     jacobian_compiler.setCode(&jacobianCode);
     jacobian_compiler.compileMatrix(jacobian);
     jacobian_compiler.finalize(opt_level);
@@ -165,7 +167,7 @@ public:
    */
   void full_state( const Eigen::VectorXd &state, Eigen::VectorXd &concentrations,
                    Eigen::MatrixXd &covariance, Eigen::VectorXd &emre) {
-    this->lnaModel.fullState(state,concentrations,covariance,emre);
+    this->sseModel.fullState(state,concentrations,covariance,emre);
   }
 
 
@@ -173,7 +175,7 @@ public:
    * Evaluates the initial state.
    */
   void getInitialState(Eigen::VectorXd &state) {
-    this->lnaModel.getInitialState(state);
+    this->sseModel.getInitialState(state);
   }
 
 
@@ -181,28 +183,33 @@ public:
    * Returns the dimension of the system.
    */
   size_t getDimension() {
-    return this->lnaModel.getDimension();
+    return this->sseModel.getDimension();
   }
 
 };
 
 
 /**
- * Defines the default LNA interpreter using byte-code interpreter with OpenMP support (if enabled).
+ * Defines the default SSE interpreter using byte-code interpreter with OpenMP support (if enabled).
  */
-class LNAinterpreter :
-    public GenericLNAinterpreter< Eval::bcimp::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+template <class Sys>
+class SSEinterpreter :
+    public GenericSSEinterpreter< Sys ,Eval::bcimp::Engine<Eigen::VectorXd, Eigen::VectorXd>,
     Eval::bcimp::Engine<Eigen::VectorXd, Eigen::MatrixXd> >
 {
 public:
-  LNAinterpreter(LinearNoiseApproximation &model, size_t opt_level,
+  SSEinterpreter(Sys &model, size_t opt_level,
                  size_t num_threads=OpenMP::getMaxThreads(), bool compileJac = false)
-    : GenericLNAinterpreter< Eval::bcimp::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+    : GenericSSEinterpreter<Sys, Eval::bcimp::Engine<Eigen::VectorXd, Eigen::VectorXd>,
       Eval::bcimp::Engine<Eigen::VectorXd, Eigen::MatrixXd> >(model, opt_level, num_threads, compileJac)
   {
     // Pass...
   }
 };
+
+typedef SSEinterpreter<IOSmodel> IOSinterpreter;
+typedef SSEinterpreter<LNAmodel> LNAinterpreter;
+typedef SSEinterpreter<REmodel> REinterpreter;
 
 
 }

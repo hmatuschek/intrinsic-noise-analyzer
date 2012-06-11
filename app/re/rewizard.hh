@@ -9,7 +9,6 @@
 #include <QCheckBox>
 #include <QLabel>
 
-#include "models/linearnoiseapproximation.hh"
 #include "../doctree/documentitem.hh"
 #include "../views/generaltaskwizard.hh"
 

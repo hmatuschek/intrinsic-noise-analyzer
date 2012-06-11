@@ -13,7 +13,7 @@ namespace Models {
 /**
  * Absolute basic model.
  *
- * Just takes a weak reference to a SMBL model and "compiles" an Ast::Module instance from it.
+ * Assembles a reference of a SMBL model to a Ast::Module instance.
  *
  * @todo Currently all mixin classes are defined as friend of this class, due to the fact, that
  *       BaseModel is now derived from @c Ast::Model, the may not be necessary anymore.
@@ -103,11 +103,9 @@ public:
   friend class ParticleNumbersMixin;
 
   /**
-   * Also the preLNAMixin and LNAMixin may access the interna of base-model.
+   * Also propensityExansion may access the interna of base-model.
    */
-  friend class preLNAMixin;
-
-  friend class LNAMixin;
+  friend class propensityExpansion;
 
   friend class AssertNoExplicitTimeDependenceMixin;
 

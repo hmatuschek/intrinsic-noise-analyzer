@@ -25,7 +25,7 @@ IOSTask::Config::setModelDocument(DocumentItem *document)
 {
   ModelSelectionTaskConfig::setModelDocument(document);
   // Construct LNA model from SBML model associated with the selected document
-  this->model = new Fluc::Models::LinearNoiseApproximation(document->getSBMLModel());
+  this->model = new Fluc::Models::IOSmodel(document->getSBMLModel());
 }
 
 
@@ -122,24 +122,24 @@ IOSTask::IOSTask(const Config &config, QObject *parent) :
    */
   switch (config.getIntegrator()) {
   case Config::RungeKutta4:
-    this->stepper = new Fluc::ODE::RungeKutta4<Fluc::Models::LNAinterpreter>(
+    this->stepper = new Fluc::ODE::RungeKutta4<Fluc::Models::IOSinterpreter>(
           this->interpreter, config.getIntegrationRange().getStepSize());
     break;
 
   case Config::RungeKuttaFehlberg45:
-    this->stepper = new Fluc::ODE::RKF45<Fluc::Models::LNAinterpreter>(
+    this->stepper = new Fluc::ODE::RKF45<Fluc::Models::IOSinterpreter>(
           this->interpreter, config.getIntegrationRange().getStepSize(),
           config.getEpsilonAbs(), config.getEpsilonRel());
     break;
 
   case Config::DormandPrince5:
-    this->stepper = new Fluc::ODE::Dopri5Stepper<Fluc::Models::LNAinterpreter>(
+    this->stepper = new Fluc::ODE::Dopri5Stepper<Fluc::Models::IOSinterpreter>(
           this->interpreter, config.getIntegrationRange().getStepSize(),
           config.getEpsilonAbs(), config.getEpsilonRel());
     break;
 
   case Config::LSODA:
-    this->stepper = new Fluc::ODE::LsodaDriver<Fluc::Models::LNAinterpreter>(
+    this->stepper = new Fluc::ODE::LsodaDriver<Fluc::Models::IOSinterpreter>(
           this->interpreter, config.getIntegrationRange().getStepSize(),
           config.getEpsilonAbs(), config.getEpsilonRel());
     break;
@@ -148,7 +148,7 @@ IOSTask::IOSTask(const Config &config, QObject *parent) :
     // First, let LNA Interpreter compile the jacobian
     this->interpreter.compileJacobian();
     // Then, setup integrator:
-    this->stepper = new Fluc::ODE::Rosenbrock4TimeInd<Fluc::Models::LNAinterpreter>(
+    this->stepper = new Fluc::ODE::Rosenbrock4TimeInd<Fluc::Models::IOSinterpreter>(
           this->interpreter, config.getIntegrationRange().getStepSize(),
           config.getEpsilonAbs(), config.getEpsilonRel());
     break;
@@ -210,7 +210,7 @@ IOSTask::process()
   // initialize (reduced) state
   config.model->getInitialState(x);
   // get full initial concentrations and covariance
-  config.model->fullState(x, concentrations);
+  config.model->fullState(x, concentrations, lna, emre, ios, thirdMoment, iosemre);
 
   this->setState(Task::RUNNING);
 

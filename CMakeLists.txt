@@ -95,7 +95,7 @@ ENDIF(LLVM_FOUND)
 add_subdirectory(lib)
 add_subdirectory(cli)
 add_subdirectory(app)
-add_subdirectory(test)
+#add_subdirectory(test)
 
 #
 # Source distribution packages:

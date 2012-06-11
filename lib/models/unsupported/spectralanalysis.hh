@@ -15,7 +15,7 @@ namespace Models {
  * The NLEsolve::NewtonRaphson solvers is used for the deterministic REs.
  */
 class SpectralAnalysisBase :
-        public SteadyStateAnalysis
+        public SteadyStateAnalysisOld
 {
 
 public:

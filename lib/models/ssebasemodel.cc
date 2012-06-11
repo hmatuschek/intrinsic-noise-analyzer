@@ -1,11 +1,10 @@
-#include "lnabasemodel.hh"
-#include "eigen3/Eigen/Core"
+#include "ssebasemodel.hh"
 
 using namespace Fluc;
 using namespace Fluc::Models;
 
 SSEBaseModel::SSEBaseModel(libsbml::Model *model)
-  : BaseModel(model), LNAMixin((BaseModel &)(*this)),
+  : BaseModel(model), propensityExpansion((BaseModel &)(*this)), ConservationAnalysisMixin((BaseModel &)(*this)),
     rate_expressions(this->numReactions()),
     rate_corrections(this->numReactions()),
     rates_gradient(this->numReactions(),this->numIndSpecies()),
@@ -28,7 +27,7 @@ SSEBaseModel::SSEBaseModel(libsbml::Model *model)
 
 
 SSEBaseModel::SSEBaseModel(const Ast::Model &model)
-  : BaseModel(model), LNAMixin((BaseModel &)(*this)),
+  : BaseModel(model), propensityExpansion((BaseModel &)(*this)), ConservationAnalysisMixin((BaseModel &)(*this)),
     rate_expressions(this->numReactions()),
     rate_corrections(this->numReactions()),
     rates_gradient(this->numReactions(),this->numIndSpecies()),
@@ -53,9 +52,23 @@ SSEBaseModel::SSEBaseModel(const Ast::Model &model)
 void
 SSEBaseModel::postConstructor()
 {
-  /* @todo conservationConstants should be have a seperate class */
+  /* @todo conservationConstants should have a seperate class */
 
-  /* @todo all LNA coeff should be calculated in unconstrained base */
+    // get Omega vectors for dependent and independent species
+    this->Omega_ind = (this->PermutationM.cast<GiNaC::ex>()*this->volumes).head(this->numIndSpecies());
+    this->Omega_dep = (this->PermutationM.cast<GiNaC::ex>()*this->volumes).tail(this->numDepSpecies());
+
+    // immediately fold all volumes -- could be done later
+    for (size_t i=0; i<numSpecies(); i++)
+      this->volumes(i)  = this->foldConstants(this->volumes(i));
+    for (size_t i=0; i<this->numIndSpecies(); i++)
+        this->Omega_ind(i)  = foldConstants(this->Omega_ind(i));
+    for (size_t i=0; i<this->numDepSpecies(); i++)
+        this->Omega_dep(i)  = foldConstants(this->Omega_dep(i));
+
+
+
+
 
   // initalize symbols as placeholders for constants arising from conservation laws
   for(size_t i=0;i<numDepSpecies();i++)

@@ -2,7 +2,7 @@
 #define LNASTEADYSTATETASK_HH
 
 #include "../task.hh"
-#include "models/linearnoiseapproximation.hh"
+#include "models/IOSmodel.hh"
 #include "models/steadystateanalysis.hh"
 #include "../timeseries.hh"
 #include "../models/generaltaskconfig.hh"
@@ -22,7 +22,7 @@ public:
       public SpeciesSelectionTaskConfig
   {
   protected:
-    Fluc::Models::LinearNoiseApproximation *model;
+    Fluc::Models::IOSmodel *model;
 
     int max_iterations;
     double epsilon;
@@ -62,7 +62,7 @@ protected:
   /** Holds the task configuration. */
   Config config;
   /** Holds an instance of the analysis. */
-  Fluc::Models::SteadyStateAnalysis steady_state;
+  Fluc::Models::SteadyStateAnalysis<Fluc::Models::IOSmodel> steady_state;
   Eigen::VectorXd concentrations;
   Eigen::VectorXd emre_corrections;
   Eigen::VectorXd ios_corrections;

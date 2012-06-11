@@ -1,6 +1,5 @@
 #include "rewizard.hh"
 #include "../application.hh"
-#include "models/linearnoiseapproximation.hh"
 #include "exception.hh"
 
 #include <QMessageBox>

@@ -75,13 +75,13 @@ Convert2IrreversibleMixin::Convert2IrreversibleMixin(Ast::Model &model)
       {
           if(reaction->hasReactant( species->first ))
           {
-              GiNaC::ex stoichiometry = - (reaction->getReactantStoichiometry(species->first->getSymbol()));
-              backwardReaction->setProductStoichiometry( species->first,-stoichiometry );
+              GiNaC::ex stoichiometry = (reaction->getReactantStoichiometry(species->first->getSymbol()));
+              backwardReaction->setProductStoichiometry( species->first,stoichiometry );
           }
           else if(reaction->hasProduct( species->first ))
           {
-              GiNaC::ex stoichiometry = - ( reaction->getProductStoichiometry(species->first->getSymbol()) );
-              backwardReaction->setReactantStoichiometry(species->first,-stoichiometry);
+              GiNaC::ex stoichiometry = ( reaction->getProductStoichiometry(species->first->getSymbol()) );
+              backwardReaction->setReactantStoichiometry(species->first,stoichiometry);
           }
           else
           {

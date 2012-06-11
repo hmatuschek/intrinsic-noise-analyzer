@@ -2,7 +2,6 @@
 
 using namespace Fluc;
 
-
 int main(int argc, char *argv[])
 {
   // Check args:
@@ -27,19 +26,20 @@ int main(int argc, char *argv[])
   //try
   {
 
-      // state vector (deterministic concentrations + covariances)
+        Models::BaseModel base(doc->getModel());
 
-
-
-    Models::BaseModel base(doc->getModel());
+        Models::REmodel model1(base);
+        Models::REinterpreter inter(model1,2,1);
 
         // Construct LNA model from SBML model
         Models::LinearNoiseApproximation model(base);
-        Models::SteadyStateAnalysis steadyState(model);
+        Models::SteadyStateAnalysisOld steadyState(model);
+
 
         Eigen::VectorXd x(model.getDimension());
 
         Eigen::VectorXd concentrations(model.numSpecies());
+
         Eigen::MatrixXd cov(model.numSpecies(),model.numSpecies());
         Eigen::VectorXd emre(model.numSpecies());
 
@@ -49,15 +49,26 @@ int main(int argc, char *argv[])
 
         // initialize state
         model.getInitialState(x);
-
-        steadyState.calcSteadyState(x);
-
+        steadyState.calcIOS(x);
         model.fullState(x,concentrations,cov,emre,ioscov,thirdmoment,iosemre);
 
-        std::cout<<concentrations<<std::endl;
+        std::cout<<concentrations.transpose()<<std::endl;
+        std::cout<<(emre).transpose()<<std::endl;
+        std::cout<<(iosemre).transpose()<<std::endl;
 
+        std::cout<<std::endl<<std::endl;
 
-//    Models::LNAinterpreter interpreter(model, 2, 1);
+        Models::IOSmodel modelN(base);
+        Models::SteadyStateAnalysis<Models::IOSmodel> test(modelN);
+
+        Eigen::VectorXd xi(modelN.getDimension());
+
+        modelN.getInitialState(xi);
+        test.calcSteadyState(xi);
+        modelN.fullState(xi,concentrations,cov,emre,ioscov,thirdmoment,iosemre);
+
+        std::cout<<concentrations.transpose()<<std::endl;
+        std::cout<<iosemre.transpose()<<std::endl;
 
 //    double dt=0.01;
 //    ODE::LsodaDriver<Models::LNAinterpreter> integrator(interpreter,dt,1e-9,1e-5);
