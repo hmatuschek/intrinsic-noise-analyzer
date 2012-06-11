@@ -81,7 +81,7 @@ public:
                 throw NumericError("Maximum iterations reached. iNA is unable to find the roots of the system. You may try again with bigger number of iterations."); break;
             case NLEsolve::RoundOffProblem:
                 throw NumericError("iNA has encountered an round-off problem for which line searched failed."); break;
-            case NLEsolve::LineSearchFailed:
+            case NLEsolve::IterationFailed:
                 throw NumericError("Line search failed. iNA is unable to find the roots of the system."); break;
             default:
                 throw InternalError("Solver returned non-standard error. Status not resolved."); break;
@@ -382,7 +382,7 @@ public:
               throw NumericError("Maximum iterations reached. iNA is unable to find the roots of the system. You may try again with bigger number of iterations."); break;
           case NLEsolve::RoundOffProblem:
               throw NumericError("iNA has encountered an round-off problem for which line searched failed."); break;
-          case NLEsolve::LineSearchFailed:
+          case NLEsolve::IterationFailed:
               throw NumericError("Line search failed. iNA is unable to find the roots of the system."); break;
           default:
               throw InternalError("Solver returned non-standard error. Status not resolved."); break;
