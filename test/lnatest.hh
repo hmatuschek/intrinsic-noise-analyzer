@@ -2,7 +2,7 @@
 #define LNATEST_HH
 
 #include "unittest.hh"
-#include "models/linearnoiseapproximation.hh"
+#include "models/LNAmodel.hh"
 
 
 namespace Fluc {
@@ -26,7 +26,7 @@ public:
 private:
   void compareIntegrators(const std::string &file, double final_time);
 
-  void integrateViaByteCode(Models::LinearNoiseApproximation &model,
+  void integrateViaByteCode(Models::LNAmodel &model,
                             const Eigen::VectorXd &init_state, Eigen::VectorXd &final_state,
                             double final_time, double err_abs, double err_rel);
 };
