@@ -1,9 +1,10 @@
 #include "lnatest.hh"
 #include "exception.hh"
 #include "utils/cputime.hh"
-#include "models/lnainterpreter.hh"
-#include "models/lnaevaluator.hh"
+#include "models/LNAmodel.hh"
 #include "ode/ode.hh"
+#include "models/sseinterpreter.hh"
+
 
 using namespace Fluc;
 
