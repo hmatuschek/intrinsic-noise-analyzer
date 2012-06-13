@@ -2,8 +2,8 @@
 #include "exception.hh"
 #include "utils/cputime.hh"
 #include "models/LNAmodel.hh"
-#include "ode/ode.hh"
 #include "models/sseinterpreter.hh"
+#include "ode/ode.hh"
 
 
 using namespace Fluc;
@@ -46,7 +46,7 @@ LNATest::compareIntegrators(const std::string &file, double final_time)
   UT_ASSERT_EQUAL(doc->getNumErrors(), 0u);
 
   // Construct LNA model to integrate
-  Models::LinearNoiseApproximation model(doc->getModel());
+  Models::LNAmodel model(doc->getModel());
 
   Eigen::VectorXd initial_state(model.getDimension());
   Eigen::VectorXd final_state_intpr(model.getDimension());
@@ -61,7 +61,7 @@ LNATest::compareIntegrators(const std::string &file, double final_time)
 
 
 void
-LNATest::integrateViaByteCode(Models::LinearNoiseApproximation &model,
+LNATest::integrateViaByteCode(Models::LNAmodel &model,
                               const Eigen::VectorXd &init_state, Eigen::VectorXd &final_state,
                               double final_time, double err_abs, double err_rel)
 {

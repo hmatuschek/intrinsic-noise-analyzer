@@ -1,5 +1,5 @@
 #include "benchmark.hh"
-#include "models/lnainterpreter.hh"
+#include "models/sseinterpreter.hh"
 #include "models/gillespieSSA.hh"
 #include "models/optimizedSSA.hh"
 
@@ -16,10 +16,10 @@
 
 using namespace Fluc;
 
-typedef Models::GenericSSEinterpreter< Eval::bci::Engine<Eigen::VectorXd>, Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd> > BCIInterpreter;
-typedef Models::GenericSSEinterpreter< Eval::bcimp::Engine<Eigen::VectorXd>, Eval::bcimp::Engine<Eigen::VectorXd, Eigen::MatrixXd> > BCIMPInterpreter;
-typedef Models::GenericSSEinterpreter< Eval::jit::Engine<Eigen::VectorXd>, Eval::jit::Engine<Eigen::VectorXd, Eigen::MatrixXd> > LLVMInterpreter;
-typedef Models::GenericSSEinterpreter< Eval::direct::Engine<Eigen::VectorXd>, Eval::direct::Engine<Eigen::VectorXd, Eigen::MatrixXd> > GiNaCInterpreter;
+typedef Models::GenericSSEinterpreter< Models::LinearNoiseApproximation, Eval::bci::Engine<Eigen::VectorXd>, Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd> > BCIInterpreter;
+typedef Models::GenericSSEinterpreter< Models::LinearNoiseApproximation, Eval::bcimp::Engine<Eigen::VectorXd>, Eval::bcimp::Engine<Eigen::VectorXd, Eigen::MatrixXd> > BCIMPInterpreter;
+typedef Models::GenericSSEinterpreter< Models::LinearNoiseApproximation, Eval::jit::Engine<Eigen::VectorXd>, Eval::jit::Engine<Eigen::VectorXd, Eigen::MatrixXd> > LLVMInterpreter;
+typedef Models::GenericSSEinterpreter< Models::LinearNoiseApproximation, Eval::direct::Engine<Eigen::VectorXd>, Eval::direct::Engine<Eigen::VectorXd, Eigen::MatrixXd> > GiNaCInterpreter;
 
 typedef Models::GenericGillespieSSA< Eval::bci::Engine<Eigen::VectorXd> > GillespieBCI;
 typedef Models::GenericGillespieSSA< Eval::jit::Engine<Eigen::VectorXd> > GillespieJIT;
