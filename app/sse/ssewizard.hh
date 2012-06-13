@@ -8,18 +8,20 @@
 #include <QSpinBox>
 #include <QCheckBox>
 #include <QLabel>
+#include <QRadioButton>
 
 #include "models/linearnoiseapproximation.hh"
 #include "../doctree/documentitem.hh"
 #include "../views/generaltaskwizard.hh"
 
-#include "iostask.hh"
+
+#include "ssetaskconfig.hh"
 
 
 /**
  * Simple wizzard to configure the deterministic time-course analysis.
  */
-class IOSWizard : public GeneralTaskWizard
+class SSEWizard : public GeneralTaskWizard
 {
   Q_OBJECT
 
@@ -41,12 +43,12 @@ protected:
    *
    * This instance will be populated by the wizzard.
    */
-  IOSTask::Config config;
+  SSETaskConfig config;
 
 
 public:
   /** Constructor. */
-  explicit IOSWizard(QWidget *parent = 0);
+  explicit SSEWizard(QWidget *parent = 0);
   /** Implements GeneralTaskWizard interface. */
   virtual GeneralTaskConfig &getConfig();
 };
@@ -57,27 +59,32 @@ public:
  * Tiny specialization of @c ModelSelectionWizardPage, that checks if the selected model
  * can be analyzed using deterministic REs (almost all models can be analyzed this way).
  */
-class IOSModelSelectionPage : public ModelSelectionWizardPage
+class SSEModelSelectionPage : public ModelSelectionWizardPage
 {
   Q_OBJECT
 
 public:
   /** Constructor. */
-  explicit IOSModelSelectionPage(GeneralTaskWizard *parent);
+  explicit SSEModelSelectionPage(GeneralTaskWizard *parent);
 
   /** Simply checks if a REModel can in instantiated for the selected SBML model. */
   virtual bool validatePage();
+
+private:
+  QRadioButton *_re_button;
+  QRadioButton *_lna_button;
+  QRadioButton *_ios_button;
 };
 
 
 /**
  * Specialization of SpeciesSelectionWizardPage.
  */
-class IOSSpeciesSelectionPage : public SpeciesSelectionWizardPage
+class SSESpeciesSelectionPage : public SpeciesSelectionWizardPage
 {
 public:
   /** Constructor. */
-  explicit IOSSpeciesSelectionPage(GeneralTaskWizard *parent);
+  explicit SSESpeciesSelectionPage(GeneralTaskWizard *parent);
 };
 
 
@@ -95,11 +102,11 @@ public:
 /**
  * Simple summary page to finalize configuration.
  */
-class IOSSummaryPage : public QWizardPage
+class SSESummaryPage : public QWizardPage
 {
 public:
   /** Constructor. */
-  explicit IOSSummaryPage(GeneralTaskWizard *parent);
+  explicit SSESummaryPage(GeneralTaskWizard *parent);
 
   virtual void initializePage();
 

@@ -28,12 +28,16 @@ SET(ina_app_lna_HEADERS
     lna/lnawizard.hh lna/lnatask.hh lna/lnataskwrapper.hh lna/lnataskview.hh
     lna/lnaplot.hh lna/lnamodule.hh)
 
-SET(ina_app_ios_SOURCES
-    ios/iosmodule.cc ios/iostask.cc ios/iostaskwrapper.cc ios/iostaskview.cc ios/ioswizard.cc
-    ios/iosplot.cc)
-SET(ina_app_ios_HEADERS
-    ios/iosmodule.hh ios/iostask.hh ios/iostaskwrapper.hh ios/iostaskview.hh ios/ioswizard.hh
-    ios/iosplot.hh)
+SET(ina_app_sse_SOURCES sse/ssetaskconfig.cc
+    sse/ssemodule.cc sse/ssewizard.cc
+    sse/iostask.cc sse/iostaskwrapper.cc sse/iostaskview.cc sse/iosplot.cc
+    sse/lnatask.cc sse/lnataskwrapper.cc sse/lnataskview.cc sse/lnaplot.cc
+    sse/retask.cc  sse/retaskwrapper.cc  sse/retaskview.cc  sse/replot.cc)
+SET(ina_app_sse_HEADERS
+    sse/ssemodule.hh sse/ssewizard.hh
+    sse/iostask.hh sse/iostaskwrapper.hh sse/iostaskview.hh sse/iosplot.hh
+    sse/lnatask.hh sse/lnataskwrapper.hh sse/lnataskview.hh sse/lnaplot.hh
+    sse/retask.hh  sse/retaskwrapper.hh  sse/retaskview.hh  sse/replot.hh)
 
 SET(ina_app_steadystate_SOURCES
     steadystate/lnasteadystatetask.cc steadystate/lnasteadystatetaskwrapper.cc
@@ -89,9 +93,10 @@ SET(ina_app_SOURCES
     ${ina_app_models_SOURCES}
     ${ina_app_views_SOURCES}
     ${ina_app_plot_SOURCES}
-    ${ina_app_re_SOURCES}
-    ${ina_app_lna_SOURCES}
-    ${ina_app_ios_SOURCES}
+    #${ina_app_re_SOURCES}
+    #${ina_app_lna_SOURCES}
+    #${ina_app_ios_SOURCES}
+    ${ina_app_sse_SOURCES}
     ${ina_app_steadystate_SOURCES}
     ${ina_app_ssa_SOURCES})
 SET(ina_app_HEADERS
@@ -100,9 +105,10 @@ SET(ina_app_HEADERS
     ${ina_app_models_HEADERS}
     ${ina_app_views_HEADERS}
     ${ina_app_plot_HEADERS}
-    ${ina_app_re_HEADERS}
-    ${ina_app_lna_HEADERS}
-    ${ina_app_ios_HEADERS}
+    #${ina_app_re_HEADERS}
+    #${ina_app_lna_HEADERS}
+    #${ina_app_ios_HEADERS}
+    ${ina_app_sse_HEADERS}
     ${ina_app_steadystate_HEADERS}
     ${ina_app_ssa_HEADERS})
 

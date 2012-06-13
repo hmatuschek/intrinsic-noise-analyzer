@@ -60,7 +60,7 @@ public:
   }
 
   /**
-   * Runs the compiled system. Firstly, checks if the system was allready compiled. If not,
+   * Runs the compiled system. First, checks if the system was allready compiled. If not,
    * the function is requested from the @c Code object. Then executes the function directly.
    */
   inline void run(const typename InType::Scalar *input, typename OutType::Scalar *output)

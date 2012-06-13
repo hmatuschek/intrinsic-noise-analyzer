@@ -1,10 +1,8 @@
 #include "main.hh"
 
-#include "lna/lnamodule.hh"
-#include "steadystate/lnasteadystatemodule.hh"
 #include "ssa/ssamodule.hh"
-#include "re/remodule.hh"
-#include "ios/iosmodule.hh"
+#include "steadystate/lnasteadystatemodule.hh"
+#include "sse/ssemodule.hh"
 #include "doctree/documentitem.hh"
 #include "utils/logger.hh"
 
@@ -30,12 +28,8 @@ int main(int argc, char *argv[])
 
   // Load SteadyState module:
   app->addModule(new LNASteadyStateModule(app));
-  // Load RE module
-  app->addModule(new REModule(app));
-  // Load LNA module
-  app->addModule(new LNAModule(app));
-  // Load IOS module
-  app->addModule(new IOSModule(app));
+  // Load SSE module
+  app->addModule(new SSEModule(app));
   // Load SSA module:
   app->addModule(new SSAModule(app));
 
