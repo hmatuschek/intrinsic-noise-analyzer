@@ -16,7 +16,7 @@ ModelItem::ModelItem(libsbml::SBMLDocument *document, QObject *parent) :
   QObject(parent), base_model(0), itemLabel("Model")
 {
   // Now, assemble a base model from SBML:
-  this->base_model = new Ast::Model(document->getModel());
+  this->base_model = new Models::BaseModel(document->getModel());
 
   // Assemble child-items:
   CompartmentsItem *compartments = new CompartmentsItem(this->base_model, this);

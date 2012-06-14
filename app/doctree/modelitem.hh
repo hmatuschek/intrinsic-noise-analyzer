@@ -4,7 +4,7 @@
 #include <QObject>
 
 #include <sbml/SBMLTypes.h>
-#include "ast/model.hh"
+#include "models/basemodel.hh"
 #include "documenttreeitem.hh"
 
 
@@ -51,7 +51,7 @@ private:
   /**
    * Holds the SBML document associated with the model.
    */
-  Fluc::Ast::Model *base_model;
+  Fluc::Models::BaseModel *base_model;
 
   /**
    * Holds the display label for the item in the @c DocumentTree.
