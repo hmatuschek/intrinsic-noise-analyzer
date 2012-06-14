@@ -54,7 +54,7 @@ SSEModelSelectionPage::SSEModelSelectionPage(GeneralTaskWizard *parent)
   // Append method selection radio buttons to the wizard page.
   _re_button  = new QRadioButton("Deterministic RE analysis.");
   _lna_button = new QRadioButton("RE, LNA and EMRE analysis.");
-  _ios_button = new QRadioButton("RE, LNA, EMERE and IOS analysis.");
+  _ios_button = new QRadioButton("RE, LNA, EMRE and IOS analysis.");
 
   QVBoxLayout *box =  new QVBoxLayout();
   box->addWidget(_re_button);
