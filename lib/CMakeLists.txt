@@ -72,7 +72,6 @@ SET(libina_models_SOURCES
     models/assertconstantparametermixin.cc
     models/assertnoassignmentrule.cc models/assertnoraterule.cc
     models/assertirreversiblereactions.cc
-    models/convert2irreversiblemixin.cc
     models/reasonablemodelmixin.cc
     models/baseunitmixin.cc
     models/particlenumbersmixin.cc
@@ -105,7 +104,6 @@ SET(libina_models_HEADERS models/models.hh
     models/assertconstantparametermixin.hh
     models/assertnoassignmentrule.hh models/assertnoraterule.hh
     models/assertirreversiblereactions.hh
-    models/convert2irreversiblemixin.hh
     models/reasonablemodelmixin.hh
     models/baseunitmin.hh
     models/particlenumbersmixin.hh

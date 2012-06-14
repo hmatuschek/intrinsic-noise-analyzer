@@ -4,7 +4,6 @@
 #include "assembler.hh"
 #include "converter.hh"
 #include "trafo/modelcopyist.hh"
-#include "models/convert2irreversiblemixin.hh"
 
 using namespace Fluc;
 using namespace Fluc::Ast;
