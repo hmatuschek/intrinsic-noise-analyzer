@@ -2,8 +2,9 @@
 #include "exception.hh"
 #include "reaction.hh"
 #include "assembler.hh"
+#include "converter.hh"
 #include "trafo/modelcopyist.hh"
-
+#include "models/convert2irreversiblemixin.hh"
 
 using namespace Fluc;
 using namespace Fluc::Ast;
@@ -21,6 +22,9 @@ Model::Model(libsbml::Model *model)
 {
   Assembler assembler(*this);
   assembler.processModel(model);
+
+  Convert2Irreversible converter(*this);
+  converter.process();
 }
 
 

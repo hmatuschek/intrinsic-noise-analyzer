@@ -47,12 +47,14 @@ void Convert2Irreversible::process()
           }
       }
 
+      // skip reaction if unsuccesful
       if (!numerator.is_equal(forwardLaw+backwardLaw))
       {
-          SBMLFeatureNotSupported err;
-          err << "Reversible reaction "
-              << (*iter)->getIdentifier() << " could not be converted to a reversible one!";
-          throw err;
+            continue;
+//          SBMLFeatureNotSupported err;
+//          err << "Reversible reaction "
+//              << (*iter)->getIdentifier() << " could not be converted to a reversible one!";
+//          throw err;
       }
 
       forwardLaw=forwardLaw/denominator;
