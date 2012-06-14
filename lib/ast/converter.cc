@@ -38,7 +38,6 @@ void Convert2Irreversible::process()
 
           if ( reaction->hasReactant( model.getSpecies(i)->getSymbol()) )
           {
-              std::cerr<<i<<std::endl;
               backwardLaw=backwardLaw.subs(model.getSpecies(i)->getSymbol()==0);
           }
           if ( reaction->hasProduct(model.getSpecies(i)->getSymbol()) )
@@ -73,12 +72,13 @@ void Convert2Irreversible::process()
 
       // create a new irreversible backward reaction
       std::string id = reaction->getIdentifier();
-      std::string name = reaction->getName();
-
       id=id.append("Reverse");
+
+      std::string name = reaction->getName();
       name.append(" (Reverse)");
+
       Ast::KineticLaw *kineticLaw = new Ast::KineticLaw(backwardLaw);
-      Ast::Reaction *backwardReaction = new Ast::Reaction(id, name, kineticLaw,false);
+      Ast::Reaction *backwardReaction = new Ast::Reaction(id, name, kineticLaw, false);
 
       // swap reactant and products in reverse reaction
       for(Ast::Reaction::iterator species = reaction->reacBegin(); species!=reaction->reacEnd(); species++)
