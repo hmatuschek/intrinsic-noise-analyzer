@@ -36,6 +36,21 @@ public:
    */
   static Ast::Reaction *dupReaction(Reaction *node);
 
+  /**
+   * Function to copy a single reaction of a model, that refers to the original species and global
+   * parameters etc, while owning a fresh copy of the kinetic law (with its own local parameters).
+   *
+   * The kinetic law of the reaction may have locally defined parameters. The translation between
+   * "old local parameters" to the new (copied) parameters is retunred in param_table.
+   */
+  static Ast::Reaction *dupReaction(Reaction *node, GiNaC::exmap &param_table);
+
+  /**
+   * Function to copy a single kinetic law instance of a reaction of a model, that refers to the
+   * original species and global parameters etc, while owning a its own local parameters.
+   */
+  static Ast::KineticLaw *dupKineticLaw(Ast::KineticLaw *law, GiNaC::exmap &param_table);
+
 
 protected:
   /**

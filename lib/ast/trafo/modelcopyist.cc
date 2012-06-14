@@ -97,6 +97,39 @@ ModelCopyist::dupReaction(Reaction *node)
   return ModelCopyist::copyReaction(node, translation_table, species_table);
 }
 
+Ast::Reaction *
+ModelCopyist::dupReaction(Reaction *node, GiNaC::exmap &param_table)
+{
+  // Create empty translation-tables:
+  std::map<Ast::Species *, Ast::Species *> species_table;
+  GiNaC::exmap translation_table;
+
+  // Perform copy:
+  Ast::Reaction *reac_copy = ModelCopyist::copyReaction(node, translation_table, species_table);
+  // Extend param_table with subst. "old param symbol" -> "copy of param symbol":
+  param_table.insert(translation_table.begin(), translation_table.end());
+
+  // return copy
+  return reac_copy;
+}
+
+
+Ast::KineticLaw *
+ModelCopyist::dupKineticLaw(Ast::KineticLaw *law, GiNaC::exmap &param_table)
+{
+  // Create empty translation-tables:
+  GiNaC::exmap translation_table;
+
+  // Perform copy:
+  Ast::KineticLaw *law_copy = ModelCopyist::copyKineticLaw(law, translation_table);
+  // Extend param_table with subst. "old param symbol" -> "copy of param symbol":
+  param_table.insert(translation_table.begin(), translation_table.end());
+
+  // return copy
+  return law_copy;
+}
+
+
 
 /* ********************************************************************************************* *
  * Helper functions...

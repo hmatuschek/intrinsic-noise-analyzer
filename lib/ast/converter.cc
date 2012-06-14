@@ -1,4 +1,6 @@
 #include "converter.hh"
+#include "trafo/modelcopyist.hh"
+
 
 using namespace Fluc;
 using namespace Fluc::Ast;
@@ -77,8 +79,14 @@ void Convert2Irreversible::process()
       std::string name = reaction->getName();
       name.append(" (Reverse)");
 
-      Ast::KineticLaw *kineticLaw = new Ast::KineticLaw(backwardLaw);
+      // Create copy of kinetic law:
+      GiNaC::exmap param_subst;
+      Ast::KineticLaw *kineticLaw = Ast::Trafo::ModelCopyist::dupKineticLaw(reaction->getKineticLaw(), param_subst);
+      // Substitute local paramters (if there are some):
+      kineticLaw->setRateLaw(backwardLaw.subs(param_subst));
+      // Assemble reverse reaction:
       Ast::Reaction *backwardReaction = new Ast::Reaction(id, name, kineticLaw, false);
+
 
       // swap reactant and products in reverse reaction
       for(Ast::Reaction::iterator species = reaction->reacBegin(); species!=reaction->reacEnd(); species++)
