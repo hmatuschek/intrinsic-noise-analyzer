@@ -99,7 +99,7 @@ CompilerCore::finalize(size_t level)
 
   //code->getModule()->dump();
   // Dump target tripel for compiled code:
-  std::cerr << "Compile for target : " << code->getModule()->getTargetTriple() << std::endl;
+  std::cerr << "Compile for target : " << engine->getTargetData()->getStringRepresentation() << std::endl;
 
   // Get function pointer:
   code->setFunctionPtr(engine->getPointerToFunction(code->getSystem()));

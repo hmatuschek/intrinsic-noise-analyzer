@@ -22,6 +22,7 @@ Code::Code(size_t num_threads)
 {
   // Init target and create module:
   llvm::InitializeNativeTarget();
+
   module = new llvm::Module("system", context);
 
   { // Assemble function interface:
