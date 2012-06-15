@@ -61,7 +61,7 @@ ModelSelectionWizardPage::validatePage()
 
 
 /* ******************************************************************************************* *
- * Implementation of ModelSelectionWizardPage
+ * Implementation of SpeciesSelectionWizardPage
  * ******************************************************************************************* */
 SpeciesSelectionWizardPage::SpeciesSelectionWizardPage(GeneralTaskWizard *parent)
   : QWizardPage(parent)
@@ -143,6 +143,69 @@ SpeciesSelectionWizardPage::validatePage()
 
 
 /* ********************************************************************************************* *
+ * Implementation of the engine configuration page
+ * ********************************************************************************************* */
+EngineWizardPage::EngineWizardPage(GeneralTaskWizard *parent, bool show_parallel_engine)
+  : QWizardPage(parent), _show_parallel_engine(show_parallel_engine)
+{
+  // Construct engine selection.
+  engineList = new QComboBox();
+  engineList->addItem("Bytecode interpreter", uint(EngineTaskConfig::BCI_ENGINE));
+  if (_show_parallel_engine)
+    engineList->addItem("Parallel bytecode interpreter", uint(EngineTaskConfig::BCIMP_ENGINE));
+  engineList->addItem("JIT compiler (experimental)", uint(EngineTaskConfig::JIT_ENGINE));
+  engineList->setCurrentIndex(0);
+
+  // Construct code opt
+  codeOpt = new QCheckBox();
+  codeOpt->setChecked(false);
+
+  // Construct thread count
+  numThreads = new QSpinBox(this);
+  numThreads->setMinimum(1);
+  numThreads->setMaximum(OpenMP::getMaxThreads());
+  numThreads->setValue(OpenMP::getMaxThreads());
+  if (1 == OpenMP::getMaxThreads())
+    numThreads->setEnabled(false);
+  numThreads->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
+  if (! _show_parallel_engine)
+    numThreads->setVisible(false);
+
+  QFormLayout *layout = new QFormLayout();
+  layout->addRow(tr("execution engine"), engineList);
+  layout->addRow(tr("optimize code"), codeOpt);
+  if (_show_parallel_engine)
+    layout->addRow(tr("number of threads"), numThreads);
+  this->setLayout(layout);
+}
+
+
+bool
+EngineWizardPage::validatePage()
+{
+  // Just get wizard
+  GeneralTaskWizard *wizard = static_cast<GeneralTaskWizard *>(this->wizard());
+
+  // Set engine kind.
+  EngineTaskConfig::EngineKind kind = EngineTaskConfig::EngineKind(
+        engineList->itemData(engineList->currentIndex()).toUInt());
+  wizard->getConfigCast<EngineTaskConfig>().setEngine(kind);
+
+  // Set code opt level
+  if (codeOpt->isChecked())
+    wizard->getConfigCast<EngineTaskConfig>().setOptLevel(1);
+  else
+    wizard->getConfigCast<EngineTaskConfig>().setOptLevel(0);
+
+  // Set num threads
+  wizard->getConfigCast<EngineTaskConfig>().setNumEvalThreads(numThreads->value());
+
+  return true;
+}
+
+
+
+/* ********************************************************************************************* *
  * Implementation of the integrator configuration page
  * ********************************************************************************************* */
 IntegratorWizardPage::IntegratorWizardPage(QWidget *parent)
@@ -190,20 +253,6 @@ IntegratorWizardPage::IntegratorWizardPage(QWidget *parent)
   ep_abs_val->setBottom(0); ep_rel->setValidator(ep_rel_val);
   this->registerField("epsilon_rel", ep_rel);
 
-  this->optByteCode = new QCheckBox();
-  this->optByteCode->setChecked(true);
-  this->optByteCode->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
-  this->registerField("opt_bytecode", this->optByteCode);
-
-  this->numThreads = new QSpinBox();
-  this->numThreads->setMinimum(1);
-  this->numThreads->setMaximum(OpenMP::getMaxThreads());
-  this->numThreads->setValue(OpenMP::getMaxThreads());
-  if (1 == OpenMP::getMaxThreads())
-    this->numThreads->setEnabled(false);
-  this->numThreads->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
-  this->registerField("num_threads", this->numThreads);
-
   QFormLayout *layout = new QFormLayout();
   layout->addRow(tr("Final time"), t);
   layout->addRow(tr("Number of time steps"), n);
@@ -211,8 +260,6 @@ IntegratorWizardPage::IntegratorWizardPage(QWidget *parent)
   layout->addRow(tr("Integrator"), this->integrator);
   layout->addRow(tr("Max. absolute error"), ep_abs);
   layout->addRow(tr("Max. relative error"), ep_rel);
-  layout->addRow(tr("Optimize byte-code"), this->optByteCode);
-  layout->addRow(tr("Thread count"), this->numThreads);
   this->setLayout(layout);
 }
 
@@ -257,14 +304,6 @@ IntegratorWizardPage::validatePage()
   config.setIntegrationRange(Fluc::ODE::IntegrationRange(t0, t, n*(1+n_imm)));
   config.setEpsilon(epsilon_abs, epsilon_rel);
   config.setIntermediateSteps(n_imm);
-
-  if (this->optByteCode->isChecked()) {
-    config.setOptLevel(1);
-  } else {
-    config.setOptLevel(0);
-  }
-
-  config.setNumThreads(this->numThreads->value());
 
   if ("rk4" == this->integrator->itemData(this->integrator->currentIndex()).toString()) {
     config.setIntegrator(ODEIntTaskConfig::RungeKutta4);

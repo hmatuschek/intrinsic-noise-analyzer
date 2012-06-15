@@ -32,6 +32,7 @@ public:
   typedef enum {
     MODEL_SELECTION_PAGE,
     SPECIES_SELECTION_PAGE,
+    ENGINE_SELECTION_PAGE,
     INTEGRATOR_CONFIG_PAGE,
     SUMMARY_PAGE
   } PageId;
@@ -85,6 +86,17 @@ class SSESpeciesSelectionPage : public SpeciesSelectionWizardPage
 public:
   /** Constructor. */
   explicit SSESpeciesSelectionPage(GeneralTaskWizard *parent);
+};
+
+
+/**
+ * Specialization of EngineWizardPage.
+ */
+class SSEEngineSelectionPage : public EngineWizardPage
+{
+public:
+  /** Constructor. */
+  explicit SSEEngineSelectionPage(GeneralTaskWizard *parent);
 };
 
 

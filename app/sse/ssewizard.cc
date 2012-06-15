@@ -27,6 +27,7 @@ SSEWizard::SSEWizard(QWidget *parent) :
 
   this->setPage(SSEWizard::MODEL_SELECTION_PAGE, new SSEModelSelectionPage(this));
   this->setPage(SSEWizard::SPECIES_SELECTION_PAGE, new SSESpeciesSelectionPage(this));
+  this->setPage(SSEWizard::ENGINE_SELECTION_PAGE, new SSEEngineSelectionPage(this));
   this->setPage(SSEWizard::INTEGRATOR_CONFIG_PAGE, new SSEIntegratorPage(this));
   this->setPage(SSEWizard::SUMMARY_PAGE, new SSESummaryPage(this));
   this->page(SSEWizard::SUMMARY_PAGE)->setFinalPage(true);
@@ -106,8 +107,20 @@ SSEModelSelectionPage::validatePage()
 SSESpeciesSelectionPage::SSESpeciesSelectionPage(GeneralTaskWizard *parent)
   : SpeciesSelectionWizardPage(parent)
 {
-  this->setTitle(tr("Time Course Analysis (IOS)"));
+  this->setTitle(tr("Time Course Analysis (SSE)"));
   this->setSubTitle(tr("Select some species for analysis."));
+}
+
+
+
+/* ********************************************************************************************* *
+ * Implementation of the integrator configuration page
+ * ********************************************************************************************* */
+SSEEngineSelectionPage::SSEEngineSelectionPage(GeneralTaskWizard *parent)
+  : EngineWizardPage(parent, true)
+{
+  setTitle("Time Course Analysis (SSE)");
+  setSubTitle("Execution engine");
 }
 
 
@@ -118,7 +131,7 @@ SSESpeciesSelectionPage::SSESpeciesSelectionPage(GeneralTaskWizard *parent)
 SSEIntegratorPage::SSEIntegratorPage(GeneralTaskWizard *parent)
   : IntegratorWizardPage(parent)
 {
-  this->setTitle("Time Course Analysis (IOS)");
+  this->setTitle("Time Course Analysis (SSE)");
   this->setSubTitle("Set parameters");
 }
 
@@ -130,7 +143,7 @@ SSEIntegratorPage::SSEIntegratorPage(GeneralTaskWizard *parent)
 SSESummaryPage::SSESummaryPage(GeneralTaskWizard *parent)
   : QWizardPage(parent)
 {
-  this->setTitle("Time Course Analysis (IOS)");
+  this->setTitle("Time Course Analysis (SSE)");
   this->setSubTitle("Summary");
 
   this->model_name = new QLabel();

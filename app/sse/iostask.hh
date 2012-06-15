@@ -32,7 +32,7 @@ protected:
    * Holds an instance of the bytecode interpreter for the LNA model, this object also implements
    * the @c System interface for the integrators.
    */
-  Fluc::Models::IOSinterpreter interpreter;
+  Fluc::Models::SSEInterpreterInterface *interpreter;
 
   /**
    * Holds a weak reference to the stepper being used.

@@ -1,6 +1,13 @@
 #include "retask.hh"
 #include "ode/ode.hh"
 
+using namespace Fluc;
+
+
+/*
+ * By the way, have I ever told you how much I hate, I mean really hate, the C++ template syntax?
+ */
+
 
 
 /* ******************************************************************************************** *
@@ -8,12 +15,309 @@
  * ******************************************************************************************** */
 RETask::RETask(const SSETaskConfig &config, QObject *parent) :
   Task(parent), config(config),
-  interpreter(*config.getModelAs<Fluc::Models::REmodel>(), config.getOptLevel(), config.getNumThreads(), false),
+  interpreter(0), stepper(0),
   timeseries(1 + config.getNumSpecies(),
     1+config.getIntegrationRange().getSteps()/(1+config.getIntermediateSteps()))
 {
-  size_t column = 0;
+  // First, construct interpreter and integerator by selected execution engine:
+  switch(config.getEngine()) {
 
+  /* *********************************** Handle GINAC Engine *********************************** */
+  case EngineTaskConfig::GINAC_ENGINE:
+    // Assemble REinterpreter with GINAC engine:
+    interpreter = new Models::GenericSSEinterpreter<
+        Models::REmodel, Eval::direct::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+        Eval::direct::Engine<Eigen::VectorXd, Eigen::MatrixXd> >(
+          *config.getModelAs<Fluc::Models::REmodel>(),
+          config.getOptLevel(), config.getNumEvalThreads(), false);
+
+    // Instantiate integrator for that engine:
+    switch (config.getIntegrator()) {
+    case SSETaskConfig::RungeKutta4:
+      stepper = new ODE::RungeKutta4< Models::GenericSSEinterpreter<
+          Models::REmodel, Eval::direct::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+          Eval::direct::Engine<Eigen::VectorXd, Eigen::MatrixXd> > >(
+            *static_cast< Models::GenericSSEinterpreter<
+            Models::REmodel, Eval::direct::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+            Eval::direct::Engine<Eigen::VectorXd, Eigen::MatrixXd> > *>(interpreter),
+            config.getIntegrationRange().getStepSize());
+      break;
+
+    case SSETaskConfig::RungeKuttaFehlberg45:
+      stepper = new ODE::RKF45< Models::GenericSSEinterpreter<
+          Models::REmodel, Eval::direct::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+          Eval::direct::Engine<Eigen::VectorXd, Eigen::MatrixXd> > >(
+            *static_cast< Models::GenericSSEinterpreter<
+            Models::REmodel, Eval::direct::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+            Eval::direct::Engine<Eigen::VectorXd, Eigen::MatrixXd> > *>(interpreter),
+            config.getIntegrationRange().getStepSize(),
+            config.getEpsilonAbs(), config.getEpsilonRel());
+      break;
+
+    case SSETaskConfig::DormandPrince5:
+      stepper = new ODE::Dopri5Stepper< Models::GenericSSEinterpreter<
+          Models::REmodel, Eval::direct::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+          Eval::direct::Engine<Eigen::VectorXd, Eigen::MatrixXd> > >(
+            *static_cast< Models::GenericSSEinterpreter<
+            Models::REmodel, Eval::direct::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+            Eval::direct::Engine<Eigen::VectorXd, Eigen::MatrixXd> > *>(interpreter),
+            config.getIntegrationRange().getStepSize(),
+            config.getEpsilonAbs(), config.getEpsilonRel());
+      break;
+
+    case SSETaskConfig::LSODA:
+      stepper = new ODE::LsodaDriver< Models::GenericSSEinterpreter<
+          Models::REmodel, Eval::direct::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+          Eval::direct::Engine<Eigen::VectorXd, Eigen::MatrixXd> > >(
+            *static_cast< Models::GenericSSEinterpreter<
+            Models::REmodel, Eval::direct::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+            Eval::direct::Engine<Eigen::VectorXd, Eigen::MatrixXd> > *>(interpreter),
+            config.getIntegrationRange().getStepSize(),
+            config.getEpsilonAbs(), config.getEpsilonRel());
+      break;
+
+    case SSETaskConfig::Rosenbrock4:
+      // First, let Interpreter compile the jacobian
+      static_cast<Models::GenericSSEinterpreter<
+          Models::REmodel, Eval::direct::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+          Eval::direct::Engine<Eigen::VectorXd, Eigen::MatrixXd> > *>(interpreter)->compileJacobian();
+
+      // Then, setup integrator:
+      this->stepper = new ODE::Rosenbrock4TimeInd< Models::GenericSSEinterpreter<
+          Models::REmodel, Eval::direct::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+          Eval::direct::Engine<Eigen::VectorXd, Eigen::MatrixXd> > >(
+            *static_cast< Models::GenericSSEinterpreter<
+            Models::REmodel, Eval::direct::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+            Eval::direct::Engine<Eigen::VectorXd, Eigen::MatrixXd> > *>(interpreter),
+            config.getIntegrationRange().getStepSize(),
+            config.getEpsilonAbs(), config.getEpsilonRel());
+      break;
+    }
+    break;
+
+    /* ******************************** Handle Byte Code Engine ******************************** */
+    case EngineTaskConfig::BCI_ENGINE:
+      // Assemble REinterpreter with BCI engine:
+      interpreter = new Models::GenericSSEinterpreter<
+          Models::REmodel, Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+          Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd> >(
+            *config.getModelAs<Fluc::Models::REmodel>(),
+            config.getOptLevel(), config.getNumEvalThreads(), false);
+
+      // Instantiate integrator for that engine:
+      switch (config.getIntegrator()) {
+      case SSETaskConfig::RungeKutta4:
+        stepper = new ODE::RungeKutta4< Models::GenericSSEinterpreter<
+            Models::REmodel, Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+            Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd> > >(
+              *static_cast< Models::GenericSSEinterpreter<
+              Models::REmodel, Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+              Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd> > *>(interpreter),
+              config.getIntegrationRange().getStepSize());
+        break;
+
+      case SSETaskConfig::RungeKuttaFehlberg45:
+        stepper = new ODE::RKF45< Models::GenericSSEinterpreter<
+            Models::REmodel, Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+            Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd> > >(
+              *static_cast< Models::GenericSSEinterpreter<
+              Models::REmodel, Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+              Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd> > *>(interpreter),
+              config.getIntegrationRange().getStepSize(),
+              config.getEpsilonAbs(), config.getEpsilonRel());
+        break;
+
+      case SSETaskConfig::DormandPrince5:
+        stepper = new ODE::Dopri5Stepper< Models::GenericSSEinterpreter<
+            Models::REmodel, Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+            Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd> > >(
+              *static_cast< Models::GenericSSEinterpreter<
+              Models::REmodel, Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+              Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd> > *>(interpreter),
+              config.getIntegrationRange().getStepSize(),
+              config.getEpsilonAbs(), config.getEpsilonRel());
+        break;
+
+      case SSETaskConfig::LSODA:
+        stepper = new ODE::LsodaDriver< Models::GenericSSEinterpreter<
+            Models::REmodel, Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+            Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd> > >(
+              *static_cast< Models::GenericSSEinterpreter<
+              Models::REmodel, Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+              Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd> > *>(interpreter),
+              config.getIntegrationRange().getStepSize(),
+              config.getEpsilonAbs(), config.getEpsilonRel());
+        break;
+
+      case SSETaskConfig::Rosenbrock4:
+        // First, let Interpreter compile the jacobian
+        static_cast<Models::GenericSSEinterpreter<
+            Models::REmodel, Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+            Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd> > *>(interpreter)->compileJacobian();
+
+        // Then, setup integrator:
+        stepper = new ODE::Rosenbrock4TimeInd< Models::GenericSSEinterpreter<
+            Models::REmodel, Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+            Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd> > >(
+              *static_cast< Models::GenericSSEinterpreter<
+              Models::REmodel, Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+              Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd> > *>(interpreter),
+              config.getIntegrationRange().getStepSize(),
+              config.getEpsilonAbs(), config.getEpsilonRel());
+        break;
+      }
+    break;
+
+  /* ********************************* Handle BCI OpenMP Engine ********************************* */
+  case EngineTaskConfig::BCIMP_ENGINE:
+    // Assemble REinterpreter with BCIMP engine:
+    interpreter = new Models::GenericSSEinterpreter<
+        Models::REmodel, Eval::bcimp::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+        Eval::bcimp::Engine<Eigen::VectorXd, Eigen::MatrixXd> >(
+          *config.getModelAs<Fluc::Models::REmodel>(),
+          config.getOptLevel(), config.getNumEvalThreads(), false);
+
+    // Instantiate integrator for that engine:
+    switch (config.getIntegrator()) {
+    case SSETaskConfig::RungeKutta4:
+      stepper = new ODE::RungeKutta4< Models::GenericSSEinterpreter<
+          Models::REmodel, Eval::bcimp::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+          Eval::bcimp::Engine<Eigen::VectorXd, Eigen::MatrixXd> > >(
+            *static_cast< Models::GenericSSEinterpreter<
+            Models::REmodel, Eval::bcimp::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+            Eval::bcimp::Engine<Eigen::VectorXd, Eigen::MatrixXd> > *>(interpreter),
+            config.getIntegrationRange().getStepSize());
+      break;
+
+    case SSETaskConfig::RungeKuttaFehlberg45:
+      stepper = new ODE::RKF45< Models::GenericSSEinterpreter<
+          Models::REmodel, Eval::bcimp::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+          Eval::bcimp::Engine<Eigen::VectorXd, Eigen::MatrixXd> > >(
+            *static_cast< Models::GenericSSEinterpreter<
+            Models::REmodel, Eval::bcimp::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+            Eval::bcimp::Engine<Eigen::VectorXd, Eigen::MatrixXd> > *>(interpreter),
+            config.getIntegrationRange().getStepSize(),
+            config.getEpsilonAbs(), config.getEpsilonRel());
+      break;
+
+    case SSETaskConfig::DormandPrince5:
+      stepper = new ODE::Dopri5Stepper< Models::GenericSSEinterpreter<
+          Models::REmodel, Eval::bcimp::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+          Eval::bcimp::Engine<Eigen::VectorXd, Eigen::MatrixXd> > >(
+            *static_cast< Models::GenericSSEinterpreter<
+            Models::REmodel, Eval::bcimp::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+            Eval::bcimp::Engine<Eigen::VectorXd, Eigen::MatrixXd> > *>(interpreter),
+            config.getIntegrationRange().getStepSize(),
+            config.getEpsilonAbs(), config.getEpsilonRel());
+      break;
+
+    case SSETaskConfig::LSODA:
+      stepper = new ODE::LsodaDriver< Models::GenericSSEinterpreter<
+          Models::REmodel, Eval::bcimp::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+          Eval::bcimp::Engine<Eigen::VectorXd, Eigen::MatrixXd> > >(
+            *static_cast< Models::GenericSSEinterpreter<
+            Models::REmodel, Eval::bcimp::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+            Eval::bcimp::Engine<Eigen::VectorXd, Eigen::MatrixXd> > *>(interpreter),
+            config.getIntegrationRange().getStepSize(),
+            config.getEpsilonAbs(), config.getEpsilonRel());
+      break;
+
+    case SSETaskConfig::Rosenbrock4:
+      // First, let Interpreter compile the jacobian
+      static_cast<Models::GenericSSEinterpreter<
+          Models::REmodel, Eval::bcimp::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+          Eval::bcimp::Engine<Eigen::VectorXd, Eigen::MatrixXd> > *>(interpreter)->compileJacobian();
+
+      // Then, setup integrator:
+      stepper = new ODE::Rosenbrock4TimeInd< Models::GenericSSEinterpreter<
+          Models::REmodel, Eval::bcimp::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+          Eval::bcimp::Engine<Eigen::VectorXd, Eigen::MatrixXd> > >(
+            *static_cast< Models::GenericSSEinterpreter<
+            Models::REmodel, Eval::bcimp::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+            Eval::bcimp::Engine<Eigen::VectorXd, Eigen::MatrixXd> > *>(interpreter),
+            config.getIntegrationRange().getStepSize(),
+            config.getEpsilonAbs(), config.getEpsilonRel());
+      break;
+    }
+    break;
+
+
+  /* ************************************* Handle JTI Engine ************************************ */
+  case EngineTaskConfig::JIT_ENGINE:
+    // Assemble REinterpreter with JIT engine:
+    interpreter = new Models::GenericSSEinterpreter<
+        Models::REmodel, Eval::jit::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+        Eval::jit::Engine<Eigen::VectorXd, Eigen::MatrixXd> >(
+          *config.getModelAs<Fluc::Models::REmodel>(),
+          config.getOptLevel(), config.getNumEvalThreads(), false);
+
+    // Instantiate integrator for that engine:
+    switch (config.getIntegrator()) {
+    case SSETaskConfig::RungeKutta4:
+      stepper = new ODE::RungeKutta4< Models::GenericSSEinterpreter<
+          Models::REmodel, Eval::jit::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+          Eval::jit::Engine<Eigen::VectorXd, Eigen::MatrixXd> > >(
+            *static_cast< Models::GenericSSEinterpreter<
+            Models::REmodel, Eval::jit::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+            Eval::jit::Engine<Eigen::VectorXd, Eigen::MatrixXd> > *>(interpreter),
+            config.getIntegrationRange().getStepSize());
+      break;
+
+    case SSETaskConfig::RungeKuttaFehlberg45:
+      stepper = new ODE::RKF45< Models::GenericSSEinterpreter<
+          Models::REmodel, Eval::jit::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+          Eval::jit::Engine<Eigen::VectorXd, Eigen::MatrixXd> > >(
+            *static_cast< Models::GenericSSEinterpreter<
+            Models::REmodel, Eval::jit::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+            Eval::jit::Engine<Eigen::VectorXd, Eigen::MatrixXd> > *>(interpreter),
+            config.getIntegrationRange().getStepSize(),
+            config.getEpsilonAbs(), config.getEpsilonRel());
+      break;
+
+    case SSETaskConfig::DormandPrince5:
+      stepper = new ODE::Dopri5Stepper< Models::GenericSSEinterpreter<
+          Models::REmodel, Eval::jit::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+          Eval::jit::Engine<Eigen::VectorXd, Eigen::MatrixXd> > >(
+            *static_cast< Models::GenericSSEinterpreter<
+            Models::REmodel, Eval::jit::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+            Eval::jit::Engine<Eigen::VectorXd, Eigen::MatrixXd> > *>(interpreter),
+            config.getIntegrationRange().getStepSize(),
+            config.getEpsilonAbs(), config.getEpsilonRel());
+      break;
+
+    case SSETaskConfig::LSODA:
+      stepper = new ODE::LsodaDriver< Models::GenericSSEinterpreter<
+          Models::REmodel, Eval::jit::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+          Eval::jit::Engine<Eigen::VectorXd, Eigen::MatrixXd> > >(
+            *static_cast< Models::GenericSSEinterpreter<
+            Models::REmodel, Eval::jit::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+            Eval::jit::Engine<Eigen::VectorXd, Eigen::MatrixXd> > *>(interpreter),
+            config.getIntegrationRange().getStepSize(),
+            config.getEpsilonAbs(), config.getEpsilonRel());
+      break;
+
+    case SSETaskConfig::Rosenbrock4:
+      // First, let Interpreter compile the jacobian
+      static_cast<Models::GenericSSEinterpreter<
+          Models::REmodel, Eval::jit::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+          Eval::jit::Engine<Eigen::VectorXd, Eigen::MatrixXd> > *>(interpreter)->compileJacobian();
+
+      // Then, setup integrator:
+      stepper = new ODE::Rosenbrock4TimeInd< Models::GenericSSEinterpreter<
+          Models::REmodel, Eval::jit::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+          Eval::jit::Engine<Eigen::VectorXd, Eigen::MatrixXd> > >(
+            *static_cast< Models::GenericSSEinterpreter<
+            Models::REmodel, Eval::jit::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+            Eval::jit::Engine<Eigen::VectorXd, Eigen::MatrixXd> > *>(interpreter),
+            config.getIntegrationRange().getStepSize(),
+            config.getEpsilonAbs(), config.getEpsilonRel());
+      break;
+    }
+    break;
+  }
+
+
+  size_t column = 0;
   QVector<QString> species_names(config.getNumSpecies());
   this->timeseries.setColumnName(column, "t"); column++;
   for (int i=0; i<(int)config.getNumSpecies(); i++, column++)
@@ -28,43 +332,6 @@ RETask::RETask(const SSETaskConfig &config, QObject *parent) :
 
     this->timeseries.setColumnName(column, QString("%1").arg(species_names[i]));
   }
-
-  /*
-   * Create integrator:
-   */
-  switch (config.getIntegrator()) {
-  case SSETaskConfig::RungeKutta4:
-    this->stepper = new Fluc::ODE::RungeKutta4<Fluc::Models::REinterpreter >(
-          this->interpreter, config.getIntegrationRange().getStepSize());
-    break;
-
-  case SSETaskConfig::RungeKuttaFehlberg45:
-    this->stepper = new Fluc::ODE::RKF45<Fluc::Models::REinterpreter>(
-          this->interpreter, config.getIntegrationRange().getStepSize(),
-          config.getEpsilonAbs(), config.getEpsilonRel());
-    break;
-
-  case SSETaskConfig::DormandPrince5:
-    this->stepper = new Fluc::ODE::Dopri5Stepper<Fluc::Models::REinterpreter>(
-          this->interpreter, config.getIntegrationRange().getStepSize(),
-          config.getEpsilonAbs(), config.getEpsilonRel());
-    break;
-
-  case SSETaskConfig::LSODA:
-    this->stepper = new Fluc::ODE::LsodaDriver<Fluc::Models::REinterpreter>(
-          this->interpreter, config.getIntegrationRange().getStepSize(),
-          config.getEpsilonAbs(), config.getEpsilonRel());
-    break;
-
-  case SSETaskConfig::Rosenbrock4:
-    // First, let LNA Interpreter compile the jacobian
-    this->interpreter.compileJacobian();
-    // Then, setup integrator:
-    this->stepper = new Fluc::ODE::Rosenbrock4TimeInd<Fluc::Models::REinterpreter>(
-          this->interpreter, config.getIntegrationRange().getStepSize(),
-          config.getEpsilonAbs(), config.getEpsilonRel());
-    break;
-  }
 }
 
 
@@ -74,6 +341,10 @@ RETask::~RETask()
   // Free integrator:
   if (0 != this->stepper)
     delete stepper;
+
+  // Free interpreter
+  if (0 != this->interpreter)
+    delete interpreter;
 }
 
 

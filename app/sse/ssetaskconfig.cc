@@ -2,15 +2,17 @@
 
 SSETaskConfig::SSETaskConfig()
   : GeneralTaskConfig(), ModelSelectionTaskConfig(), SpeciesSelectionTaskConfig(),
-    ODEIntTaskConfig(), selected_method(UNDEFINED_ANALYSIS), re_model(0), lna_model(0), ios_model(0)
+    EngineTaskConfig(), ODEIntTaskConfig(),
+    selected_method(UNDEFINED_ANALYSIS), re_model(0), lna_model(0), ios_model(0)
 {
   // pass...
 }
 
 SSETaskConfig::SSETaskConfig(const SSETaskConfig &other)
   : GeneralTaskConfig(), ModelSelectionTaskConfig(other), SpeciesSelectionTaskConfig(other),
-    ODEIntTaskConfig(other), selected_method(other.selected_method), re_model(other.re_model),
-    lna_model(other.lna_model), ios_model(other.ios_model)
+    EngineTaskConfig(other), ODEIntTaskConfig(other),
+    selected_method(other.selected_method), re_model(other.re_model), lna_model(other.lna_model),
+    ios_model(other.ios_model)
 {
   // Pass...
 }

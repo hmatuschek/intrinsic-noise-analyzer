@@ -15,6 +15,7 @@ class SSETaskConfig :
     public GeneralTaskConfig,
     public ModelSelectionTaskConfig,
     public SpeciesSelectionTaskConfig,
+    public EngineTaskConfig,
     public ODEIntTaskConfig
 {
 public:

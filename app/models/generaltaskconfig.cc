@@ -93,19 +93,80 @@ SpeciesSelectionTaskConfig::setSelectedSpecies(const QStringList &list)
 
 
 /* ******************************************************************************************** *
+ * Implementation of EngineTaskConfig
+ * ******************************************************************************************** */
+EngineTaskConfig::EngineTaskConfig()
+  : _engine(BCI_ENGINE)
+{
+  // pass...
+}
+
+EngineTaskConfig::EngineTaskConfig(const EngineTaskConfig &other)
+  : _engine(other._engine)
+{
+  // pass...
+}
+
+EngineTaskConfig::~EngineTaskConfig()
+{
+  // pass....
+}
+
+
+EngineTaskConfig::EngineKind
+EngineTaskConfig::getEngine() const
+{
+  return _engine;
+}
+
+void
+EngineTaskConfig::setEngine(EngineKind kind)
+{
+  _engine = kind;
+}
+
+
+size_t
+EngineTaskConfig::getOptLevel() const
+{
+  return _optLevel;
+}
+
+void
+EngineTaskConfig::setOptLevel(size_t level)
+{
+  _optLevel = level;
+}
+
+
+size_t
+EngineTaskConfig::getNumEvalThreads() const
+{
+  return _numEvalThreads;
+}
+
+void
+EngineTaskConfig::setNumEvalThreads(size_t num)
+{
+  _numEvalThreads = num;
+}
+
+
+
+/* ******************************************************************************************** *
  * Implementation of ODEIntTaskConfig
  * ******************************************************************************************** */
 ODEIntTaskConfig::ODEIntTaskConfig()
   : integrator((Integrator)0), integration_range(0,0,0), intermediate_steps(0),
-    num_threads(OpenMP::getMaxThreads()), opt_level(1), epsilon_abs(0), epsilon_rel(0)
+     epsilon_abs(0), epsilon_rel(0)
 {
   // Pass...
 }
 
 ODEIntTaskConfig::ODEIntTaskConfig(const ODEIntTaskConfig &other)
   : integrator(other.integrator), integration_range(other.integration_range),
-    intermediate_steps(other.intermediate_steps), num_threads(other.num_threads),
-    opt_level(other.opt_level), epsilon_abs(other.epsilon_abs), epsilon_rel(other.epsilon_rel)
+    intermediate_steps(other.intermediate_steps),
+    epsilon_abs(other.epsilon_abs), epsilon_rel(other.epsilon_rel)
 {
   // Pass...
 }
@@ -155,30 +216,6 @@ void
 ODEIntTaskConfig::setIntermediateSteps(size_t steps)
 {
   this->intermediate_steps = steps;
-}
-
-size_t
-ODEIntTaskConfig::getOptLevel() const
-{
-  return this->opt_level;
-}
-
-void
-ODEIntTaskConfig::setOptLevel(size_t level)
-{
-  this->opt_level = level;
-}
-
-size_t
-ODEIntTaskConfig::getNumThreads() const
-{
-  return this->num_threads;
-}
-
-void
-ODEIntTaskConfig::setNumThreads(size_t num)
-{
-  this->num_threads = num;
 }
 
 double

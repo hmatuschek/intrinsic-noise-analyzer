@@ -79,6 +79,58 @@ public:
 };
 
 
+
+/** Virtual configuration interface for the execution engine to use. */
+class EngineTaskConfig
+{
+public:
+  /** Defines the execution engine to use. */
+  typedef enum {
+    GINAC_ENGINE,  ///< Just kidding.
+    BCI_ENGINE,    ///< The default byte code interpreter.
+    BCIMP_ENGINE,  ///< BCI + OpenMP.
+    JIT_ENGINE     ///< JIT comiler engine via LLVM.
+  } EngineKind;
+
+
+protected:
+  /** Holds the selected engine. */
+  EngineKind _engine;
+
+  /** Holds the optimization level of code. */
+  size_t _optLevel;
+
+  /** Holds the number of threads to use for evaluation. */
+  size_t _numEvalThreads;
+
+
+public:
+  /** Default constructor, sets the engine to @c BCI_ENGINE. */
+  EngineTaskConfig();
+
+  /** Copy constructor. */
+  EngineTaskConfig(const EngineTaskConfig &other);
+
+  /** Destructor. */
+  virtual ~EngineTaskConfig();
+
+  /** Returns the selected engine. */
+  virtual EngineKind getEngine() const;
+  /** Resets the selected engine. */
+  virtual void setEngine(EngineKind kind);
+
+  /** Returns the code optimization level. */
+  virtual size_t getOptLevel() const;
+  /** Sets the code optimization level. */
+  virtual void setOptLevel(size_t level);
+
+  /** Returns the number of threads to use for expression evaluation. */
+  virtual size_t getNumEvalThreads() const;
+  virtual void setNumEvalThreads(size_t num);
+};
+
+
+
 /**
  * Virtual configuration interface for ODE integrator tasks.
  */
@@ -102,10 +154,6 @@ protected:
   Fluc::ODE::IntegrationRange integration_range;
   /** Optional, holds the itermediate steps (for RK4). */
   size_t intermediate_steps;
-  /** Hold the number of parallel threads to use for integration. */
-  size_t num_threads;
-  /** Byte-code optimization level. */
-  size_t opt_level;
   /** Holds the absolut error for adaptive integrators. */
   double epsilon_abs;
   /** Holds the relative error for adaptive integrators. */
@@ -133,14 +181,6 @@ public:
   virtual size_t getIntermediateSteps() const;
   /** (Re-) Sets the number of intermediate steps. */
   virtual void setIntermediateSteps(size_t steps);
-  /** Returns the byte-code optimization level. */
-  virtual size_t getOptLevel() const;
-  /** (Re-) Sets the byte-code optimization level. */
-  virtual void setOptLevel(size_t level);
-  /** Returns the number of threads to use for integration. */
-  virtual size_t getNumThreads() const;
-  /** (Re-) Sets the number of threads for integration. */
-  virtual void setNumThreads(size_t num);
   /** Returns the absolute error. */
   virtual double getEpsilonAbs() const;
   /** (Re-) Sets the absolute error. */

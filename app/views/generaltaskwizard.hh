@@ -81,6 +81,38 @@ private:
 
 
 /**
+ * Simple wizard to select and configure the execution engine.
+ */
+class EngineWizardPage : public QWizardPage
+{
+  Q_OBJECT
+
+protected:
+  /** If true, the wizard will show engines for parallel execution. */
+  bool _show_parallel_engine;
+
+public:
+  /** Constructor. */
+  explicit EngineWizardPage(GeneralTaskWizard *parent, bool show_parallel_engine=true);
+
+  /** Sets the selected engine and configuration. */
+  virtual bool validatePage();
+
+
+private:
+  /** Holds the list of available engines. */
+  QComboBox *engineList;
+
+  /** Enables optimization. */
+  QCheckBox *codeOpt;
+
+  /** Holds the number of threads. */
+  QSpinBox  *numThreads;
+};
+
+
+
+/**
  * Simple wizard page to configure an ODE integrator.
  */
 class IntegratorWizardPage : public QWizardPage
@@ -101,8 +133,6 @@ private slots:
 private:
   QComboBox *integrator;
   QLineEdit *intermediateSteps;
-  QCheckBox *optByteCode;
-  QSpinBox  *numThreads;
   QLineEdit *ep_abs;
   QLineEdit *ep_rel;
 };

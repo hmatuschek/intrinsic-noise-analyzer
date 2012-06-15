@@ -10,13 +10,26 @@
 namespace Fluc {
 namespace Models {
 
+
+/** This class defines the virtual base class of all interpreters. This is necessary to allow
+ * the determination of the execution engine at runtime. This class does not define any methods
+ * to be implemented by the @c GenericSSEinterpreter, it just forces a RTTI vtable for all
+ * interpreters.
+ */
+class SSEInterpreterInterface {
+public:
+  virtual ~SSEInterpreterInterface();
+};
+
+
+
 /**
  * Wraps an instance of SSE model and compiles it.
  *
  * @ingroup models
  */
 template <class Sys, class SysEngine, class JacEngine>
-class GenericSSEinterpreter
+class GenericSSEinterpreter : public SSEInterpreterInterface
 {
 protected:
   /**

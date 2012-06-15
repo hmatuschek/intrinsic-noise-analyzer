@@ -28,13 +28,13 @@ protected:
   SSETaskConfig config;
 
   /**
-   * Holds an instance of the bytecode interpreter for the LNA model, this object also implements
+   * Holds an instance of the interpreter for the LNA model, this object also implements
    * the @c System interface for the integrators.
    */
-  Fluc::Models::LNAinterpreter interpreter;
+  Fluc::Models::SSEInterpreterInterface *interpreter;
 
   /**
-   * Holds a weak reference to the stepper being used.
+   * Holds the stepper being used.
    */
   Fluc::ODE::Stepper *stepper;
 
