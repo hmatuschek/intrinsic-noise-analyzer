@@ -98,6 +98,8 @@ CompilerCore::finalize(size_t level)
   Utils::Logger::get().log(msg);
 
   //code->getModule()->dump();
+  // Dump target tripel for compiled code:
+  std::cerr << "Compile for target : " << code->getModule()->getTargetTriple() << std::endl;
 
   // Get function pointer:
   code->setFunctionPtr(engine->getPointerToFunction(code->getSystem()));
