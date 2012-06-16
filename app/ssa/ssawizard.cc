@@ -24,6 +24,7 @@ SSAWizard::SSAWizard(QWidget *parent) :
 
   this->setPage(SSAWizard::MODEL_SELECTION_PAGE, new SSAModelSelectionPage(this));
   this->setPage(SSAWizard::SPECIES_SELECTION_PAGE, new SSASpeciesSelectionPage(this));
+  this->setPage(SSAWizard::ENGINE_SELECTION_PAGE, new SSAEngineSelectionPage(this));
   this->setPage(SSAWizard::CONFIG_PAGE, new SSAConfigPage(this));
   this->setPage(SSAWizard::SUMMARY_PAGE, new SSASummaryPage(this));
 
@@ -136,7 +137,7 @@ SSAConfigPage::validatePage()
   config.setEnsembleSize(this->field("size").toUInt(&valid));
   config.setFinalTime(this->field("time").toDouble(&valid));
   config.setSteps(this->field("steps").toUInt(&valid));
-  config.setSteps(this->field("thread_count").toInt(&valid));
+  config.setNumThreads(this->field("thread_count").toInt(&valid));
 
   return valid;
 }
