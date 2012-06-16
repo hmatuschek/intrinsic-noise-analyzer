@@ -193,4 +193,6 @@ public:
   virtual void setEpsilon(double abs, double rel);
 };
 
+
+
 #endif // __INA_APP_MODELS_GENERALTASKCONFIG_HH__

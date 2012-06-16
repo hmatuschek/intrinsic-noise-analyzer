@@ -9,10 +9,10 @@
 #include "ssatask.hh"
 
 #include "models/models.hh"
+#include "../views/generaltaskwizard.hh"
 
 
-
-class SSAWizard : public QWizard
+class SSAWizard : public GeneralTaskWizard
 {
   Q_OBJECT
 
@@ -21,6 +21,7 @@ public:
   {
     MODEL_SELECTION_PAGE,
     SPECIES_SELECTION_PAGE,
+    ENGINE_SELECTION_PAGE,
     CONFIG_PAGE,
     SUMMARY_PAGE
   } PageId;
@@ -29,78 +30,38 @@ public:
 public:
   explicit SSAWizard(QWidget *parent = 0);
 
-  void setDocument(DocumentItem *document);
-  DocumentItem *getDocument();
-
-  void setSelectedSpecies(const QList<QString> &species);
-  const QList<QString> &getSelectedSpecies();
-
-  void setEnsembleSize(size_t size);
-  size_t getEnsembleSize();
-
-  void setFinalTime(double time);
-  double getFinalTime();
-
-  void setNumSamples(size_t size);
-  size_t getNumSamples();
-
-  void setMethod(const QString &method);
-  const QString &getMethod();
-
-  void setOptimizeByteCode(bool optimize);
-  bool getOptimizeByteCode();
-
-  void setThreadCount(size_t count);
-  size_t getThreadCount();
-
-  void setSimulator(Fluc::Models::StochasticSimulator *simulator);
-  Fluc::Models::StochasticSimulator *getSimulator();
-
-  SSATaskConfig getConfig();
-
+  virtual GeneralTaskConfig &getConfig();
 
 private:
-  DocumentItem *document;
-  QList<QString> selected_species;
-  size_t ensemble_size;
-  double final_time;
-  size_t num_samples;
-  QString method;
-  bool optimize_bytecode;
-  size_t thread_count;
-  Fluc::Models::StochasticSimulator *simulator;
+  SSATaskConfig config;
 };
 
 
 
-class SSAModelSelectionPage : public QWizardPage
+class SSAModelSelectionPage : public ModelSelectionWizardPage
 {
   Q_OBJECT
 
 public:
-  explicit SSAModelSelectionPage(QWidget *parent=0);
-
-  virtual bool validatePage();
-
-
-private:
-  QComboBox *modelSelection;
+  explicit SSAModelSelectionPage(GeneralTaskWizard *parent);
 };
 
 
-class SSASpeciesSelectionPage : public QWizardPage
+class SSASpeciesSelectionPage : public SpeciesSelectionWizardPage
 {
   Q_OBJECT
 
 public:
-  explicit SSASpeciesSelectionPage(QWidget *parent=0);
+  explicit SSASpeciesSelectionPage(GeneralTaskWizard *parent);
+};
 
-  virtual void initializePage();
 
-  virtual bool validatePage();
+class SSAEngineSelectionPage : public EngineWizardPage
+{
+  Q_OBJECT
 
-private:
-  QListWidget *speciesList;
+public:
+  explicit SSAEngineSelectionPage(GeneralTaskWizard *parent);
 };
 
 
@@ -109,7 +70,7 @@ class SSAConfigPage : public QWizardPage
   Q_OBJECT
 
 public:
-  explicit SSAConfigPage(QWidget *parent=0);
+  explicit SSAConfigPage(SSAWizard *wizard);
 
   virtual bool validatePage();
 
@@ -123,7 +84,7 @@ class SSASummaryPage : public QWizardPage
   Q_OBJECT
 
 public:
-  explicit SSASummaryPage(QWidget *parent=0);
+  explicit SSASummaryPage(SSAWizard *wizard);
 
   virtual void initializePage();
 
@@ -138,7 +99,6 @@ private:
   QLabel *num_samples;
   QLabel *mem_usage;
   QLabel *method;
-  QLabel *optimize_bytecode;
   QLabel *thread_count;
 };
 
