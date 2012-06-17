@@ -815,7 +815,7 @@ int MinPack::hybrd ( int n, double x[],
   int iwa[1];
   int j;
   bool jeval;
-  int jm1;
+  //int jm1;
   int l;
   int msum;
   int ncfail;
@@ -1275,7 +1275,7 @@ int MinPack::hybrd ( int n, double x[],
 }
 //****************************************************************************80
 
-int MinPack::hybrd1 ( void fcn ( int n, double x[], double fvec[], int *iflag ), int n,
+int MinPack::hybrd1 ( int n,
   double x[], double fvec[], double tol, double wa[], int lwa )
 
 //****************************************************************************80
@@ -1568,11 +1568,11 @@ void MinPack::qform ( int m, int n, double q[], int ldq, double wa[] )
 {
   int i;
   int j;
-  int jm1;
+  //int jm1;
   int k;
-  int l;
+  //int l;
   int minmn;
-  int np1;
+  //int np1;
   double sum;
   double temp;
 //
@@ -2038,7 +2038,7 @@ bool MinPack::r1updt ( int m, int n, double s[], int ls, double u[], double v[],
   int j;
   int jj;
   int l;
-  int nmj;
+  //int nmj;
   int nm1;
   double p25 = 0.25;
   double p5 = 0.5;
