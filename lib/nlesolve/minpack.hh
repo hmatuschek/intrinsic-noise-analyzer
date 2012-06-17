@@ -49,11 +49,11 @@ double r8_max ( double x, double y );
 double r8_min ( double x, double y );
 double r8_tiny ( );
 double r8_uniform_01 ( int *seed );
-void r8mat_print ( int m, int n, double a[], std::string title );
-void r8mat_print_some ( int m, int n, double a[], int ilo, int jlo, int ihi, 
-  int jhi, std::string title );
-void r8vec_print ( int n, double a[], std::string title );
-void timestamp ( );
+//void r8mat_print ( int m, int n, double a[], std::string title );
+//void r8mat_print_some ( int m, int n, double a[], int ilo, int jlo, int ihi,
+//  int jhi, std::string title );
+//void r8vec_print ( int n, double a[], std::string title );
+//void timestamp ( );
 
 };
 

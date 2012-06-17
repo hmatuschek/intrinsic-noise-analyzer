@@ -2552,244 +2552,100 @@ double MinPack::r8_uniform_01 ( int *seed )
 
   return r;
 }
-//****************************************************************************80
-
-void MinPack::r8mat_print ( int m, int n, double a[], string title )
 
 //****************************************************************************80
-//
-//  Purpose:
-//
-//    R8MAT_PRINT prints an R8MAT.
-//
-//  Discussion:
-//
-//    An R8MAT is a doubly dimensioned array of R8 values,  stored as a vector
-//    in column-major order.
-//
-//    Entry A(I,J) is stored as A[I+J*M]
-//
-//  Licensing:
-//
-//    This code is distributed under the GNU LGPL license.
-//
-//  Modified:
-//
-//    10 September 2009
-//
-//  Author:
-//
-//    John Burkardt
-//
-//  Parameters:
-//
-//    Input, int M, the number of rows in A.
-//
-//    Input, int N, the number of columns in A.
-//
-//    Input, double A[M*N], the M by N matrix.
-//
-//    Input, string TITLE, a title.
-//
-{
-  r8mat_print_some ( m, n, a, 1, 1, m, n, title );
 
-  return;
-}
+//void r8vec_print ( int n, double a[], string title )
+
+////****************************************************************************80
+////
+////  Purpose:
+////
+////    R8VEC_PRINT prints an R8VEC.
+////
+////  Discussion:
+////
+////    An R8VEC is a vector of R8's.
+////
+////  Licensing:
+////
+////    This code is distributed under the GNU LGPL license.
+////
+////  Modified:
+////
+////    16 August 2004
+////
+////  Author:
+////
+////    John Burkardt
+////
+////  Parameters:
+////
+////    Input, int N, the number of components of the vector.
+////
+////    Input, double A[N], the vector to be printed.
+////
+////    Input, string TITLE, a title.
+////
+//{
+//  int i;
+
+//  cout << "\n";
+//  cout << title << "\n";
+//  cout << "\n";
+//  for ( i = 0; i < n; i++ )
+//  {
+//    cout << "  " << setw(8)  << i
+//         << "  " << setw(14) << a[i]  << "\n";
+//  }
+
+//  return;
+//}
 //****************************************************************************80
 
-void MinPack::r8mat_print_some ( int m, int n, double a[], int ilo, int jlo, int ihi,
-  int jhi, string title )
+//void MinPack::timestamp ( )
 
-//****************************************************************************80
-//
-//  Purpose:
-//
-//    R8MAT_PRINT_SOME prints some of an R8MAT.
-//
-//  Discussion:
-//
-//    An R8MAT is a doubly dimensioned array of R8 values,  stored as a vector
-//    in column-major order.
-//
-//  Licensing:
-//
-//    This code is distributed under the GNU LGPL license.
-//
-//  Modified:
-//
-//    10 September 2009
-//
-//  Author:
-//
-//    John Burkardt
-//
-//  Parameters:
-//
-//    Input, int M, the number of rows of the matrix.
-//    M must be positive.
-//
-//    Input, int N, the number of columns of the matrix.
-//    N must be positive.
-//
-//    Input, double A[M*N], the matrix.
-//
-//    Input, int ILO, JLO, IHI, JHI, designate the first row and
-//    column, and the last row and column to be printed.
-//
-//    Input, string TITLE, a title.
-//
-{
-# define INCX 5
+////****************************************************************************80
+////
+////  Purpose:
+////
+////    TIMESTAMP prints the current YMDHMS date as a time stamp.
+////
+////  Example:
+////
+////    31 May 2001 09:45:54 AM
+////
+////  Licensing:
+////
+////    This code is distributed under the GNU LGPL license.
+////
+////  Modified:
+////
+////    08 July 2009
+////
+////  Author:
+////
+////    John Burkardt
+////
+////  Parameters:
+////
+////    None
+////
+//{
+//# define TIME_SIZE 40
 
-  int i;
-  int i2hi;
-  int i2lo;
-  int j;
-  int j2hi;
-  int j2lo;
+//  static char time_buffer[TIME_SIZE];
+//  const struct std::tm *tm_ptr;
+//  size_t len;
+//  std::time_t now;
 
-  cout << "\n";
-  cout << title << "\n";
-//
-//  Print the columns of the matrix, in strips of 5.
-//
-  for ( j2lo = jlo; j2lo <= jhi; j2lo = j2lo + INCX )
-  {
-    j2hi = j2lo + INCX - 1;
-    j2hi = i4_min ( j2hi, n );
-    j2hi = i4_min ( j2hi, jhi );
+//  now = std::time ( NULL );
+//  tm_ptr = std::localtime ( &now );
 
-    cout << "\n";
-//
-//  For each column J in the current range...
-//
-//  Write the header.
-//
-    cout << "  Col:    ";
-    for ( j = j2lo; j <= j2hi; j++ )
-    {
-      cout << setw(7) << j << "       ";
-    }
-    cout << "\n";
-    cout << "  Row\n";
-    cout << "\n";
-//
-//  Determine the range of the rows in this strip.
-//
-    i2lo = i4_max ( ilo, 1 );
-    i2hi = i4_min ( ihi, m );
+//  len = std::strftime ( time_buffer, TIME_SIZE, "%d %B %Y %I:%M:%S %p", tm_ptr );
 
-    for ( i = i2lo; i <= i2hi; i++ )
-    {
-//
-//  Print out (up to) 5 entries in row I, that lie in the current strip.
-//
-      cout << setw(5) << i << "  ";
-      for ( j = j2lo; j <= j2hi; j++ )
-      {
-        cout << setw(12) << a[i-1+(j-1)*m] << "  ";
-      }
-      cout << "\n";
-    }
-  }
+//  std::cout << time_buffer << "\n";
 
-  return;
-# undef INCX
-}
-//****************************************************************************80
-
-void r8vec_print ( int n, double a[], string title )
-
-//****************************************************************************80
-//
-//  Purpose:
-//
-//    R8VEC_PRINT prints an R8VEC.
-//
-//  Discussion:
-//
-//    An R8VEC is a vector of R8's.
-//
-//  Licensing:
-//
-//    This code is distributed under the GNU LGPL license.
-//
-//  Modified:
-//
-//    16 August 2004
-//
-//  Author:
-//
-//    John Burkardt
-//
-//  Parameters:
-//
-//    Input, int N, the number of components of the vector.
-//
-//    Input, double A[N], the vector to be printed.
-//
-//    Input, string TITLE, a title.
-//
-{
-  int i;
-
-  cout << "\n";
-  cout << title << "\n";
-  cout << "\n";
-  for ( i = 0; i < n; i++ )
-  {
-    cout << "  " << setw(8)  << i
-         << "  " << setw(14) << a[i]  << "\n";
-  }
-
-  return;
-}
-//****************************************************************************80
-
-void MinPack::timestamp ( )
-
-//****************************************************************************80
-//
-//  Purpose:
-//
-//    TIMESTAMP prints the current YMDHMS date as a time stamp.
-//
-//  Example:
-//
-//    31 May 2001 09:45:54 AM
-//
-//  Licensing:
-//
-//    This code is distributed under the GNU LGPL license.
-//
-//  Modified:
-//
-//    08 July 2009
-//
-//  Author:
-//
-//    John Burkardt
-//
-//  Parameters:
-//
-//    None
-//
-{
-# define TIME_SIZE 40
-
-  static char time_buffer[TIME_SIZE];
-  const struct std::tm *tm_ptr;
-  size_t len;
-  std::time_t now;
-
-  now = std::time ( NULL );
-  tm_ptr = std::localtime ( &now );
-
-  len = std::strftime ( time_buffer, TIME_SIZE, "%d %B %Y %I:%M:%S %p", tm_ptr );
-
-  std::cout << time_buffer << "\n";
-
-  return;
-# undef TIME_SIZE
-}
+//  return;
+//# undef TIME_SIZE
+//}
