@@ -36,10 +36,8 @@ SSAModule::configSSA()
 
   // Construct task from wizard:
   SSATask *task = 0;
-  SSATaskConfig config(wizard->getConfig());
-
   try {
-    task = new SSATask(config);
+    task = new SSATask(wizard->getConfigCast<SSATaskConfig>());
   } catch (Fluc::Exception err) {
     QMessageBox::warning(
           0, tr("Can not construct steady state anlysis from model: "), err.what());
@@ -49,7 +47,7 @@ SSAModule::configSSA()
 
   // Add task to application and run it:
   Application::getApp()->docTree()->addTask(
-        this->wizard->getDocument(),
+        this->wizard->getConfigCast<SSATaskConfig>().getModelDocument(),
         new SSATaskWrapper(task));
 
   task->start();

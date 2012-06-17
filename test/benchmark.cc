@@ -524,7 +524,7 @@ Benchmark::suite()
 {
   UnitTest::TestSuite *s = new UnitTest::TestSuite("Engine benchmark");
 
-  /*s->addTest(new UnitTest::TestCaller<Benchmark>(
+  s->addTest(new UnitTest::TestCaller<Benchmark>(
                "Coremodel 1 (OptSSA, JIT, Opt)", &Benchmark::testCoremodelJITOptSSAOpt));
 
   s->addTest(new UnitTest::TestCaller<Benchmark>(
@@ -555,7 +555,7 @@ Benchmark::suite()
                "Coremodel 1 (LSODA, BCIMP)", &Benchmark::testCoremodelBCIMPLSODANoOpt));
 
   s->addTest(new UnitTest::TestCaller<Benchmark>(
-               "Coremodel 1 (LSODA, LLVM)", &Benchmark::testCoremodelJITLSODANoOpt)); */
+               "Coremodel 1 (LSODA, LLVM)", &Benchmark::testCoremodelJITLSODANoOpt)); 
 
   s->addTest(new UnitTest::TestCaller<Benchmark>(
                "Coremodel 1 (Rosen4, BCI)", &Benchmark::testCoremodelBCIRosen4NoOpt));
@@ -575,7 +575,7 @@ Benchmark::suite()
   s->addTest(new UnitTest::TestCaller<Benchmark>(
                "Coremodel 1 (Rosen4, BCIMP)", &Benchmark::testCoremodelBCIMPRosen4NoOpt));
 
-  /*s->addTest(new UnitTest::TestCaller<Benchmark>(
+  s->addTest(new UnitTest::TestCaller<Benchmark>(
                "Coremodel 1 (Gillespie, BCI, Opt)", &Benchmark::testCoremodelBCIGillespieOpt));
 
   s->addTest(new UnitTest::TestCaller<Benchmark>(
@@ -591,7 +591,7 @@ Benchmark::suite()
                "Coremodel 1 (Gillespie, GiNaC)", &Benchmark::testCoremodelGiNaCGillespie));
 
   s->addTest(new UnitTest::TestCaller<Benchmark>(
-               "Coremodel 1 (LSODA, GiNaC)", &Benchmark::testCoremodelGiNaCLSODA));*/
+               "Coremodel 1 (LSODA, GiNaC)", &Benchmark::testCoremodelGiNaCLSODA));
 
 
   return s;

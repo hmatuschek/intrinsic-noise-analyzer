@@ -1,4 +1,4 @@
-SET(LLVM_CONFIG_EXEC_NAME "llvm-config" "llvm-config-2.9" "llvm-config-2.8" "llvm-config-2.7")
+SET(LLVM_CONFIG_EXEC_NAME "llvm-config" "llvm-config-mp-2.9" "llvm-config-2.9" "llvm-config-2.8" "llvm-config-2.7")
 FIND_PROGRAM(LLVM_CONFIG_EXEC NAMES ${LLVM_CONFIG_EXEC_NAME})
 
 
