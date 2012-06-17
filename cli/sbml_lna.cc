@@ -47,16 +47,16 @@ int main(int argc, char *argv[])
         Eigen::MatrixXd ioscov(model.numSpecies(),model.numSpecies());
         Eigen::VectorXd iosemre(model.numSpecies());
 
-        // initialize state
-        model.getInitialState(x);
-        steadyState.calcIOS(x);
-        model.fullState(x,concentrations,cov,emre,ioscov,thirdmoment,iosemre);
+//        // initialize state
+//        model.getInitialState(x);
+//        steadyState.calcIOS(x);
+//        model.fullState(x,concentrations,cov,emre,ioscov,thirdmoment,iosemre);
 
-        std::cout<<concentrations.transpose()<<std::endl;
-        std::cout<<(emre).transpose()<<std::endl;
-        std::cout<<(iosemre).transpose()<<std::endl;
+//        std::cout<<concentrations.transpose()<<std::endl;
+//        std::cout<<(emre).transpose()<<std::endl;
+//        std::cout<<(iosemre).transpose()<<std::endl;
 
-        std::cout<<std::endl<<std::endl;
+//        std::cout<<std::endl<<std::endl;
 
         Models::IOSmodel modelN(base);
         Models::SteadyStateAnalysis<Models::IOSmodel> test(modelN);

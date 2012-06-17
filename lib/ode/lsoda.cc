@@ -15,7 +15,7 @@ LSODA::LSODA()
 
 {
     // some parameters
-    mxstp0 = 500; mxhnl0 = 10;
+    mxstp0 = 5000; mxhnl0 = 10;
     // pass...
 
 }

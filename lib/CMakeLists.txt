@@ -125,9 +125,13 @@ SET(libina_unsupported_HEADERS
 
 # Add source for nonlinear solvers
 SET(libina_nlesolve_SOURCES
-   nlesolve/nlesolve.cc)
+   nlesolve/newtonraphson.cc
+   nlesolve/minpack.cc
+   nlesolve/hybridsolver.hh)
 SET(libina_nlesolve_HEADERS
-   nlesolve/nlesolve.hh)
+   nlesolve/newtonraphson.hh
+   nlesolve/minpack.hh
+   nlesolve/hybridsolver.hh)
 
 # Add sources for ODE solvers etc.
 SET(libina_ode_SOURCES

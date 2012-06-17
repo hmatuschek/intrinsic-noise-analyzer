@@ -43,20 +43,20 @@ SET(sbml_fft_HEADERS
 #    sbml_fsp.hh)
 
 ADD_EXECUTABLE(sbml_lna ${sbml_lna_SOURCES})
-ADD_EXECUTABLE(sbml_ssa ${sbml_ssa_SOURCES})
+#ADD_EXECUTABLE(sbml_ssa ${sbml_ssa_SOURCES})
 #ADD_EXECUTABLE(sbml_cle ${sbml_cle_SOURCES})
 
-ADD_EXECUTABLE(sbml_lna_time ${sbml_lna_time_SOURCES})
-ADD_EXECUTABLE(sbml_ssa_time ${sbml_ssa_time_SOURCES})
+#ADD_EXECUTABLE(sbml_lna_time ${sbml_lna_time_SOURCES})
+#ADD_EXECUTABLE(sbml_ssa_time ${sbml_ssa_time_SOURCES})
 
-ADD_EXECUTABLE(sbml_fft ${sbml_fft_SOURCES})
+#ADD_EXECUTABLE(sbml_fft ${sbml_fft_SOURCES})
 #ADD_EXECUTABLE(sbml_fsp ${sbml_fsp_SOURCES})
 
 TARGET_LINK_LIBRARIES(sbml_lna ${LIBS} libina)
-TARGET_LINK_LIBRARIES(sbml_ssa ${LIBS} libina)
+#TARGET_LINK_LIBRARIES(sbml_ssa ${LIBS} libina)
 #TARGET_LINK_LIBRARIES(sbml_cle ${LIBS} libina)
-TARGET_LINK_LIBRARIES(sbml_fft ${LIBS} libina)
+#TARGET_LINK_LIBRARIES(sbml_fft ${LIBS} libina)
 #TARGET_LINK_LIBRARIES(sbml_fsp ${LIBS} libina)
 
-TARGET_LINK_LIBRARIES(sbml_ssa_time ${LIBS} libina)
-TARGET_LINK_LIBRARIES(sbml_lna_time ${LIBS} libina)
+#TARGET_LINK_LIBRARIES(sbml_ssa_time ${LIBS} libina)
+#TARGET_LINK_LIBRARIES(sbml_lna_time ${LIBS} libina)

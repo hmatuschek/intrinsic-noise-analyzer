@@ -1,196 +1,300 @@
-#ifndef __FLUC_NEWTONRAPHSON_HH
-#define __FLUC_NEWTONRAPHSON_HH
+/**
+ * @defgroup nlesolve Nonlinear solver
+ * @ingroup math
+ */
 
-#include <iostream>
-#include <eigen3/Eigen/Eigen>
-
-#include "Uncmin.h"
-#include "linesearch.hh"
-
-#include "models/linearnoiseapproximation.hh"
+#ifndef __FLUC_MODELS_NEWTONRAPHSON_HH
+#define __FLUC_MODELS_NEWTONRAPHSON_HH
 
 namespace Fluc {
+namespace NLEsolve {
 
-// Vector and Matrix classes from Eigen
-typedef Eigen::VectorXd dvec;
-typedef Eigen::MatrixXd dmat;
-
-namespace Models {
-
-// Class to use as function template argument to Uncmin for this problem
-class REwrapper
-{
-
-public:
-
-    REwrapper(LinearNoiseApproximation &that) : model(that)
-    {
-
+    enum Status {
+        Waiting = 0,
+        Success = 1,
+        MaxIterationsReached = 2,
+        IterationFailed = 3,
     };
 
-    ~REwrapper();
-
-        // Function to minimize
-        double f_to_minimize(dvec &conc){
-            Eigen::VectorXd REs;
-            // evaluate rate equations
-            model.getREs(conc,REs);
-            return .5*(REs.squaredNorm());
-        };
-
-        // Gradient of function to minimize
-        void gradient(dvec &conc, dvec &nablaf){
-
-            Eigen::VectorXd REs;
-            Eigen::MatrixXd JacobianM;
-            model.getREs(conc,REs);
-            // construct Jacobian matrix
-            model.getJacobianMatrix(JacobianM);
-            nablaf = JacobianM.transpose()*REs;
-        }
-
-        // Hessian not used in this example
-        void hessian(dvec /* &x */, dmat /* &h */) {}
-
-        // Indicates analytic gradient is used
-        int HasAnalyticGradient() {return 1;}
-
-        // Indicates analytic hessian is not used
-        int HasAnalyticHessian() {return 0;}
-
-        // Any real vector will contain valid parameter values
-        int ValidParameters(dvec &x) {return 1;}
-
-        // Dimension of problem
-        int dim() {return model.numIndSpecies();}
-
-private:
-        LinearNoiseApproximation &model;
-};
-
-}
-
-namespace NLEsolve {
+    enum LineSearchStatus {
+        OK = 1,
+        Converged = 2,
+        LineSearchFailed = 3,
+        RoundOffProblem = 4,
+    };
 
 
 /**
- * Newton-Raphson method.
- *
+ * NewtonRaphson solver.
  * @ingroup nlesolve
  */
-
 template<typename T>
-void
-newton(T* that, Eigen::VectorXd &conc, bool &check, size_t &maxiter, const double &epsilon)
+class NewtonRaphson
 {
+protected:
+  /**
+   * Holds a reference to an instance of LinearNoiseApproximation.
+   */
+   T &that;
 
-    const double TOLF = epsilon,TOLMIN=1.e-12,STPMX=100.;
-    const double TOLX = std::numeric_limits<double>::epsilon();
+   Eigen::MatrixXd JacobianM;
+   Eigen::VectorXd REs;
 
-    Eigen::VectorXd REs;
-    Eigen::MatrixXd JacobianM;
+   size_t iterations;
 
-    double test,den;
-    double f,fold;
+public:
 
-    Eigen::VectorXd conc_old;
-    Eigen::VectorXd rhs;
+   struct params {
+       params(size_t dim) : maxIterations(100*(dim+1)), epsilon(1.e-9),
+           ALF(1.e-4), TOLX(std::numeric_limits<double>::epsilon()), TOLF(epsilon), TOLMIN(1.e-12), STPMX(100.){}
 
-    Eigen::VectorXd nablaf;
-    Eigen::VectorXd dx;
+       size_t maxIterations;   // maximum number of function evaluation
+       double epsilon;
 
-    // evaluate rate equations
-    that->getREs(conc,REs);
+       double ALF;
+       double TOLX,TOLF,TOLMIN;
+       int STPMX;
 
-    // construct Jacobian matrix
-    that->getJacobianMatrix(JacobianM);
+   };
 
-    // dimension
-    size_t dim = conc.size();
+   params parameters;
 
-    // calc max step
-    double stpmax=STPMX*std::max(conc.norm(),double(dim));
+  /**
+   * Constructor...
+   */
 
-    double kmax = maxiter;
+  NewtonRaphson(T &model)
+      : that(model), parameters(model.numIndSpecies())
+  {
+      // ... pass
+  }
 
-    Models::REwrapper minimizer(&that);
-    Uncmin<dvec, dmat, Models::REwrapper > min(&minimizer);
+  const Eigen::MatrixXd&
+  getJacobianM()
+  {
+     return this->JacobianM;
+  }
 
-    for(int k=0;k<kmax;k++)
-    {
+  int getIterations()
+  { return this->iterations; }
 
-        maxiter = k;
+  Status
+  solve(Eigen::VectorXd &conc)
+  {
 
-        // compute f to minimize
-//        f = .5*(REs.squaredNorm());
+      double test,temp;
 
-        // calculate steepest descent direction
-//        nablaf = JacobianM.transpose()*REs;
+      Eigen::VectorXd conc_old;
+      Eigen::VectorXd rhs;
 
-        // store old concentrations
-        conc_old = conc;
+      Eigen::VectorXd nablaf;
+      Eigen::VectorXd dx;
 
-        min.SetMethod(2);
+      // evaluate rate equations
+      that.getREs(conc,REs);
 
-        check = min.Minimize(conc_old,conc,f,nablaf);
+      // dimension
+      size_t dim = conc.size();
 
-        // evaluate rate equations
-        that->getREs(conc,REs);
+      // calc max step
+      const double stpmax=this->parameters.STPMX*std::max(conc.norm(),double(dim));
 
-        // construct Jacobian matrix
-        that->getJacobianMatrix(JacobianM);
+      for(size_t k=0;k<this->parameters.maxIterations;k++)
+      {
 
-        // test for convergence of REs
+          // evaluate rate equations
+          that.getREs(conc,REs);
 
-        // max norm
-        test = REs.lpNorm<Eigen::Infinity>();
+          conc_old = conc;
 
-        if ( test < TOLF )
-        {
-           //std::cerr<<"convergence in REs"<<std::endl;
-           check = true;
-           return;
-        }
+          LineSearchStatus lcheck = newtonStep(conc_old,conc,stpmax);
+
+          // test for convergence of REs
+          if ( REs.lpNorm<Eigen::Infinity>() < this->parameters.TOLF)
+          {
+             this->iterations=k+1;
+             return Success;
+          }
+
+          // check linesearch
+          switch(lcheck)
+          {
+            case Converged: return Success;
+            case RoundOffProblem : return IterationFailed;
+            default: break;
+          }
+
+          // test for convergence of dx
+          test = 0.;
+          for(size_t i=0;i<dim;i++)
+          {
+              temp = (std::abs(conc(i)-conc_old(i)))/std::max(conc(i),1.);
+              if (temp > test) test = temp;
+          }
+
+          if (test < this->parameters.TOLX)
+          {
+              //convergence of dx
+              this->iterations=k+1;
+              return Success;
+          }
+
+      } // next newton iteration
+
+      return MaxIterationsReached;
+  }
+
+  LineSearchStatus
+  newtonStep(const Eigen::VectorXd &inState, Eigen::VectorXd &outState,double stpmax)
+  {
+
+      double f,fold;
+
+      double test,temp,den;
+
+      size_t dim = inState.size();
+
+      Eigen::VectorXd nablaf;
+      Eigen::VectorXd dx;
+
+      // construct Jacobian matrix
+      that.getREs(inState,REs);
+      that.getJacobianMatrix(inState,JacobianM);
+
+      // compute f to minimize
+      f = .5*(REs.squaredNorm());
+      // calculate steepest descent direction
+      nablaf = JacobianM.transpose()*REs;
+
+      // store also old f
+      fold = f;
+
+      // solve JacobianM*dx=-REs
+      dx = JacobianM.fullPivLu().solve(-REs);
+
+      // if linesearch failed try with full pivoting.
+      LineSearchStatus lcheck = this->linesearch(inState, outState, dx, fold, f, nablaf, stpmax);
+      //< returns new outState and f, also updates REs
+
+      // check for spurious convergence of nablaf = 0
+      if (lcheck==LineSearchFailed) {
+         test = 0.0;
+         den = std::max(f,0.5*double(dim));
+         for(size_t i=0; i<dim;i++)
+         {
+             temp = std::abs(nablaf(i))*std::max(std::abs(outState(i)),1.)/den;
+             if (temp > test) test = temp;
+         }
+
+         if(test < this->parameters.TOLMIN)
+             return LineSearchFailed;
+         else
+         {
+             return Converged;
+         }
+      }
+
+      return lcheck;
+
+  }
 
 
-        // check for spurious convergence of nablaf = 0
-        double temp;
-        if (!check) {
-           test = 0.0;
-           den = std::max(f,0.5*double(dim));
-           for(size_t i=0; i<dim;i++)
-           {
-               temp = std::abs(nablaf(i))*std::max(std::abs(conc(i)),1.)/den;
-               if (temp > test) test = temp;
-           }
+  /**
+   * Adaptive line search method.
+   *
+   * The method uses a cubic interpolation formula to find the optimal step size.
+   * \cite press2007
+   *
+   * @param xold : start function arguments
+   * @param x : end function arguments
+   * @param dx : the search direction
+   * @param fold : old function value
+   * @param f : new function value
+   * @param nablaf : gradient of f in search direction
+   *
+   */
+  LineSearchStatus
+  linesearch(const Eigen::VectorXd &xold, Eigen::VectorXd &x, Eigen::VectorXd &dx,
+                                      const double fold, double &f, const Eigen::VectorXd &nablaf,
+                                      const double &stpmax)
+  {
 
-           /* @todo check this return */
-           check = !(test < TOLMIN);
-           //std::cerr<<"Spurious convergence of nablaf!"<<std::endl;
-           return;
-        }
+      size_t dim = xold.size();
 
-        // test for convergence of dx
-        test = 0.;
-        for(size_t i=0;i<dim;i++)
-        {
-            temp = (std::abs(conc(i)-conc_old(i)))/std::max(conc(i),1.);
-            if (temp > test) test = temp;
-        }
-        if (test < TOLX)
-        {
-            //std::cerr<<"convergence of dx"<<std::endl;
-            return;
-        }
+      double temp=0., test=0.;
+      double rhs1=0., rhs2=0.;
+      double lambda=0., lambda2=0., lambdamin=0., tmplambda=0;
+      double a=0., b=0., disc=0., f2=0.;
 
-    } // next newton iteration
+      double norm = dx.norm();
+      // scale if dx is too large
+      if(norm > stpmax) dx*=(stpmax/norm);
 
-    check=false;
+      double slope = nablaf.adjoint()*dx;
+
+      if (slope >= 0.) return RoundOffProblem;
+      test = 0.0;
+      for (size_t i=0;i<dim;i++)
+      {
+          temp=std::abs(dx(i))/std::max(abs(i),1);
+          if (temp > test) test = temp;
+      }
+
+      lambdamin = this->parameters.TOLX/test;
+
+      // first do newton step
+      lambda   = 1.0;
+      for(;;){
+
+          x = xold+lambda*dx;
+
+          // evaluate rate equations
+          that.getREs(x,REs);
+
+          f = 0.5*(REs.squaredNorm());
+
+          if (lambda < lambdamin)
+          {
+             x=xold;
+             return LineSearchFailed;
+          }
+          else if (f <= (fold + this->parameters.ALF*lambda*slope) )
+          {
+              return OK;
+          }
+          else
+          {
+              if (lambda == 1.0)
+                  tmplambda = -slope/(2.*(f-fold-slope));
+              else {
+                 rhs1 = f-fold-lambda*slope;
+                 rhs2 = f2-fold-lambda2*slope;
+                 a = (rhs1/(lambda*lambda)-rhs2/(lambda2*lambda2))/(lambda-lambda2);
+                 b = (-lambda2*rhs1/(lambda*lambda)+lambda*rhs2/(lambda2*lambda2))/(lambda-lambda2);
+                 if (a==0.) tmplambda = -slope/(2.*b);
+                 else{
+                    disc=b*b-3.*a*slope;
+                    if (disc<0.) tmplambda = 0.5*lambda;
+                    else if (b<=0.) tmplambda=(-b+std::sqrt(disc))/(3.*a);
+                    else tmplambda=-slope/(b+std::sqrt(disc));
+                 }
+                 if (tmplambda>0.5*lambda) tmplambda = 0.5*lambda;
+              }
+          }
+
+          lambda2 = lambda;
+          f2 = f;
+          lambda = std::max(tmplambda,0.1*lambda);
+
+      }
+
+  }
+
+};
+
 
 }
-
 }
 
-}
 
-#endif
+#endif // NLESOLVE_HH

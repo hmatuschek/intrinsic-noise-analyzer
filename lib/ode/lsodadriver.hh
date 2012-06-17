@@ -1,5 +1,5 @@
 #ifndef __FLUC_ODE_LSODEADRIVER_HH__
-#define __FLUC_ODE_LSODEADRIVER__
+#define __FLUC_ODE_LSODEADRIVER_HH__
 
 #include <eigen3/Eigen/Eigen>
 #include "exception.hh"

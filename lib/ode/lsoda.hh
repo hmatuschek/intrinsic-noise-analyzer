@@ -1,3 +1,6 @@
+#ifndef __FLUC_ODE_LSODA_HH__
+#define __FLUC_ODE_LSODA_HH__
+
 #include <math.h>
 #include <iostream>
 #include <cstdio>
@@ -21,12 +24,6 @@ public:
 };
 /// @endcond
 
-/**
-* Repack of LSODA c from fortran tanslation
-* @todo convert all printf to exceptions
-* @todo incoorporate analytical Jacobian
-*/
-
 
 /*
   This is a C version of the LSODA library. I acquired the original
@@ -45,8 +42,6 @@ public:
 
   - Heng Li <lh3lh3@gmail.com>
  */
-
-
 
 /* The MIT License
 
@@ -73,35 +68,11 @@ public:
    SOFTWARE.
 */
 
-/* Contact: Heng Li <lh3@sanger.ac.uk> */
-
-/***********
- * lsoda.c *
- ***********/
-
-/*
-From tam@dragonfly.wri.com Wed Apr 24 01:35:52 1991
-Return-Path: <tam>
-Date: Wed, 24 Apr 91 03:35:24 CDT
-From: tam@dragonfly.wri.com
-To: whitbeck@wheeler.wrc.unr.edu
-Subject: lsoda.c
-Cc: augenbau@sparc0.brc.uconn.edu
-
-
-I'm told by Steve Nichols at Georgia Tech that you are interested in
-a stiff integrator.  Here's a translation of the fortran code LSODA.
-
-Please note
-that there is no comment.  The interface is the same as the FORTRAN
-code and I believe the documentation in LSODA will suffice.
-As usual, a free software comes with no guarantee.
-
-Hon Wah Tam
-Wolfram Research, Inc.
-tam@wri.com
+/**
+* Repack of LSODA c from fortran tanslation
+* @todo convert all printf to exceptions
+* @todo incoorporate analytical Jacobian
 */
-
 
 class LSODA : public LsodaConstants {
 
@@ -185,3 +156,5 @@ private:
 
 }
 }
+
+#endif
