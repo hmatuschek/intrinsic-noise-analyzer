@@ -165,12 +165,15 @@ EngineWizardPage::EngineWizardPage(GeneralTaskWizard *parent, bool show_parallel
   numThreads->setMinimum(1);
   numThreads->setMaximum(OpenMP::getMaxThreads());
   numThreads->setValue(OpenMP::getMaxThreads());
-  if (1 == OpenMP::getMaxThreads())
-    numThreads->setEnabled(false);
+  numThreads->setEnabled(false);  // Disable num-threads field since default engine is BCI
   numThreads->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
   if (! _show_parallel_engine)
     numThreads->setVisible(false);
 
+  // Connect signals:
+  QObject::connect(engineList, SIGNAL(currentIndexChanged(int)), this, SLOT(engineSelected(int)));
+
+  // Assemble layout
   QFormLayout *layout = new QFormLayout();
   layout->addRow(tr("execution engine"), engineList);
   layout->addRow(tr("optimize code"), codeOpt);
@@ -201,6 +204,23 @@ EngineWizardPage::validatePage()
   wizard->getConfigCast<EngineTaskConfig>().setNumEvalThreads(numThreads->value());
 
   return true;
+}
+
+
+void
+EngineWizardPage::engineSelected(int index)
+{
+  if (1 == OpenMP::getMaxThreads())
+    numThreads->setEnabled(false);
+
+  EngineTaskConfig::EngineKind kind = EngineTaskConfig::EngineKind(
+        engineList->itemData(engineList->currentIndex()).toUInt());
+
+  if (EngineTaskConfig::BCIMP_ENGINE == kind) {
+    numThreads->setEnabled(true);
+  } else {
+    numThreads->setEnabled(false);
+  }
 }
 
 

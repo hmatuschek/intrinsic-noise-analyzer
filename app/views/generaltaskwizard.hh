@@ -108,6 +108,10 @@ private:
 
   /** Holds the number of threads. */
   QSpinBox  *numThreads;
+
+private slots:
+  /** Callback if the engine was changed. */
+  void engineSelected(int index);
 };
 
 
