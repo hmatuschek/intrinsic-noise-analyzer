@@ -1,6 +1,6 @@
-Summary: An analysis tool for biological networks
+Summary: An analysis tool for biochemical reaction networks
 
-%define version 0.2.0
+%define version 0.2.99
 
 License: GPLv2
 Group: Productivity/Scientific/Chemistry
@@ -11,22 +11,32 @@ Source: intrinsic-noise-analyzer-%{version}.tar.gz
 URL: https://googlecode.com/p/intrinsic-noise-analyzer
 Version: %{version}
 Buildroot: /tmp/intrinsicnoiseanalyzerrpm
-BuildRequires: gcc-c++, cmake, libsbml-cppnamespace-devel = 5.0.0 
+BuildRequires: gcc-c++, cmake, libsbml-cppnamespace-devel = 5.0.0
 Requires: libsbml-cppnamespace = 5.0.0, libina = %{version}-%{release}
 %if 0%{?suse_version}
-BuildRequires: libqt4-devel >= 4.5, libginac-devel
-Requires: libqt4 >= 4.5, libginac2
+BuildRequires: libqt4-devel >= 4.5, libginac-devel, llvm29-devel = 2.9
+Requires: libqt4 >= 4.5, libginac2, llvm29 = 2.9
 %endif
 %if 0%{?fedora}
-BuildRequires: qt4-devel >= 4.5, ginac-devel
-BuildRequires: qt4 >= 4.5, ginac
+BuildRequires: qt4-devel >= 4.5, ginac-devel, llvm-devel = 2.9
+Requires: qt4 >= 4.5, ginac, llvm = 2.9
 %endif
 
 %description
-An analysis tool for biological networks.
+The intrinsic Noise Analyzer (iNA) is an easy-to-use computational tool for 
+efficient analysis of intrinsic noise in biochemical reaction networks. The 
+SBML-based software combines two complementary approaches to analyze the 
+Chemical Master Equation:
+
+ - the System Size Expansion - a systematic analytical approximation method,
+ - the Stochastic Simulation Algorithm - a widely used Monte Carlo method.
+
+iNA is based on the computer algebra system Ginac and facilitates multi-core
+simulations.
+
 
 %package -n libina
-Summary: Runtime library for the Intrinsic Noise Analyzer
+Summary: Runtime library for the intrinsic Noise Analyzer
 Group: Science
 BuildRequires: gcc-c++, cmake, libsbml-cppnamespace-devel = 5.0.0 
 Requires: libsbml-cppnamespace = 5.0.0
@@ -40,13 +50,13 @@ BuildRequires: ginac
 %endif
 
 %description -n libina
-Provides the runtime-library for the Intrinsic Noise Analyzer.
+Provides the runtime library for the intrinsic Noise Analyzer.
 
 %prep
 %setup -q
 
 %build
-cmake -DCMAKE_INSTALL_PREFIX=$RPM_BUILD_ROOT/usr
+cmake -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX=$RPM_BUILD_ROOT/usr
 make
 
 %install
