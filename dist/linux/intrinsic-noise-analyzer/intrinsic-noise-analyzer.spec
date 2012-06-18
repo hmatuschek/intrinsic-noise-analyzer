@@ -14,12 +14,12 @@ Buildroot: /tmp/intrinsicnoiseanalyzerrpm
 BuildRequires: gcc-c++, cmake, libsbml-cppnamespace-devel = 5.0.0
 Requires: libsbml-cppnamespace = 5.0.0, libina = %{version}-%{release}
 %if 0%{?suse_version}
-BuildRequires: libqt4-devel >= 4.5, libginac-devel, llvm29-devel = 2.9
-Requires: libqt4 >= 4.5, libginac2, llvm29 = 2.9
+BuildRequires: libqt4-devel >= 4.5, libginac-devel, llvm-devel >= 2.9
+Requires: libqt4 >= 4.5, libginac2, llvm >= 2.9
 %endif
 %if 0%{?fedora}
-BuildRequires: qt4-devel >= 4.5, ginac-devel, llvm-devel = 2.9
-Requires: qt4 >= 4.5, ginac, llvm = 2.9
+BuildRequires: qt4-devel >= 4.5, ginac-devel, llvm-devel >= 2.9
+Requires: qt4 >= 4.5, ginac, llvm >= 2.9
 %endif
 
 %description
