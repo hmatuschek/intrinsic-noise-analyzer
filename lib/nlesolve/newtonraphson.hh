@@ -101,7 +101,7 @@ public:
       // calc max step
       const double stpmax=this->parameters.STPMX*std::max(conc.norm(),double(dim));
 
-      for(size_t k=0;k<this->parameters.maxIterations;k++)
+      for(this->iterations=1;this->iterations<this->parameters.maxIterations;this->iterations++)
       {
 
           // evaluate rate equations
@@ -114,17 +114,14 @@ public:
           // test for convergence of REs
           if ( REs.lpNorm<Eigen::Infinity>() < this->parameters.TOLF)
           {
-             this->iterations=k+1;
              return Success;
           }
 
           // check linesearch
           switch(lcheck)
           {
-            case Converged:
-              this->iterations=k+1; return Success;
-            case RoundOffProblem :
-              this->iterations=k+1; return IterationFailed;
+            case Converged: return Success;
+            case RoundOffProblem : return IterationFailed;
             default: break;
           }
 
@@ -139,7 +136,6 @@ public:
           if (test < this->parameters.TOLX)
           {
               //convergence of dx
-              this->iterations=k+1;
               return Success;
           }
 

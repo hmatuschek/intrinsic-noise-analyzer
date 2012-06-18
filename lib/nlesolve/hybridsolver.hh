@@ -17,7 +17,6 @@ class HybridSolver
       protected ODE::LSODA
 {
 
-
 protected:
 
   double *ywork;
@@ -37,7 +36,7 @@ public:
 
     //parameters.epsilon=epsilon;
 
-    this->parameters.maxIterations=50;
+    this->parameters.maxIterations=75;
 
     istate=1;
 
@@ -81,6 +80,9 @@ public:
     return this->that.numIndSpecies();
   }
 
+  /**
+   * Runs the solver.
+   */
   Status
   solve(Eigen::VectorXd &conc, double dt=0.1)
   {
