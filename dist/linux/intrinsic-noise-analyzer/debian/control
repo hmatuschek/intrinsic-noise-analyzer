@@ -1,7 +1,9 @@
 Source: intrinsic-noise-analyzer
 Priority: extra
 Maintainer: Hannes Matuschek <hmatuschek@gmail.com>
-Build-Depends: cdbs (>= 0.4.51), debhelper (>= 8.0.0), cmake, libsbml-cppnamespace-dev (= 5.0.0-1), libqt4-dev (>= 4.5), libqtcore4 (>= 4.5), libqtgui4 (>= 4.5), libginac-dev
+Build-Depends: cdbs (>= 0.4.51), debhelper (>= 8.0.0), cmake, libsbml-cppnamespace-dev (= 5.0.0-1),\
+               libqt4-dev (>= 4.5), libqtcore4 (>= 4.5), libqtgui4 (>= 4.5), libginac-dev,\
+               llvm-dev (>= 2.9), llvm (>= 2.9)
 Standards-Version: 3.9.2
 Section: science
 Homepage: http://www.googlecode.com/p/intrinsic-noise-analyzer
