@@ -170,7 +170,8 @@ public:
       fold = f;
 
       // solve JacobianM*dx=-REs
-      dx = JacobianM.fullPivLu().solve(-REs);
+      //dx = JacobianM.fullPivLu().solve(-REs);
+      dx = JacobianM.lu().solve(-REs);
 
       LineSearchStatus lcheck;
 
