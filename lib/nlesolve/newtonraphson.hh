@@ -14,6 +14,7 @@ namespace NLEsolve {
         Success = 1,
         MaxIterationsReached = 0,
         IterationFailed = -1,
+        NegativeValues = -2,
     };
 
     enum LineSearchStatus {
@@ -111,6 +112,12 @@ public:
 
           LineSearchStatus lcheck = newtonStep(conc_old,conc,stpmax);
 
+          if (!(conc.array()>0).all())
+          {
+              conc = conc_old;
+              return NegativeValues;
+          }
+
           // test for convergence of REs
           if ( REs.lpNorm<Eigen::Infinity>() < this->parameters.TOLF)
           {
@@ -121,7 +128,8 @@ public:
           switch(lcheck)
           {
             case Converged: return Success;
-            case RoundOffProblem : return IterationFailed;
+            case RoundOffProblem :
+              conc = conc_old; return IterationFailed;
             default: break;
           }
 

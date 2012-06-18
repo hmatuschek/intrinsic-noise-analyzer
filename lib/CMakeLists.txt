@@ -127,7 +127,7 @@ SET(libina_unsupported_HEADERS
 SET(libina_nlesolve_SOURCES
    nlesolve/newtonraphson.cc
    nlesolve/minpack.cc
-   nlesolve/hybridsolver.hh)
+   nlesolve/hybridsolver.cc)
 SET(libina_nlesolve_HEADERS
    nlesolve/newtonraphson.hh
    nlesolve/minpack.hh

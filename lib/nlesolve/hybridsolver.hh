@@ -111,10 +111,9 @@ public:
           std::cerr << "Iterations: "<< this->getIterations() << std::endl;
           if(lcheck==IterationFailed) std::cerr << "Linesearch failed." << std::endl;
 
-          if(lcheck!=Success || !(conc.array()>0).all()){
-              if(!(conc.array()>0).all()) std::cerr << "Negative concentrations encountered." << std::endl;
+          if(lcheck!=Success){
+              if(lcheck==NegativeValues) std::cerr << "Negative concentrations encountered." << std::endl;
               std::cerr << "Integration step: "<<dt<< std::endl;
-              conc=conc_old;
               ODEStep(conc,0,dt);
           }
 
