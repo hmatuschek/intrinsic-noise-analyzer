@@ -1,6 +1,8 @@
 #ifndef __FLUC_EVAL_HH__
 #define __FLUC_EVAL_HH__
 
+#include "config.hh"
+
 
 /**
  * @defgroup eval Expression Evaluation

@@ -3,6 +3,7 @@
 
 #include "unittest.hh"
 #include "fluctuator.hh"
+#include "config.hh"
 
 
 namespace Fluc {
