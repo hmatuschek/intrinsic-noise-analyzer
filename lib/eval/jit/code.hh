@@ -1,6 +1,7 @@
 #ifndef __FLUC_EVALUATE_LLVM_CODE_HH__
 #define __FLUC_EVALUATE_LLVM_CODE_HH__
 
+#include "config.hh"
 #include <llvm/LLVMContext.h>
 #include <llvm/Module.h>
 #include <llvm/DerivedTypes.h>
@@ -9,7 +10,11 @@
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/ExecutionEngine/GenericValue.h>
 #include <llvm/Support/raw_ostream.h>
+#if INA_LLVM_VERSION_IS_2X
 #include <llvm/Target/TargetSelect.h>
+#elif INA_LLVM_VERSION_IS_3X
+#include <llvm/Support/TargetSelect.h>
+#endif
 #include <llvm/Support/IRBuilder.h>
 
 

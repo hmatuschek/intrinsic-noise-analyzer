@@ -44,13 +44,23 @@ Code::Code(size_t num_threads)
   }
 
   { // Define complex<double> ABI type
+#if INA_LLVM_VERSION_IS_2X
     this->complex_t = llvm::StructType::get(
           context, llvm::Type::getDoubleTy(context), llvm::Type::getDoubleTy(context),
           (const llvm::Type *)0);
+#elif INA_LLVM_VERSION_IS_3X
+    this->complex_t = llvm::StructType::get(
+          llvm::Type::getDoubleTy(context), llvm::Type::getDoubleTy(context),
+          (const llvm::Type *)0);
+#endif
   }
 
   { // Define extern pow() function from libm:
+#ifdef INA_LLVM_VERSION_IS_2X
     std::vector<const llvm::Type *> args(2, llvm::Type::getDoubleTy(context));
+#elif INA_LLVM_VERSION_IS_3X
+    std::vector<llvm::Type *> args(2, llvm::Type::getDoubleTy(context));
+#endif
     llvm::FunctionType *signature = llvm::FunctionType::get(
           llvm::Type::getDoubleTy(context), args, false);
     this->real_pow = llvm::Function::Create(
@@ -58,7 +68,11 @@ Code::Code(size_t num_threads)
   }
 
   { // Define extern abs() function from libm:
+#ifdef INA_LLVM_VERSION_IS_2X
     std::vector<const llvm::Type *> args(1, llvm::Type::getDoubleTy(context));
+#elif INA_LLVM_VERSION_IS_3X
+    std::vector<llvm::Type *> args(1, llvm::Type::getDoubleTy(context));
+#endif
     llvm::FunctionType *signature = llvm::FunctionType::get(
           llvm::Type::getDoubleTy(context), args, false);
     this->real_abs = llvm::Function::Create(
@@ -66,7 +80,11 @@ Code::Code(size_t num_threads)
   }
 
   { // Define extern log() function from libm:
+#ifdef INA_LLVM_VERSION_IS_2X
     std::vector<const llvm::Type *> args(1, llvm::Type::getDoubleTy(context));
+#elif INA_LLVM_VERSION_IS_3X
+    std::vector<llvm::Type *> args(1, llvm::Type::getDoubleTy(context));
+#endif
     llvm::FunctionType *signature = llvm::FunctionType::get(
           llvm::Type::getDoubleTy(context), args, false);
     this->real_log = llvm::Function::Create(
@@ -74,7 +92,11 @@ Code::Code(size_t num_threads)
   }
 
   { // Define extern exp() function from libm:
+#ifdef INA_LLVM_VERSION_IS_2X
     std::vector<const llvm::Type *> args(1, llvm::Type::getDoubleTy(context));
+#elif INA_LLVM_VERSION_IS_3X
+    std::vector<llvm::Type *> args(1, llvm::Type::getDoubleTy(context));
+#endif
     llvm::FunctionType *signature = llvm::FunctionType::get(
           llvm::Type::getDoubleTy(context), args, false);
     this->real_exp = llvm::Function::Create(
