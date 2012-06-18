@@ -1,4 +1,5 @@
 SET(LLVM_CONFIG_EXEC_NAMES "llvm-config"
+    "llvm-config-mp-3.1" "llvm-config-3.1"
     "llvm-config-mp-3.0" "llvm-config-3.0"
     "llvm-config-mp-2.9" "llvm-config-2.9")
 FIND_PROGRAM(LLVM_CONFIG_EXEC NAMES ${LLVM_CONFIG_EXEC_NAMES})
