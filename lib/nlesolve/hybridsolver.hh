@@ -107,7 +107,7 @@ public:
           std::cerr << "Try Newton step"<< std::endl;
           Status lcheck = NewtonRaphson<Sys>::solve(conc);
           std::cerr << "Iterations: "<< this->getIterations() << std::endl;
-          if(lcheck==LineSearchFailed) std::cerr << "Linesearch failed." << std::endl;
+          if(lcheck==IterationFailed) std::cerr << "Linesearch failed." << std::endl;
 
           if(lcheck!=Success || !(conc.array()>0).all()){
               if(!(conc.array()>0).all()) std::cerr << "Negative concentrations encountered." << std::endl;
