@@ -7,10 +7,9 @@
 namespace Fluc{
 namespace NLEsolve{
 /**
- * A hybrid of the ODE integrator LSODA and the Newton Raphson method
- * to solve nonlinear algebraic equations.
+ * A hybrid of the ODE integrator LSODA and the Newton-Raphson method for nonlinear algebraic equations.
  *
- * @ingroup NLEsolve
+ * @ingroup nlesolve
  */
 template <class Sys>
 class HybridSolver
@@ -20,8 +19,6 @@ class HybridSolver
 
 
 protected:
-  /** Holds the initial step-size (dt). */
-  double step_size;
 
   double *ywork;
   double *atolwork;
@@ -39,6 +36,8 @@ public:
   {
 
     //parameters.epsilon=epsilon;
+
+    this->parameters.maxIterations=50;
 
     istate=1;
 
@@ -100,23 +99,24 @@ public:
       // dimension
       size_t dim = conc.size();
 
-      // calc max step
-      const double stpmax=this->parameters.STPMX*std::max(conc.norm(),double(dim));
-
-
-      for(size_t k=0;k<this->parameters.maxIterations;k++)
+      for(size_t k=0;k<this->parameters.maxIterations; k++, dt*=10)
       {
-
-          // advance system
-          ODEStep(conc,0,dt); dt*=10;
 
           conc_old = conc;
 
-          LineSearchStatus lcheck = NewtonRaphson<Sys>::newtonStep(conc_old,conc,stpmax);
+          std::cerr << "Try Newton step"<< std::endl;
+          Status lcheck = NewtonRaphson<Sys>::solve(conc);
+          std::cerr << "Iterations: "<< this->getIterations() << std::endl;
+          if(lcheck==LineSearchFailed) std::cerr << "Linesearch failed." << std::endl;
 
+          if(lcheck!=Success || !(conc.array()>0).all()){
+              if(!(conc.array()>0).all()) std::cerr << "Negative concentrations encountered." << std::endl;
+              std::cerr << "Integration step: "<<dt<< std::endl;
+              conc=conc_old;
+              ODEStep(conc,0,dt);
+          }
 
-
-          // test for convergence of REs
+          // test for convergence of derivatives
           test = 0.;
           for(size_t i=0;i<dim;i++)
           {
@@ -125,21 +125,9 @@ public:
           }
           if ( test < this->parameters.TOLF)
           {
+             // do additional Newton step?
              this->iterations=k+1;
              return Success;
-          }
-
-          // check linesearch
-          switch(lcheck)
-          {
-            case Converged: return Success;
-            case RoundOffProblem : conc=conc_old; ODEStep(conc,0,dt);
-            default: break;
-          }
-
-          if(!(conc.array()>0).all())
-          {
-              conc=conc_old; ODEStep(conc,0,dt); dt*=10;
           }
 
           // test for convergence of dx

@@ -1,5 +1,5 @@
 /**
- * @defgroup nlesolve Nonlinear solver
+ * @defgroup nlesolve Nonlinear solvers
  * @ingroup math
  */
 

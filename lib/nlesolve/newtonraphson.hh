@@ -1,31 +1,31 @@
-/**
- * @defgroup nlesolve Nonlinear solver
- * @ingroup math
- */
-
 #ifndef __FLUC_MODELS_NEWTONRAPHSON_HH
 #define __FLUC_MODELS_NEWTONRAPHSON_HH
 
 namespace Fluc {
 namespace NLEsolve {
 
+    enum LineSearchMethod {
+        NoLineSearch = 0,
+        Damped = 1,
+        Optimization = 2,
+    };
+
     enum Status {
-        Waiting = 0,
         Success = 1,
-        MaxIterationsReached = 2,
-        IterationFailed = 3,
+        MaxIterationsReached = 0,
+        IterationFailed = -1,
     };
 
     enum LineSearchStatus {
-        OK = 1,
+        Done = 1,
         Converged = 2,
-        LineSearchFailed = 3,
-        RoundOffProblem = 4,
+        LineSearchFailed = 0,
+        RoundOffProblem = -1,
     };
 
 
 /**
- * NewtonRaphson solver.
+ * Nonlinear algebraic equation solver using the Newton-Raphson method with linesearch.
  * @ingroup nlesolve
  */
 template<typename T>
@@ -45,8 +45,10 @@ protected:
 public:
 
    struct params {
-       params(size_t dim) : maxIterations(100*(dim+1)), epsilon(1.e-9),
+       params(size_t dim) : linesearch(Optimization), maxIterations(100*(dim+1)), epsilon(1.e-9),
            ALF(1.e-4), TOLX(std::numeric_limits<double>::epsilon()), TOLF(epsilon), TOLMIN(1.e-12), STPMX(100.){}
+
+       LineSearchMethod linesearch;
 
        size_t maxIterations;   // maximum number of function evaluation
        double epsilon;
@@ -119,8 +121,10 @@ public:
           // check linesearch
           switch(lcheck)
           {
-            case Converged: return Success;
-            case RoundOffProblem : return IterationFailed;
+            case Converged:
+              this->iterations=k+1; return Success;
+            case RoundOffProblem :
+              this->iterations=k+1; return IterationFailed;
             default: break;
           }
 
@@ -172,8 +176,18 @@ public:
       // solve JacobianM*dx=-REs
       dx = JacobianM.fullPivLu().solve(-REs);
 
-      // if linesearch failed try with full pivoting.
-      LineSearchStatus lcheck = this->linesearch(inState, outState, dx, fold, f, nablaf, stpmax);
+      LineSearchStatus lcheck;
+
+      switch(parameters.linesearch)
+      {
+          case Optimization:
+            lcheck = this->linesearch(inState, outState, dx, fold, f, nablaf, stpmax);
+            break;
+          case Damped:
+            lcheck = this->linesearch2(inState, outState, dx, fold, f, stpmax);
+          default: return Done;
+
+      }
       //< returns new outState and f, also updates REs
 
       // check for spurious convergence of nablaf = 0
@@ -260,7 +274,7 @@ public:
           }
           else if (f <= (fold + this->parameters.ALF*lambda*slope) )
           {
-              return OK;
+              return Done;
           }
           else
           {
@@ -287,6 +301,58 @@ public:
           lambda = std::max(tmplambda,0.1*lambda);
 
       }
+
+  }
+
+  /**
+   * Damped line search method.
+   *
+   * @ingroup nlesolve
+   * @todo this method does not work properly.
+   *
+   * This method simply halfens the step size.
+   */
+
+  LineSearchStatus
+  linesearch2(const Eigen::VectorXd &xold, Eigen::VectorXd &x, Eigen::VectorXd &dx,
+                                      const double fold, double &f, double stpmax)
+  {
+
+      // first try Newton step
+
+      int n=0;
+
+      double lambda=1;
+
+
+      double norm = dx.norm();
+      // scale if dx is too large
+      if(norm > stpmax) dx*=(stpmax/norm);
+
+      // loop over until f has sufficiently decreased
+      while(f > fold)
+      {
+
+          n++;
+
+          x = xold+lambda*dx;
+
+          this->that.getREs(x,this->REs);
+
+          f = 0.5*this->REs.squaredNorm();
+
+          // take half step size
+          lambda *= 0.5;
+
+          if(n>32)
+          {
+              std::cerr<<"max reached"<<std::endl;
+              return LineSearchFailed;
+          }
+
+      }
+
+      return Done;
 
   }
 
