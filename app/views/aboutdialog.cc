@@ -103,7 +103,7 @@ QString AboutPage::content =
         "<LI>the Stochastic Simulation Algorithm - a widely used Monte Carlo method.</UL>"
         "iNA is based on the computer algebra system Ginac and facilitates multi-core simulations. </p>"
 "  <h3>Copyright</h3>"
-"  <p>Intrinsic Noise Analyzer version 0.2.0, "
+"  <p>Intrinsic Noise Analyzer version 0.3.0, "
 "     Copyright (C) 2011,2012 Ramon Grima, Hannes Matuschek, Philipp Thomas</p>"
 "  <p>The Intrinsic Noise Analyzer comes with ABSOLUTELY NO WARRANTY;"
 "     This is free software, and you are welcome to redistribute it"
