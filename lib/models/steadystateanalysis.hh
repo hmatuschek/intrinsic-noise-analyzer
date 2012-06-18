@@ -76,8 +76,6 @@ public:
         {
             case NLEsolve::Success:
               break;
-            case NLEsolve::Waiting:
-              throw InternalError("Solver still waiting. This should not have happened."); break;
             case NLEsolve::MaxIterationsReached:
                 throw NumericError("Maximum iterations reached. iNA is unable to find the roots of the system. You may try again with bigger number of iterations."); break;
             case NLEsolve::IterationFailed:
@@ -375,8 +373,6 @@ public:
       {
           case NLEsolve::Success:
             break;
-          case NLEsolve::Waiting:
-            throw InternalError("Solver still waiting. This should not have happened."); break;
           case NLEsolve::MaxIterationsReached:
               throw NumericError("Maximum iterations reached. iNA is unable to find the roots of the system. You may try again with bigger number of iterations."); break;
           case NLEsolve::IterationFailed:
