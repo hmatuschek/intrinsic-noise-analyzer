@@ -6,7 +6,7 @@
 #include "builder.hh"
 #include "eval/compilercommon.hh"
 
-#include <ginac.h>
+#include <ginac/ginac.h>
 #include <eigen3/Eigen/Eigen>
 #include "ginacsupportforeigen.hh"
 

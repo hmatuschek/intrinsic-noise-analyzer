@@ -2,7 +2,7 @@
 #define __FLUC_EVALUATE_LLVM_BUILDER_HH__
 
 #include "code.hh"
-#include <ginac.h>
+#include <ginac/ginac.h>
 
 
 namespace Fluc {

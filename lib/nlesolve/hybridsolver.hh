@@ -127,6 +127,7 @@ public:
           if ( test < this->parameters.TOLF)
           {
              // do additional Newton step?
+             NewtonRaphson<Sys>::solve(conc);
              this->iterations=k+1;
              return Success;
           }

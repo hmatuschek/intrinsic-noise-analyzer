@@ -4,7 +4,7 @@
 #include "code.hh"
 #include "exception.hh"
 #include "builder.hh"
-#include <ginac.h>
+#include <ginac/ginac.h>
 
 
 namespace Fluc {
