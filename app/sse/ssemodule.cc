@@ -45,7 +45,7 @@ SSEModule::configSSE()
   Task *task = 0;
 
   Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
-  message << "Create IOS analysis.";
+  message << "Created SSE analysis.";
   Utils::Logger::get().log(message);
 
   try {

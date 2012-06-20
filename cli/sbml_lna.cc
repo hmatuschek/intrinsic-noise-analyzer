@@ -1,9 +1,17 @@
 #include "sbml_lna.hh"
 
+
+#include "utils/logger.hh"
+
 using namespace Fluc;
 
 int main(int argc, char *argv[])
 {
+
+
+  Utils::Logger::get().addHandler(new Utils::TextMessageHandler(std::cout, Utils::Message::INFO));
+
+
   // Check args:
   if (argc != 2)
   {

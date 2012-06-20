@@ -36,7 +36,7 @@ public:
 
     //parameters.epsilon=epsilon;
 
-    this->parameters.maxIterations=75;
+    this->parameters.maxIterations=100;
 
     istate=1;
 
@@ -81,9 +81,10 @@ public:
    * Runs the solver.
    */
   Status
-  solve(Eigen::VectorXd &conc, double dt=0.1)
+  solve(Eigen::VectorXd &conc, double maxTime=1.e9)
   {
 
+      double dt = 0.1;
       double test,temp;
 
       Eigen::VectorXd conc_old;
@@ -94,28 +95,38 @@ public:
       // dimension
       size_t dim = conc.size();
 
-      for(size_t k=0;k<this->parameters.maxIterations; k++, dt*=10)
+      if(maxTime<1.e-1) maxTime=1.e-1;
+
+
+      Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
+
+      for(double t=0.;t<maxTime; t+=dt, dt*=10)
       {
 
           conc_old = conc;
 
-          std::cerr << "Try Newton step"<< std::endl;
+          message << "Try Newton step ..."<< std::endl;
           Status lcheck = NewtonRaphson<Sys>::solve(conc);
+
+          message.clear();
           switch(lcheck)
           {
             case IterationFailed:
-              std::cerr << "Newton step: Linesearch failed." << std::endl; break;
+              message << "Newton step: Linesearch failed." << std::endl; break;
             case NegativeValues:
-              std::cerr << "Newton step: Negative concentrations encountered." << std::endl;  break;
+              message << "Newton step: Negative concentrations encountered." << std::endl;  break;
             case MaxIterationsReached:
-              std::cerr << "Newton step: Maximum iterations reached." << std::endl; break;
+              message << "Newton step: Maximum iterations reached." << std::endl; break;
             case Success:
-              break;
+              message << "Newton step converged in " << this->getIterations() << "." << std::endl; break;
           }
+          Utils::Logger::get().log(message);
 
           if(lcheck!=Success){
-              std::cerr << "Use integration with time step: "<<dt<< std::endl;
-              ODEStep(conc,0,dt);
+              message.clear();
+              message << "Use integration of duration "<< dt << "." << std::endl;
+              ODEStep(conc,0,dt);             
+              Utils::Logger::get().log(message);
           }
 
           // test for convergence of derivatives
@@ -128,7 +139,6 @@ public:
           if ( test < this->parameters.TOLF)
           {
              NewtonRaphson<Sys>::solve(conc);
-             this->iterations=k+1;
              return Success;
           }
 
@@ -141,8 +151,7 @@ public:
           }
           if (test < this->parameters.TOLX)
           {
-              //convergence of dx
-              this->iterations=k+1;
+              NewtonRaphson<Sys>::solve(conc);
               return Success;
           }
 
