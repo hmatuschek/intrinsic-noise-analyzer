@@ -81,10 +81,9 @@ public:
    * Runs the solver.
    */
   Status
-  solve(Eigen::VectorXd &conc, double maxTime=1.e9)
+  solve(Eigen::VectorXd &conc, double maxTime=1.e9, double dt=0.1)
   {
 
-      double dt = 0.1;
       double test,temp;
 
       Eigen::VectorXd conc_old;
@@ -95,7 +94,7 @@ public:
       // dimension
       size_t dim = conc.size();
 
-      if(maxTime<1.e-1) maxTime=1.e-1;
+      if(maxTime<dt) maxTime=dt;
 
 
       Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
