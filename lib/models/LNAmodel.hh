@@ -23,11 +23,9 @@ protected:
   */
   void constructCovarianceMatrix(Eigen::MatrixXex &cov);
 
-  void
-  constructSymmetricMatrix(const Eigen::VectorXex &covVec,Eigen::MatrixXex &cov);
+  void constructSymmetricMatrix(const Eigen::VectorXex &covVec,Eigen::MatrixXex &cov);
 
-  void
-  flattenSymmetricMatrix(const Eigen::MatrixXex &mat,Eigen::VectorXex &vec);
+  void flattenSymmetricMatrix(const Eigen::MatrixXex &mat,Eigen::VectorXex &vec);
 
   size_t dimCOV;
 
@@ -72,46 +70,6 @@ public:
    * @param concentrations vector, @param covariance matrix and @param emre correction vector.
    */
   void fullState(const Eigen::VectorXd &state, Eigen::VectorXd &concentrations, Eigen::MatrixXd &covariance, Eigen::VectorXd &emre);
-
-  /**
-  * Sets the state of the interpreter and gives correction terms for macroscopic REs.
-  */
-  void getRateCorrections(const Eigen::VectorXd &state, Eigen::MatrixXd &REcorr);
-
-  /**
-  * Gives correction terms to macroscopic REs at current state.
-  */
-  void getRateCorrections(Eigen::VectorXd &REcorr);
-
-  /**
-  * Sets the state of the interpreter and gives Hessian.
-  */
-  void getHessian(const Eigen::VectorXd &state, Eigen::MatrixXd &Hessian);
-
-  /**
-  * Gives Hessian at current state.
-  */
-  void getHessian(Eigen::MatrixXd &Hessian);
-
-  /**
-  * Sets the state of the interpreter and gives Diffusion matrix in vectorized form.
-  */
-  void getDiffusionVec(const Eigen::VectorXd &state, Eigen::VectorXd &DiffusionVec);
-
-  /**
-  * Gives Diffusion matrix in vectorized form.
-  */
-  void getDiffusionVec(Eigen::VectorXd &DiffusionVec);
-
-  /**
-  * Sets the state of the interpreter and gives Diffusion matrix.
-  */
-  void getDiffusionMatrix(const Eigen::VectorXd &state, Eigen::MatrixXd &DiffusionM);
-
-  /**
-  * Gives Diffusion matrix.
-  */
-  void getDiffusionMatrix(Eigen::MatrixXd &DiffusionM);
 
   friend class SpectralAnalysis;
   friend class SpectralAnalysisBase;

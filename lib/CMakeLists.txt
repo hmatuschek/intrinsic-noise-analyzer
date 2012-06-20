@@ -57,7 +57,6 @@ SET(libina_models_SOURCES
     models/conservationanalysismixin.cc
     models/propensityexpansion.cc
     models/ssebasemodel.cc
-    models/linearnoiseapproximation.cc
     models/REmodel.cc
     models/LNAmodel.cc
     models/IOSmodel.cc
@@ -76,7 +75,6 @@ SET(libina_models_SOURCES
     models/baseunitmixin.cc
     models/particlenumbersmixin.cc
     models/sseinterpreter.cc
-    models/lnaevaluator.cc
     models/steadystateanalysis.cc
 )
 
@@ -85,7 +83,6 @@ SET(libina_models_HEADERS models/models.hh
     models/conservationanalysismixin.hh
     models/propensityexpansion.hh
     models/ssebasemodel.hh
-    models/linearnoiseapproximation.hh
     models/REmodel.hh
     models/LNAmodel.hh
     models/IOSmodel.hh
@@ -108,7 +105,6 @@ SET(libina_models_HEADERS models/models.hh
     models/baseunitmin.hh
     models/particlenumbersmixin.hh
     models/sseinterpreter.hh
-    models/lnaevaluator.hh
     models/steadystateanalysis.hh
 )
 
@@ -117,20 +113,26 @@ SET(libina_models_HEADERS models/models.hh
 SET(libina_unsupported_SOURCES
     models/unsupported/spectrumrecorder.cc
     models/unsupported/spectralanalysis.cc
+    models/unsupported/linearnoiseapproximation.cc
+    models/unsupported/lnaevaluator.cc
+    models/unsupported/steadystateanalysisold.cc
+#    models/unsupported/minpack.cc
 )
 SET(libina_unsupported_HEADERS
     models/unsupported/spectrumrecorder.hh
     models/unsupported/spectralanalysis.hh
+    models/unsupported/linearnoiseapproximation.hh
+    models/unsupported/lnaevaluator.hh
+    models/unsupported/steadystateanalysisold.hh
+#    models/unsupported/minpack.hh
 )
 
 # Add source for nonlinear solvers
 SET(libina_nlesolve_SOURCES
    nlesolve/newtonraphson.cc
-   nlesolve/minpack.cc
    nlesolve/hybridsolver.cc)
 SET(libina_nlesolve_HEADERS
    nlesolve/newtonraphson.hh
-   nlesolve/minpack.hh
    nlesolve/hybridsolver.hh)
 
 # Add sources for ODE solvers etc.

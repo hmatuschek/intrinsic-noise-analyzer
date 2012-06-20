@@ -9,9 +9,9 @@
 /**
  * Abstract @c Task config class.
  *
- * This class implements nothing, but defines the virtual base-type for all configuration
+ * This class implements nothing, but defines the virtual base type for all configuration
  * mixins, that implments secialized configurations for specific tasks. For each configuration
- * mixin, there is a corresponding wizzard-page class, that performs the actual UI part of the
+ * mixin, there is a corresponding wizard page class, that performs the actual UI part of the
  * configuration.
  */
 class GeneralTaskConfig : public QObject

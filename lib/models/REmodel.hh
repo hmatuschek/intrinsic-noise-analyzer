@@ -41,27 +41,27 @@ public:
   /**
   * Sets the state of the interpreter.
   */
-  void setState(const Eigen::VectorXd &state);
+  //void setState(const Eigen::VectorXd &state);
 
   /**
   * Sets the state of the interpreter and gives rate equations.
   */
-  void getREs(const Eigen::VectorXd &state, Eigen::VectorXd &REs);
+  //void getREs(const Eigen::VectorXd &state, Eigen::VectorXd &REs);
 
   /**
   * Gives rate equations evaluated at current state.
   */
-  void getREs(Eigen::VectorXd &REs);
+  //void getREs(Eigen::VectorXd &REs);
 
   /**
   * Sets the state of the interpreter and gives Jacobian matrix.
   */
-  void getJacobianMatrix(const Eigen::VectorXd &state, Eigen::MatrixXd &JacobianMatrix);
+  //void getJacobianMatrix(const Eigen::VectorXd &state, Eigen::MatrixXd &JacobianMatrix);
 
   /**
   * Gives Jacobian matrix at current state.
   */
-  void getJacobianMatrix(Eigen::MatrixXd &JacobianMatrix);
+  //void getJacobianMatrix(Eigen::MatrixXd &JacobianMatrix);
 
   const Eigen::VectorXex &getUpdateVector() const;
 

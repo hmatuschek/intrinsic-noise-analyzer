@@ -16,10 +16,10 @@
 
 using namespace Fluc;
 
-typedef Models::GenericSSEinterpreter< Models::LinearNoiseApproximation, Eval::bci::Engine<Eigen::VectorXd>, Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd> > BCIInterpreter;
-typedef Models::GenericSSEinterpreter< Models::LinearNoiseApproximation, Eval::bcimp::Engine<Eigen::VectorXd>, Eval::bcimp::Engine<Eigen::VectorXd, Eigen::MatrixXd> > BCIMPInterpreter;
-typedef Models::GenericSSEinterpreter< Models::LinearNoiseApproximation, Eval::jit::Engine<Eigen::VectorXd>, Eval::jit::Engine<Eigen::VectorXd, Eigen::MatrixXd> > LLVMInterpreter;
-typedef Models::GenericSSEinterpreter< Models::LinearNoiseApproximation, Eval::direct::Engine<Eigen::VectorXd>, Eval::direct::Engine<Eigen::VectorXd, Eigen::MatrixXd> > GiNaCInterpreter;
+typedef Models::GenericSSEinterpreter< Models::IOSmodel, Eval::bci::Engine<Eigen::VectorXd>, Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd> > BCIInterpreter;
+typedef Models::GenericSSEinterpreter< Models::IOSmodel, Eval::bcimp::Engine<Eigen::VectorXd>, Eval::bcimp::Engine<Eigen::VectorXd, Eigen::MatrixXd> > BCIMPInterpreter;
+typedef Models::GenericSSEinterpreter< Models::IOSmodel, Eval::jit::Engine<Eigen::VectorXd>, Eval::jit::Engine<Eigen::VectorXd, Eigen::MatrixXd> > LLVMInterpreter;
+typedef Models::GenericSSEinterpreter< Models::IOSmodel, Eval::direct::Engine<Eigen::VectorXd>, Eval::direct::Engine<Eigen::VectorXd, Eigen::MatrixXd> > GiNaCInterpreter;
 
 typedef Models::GenericGillespieSSA< Eval::bci::Engine<Eigen::VectorXd> > GillespieBCI;
 typedef Models::GenericGillespieSSA< Eval::jit::Engine<Eigen::VectorXd> > GillespieJIT;
@@ -42,7 +42,7 @@ Benchmark::setUp()
   libsbml::SBMLDocument *doc = libsbml::readSBMLFromFile("test/regression-tests/coremodel2.xml");
   UT_ASSERT(0 == doc->getNumErrors());
 
-  this->lna = new Models::LinearNoiseApproximation(doc->getModel());
+  this->lna = new Models::IOSmodel(doc->getModel());
   this->document = doc;
 }
 
@@ -56,7 +56,7 @@ Benchmark::tearDown()
 
 
 void
-Benchmark::integrate_BCI_LSODA(Models::LinearNoiseApproximation *model, double t_end, size_t opt_level)
+Benchmark::integrate_BCI_LSODA(Models::IOSmodel *model, double t_end, size_t opt_level)
 {
   double dt = t_end/N_steps;
 
@@ -83,7 +83,7 @@ Benchmark::integrate_BCI_LSODA(Models::LinearNoiseApproximation *model, double t
 }
 
 void
-Benchmark::integrate_BCIMP_LSODA(Models::LinearNoiseApproximation *model, double t_end, size_t opt_level)
+Benchmark::integrate_BCIMP_LSODA(Models::IOSmodel *model, double t_end, size_t opt_level)
 {
   double dt = t_end/N_steps;
 
@@ -110,7 +110,7 @@ Benchmark::integrate_BCIMP_LSODA(Models::LinearNoiseApproximation *model, double
 }
 
 void
-Benchmark::integrate_JIT_LSODA(Models::LinearNoiseApproximation *model, double t_end, size_t opt_level)
+Benchmark::integrate_JIT_LSODA(Models::IOSmodel *model, double t_end, size_t opt_level)
 {
   double dt = t_end/N_steps;
 
@@ -140,7 +140,7 @@ Benchmark::integrate_JIT_LSODA(Models::LinearNoiseApproximation *model, double t
 
 
 void
-Benchmark::integrate_GiNaC_LSODA(Models::LinearNoiseApproximation *model, double t_end, size_t opt_level)
+Benchmark::integrate_GiNaC_LSODA(Models::IOSmodel *model, double t_end, size_t opt_level)
 {
   double dt = t_end/N_steps;
 
@@ -170,7 +170,7 @@ Benchmark::integrate_GiNaC_LSODA(Models::LinearNoiseApproximation *model, double
 
 
 void
-Benchmark::integrate_BCI_Rosen4(Models::LinearNoiseApproximation *model, double t_end, size_t opt_level)
+Benchmark::integrate_BCI_Rosen4(Models::IOSmodel *model, double t_end, size_t opt_level)
 {
   double dt = t_end/N_steps;
 
@@ -197,7 +197,7 @@ Benchmark::integrate_BCI_Rosen4(Models::LinearNoiseApproximation *model, double 
 }
 
 void
-Benchmark::integrate_BCIMP_Rosen4(Models::LinearNoiseApproximation *model, double t_end, size_t opt_level)
+Benchmark::integrate_BCIMP_Rosen4(Models::IOSmodel *model, double t_end, size_t opt_level)
 {
   double dt = t_end/N_steps;
 
@@ -224,7 +224,7 @@ Benchmark::integrate_BCIMP_Rosen4(Models::LinearNoiseApproximation *model, doubl
 }
 
 void
-Benchmark::integrate_JIT_Rosen4(Models::LinearNoiseApproximation *model, double t_end, size_t opt_level)
+Benchmark::integrate_JIT_Rosen4(Models::IOSmodel *model, double t_end, size_t opt_level)
 {
   double dt = t_end/N_steps;
 

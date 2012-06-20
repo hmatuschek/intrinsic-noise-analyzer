@@ -2,7 +2,7 @@
 #define __TEST_BENCHMARK_HH__
 
 #include "unittest.hh"
-#include "models/linearnoiseapproximation.hh"
+#include "models/IOSmodel.hh"
 
 namespace Fluc {
 
@@ -10,27 +10,27 @@ class Benchmark : public UnitTest::TestCase
 {
 protected:
   libsbml::SBMLDocument *document;
-  Models::LinearNoiseApproximation *lna;
+  Models::IOSmodel *lna;
 
-  void integrate_BCI_LSODA(Models::LinearNoiseApproximation *model,
+  void integrate_BCI_LSODA(Models::IOSmodel *model,
                            double t, size_t opt_level);
 
-  void integrate_BCIMP_LSODA(Models::LinearNoiseApproximation *model,
+  void integrate_BCIMP_LSODA(Models::IOSmodel *model,
                              double t, size_t opt_level);
 
-  void integrate_JIT_LSODA(Models::LinearNoiseApproximation *model,
+  void integrate_JIT_LSODA(Models::IOSmodel *model,
                            double t, size_t opt_level);
 
-  void integrate_GiNaC_LSODA(Models::LinearNoiseApproximation *model,
+  void integrate_GiNaC_LSODA(Models::IOSmodel *model,
                              double t, size_t opt_level);
 
-  void integrate_BCI_Rosen4(Models::LinearNoiseApproximation *model,
+  void integrate_BCI_Rosen4(Models::IOSmodel *model,
                            double t, size_t opt_level);
 
-  void integrate_BCIMP_Rosen4(Models::LinearNoiseApproximation *model,
+  void integrate_BCIMP_Rosen4(Models::IOSmodel *model,
                              double t, size_t opt_level);
 
-  void integrate_JIT_Rosen4(Models::LinearNoiseApproximation *model,
+  void integrate_JIT_Rosen4(Models::IOSmodel *model,
                            double t, size_t opt_level);
 
   void simulate_BCI_gillespie(libsbml::Model *model, double t, size_t opt_level);

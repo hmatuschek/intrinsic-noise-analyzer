@@ -10,7 +10,6 @@
 #include <QLabel>
 #include <QRadioButton>
 
-#include "models/linearnoiseapproximation.hh"
 #include "../doctree/documentitem.hh"
 #include "../views/generaltaskwizard.hh"
 
@@ -19,7 +18,7 @@
 
 
 /**
- * Simple wizzard to configure the deterministic time-course analysis.
+ * Simple wizard to configure the deterministic time-course analysis.
  */
 class SSEWizard : public GeneralTaskWizard
 {
@@ -27,7 +26,7 @@ class SSEWizard : public GeneralTaskWizard
 
 public:
   /**
-   * Wizzard page identifier.
+   * Wizard page identifier.
    */
   typedef enum {
     MODEL_SELECTION_PAGE,
@@ -42,7 +41,7 @@ protected:
   /**
    * The task configuration.
    *
-   * This instance will be populated by the wizzard.
+   * This instance will be populated by the wizard.
    */
   SSETaskConfig config;
 

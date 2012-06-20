@@ -2,7 +2,7 @@
 #define __FLUC_LINEARNOISEAPPROXIMATION_HH__
 
 #include "kroneckerproduct.hh"
-#include "ssebasemodel.hh"
+#include "../ssebasemodel.hh"
 
 namespace Fluc {
 namespace Models {

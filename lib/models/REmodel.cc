@@ -107,69 +107,69 @@ REmodel::fullState(const Eigen::VectorXd &state, Eigen::VectorXd &full_state)
 
 }
 
-void
-REmodel::setState(const Eigen::VectorXd &state)
-{
+//void
+//REmodel::setState(const Eigen::VectorXd &state)
+//{
 
-    // construct full concentration vector
-    Eigen::VectorXd concentrations(this->numSpecies());
-    this->fullState(state.head(this->numIndSpecies()),concentrations);
+//    // construct full concentration vector
+//    Eigen::VectorXd concentrations(this->numSpecies());
+//    this->fullState(state.head(this->numIndSpecies()),concentrations);
 
-    // First update values for state:
-    this->interpreter.setValues(concentrations);
+//    // First update values for state:
+//    this->interpreter.setValues(concentrations);
 
-    // ...done.
+//    // ...done.
 
-}
+//}
 
-void
-REmodel::getREs(const Eigen::VectorXd &state, Eigen::VectorXd &REs)
-{
-    // set state
-    this->setState(state);
-    // and get rate equations
-    this->getREs(REs);
-}
+//void
+//REmodel::getREs(const Eigen::VectorXd &state, Eigen::VectorXd &REs)
+//{
+//    // set state
+//    this->setState(state);
+//    // and get rate equations
+//    this->getREs(REs);
+//}
 
-void
-REmodel::getREs(Eigen::VectorXd &REs)
-{
-    // make sure vector is big enough
-    REs.resize(this->numIndSpecies());
-    // and evaluate:
-    for (size_t i=0; i<this->numIndSpecies(); i++)
-        REs(i) = this->interpreter.evaluate(this->REs(i));
-    // ... done.
-}
+//void
+//REmodel::getREs(Eigen::VectorXd &REs)
+//{
+//    // make sure vector is big enough
+//    REs.resize(this->numIndSpecies());
+//    // and evaluate:
+//    for (size_t i=0; i<this->numIndSpecies(); i++)
+//        REs(i) = this->interpreter.evaluate(this->REs(i));
+//    // ... done.
+//}
 
-void
-REmodel::getJacobianMatrix(Eigen::MatrixXd &JacobianMatrix)
-{
+//void
+//REmodel::getJacobianMatrix(Eigen::MatrixXd &JacobianMatrix)
+//{
 
-    // make sure Jacobian is big enough
-    JacobianMatrix.resize(this->numIndSpecies(),this->numIndSpecies());
+//    // make sure Jacobian is big enough
+//    JacobianMatrix.resize(this->numIndSpecies(),this->numIndSpecies());
 
-    // and evaluate:
-    for (size_t i=0; i<this->numIndSpecies(); i++)
-    {
-      for (size_t j=0; j<this->numIndSpecies(); j++)
-      {
-        JacobianMatrix(i,j) = this->interpreter.evaluate(this->JacobianM(i,j));
-      }
-    }
+//    // and evaluate:
+//    for (size_t i=0; i<this->numIndSpecies(); i++)
+//    {
+//      for (size_t j=0; j<this->numIndSpecies(); j++)
+//      {
+//        JacobianMatrix(i,j) = this->interpreter.evaluate(this->JacobianM(i,j));
+//      }
+//    }
 
-    // ... done.
+//    // ... done.
 
-}
+//}
 
-void
-REmodel::getJacobianMatrix(const Eigen::VectorXd &state, Eigen::MatrixXd &JacobianMatrix)
-{
-    // set state
-    this->setState(state);
-    // and get Jacobian matrix
-    this->getJacobianMatrix(JacobianMatrix);
-}
+//void
+//REmodel::getJacobianMatrix(const Eigen::VectorXd &state, Eigen::MatrixXd &JacobianMatrix)
+//{
+//    // set state
+//    this->setState(state);
+//    // and get Jacobian matrix
+//    this->getJacobianMatrix(JacobianMatrix);
+//}
 
 
 

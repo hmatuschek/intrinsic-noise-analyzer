@@ -27,19 +27,17 @@
 #include "assertconstantparametermixin.hh"
 #include "reasonablemodelmixin.hh"
 
-#include "linearnoiseapproximation.hh"
 #include "REmodel.hh"
 #include "LNAmodel.hh"
 #include "IOSmodel.hh"
 
 #include "steadystateanalysis.hh"
 #include "sseinterpreter.hh"
-#include "lnaevaluator.hh"
 
 #include "stochasticsimulator.hh"
 #include "gillespieSSA.hh"
 #include "optimizedSSA.hh"
 
-//#include "unsupported.hh"
+#include "unsupported.hh"
 
 #endif

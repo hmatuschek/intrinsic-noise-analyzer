@@ -11,6 +11,9 @@
 #include "models/unsupported/spectrumrecorder.hh"
 #include "models/unsupported/spectralanalysis.hh"
 
+#include "models/unsupported/linearnoiseapproximation.hh"
+#include "models/unsupported/steadystateanalysisold.hh"
+
 #include "models/unsupported/gillespieCLE.hh"
 
 #include "models/unsupported/optimizedSSAginac.hh"

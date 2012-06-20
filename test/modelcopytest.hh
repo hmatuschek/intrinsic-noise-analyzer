@@ -2,7 +2,7 @@
 #define MODELCOPYTEST_HH
 
 #include "unittest.hh"
-#include "models/linearnoiseapproximation.hh"
+#include "ast/ast.hh"
 
 namespace Fluc {
 

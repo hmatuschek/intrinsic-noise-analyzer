@@ -26,7 +26,7 @@ public:
   } PageId;
 
 protected:
-  /** The task configuration. This instance will be populated by the wizzard. */
+  /** The task configuration. This instance will be populated by the wizard. */
   LNASteadyStateTask::Config config;
 
 public:

@@ -1,7 +1,7 @@
 #ifndef __FLUC_SPECTRALANALYSIS_HH
 #define __FLUC_SPECTRALANALYSIS_HH
 
-#include "models/steadystateanalysis.hh"
+#include "steadystateanalysisold.hh"
 
 namespace Fluc {
 namespace Models {
