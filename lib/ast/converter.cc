@@ -70,12 +70,6 @@ void Convert2Irreversible::process()
       forwardLaw=forwardLaw/denominator;
       backwardLaw=-backwardLaw/denominator;
 
-      std::cerr<<reaction->getName()<<std::endl;
-
-      std::cerr<<"numerator: "<<numerator<<std::endl;
-      std::cerr<<"forward: "<<forwardLaw<<std::endl;
-      std::cerr<<"backward: "<<backwardLaw<<std::endl;
-
       // set forward rate law
       reaction->setReversible(false);
       reaction->getKineticLaw()->setRateLaw(forwardLaw);
@@ -113,11 +107,12 @@ void Convert2Irreversible::process()
 
       count++;
 
-      std::cerr<<"success"<<std::endl;
+      std::cout<<"Converted reversible reaction "<<reaction->getName()<<" to irreversible."<<std::endl;
+
 
     }
   }
 
-  if(count) std::cerr<<"Converted "<<count<<" reactions succesfully."<<std::endl;
+  if(count) std::cout<<"---"<<std::endl<<"Converted "<<count<<" reversible reactions succesfully."<<std::endl;
 
 }

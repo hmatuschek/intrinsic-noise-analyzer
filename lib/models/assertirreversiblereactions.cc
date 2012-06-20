@@ -17,8 +17,8 @@ AssertIrreversibleReactions::AssertIrreversibleReactions(BaseModel &model)
     if (static_cast<Ast::Reaction *>(*iter)->isReversible())
     {
       SBMLFeatureNotSupported err;
-      err << "Reversible reactions are not supported yet: Reaction "
-          << (*iter)->getIdentifier() << " is defined to be reversible!";
+      err << "Reaction "
+          << (*iter)->getIdentifier() << " is defined reversible and could not be converted to irreversible.";
       throw err;
     }
   }
