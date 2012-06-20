@@ -97,32 +97,34 @@ public:
       if(maxTime<dt) maxTime=dt;
 
 
-      Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
 
       for(double t=0.;t<maxTime; t+=dt, dt*=10)
       {
 
           conc_old = conc;
 
+          Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
           message << "Try Newton step ..."<< std::endl;
+
           Status lcheck = NewtonRaphson<Sys>::solve(conc);
 
-          message.clear();
           switch(lcheck)
           {
             case IterationFailed:
-              message << "Newton step: Linesearch failed." << std::endl; break;
+              message << " Linesearch failed." << std::endl; break;
             case NegativeValues:
-              message << "Newton step: Negative concentrations encountered." << std::endl;  break;
+              message << " Negative concentrations encountered." << std::endl;  break;
             case MaxIterationsReached:
-              message << "Newton step: Maximum iterations reached." << std::endl; break;
+              message << " Maximum iterations reached." << std::endl; break;
             case Success:
-              message << "Newton step converged in " << this->getIterations() << "." << std::endl; break;
+              message << "Converged in " << this->getIterations() << " iterations." << std::endl; break;
           }
+
           Utils::Logger::get().log(message);
 
-          if(lcheck!=Success){
-              message.clear();
+          if(lcheck!=Success)
+          {
+              Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
               message << "Use integration of duration "<< dt << "." << std::endl;
               ODEStep(conc,0,dt);             
               Utils::Logger::get().log(message);
