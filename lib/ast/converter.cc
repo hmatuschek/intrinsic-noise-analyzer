@@ -1,5 +1,6 @@
 #include "converter.hh"
 #include "trafo/modelcopyist.hh"
+#include "utils/logger.hh"
 
 
 using namespace Fluc;
@@ -107,12 +108,19 @@ void Convert2Irreversible::process()
 
       count++;
 
-      std::cout<<"Converted reversible reaction "<<reaction->getName()<<" to irreversible."<<std::endl;
-
+      {
+        Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
+        message << "Converted reversible reaction "<<reaction->getName()<<" to irreversible.";
+        Utils::Logger::get().log(message);
+      }
 
     }
   }
 
-  if(count) std::cout<<"---"<<std::endl<<"Converted "<<count<<" reversible reactions succesfully."<<std::endl;
+  if(count){
+    Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
+    message << "Converted "<<count<<" reversible reactions succesfully.";
+    Utils::Logger::get().log(message);
+  }
 
 }

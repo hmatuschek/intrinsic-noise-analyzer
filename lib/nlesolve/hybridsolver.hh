@@ -60,10 +60,6 @@ public:
   virtual void evalODE(double t, double state[], double dx[], int nsize)
   {
       this->interpreter.run(state,dx);
-//      Eigen::VectorXd REs;
-//      this->that.getREs(Eigen::Map<Eigen::VectorXd>(y,nsize),REs);
-//      for(int i=0;i<nsize; i++)
-//        yd[i]=REs(i);
   }
 
   virtual void evalJac(double t, double *y, double **jac, int nsize)
@@ -105,12 +101,20 @@ public:
 
           std::cerr << "Try Newton step"<< std::endl;
           Status lcheck = NewtonRaphson<Sys>::solve(conc);
-          std::cerr << "Iterations: "<< this->getIterations() << std::endl;
-          if(lcheck==IterationFailed) std::cerr << "Linesearch failed." << std::endl;
+          switch(lcheck)
+          {
+            case IterationFailed:
+              std::cerr << "Newton step: Linesearch failed." << std::endl; break;
+            case NegativeValues:
+              std::cerr << "Newton step: Negative concentrations encountered." << std::endl;  break;
+            case MaxIterationsReached:
+              std::cerr << "Newton step: Maximum iterations reached." << std::endl; break;
+            case Success:
+              break;
+          }
 
           if(lcheck!=Success){
-              if(lcheck==NegativeValues) std::cerr << "Negative concentrations encountered." << std::endl;
-              std::cerr << "Integration step: "<<dt<< std::endl;
+              std::cerr << "Use integration with time step: "<<dt<< std::endl;
               ODEStep(conc,0,dt);
           }
 
@@ -123,7 +127,6 @@ public:
           }
           if ( test < this->parameters.TOLF)
           {
-             // do additional Newton step?
              NewtonRaphson<Sys>::solve(conc);
              this->iterations=k+1;
              return Success;

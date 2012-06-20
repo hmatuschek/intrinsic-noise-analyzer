@@ -1,6 +1,8 @@
 #include "lsoda.hh"
 #include "lsodahelper.hh"
 
+#include <cstdio>
+
 using namespace Fluc;
 using namespace Fluc::ODE;
 
@@ -15,7 +17,7 @@ LSODA::LSODA()
 
 {
     // some parameters
-    mxstp0 = 5000; mxhnl0 = 10;
+    mxstp0 = 500; mxhnl0 = 10;
     // pass...
 
 }
@@ -125,7 +127,7 @@ c which supplies the vector function f by loading ydot(i) with f(i).
 c
 c b. write a main program which calls subroutine lsoda once for
 c each point at which answers are desired.  this should also provide
-c for possible use of logical unit 6 for output of error messages
+c for possible use of logical unit 6 for output of error printfs
 c by lsoda.  on the first call to lsoda, supply arguments as follows..
 c
 c f      = name of subroutine for right-hand side vector f.
@@ -170,13 +172,13 @@ c      t = corresponding value of independent variable (normally tout).
 c istate = 2  if lsoda was successful, negative otherwise.
 c          -1 means excess work done on this call (perhaps wrong jt).
 c          -2 means excess accuracy requested (tolerances too small).
-c          -3 means illegal input detected (see printed message).
+c          -3 means illegal input detected (see printed printf).
 c          -4 means repeated error test failures (check all inputs).
 c          -5 means repeated convergence failures (perhaps bad jacobian
 c             supplied or wrong choice of jt or tolerances).
 c          -6 means error weight became zero during problem. (solution
 c             component i vanished, and atol or atol(i) = 0.)
-c          -7 means work space insufficient to finish (see messages).
+c          -7 means work space insufficient to finish (see printfs).
 c
 c d. to continue the integration after a successful return, simply
 c reset tout and call lsoda again.  no other parameters need be reset.
@@ -2071,6 +2073,7 @@ void
 LSODA::freevectors(void)
 {
 }
+
 
 void
 LSODA::_freevectors(void)

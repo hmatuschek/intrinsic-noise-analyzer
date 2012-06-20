@@ -3,7 +3,6 @@
 
 #include <math.h>
 #include <iostream>
-#include <cstdio>
 
 namespace Fluc {
 namespace ODE {
