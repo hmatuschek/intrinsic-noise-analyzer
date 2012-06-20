@@ -91,6 +91,11 @@ public:
                     int itol, double *rtol, double *atol,
                     int itask, int *istate, int iopt, int jt   );
 
+ size_t numFunctionsEvaluations();
+
+ size_t numJacobianEvaluations();
+
+
 private:
 
  void     stoda(int neq, double *y);
