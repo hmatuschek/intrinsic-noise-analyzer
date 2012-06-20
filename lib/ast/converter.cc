@@ -34,33 +34,41 @@ void Convert2Irreversible::process()
 
       GiNaC::ex forwardLaw = numerator;
       GiNaC::ex backwardLaw = numerator;
+      GiNaC::ex constantFlux = numerator;
 
-      for(size_t i=0; i<model.numSpecies(); i++)
+      // swap reactant and products in reverse reaction
+      for(Ast::Reaction::iterator reactant = reaction->reacBegin(); reactant!=reaction->reacEnd(); reactant++)
       {
-
-          if ( reaction->hasReactant( model.getSpecies(i)->getSymbol()) )
-          {
-              backwardLaw=backwardLaw.subs(model.getSpecies(i)->getSymbol()==0);
-          }
-          if ( reaction->hasProduct(model.getSpecies(i)->getSymbol()) )
-          {
-              forwardLaw=forwardLaw.subs(model.getSpecies(i)->getSymbol()==0);
-          }
+          backwardLaw=backwardLaw.subs(reactant->first->getSymbol()==0);
+          constantFlux=constantFlux.subs(reactant->first->getSymbol()==0);
       }
+      for(Ast::Reaction::iterator product = reaction->prodBegin(); product!=reaction->prodEnd(); product++)
+      {
+          forwardLaw=forwardLaw.subs(product->first->getSymbol()==0);
+          constantFlux=constantFlux.subs(product->first->getSymbol()==0);
+      }
+
+      // substract constant fluxes
+      // from reactions with nonzero stoichiometries
+      if(!constantFlux.is_zero())
+      {
+          if(reaction->reacBegin()==reaction->reacEnd())
+              backwardLaw-=constantFlux;
+          else if(reaction->prodBegin()==reaction->prodEnd())
+              forwardLaw-=constantFlux;
+          else
+              continue;
+      }
+
 
       // skip reaction if unsuccesful
       if (!numerator.is_equal(forwardLaw+backwardLaw))
       {
             continue;
-//          SBMLFeatureNotSupported err;
-//          err << "Reversible reaction "
-//              << (*iter)->getIdentifier() << " could not be converted to a reversible one!";
-//          throw err;
       }
 
       forwardLaw=forwardLaw/denominator;
       backwardLaw=-backwardLaw/denominator;
-
 
       std::cerr<<reaction->getName()<<std::endl;
 
