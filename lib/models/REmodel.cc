@@ -249,6 +249,11 @@ REmodel::getSSEvar(size_t index) const {
     return this->stateVariables[index];
 }
 
+const Eigen::MatrixXex &
+REmodel::getJacobian() const {
+    return this->JacobianM;
+}
+
 
 void
 REmodel::dump(std::ostream &str)

@@ -99,8 +99,8 @@ SSAConfigPage::SSAConfigPage(SSAWizard *parent)
   this->registerField("steps", steps);
 
   method = new QComboBox();
-  method->addItem(tr("Direct SSA"), SSATaskConfig::DIRECT_SSA);
   method->addItem(tr("Optimized SSA"), SSATaskConfig::OPTIMIZED_SSA);
+  method->addItem(tr("Direct SSA"), SSATaskConfig::DIRECT_SSA);
   method->setCurrentIndex(0);
 
   QSpinBox *thread_count = new QSpinBox();

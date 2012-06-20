@@ -824,6 +824,11 @@ LinearNoiseApproximation::getUpdateVector() const {
   return this->updateVector;
 }
 
+const Eigen::MatrixXex &
+LinearNoiseApproximation::getJacobian() const {
+  return this->JacobianM;
+}
+
 
 void
 LinearNoiseApproximation::dump(std::ostream &str)

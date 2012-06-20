@@ -57,12 +57,13 @@ public:
       lsoda(getDimension(), state.data()-1, &t, t+dt, 2, rtolwork, atolwork, 1, &istate, 0, 2);
   }
 
-  virtual void evalODE(double t, double y[], double yd[], int nsize)
+  virtual void evalODE(double t, double state[], double dx[], int nsize)
   {
-      Eigen::VectorXd REs;
-      this->that.getREs(Eigen::Map<Eigen::VectorXd>(y,nsize),REs);
-      for(int i=0;i<nsize; i++)
-        yd[i]=REs(i);
+      this->interpreter.run(state,dx);
+//      Eigen::VectorXd REs;
+//      this->that.getREs(Eigen::Map<Eigen::VectorXd>(y,nsize),REs);
+//      for(int i=0;i<nsize; i++)
+//        yd[i]=REs(i);
   }
 
   virtual void evalJac(double t, double *y, double **jac, int nsize)
@@ -90,13 +91,9 @@ public:
       double test,temp;
 
       Eigen::VectorXd conc_old;
-      Eigen::VectorXd rhs;
 
       Eigen::VectorXd nablaf;
       Eigen::VectorXd dx;
-
-      // evaluate rate equations
-      this->that.getREs(conc,rhs);
 
       // dimension
       size_t dim = conc.size();

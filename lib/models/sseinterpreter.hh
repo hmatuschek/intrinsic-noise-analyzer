@@ -32,13 +32,13 @@ template <class Sys, class SysEngine, class JacEngine>
 class GenericSSEinterpreter : public SSEInterpreterInterface
 {
 protected:
-  /**
+   /**
    * Holds a reference to an instance of LinearNoiseApproximation.
    */
    Sys &sseModel;
 
    /**
-    * The bytecode interpreter instance to evaluate the propensities etc.
+    * The bytecode interpreter instance to evaluate the ODEs.
     */
    typename SysEngine::Interpreter interpreter;
 
@@ -85,7 +85,7 @@ public:
       hasJacobian(false), opt_level(opt_level)
   {
     // Compile expressions
-    typename SysEngine::Compiler compiler(model.stateIndex);
+    typename SysEngine::Compiler compiler(sseModel.stateIndex);
     compiler.setCode(&this->bytecode);
     compiler.compileVector(sseModel.getUpdateVector());
     compiler.finalize(opt_level);

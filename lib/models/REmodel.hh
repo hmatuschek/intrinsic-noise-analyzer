@@ -65,6 +65,10 @@ public:
 
   const Eigen::VectorXex &getUpdateVector() const;
 
+
+  const Eigen::MatrixXex &getJacobian() const;
+
+
   const GiNaC::symbol &getREvar(size_t s) const;
 
   const GiNaC::symbol &getSSEvar(size_t index) const;

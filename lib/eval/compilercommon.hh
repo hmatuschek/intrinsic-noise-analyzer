@@ -52,7 +52,7 @@ public:
    * Compiles a matrix of expressions, that will evaluate to an @c Eigen::MatrixXd of the same
    * shape.
    */
-  void compileMatrix(Eigen::MatrixXex &matrix)
+  void compileMatrix(const Eigen::MatrixXex &matrix)
   {
     for (int i=0; i<matrix.rows(); i++)
     {

@@ -67,6 +67,8 @@ public:
 
   const Eigen::VectorXex &getUpdateVector() const;
 
+  const Eigen::MatrixXex &getJacobian() const;
+
 protected:
   /**
   * Sets the state of the interpreter and gives correction terms for macroscopic REs.

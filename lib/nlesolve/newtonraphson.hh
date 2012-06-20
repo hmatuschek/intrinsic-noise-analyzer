@@ -1,6 +1,8 @@
 #ifndef __FLUC_MODELS_NEWTONRAPHSON_HH
 #define __FLUC_MODELS_NEWTONRAPHSON_HH
 
+#include "eval/eval.hh"
+
 namespace Fluc {
 namespace NLEsolve {
 
@@ -38,10 +40,32 @@ protected:
    */
    T &that;
 
-   Eigen::MatrixXd JacobianM;
    Eigen::VectorXd REs;
+   Eigen::MatrixXd JacobianM;
 
    size_t iterations;
+
+
+   /**
+    * The bytecode interpreter instance to evaluate the ODEs.
+    */
+   Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Interpreter interpreter;
+
+   /**
+    * Holds the interpreter to evaluate the Jacobian.
+    */
+   Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Interpreter jacobian_interpreter;
+
+   /**
+    * The bytecode to interprete.
+    */
+   Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Code bytecode;
+
+   /**
+    * The bytecode to interprete.
+    */
+   Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Code jacobianCode;
+
 
 public:
 
@@ -67,9 +91,28 @@ public:
    */
 
   NewtonRaphson(T &model)
-      : that(model), parameters(model.numIndSpecies())
+      : that(model),
+        REs(model.numIndSpecies()),JacobianM(model.numIndSpecies(),model.numIndSpecies()),
+        parameters(model.numIndSpecies())
   {
-      // ... pass
+      // Compile expressions
+      Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Compiler compiler(model.stateIndex);
+      compiler.setCode(&this->bytecode);
+      compiler.compileVector(model.getUpdateVector().head(model.numIndSpecies()));
+      compiler.finalize(0);
+
+      // Set bytecode for interpreter
+      this->interpreter.setCode(&(this->bytecode));
+      this->jacobian_interpreter.setCode(&(this->jacobianCode));
+
+      // Compile jacobian:
+      Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Compiler jacobian_compiler(model.stateIndex);
+      jacobian_compiler.setCode(&jacobianCode);
+      jacobian_compiler.compileMatrix(model.getJacobian());
+      jacobian_compiler.finalize(0);
+
+
+
   }
 
   const Eigen::MatrixXd&
@@ -88,13 +131,12 @@ public:
       double test,temp;
 
       Eigen::VectorXd conc_old;
-      Eigen::VectorXd rhs;
 
       Eigen::VectorXd nablaf;
       Eigen::VectorXd dx;
 
       // evaluate rate equations
-      that.getREs(conc,REs);
+      interpreter.run(conc,REs);
 
       // dimension
       size_t dim = conc.size();
@@ -106,7 +148,7 @@ public:
       {
 
           // evaluate rate equations
-          that.getREs(conc,REs);
+          interpreter.run(conc,REs);
 
           conc_old = conc;
 
@@ -166,8 +208,8 @@ public:
       Eigen::VectorXd dx;
 
       // construct Jacobian matrix
-      that.getREs(inState,REs);
-      that.getJacobianMatrix(inState,JacobianM);
+      interpreter.run(inState,REs);
+      jacobian_interpreter.run(inState,JacobianM);
 
       // compute f to minimize
       f = .5*(REs.squaredNorm());
@@ -268,7 +310,7 @@ public:
           x = xold+lambda*dx;
 
           // evaluate rate equations
-          that.getREs(x,REs);
+          this->interpreter.run(x,this->REs);
 
           f = 0.5*(REs.squaredNorm());
 
@@ -342,7 +384,7 @@ public:
 
           x = xold+lambda*dx;
 
-          this->that.getREs(x,this->REs);
+          interpreter.run(x,REs);
 
           f = 0.5*this->REs.squaredNorm();
 
@@ -368,4 +410,4 @@ public:
 }
 
 
-#endif // NLESOLVE_HH
+#endif // NEWTONRAPHSON_HH
