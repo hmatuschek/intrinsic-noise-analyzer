@@ -1,5 +1,6 @@
 #include "lsoda.hh"
 #include "lsodahelper.hh"
+#include "exception.hh"
 
 #include <cstdio>
 
@@ -22,6 +23,17 @@ LSODA::LSODA()
 
 }
 
+size_t
+LSODA::numFunctionsEvaluations()
+{
+    return nfe;
+}
+
+size_t
+LSODA::numJacobianEvaluations()
+{
+    return nje;
+}
 
 /* Terminate lsoda due to illegal input. */
 void
@@ -29,9 +41,10 @@ LSODA::terminate(int *istate)
 {
         if (illin == 5)
         {
-                printf(
-                        "[lsoda] repeated occurrence of illegal input. "
-                        "run aborted.. apparent infinite loop\n");
+                InternalError err;
+                err<<"[lsoda] repeated occurrence of illegal input. "
+                     "run aborted.. apparent infinite loop.");
+                throw(err);
         }
         else
         {
@@ -240,8 +253,10 @@ LSODA::lsoda (int neq, double *y, double *t, double tout,
                 if (tout == *t) {
                         ntrep++;
                         if (ntrep < 5) return;
-                        printf("[lsoda] repeated calls with istate = 1 and tout = t. run aborted\n"
-                                "apparent infinite loop\n");
+                        InternalError err;
+                        err<<"[lsoda] repeated calls with istate = 1 and tout = t. run aborted. "
+                             "apparent infinite loop");
+                        throw(err);
                         return;
                 }
         }
@@ -393,7 +408,6 @@ LSODA::lsoda (int neq, double *y, double *t, double tout,
                 for (i = 1; i <= lenyh; i++)
                 {
                         yh[i] = new double [1 + nyh];
-                        //if (error) return;
                 }
 
                 wm = new double * [1 + nyh];
@@ -401,7 +415,6 @@ LSODA::lsoda (int neq, double *y, double *t, double tout,
                 for (i = 1; i <= nyh; i++)
                 {
                         wm[i] = new double [1 + nyh];
-                        //if (error) return;
                 }
 
                 ewt = new double [1 + nyh];
@@ -480,10 +493,10 @@ LSODA::lsoda (int neq, double *y, double *t, double tout,
                 msbp = 20;
                 mxncf = 10;
                 /*
-                Initial call to f.
+                Initial call to function.
                 */
                 evalODE(*t, y+1, yh[2]+1, neq);
-                // (*f) (*t, y + 1, yh[2] + 1, _data);
+
                 nfe = 1;
                 /*
                 Load the initial value vector in yh.
@@ -1232,7 +1245,7 @@ LSODA::stoda(int neq, double *y)
                                         for (i = 1; i <= n; i++)
                                                 y[i] = yp1[i];
                                         evalODE(tn, y+1, savf+1, neq);
-                                        // (*f) (tn, y + 1, savf + 1, _data);
+
                                         nfe++;
                                         yp1 = yh[2];
                                         for (i = 1; i <= n; i++)
