@@ -5,6 +5,7 @@
 #include <QStackedWidget>
 #include <QLabel>
 #include <QProgressBar>
+#include <QTimer>
 
 #include "../task.hh"
 #include "../doctree/taskitem.hh"
@@ -130,6 +131,9 @@ protected:
    */
   TaskItem *task_item;
 
+  /** Holds a timer to update the state and time of a task. */
+  QTimer *_updateTimer;
+
 public:
   /**
    * Cosntructor for the given task-item.
@@ -142,6 +146,11 @@ protected slots:
    * Callback if the task made some progress.
    */
   void taskProgress();
+
+  /**
+   * Callback if the task state has changed.
+   */
+  void taskStateChanged();
 
   /**
    * Callback to terminate task.

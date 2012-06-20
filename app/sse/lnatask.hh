@@ -93,6 +93,10 @@ protected:
    * Performs the analysis, will be run in a separate thread.
    */
   virtual void process();
+
+private:
+  /** Instantiates the interpreter. */
+  void instantiateInterpreter();
 };
 
 #endif // LNATASK_HH

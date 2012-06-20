@@ -191,11 +191,21 @@ TaskProgressWidget::TaskProgressWidget(TaskItem *task, QWidget *parent)
   layout->addWidget(stop_button);
   this->setLayout(layout);
 
+  _updateTimer = new QTimer(this);
+  QObject::connect(_updateTimer, SIGNAL(timeout()), this, SLOT(taskProgress()));
+  _updateTimer->start(1000);
+
   // Connect events:
   QObject::connect(this->task_item->getTask(), SIGNAL(updateProgress()), this, SLOT(taskProgress()));
+  QObject::connect(this->task_item->getTask(), SIGNAL(stateChanged()), this, SLOT(taskStateChanged()));
   QObject::connect(stop_button, SIGNAL(clicked()), this, SLOT(stopAnalysis()));
 
   // Update current progress:
+  if (Task::INITIALIZED == this->task_item->getTask()->getState()) {
+    this->progress_bar->setRange(0,0);
+  } else {
+    this->progress_bar->setRange(0,100);
+  }
   this->progress_bar->setValue(100 * this->task_item->getTask()->getProgress());
 }
 
@@ -217,6 +227,24 @@ TaskProgressWidget::taskProgress()
   {
     double time_r = (1. - p) * dt/p;
     this->time_remain->setText(tr("Time remaining: %1").arg(this->formatTime(time_r)));
+  }
+}
+
+
+void
+TaskProgressWidget::taskStateChanged()
+{
+  if (Task::INITIALIZED == this->task_item->getTask()->getState()) {
+    this->progress_bar->setRange(0,0);
+    this->taskProgress();
+  } else {
+    this->progress_bar->setRange(0,100);
+    this->taskProgress();
+  }
+
+  if ( (Task::INITIALIZED != this->task_item->getTask()->getState()) &&
+       (Task::RUNNING != this->task_item->getTask()->getState()) ) {
+    _updateTimer->stop();
   }
 }
 

@@ -109,6 +109,7 @@ void
 LNASteadyStateTask::process()
 {
   this->setState(Task::INITIALIZED);
+  this->setProgress(0);
 
   Fluc::Models::IOSmodel *lna_model
       = dynamic_cast<Fluc::Models::IOSmodel *>(config.getModel());
@@ -117,7 +118,7 @@ LNASteadyStateTask::process()
   Eigen::VectorXd reduced_state(lna_model->getDimension());
 
   // signal running:
-  this->setState(Task::RUNNING);
+  //this->setState(Task::RUNNING);
 
   // Calc steadystate:
   this->steady_state.calcSteadyState(reduced_state);

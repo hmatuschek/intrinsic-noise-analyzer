@@ -127,6 +127,10 @@ protected:
    * Performs the analysis, will be run in a separate thread.
    */
   virtual void process();
+
+private:
+  /** Creates the interpreter instance. */
+  void instantiateInterpreter();
 };
 
 #endif // RETASK_HH
