@@ -68,7 +68,7 @@ public:
 
   inline void run(const typename InType::Scalar *input, typename OutType::Scalar *output)
   {
-#pragma omp parallel for
+#pragma omp parallel for if(interpreters.size()>1)
     for (size_t i=0; i<this->interpreters.size(); i++)
     {
       this->interpreters[i].run(input, output);
