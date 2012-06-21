@@ -19,6 +19,9 @@ class SSATaskView : public TaskView
 
 public:
   explicit SSATaskView(SSATaskWrapper *task_item, QWidget *parent=0);
+
+protected:
+  virtual QWidget *createResultWidget(TaskItem *task_item);
 };
 
 

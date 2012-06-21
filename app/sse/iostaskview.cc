@@ -18,9 +18,16 @@
 IOSTaskView::IOSTaskView(IOSTaskWrapper *task_wrapper, QWidget *parent)
   : TaskView(task_wrapper, parent)
 {
-  this->setResultWidget(new IOSResultWidget(static_cast<IOSTaskWrapper *>(task_wrapper), 0));
+  // Update main-widget:
+  taskStateChanged();
 }
 
+
+QWidget *
+IOSTaskView::createResultWidget(TaskItem *task_item)
+{
+  return new IOSResultWidget(static_cast<IOSTaskWrapper *>(task_item));
+}
 
 
 

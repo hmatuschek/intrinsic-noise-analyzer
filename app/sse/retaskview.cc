@@ -18,9 +18,16 @@
 RETaskView::RETaskView(RETaskWrapper *task_wrapper, QWidget *parent)
   : TaskView(task_wrapper, parent)
 {
-  this->setResultWidget(new REResultWidget(static_cast<RETaskWrapper *>(task_wrapper), 0));
+  // Update main-widget:
+  taskStateChanged();
 }
 
+
+QWidget *
+RETaskView::createResultWidget(TaskItem *task_item)
+{
+  return new REResultWidget(static_cast<RETaskWrapper *>(task_item));
+}
 
 
 

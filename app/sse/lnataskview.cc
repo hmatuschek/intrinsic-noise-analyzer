@@ -18,9 +18,16 @@
 LNATaskView::LNATaskView(LNATaskWrapper *task_wrapper, QWidget *parent)
   : TaskView(task_wrapper, parent)
 {
-  this->setResultWidget(new LNAResultWidget(static_cast<LNATaskWrapper *>(task_wrapper), 0));
+  // Update main-widget:
+  taskStateChanged();
 }
 
+
+QWidget *
+LNATaskView::createResultWidget(TaskItem *task_item)
+{
+  return new LNAResultWidget(static_cast<LNATaskWrapper *>(task_item));
+}
 
 
 

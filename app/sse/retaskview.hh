@@ -22,6 +22,9 @@ class RETaskView : public TaskView
 
 public:
   explicit RETaskView(RETaskWrapper *task_item, QWidget *parent=0);
+
+protected:
+  virtual QWidget *createResultWidget(TaskItem *task_item);
 };
 
 

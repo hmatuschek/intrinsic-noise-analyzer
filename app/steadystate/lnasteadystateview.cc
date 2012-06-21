@@ -17,8 +17,18 @@
 LNASteadyStateView::LNASteadyStateView(LNASteadyStateTaskWrapper *task_wrapper, QWidget *parent)
   : TaskView(task_wrapper, parent)
 {
-  this->setResultWidget(new LNASteadyStateResultWidget(task_wrapper, 0));
+  // Update main-widget:
+  taskStateChanged();
 }
+
+
+QWidget *
+LNASteadyStateView::createResultWidget(TaskItem *task_item)
+{
+  return new LNASteadyStateResultWidget(static_cast<LNASteadyStateTaskWrapper *>(task_item));
+}
+
+
 
 
 LNASteadyStateResultWidget::LNASteadyStateResultWidget(LNASteadyStateTaskWrapper *task_wrapper, QWidget *parent)

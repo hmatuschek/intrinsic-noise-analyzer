@@ -9,10 +9,10 @@
  * Implementation of TaskView
  * ********************************************************************************************* */
 TaskView::TaskView(TaskItem *task_wrapper, QWidget *parent)
-  : QWidget(parent), task_item(task_wrapper)
+  : QWidget(parent), task_item(task_wrapper), current_main_widget(0)
 {
   // Some basic layout stuff
-  this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
+  this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   this->setBackgroundRole(QPalette::Window);
 
   // Construct widgets:
@@ -21,49 +21,23 @@ TaskView::TaskView(TaskItem *task_wrapper, QWidget *parent)
   this->title->setAlignment(Qt::AlignRight);
   this->title->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
 
-  this->stack = new QStackedWidget();
-  this->stack->addWidget(new TaskProgressWidget(task_wrapper));
-  this->stack->addWidget(new QLabel(tr("BUG: Specialized TaskView has not set a ResultWidget.")));
-  this->stack->addWidget(new TaskErrorWidget(task_wrapper));
-  this->stack->addWidget(new TaskTerminatingWidget());
-  this->stack->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+  // Select visible widget by state of task:
+  current_main_widget = new QLabel("Err, specialized TaskView has not implemented view-update.");
 
   // construct layout:
   QVBoxLayout *layout = new QVBoxLayout();
   layout->addWidget(this->title);
-  layout->addWidget(this->stack);
+  layout->addWidget(current_main_widget);
   this->setLayout(layout);
 
   // Connect signals to task:
   QObject::connect(this->task_item->getTask(), SIGNAL(stateChanged()), this, SLOT(taskStateChanged()));
   QObject::connect(this->task_item->getTask(), SIGNAL(destroyed()), this, SLOT(taskDestroyed()));
-
-  // Select visible widget by state:
-  switch(task_wrapper->getTask()->getState())
-  {
-  case Task::INITIALIZED:
-  case Task::RUNNING:
-    this->stack->setCurrentIndex(0);
-    break;
-
-  case Task::DONE:
-    this->stack->setCurrentIndex(1);
-    break;
-
-  case Task::ERROR:
-    this->stack->setCurrentIndex(2);
-    break;
-
-  case Task::TERMINATING:
-    this->stack->setCurrentIndex(3);
-    break;
-  }
 }
 
 
 TaskView::~TaskView()
 {
-  //std::cerr << "TaskView deleted." << std::endl;
   // Pass...
 }
 
@@ -72,23 +46,23 @@ void
 TaskView::taskStateChanged()
 {
   // Select visible widget by state of task:
-  switch (this->task_item->getTask()->getState())
+  switch (task_item->getTask()->getState())
   {
   case Task::INITIALIZED:
   case Task::RUNNING:
-    this->stack->setCurrentIndex(0);
+    setMainWidget(createProgressWidget(task_item));
     break;
 
   case Task::DONE:
-    this->stack->setCurrentIndex(1);
+    setMainWidget(createResultWidget(task_item));
     break;
 
   case Task::ERROR:
-    this->stack->setCurrentIndex(2);
+    setMainWidget(createErrorWidget(task_item));
     break;
 
   case Task::TERMINATING:
-    this->stack->setCurrentIndex(2);
+    setMainWidget(createTerminatingWidget(task_item));
     break;
   }
 }
@@ -97,50 +71,38 @@ TaskView::taskStateChanged()
 void
 TaskView::taskDestroyed()
 {
-  //std::cerr << "Task destroyed, destroy task view." << std::endl;
-
-  // The view is invalid of the task gets destroyed:
+  // The view is invalid if the task gets destroyed:
   this->deleteLater();
 }
 
 
-void
-TaskView::setProgressWidget(QWidget *widget)
-{
-  int index = this->stack->currentIndex();
-  QWidget *old = this->stack->widget(0);
-
-  this->stack->insertWidget(0, widget);
-  this->stack->removeWidget(old);
-  delete old;
-
-  this->stack->setCurrentIndex(index);
+QWidget *
+TaskView::createProgressWidget(TaskItem *task_item) {
+  return new TaskProgressWidget(task_item);
 }
 
-void
-TaskView::setResultWidget(QWidget *widget)
-{
-  int index = this->stack->currentIndex();
-  QWidget *old = this->stack->widget(1);
 
-  this->stack->insertWidget(1, widget);
-  this->stack->removeWidget(old);
-  delete old;
-
-  this->stack->setCurrentIndex(index);
+QWidget *
+TaskView::createErrorWidget(TaskItem *task_item) {
+  return new TaskErrorWidget(task_item);
 }
 
+QWidget *
+TaskView::createTerminatingWidget(TaskItem *task_item) {
+  return new TaskTerminatingWidget();
+}
+
+
 void
-TaskView::setErrorWidget(QWidget *widget)
+TaskView::setMainWidget(QWidget *widget)
 {
-  int index = this->stack->currentIndex();
-  QWidget *old = this->stack->widget(2);
+  if (0 != current_main_widget && widget != current_main_widget) {
+    this->layout()->removeWidget(current_main_widget);
+    delete current_main_widget;
+    this->layout()->addWidget(widget);
+  }
 
-  this->stack->insertWidget(2, widget);
-  this->stack->removeWidget(old);
-  delete old;
-
-  this->stack->setCurrentIndex(index);
+  current_main_widget = widget;
 }
 
 

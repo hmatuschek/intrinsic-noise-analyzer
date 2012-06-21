@@ -50,25 +50,31 @@ public:
 
 
 protected:
-  /**
-   * (Re-) Sets the default progress widget.
-   */
-  void setProgressWidget(QWidget *widget);
+  /** Can be overridden by specialized classes to return a specialized progress widget for the
+   * task. */
+  virtual QWidget *createProgressWidget(TaskItem *task_item);
 
-  /**
-   * Sets the default result-widget.
-   */
-  void setResultWidget(QWidget *widget);
+  /** Can be overridden by specialized classes to return a specialized result widget for the
+   * task. */
+  virtual QWidget *createResultWidget(TaskItem *task_item) = 0;
 
-  /**
-   * Resets the default error-widget.
-   */
-  void setErrorWidget(QWidget *widget);
+  /** Can be overridden by specialized classes to return a specialized error widget for the
+   * task. */
+  virtual QWidget *createErrorWidget(TaskItem *task_item);
+
+  /** Can be overridden by specialized classes to return a specialized terminating widget for the
+   * task. */
+  virtual QWidget *createTerminatingWidget(TaskItem *task_item);
+
+
+protected:
+  /** Replaces the main widget. */
+  void setMainWidget(QWidget *widget);
 
 
 protected slots:
   /**
-   * Processes a state-change of the task.
+   * Processes a state-change of the task, replaces the main widget.
    */
   void taskStateChanged();
 
@@ -80,12 +86,6 @@ protected slots:
 
 private:
   /**
-   * Private helper function to setup widgets.
-   */
-  void initWidgets();
-
-private:
-  /**
    * Title widget.
    */
   QLabel *title;
@@ -93,7 +93,7 @@ private:
   /**
    * Layout holding all widets.
    */
-  QStackedWidget *stack;
+  QWidget *current_main_widget;
 };
 
 
