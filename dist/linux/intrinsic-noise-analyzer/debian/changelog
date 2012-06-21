@@ -1,8 +1,8 @@
-intrinsic-noise-analyzer (0.2.99-1) unstable; urgency=low
+intrinsic-noise-analyzer (0.3.0-1) unstable; urgency=low
 
   * The new release
 
- -- Hannes Matuschek <hmatuschek@gmail.com>  Tue, 07 Feb 2012 18:03:03 +0100
+ -- Hannes Matuschek <hmatuschek@gmail.com>  Fri, 21 Jun 2012 00:00:00 +0000
 
 intrinsic-noise-analyzer (0.2.0-1) unstable; urgency=low
 

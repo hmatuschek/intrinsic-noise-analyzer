@@ -97,10 +97,6 @@ CompilerCore::finalize(size_t level)
   msg << "Optimized LLVM IR code in " << clock.stop() << "s.";
   Utils::Logger::get().log(msg);
 
-  code->getModule()->dump();
-  // Dump target tripel for compiled code:
-  //std::cerr << "Compile for target : " << engine->getTargetData()->getStringRepresentation() << std::endl;
-
   // Get function pointer:
   code->setFunctionPtr(engine->getPointerToFunction(code->getSystem()));
 }
