@@ -74,6 +74,7 @@ private:
   QLineEdit *f_num;
   QLineEdit *n_iter;
   QLineEdit *epsilon;
+  QLineEdit *t_max;
 
 private slots:
   void fAutomaticToggled(bool value);
