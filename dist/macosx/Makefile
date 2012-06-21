@@ -14,7 +14,7 @@ clean:
 dmg: ina-app
 	hdiutil create -srcfolder IntrinsicNoiseAnalyzer.app IntrinsicNoiseAnalyzer-${VERSION}.dmg
 
-ina-app: libina libQtGui libQtCore libginac libcln libsbml
+ina-app: libina libQtGui libQtCore libginac libcln libsbml libffi
 	cp $(SYSTEM_BINARY_DIR)/ina IntrinsicNoiseAnalyzer.app/Contents/MacOS
 	cp ina.icns IntrinsicNoiseAnalyzer.app/Contents/Resources
 	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libina.dylib @executable_path/../Frameworks/libina.dylib ${APP_BINARY_DIR}/ina
@@ -23,6 +23,7 @@ ina-app: libina libQtGui libQtCore libginac libcln libsbml
 	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libginac-1.5.0.dylib @executable_path/../Frameworks/libginac-1.5.0.dylib ${APP_BINARY_DIR}/ina
 	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libcln.6.dylib @executable_path/../Frameworks/libcln.6.dylib ${APP_BINARY_DIR}/ina
 	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libsbml.5.dylib @executable_path/../Frameworks/libsbml.5.dylib ${APP_BINARY_DIR}/ina
+	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libffi.5.dylib @executable_path/../Frameworks/libffi.6.dylib ${APP_BINARY_DIR}/ina 
 
 libina: libginac libcln libsbml
 	cp $(SYSTEM_LIBRARY_DIR)/libina.dylib ${APP_LIBRARY_DIR}
@@ -89,3 +90,7 @@ libiconv:
 libbz2:
 	cp ${SYSTEM_LIBRARY_DIR}/libbz2.1.0.dylib ${APP_LIBRARY_DIR}
 	install_name_tool -id @executable_path/../Frameworks/libbz2.1.0.dylib ${APP_LIBRARY_DIR}/libbz2.1.0.dylib
+
+libffi:
+	cp ${SYSTEM_LIBRARY_DIR}/libffi.6.dylib ${APP_LIBRARY_DIR}
+	install_name_tool -id @executable_path/../Frameworks/libffi.6.dylib ${APP_LIBRARY_DIR}/libffi.6.dylib
