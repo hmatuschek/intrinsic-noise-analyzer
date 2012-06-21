@@ -25,6 +25,7 @@ public:
     Fluc::Models::IOSmodel *model;
 
     int max_iterations;
+    double max_time_step;
     double epsilon;
 
     bool auto_frequencies;
@@ -51,6 +52,11 @@ public:
     size_t getMaxIterations() const;
     /** Resets the max number of iterations. */
     void setMaxIterations(size_t num);
+
+    /** Returns the max time step. */
+    double getMaxTimeStep() const;
+    /** Sets the max time step. */
+    void setMaxTimeStep(double t_max);
 
     /** Returns epsilon. */
     double getEpsilon() const;

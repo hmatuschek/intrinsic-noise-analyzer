@@ -7,7 +7,7 @@
  * ******************************************************************************************* */
 LNASteadyStateTask::Config::Config()
   : GeneralTaskConfig(), ModelSelectionTaskConfig(), SpeciesSelectionTaskConfig(),
-    model(0), max_iterations(0), epsilon(0), auto_frequencies(false),
+    model(0), max_iterations(0), max_time_step(0), epsilon(0), auto_frequencies(false),
     min_frequency(0), max_frequency(0), num_frequency(0)
 {
   // Pass...
@@ -15,9 +15,10 @@ LNASteadyStateTask::Config::Config()
 
 LNASteadyStateTask::Config::Config(const Config &other)
   : GeneralTaskConfig(), ModelSelectionTaskConfig(other), SpeciesSelectionTaskConfig(other),
-    model(other.model), max_iterations(other.max_iterations), epsilon(other.epsilon),
-    auto_frequencies(other.auto_frequencies), min_frequency(other.min_frequency),
-    max_frequency(other.max_frequency), num_frequency(other.num_frequency)
+    model(other.model), max_iterations(other.max_iterations), max_time_step(other.max_time_step),
+    epsilon(other.epsilon), auto_frequencies(other.auto_frequencies),
+    min_frequency(other.min_frequency), max_frequency(other.max_frequency),
+    num_frequency(other.num_frequency)
 {
   // Pass...
 }
@@ -50,6 +51,18 @@ LNASteadyStateTask::Config::setMaxIterations(size_t num)
 }
 
 double
+LNASteadyStateTask::Config::getMaxTimeStep() const
+{
+  return max_time_step;
+}
+
+void
+LNASteadyStateTask::Config::setMaxTimeStep(double t_max)
+{
+  max_time_step = t_max;
+}
+
+double
 LNASteadyStateTask::Config::getEpsilon() const
 {
   return this->epsilon;
@@ -69,7 +82,7 @@ LNASteadyStateTask::Config::setEpsilon(double eps)
 LNASteadyStateTask::LNASteadyStateTask(const Config &config, QObject *parent)
   : Task(parent), config(config),
     steady_state(dynamic_cast<Fluc::Models::IOSmodel &>(*config.getModel()),
-      config.getMaxIterations(), config.getEpsilon()),
+      config.getMaxIterations(), config.getEpsilon(), config.getMaxTimeStep()),
     concentrations(config.getNumSpecies()), emre_corrections(config.getNumSpecies()),
     ios_corrections(config.getNumSpecies()),
     lna_covariances(config.getNumSpecies(), config.getNumSpecies()),
@@ -116,9 +129,6 @@ LNASteadyStateTask::process()
 
   // Allocate reduced state vector (independent species)
   Eigen::VectorXd reduced_state(lna_model->getDimension());
-
-  // signal running:
-  //this->setState(Task::RUNNING);
 
   // Calc steadystate:
   this->steady_state.calcSteadyState(reduced_state);

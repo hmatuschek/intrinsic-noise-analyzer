@@ -97,7 +97,12 @@ LNASteadyStateSpectrumConfigPage::LNASteadyStateSpectrumConfigPage(GeneralTaskWi
   this->epsilon->setValidator(epsilon_val);
   this->registerField("epsilon", this->epsilon);
 
-//  QCheckBox *f_automatic = new QCheckBox();
+  t_max = new QLineEdit(); t_max->setText("1e9");
+  t_max->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
+  QDoubleValidator *t_max_val = new QDoubleValidator(0); t_max_val->setBottom(0);
+  t_max->setValidator(t_max_val);
+
+  //  QCheckBox *f_automatic = new QCheckBox();
 //  f_automatic->setChecked(true);
 //  this->registerField("f_automatic", f_automatic);
 
@@ -123,8 +128,9 @@ LNASteadyStateSpectrumConfigPage::LNASteadyStateSpectrumConfigPage(GeneralTaskWi
 //  this->f_num->setEnabled(false);
 
   QFormLayout *layout = new QFormLayout();
-  layout->addRow(tr("Max. iterations"), this->n_iter);
-  layout->addRow(tr("Precision"), this->epsilon);
+  layout->addRow(tr("Precision"), epsilon);
+  layout->addRow(tr("Max. iterations"), n_iter);
+  layout->addRow(tr("Max. time step"), t_max);
   //layout->addRow(tr("Automatic frequency range"), f_automatic);
   //layout->addRow(tr("Minimum frequency"), f_min);
   //layout->addRow(tr("Maximum frequency"), f_max);
@@ -148,10 +154,12 @@ LNASteadyStateSpectrumConfigPage::validatePage()
 //  wizard->setFrequencyRange(this->field("f_min").toDouble(),
 //                            this->field("f_max").toDouble(),
 //                            this->field("f_num").toUInt());
-  config.setMaxIterations(this->field("n_iter").toInt());
-  config.setEpsilon(this->field("epsilon").toDouble());
+  bool ok;
+  config.setEpsilon(epsilon->text().toDouble(&ok));
+  config.setMaxIterations(n_iter->text().toInt(&ok));
+  config.setMaxTimeStep(t_max->text().toDouble(&ok));
 
-  return true;
+  return ok;
 }
 
 
