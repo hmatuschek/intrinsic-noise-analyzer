@@ -64,7 +64,7 @@ Code::Code(size_t num_threads)
     llvm::FunctionType *signature = llvm::FunctionType::get(
           llvm::Type::getDoubleTy(context), args, false);
     this->real_pow = llvm::Function::Create(
-          signature, llvm::Function::DLLImportLinkage, "pow", module);
+          signature, llvm::Function::ExternalLinkage, "pow", module);
   }
 
   { // Define extern abs() function from libm:
@@ -76,7 +76,7 @@ Code::Code(size_t num_threads)
     llvm::FunctionType *signature = llvm::FunctionType::get(
           llvm::Type::getDoubleTy(context), args, false);
     this->real_abs = llvm::Function::Create(
-          signature, llvm::Function::DLLImportLinkage, "abs", module);
+          signature, llvm::Function::ExternalLinkage, "abs", module);
   }
 
   { // Define extern log() function from libm:
@@ -88,7 +88,7 @@ Code::Code(size_t num_threads)
     llvm::FunctionType *signature = llvm::FunctionType::get(
           llvm::Type::getDoubleTy(context), args, false);
     this->real_log = llvm::Function::Create(
-          signature, llvm::Function::DLLImportLinkage, "log", module);
+          signature, llvm::Function::ExternalLinkage, "log", module);
   }
 
   { // Define extern exp() function from libm:
@@ -100,7 +100,7 @@ Code::Code(size_t num_threads)
     llvm::FunctionType *signature = llvm::FunctionType::get(
           llvm::Type::getDoubleTy(context), args, false);
     this->real_exp = llvm::Function::Create(
-          signature, llvm::Function::DLLImportLinkage, "exp", module);
+          signature, llvm::Function::ExternalLinkage, "exp", module);
   }
 }
 
