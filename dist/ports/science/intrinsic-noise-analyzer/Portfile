@@ -4,7 +4,7 @@
 PortSystem 1.0
 
 name intrinsic-noise-analyzer
-version 0.2.99
+version 0.2.100
 categories science
 platforms darwin
 
@@ -21,15 +21,15 @@ homepage http://code.google.com/p/intrinsic-noise-analyzer
 master_sites https://dl.dropbox.com/u/17326152/ 
 # http://intrinsic-noise-analyzer.googlecode.com/files/
 
-checksums md5    d64388667c09e5976a2e9ae5648f3c33 \
-          sha1   40f4520343e76b1cad8bd58c6278fe71f628e872 \
-          rmd160 6e98e6a253ce0e09c7ad146b4b1761a95675e567
+checksums md5    58540a00be2750e0d7225593b63c2127 \
+          sha1   eaa9f312c1ec388c11856fc3ce8e6ef41f8e6190 \
+          rmd160 ce6b1845a08bdd0340b50f20f8eba702598ee482
 
 # We depend on libsbml with cppnamespace
 depends_lib  port:libsbml-cppnamespace \
              port:qt4-mac \
              port:GiNaC \
-             port:llvm-2.9
+             port:llvm-3.1
 
 depends_build port:cmake
 
