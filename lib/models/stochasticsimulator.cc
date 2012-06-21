@@ -69,7 +69,11 @@ StochasticSimulator::StochasticSimulator(libsbml::Model *model, int size, int se
   }
 
   Utils::Message msg = LOG_MESSAGE(Utils::Message::DEBUG);
-  msg << "Initial conditions:" << ics.transpose();
+  msg << "SSA initial copy numbers: ";
+  for(size_t i=0; i<numSpecies(); i++)
+  {
+      msg<<this->getSpecies(i)->getName()<<"="<<ics(i)<<" ";
+  }
   Utils::Logger::get().log(msg);
 
   // initialize ensemble

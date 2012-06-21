@@ -34,6 +34,8 @@ ReactionView::ReactionView(ReactionItem *reaction, QWidget *parent) :
 
   this->setLayout(layout);
 
+  GiNaC::exmap species_names;
+
   // Assemble reaction equation:
   Fluc::Ast::Reaction *reac = reaction->getReaction();
 
@@ -44,6 +46,7 @@ ReactionView::ReactionView(ReactionItem *reaction, QWidget *parent) :
 
     if (iter->first->hasName()) {
       symbol << iter->first->getName();
+      species_names.insert(std::pair<GiNaC::ex,GiNaC::ex>( iter->first->getSymbol(), GiNaC::symbol(iter->first->getName()) ));
     } else {
       symbol << iter->first->getIdentifier();
     }
@@ -65,6 +68,7 @@ ReactionView::ReactionView(ReactionItem *reaction, QWidget *parent) :
       symbol << iter->first->getName();
     } else {
       symbol << iter->first->getIdentifier();
+      species_names.insert(std::pair<GiNaC::ex,GiNaC::ex>( iter->first->getSymbol(), GiNaC::symbol(iter->first->getName()) ));
     }
 
     if (1 != iter->second)
@@ -75,7 +79,7 @@ ReactionView::ReactionView(ReactionItem *reaction, QWidget *parent) :
     renderer->addProduct(stoi.str(), symbol.str());
   }
 
-  std::stringstream rate; rate << reac->getKineticLaw()->getRateLaw();
+  std::stringstream rate; rate << reac->getKineticLaw()->getRateLaw().subs(species_names);
   renderer->setRate(rate.str());
 
   // Connect signals:

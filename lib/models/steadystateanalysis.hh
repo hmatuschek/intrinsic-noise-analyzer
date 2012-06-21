@@ -17,10 +17,20 @@ class SteadyStateAnalysis
 
     M &sseModel;
 
+    /**
+     * An instance of a nonlinear solver.
+     */
     //NLEsolve::NewtonRaphson<M> solver;
     NLEsolve::HybridSolver<M> solver;
 
-    double max_time_step;
+    /**
+     * Holds maximum the maximum integrate time.
+     */
+    double max_time;
+
+    /**
+     * Holds the minimum time step.
+     */
     double min_time_step;
 
 public:
@@ -29,7 +39,7 @@ public:
     * Constructor
     */
     SteadyStateAnalysis(M &model)
-      : sseModel(model), solver(model), max_time_step(1e9), min_time_step(1e-1)
+      : sseModel(model), solver(model), max_time(1e9), min_time_step(1e-1)
     {
       // Pass...
     }
@@ -39,7 +49,7 @@ public:
     * Constructor
     */
     SteadyStateAnalysis(M &model, size_t iter, double epsilon, double t_max=1e9, double dt=1e-1)
-      : sseModel(model), solver(model), max_time_step(t_max), min_time_step(dt)
+      : sseModel(model), solver(model), max_time(t_max), min_time_step(dt)
     {
       this->setPrecision(epsilon);
       this->setMaxIterations(iter);
@@ -73,7 +83,7 @@ public:
 
     {
         // solve it
-        switch(this->solver.solve(conc, max_time_step, min_time_step))
+        switch(this->solver.solve(conc, max_time, min_time_step))
         {
             case NLEsolve::Success:
               break;

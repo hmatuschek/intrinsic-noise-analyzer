@@ -169,8 +169,10 @@ public:
           // check linesearch
           switch(lcheck)
           {
-            case Converged: return Success;
-            case RoundOffProblem :
+            case Converged:
+              return Success;
+            case RoundOffProblem:
+            case LineSearchFailed:
               conc = conc_old; return IterationFailed;
             default: break;
           }

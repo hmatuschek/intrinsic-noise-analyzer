@@ -108,14 +108,14 @@ IOSTask::process()
 
   {
     Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
-    message << "Compile IOS analysis.";
+    message << "Compiling IOS analysis.";
     Utils::Logger::get().log(message);
   }
   instantiateInterpreter();
 
   {
     Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
-    message << "Start IOS analysis.";
+    message << "Starting IOS analysis.";
     Utils::Logger::get().log(message);
   }
 
