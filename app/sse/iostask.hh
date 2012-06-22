@@ -52,6 +52,9 @@ protected:
    */
   Table timeseries;
 
+  /** Holds the list of the names of the selected species. */
+  QVector<QString> species_names;
+
   /** Index table for RE means. Maps the i-th selected species to the corresponding
    * column in the timeseries table. */
   Eigen::VectorXi re_index_table;
@@ -95,6 +98,12 @@ public:
    * Returns the list of selected species.
    */
   const QList<QString> &getSelectedSpecies() const;
+
+  /** Returns the display name of the i-th selected species. */
+  const QString &getSpeciesName(size_t i) const;
+
+  /** Retunrs the vecrtor of display names of the selected species. */
+  const QVector<QString> &getSpeciesNames() const;
 
   /**
    * Returns the time-series table.

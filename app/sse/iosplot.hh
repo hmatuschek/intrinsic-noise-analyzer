@@ -5,7 +5,7 @@
 #include "../plot/graph.hh"
 #include "../timeseries.hh"
 #include "../views/varianceplot.hh"
-
+#include "iostask.hh"
 
 
 /**
@@ -52,7 +52,7 @@ class IOSLNACorrelationPlot : public Plot::Figure
   Q_OBJECT
 
 public:
-  explicit IOSLNACorrelationPlot(size_t num_species, Table *data,
+  explicit IOSLNACorrelationPlot(IOSTask *taks,
                                  const QString &time_unit,
                                  QObject *parent=0);
 };
@@ -63,7 +63,7 @@ class IOSEMRECorrelationPlot : public Plot::Figure
   Q_OBJECT
 
 public:
-  explicit IOSEMRECorrelationPlot(size_t num_species, Table *data,
+  explicit IOSEMRECorrelationPlot(IOSTask *task,
                                   const QString &time_unit,
                                   QObject *parent=0);
 };

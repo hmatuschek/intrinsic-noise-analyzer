@@ -14,6 +14,7 @@ IOSTask::IOSTask(const SSETaskConfig &config, QObject *parent) :
   timeseries(
     1 + 3*config.getNumSpecies() + config.getNumSpecies()*(config.getNumSpecies()+1),
     1+config.getIntegrationRange().getSteps()/(1+config.getIntermediateSteps())),
+  species_names(config.getNumSpecies()),
   re_index_table(config.getNumSpecies()),
   lna_index_table(config.getNumSpecies(), config.getNumSpecies()),
   emre_index_table(config.getNumSpecies()),
@@ -24,7 +25,6 @@ IOSTask::IOSTask(const SSETaskConfig &config, QObject *parent) :
 {
   // Assemble index tables and assign column names to time-series table:
   size_t column = 0;
-  QVector<QString> species_names(config.getNumSpecies());
 
   // Time column:
   this->timeseries.setColumnName(column, "t"); column++;
@@ -259,6 +259,19 @@ Table *
 IOSTask::getTimeSeries()
 {
   return &(this->timeseries);
+}
+
+
+const QString &
+IOSTask::getSpeciesName(size_t i) const
+{
+  return species_names[i];
+}
+
+const QVector<QString> &
+IOSTask::getSpeciesNames() const
+{
+  return species_names;
 }
 
 

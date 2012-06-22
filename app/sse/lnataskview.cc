@@ -89,8 +89,7 @@ LNAResultWidget::plotButtonPressed()
     Application::getApp()->docTree()->addPlot(
           this->lna_task_wrapper,
           new PlotItem(
-            new LNACorrelationPlot(this->lna_task_wrapper->getLNATask()->getSelectedSpecies().size(),
-                                   this->lna_task_wrapper->getLNATask()->getTimeSeries(),
+            new LNACorrelationPlot(this->lna_task_wrapper->getLNATask(),
                                    time_unit)));
   }
 

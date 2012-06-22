@@ -12,10 +12,10 @@ LNATask::LNATask(const SSETaskConfig &config, QObject *parent) :
   Task(parent), config(config),
   interpreter(0), stepper(0),
   timeseries(1 + 2*config.getNumSpecies() + config.getNumSpecies()*(config.getNumSpecies()+1)/2,
-    1+config.getIntegrationRange().getSteps()/(1+config.getIntermediateSteps()))
+    1+config.getIntegrationRange().getSteps()/(1+config.getIntermediateSteps())),
+  species_names(config.getNumSpecies())
 {
   size_t column = 0;
-  QVector<QString> species_names(config.getNumSpecies());
 
   this->timeseries.setColumnName(column, "t"); column++;
   for (int i=0; i<(int)config.getNumSpecies(); i++, column++)
@@ -215,6 +215,18 @@ const QList<QString> &
 LNATask::getSelectedSpecies() const
 {
   return config.getSelectedSpecies();
+}
+
+const QString &
+LNATask::getSpeciesName(size_t i) const
+{
+  return species_names[i];
+}
+
+const QVector<QString> &
+LNATask::getSpeciesNames() const
+{
+  return species_names;
 }
 
 
