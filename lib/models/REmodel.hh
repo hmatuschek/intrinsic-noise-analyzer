@@ -10,6 +10,8 @@ namespace Models {
 /**
  * The RE model.
  *
+ * Simply computes the deterministic rate equations (REs).
+ *
  * @ingroup sse
  */
 

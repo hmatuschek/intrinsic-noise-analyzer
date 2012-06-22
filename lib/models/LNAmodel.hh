@@ -7,7 +7,9 @@ namespace Fluc {
 namespace Models {
 
 /**
- * The Linear Noise Approximation model \cite elf2003 and \cite grima2010.
+ * The Linear Noise Approximation model.
+ *
+ * The LNA has been described in \cite vanKampen and \cite elf2003. The EMRE has been derived in \cite grima2010.
  *
  * @ingroup sse
  */

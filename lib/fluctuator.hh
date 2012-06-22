@@ -18,14 +18,16 @@
 /**
  * \mainpage The Intrinsic Noise Analyzer
  *
- * The intrinsic noise analyzer (iNA) is an easy-to-use computational tool for efficient analysis
+ * intrinsic noise analyzer (iNA) is an easy-to-use computational tool for efficient analysis
  * of intrinsic noise in biochemical reaction networks. The SBML-based software combines two
  * complementary approaches to analyze the Chemical Master Equation:
  *
  * @li The System Size Expansion - a systematic analytical approximation method,
  * @li the Stochastic Simulation Algorithm - a widely used Monte Carlo method.
  *
- * iNA is based on the computer algebra system Ginac and facilitates multi-core simulations.
+ * iNA is based on the computer algebra system Ginac and the compiler framework LLVM.
+ *
+ * The initial release of iNA has been introduced to the scientific community in PLoS One \cite ina2012.
  *
  * This documentation covers the API of the core library, implenting all algorithms needed to
  * perform the analyses listed above. To perform an analysis, usually 3 steps are required:
