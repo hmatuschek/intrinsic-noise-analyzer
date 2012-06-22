@@ -23,7 +23,7 @@ ina-app: libina libQtGui libQtCore libginac libcln libsbml libffi
 	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libginac-1.5.0.dylib @executable_path/../Frameworks/libginac-1.5.0.dylib ${APP_BINARY_DIR}/ina
 	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libcln.6.dylib @executable_path/../Frameworks/libcln.6.dylib ${APP_BINARY_DIR}/ina
 	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libsbml.5.dylib @executable_path/../Frameworks/libsbml.5.dylib ${APP_BINARY_DIR}/ina
-	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libffi.5.dylib @executable_path/../Frameworks/libffi.6.dylib ${APP_BINARY_DIR}/ina 
+	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libffi.6.dylib @executable_path/../Frameworks/libffi.6.dylib ${APP_BINARY_DIR}/ina 
 
 libina: libginac libcln libsbml
 	cp $(SYSTEM_LIBRARY_DIR)/libina.dylib ${APP_LIBRARY_DIR}
@@ -31,6 +31,7 @@ libina: libginac libcln libsbml
 	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libginac-1.5.0.dylib @executable_path/../Frameworks/libginac-1.5.0.dylib ${APP_LIBRARY_DIR}/libina.dylib
 	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libcln.6.dylib @executable_path/../Frameworks/libcln.6.dylib ${APP_LIBRARY_DIR}/libina.dylib
 	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libsbml.5.dylib @executable_path/../Frameworks/libsbml.5.dylib ${APP_LIBRARY_DIR}/libina.dylib
+	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libffi.6.dylib @executable_path/../Frameworks/libffi.6.dylib ${APP_LIBRARY_DIR}/libina.dylib 
 
 libQtGui: libQtCore libz libpng
 	cp ${SYSTEM_LIBRARY_DIR}/libQtGui.4.dylib ${APP_LIBRARY_DIR}
