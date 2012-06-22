@@ -74,7 +74,7 @@ IOSTask::IOSTask(const SSETaskConfig &config, QObject *parent) :
   // IOS EMRE Mean corrections
   for (int i=0; i<(int)config.getNumSpecies(); i++, column++) {
     this->timeseries.setColumnName(
-          column, QString("IOS mean %1").arg(species_names[i]));
+          column, QString("IOS %1").arg(species_names[i]));
     this->ios_emre_index_table(i) = column;
   }
 
