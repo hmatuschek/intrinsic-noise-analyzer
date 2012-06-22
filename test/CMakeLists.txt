@@ -16,8 +16,8 @@ SET(ina_test_HEADERS
     sbmlshparsertest.cc optionparsertest.hh odetest.hh modelcopytest.hh benchmark.hh)
 
 IF(WITH_EXECUTION_ENGINE_LIBJIT)
-SET(fluctuator_test_SOURCES ${ina_test_SOURCES} libjitinterpretertest.cc)
-SET(fluctuator_test_HEADERS ${ina_test_HEADERS} libjitinterpretertest.hh)
+SET(ina_test_SOURCES ${ina_test_SOURCES} libjitinterpretertest.cc)
+SET(ina_test_HEADERS ${ina_test_HEADERS} libjitinterpretertest.hh)
 ENDIF(WITH_EXECUTION_ENGINE_LIBJIT)
 
 ADD_EXECUTABLE(ina-test ${ina_test_SOURCES})

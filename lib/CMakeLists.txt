@@ -12,7 +12,7 @@ SET(libina_SOURCES
     erf.cc kroneckerproduct.cc incompletegamma.cc
     ginacsupportforeigen.cc math.cc openmp.cc mersennetwister.cc)
 
-SET(libina_HEADERS fluctuator.hh smartptr.hh linkedlist.hh
+SET(libina_HEADERS ina.hh smartptr.hh linkedlist.hh
     exception.hh
     erf.hh kroneckerproduct.hh incompletegamma.hh
     ginacsupportforeigen.hh math.hh openmp.hh mersennetwister.hh)
