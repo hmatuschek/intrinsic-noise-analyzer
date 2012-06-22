@@ -12,8 +12,8 @@
  * GNU General Public License for more details. */
 
 
-#ifndef __FLUC_FLUCTUATOR_HH__
-#define __FLUC_FLUCTUATOR_HH__
+#ifndef __FLUC_INA_HH__
+#define __FLUC_INA_HH__
 
 /**
  * \mainpage Intrinsic Noise Analyzer
@@ -27,7 +27,7 @@
  *
  * iNA is based on the computer algebra system Ginac and the compiler framework LLVM.
  *
- * The initial release of iNA has been introduced to the scientific community in PLoS One \cite ina2012.
+ * The initial release has been introduced in PLoS One \cite ina2012.
  *
  * This documentation covers the API of the core library, implenting all algorithms needed to
  * perform the analyses listed above. To perform an analysis, usually 3 steps are required:
@@ -48,4 +48,4 @@
 #include "erf.hh"
 #include "incompletegamma.hh"
 
-#endif // __FLUC_FLUCTUATOR_HH__
+#endif // __FLUC_INA_HH__
