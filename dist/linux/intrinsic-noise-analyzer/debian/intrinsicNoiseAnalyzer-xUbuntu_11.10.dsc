@@ -10,11 +10,11 @@ Build-Depends: cdbs (>= 0.4.51), debhelper (>= 8.0.0), cmake, libsbml-cppnamespa
 Package-List: 
  intrinsic-noise-analyzer deb science extra
 Checksums-Sha1: 
- 21dd7066a13bf344127bbd5586eeef2217700f34 988410 intrinsic-noise-analyzer_0.2.99.orig.tar.gz
- 8aee9773a444b5306b0c15f74f10748a1e47f86c 1658 intrinsic-noise-analyzer_0.2.99-1.debian.tar.gz
+ de0f0ba4fd8e30c204118585140de7cfe050ced1 941558 intrinsic-noise-analyzer_0.3.0.orig.tar.gz
+ a21688caa017b10adf3a270aa87d8be3c949f3cd 1636 intrinsic-noise-analyzer_0.3.0-1.debian.tar.gz
 Checksums-Sha256: 
- 2b26af6d863677ee81998b9c05a0a76a5f298628473d248e5d9f156e8f745589 988410 intrinsic-noise-analyzer_0.2.99.orig.tar.gz
- 2f5bc7821e5a687fd84ed6ff4cc0f998270c62c227c057b142f8e4a35aefbbcf 1658 intrinsic-noise-analyzer_0.2.99-1.debian.tar.gz
+ 83bfa288cf7fb1e61b45da8697dc021bcd8ba5888cf34d5c371ef0b77fbfb694 941558 intrinsic-noise-analyzer_0.3.0.orig.tar.gz
+ ea6c5217b24a97ec94ff032496f4918544908388de2f9db6ff5967ec16bd1129 1636 intrinsic-noise-analyzer_0.3.0-1.debian.tar.gz
 Files: 
- a5f9dfb13280b34a6f9e543a1cd4f060 988410 intrinsic-noise-analyzer_0.2.99.orig.tar.gz
- f434c393b61d4016516e1063ce7ea4cd 1658 intrinsic-noise-analyzer_0.2.99-1.debian.tar.gz
+ 0b7f66582402134487cb52a8fe262c73 941558 intrinsic-noise-analyzer_0.3.0.orig.tar.gz
+ 1a7cc0e59470a293e2e949f1fc95638a 1636 intrinsic-noise-analyzer_0.3.0-1.debian.tar.gz
