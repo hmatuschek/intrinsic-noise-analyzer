@@ -110,7 +110,6 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}/lib)
 # traverse into source tree:
 #
 add_subdirectory(lib)
-add_subdirectory(cli)
 add_subdirectory(app)
 add_subdirectory(test)
 

@@ -13,7 +13,7 @@ RegressionTest::testConstSpecies()
   libsbml::SBMLDocument *doc = libsbml::readSBMLFromFile("test/regression-tests/const_species.xml");
   UT_ASSERT(0 == doc->getNumErrors());
 
-  UT_ASSERT_THROW(Models::LinearNoiseApproximation(doc->getModel()),
+  UT_ASSERT_THROW(Models::REmodel(doc->getModel()),
                   Fluc::SBMLFeatureNotSupported);
 
   delete doc;
@@ -26,7 +26,7 @@ RegressionTest::testSpeciesByAssignmentRule()
   libsbml::SBMLDocument *doc = libsbml::readSBMLFromFile("test/regression-tests/species_by_assignment_rule.xml");
   UT_ASSERT(0 == doc->getNumErrors());
 
-  UT_ASSERT_THROW(Models::LinearNoiseApproximation(doc->getModel()),
+  UT_ASSERT_THROW(Models::REmodel(doc->getModel()),
                   Fluc::SBMLFeatureNotSupported);
 
   delete doc;
@@ -39,7 +39,7 @@ RegressionTest::testNonConstantParameter()
   libsbml::SBMLDocument *doc = libsbml::readSBMLFromFile("test/regression-tests/non_const_parameter.xml");
   UT_ASSERT(0 == doc->getNumErrors());
 
-  UT_ASSERT_THROW(Models::LinearNoiseApproximation(doc->getModel()),
+  UT_ASSERT_THROW(Models::REmodel(doc->getModel()),
                   Fluc::SBMLFeatureNotSupported);
 
   delete doc;
@@ -52,7 +52,7 @@ RegressionTest::testNonConstantCompartment()
   libsbml::SBMLDocument *doc = libsbml::readSBMLFromFile("test/regression-tests/non_const_compartment.xml");
   UT_ASSERT(0 == doc->getNumErrors());
 
-  UT_ASSERT_THROW(Models::LinearNoiseApproximation(doc->getModel()),
+  UT_ASSERT_THROW(Models::REmodel(doc->getModel()),
                   Fluc::SBMLFeatureNotSupported);
 
   delete doc;
@@ -65,7 +65,7 @@ RegressionTest::testAlgebraicConstraint()
   libsbml::SBMLDocument *doc = libsbml::readSBMLFromFile("test/regression-tests/algebraicrules.xml");
   UT_ASSERT(0 == doc->getNumErrors());
 
-  UT_ASSERT_THROW(Models::LinearNoiseApproximation(doc->getModel()),
+  UT_ASSERT_THROW(Models::REmodel(doc->getModel()),
                   Fluc::SBMLFeatureNotSupported);
 
   delete doc;
@@ -78,7 +78,7 @@ RegressionTest::testSpeciesByRateRule()
   libsbml::SBMLDocument *doc = libsbml::readSBMLFromFile("test/regression-tests/rate_rules.xml");
   UT_ASSERT(0 == doc->getNumErrors());
 
-  UT_ASSERT_THROW(Models::LinearNoiseApproximation(doc->getModel()),
+  UT_ASSERT_THROW(Models::REmodel(doc->getModel()),
                   Fluc::SBMLFeatureNotSupported);
 
   delete doc;

@@ -219,7 +219,7 @@ IOSLNACorrelationPlot::IOSLNACorrelationPlot(size_t num_species, Table *data,
 IOSEMRECorrelationPlot::IOSEMRECorrelationPlot(size_t num_species, Table *data,
                                                const QString &time_unit,
                                                QObject *parent)
-  : Figure("Correlation Coefficients (EMRE+IOS)", parent)
+  : Figure("Correlation Coefficients (IOS)", parent)
 {
   this->setXLabel(tr("time [%1]").arg(time_unit));
   this->setYLabel(tr("correlation coefficient"));
