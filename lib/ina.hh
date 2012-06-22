@@ -16,7 +16,7 @@
 #define __FLUC_FLUCTUATOR_HH__
 
 /**
- * \mainpage The Intrinsic Noise Analyzer
+ * \mainpage Intrinsic Noise Analyzer
  *
  * intrinsic noise analyzer (iNA) is an easy-to-use computational tool for efficient analysis
  * of intrinsic noise in biochemical reaction networks. The SBML-based software combines two

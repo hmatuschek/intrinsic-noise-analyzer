@@ -2,7 +2,7 @@
 #define INTERPRETERTEST_HH
 
 #include "unittest.hh"
-#include "fluctuator.hh"
+#include "ina.hh"
 #include "config.hh"
 
 

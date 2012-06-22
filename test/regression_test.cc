@@ -1,5 +1,5 @@
 #include "regression_test.hh"
-#include "fluctuator.hh"
+#include "ina.hh"
 #include <sbml/SBMLTypes.h>
 
 

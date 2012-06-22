@@ -8,7 +8,7 @@
 #include <QUrl>
 
 #include "application.hh"
-#include "fluctuator.hh"
+#include "ina.hh"
 #include "views/aboutdialog.hh"
 
 
