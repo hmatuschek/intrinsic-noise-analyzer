@@ -20,9 +20,9 @@ homepage http://code.google.com/p/intrinsic-noise-analyzer
 
 master_sites http://intrinsic-noise-analyzer.googlecode.com/files/
 
-checksums md5    58540a00be2750e0d7225593b63c2127 \
-          sha1   eaa9f312c1ec388c11856fc3ce8e6ef41f8e6190 \
-          rmd160 ce6b1845a08bdd0340b50f20f8eba702598ee482
+checksums md5    989f90804ffa835f409d1d3df5c6c1ab \
+          sha1   90f77d357b70c3c559a1c2dff89f40d1a80655f6 \
+          rmd160 12aaaddfaf23c59f1503f9f5703c94f489f92789
 
 # We depend on libsbml with cppnamespace
 depends_lib  port:libsbml-cppnamespace \
