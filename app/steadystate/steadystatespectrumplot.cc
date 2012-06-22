@@ -65,7 +65,7 @@ SteadyStatePlot::SteadyStatePlot(LNASteadyStateTask *task, QObject *parent)
 
   this->addToLegend("REs & LNA Cov.", lna);
   this->addToLegend("EMRE & IOS Cov.", emre);
-  this->addToLegend("EMRE/IOS", ios);
+  this->addToLegend("IOS", ios);
 
   Eigen::VectorXd &mean     = task->getConcentrations();
   Eigen::VectorXd &emre_cor = task->getEMRECorrections();
