@@ -38,7 +38,7 @@ LNASteadyStateResultWidget::LNASteadyStateResultWidget(LNASteadyStateTaskWrapper
   this->setBackgroundRole(QPalette::Window);
 
   // Create state/concentrations table
-  this->state_label = new QLabel("Concentrations (RE / EMRE)");
+  this->state_label = new QLabel("Concentrations");
   this->state_label->setFont(Application::getApp()->getH2Font());
   this->state_label->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
   this->state_label->setAlignment(Qt::AlignLeft | Qt::AlignTop);
