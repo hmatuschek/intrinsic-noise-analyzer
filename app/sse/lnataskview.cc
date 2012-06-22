@@ -18,9 +18,16 @@
 LNATaskView::LNATaskView(LNATaskWrapper *task_wrapper, QWidget *parent)
   : TaskView(task_wrapper, parent)
 {
-  this->setResultWidget(new LNAResultWidget(static_cast<LNATaskWrapper *>(task_wrapper), 0));
+  // Update main-widget:
+  taskStateChanged();
 }
 
+
+QWidget *
+LNATaskView::createResultWidget(TaskItem *task_item)
+{
+  return new LNAResultWidget(static_cast<LNATaskWrapper *>(task_item));
+}
 
 
 
@@ -82,8 +89,7 @@ LNAResultWidget::plotButtonPressed()
     Application::getApp()->docTree()->addPlot(
           this->lna_task_wrapper,
           new PlotItem(
-            new LNACorrelationPlot(this->lna_task_wrapper->getLNATask()->getSelectedSpecies().size(),
-                                   this->lna_task_wrapper->getLNATask()->getTimeSeries(),
+            new LNACorrelationPlot(this->lna_task_wrapper->getLNATask(),
                                    time_unit)));
   }
 

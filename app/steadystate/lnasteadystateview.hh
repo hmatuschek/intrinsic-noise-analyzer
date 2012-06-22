@@ -16,6 +16,9 @@
 class LNASteadyStateView : public TaskView {
 public:
   explicit LNASteadyStateView(LNASteadyStateTaskWrapper *task_item, QWidget *parent=0);
+
+protected:
+  virtual QWidget *createResultWidget(TaskItem *task_item);
 };
 
 

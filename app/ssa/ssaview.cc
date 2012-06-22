@@ -18,9 +18,15 @@
 SSATaskView::SSATaskView(SSATaskWrapper *task_wrapper, QWidget *parent)
   : TaskView(task_wrapper, parent)
 {
-  this->setResultWidget(new SSAResultWidget(task_wrapper, 0));
+  // Update main-widget:
+  taskStateChanged();
 }
 
+QWidget *
+SSATaskView::createResultWidget(TaskItem *task_item)
+{
+  return new SSAResultWidget(static_cast<SSATaskWrapper *>(task_item));
+}
 
 
 /* ********************************************************************************************* *

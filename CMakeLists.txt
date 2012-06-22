@@ -110,7 +110,6 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}/lib)
 # traverse into source tree:
 #
 add_subdirectory(lib)
-add_subdirectory(cli)
 add_subdirectory(app)
 add_subdirectory(test)
 
@@ -118,8 +117,8 @@ add_subdirectory(test)
 # Source distribution packages:
 #
 set(CPACK_PACKAGE_VERSION_MAJOR "0")
-set(CPACK_PACKAGE_VERSION_MINOR "2")
-set(CPACK_PACKAGE_VERSION_PATCH "100")
+set(CPACK_PACKAGE_VERSION_MINOR "3")
+set(CPACK_PACKAGE_VERSION_PATCH "0")
 set(CPACK_SOURCE_GENERATOR "TGZ")
 set(CPACK_SOURCE_PACKAGE_FILE_NAME
   "${CMAKE_PROJECT_NAME}-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")

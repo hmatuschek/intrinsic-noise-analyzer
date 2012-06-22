@@ -4,7 +4,7 @@
 PortSystem 1.0
 
 name intrinsic-noise-analyzer
-version 0.2.100
+version 0.3.0
 categories science
 platforms darwin
 
@@ -18,8 +18,7 @@ license           GPL-2
 
 homepage http://code.google.com/p/intrinsic-noise-analyzer
 
-master_sites https://dl.dropbox.com/u/17326152/ 
-# http://intrinsic-noise-analyzer.googlecode.com/files/
+master_sites http://intrinsic-noise-analyzer.googlecode.com/files/
 
 checksums md5    58540a00be2750e0d7225593b63c2127 \
           sha1   eaa9f312c1ec388c11856fc3ce8e6ef41f8e6190 \
@@ -37,7 +36,7 @@ configure.cmd       cmake
 configure.pre_args  -DCMAKE_INSTALL_PREFIX=${prefix}
 configure.args      -DCMAKE_VERBOSE_MAKEFILE=ON \
                     -DCMAKE_COLOR_MAKEFILE=ON \
-                    -DCMAKE_BUILD_TYPE=Debug \
+                    -DCMAKE_BUILD_TYPE=Release \
                     -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON \
                     -DCMAKE_INSTALL_NAME_DIR=${prefix}/lib \
                     -DCMAKE_SYSTEM_PREFIX_PATH=\"${prefix}\;/usr\" 

@@ -85,7 +85,7 @@ LNASteadyStateSpectrumConfigPage::LNASteadyStateSpectrumConfigPage(GeneralTaskWi
   this->setTitle(tr("Steady State Analysis"));
   this->setSubTitle(tr("Configure steady state solver."));
 
-  this->n_iter = new QLineEdit(); this->n_iter->setText("1000");
+  this->n_iter = new QLineEdit(); this->n_iter->setText("100");
   this->n_iter->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
   QIntValidator *n_iter_val = new QIntValidator(); n_iter_val->setBottom(1);
   this->n_iter->setValidator(n_iter_val);
@@ -129,8 +129,8 @@ LNASteadyStateSpectrumConfigPage::LNASteadyStateSpectrumConfigPage(GeneralTaskWi
 
   QFormLayout *layout = new QFormLayout();
   layout->addRow(tr("Precision"), epsilon);
-  layout->addRow(tr("Max. iterations"), n_iter);
-  layout->addRow(tr("Max. time step"), t_max);
+  layout->addRow(tr("Max. Newton iterations"), n_iter);
+  layout->addRow(tr("Max. integration time"), t_max);
   //layout->addRow(tr("Automatic frequency range"), f_automatic);
   //layout->addRow(tr("Minimum frequency"), f_min);
   //layout->addRow(tr("Maximum frequency"), f_max);

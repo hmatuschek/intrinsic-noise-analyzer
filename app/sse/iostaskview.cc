@@ -18,9 +18,16 @@
 IOSTaskView::IOSTaskView(IOSTaskWrapper *task_wrapper, QWidget *parent)
   : TaskView(task_wrapper, parent)
 {
-  this->setResultWidget(new IOSResultWidget(static_cast<IOSTaskWrapper *>(task_wrapper), 0));
+  // Update main-widget:
+  taskStateChanged();
 }
 
+
+QWidget *
+IOSTaskView::createResultWidget(TaskItem *task_item)
+{
+  return new IOSResultWidget(static_cast<IOSTaskWrapper *>(task_item));
+}
 
 
 
@@ -80,9 +87,7 @@ IOSResultWidget::plotButtonPressed()
   Application::getApp()->docTree()->addPlot(
         this->ios_task_wrapper,
         new PlotItem(
-          new IOSLNACorrelationPlot(this->ios_task_wrapper->getIOSTask()->getSelectedSpecies().size(),
-                                    this->ios_task_wrapper->getIOSTask()->getTimeSeries(),
-                                    time_unit)));
+          new IOSLNACorrelationPlot(this->ios_task_wrapper->getIOSTask(), time_unit)));
 
   Application::getApp()->docTree()->addPlot(
         this->ios_task_wrapper,
@@ -95,9 +100,7 @@ IOSResultWidget::plotButtonPressed()
   Application::getApp()->docTree()->addPlot(
         this->ios_task_wrapper,
         new PlotItem(
-          new IOSEMRECorrelationPlot(this->ios_task_wrapper->getIOSTask()->getSelectedSpecies().size(),
-                                     this->ios_task_wrapper->getIOSTask()->getTimeSeries(),
-                                     time_unit)));
+          new IOSEMRECorrelationPlot(this->ios_task_wrapper->getIOSTask(), time_unit)));
 
   Application::getApp()->docTree()->addPlot(
         this->ios_task_wrapper,

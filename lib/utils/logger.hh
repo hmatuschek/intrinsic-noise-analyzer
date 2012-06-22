@@ -32,9 +32,9 @@ public:
 protected:
   /** Holds the log level of the message. */
   Level _level;
-  /** Optionally hods the code-line of origin of the message. */
+  /** Optionally holds the code-line of origin of the message. */
   size_t _line;
-  /** Optionally hods the code-file of origin of the message. */
+  /** Optionally holds the code-file of origin of the message. */
   std::string _file;
   /** Holds the time-stamp of the message. */
   time_t _time;

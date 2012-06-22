@@ -14,7 +14,7 @@
 
 
 /**
- * General view object for @c RETask instances.
+ * General view object for @c IOSTask instances.
  */
 class IOSTaskView : public TaskView
 {
@@ -22,6 +22,9 @@ class IOSTaskView : public TaskView
 
 public:
   explicit IOSTaskView(IOSTaskWrapper *task_item, QWidget *parent=0);
+
+protected:
+  virtual QWidget *createResultWidget(TaskItem *task_item);
 };
 
 

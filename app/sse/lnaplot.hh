@@ -5,6 +5,7 @@
 #include "../plot/graph.hh"
 #include "../plot/variancelinegraph.hh"
 #include "../timeseries.hh"
+#include "lnatask.hh"
 
 
 /**
@@ -40,7 +41,7 @@ class LNACorrelationPlot : public Plot::Figure
   Q_OBJECT
 
 public:
-  explicit LNACorrelationPlot(size_t num_species, Table *data, const QString &time_unit,
+  explicit LNACorrelationPlot(LNATask *taks, const QString &time_unit,
                               QObject *parent=0);
 };
 

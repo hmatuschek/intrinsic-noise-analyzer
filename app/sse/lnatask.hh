@@ -50,6 +50,9 @@ protected:
    */
   Table timeseries;
 
+  /** Holds the vector of display names of the selected species. */
+  QVector<QString> species_names;
+
 
 public:
   /**
@@ -66,6 +69,10 @@ public:
    * Returns the list of selected species.
    */
   const QList<QString> &getSelectedSpecies() const;
+
+  const QString &getSpeciesName(size_t i) const;
+
+  const QVector<QString> &getSpeciesNames() const;
 
   /**
    * Returns the time-series table.

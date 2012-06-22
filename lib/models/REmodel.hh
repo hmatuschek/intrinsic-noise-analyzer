@@ -10,6 +10,8 @@ namespace Models {
 /**
  * The RE model.
  *
+ * Simply computes the deterministic rate equations (REs).
+ *
  * @ingroup sse
  */
 
@@ -38,36 +40,10 @@ protected:
 
 
 public:
-  /**
-  * Sets the state of the interpreter.
-  */
-  //void setState(const Eigen::VectorXd &state);
-
-  /**
-  * Sets the state of the interpreter and gives rate equations.
-  */
-  //void getREs(const Eigen::VectorXd &state, Eigen::VectorXd &REs);
-
-  /**
-  * Gives rate equations evaluated at current state.
-  */
-  //void getREs(Eigen::VectorXd &REs);
-
-  /**
-  * Sets the state of the interpreter and gives Jacobian matrix.
-  */
-  //void getJacobianMatrix(const Eigen::VectorXd &state, Eigen::MatrixXd &JacobianMatrix);
-
-  /**
-  * Gives Jacobian matrix at current state.
-  */
-  //void getJacobianMatrix(Eigen::MatrixXd &JacobianMatrix);
 
   const Eigen::VectorXex &getUpdateVector() const;
 
-
   const Eigen::MatrixXex &getJacobian() const;
-
 
   const GiNaC::symbol &getREvar(size_t s) const;
 
@@ -134,13 +110,6 @@ public:
    * Just dumps the RE internals.
    */
   virtual void dump(std::ostream &str);
-
-
-  // @todo du brauchst keine freunde!!!
-
-  friend class LNAevaluator;
-  friend class SpectralAnalysis;
-  friend class SpectralAnalysisBase;
 
 };
 

@@ -12,8 +12,9 @@ IOSTask::IOSTask(const SSETaskConfig &config, QObject *parent) :
   Task(parent), config(config),
   interpreter(0),
   timeseries(
-    1 + 4*config.getNumSpecies() + config.getNumSpecies()*(config.getNumSpecies()+1),
+    1 + 3*config.getNumSpecies() + config.getNumSpecies()*(config.getNumSpecies()+1),
     1+config.getIntegrationRange().getSteps()/(1+config.getIntermediateSteps())),
+  species_names(config.getNumSpecies()),
   re_index_table(config.getNumSpecies()),
   lna_index_table(config.getNumSpecies(), config.getNumSpecies()),
   emre_index_table(config.getNumSpecies()),
@@ -24,7 +25,6 @@ IOSTask::IOSTask(const SSETaskConfig &config, QObject *parent) :
 {
   // Assemble index tables and assign column names to time-series table:
   size_t column = 0;
-  QVector<QString> species_names(config.getNumSpecies());
 
   // Time column:
   this->timeseries.setColumnName(column, "t"); column++;
@@ -74,16 +74,16 @@ IOSTask::IOSTask(const SSETaskConfig &config, QObject *parent) :
   // IOS EMRE Mean corrections
   for (int i=0; i<(int)config.getNumSpecies(); i++, column++) {
     this->timeseries.setColumnName(
-          column, QString("IOS mean %1").arg(species_names[i]));
+          column, QString("IOS %1").arg(species_names[i]));
     this->ios_emre_index_table(i) = column;
   }
 
   // IOS Skewness
-  for (int i=0; i<(int)config.getNumSpecies(); i++, column++) {
+  /*for (int i=0; i<(int)config.getNumSpecies(); i++, column++) {
     this->timeseries.setColumnName(
           column, QString("Skew %1").arg(species_names[i]));
     this->skewness_index_table(i) = column;
-  }
+  }*/
 }
 
 
@@ -108,14 +108,14 @@ IOSTask::process()
 
   {
     Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
-    message << "Compile IOS analysis.";
+    message << "Compiling IOS analysis.";
     Utils::Logger::get().log(message);
   }
   instantiateInterpreter();
 
   {
     Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
-    message << "Start IOS analysis.";
+    message << "Starting IOS analysis.";
     Utils::Logger::get().log(message);
   }
 
@@ -175,7 +175,7 @@ IOSTask::process()
     output_vector(re_index_table(i)) = concentrations(index_i);
     output_vector(emre_index_table(i)) = concentrations(index_i);
     output_vector(ios_emre_index_table(i)) = concentrations(index_i);
-    output_vector(skewness_index_table(i)) = 0.0;
+    //output_vector(skewness_index_table(i)) = 0.0;
     for (size_t j=i; j<N_sel_species; j++){
       output_vector(lna_index_table(i,j)) = 0.0;
       output_vector(ios_index_table(i,j)) = 0.0;
@@ -231,7 +231,7 @@ IOSTask::process()
         }
       }
       // Store skewness:
-      output_vector(skewness_index_table(i)) = thirdMoment(index_i);
+      //output_vector(skewness_index_table(i)) = thirdMoment(index_i);
     }
     this->timeseries.append(output_vector);
   }
@@ -259,6 +259,19 @@ Table *
 IOSTask::getTimeSeries()
 {
   return &(this->timeseries);
+}
+
+
+const QString &
+IOSTask::getSpeciesName(size_t i) const
+{
+  return species_names[i];
+}
+
+const QVector<QString> &
+IOSTask::getSpeciesNames() const
+{
+  return species_names;
 }
 
 

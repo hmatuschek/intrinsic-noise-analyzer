@@ -22,6 +22,9 @@ class LNATaskView : public TaskView
 
 public:
   explicit LNATaskView(LNATaskWrapper *task_item, QWidget *parent=0);
+
+protected:
+  virtual QWidget *createResultWidget(TaskItem *task_item);
 };
 
 

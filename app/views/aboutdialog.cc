@@ -101,7 +101,7 @@ QString AboutPage::content =
 "  <p> iNA is an easy-to-use computational tool for efficient analysis of intrinsic noise in biochemical reaction networks. The software combines two complementary approaches to analyze the Chemical Master Equation:"
         "<UL><LI>the System Size Expansion - a systematic analytical approximation method,"
         "<LI>the Stochastic Simulation Algorithm - a widely used Monte Carlo method.</UL>"
-        "iNA is based on the computer algebra system Ginac and facilitates multi-core simulations. </p>"
+        "iNA is based on the computer algebra system Ginac and the compiler framework LLVM. </p>"
 "  <h3>Copyright</h3>"
 "  <p>Intrinsic Noise Analyzer version 0.3.0, "
 "     Copyright (C) 2011,2012 Ramon Grima, Hannes Matuschek, Philipp Thomas</p>"

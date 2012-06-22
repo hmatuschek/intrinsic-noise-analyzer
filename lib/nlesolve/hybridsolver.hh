@@ -126,8 +126,8 @@ public:
           {
               Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
               message << "Use integration of duration "<< dt << "." << std::endl;
-              ODEStep(conc,0,dt);             
               Utils::Logger::get().log(message);
+              ODEStep(conc,0,dt);
           }
 
           // test for convergence of derivatives

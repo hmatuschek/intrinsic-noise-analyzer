@@ -147,7 +147,7 @@ EMRETimeSeriesPlot::EMRETimeSeriesPlot(size_t num_species, Table *series,
 /* ********************************************************************************************* *
  * Implementation of correlation plot.
  * ********************************************************************************************* */
-LNACorrelationPlot::LNACorrelationPlot(size_t num_species, Table *data,
+LNACorrelationPlot::LNACorrelationPlot(LNATask *task,
                                        const QString &time_unit,
                                        QObject *parent)
   : Figure("Correlation Coefficients (LNA)", parent)
@@ -155,7 +155,9 @@ LNACorrelationPlot::LNACorrelationPlot(size_t num_species, Table *data,
   this->setXLabel(tr("time [%1]").arg(time_unit));
   this->setYLabel(tr("correlation coefficient"));
 
+  size_t num_species = task->getSelectedSpecies().size();
   size_t N_cov = (num_species*(num_species-1))/2;
+  Table *data = task->getTimeSeries();
   QVector<Plot::LineGraph *> graphs(N_cov);
 
   // Allocate a graph for each colum in time-series:
@@ -171,7 +173,7 @@ LNACorrelationPlot::LNACorrelationPlot(size_t num_species, Table *data,
       graphs[graph_idx] = new Plot::LineGraph(style);
       this->axis->addGraph(graphs[graph_idx]);
       this->addToLegend(
-            QString("corr(%1, %2)").arg(data->getColumnName(1+i)).arg(data->getColumnName(1+j)),
+            QString("corr(%1, %2)").arg(task->getSpeciesName(i)).arg(task->getSpeciesName(j)),
             graphs[graph_idx]);
       index_table(i,j) = index_table(j,i) = column_idx;
     }

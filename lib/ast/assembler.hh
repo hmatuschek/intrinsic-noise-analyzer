@@ -21,7 +21,7 @@ namespace Ast {
 
 /**
  * This class traverses a SBML AST representation of mathematical expressions and definitions and
- * assembles a Fluctuator AST representation of a Module, that can be compiled, manipulated or
+ * assembles a AST representation of a Module, that can be compiled, manipulated or
  * interpreted.
  *
  * @ingroup ast

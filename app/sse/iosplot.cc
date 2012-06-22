@@ -137,7 +137,7 @@ IOSEMREComparePlot::IOSEMREComparePlot(size_t num_species, Table *series,
 /* ********************************************************************************************* *
  * Implementation of correlation plot.
  * ********************************************************************************************* */
-IOSLNACorrelationPlot::IOSLNACorrelationPlot(size_t num_species, Table *data,
+IOSLNACorrelationPlot::IOSLNACorrelationPlot(IOSTask *task,
                                              const QString &time_unit,
                                              QObject *parent)
   : Figure("Correlation Coefficients (LNA)", parent)
@@ -145,8 +145,10 @@ IOSLNACorrelationPlot::IOSLNACorrelationPlot(size_t num_species, Table *data,
   this->setXLabel(tr("time [%1]").arg(time_unit));
   this->setYLabel(tr("correlation coefficient"));
 
+  size_t num_species = task->getSelectedSpecies().size();
   size_t N_cov = (num_species*(num_species-1))/2;
   QVector<Plot::LineGraph *> graphs(N_cov);
+  Table *data = task->getTimeSeries();
 
   // Allocate a graph for each colum in time-series:
   size_t graph_idx = 0;
@@ -161,7 +163,7 @@ IOSLNACorrelationPlot::IOSLNACorrelationPlot(size_t num_species, Table *data,
       graphs[graph_idx] = new Plot::LineGraph(style);
       this->axis->addGraph(graphs[graph_idx]);
       this->addToLegend(
-            QString("corr(%1, %2)").arg(data->getColumnName(1+i)).arg(data->getColumnName(1+j)),
+            QString("corr(%1, %2)").arg(task->getSpeciesName(i)).arg(task->getSpeciesName(j)),
             graphs[graph_idx]);
       index_table(i,j) = index_table(j,i) = column_idx;
     }
@@ -216,16 +218,18 @@ IOSLNACorrelationPlot::IOSLNACorrelationPlot(size_t num_species, Table *data,
 /* ********************************************************************************************* *
  * Implementation of correlation plot.
  * ********************************************************************************************* */
-IOSEMRECorrelationPlot::IOSEMRECorrelationPlot(size_t num_species, Table *data,
+IOSEMRECorrelationPlot::IOSEMRECorrelationPlot(IOSTask *task,
                                                const QString &time_unit,
                                                QObject *parent)
-  : Figure("Correlation Coefficients (EMRE+IOS)", parent)
+  : Figure("Correlation Coefficients (IOS)", parent)
 {
   this->setXLabel(tr("time [%1]").arg(time_unit));
   this->setYLabel(tr("correlation coefficient"));
 
+  size_t num_species = task->getSelectedSpecies().size();
   size_t N_cov = (num_species*(num_species-1))/2;
   QVector<Plot::LineGraph *> graphs(N_cov);
+  Table *data = task->getTimeSeries();
 
   // Allocate a graph for each colum in time-series:
   size_t graph_idx = 0;
@@ -240,7 +244,7 @@ IOSEMRECorrelationPlot::IOSEMRECorrelationPlot(size_t num_species, Table *data,
       graphs[graph_idx] = new Plot::LineGraph(style);
       this->axis->addGraph(graphs[graph_idx]);
       this->addToLegend(
-            QString("corr(%1, %2)").arg(data->getColumnName(1+i)).arg(data->getColumnName(1+j)),
+            QString("corr(%1, %2)").arg(task->getSpeciesName(i)).arg(task->getSpeciesName(j)),
             graphs[graph_idx]);
       index_table(i,j) = index_table(j,i) = column_idx;
     }
