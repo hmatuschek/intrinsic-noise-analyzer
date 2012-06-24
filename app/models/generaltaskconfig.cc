@@ -102,7 +102,7 @@ EngineTaskConfig::EngineTaskConfig()
 }
 
 EngineTaskConfig::EngineTaskConfig(const EngineTaskConfig &other)
-  : _engine(other._engine)
+  : _engine(other._engine), _optLevel(other._optLevel), _numEvalThreads(other._numEvalThreads)
 {
   // pass...
 }

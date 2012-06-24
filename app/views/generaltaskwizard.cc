@@ -151,8 +151,6 @@ EngineWizardPage::EngineWizardPage(GeneralTaskWizard *parent, bool show_parallel
   // Construct engine selection.
   engineList = new QComboBox();
   engineList->addItem("JIT compiler", uint(EngineTaskConfig::JIT_ENGINE));
-//  engineList->addItem("Bytecode interpreter", uint(EngineTaskConfig::BCI_ENGINE));
-//if (_show_parallel_engine)
   engineList->addItem("Bytecode interpreter", uint(EngineTaskConfig::BCIMP_ENGINE));
   engineList->setCurrentIndex(0);
 
