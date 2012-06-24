@@ -104,7 +104,7 @@ public:
           conc_old = conc;
 
           Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
-          message << "Try Newton step ..."<< std::endl;
+          message << "Try Newton step ... ";
 
           Status lcheck = NewtonRaphson<Sys>::solve(conc);
 
