@@ -100,6 +100,10 @@ LNAmodel::postConstructor()
     Eigen::VectorXex EMREUpdate;
     EMREUpdate = ((this->JacobianM*emreVariables)+Delta);
 
+    // fold constants
+    this->foldConservationConstants(conserved_cycles,CovUpdate);
+    this->foldConservationConstants(conserved_cycles,EMREUpdate);
+
     // and combine to update vector
     this->updateVector.segment(this->numIndSpecies(),dimCOV) = CovUpdate;
     this->updateVector.tail(this->numIndSpecies()) = EMREUpdate;
@@ -222,19 +226,6 @@ LNAmodel::constructSymmetricMatrix(const Eigen::VectorXex &covVec,Eigen::MatrixX
 }
 
 
-//void
-//LNAmodel::getRateCorrections(Eigen::VectorXd &REcorr)
-//{
-//    // make sure vector is big enough
-//    REcorr.resize(this->numIndSpecies());
-//    // and evaluate:
-//    for (size_t i=0; i<this->numIndSpecies(); i++)
-//        REcorr(i) = this->interpreter.evaluate(this->REcorrections(i));
-//    // ... done.
-//}
-
-
-
 void
 LNAmodel::flattenSymmetricMatrix(const Eigen::MatrixXex &mat,Eigen::VectorXex &vec)
 {
@@ -248,101 +239,3 @@ LNAmodel::flattenSymmetricMatrix(const Eigen::MatrixXex &mat,Eigen::VectorXex &v
       }
     }
 }
-
-//void
-//LNAmodel::getDiffusionVec(Eigen::VectorXd &DiffusionVec)
-//{
-
-//    // make sure Diffusion vector is big enough
-//    DiffusionVec.resize(this->numIndSpecies()*this->numIndSpecies());
-
-//    // and evaluate:
-//    for (size_t i=0; i<(this->numIndSpecies()*this->numIndSpecies()); i++)
-//    {
-//        DiffusionVec(i) = this->interpreter.evaluate(this->DiffusionVec(i));
-//    }
-
-//    // ... done.
-
-//}
-
-//void
-//LNAmodel::getDiffusionVec(const Eigen::VectorXd &state, Eigen::VectorXd &DiffusionVec)
-//{
-//    // set state
-//    this->setState(state);
-//    // and get Diffusion vector
-//    this->getDiffusionVec(DiffusionVec);
-//}
-
-
-//void
-//LNAmodel::getDiffusionMatrix(Eigen::MatrixXd &DiffusionM)
-//{
-
-//    // make sure Diffusion vector is big enough
-//    DiffusionM.resize(this->numIndSpecies(),this->numIndSpecies());
-
-//    // just lower triangular matrix
-//    Eigen::MatrixXd lowerTriangD(this->numIndSpecies(),this->numIndSpecies());
-
-//    // and evaluate this:
-//    for (size_t i=0; i<this->numIndSpecies(); i++)
-//    {
-//        for(size_t j=0;j<=i;j++)
-//        {
-//            lowerTriangD(i,j) = this->interpreter.evaluate(this->DiffusionMatrix(i,j));
-//        }
-//    }
-
-//    // conversion to dense matrix
-//    DiffusionM = lowerTriangD.selfadjointView<Eigen::Lower>();
-
-//    // ... done.
-
-//}
-
-//void
-//LNAmodel::getDiffusionMatrix(const Eigen::VectorXd &state, Eigen::MatrixXd &DiffusionM)
-//{
-//    // set state
-//    this->setState(state);
-//    // and get Diffusion matrix
-//    this->getDiffusionMatrix(DiffusionM);
-//}
-
-
-//void
-//LNAmodel::getHessian(Eigen::MatrixXd &HessianM)
-//{
-
-//    // make sure the matrix is big enough
-//    HessianM.resize(this->numIndSpecies(),this->numIndSpecies()*(this->numIndSpecies()+1)/2);
-
-//    // and evaluate this:
-//    for (size_t i=0; i<this->numIndSpecies(); i++)
-//    {
-//        int idx=0;
-//        for (size_t j=0; j<this->numIndSpecies(); j++)
-//        {
-//            for(size_t k=0;k<=j;k++)
-//            {
-//                HessianM(i,idx) = this->interpreter.evaluate(this->Hessian(i,idx));
-//                idx++;
-//            }
-//        }
-//    }
-
-//    // ... done.
-
-//}
-
-//void
-//LNAmodel::getHessian(const Eigen::VectorXd &state, Eigen::MatrixXd &HessianM)
-//{
-//    // set state
-//    this->setState(state);
-//    // and get the Hessian in matrix matrix form
-//    this->getHessian(HessianM);
-//}
-
