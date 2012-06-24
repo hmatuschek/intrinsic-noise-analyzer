@@ -59,7 +59,7 @@ propensityExpansion::propensityExpansion(BaseModel &base):
         {
             // use expansion of rates
             this->rates[i]  = volume*taylor.coeff(alpha,-1);
-            this->rates1[i] += taylor.coeff(alpha,0);
+            this->rates1[i] = taylor.coeff(alpha,0);
         }
      }
     }

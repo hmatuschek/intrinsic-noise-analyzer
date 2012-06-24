@@ -70,13 +70,14 @@ REmodel::postConstructor()
         this->conserved_cycles = om_dep.asDiagonal().inverse()*this->conservation_matrix*(this->Omega.asDiagonal())*this->ICsPermuted;
 
         // now fold coverservation constants for all coefficients
-        this->foldConservationConstants(this->conserved_cycles);
+        //this->foldConservationConstants(this->conserved_cycles);
 
     }
 
 
     // and combine to update vector
     this->updateVector = this->REs;
+    this->foldConservationConstants(conserved_cycles,this->updateVector);
 
 }
 

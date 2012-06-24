@@ -23,11 +23,13 @@ class SSEBaseModel :
 {
 
 private:
+
     Eigen::VectorXex rate_expressions;
     Eigen::VectorXex rate_corrections;
     Eigen::MatrixXex rates_gradient;
+    Eigen::MatrixXex rates_gradientO1;
     Eigen::MatrixXex rates_hessian;
-
+    Eigen::MatrixXex rates_3rd;
 
     /**
     *  \f$ \Omega \f$-vector for independent species
@@ -68,6 +70,11 @@ protected:
     Eigen::MatrixXex JacobianM;
 
     /**
+    * Expressions of \f$ J_{i}^{j(1)} \f$ in unconstrained base.
+    */
+    Eigen::MatrixXex JacobianMO1;
+
+    /**
     * Expressions of Hessian in unconstrained base.
     */
     Eigen::MatrixXex Hessian;
@@ -78,6 +85,11 @@ protected:
     Eigen::MatrixXex DiffusionMatrix;
 
     /**
+    * Expressions for Diffusion matrix \f$ \underline{D}^{(1)} \f$ in unconstrained base.
+    */
+    Eigen::MatrixXex DiffusionMatrixO1;
+
+    /**
     * Expressions for Diffusion matrix in vectorized form \f$ \text{vec}(\underline{D}) \f$ and unconstrained base.
     */
     Eigen::VectorXex DiffusionVec;
@@ -86,6 +98,11 @@ protected:
     * Expressions for 3-tensor matrix \f$ D_{i}^{jk} \f$ in unconstrained base.
     */
     Eigen::MatrixXex DiffusionJacM;  
+
+    /**
+    * Expressions for 3-tensor matrix \f$ D_{i}^{(1)jk} \f$ in unconstrained base.
+    */
+    Eigen::MatrixXex DiffusionJacMO1;
 
     /**
     * Expressions for 3-tensor matrix \f$ D_{ijk} \f$ in unconstrained base.
@@ -113,13 +130,6 @@ protected:
     Eigen::MatrixXex fHessian;
 
     /**
-    * THIS FUNCTION CALL IS REDUNDANT NOW!
-    * A method that folds all constants arising from conservation laws
-    */
-    void foldConservationConstants(const Eigen::VectorXd &conserved_cycles);
-
-    /**
-    * THIS FUNCTION CALL IS REDUNDANT NOW!
     * A method that folds all constants arising from conservation laws in a given expression
     */
     void foldConservationConstants(const Eigen::VectorXd &conserved_cycles, Eigen::VectorXex &vec);
@@ -141,7 +151,6 @@ private:
      */
     void postConstructor();
 
-
 public:
     /**
      * Constructor from SBML model.
@@ -157,4 +166,4 @@ public:
 }
 }
 
-#endif // __FLUC_MODELS_LNABASEMODEL_HH
+#endif // __FLUC_MODELS_SSEBASEMODEL_HH
