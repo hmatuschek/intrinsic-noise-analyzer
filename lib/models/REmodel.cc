@@ -63,17 +63,10 @@ REmodel::postConstructor()
     */
 
     if(numDepSpecies()>0){
-
         Eigen::VectorXd om_dep=this->Omega.tail(this->numDepSpecies());
-
         // compute conserved cycles in permutated base and store in conserved_cycles
         this->conserved_cycles = om_dep.asDiagonal().inverse()*this->conservation_matrix*(this->Omega.asDiagonal())*this->ICsPermuted;
-
-        // now fold coverservation constants for all coefficients
-        //this->foldConservationConstants(this->conserved_cycles);
-
     }
-
 
     // and combine to update vector
     this->updateVector = this->REs;

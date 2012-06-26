@@ -22,6 +22,8 @@ void
 LNAmodel::postConstructor()
 {
 
+    Eigen::VectorXex REupdate =  updateVector;
+
     dimCOV = this->numIndSpecies()*(this->numIndSpecies()+1)/2;
 
     // add dimension of covariances
@@ -29,7 +31,7 @@ LNAmodel::postConstructor()
     // add dimension of EMRE
     dim+= this->numIndSpecies();
     // reserve some space
-    updateVector.conservativeResize(dim);
+    updateVector.resize(dim);
 
     // assign a set of new symbols
     // ... and add them to index table
@@ -105,6 +107,7 @@ LNAmodel::postConstructor()
     this->foldConservationConstants(conserved_cycles,EMREUpdate);
 
     // and combine to update vector
+    this->updateVector.head(this->numIndSpecies())=REupdate;
     this->updateVector.segment(this->numIndSpecies(),dimCOV) = CovUpdate;
     this->updateVector.tail(this->numIndSpecies()) = EMREUpdate;
 

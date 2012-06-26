@@ -73,9 +73,6 @@ public:
    */
   void fullState(const Eigen::VectorXd &state, Eigen::VectorXd &concentrations, Eigen::MatrixXd &covariance, Eigen::VectorXd &emre);
 
-  friend class SpectralAnalysis;
-  friend class SpectralAnalysisBase;
-
 };
 
 

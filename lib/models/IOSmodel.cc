@@ -35,7 +35,9 @@ IOSmodel::postConstructor()
     dim += this->numIndSpecies();
 
     // reserve some space
-    updateVector.conservativeResize(dim);
+
+    Eigen::VectorXex LNAupdate = updateVector;
+    updateVector.resize(dim);
     stateVariables.reserve(dim-this->numIndSpecies());
 
     // assign a set of new symbols
@@ -297,11 +299,10 @@ IOSmodel::postConstructor()
     this->foldConservationConstants(conserved_cycles,EMREiosUpdate);
 
     // and attach to update vector
+    this->updateVector.head(dimold) = LNAupdate;
     this->updateVector.segment(dimold, dim3M) = ThirdMomentUpdate;
     this->updateVector.segment(dimold+dim3M, dimCOV) = iosUpdate;
     this->updateVector.tail(this->numIndSpecies()) = EMREiosUpdate;
-
-    this->foldConservationConstants(conserved_cycles,this->updateVector);
 
 }
 
