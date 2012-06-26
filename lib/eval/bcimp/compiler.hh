@@ -91,6 +91,11 @@ public:
       this->compiler.setCode(&this->code->getCode(i));
       this->compiler.finalize(opt_level);
     }
+
+    Utils::Message message = LOG_MESSAGE(Utils::Message::DEBUG);
+    message << "Bytecode finalized for " << this->code->getNumThreads()
+            << " threads.";
+    Utils::Logger::get().log(message);
   }
 };
 

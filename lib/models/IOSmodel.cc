@@ -21,6 +21,8 @@ void
 IOSmodel::postConstructor()
 {
 
+    this->setupIOScoeffs();
+
     GiNaC::ex temp;
 
     dim3M = (this->numIndSpecies()*(this->numIndSpecies()+1)*(this->numIndSpecies()+2))/6;
