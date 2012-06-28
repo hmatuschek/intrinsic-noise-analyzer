@@ -134,7 +134,7 @@ SSEBaseModel::postConstructor()
             for(size_t l=0; l<=k; l++)
             {
                 rates_3rd(i,idy) =
-                        GiNaC::diff( rates_hessian(i,idx), species[PermutationVec(j)]);
+                        GiNaC::diff( rates_hessian(i,idx), species[PermutationVec(l)]);
                 idy++;
             }
             idx++;
@@ -245,20 +245,6 @@ SSEBaseModel::postConstructor()
 
 
 }
-
-void
-SSEBaseModel::foldConservationConstants(const Eigen::VectorXd &conserved_cycles, Eigen::VectorXex &vec)
-{
-
-    // generate substitution table
-    GiNaC::exmap subs_table = generateConservationConstantsTable(conserved_cycles);
-
-    // ... and fold all constants due to conservation laws
-    for (int i=0; i<vec.size(); i++)
-            vec(i)=vec(i).subs(subs_table);
-
-}
-
 
 GiNaC::exmap
 SSEBaseModel::generateConservationConstantsTable(const Eigen::VectorXd &conserved_cycles)

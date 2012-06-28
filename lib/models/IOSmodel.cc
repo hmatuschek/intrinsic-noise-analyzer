@@ -198,35 +198,21 @@ IOSmodel::postConstructor()
                     // use Wick's theorem to calculate 4-th moment + (i <-> j)
                     wick1 = (cov(k,l)*cov(m,j)+cov(k,m)*cov(l,j)+cov(k,j)*cov(l,m));
                     wick2 = (cov(k,l)*cov(m,i)+cov(k,m)*cov(l,i)+cov(k,i)*cov(l,m));
-                    temp += 2*(this->PhilippianM(i,idz)*wick1+this->PhilippianM(j,idz)*wick2);
+                    iosUpdate(i) += (this->PhilippianM(i,idz)*wick1+this->PhilippianM(j,idz)*wick2);
                     idz++;
                 }
                 // m=l
                 wick1 = (2*cov(k,l)*cov(l,j)+cov(k,j)*cov(l,l));
                 wick2 = (2*cov(k,l)*cov(l,i)+cov(k,i)*cov(l,l));
-                temp += (this->PhilippianM(i,idz)*wick1+this->PhilippianM(j,idz)*wick2);
+                iosUpdate(idx) += (this->PhilippianM(i,idz)*wick1+this->PhilippianM(j,idz)*wick2)/2;
 
                 idz++;
-
-                iosUpdate(idx)+=2*temp/6;
 
             } // end l
 
-            // l=k
-            temp=0;
-            for(size_t m=0; m<k; m++)
-            {
-                // use Wick's theorem to calculate 4-th moment + (i <-> j)
-                wick1 = (cov(k,k)*cov(m,j)+2*cov(k,j)*cov(k,m));
-                wick2 = (cov(k,k)*cov(m,i)+2*cov(k,i)*cov(k,m));
-                temp += 2*(this->PhilippianM(i,idz)*wick1+this->PhilippianM(j,idz)*wick2);
-                idz++;
-            }
-            // m=l=k
             wick1 = 3*cov(k,k)*cov(k,j);
             wick2 = 3*cov(k,k)*cov(k,i);
-            temp += (this->PhilippianM(i,idz)*wick1+this->PhilippianM(j,idz)*wick2);
-            iosUpdate(idx) += temp/6;
+            iosUpdate(idx) += (this->PhilippianM(i,idz)*wick1+this->PhilippianM(j,idz)*wick2)/6;
             idz++;
 
             // same for l=k appears only once in sum
@@ -261,25 +247,16 @@ IOSmodel::postConstructor()
             temp = 0;
             for (size_t l=0; l<k; l++)
             {
-                temp += 2*this->PhilippianM(i,idy)*thirdmomentVariables[j](k,l);
+                Delta(i) += this->PhilippianM(i,idy)*thirdmomentVariables[j](k,l);
                 idy++;
             }
             // k=l
-            temp += this->PhilippianM(i,idy)*thirdmomentVariables[j](k,k);
+            Delta(i) += this->PhilippianM(i,idy)*thirdmomentVariables[j](k,k)/2;
             idy++;
-            Delta(i)+=2*temp/6;
         }
 
-        // j=k
-        temp = 0;
-        for (size_t l=0; l<j; l++)
-        {
-            temp += 2*this->PhilippianM(i,idy)*thirdmomentVariables[j](j,l);
-            idy++;
-        }
-        // j=l=k
-        temp += this->PhilippianM(i,idy)*thirdmomentVariables[j](j,j);
-        Delta(i)+=temp/6;
+        Delta(i) += this->PhilippianM(i,idy)*thirdmomentVariables[j](j,j)/6;
+
         idy++;
 
         Delta(i) += this->Hessian(i,idx)*iosVariables(idx)/2.;

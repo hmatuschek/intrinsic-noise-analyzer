@@ -177,9 +177,11 @@ REmodel::getSSEvar(size_t index) const {
     return this->stateVariables[index];
 }
 
-const Eigen::MatrixXex &
-REmodel::getJacobian() const {
-    return this->JacobianM;
+const Eigen::MatrixXex
+REmodel::getJacobian() {
+    Eigen::MatrixXex jac=this->JacobianM;
+    foldConservationConstants(this->conserved_cycles,jac);
+    return jac;
 }
 
 
