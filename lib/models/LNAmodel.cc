@@ -21,7 +21,6 @@ LNAmodel::LNAmodel(const Ast::Model &model)
 void
 LNAmodel::postConstructor()
 {
-    this->setupLNAcoeffs();
 
     Eigen::VectorXex REupdate =  updateVector;
 

@@ -145,23 +145,6 @@ protected:
     GiNaC::ex vertex(std::list<size_t> &lower, std::list<size_t> &upper, size_t order=0);
 
 
-protected:
-    /**
-     * Performs setup of common SSE coeffs.
-     */
-    void setupREcoeffs();
-
-    /**
-     * Performs setup of LNA coeffs.
-     */
-    void setupLNAcoeffs();
-
-    /**
-     * Performs setup of IOS coeffs.
-     */
-    void setupIOScoeffs();
-
-
 private:
     /**
      * Performs a common construction part, shared between all constructors.
