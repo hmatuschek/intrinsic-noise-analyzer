@@ -124,7 +124,7 @@ public:
 
     {
         size_t offset = sseModel.numIndSpecies();
-        size_t lnaLength = offset*(offset+1)/2+offset;
+        size_t lnaLength = offset*(offset+1)/2;
 
         Eigen::VectorXd A(lnaLength);
         Eigen::MatrixXd B(lnaLength,lnaLength);
@@ -171,7 +171,7 @@ public:
 
 
         size_t offset = sseModel.numIndSpecies();
-        size_t lnaLength = offset*(offset+1)/2+offset;
+        size_t lnaLength = offset*(offset+1)/2;
         size_t sseLength = sseModel.getUpdateVector().size()-sseModel.numIndSpecies();
 
         Eigen::VectorXex sseUpdate = sseModel.getUpdateVector().segment(offset,sseLength);
