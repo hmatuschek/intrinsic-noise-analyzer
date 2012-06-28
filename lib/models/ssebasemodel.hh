@@ -132,7 +132,21 @@ protected:
     /**
     * A method that folds all constants arising from conservation laws in a given expression
     */
-    void foldConservationConstants(const Eigen::VectorXd &conserved_cycles, Eigen::VectorXex &vec);
+    //void foldConservationConstants(const Eigen::VectorXd &conserved_cycles, Eigen::VectorXex &vec);
+
+    template<typename Derived>
+    void foldConservationConstants(const Eigen::VectorXd &conserved_cycles, Eigen::MatrixBase<Derived> &mat)
+    {
+
+        // generate substitution table
+        GiNaC::exmap subs_table = generateConservationConstantsTable(conserved_cycles);
+
+        // ... and fold all constants due to conservation laws
+        for (int i=0; i<mat.rows(); i++)
+            for(int j=0; j<mat.cols(); j++)
+                mat(i,j)=mat(i,j).subs(subs_table);
+
+    }
 
     /**
     * A method that generates a substituation table for all conservation laws arising from the model
