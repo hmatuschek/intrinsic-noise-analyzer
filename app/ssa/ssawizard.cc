@@ -76,7 +76,6 @@ SSAEngineSelectionPage::SSAEngineSelectionPage(GeneralTaskWizard *parent)
 }
 
 
-
 /* ********************************************************************************************* *
  * Implementation SSA config page:
  * ********************************************************************************************* */

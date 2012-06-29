@@ -302,10 +302,14 @@ void
 IntegratorWizardPage::onIntegratorSelected(int index)
 {
   QVariant value = this->integrator->itemData(index);
-  if ("rkf45" == value.toString() || "dopr5" == value.toString())
+  if ("rk4" == value.toString())
   {
-    this->ep_abs->setEnabled(false);
-    this->ep_rel->setEnabled(false);
+      this->ep_abs->setEnabled(false);
+      this->ep_rel->setEnabled(false);
+      this->intermediateSteps->setEnabled(true);
+  }
+  else if ("rkf45" == value.toString() || "dopr5" == value.toString())
+  {
     this->intermediateSteps->setEnabled(true);
   }
   else
