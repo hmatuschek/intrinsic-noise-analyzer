@@ -288,7 +288,7 @@ IntegratorWizardPage::IntegratorWizardPage(QWidget *parent)
   layout->addRow(tr("Max. absolute error"), ep_abs);
   layout->addRow(tr("Max. relative error"), ep_rel);
 
-  t->setToolTip("Exit time of the integrator.");
+  t->setToolTip("Final time of integration.");
   n->setToolTip("Number of individual time points for output.");
   intermediateSteps->setToolTip("Number of additional steps to be taken. \n"
                                 "Increasing this number can improve the accuracy of the computation at the cost of slower runtime.");
