@@ -154,9 +154,9 @@ EngineWizardPage::EngineWizardPage(GeneralTaskWizard *parent, bool show_parallel
   engineList->addItem("Bytecode interpreter", uint(EngineTaskConfig::BCIMP_ENGINE));
 
   engineList->setItemData(0, "This option is very fast. \n"
-                             "The just-in-time compiler (JIT) automatically compiles the mathematical model representation into machine readable code.", Qt::ToolTipRole);
+                             "The just-in-time compiler (JIT) automatically compiles the mathematical model representation into executable code.", Qt::ToolTipRole);
   engineList->setItemData(1, "This option is moderately fast. \n"
-                             "The bytecode interpreter produces compact numeric codes of the mathematical model representation.", Qt::ToolTipRole);
+                             "The bytecode interpreter executes compact numeric codes of the mathematical model representation.", Qt::ToolTipRole);
 
   engineList->setCurrentIndex(0);
 
