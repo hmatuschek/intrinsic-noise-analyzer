@@ -129,7 +129,7 @@ LNASteadyStateSpectrumConfigPage::LNASteadyStateSpectrumConfigPage(GeneralTaskWi
 
   QFormLayout *layout = new QFormLayout();
   layout->addRow(tr("Precision"), epsilon);
-  layout->addRow(tr("Max. Newton iterations"), n_iter);
+  layout->addRow(tr("Max. iterations"), n_iter);
   layout->addRow(tr("Max. integration time"), t_max);
   //layout->addRow(tr("Automatic frequency range"), f_automatic);
   //layout->addRow(tr("Minimum frequency"), f_min);

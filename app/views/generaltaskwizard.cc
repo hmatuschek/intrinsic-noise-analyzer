@@ -173,10 +173,10 @@ EngineWizardPage::EngineWizardPage(GeneralTaskWizard *parent, bool show_parallel
 
   // Assemble layout
   QFormLayout *layout = new QFormLayout();
-  layout->addRow(tr("execution engine"), engineList);
-  layout->addRow(tr("optimize code"), codeOpt);
+  layout->addRow(tr("Execution engine"), engineList);
+  layout->addRow(tr("Optimize code"), codeOpt);
   if (_show_parallel_engine)
-    layout->addRow(tr("number of threads"), numThreads);
+    layout->addRow(tr("Number of threads"), numThreads);
   this->setLayout(layout);
 }
 

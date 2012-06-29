@@ -72,7 +72,7 @@ SSAEngineSelectionPage::SSAEngineSelectionPage(GeneralTaskWizard *parent)
   : EngineWizardPage(parent, false)
 {
   this->setTitle(tr("Stochastic Simulation Algorithm"));
-  setSubTitle(tr("Execution engine"));
+  setSubTitle(tr("Select engine for propensity evaluation"));
 }
 
 

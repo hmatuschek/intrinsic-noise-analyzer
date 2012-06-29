@@ -111,13 +111,13 @@ public:
           switch(lcheck)
           {
             case IterationFailed:
-              message << " Linesearch failed." << std::endl; break;
+              message << " Linesearch failed."; break;
             case NegativeValues:
-              message << " Negative concentrations encountered." << std::endl;  break;
+              message << " Negative concentrations encountered.";  break;
             case MaxIterationsReached:
-              message << " Maximum iterations reached." << std::endl; break;
+              message << " Maximum iterations reached."; break;
             case Success:
-              message << "Converged in " << this->getIterations() << " iterations." << std::endl; break;
+              message << "Converged in " << this->getIterations() << " iterations."; break;
           }
 
           Utils::Logger::get().log(message);
@@ -125,7 +125,7 @@ public:
           if(lcheck!=Success)
           {
               Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
-              message << "Use integration of duration "<< dt << "." << std::endl;
+              message << "Use integration of duration "<< dt << ".";
               Utils::Logger::get().log(message);
               ODEStep(conc,0,dt);
           }

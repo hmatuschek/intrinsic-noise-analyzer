@@ -52,9 +52,13 @@ SSEModelSelectionPage::SSEModelSelectionPage(GeneralTaskWizard *parent)
   this->setSubTitle(tr("Select a model to analyze and the method."));
 
   // Append method selection radio buttons to the wizard page.
-  _re_button  = new QRadioButton("Deterministic RE analysis.");
-  _lna_button = new QRadioButton("RE, LNA and EMRE analysis.");
-  _ios_button = new QRadioButton("RE, LNA, EMRE and IOS analysis.");
+  _re_button  = new QRadioButton("Rate Equations (REs)");
+  _lna_button = new QRadioButton("Linear Noise Approximation (LNA)");
+  _ios_button = new QRadioButton("Inverse Omega Square (IOS)");
+
+  _re_button->setToolTip("Deterministic analysis using macroscopic rate equations.");
+  _lna_button->setToolTip("Analysis yielding the fluctuations about the macroscopic concentrations.");
+  _ios_button->setToolTip("Analysis yielding corrections beyond the RE and LNA analysis.");
 
   QVBoxLayout *box =  new QVBoxLayout();
   box->addWidget(_re_button);

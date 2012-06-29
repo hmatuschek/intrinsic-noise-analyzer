@@ -188,7 +188,12 @@ LNASteadyStateTask::process()
   this->setProgress(1);
   this->setState(Task::DONE);
 
-  std::cerr << "Finished SteadyStateTask." << std::endl;
+  {
+    Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
+    message << "Finished steady state analysis.";
+    Utils::Logger::get().log(message);
+  }
+
 }
 
 
@@ -241,7 +246,6 @@ LNASteadyStateTask::getSpectrum()
 {
   return this->spectrum;
 }
-
 
 const QString &
 LNASteadyStateTask::getSpeciesId(int i)

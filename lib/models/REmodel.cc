@@ -72,6 +72,8 @@ REmodel::postConstructor()
     this->updateVector = this->REs;
     this->foldConservationConstants(conserved_cycles,this->updateVector);
 
+    this->foldConservationConstants(this->conserved_cycles,this->JacobianM);
+
 }
 
 
@@ -177,11 +179,9 @@ REmodel::getSSEvar(size_t index) const {
     return this->stateVariables[index];
 }
 
-const Eigen::MatrixXex
-REmodel::getJacobian() {
-    Eigen::MatrixXex jac=this->JacobianM;
-    foldConservationConstants(this->conserved_cycles,jac);
-    return jac;
+const Eigen::MatrixXex &
+REmodel::getJacobian() const {
+    return this->JacobianM;
 }
 
 
