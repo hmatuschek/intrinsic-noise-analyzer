@@ -123,7 +123,7 @@ SSEEngineSelectionPage::SSEEngineSelectionPage(GeneralTaskWizard *parent)
   : EngineWizardPage(parent, true)
 {
   setTitle("Time Course Analysis (SSE)");
-  setSubTitle("Execution engine");
+  setSubTitle("Select engine for ODE evaluation");
 }
 
 

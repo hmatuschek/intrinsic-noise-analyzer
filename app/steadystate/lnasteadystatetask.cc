@@ -1,7 +1,5 @@
 #include "lnasteadystatetask.hh"
 
-
-
 /* ******************************************************************************************* *
  * Implementation of LNASteadyStateTask::Config, the task configuration.
  * ******************************************************************************************* */
@@ -189,9 +187,9 @@ LNASteadyStateTask::process()
   this->setState(Task::DONE);
 
   {
-    Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
-    message << "Finished steady state analysis.";
-    Utils::Logger::get().log(message);
+   Fluc::Utils::Message message = LOG_MESSAGE(Fluc::Utils::Message::INFO);
+   message << "Finished steady state analysis.";
+   Fluc::Utils::Logger::get().log(message);
   }
 
 }
