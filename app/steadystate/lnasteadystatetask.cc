@@ -183,7 +183,6 @@ LNASteadyStateTask::process()
   }*/
 
   // Done...
-  this->setProgress(1);
   this->setState(Task::DONE);
 
   {
