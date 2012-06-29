@@ -153,6 +153,18 @@ TaskItem::onStateChanged()
     this->itemLabel = QString("%1 (error)").arg(this->task->getLabel());
   }
 
+  if (Task::TERMINATING == this->task->getState())
+  {
+    // Update label:
+    this->itemLabel = QString("%1").arg(this->task->getLabel());
+  }
+
+  if (Task::DONE == this->task->getState())
+  {
+    // Update label:
+    this->itemLabel = QString("%1 (done)").arg(this->task->getLabel());
+  }
+
   // Mark item for update
   Application::getApp()->docTree()->markForUpdate(this);
 }
