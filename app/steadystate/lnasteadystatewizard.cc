@@ -55,7 +55,7 @@ LNASteadyStateModelSelectionPage::validatePage()
       return false;
   } catch (Exception err) {
     // Simply show a warning and done.
-    QMessageBox::warning(0, tr("Can not construct LNA anlysis from model: "), err.what());
+    QMessageBox::warning(0, tr("Cannot construct LNA anlysis from model: "), err.what());
     return false;
   }
 
@@ -101,6 +101,11 @@ LNASteadyStateSpectrumConfigPage::LNASteadyStateSpectrumConfigPage(GeneralTaskWi
   t_max->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
   QDoubleValidator *t_max_val = new QDoubleValidator(0); t_max_val->setBottom(0);
   t_max->setValidator(t_max_val);
+
+  this->n_iter->setToolTip("Maximum number of iterations used by the Newton-Rapson method.");
+  this->t_max->setToolTip("iNA makes use of the ODE integrator LSODA in case the Newton-Raphson method fails. \n"
+                          "The option specifies the maximum time by which the system should have reached steady state.");
+  this->epsilon->setToolTip("Accuracy of the Newton-Rapson method.");
 
   //  QCheckBox *f_automatic = new QCheckBox();
 //  f_automatic->setChecked(true);

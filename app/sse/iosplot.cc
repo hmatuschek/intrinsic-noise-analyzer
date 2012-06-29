@@ -34,7 +34,7 @@ IOSLNATimeSeriesPlot::IOSLNATimeSeriesPlot(size_t num_species, Table *series,
 IOSEMRETimeSeriesPlot::IOSEMRETimeSeriesPlot(size_t num_species, Table *series,
                                              const QString &species_unit, const QString &time_unit,
                                              QObject *parent)
-  : VariancePlot("Mean concentrations (EMRE & IOS)", parent)
+  : VariancePlot("Mean concentrations (EMRE & IOS Var.)", parent)
 {
   // Create a plot:
   this->setXLabel(tr("time [%1]").arg(time_unit));
@@ -61,7 +61,7 @@ IOSEMRETimeSeriesPlot::IOSEMRETimeSeriesPlot(size_t num_species, Table *series,
 IOSEMREComparePlot::IOSEMREComparePlot(size_t num_species, Table *series,
                                        const QString &species_unit, const QString &time_unit,
                                        QObject *parent)
-  : Plot::Figure("Mean concentrations (EMRE & IOS)", parent)
+  : Plot::Figure("Mean concentrations (RE, EMRE & IOS)", parent)
 {
   // Create a plot:
   this->setXLabel(tr("time [%1]").arg(time_unit));
