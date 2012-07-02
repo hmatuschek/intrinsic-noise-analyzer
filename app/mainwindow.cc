@@ -160,7 +160,7 @@ MainWindow::about()
 void
 MainWindow::openTutorial()
 {
-  QDesktopServices::openUrl(QUrl("http://code.google.com/p/intrinsic-noise-analyzer"));
+  QDesktopServices::openUrl(QUrl("http://code.google.com/p/intrinsic-noise-analyzer/wiki/Help"));
 }
 
 

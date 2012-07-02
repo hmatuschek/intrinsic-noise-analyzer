@@ -7,7 +7,7 @@
 LNATimeSeriesPlot::LNATimeSeriesPlot(size_t num_species, Table *series,
                                      const QString &species_unit, const QString &time_unit,
                                      QObject *parent)
-    : Plot::Figure("Mean concentrations & fluctuations (RE & LNA)", parent)
+    : Plot::Figure("Mean concentrations (RE & LNA)", parent)
 {
   // Create a plot:
   this->setXLabel(tr("time [%1]").arg(time_unit));

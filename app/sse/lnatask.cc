@@ -200,7 +200,7 @@ LNATask::process()
 QString
 LNATask::getLabel()
 {
-  return "Time Course Analysis (SSE)";
+  return "Time Course Analysis (LNA)";
 }
 
 

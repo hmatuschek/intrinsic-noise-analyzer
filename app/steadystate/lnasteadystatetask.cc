@@ -1,7 +1,5 @@
 #include "lnasteadystatetask.hh"
 
-
-
 /* ******************************************************************************************* *
  * Implementation of LNASteadyStateTask::Config, the task configuration.
  * ******************************************************************************************* */
@@ -185,10 +183,14 @@ LNASteadyStateTask::process()
   }*/
 
   // Done...
-  this->setProgress(1);
   this->setState(Task::DONE);
 
-  std::cerr << "Finished SteadyStateTask." << std::endl;
+  {
+   Fluc::Utils::Message message = LOG_MESSAGE(Fluc::Utils::Message::INFO);
+   message << "Finished steady state analysis.";
+   Fluc::Utils::Logger::get().log(message);
+  }
+
 }
 
 
@@ -241,7 +243,6 @@ LNASteadyStateTask::getSpectrum()
 {
   return this->spectrum;
 }
-
 
 const QString &
 LNASteadyStateTask::getSpeciesId(int i)

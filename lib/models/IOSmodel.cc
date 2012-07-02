@@ -20,6 +20,9 @@ IOSmodel::IOSmodel(const Ast::Model &model)
 void
 IOSmodel::postConstructor()
 {
+
+    GiNaC::ex temp;
+
     dim3M = (this->numIndSpecies()*(this->numIndSpecies()+1)*(this->numIndSpecies()+2))/6;
 
     size_t dimold = dim;
@@ -32,7 +35,9 @@ IOSmodel::postConstructor()
     dim += this->numIndSpecies();
 
     // reserve some space
-    updateVector.conservativeResize(dim);
+
+    Eigen::VectorXex LNAupdate = updateVector;
+    updateVector.resize(dim);
     stateVariables.reserve(dim-this->numIndSpecies());
 
     // assign a set of new symbols
@@ -103,6 +108,8 @@ IOSmodel::postConstructor()
             {
                 ThirdMomentUpdate(idx)=this->Diffusion3Tensor(idx);
 
+                ThirdMomentUpdate(idx)+=this->REcorrections(i)*cov(j,k)+this->REcorrections(j)*cov(i,k)+this->REcorrections(k)*cov(i,j);
+
                 ThirdMomentUpdate(idx)+=this->DiffusionMatrix(j,k)*emreVariables(i)+this->DiffusionMatrix(i,k)*emreVariables(j)+this->DiffusionMatrix(i,j)*emreVariables(k);
 
                 idy = 0;
@@ -157,32 +164,63 @@ IOSmodel::postConstructor()
 
     idx=0;
     idy=0;
+
+    GiNaC::ex wick1,wick2;
+
     for(size_t i=0;i<this->numIndSpecies();i++)
     for(size_t j=0;j<=i;j++)
     {
-        iosUpdate(idx)=0;
+        iosUpdate(idx)=this->DiffusionMatrixO1(i,j);
+
+        iosUpdate(idx)+=this->REcorrections(i)*emreVariables(j)+this->REcorrections(j)*emreVariables(i);
 
         idy=0;
+        int idz=0;
 
         for(size_t k=0; k<this->numIndSpecies(); k++)
-             {
+        {
 
-                iosUpdate(idx) += diffjac[k](i,j)*emreVariables(k);//this->DiffusionJacM(idx,k)*emreVariables(k);
-                iosUpdate(idx) += this->JacobianM(i,k)*iosCov(k,j)+this->JacobianM(j,k)*iosCov(k,i);
+            iosUpdate(idx) += JacobianMO1(i,k)*cov(k,j)+JacobianMO1(j,k)*cov(k,i);
 
-                for(size_t l=0; l<k; l++)
+            iosUpdate(idx) += diffjac[k](i,j)*emreVariables(k);//this->DiffusionJacM(idx,k)*emreVariables(k);
+            iosUpdate(idx) += this->JacobianM(i,k)*iosCov(k,j)+this->JacobianM(j,k)*iosCov(k,i);
+
+            for(size_t l=0; l<k; l++)
+            {
+                iosUpdate(idx) += this->Hessian(i,idy)*thirdmomentVariables[j](k,l)+this->Hessian(j,idy)*thirdmomentVariables[i](k,l);
+                iosUpdate(idx) += this->DiffusionHessianM(idx,idy)*cov(k,l);
+                idy++; //counts l,k loop
+
+                temp=0;
+                for(size_t m=0; m<l; m++)
                 {
-                    iosUpdate(idx) += this->Hessian(i,idy)*thirdmomentVariables[j](k,l)+this->Hessian(j,idy)*thirdmomentVariables[i](k,l);
-                    iosUpdate(idx) += this->DiffusionHessianM(idx,idy)*cov(k,l);
-                    idy++; //counts l,k loop
+
+                    // use Wick's theorem to calculate 4-th moment + (i <-> j)
+                    wick1 = (cov(k,l)*cov(m,j)+cov(k,m)*cov(l,j)+cov(k,j)*cov(l,m));
+                    wick2 = (cov(k,l)*cov(m,i)+cov(k,m)*cov(l,i)+cov(k,i)*cov(l,m));
+                    iosUpdate(i) += (this->PhilippianM(i,idz)*wick1+this->PhilippianM(j,idz)*wick2);
+                    idz++;
                 }
+                // m=l
+                wick1 = (2*cov(k,l)*cov(l,j)+cov(k,j)*cov(l,l));
+                wick2 = (2*cov(k,l)*cov(l,i)+cov(k,i)*cov(l,l));
+                iosUpdate(idx) += (this->PhilippianM(i,idz)*wick1+this->PhilippianM(j,idz)*wick2)/2;
 
-                // same for l=k appears only once in sum
-                iosUpdate(idx) += (this->Hessian(i,idy)*thirdmomentVariables[j](k,k)/2+this->Hessian(j,idy)*thirdmomentVariables[i](k,k)/2);
-                iosUpdate(idx) += this->DiffusionHessianM(idx,idy)*cov(k,k)/2;
-                idy++;
+                idz++;
 
-             }
+            } // end l
+
+            wick1 = 3*cov(k,k)*cov(k,j);
+            wick2 = 3*cov(k,k)*cov(k,i);
+            iosUpdate(idx) += (this->PhilippianM(i,idz)*wick1+this->PhilippianM(j,idz)*wick2)/6;
+            idz++;
+
+            // same for l=k appears only once in sum
+            iosUpdate(idx) += (this->Hessian(i,idy)*thirdmomentVariables[j](k,k)/2+this->Hessian(j,idy)*thirdmomentVariables[i](k,k)/2);
+            iosUpdate(idx) += this->DiffusionHessianM(idx,idy)*cov(k,k)/2;
+            idy++;
+
+        }
 
         idx++; // counts i,j loop
      }
@@ -197,6 +235,7 @@ IOSmodel::postConstructor()
     {
       Delta(i)=0.;
       idx=0;
+      idy=0;
       for (size_t j=0; j<this->numIndSpecies(); j++)
       {
         for (size_t k=0; k<j; k++)
@@ -204,17 +243,40 @@ IOSmodel::postConstructor()
             // factor 2 is used to sum over strictly upper cov matrix
             Delta(i) += this->Hessian(i,idx)*iosVariables(idx);
             idx++; // counts j,k loop
+
+            temp = 0;
+            for (size_t l=0; l<k; l++)
+            {
+                Delta(i) += this->PhilippianM(i,idy)*thirdmomentVariables[j](k,l);
+                idy++;
+            }
+            // k=l
+            Delta(i) += this->PhilippianM(i,idy)*thirdmomentVariables[j](k,k)/2;
+            idy++;
         }
+
+        Delta(i) += this->PhilippianM(i,idy)*thirdmomentVariables[j](j,j)/6;
+
+        idy++;
+
         Delta(i) += this->Hessian(i,idx)*iosVariables(idx)/2.;
         idx++;
-      }
-    }
+        Delta(i) += this->JacobianMO1(i,j)*emreVariables(j);
 
-    // @todo add philippian!
+      }
+
+
+    }
 
     Eigen::VectorXex EMREiosUpdate = ((this->JacobianM*iosemreVariables)+Delta);
 
+    // fold conservation constants
+    this->foldConservationConstants(conserved_cycles,ThirdMomentUpdate);
+    this->foldConservationConstants(conserved_cycles,iosUpdate);
+    this->foldConservationConstants(conserved_cycles,EMREiosUpdate);
+
     // and attach to update vector
+    this->updateVector.head(dimold) = LNAupdate;
     this->updateVector.segment(dimold, dim3M) = ThirdMomentUpdate;
     this->updateVector.segment(dimold+dim3M, dimCOV) = iosUpdate;
     this->updateVector.tail(this->numIndSpecies()) = EMREiosUpdate;

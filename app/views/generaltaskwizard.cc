@@ -151,13 +151,18 @@ EngineWizardPage::EngineWizardPage(GeneralTaskWizard *parent, bool show_parallel
   // Construct engine selection.
   engineList = new QComboBox();
   engineList->addItem("JIT compiler", uint(EngineTaskConfig::JIT_ENGINE));
-//  engineList->addItem("Bytecode interpreter", uint(EngineTaskConfig::BCI_ENGINE));
-//if (_show_parallel_engine)
   engineList->addItem("Bytecode interpreter", uint(EngineTaskConfig::BCIMP_ENGINE));
+
+  engineList->setItemData(0, "This option is very fast. \n"
+                             "The just-in-time compiler (JIT) automatically compiles the mathematical model representation into executable code.", Qt::ToolTipRole);
+  engineList->setItemData(1, "This option is moderately fast. \n"
+                             "The bytecode interpreter executes compact numeric codes of the mathematical model representation.", Qt::ToolTipRole);
+
   engineList->setCurrentIndex(0);
 
   // Construct code opt
   codeOpt = new QCheckBox();
+  codeOpt->setToolTip("Code optimization can be advantageous for computational expensive calculations.");
   codeOpt->setChecked(false);
 
   // Construct thread count
@@ -167,18 +172,20 @@ EngineWizardPage::EngineWizardPage(GeneralTaskWizard *parent, bool show_parallel
   numThreads->setValue(OpenMP::getMaxThreads());
   numThreads->setEnabled(false);  // Disable num-threads field since default engine is BCI
   numThreads->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
+  numThreads->setToolTip("The bytecode interpreter can make use of multiple CPUs depending on your hardware.");
   if (! _show_parallel_engine)
     numThreads->setVisible(false);
+
 
   // Connect signals:
   QObject::connect(engineList, SIGNAL(currentIndexChanged(int)), this, SLOT(engineSelected(int)));
 
   // Assemble layout
   QFormLayout *layout = new QFormLayout();
-  layout->addRow(tr("execution engine"), engineList);
-  layout->addRow(tr("optimize code"), codeOpt);
+  layout->addRow(tr("Execution engine"), engineList);
+  layout->addRow(tr("Optimize code"), codeOpt);
   if (_show_parallel_engine)
-    layout->addRow(tr("number of threads"), numThreads);
+    layout->addRow(tr("Number of threads"), numThreads);
   this->setLayout(layout);
 }
 
@@ -275,11 +282,18 @@ IntegratorWizardPage::IntegratorWizardPage(QWidget *parent)
 
   QFormLayout *layout = new QFormLayout();
   layout->addRow(tr("Final time"), t);
-  layout->addRow(tr("Number of time steps"), n);
+  layout->addRow(tr("Plot points"), n);
   layout->addRow(tr("Number of intermediate steps"), intermediateSteps);
   layout->addRow(tr("Integrator"), this->integrator);
   layout->addRow(tr("Max. absolute error"), ep_abs);
   layout->addRow(tr("Max. relative error"), ep_rel);
+
+  t->setToolTip("Final time of integration.");
+  n->setToolTip("Number of individual time points for output.");
+  intermediateSteps->setToolTip("Number of additional steps to be taken. \n"
+                                "Increasing this number can improve the accuracy of the computation at the cost of slower runtime.");
+  integrator->setToolTip("Sets the numerical algorithm for ODE integration. \n LSODA is a good general-purpose choice.");
+
   this->setLayout(layout);
 }
 
@@ -290,8 +304,12 @@ IntegratorWizardPage::onIntegratorSelected(int index)
   QVariant value = this->integrator->itemData(index);
   if ("rk4" == value.toString())
   {
-    this->ep_abs->setEnabled(false);
-    this->ep_rel->setEnabled(false);
+      this->ep_abs->setEnabled(false);
+      this->ep_rel->setEnabled(false);
+      this->intermediateSteps->setEnabled(true);
+  }
+  else if ("rkf45" == value.toString() || "dopr5" == value.toString())
+  {
     this->intermediateSteps->setEnabled(true);
   }
   else

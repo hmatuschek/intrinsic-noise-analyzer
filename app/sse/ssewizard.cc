@@ -48,13 +48,17 @@ SSEWizard::getConfig()
 SSEModelSelectionPage::SSEModelSelectionPage(GeneralTaskWizard *parent)
   : ModelSelectionWizardPage(parent)
 {
-  this->setTitle(tr("Time Course analysis (SSE)"));
+  this->setTitle(tr("Time Course Analysis (SSE)"));
   this->setSubTitle(tr("Select a model to analyze and the method."));
 
   // Append method selection radio buttons to the wizard page.
-  _re_button  = new QRadioButton("Deterministic RE analysis.");
-  _lna_button = new QRadioButton("RE, LNA and EMRE analysis.");
-  _ios_button = new QRadioButton("RE, LNA, EMRE and IOS analysis.");
+  _re_button  = new QRadioButton("Rate Equations (REs)");
+  _lna_button = new QRadioButton("Linear Noise Approximation (LNA)");
+  _ios_button = new QRadioButton("Inverse Omega Squared Analysis (IOS)");
+
+  _re_button->setToolTip("Deterministic analysis using macroscopic rate equations.");
+  _lna_button->setToolTip("Analysis yielding the fluctuations about the macroscopic concentrations.");
+  _ios_button->setToolTip("Analysis yielding corrections beyond the RE and LNA analysis.");
 
   QVBoxLayout *box =  new QVBoxLayout();
   box->addWidget(_re_button);
@@ -119,7 +123,7 @@ SSEEngineSelectionPage::SSEEngineSelectionPage(GeneralTaskWizard *parent)
   : EngineWizardPage(parent, true)
 {
   setTitle("Time Course Analysis (SSE)");
-  setSubTitle("Execution engine");
+  setSubTitle("Select engine for ODE evaluation");
 }
 
 

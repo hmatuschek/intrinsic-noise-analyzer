@@ -95,12 +95,12 @@ LNAResultWidget::plotButtonPressed()
 
 
   // Add EMRE plot:
-  Application::getApp()->docTree()->addPlot(
-        this->lna_task_wrapper,
-        new PlotItem(
-          new EMRETimeSeriesPlot(this->lna_task_wrapper->getLNATask()->getSelectedSpecies().size(),
-                                 this->lna_task_wrapper->getLNATask()->getTimeSeries(),
-                                 concentration_unit, time_unit)));
+//  Application::getApp()->docTree()->addPlot(
+//        this->lna_task_wrapper,
+//        new PlotItem(
+//          new EMRETimeSeriesPlot(this->lna_task_wrapper->getLNATask()->getSelectedSpecies().size(),
+//                                 this->lna_task_wrapper->getLNATask()->getTimeSeries(),
+//                                 concentration_unit, time_unit)));
 }
 
 
@@ -120,8 +120,8 @@ LNAResultWidget::saveButtonPressed()
   if (!file.open(QIODevice::WriteOnly| QIODevice::Text))
   {
     QMessageBox box;
-    box.setWindowTitle(tr("Can not open file"));
-    box.setText(tr("Can not open file %1 for writing").arg(filename));
+    box.setWindowTitle(tr("Cannot open file"));
+    box.setText(tr("Cannot open file %1 for writing").arg(filename));
     box.exec();
   }
 

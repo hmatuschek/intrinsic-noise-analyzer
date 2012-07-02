@@ -72,9 +72,8 @@ SSAEngineSelectionPage::SSAEngineSelectionPage(GeneralTaskWizard *parent)
   : EngineWizardPage(parent, false)
 {
   this->setTitle(tr("Stochastic Simulation Algorithm"));
-  setSubTitle(tr("Execution engine"));
+  setSubTitle(tr("Select engine for propensity evaluation"));
 }
-
 
 
 /* ********************************************************************************************* *
@@ -117,6 +116,12 @@ SSAConfigPage::SSAConfigPage(SSAWizard *parent)
   layout->addRow(tr("Plot points"), steps);
   layout->addRow(tr("SSA method"), method);
   layout->addRow(tr("Thread count"), thread_count);
+
+  size->setToolTip("Number of stochastic sample paths used for statistical average.");
+  time->setToolTip("Final time of simulation.");
+  steps->setToolTip("Specifies the number of individual time points from which statistical average is obtained.");
+  method->setToolTip("You can use the optimized exact SSA method for all purposes.");
+  thread_count->setToolTip("iNA can take advantage of multiple CPUs to simulate multiple sample paths in parallel.");
 
   this->setLayout(layout);
 }

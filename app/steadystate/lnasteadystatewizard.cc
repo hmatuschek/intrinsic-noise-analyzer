@@ -55,7 +55,7 @@ LNASteadyStateModelSelectionPage::validatePage()
       return false;
   } catch (Exception err) {
     // Simply show a warning and done.
-    QMessageBox::warning(0, tr("Can not construct LNA anlysis from model: "), err.what());
+    QMessageBox::warning(0, tr("Cannot construct LNA anlysis from model: "), err.what());
     return false;
   }
 
@@ -102,6 +102,11 @@ LNASteadyStateSpectrumConfigPage::LNASteadyStateSpectrumConfigPage(GeneralTaskWi
   QDoubleValidator *t_max_val = new QDoubleValidator(0); t_max_val->setBottom(0);
   t_max->setValidator(t_max_val);
 
+  this->n_iter->setToolTip("Maximum number of iterations used by the Newton-Rapson method.");
+  this->t_max->setToolTip("iNA makes use of the ODE integrator LSODA in case the Newton-Raphson method fails. \n"
+                          "The option specifies the maximum time by which the system should have reached steady state.");
+  this->epsilon->setToolTip("Accuracy of the Newton-Rapson method.");
+
   //  QCheckBox *f_automatic = new QCheckBox();
 //  f_automatic->setChecked(true);
 //  this->registerField("f_automatic", f_automatic);
@@ -129,7 +134,7 @@ LNASteadyStateSpectrumConfigPage::LNASteadyStateSpectrumConfigPage(GeneralTaskWi
 
   QFormLayout *layout = new QFormLayout();
   layout->addRow(tr("Precision"), epsilon);
-  layout->addRow(tr("Max. Newton iterations"), n_iter);
+  layout->addRow(tr("Max. iterations"), n_iter);
   layout->addRow(tr("Max. integration time"), t_max);
   //layout->addRow(tr("Automatic frequency range"), f_automatic);
   //layout->addRow(tr("Minimum frequency"), f_min);

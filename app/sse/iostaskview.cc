@@ -77,17 +77,17 @@ IOSResultWidget::plotButtonPressed()
 
 
   // Add timeseries plot:
-  Application::getApp()->docTree()->addPlot(
-        this->ios_task_wrapper,
-        new PlotItem(
-          new IOSLNATimeSeriesPlot(this->ios_task_wrapper->getIOSTask()->getSelectedSpecies().size(),
-                                this->ios_task_wrapper->getIOSTask()->getTimeSeries(),
-                                concentration_unit, time_unit)));
+//  Application::getApp()->docTree()->addPlot(
+//        this->ios_task_wrapper,
+//        new PlotItem(
+//          new IOSLNATimeSeriesPlot(this->ios_task_wrapper->getIOSTask()->getSelectedSpecies().size(),
+//                                this->ios_task_wrapper->getIOSTask()->getTimeSeries(),
+//                                concentration_unit, time_unit)));
 
-  Application::getApp()->docTree()->addPlot(
-        this->ios_task_wrapper,
-        new PlotItem(
-          new IOSLNACorrelationPlot(this->ios_task_wrapper->getIOSTask(), time_unit)));
+//  Application::getApp()->docTree()->addPlot(
+//        this->ios_task_wrapper,
+//        new PlotItem(
+//          new IOSLNACorrelationPlot(this->ios_task_wrapper->getIOSTask(), time_unit)));
 
   Application::getApp()->docTree()->addPlot(
         this->ios_task_wrapper,
