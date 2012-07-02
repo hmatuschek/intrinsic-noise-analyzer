@@ -1,6 +1,6 @@
 Summary: An analysis tool for biochemical reaction networks
 
-%define version 0.3.0
+%define version 0.3.1
 
 License: GPLv2
 Group: Productivity/Scientific/Chemistry
