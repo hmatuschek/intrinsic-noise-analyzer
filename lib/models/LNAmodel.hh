@@ -73,6 +73,9 @@ public:
    */
   void fullState(const Eigen::VectorXd &state, Eigen::VectorXd &concentrations, Eigen::MatrixXd &covariance, Eigen::VectorXd &emre);
 
+  void fluxAnalysis(const Eigen::VectorXd &state,  Eigen::VectorXd &flux, Eigen::MatrixXd &fluxCovariance);
+
+
 };
 
 

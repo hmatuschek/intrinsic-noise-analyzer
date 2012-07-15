@@ -43,6 +43,10 @@ public:
    */
   virtual void getInitialState(Eigen::VectorXd &x);
 
+
+  void fluxAnalysis(const Eigen::VectorXd &state, Eigen::VectorXd &flux,
+                    Eigen::MatrixXd &fluxCovariance, Eigen::MatrixXd &fluxIOS);
+
   /**
    * Reconstruct concentration vector, covariance matrix and EMRE & IOS correction vector from state vector.
    *

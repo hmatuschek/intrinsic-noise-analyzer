@@ -103,6 +103,26 @@ REmodel::fullState(const Eigen::VectorXd &state, Eigen::VectorXd &full_state)
 
 }
 
+GiNaC::exmap
+REmodel::getFlux(const Eigen::VectorXd &state, Eigen::VectorXd &flux)
+
+{
+
+    flux.resize(this->numReactions());
+
+    GiNaC::exmap subtab;
+    for(size_t s=0; s<this->numIndSpecies(); s++)
+        subtab.insert( std::pair<GiNaC::ex,GiNaC::ex>( getREvar(s), state(s) ) );
+
+    this->foldConservationConstants(conserved_cycles,this->rate_expressions);
+
+    for(size_t i=0; i<numReactions();i++)
+        flux(i)=GiNaC::ex_to<GiNaC::numeric>(this->rate_expressions(i).subs(subtab)).to_double();
+
+    return subtab;
+
+}
+
 size_t
 REmodel::getDimension()
 {

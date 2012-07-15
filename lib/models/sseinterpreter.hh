@@ -178,7 +178,7 @@ public:
   /**
    * Constructs the "full" state from the internal, reduced state.
    */
-  void full_state( const Eigen::VectorXd &state, Eigen::VectorXd &concentrations,
+  void getFullState( const Eigen::VectorXd &state, Eigen::VectorXd &concentrations,
                    Eigen::MatrixXd &covariance, Eigen::VectorXd &emre) {
     this->sseModel.fullState(state,concentrations,covariance,emre);
   }

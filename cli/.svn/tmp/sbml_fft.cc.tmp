@@ -1,0 +1,110 @@
+#include "sbml_fft.hh"
+#include "models/spectralanalysis.hh"
+#include "math.hh"
+#include <fstream>
+
+using namespace Fluc;
+
+int main(int argc, char *argv[])
+{
+  // Check args:
+  if (argc != 2)
+  {
+    std::cerr << "Usage: " << argv[0] << " SBML_FILENAME" << std::endl;
+    return -1;
+  }
+
+  // Open document:
+  libsbml::SBMLDocument *doc = libsbml::readSBMLFromFile(argv[1]);
+
+  // Check for errors:
+  if (0 < doc->getNumErrors())
+  {
+    std::cerr << "Error while reading SBML: ";
+    doc->printErrors(std::cerr);
+    return -1;
+  }
+
+  // Do the work:
+  try
+  {
+
+    // Construct some analyses from the SBML model
+    Models::LinearNoiseApproximation lna(doc->getModel());
+    Models::SteadyStateAnalysis steadyState(lna);
+<<<<<<< .mine
+=======
+
+    Models::SpectralAnalysis specA(lna);
+
+>>>>>>> .r573
+    Models::OptimizedSSA model(doc->getModel(),1,1024,2,1);
+
+    double dt=0.05;
+    double transientTime = 20;
+    size_t windowSize = 100;
+    size_t ensembleSize = 1000;
+    size_t specId = 0;
+
+    Eigen::FFT<double> fft;
+    Eigen::VectorXcd transform;
+    Eigen::VectorXd spectrum(Eigen::VectorXd::Zero(windowSize));
+    Eigen::VectorXd state(windowSize);
+
+    std::ofstream myfile;
+
+    // frequency range
+    Eigen::VectorXd freq(windowSize/2+1);
+    for(size_t i=0;i<unsigned(freq.size());i++)
+        freq(i)=i/dt/windowSize;
+
+    Eigen::VectorXd x;
+    Eigen::MatrixXd LNAspec;
+<<<<<<< .mine
+=======
+    Eigen::VectorXd specCorr(Eigen::VectorXd::Zero(windowSize));
+    Eigen::VectorXcd transform;
+>>>>>>> .r573
+
+    steadyState.calcSteadyState(x);
+    steadyState.calcSpectrum(freq,LNAspec,false);
+
+    specA.calcSpectrum(freq,specCorr,specId,specId);
+
+    model.run(transientTime);
+
+    std::cerr<<model.getSpecies(specId)->getName()<<std::endl;
+
+    for(size_t m=0; m<ensembleSize; m++)
+    {
+
+        //get time window
+        for(size_t j=0.; j<windowSize; j++)
+        {
+           model.run(dt);
+           state(j) = model.getState(0,specId);
+        }
+
+        //accumulate data
+        fft.fwd( transform, state );
+        spectrum += transform.cwiseAbs2();
+
+        if(m%10==0){
+        myfile.open("spectrum.txt",std::ios_base::trunc);
+        for(int fs=1;fs<freq.size()/2;fs++)
+            myfile << freq(fs) << "\t"
+                   << spectrum(fs)*dt/transform.size()/(m+1) << "\t"
+                   << LNAspec(fs,specId) << "\t"
+                   << specCorr(fs) << "\n";
+            myfile.close();
+        }
+
+    }
+
+  }
+  catch (Exception err)
+  {
+    std::cerr << "Can not perform SSA: " << err.str() << std::endl;
+    return -1;
+  }
+}

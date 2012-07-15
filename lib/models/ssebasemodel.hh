@@ -22,7 +22,7 @@ class SSEBaseModel :
     public ConservationAnalysisMixin
 {
 
-private:
+protected:
 
     Eigen::VectorXex rate_expressions;
     Eigen::VectorXex rate_corrections;
@@ -30,6 +30,8 @@ private:
     Eigen::MatrixXex rates_gradientO1;
     Eigen::MatrixXex rates_hessian;
     Eigen::MatrixXex rates_3rd;
+
+private:
 
     /**
     *  \f$ \Omega \f$-vector for independent species

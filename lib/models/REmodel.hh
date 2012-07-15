@@ -89,6 +89,8 @@ public:
    */
   void fullState(const Eigen::VectorXd &state, Eigen::VectorXd &fullState);
 
+  GiNaC::exmap getFlux(const Eigen::VectorXd &state,  Eigen::VectorXd &flux);
+
   /**
    * Evaluate the full Omega (volumes) vector.
    */

@@ -385,3 +385,168 @@ IOSmodel::getInitialState(Eigen::VectorXd &x)
      Eigen::VectorXd::Zero(this->numIndSpecies());
 
 }
+
+void
+IOSmodel::fluxAnalysis(const Eigen::VectorXd &state, Eigen::VectorXd &flux,
+                       Eigen::MatrixXd &fluxCovariance, Eigen::MatrixXd &fluxIOS)
+
+{
+
+    fluxIOS.resize(this->numReactions(),this->numReactions());
+
+    // reconstruct full concentration vector and covariances in original permutation order
+    GiNaC::exmap subtab = getFlux(state,flux);
+
+    LNAmodel::fluxAnalysis(state,flux,fluxCovariance);
+
+    // get reduced covariance vector
+    Eigen::VectorXd covvec = state.segment(this->numIndSpecies(),dimCOV);
+    // red cov permutated
+    Eigen::MatrixXd covLNA(this->numIndSpecies(),this->numIndSpecies());
+
+       // fill upper triangular
+       size_t idx=0;
+       for(size_t i=0;i<this->numIndSpecies();i++)
+       {
+           for(size_t j=0;j<=i;j++)
+           {
+               covLNA(i,j) = covvec(idx);
+               // fill rest by symmetry
+               covLNA(j,i) = covLNA(i,j);
+               idx++;
+           }
+       }
+
+
+    // get reduced covariance vector
+    covvec = state.segment(2*this->numIndSpecies()+dimCOV+dim3M,dimCOV);
+    // red cov permutated
+    Eigen::MatrixXd cov_ind(this->numIndSpecies(),this->numIndSpecies());
+
+       // fill upper triangular
+       idx=0;
+       for(size_t i=0;i<this->numIndSpecies();i++)
+       {
+           for(size_t j=0;j<=i;j++)
+           {
+               cov_ind(i,j) = covvec(idx);
+               // fill rest by symmetry
+               cov_ind(j,i) = cov_ind(i,j);
+               idx++;
+           }
+       }
+
+    Eigen::MatrixXd rateJac(this->rates_gradient.rows(),this->rates_gradient.cols());
+    Eigen::MatrixXd rateHessian(this->numReactions(),this->dimCOV);
+
+    this->foldConservationConstants(conserved_cycles,rates_gradient);
+    for(int i=0;i<this->rates_gradient.rows();i++)
+    {
+      for(int j=0;j<this->rates_gradient.cols();j++)
+          rateJac(i,j)=GiNaC::ex_to<GiNaC::numeric>(rates_gradient(i,j).subs(subtab)).to_double();
+      for(int j=0;j<this->rates_hessian.cols();j++)
+      {
+          rateHessian(i,j)=GiNaC::ex_to<GiNaC::numeric>(rates_hessian(i,j).subs(subtab)).to_double();
+      }
+    }
+    fluxIOS = fluxCovariance + rateJac*cov_ind*rateJac.transpose();
+
+
+    // reconstruct thirdmoments
+    // get reduced skewness vector (should better be a view rather then a copy)
+    Eigen::VectorXd tail = state.segment(2*this->numIndSpecies()+dimCOV,dim3M);
+    std::vector< Eigen::MatrixXd > thirdmoment(this->numIndSpecies());
+
+    double val = 0;
+
+    idx = 0;
+    for(size_t i=0;i<this->numIndSpecies();i++)
+    {
+        thirdmoment[i].resize(this->numIndSpecies(),this->numIndSpecies());
+        for(size_t j=0;j<=i;j++)
+            for(size_t k=0;k<=j;k++)
+            {
+                val = tail[idx];
+
+                thirdmoment[i](j,k)=val;
+                thirdmoment[i](k,j)=val;
+
+                thirdmoment[j](i,k)=val;
+                thirdmoment[j](k,i)=val;
+
+                thirdmoment[k](i,j)=val;
+                thirdmoment[k](j,i)=val;
+
+                idx++; // counts i,j,k loop
+            }
+    }
+
+
+    for(size_t i=0;i<this->numReactions();i++)
+        for(size_t j=0;j<this->numReactions();j++)
+        {
+
+            for(size_t s=0;s<this->numIndSpecies();s++)
+            {
+                idx=0;
+                for(size_t t=0;t<this->numIndSpecies();t++)
+                {
+                    for(size_t u=0;u<t;u++)
+                    {
+                        fluxIOS(i,j)+=thirdmoment[s](t,u)*(rateHessian(i,idx)*rateJac(j,s)+rateHessian(j,idx)*rateJac(i,s));
+                        idx++;
+                    }
+                    // t=u
+                    fluxIOS(i,j)+=rateHessian(i,idx)*thirdmoment[s](t,t)*rateJac(j,s)/2.+rateHessian(j,idx)*thirdmoment[s](t,t)*rateJac(i,s)/2.;
+                    idx++;
+                }
+            }
+
+
+            idx=0;
+            for(size_t s=0;s<this->numIndSpecies();s++)
+            {
+                for(size_t t=0;t<s;t++)
+                {
+                    int idy=0;
+                    for(size_t u=0;u<this->numIndSpecies();u++)
+                    {
+                        for(size_t v=0;v<u;v++)
+                        {
+                            double wick = covLNA(s,t)*covLNA(u,v)+covLNA(s,u)*covLNA(t,v)+covLNA(s,v)*covLNA(t,u);
+                            fluxIOS(i,j)+=rateHessian(i,idx)*rateHessian(j,idy)*wick;
+                            idy++;
+                        }
+                        // u=v
+                        double wick = covLNA(s,t)*covLNA(u,u)+2.*covLNA(s,u)*covLNA(t,u);
+                        fluxIOS(i,j)+=rateHessian(i,idx)*rateHessian(j,idy)*wick/2;
+                    }
+
+                    idx++;
+                }
+
+                // s=t
+                int idy=0;
+                for(size_t u=0;u<this->numIndSpecies();u++)
+                {
+                    for(size_t v=0;v<u;v++)
+                    {
+                        double wick = covLNA(s,s)*covLNA(u,v)+2.*covLNA(s,u)*covLNA(s,v);
+                        fluxIOS(i,j)+=rateHessian(i,idx)*rateHessian(j,idy)*wick/2;
+                        idy++;
+                    }
+                    // u=v
+                    double wick = covLNA(s,s)*covLNA(u,u)+2.*covLNA(s,u)*covLNA(s,u);
+                    fluxIOS(i,j)+=rateHessian(i,idx)*rateHessian(j,idy)*wick/4;
+                }
+
+                idx++;
+
+            }
+
+
+        }
+
+    // done.
+}
+
