@@ -387,11 +387,12 @@ IOSmodel::getInitialState(Eigen::VectorXd &x)
 }
 
 void
-IOSmodel::fluxAnalysis(const Eigen::VectorXd &state, Eigen::VectorXd &flux,
+IOSmodel::fluxAnalysis(const Eigen::VectorXd &state, Eigen::VectorXd &flux, Eigen::VectorXd &fluxEMRE,
                        Eigen::MatrixXd &fluxCovariance, Eigen::MatrixXd &fluxIOS)
 
 {
 
+    fluxEMRE.resize(this->numReactions());
     fluxIOS.resize(this->numReactions(),this->numReactions());
 
     // reconstruct full concentration vector and covariances in original permutation order
@@ -401,6 +402,8 @@ IOSmodel::fluxAnalysis(const Eigen::VectorXd &state, Eigen::VectorXd &flux,
 
     // get reduced covariance vector
     Eigen::VectorXd covvec = state.segment(this->numIndSpecies(),dimCOV);
+    Eigen::VectorXd emre = state.segment(this->numIndSpecies()+dimCOV,this->numIndSpecies());
+
     // red cov permutated
     Eigen::MatrixXd covLNA(this->numIndSpecies(),this->numIndSpecies());
 
@@ -438,19 +441,47 @@ IOSmodel::fluxAnalysis(const Eigen::VectorXd &state, Eigen::VectorXd &flux,
 
     Eigen::MatrixXd rateJac(this->rates_gradient.rows(),this->rates_gradient.cols());
     Eigen::MatrixXd rateHessian(this->numReactions(),this->dimCOV);
+    Eigen::MatrixXd rate1Jac(this->rates_gradient.rows(),this->rates_gradient.cols());
 
     this->foldConservationConstants(conserved_cycles,rates_gradient);
+    this->foldConservationConstants(conserved_cycles,rate_corrections);
+
     for(int i=0;i<this->rates_gradient.rows();i++)
     {
       for(int j=0;j<this->rates_gradient.cols();j++)
+      {
+          rate1Jac(i,j)=GiNaC::ex_to<GiNaC::numeric>(rates_gradientO1(i,j).subs(subtab)).to_double();
           rateJac(i,j)=GiNaC::ex_to<GiNaC::numeric>(rates_gradient(i,j).subs(subtab)).to_double();
+      }
       for(int j=0;j<this->rates_hessian.cols();j++)
       {
           rateHessian(i,j)=GiNaC::ex_to<GiNaC::numeric>(rates_hessian(i,j).subs(subtab)).to_double();
       }
     }
-    fluxIOS = fluxCovariance + rateJac*cov_ind*rateJac.transpose();
 
+
+    fluxEMRE = rateJac*emre;
+
+    for(size_t i=0;i<this->numReactions();i++)
+      fluxEMRE(i) += GiNaC::ex_to<GiNaC::numeric>(rate_corrections(i).subs(subtab)).to_double();
+
+    for(size_t j=0; j<this->numReactions(); j++)
+    {
+        idx=0;
+        for(size_t s=0; s<this->numIndSpecies(); s++)
+        {
+            for(size_t t=0; t<s; t++)
+            {
+                fluxEMRE(j)+=rateHessian(j,idx)*covLNA(s,t);
+                idx++;
+            }
+            // t=s
+            fluxEMRE(j)+=rateHessian(j,idx)*covLNA(s,s)/2.;
+            idx++;
+        }
+    }
+
+    fluxIOS = rateJac*cov_ind*rateJac.transpose();
 
     // reconstruct thirdmoments
     // get reduced skewness vector (should better be a view rather then a copy)
@@ -487,13 +518,17 @@ IOSmodel::fluxAnalysis(const Eigen::VectorXd &state, Eigen::VectorXd &flux,
         {
 
             for(size_t s=0;s<this->numIndSpecies();s++)
+                for(size_t t=0;t<this->numIndSpecies();t++)
+                    fluxIOS(i,j)+= rateJac(i,s)*covLNA(s,t)*rate1Jac(j,t)+rateJac(j,s)*covLNA(s,t)*rate1Jac(i,t);
+
+            for(size_t s=0;s<this->numIndSpecies();s++)
             {
                 idx=0;
                 for(size_t t=0;t<this->numIndSpecies();t++)
                 {
                     for(size_t u=0;u<t;u++)
                     {
-                        fluxIOS(i,j)+=thirdmoment[s](t,u)*(rateHessian(i,idx)*rateJac(j,s)+rateHessian(j,idx)*rateJac(i,s));
+                        fluxIOS(i,j)+=thirdmoment[s](t,u)*(rateHessian(i,idx)*rateJac(j,s));//+rateHessian(j,idx)*rateJac(i,s));
                         idx++;
                     }
                     // t=u
@@ -501,6 +536,8 @@ IOSmodel::fluxAnalysis(const Eigen::VectorXd &state, Eigen::VectorXd &flux,
                     idx++;
                 }
             }
+
+
 
 
             idx=0;
@@ -513,12 +550,12 @@ IOSmodel::fluxAnalysis(const Eigen::VectorXd &state, Eigen::VectorXd &flux,
                     {
                         for(size_t v=0;v<u;v++)
                         {
-                            double wick = covLNA(s,t)*covLNA(u,v)+covLNA(s,u)*covLNA(t,v)+covLNA(s,v)*covLNA(t,u);
+                            double wick = covLNA(s,u)*covLNA(t,v)+covLNA(s,v)*covLNA(t,u);
                             fluxIOS(i,j)+=rateHessian(i,idx)*rateHessian(j,idy)*wick;
                             idy++;
                         }
                         // u=v
-                        double wick = covLNA(s,t)*covLNA(u,u)+2.*covLNA(s,u)*covLNA(t,u);
+                        double wick = 2.*covLNA(s,u)*covLNA(t,u);
                         fluxIOS(i,j)+=rateHessian(i,idx)*rateHessian(j,idy)*wick/2;
                     }
 

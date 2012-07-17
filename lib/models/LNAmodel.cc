@@ -172,11 +172,11 @@ LNAmodel::fullState(const Eigen::VectorXd &state, Eigen::VectorXd &concentration
 
 void
 LNAmodel::fluxAnalysis(const Eigen::VectorXd &state, Eigen::VectorXd &flux,
-                                     Eigen::MatrixXd &fluxCovariance)
+                                     Eigen::MatrixXd &fluxLNA)
 
 {
 
-    fluxCovariance.resize(this->numReactions(),this->numReactions());
+    fluxLNA.resize(this->numReactions(),this->numReactions());
 
     // reconstruct full concentration vector and covariances in original permutation order
     GiNaC::exmap subtab = getFlux(state,flux);
@@ -186,8 +186,9 @@ LNAmodel::fluxAnalysis(const Eigen::VectorXd &state, Eigen::VectorXd &flux,
 
     // get reduced covariance vector
     Eigen::VectorXd covvec = state.segment(this->numIndSpecies(),dimCOV);
+
     // red cov permutated
-    Eigen::MatrixXd cov_ind(this->numIndSpecies(),this->numIndSpecies());
+    Eigen::MatrixXd covLNA(this->numIndSpecies(),this->numIndSpecies());
 
        // fill upper triangular
        size_t idx=0;
@@ -195,20 +196,26 @@ LNAmodel::fluxAnalysis(const Eigen::VectorXd &state, Eigen::VectorXd &flux,
        {
            for(size_t j=0;j<=i;j++)
            {
-               cov_ind(i,j) = covvec(idx);
+               covLNA(i,j) = covvec(idx);
                // fill rest by symmetry
-               cov_ind(j,i) = cov_ind(i,j);
+               covLNA(j,i) = covLNA(i,j);
                idx++;
            }
        }
 
     Eigen::MatrixXd rateJac(this->rates_gradient.rows(),this->rates_gradient.cols());
+    Eigen::MatrixXd rateHessian(this->numReactions(),this->dimCOV);
+
     this->foldConservationConstants(conserved_cycles,rates_gradient);
     for(int i=0;i<this->rates_gradient.rows();i++)
+    {
       for(int j=0;j<this->rates_gradient.cols();j++)
           rateJac(i,j)=GiNaC::ex_to<GiNaC::numeric>(rates_gradient(i,j).subs(subtab)).to_double();
+      for(int j=0;j<this->rates_hessian.cols();j++)
+          rateHessian(i,j)=GiNaC::ex_to<GiNaC::numeric>(rates_hessian(i,j).subs(subtab)).to_double();
+    }
 
-    fluxCovariance = rateJac*cov_ind*rateJac.transpose();
+    fluxLNA = rateJac*covLNA*rateJac.transpose();
 
     // done.
 }

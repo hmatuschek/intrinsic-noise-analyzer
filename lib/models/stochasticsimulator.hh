@@ -107,13 +107,22 @@ public:
   void getState(Eigen::MatrixXd &state);
 
   /**
-  *  Performs the ensemble average.
+  *  Performs the ensemble average of concentration statistics.
   *
   *  @param mean the vector of mean concentrations
   *  @param covariance the lower diagonal covariance matrix
   **/
 
   void stats(Eigen::VectorXd &mean, Eigen::MatrixXd &covariance, Eigen::VectorXd &skewness);
+
+  /**
+  *  Performs the ensemble average of the flux statistics.
+  *
+  *  @param mean the vector of mean fluxes
+  *  @param covariance of fluxes
+  **/
+  void fluxStatistics(Eigen::VectorXd &mean, Eigen::MatrixXd &covariance);
+
 
   /**
   *  Evaluates the histogram of a species from current state

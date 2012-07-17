@@ -44,7 +44,7 @@ public:
   virtual void getInitialState(Eigen::VectorXd &x);
 
 
-  void fluxAnalysis(const Eigen::VectorXd &state, Eigen::VectorXd &flux,
+  void fluxAnalysis(const Eigen::VectorXd &state, Eigen::VectorXd &flux, Eigen::VectorXd &fluxEMRE,
                     Eigen::MatrixXd &fluxCovariance, Eigen::MatrixXd &fluxIOS);
 
   /**

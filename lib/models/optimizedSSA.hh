@@ -116,6 +116,17 @@ public:
     }
   }
 
+  /** Reimplement evaluate using the generic interpreter. */
+  void
+  evaluate(const Eigen::VectorXd &state, Eigen::VectorXd &propensities)
+  {
+
+    interpreter[0].setCode(&all_byte_code);
+    interpreter[0].run(state, propensities);
+
+  }
+
+
   /**
    * The stepper for the SSA
    */
@@ -169,7 +180,6 @@ public:
       } //end time step loop
     } // end ensemble loop
   }
-
 
 private:
     /** Reserves space for propensities of each threads. */

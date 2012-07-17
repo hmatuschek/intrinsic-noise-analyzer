@@ -50,8 +50,9 @@ StochasticSimulator::StochasticSimulator(libsbml::Model *model, int size, int se
         if(ics(i)==0.)
         {
             InternalError err;
-            err << "Could not initiate Stochastic Simulation since initial particle number of species " << this->getSpecies(i)->getName();
-            err << "evaluated to zero.";
+            err << "Could not initiate Stochastic Simulation since initial particle number of species <i>"
+                << (this->getSpecies(i)->hasName() ? this->getSpecies(i)->getName() : this->getSpecies(i)->getIdentifier())
+                << "</i> evaluated to zero.";
             throw err;
             throw InternalError();
         }
@@ -59,8 +60,9 @@ StochasticSimulator::StochasticSimulator(libsbml::Model *model, int size, int se
      else if(ics(i)<0.)
      {
          InternalError err;
-         err << "Could not initiate Stochastic Simulation since initial particle number of species " << this->getSpecies(i)->getName();
-         err << "evaluated to a value < 0.";
+         err << "Could not initiate Stochastic Simulation since initial particle number of species <i>"
+             << (this->getSpecies(i)->hasName() ? this->getSpecies(i)->getName() : this->getSpecies(i)->getIdentifier())
+             << "</i> evaluated to a value < 0.";
          throw err;
          throw InternalError();
      }
@@ -72,7 +74,12 @@ StochasticSimulator::StochasticSimulator(libsbml::Model *model, int size, int se
   msg << "SSA initial copy numbers: ";
   for(size_t i=0; i<numSpecies(); i++)
   {
-      msg<<this->getSpecies(i)->getName()<<"="<<ics(i)<<" ";
+      if(this->getSpecies(i)->hasName())
+        msg<<this->getSpecies(i)->getName();
+      else
+        msg<<this->getSpecies(i)->getIdentifier();
+
+      msg<<"="<<ics(i)<<" ";
   }
   Utils::Logger::get().log(msg);
 
@@ -99,9 +106,8 @@ StochasticSimulator::evaluate(const Eigen::VectorXd &populationVec, Eigen::Vecto
 
   // then evaluate propensities
   for (size_t i=0; i<this->numReactions(); i++)
-  {
     propensities(i) = this->interpreter.evaluate(this->propensities[i]);
-  }
+
 }
 
 
@@ -130,7 +136,6 @@ StochasticSimulator::getHistogram(size_t speciesId,std::map<double,double> &hist
             it->second+=1.;
     }
 }
-
 
 void
 StochasticSimulator::stats(Eigen::VectorXd &mean, Eigen::MatrixXd &covariance, Eigen::VectorXd &skewness)
@@ -204,6 +209,33 @@ StochasticSimulator::stats(Eigen::VectorXd &mean, Eigen::MatrixXd &covariance, E
   }
 
 }
+
+void
+StochasticSimulator::fluxStatistics(Eigen::VectorXd &mean, Eigen::MatrixXd &covariance)
+
+{
+
+    Eigen::VectorXd prop(this->numReactions());
+
+    mean = Eigen::VectorXd::Zero(this->numReactions());
+    covariance = Eigen::MatrixXd::Zero(this->numReactions(),this->numReactions());
+
+    // calculate mean fluxes
+    for(int ids=0;ids<this->ensembleSize;ids++){
+     this->evaluate(this->observationMatrix.row(ids), prop);
+     mean += prop;
+     covariance += prop*prop.transpose();
+    }
+    mean /= this->ensembleSize;
+    covariance /= (this->ensembleSize-1);
+
+    covariance-=mean*mean.transpose()*(this->ensembleSize)/(this->ensembleSize-1);
+
+    //
+
+}
+
+
 
 
 size_t

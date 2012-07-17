@@ -58,12 +58,16 @@ int main(int argc, char *argv[])
     Eigen::MatrixXd fluxCOV;
     Eigen::MatrixXd fluxIOS;
     Eigen::VectorXd flux;
+    Eigen::VectorXd fluxEMRE;
 
-    model.fluxAnalysis(x,flux,fluxCOV,fluxIOS);
+
+    std::cout << "SSE flux analysis:" << std::endl;
+    std::cout << "==================" << std::endl;
+    model.fluxAnalysis(x,flux,fluxEMRE,fluxCOV,fluxIOS);
     // output mean concentrations
     for(size_t i=0; i<model.numReactions(); i++)
     {
-        std::cout<< model.getReaction(i)->getName() << ": \t" << flux(i) <<"\t"<<sqrt(fluxCOV(i,i)) <<"\t"<<sqrt(fluxIOS(i,i)) << std::endl;
+        std::cout<< model.getReaction(i)->getName() << ": \t" << flux(i) <<" (+/-"<< sqrt(fluxCOV(i,i)) <<")\t | "<< flux(i)+fluxEMRE(i)  <<" (+-"<< sqrt(fluxCOV(i,i)+fluxIOS(i,i)) << ")" << std::endl;
     }
 
     std::cout << std::endl << std::endl;
@@ -111,69 +115,33 @@ int main(int argc, char *argv[])
 //       }
 //    }
 
-    //std::cout<< std::endl;
+    std::cout << "SSA flux analysis:" << std::endl;
+    std::cout << "==================" << std::endl;
 
-    double t=0;
-    for(int i=0; i<10000; i++){
-
-
-       //model.full_state(x,concentrations,cov,emre);
-
-       //if(i%100==0)
-       {
-           //std::cout<< t <<"\t";
-
-//           // output mean concentrations
- //          for(size_t i=0; i<model.numSpecies(); i++)
-           {
-             // std::cout<< concentrations(i) <<"\t";
-           }
-
-
-           //           // output EMRE concentrations
-//                      for(size_t i=0; i<model.numSpecies(); i++)
-                      {
-                      //   std::cout<< emre(i) <<"\t";
-                      }
-
-           //           // output variances
-           //           for(size_t i=0; i<model.numSpecies(); i++)
-           //           {
-           //              std::cout<< cov(i,i)<<"\t";
-           //           }
-
-           //           // output covariances
-
-           //           for(size_t i=0; i<model.numSpecies();i++)
-           //           {
-           //              for(size_t j=0; j<i;j++)
-           //              {
-           //                   std::cout<< cov(i,j)<<"\t";
-           //              }
-           //           }
-
-           //std::cout << std::endl;
-       }
-
-       integrator.step(x,t,dx);
-       x += dx; t += dt;
-
-     }
-
-    //model.fullState(x,concentrations,cov,emre);
-
-    std::cout<< t <<"\t";
-
-    // output mean concentrations
-    for(size_t i=0; i<model.numSpecies(); i++)
     {
-      // std::cout<< concentrations(i) <<"\t";
-    }
+      // Construct SSA model from SBML model
+      Models::OptimizedSSA model(doc->getModel(),30000,1024);
+      double dt=0.1;
 
+      Eigen::VectorXd mean;
+      Eigen::MatrixXd variance;
+
+      Eigen::MatrixXd cov(model.numSpecies(),model.numSpecies());
+
+      for(double t=0.; t<50.; t+=dt)
+      {
+         model.run(dt);
+      }
+
+      model.fluxStatistics(mean,variance);
+
+      // output mean concentrations
+      for(size_t i=0; i<model.numReactions(); i++)
+      {
+          std::cout<< model.getReaction(i)->getName() << ": \t" << mean(i) <<" (+/-"<< sqrt(variance(i,i)) <<")\t" << std::endl;
+      }
+
+    }
   }
-  //catch (Exception err)
-  {
-  //  std::cerr << "Can not perform LNA: " << err.str() << std::endl;
-  //  return -1;
-  }
+
 }
