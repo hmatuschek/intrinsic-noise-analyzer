@@ -38,7 +38,7 @@ namespace Sbmlsh {
  *   DefaultUnitDefinition {DefaultUnitDefinition};
  *
  * DefaultUnitDefinition =
- *   ("s" | "t" | "v" | "a" | "l" | "e" | "c") "=" QuotedString;
+ *   ("s" | "t" | "v" | "a" | "l" | "e" | "c") "=" Identifier;
  *
  * UnitDefinitions =
  *   "@units" EOL UnitDefinition {EOL UnitDefinition};
