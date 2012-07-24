@@ -58,6 +58,12 @@ public:
   Type getType() const;
 
   /**
+   * Returns true, if the node is not empty. This call is equivalent to
+   * ConcreteSyntaxTree::EMPTY_NODE == getType().
+   */
+  bool isEmpty() const;
+
+  /**
    * Returns the index of the token (if the node is a token-node).
    */
   size_t getTokenIdx() const;

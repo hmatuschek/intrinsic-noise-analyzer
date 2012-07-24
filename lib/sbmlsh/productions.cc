@@ -157,7 +157,7 @@ DefaultUnitDefinitionsProduction::get()
  * Implementation of DefaultUnitDefinitionProduction:
  *
  * DefaultUnitDefinition =
- *   DefaultUnitIdentifier "=" QuotedString;
+ *   DefaultUnitIdentifier "=" Identifier;
  * ******************************************************************************************** */
 DefaultUnitDefinitionProduction::DefaultUnitDefinitionProduction()
   : Utils::Production()
@@ -166,7 +166,7 @@ DefaultUnitDefinitionProduction::DefaultUnitDefinitionProduction()
 
   this->elements.push_back(DefaultUnitIdentifierProduction::get());
   this->elements.push_back(new Utils::TokenProduction(T_ASSIGN));
-  this->elements.push_back(new Utils::TokenProduction(T_QUOTED_STRING));
+  this->elements.push_back(new Utils::TokenProduction(T_IDENTIFIER));
 }
 
 DefaultUnitDefinitionProduction *DefaultUnitDefinitionProduction::instance = 0;
@@ -479,23 +479,19 @@ CompartmentDefinitionListProduction::CompartmentDefinitionListProduction()
   this->elements.push_back(new Utils::TokenProduction(T_IDENTIFIER));
 
   // ["=" NUMBER]
-  {
-    std::list<Utils::Production *> elements;
-    elements.push_back(new Utils::TokenProduction(T_ASSIGN));
-    elements.push_back(NumberProduction::get());
-    this->elements.push_back(new Utils::OptionalProduction(new Utils::Production(elements)));
-  }
+  this->elements.push_back(
+        new Utils::OptionalProduction(
+          new Utils::Production(
+            2, new Utils::TokenProduction(T_ASSIGN), NumberProduction::get())));
 
   // [QuotedString]
   this->elements.push_back(
         new Utils::OptionalProduction(new Utils::TokenProduction(T_QUOTED_STRING)));
 
   // [EOL CompartmentDefinitionList]
-  {
-    std::list<Utils::Production *> elements;
-    elements.push_back(new Utils::TokenProduction(T_END_OF_LINE));
-    elements.push_back(this);
-  }
+  this->elements.push_back(
+        new Utils::OptionalProduction(
+          new Utils::Production(2, EndOfLineProduction::get(), this)));
 }
 
 CompartmentDefinitionListProduction *CompartmentDefinitionListProduction::instance = 0;
@@ -865,8 +861,9 @@ ReactionDefinitionsProduction::get()
  * Implementation of ReactionDefinitionListProduction:
  *
  * ReactionDefinitionList =
- *   ("@r" | "@rr") Identifier [QuotedString] EOL
- *   ReactionEquation ((":" Identifier) | (EOL KineticLaw))
+ *   ("@r" | "@rr") "=" Identifier [QuotedString] EOL
+ *   ReactionEquation [":" Identifier] EOL
+ *   KineticLaw
  *   [EOL ReactionDefinitionList];
  * ******************************************************************************************** */
 ReactionDefinitionListProduction::ReactionDefinitionListProduction()
@@ -878,6 +875,10 @@ ReactionDefinitionListProduction::ReactionDefinitionListProduction()
   this->elements.push_back(
         new Utils::AltProduction(
           2, new Utils::TokenProduction(T_R_KW), new Utils::TokenProduction(T_RR_KW)));
+
+  // "="
+  this->elements.push_back(
+        new Utils::TokenProduction(T_ASSIGN));
 
   // ID
   this->elements.push_back(
@@ -891,18 +892,17 @@ ReactionDefinitionListProduction::ReactionDefinitionListProduction()
   this->elements.push_back(EndOfLineProduction::get());
   this->elements.push_back(ReactionEquationProduction::get());
 
-  // (":" Identifier | EOL KineticLaw)
+  // [":" Identifier] EOL
   this->elements.push_back(
-        new Utils::AltProduction(
-          2,
+        new Utils::OptionalProduction(
           new Utils::Production(
             2,
             new Utils::TokenProduction(T_COLON),
-            new Utils::TokenProduction(T_IDENTIFIER)),
-          new Utils::Production(
-            2,
-            EndOfLineProduction::get(),
-            KineticLawProduction::get())));
+            new Utils::TokenProduction(T_IDENTIFIER))));
+  this->elements.push_back(EndOfLineProduction::get());
+
+  // KineticLaw
+  this->elements.push_back(KineticLawProduction::get());
 
   // [EOL ReactionDefinitionList]
   this->elements.push_back(

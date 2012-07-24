@@ -233,16 +233,16 @@ SBMLSHParserTest::testParserModel()
          << "  cytosol = 1e5 \"Cytosol\"" << std::endl
          << std::endl
          << "@species" << std::endl
-         << "  cytosol: [ES] = 0 \"ES\"" << std::endl
-         << "  cytosol: [P]  = 0 \"P\"" << std::endl
+         << "  cytosol: [ES] = 0  \"ES\"" << std::endl
+         << "  cytosol: [P]  = 0  \"P\"" << std::endl
          << "  cytosol: [S]  = 10 \"S\"" << std::endl
          << "  cytosol: [E]  = 10 \"E\"" << std::endl
          << std::endl
          << "@reactions" << std::endl
-         << "  @r veq \"veq\"" << std::endl
+         << "  @r = veq \"veq\"" << std::endl
          << "    E + S -> ES" << std::endl
          << "    cytosol*(k1*E*S - k2*ES): k1=1e6, k2=0.2" << std::endl
-         << "  @r vcat \"vcat\"" << std::endl
+         << "  @r = vcat \"vcat\"" << std::endl
          << "    ES -> E + P" << std::endl
          << "    cytosol*k1*ES: k1=1" << std::endl;   //
 

@@ -21,6 +21,12 @@ ConcreteSyntaxTree::getType() const
   return this->type;
 }
 
+bool
+ConcreteSyntaxTree::isEmpty() const
+{
+  return ConcreteSyntaxTree::EMPTY_NODE == this->type;
+}
+
 
 size_t
 ConcreteSyntaxTree::getTokenIdx() const
@@ -203,11 +209,11 @@ TokenProduction::parse(Lexer &lexer, ConcreteSyntaxTree &element)
     throw err;
   }
 
-  ConcreteSyntaxTree::asTokenNode(element, this->id);
+  ConcreteSyntaxTree::asTokenNode(element, lexer.currentIndex());
 
   /*std::cerr << "Parsed token " << lexer.current().getId()
             << " @line " << lexer.current().getLine()
-            << ": \"" << lexer.current().getValue() << "\"" << std::endl; */
+            << ": \"" << lexer.current().getValue() << "\"" << std::endl;*/
 
   // Consume token...
   lexer.next();

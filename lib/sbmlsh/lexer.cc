@@ -7,11 +7,13 @@ using namespace Fluc::Sbmlsh;
 Lexer::Lexer(std::istream &input)
   : Utils::Lexer(input)
 {
+  // Token rules for white spaces
   this->addRule(new Utils::WhiteSpaceTokenRule(T_WHITESPACE));
   this->addTokenName(T_WHITESPACE, "WHITESPACE");
   this->addRule(new Utils::EOLTokenRule(T_END_OF_LINE));
   this->addTokenName(T_END_OF_LINE, "END_OF_LINE");
 
+  // Tokenrules for keywords
   this->addRule(new Utils::KeyWordTokenRule(T_MODEL_KW, "@model"));
   this->addTokenName(T_MODEL_KW, "@model");
   this->addRule(new Utils::KeyWordTokenRule(T_UNITS_KW, "@units"));

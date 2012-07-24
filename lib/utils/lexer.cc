@@ -124,6 +124,13 @@ Lexer::current()
 }
 
 
+size_t
+Lexer::currentIndex() const
+{
+  return this->stack.back().idx;
+}
+
+
 void
 Lexer::push_state()
 {
@@ -178,6 +185,12 @@ Lexer::getTokenName(unsigned id)
   }
 
   return item->second;
+}
+
+
+const Token &
+Lexer::operator [](size_t idx) const {
+  return history[idx];
 }
 
 

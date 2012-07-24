@@ -11,6 +11,8 @@ namespace Sbmlsh {
 
 /**
  * Defines all token types used by the SBML-SH parser
+ *
+ * @ingroup sbmlsh
  */
 typedef enum {
   T_WHITESPACE = Utils::Token::FIRST_USER_DEFINED,
@@ -64,11 +66,15 @@ typedef enum {
 
 
 /**
- * A helper token-rule to parse version strings "?.?.?".
+ * A helper token-rule to parse version strings "?.?.?", where "?" is a place holder for an positive
+ * integer.
+ *
+ * @ingroup sbmlsh
  */
 class VersionNumberTokenRule : public Utils::TokenRule
 {
 public:
+  /** Constructor. */
   VersionNumberTokenRule();
 };
 
@@ -82,6 +88,8 @@ public:
 class Lexer: public Utils::Lexer
 {
 public:
+  /** Constructor.
+   * @param input Specifies the input stream to lex. */
   Lexer(std::istream &input);
 };
 

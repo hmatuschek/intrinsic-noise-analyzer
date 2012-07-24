@@ -206,6 +206,8 @@ public:
    */
   const Token &current();
 
+  size_t currentIndex() const;
+
   /**
    * Saves the current state on the stack.
    */
@@ -235,6 +237,9 @@ public:
    * Returns the name for the token or "Token(ID)" if no name is registered.
    */
   std::string getTokenName(unsigned id);
+
+  /** Returns the i-th parsed token. */
+  const Token &operator[] (size_t idx) const;
 
 
 protected:

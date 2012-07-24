@@ -5,6 +5,13 @@
 
 
 namespace Fluc {
+
+namespace Ast {
+// Forward declaration.
+class Model;
+}
+
+
 namespace Sbmlsh {
 
 
@@ -124,7 +131,8 @@ protected:
 public:
   Parser(std::istream &input);
 
-  void parse();
+  void parse(Ast::Model &model);
+  Ast::Model *parse();
 };
 
 

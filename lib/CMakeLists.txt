@@ -40,9 +40,9 @@ SET(libina_ast_trafo_HEADERS ast/trafo/trafo.hh
     ast/trafo/modelcopyist.hh)
 
 SET(libina_sbmlsh_SOURCES
-    sbmlsh/lexer.cc sbmlsh/parser.cc sbmlsh/productions.cc)
+    sbmlsh/lexer.cc sbmlsh/parser.cc sbmlsh/productions.cc sbmlsh/assembler.cc)
 SET(libina_sbmlsh_HEADERS
-    sbmlsh/lexer.hh sbmlsh/parser.hh sbmlsh/productions.hh)
+    sbmlsh/lexer.hh sbmlsh/parser.hh sbmlsh/productions.hh sbmlsh/assembler.hh)
 
 SET(libina_utils_SOURCES
     utils/exception.cc utils/automata.cc utils/lexer.cc utils/tokenrules.cc utils/parser.cc
