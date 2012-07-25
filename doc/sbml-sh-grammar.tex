@@ -193,20 +193,27 @@ The parameter section consists of the \emph{@parameters} keyword followed by a l
 
 
 \subsubsection*{rule definition}
+SBML-SH allows to define rate and assignment rules for the model. This can be done within the rule section (table \ref{tab:rules}). The rule section consists of the \emph{@rules} keyword and a list of at least one rule separated by line-breaks. 
+
 \begin{table}[h!]
 \begin{grammar}
-<RuleSec> ::= '@Rules' <RuleList>
+<RuleSec> ::= '@rules' <RuleList>
 
 <RuleList> ::= <EOL> <Rule> <RuleList>
   \alt <EOL> <Rule>
   
 <Rule> ::= <Identifier> '=' <Expression>
-\alt '@rule' ':' <Identifier> '=' <Expression>
+\alt '@rate' ':' <Identifier> '=' <Expression>
 \end{grammar}
+\caption{Grammar of the rules section.} \label{tab:rules}
 \end{table}
+
+A rule is consists of an identifier of the species (or paramter) the rule is defined for and followed by an expression. This defines a assignment rule for the species. Alternatively, if the rule is prefixed with the \emph{@rate} keyword, a rate rule is defined.
 
 
 \subsubsection*{reaction definition}
+Reactions can be defined within the reactions section (\ref{tab:reactions}). This section consists of the \emph{@reactions} keyword followed by a list of at least on reaction definition separated by line breaks. 
+
 \begin{table}[h!]
 \begin{grammar}
 <ReactionSec> ::= '@reactions' <ReactionList>
@@ -215,13 +222,27 @@ The parameter section consists of the \emph{@parameters} keyword followed by a l
   \alt <EOL> <Reaction>
   
 <Reaction> ::= ('@r' | '@rr') <Identifier> [<QuotedString>] <EOL> <ReactionEquation> [':' <Identifier>] <EOL> <KineticLaw>
+\end{grammar}
+\caption{Grammar of the reactions section} \label{tab:reactions}
+\end{table}
 
-<ReactionEquation> ::= <Stoichiometry> '->' [<Stoichiometry>]
-  \alt '->' <Stoichiometry>
+A reaction definition consists of at least 3 lines. The first line starts with either the \emph{@r} or with the \emph{@rr} keyword. The first defines an irreversible reaction while the latter defines a reversible one. The keyword is followed by the unique identifier of the reaction and an optional descriptive name. The second line defines the reaction equation (table \ref{tab:reaceq}) followed by an optional identifier specifying a modifier species. And the third line specifies the kinetic law expression (table \ref:{tab:reackin}).
+
+\begin{table}[h!]
+\begin{grammar}
+<ReactionEquation> ::= <Stoichiometry> '$->$' [<Stoichiometry>]
+  \alt '$->$' <Stoichiometry>
   
 <Stoichiometry> ::= [<Integer>] <Identifier> '+' <Stoichiometry>
   \alt [<Integer>] <Identifier>
+\end{grammar}
+\caption{Grammar of the reaction equation.} \label{tab:reaceq}
+\end{table}
   
+A reaction equation consists of either a stoichiometry expression for the reactants and an optional stoichiometry expression for the products, or by defining only the stoichiometry for the products. The stoichiometry expression consists of a sum of identifiers of the reactants or products prefixed with an optional integer, specifying the multiplicity for the species. If the multiplicity is left, 1 is assumed.
+
+\begin{table}[h!]
+\begin{grammar}
 <KineticLaw> ::= <Expression> [':' <LocalParameterList>]
 
 <LocalParameterList> ::= <LocalParameter> ',' <LocalParameterList>
@@ -229,10 +250,13 @@ The parameter section consists of the \emph{@parameters} keyword followed by a l
   
 <LocalParameter> ::= <Identifier> '=' <Expression>
 \end{grammar}
+\caption{Grammar of the kinetic law definition} \label{tab:reackin}
 \end{table}
 
+The kinetic law definition consist of an expression for the kinetic law followed by an optional list of local parameters. The list of local parameters is just a semicolon separated list of assignments, where the identifier specifies the unique identifier of the local parameter and the expression specifies its value.
 
 \subsubsection*{event definition}
+Events can be described within the events section. This section consist of the \emph{@events} keyword followed by a list of at least one event definition. 
 \begin{table} [h!]
 \begin{grammar}
 <EventSec> ::= '@events' <EventList>
