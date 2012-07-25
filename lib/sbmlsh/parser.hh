@@ -74,7 +74,7 @@ namespace Sbmlsh {
  *   "@rules" EOL RuleDefinitionList;
  *
  * RuleDefinitionList =
- *   ["@rate" ":"] Identifier "=" Expression [EOL RuleDefinition];
+ *   ["@rate" ":"] Identifier "=" Expression [EOL RuleDefinitionList];
  *
  * ReactionDefinitions =
  *   "@reactions" EOL ReactionDefinitionList;
