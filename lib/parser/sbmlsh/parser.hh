@@ -15,7 +15,6 @@ class Model;
 namespace Parser {
 namespace Sbmlsh {
 
-
 /**
  * ...
  *
@@ -143,7 +142,6 @@ public:
    * constructor. */
   Ast::Model *parse();
 };
-
 
 }
 }

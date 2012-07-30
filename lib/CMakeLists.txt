@@ -41,15 +41,15 @@ SET(libina_ast_trafo_HEADERS ast/trafo/trafo.hh
 
 SET(libina_sbmlsh_parser_SOURCES
     parser/sbmlsh/lexer.cc parser/sbmlsh/parser.cc parser/sbmlsh/productions.cc
-    parser/sbmlsh/assembler.cc parser/sbmlsh/exporter.cc)
+    parser/sbmlsh/assembler.cc parser/sbmlsh/exporter.cc parser/sbmlsh/sbmlsh.cc)
 SET(libina_sbmlsh_parser_HEADERS
     parser/sbmlsh/lexer.hh parser/sbmlsh/parser.hh parser/sbmlsh/productions.hh
-    parser/sbmlsh/assembler.hh parser/sbmlsh/exporter.hh)
+    parser/sbmlsh/assembler.hh parser/sbmlsh/exporter.hh parser/sbmlsh/sbmlsh.hh)
 
 SET(libina_sbml_parser_SOURCES
-    parser/sbml/assembler.cc)
+    parser/sbml/sbml.cc parser/sbml/assembler.cc)
 SET(libina_sbml_parser_HEADERS
-    parser/sbml/assembler.hh)
+    parser/sbml/sbml.hh parser/sbml/assembler.hh)
 
 SET(libina_parser_SOURCES
     ${libina_sbmlsh_parser_SOURCES}

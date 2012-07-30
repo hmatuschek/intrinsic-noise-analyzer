@@ -1,18 +1,15 @@
-#ifndef __FLUC_COMPILER_AST_ASSEMBLER_HH__
-#define __FLUC_COMPILER_AST_ASSEMBLER_HH__
+#ifndef __FLUC_PARSER_SBML_ASSEMBLER_HH__
+#define __FLUC_PARSER_SBML_ASSEMBLER_HH__
 
 #include <sbml/SBMLTypes.h>
-#include <ginac/ginac.h>
-
-#include "exception.hh"
-
-#include "ast/model.hh"
 #include "ast/functiondefinition.hh"
 #include "ast/reaction.hh"
 #include "ast/unitdefinition.hh"
 #include "ast/species.hh"
 #include "ast/compartment.hh"
 #include "ast/parameter.hh"
+#include "exception.hh"
+#include "ast/model.hh"
 
 
 namespace Fluc {
@@ -20,41 +17,29 @@ namespace Parser {
 namespace Sbml {
 
 
-/**
- * This class traverses a SBML AST representation of mathematical expressions and definitions and
- * assembles a AST representation of a Module, that can be compiled, manipulated or
- * interpreted.
- *
- * @ingroup ast
- */
-class Assembler
+/** This class represents a stack of variable scopes that is used to resolve symbol identifiers
+ * properly. This class is used internal to parse SBML documents. */
+class ParserContext
 {
 protected:
   /**
    * Holds a weak reference to the current module being processed.
    */
-  Ast::Model &model;
+  Ast::Model &_model;
 
   /**
    * Implements a stack of variable scopes (nested scopes) variable symboles are resolved
    * top-down along this scopes.
    */
-  std::list<Ast::Scope *> scope_stack;
+  std::list<Ast::Scope *> _scope_stack;
 
 
 public:
   /**
    * Constructs a new AST assembler for the given module.
    */
-  Assembler(Ast::Model &model);
+  ParserContext(Ast::Model &_model);
 
-  /**
-   * Processes the given model and populates the current AST module with definitions found.
-   */
-  void processModel(libsbml::Model *model);
-
-
-protected:
   /**
    * Pushes a scope on the stack:
    */
@@ -84,100 +69,48 @@ protected:
   /**
    * Tries to resolve a variable in the given scope.
    */
-  Ast::VariableDefinition *resolveVariable(const std::string &id, std::list<Ast::Scope *>::reverse_iterator scope);
+  Ast::VariableDefinition *resolveVariable(const std::string &id,
+                                           std::list<Ast::Scope *>::reverse_iterator scope);
 
-  /**
-   * Constructs a AST representation of a function definition from the given SBML function
-   * definition.
-   */
-  Ast::FunctionDefinition *processFunctionDefinition(libsbml::FunctionDefinition *funcdef);
-
-  /**
-   * Constructs a AST representation of a species definition from the given SBML species.
-   */
-  Ast::VariableDefinition *processSpeciesDefinition(libsbml::Species *node);
-
-  /**
-   * Constructs a AST representation of a parameter definition from the given SBML parameter.
-   */
-  Ast::VariableDefinition *processParameterDefinition(libsbml::Parameter *node);
-
-  /**
-   * Constructs a AST representation of a compartment definition from the given SBML Compartment.
-   */
-  Ast::VariableDefinition *processCompartmentDefinition(libsbml::Compartment *node);
-
-  /**
-   * Returns true, if the unit definition redefines a default unit.
-   */
-  bool isDefaultUnitRedefinition(libsbml::UnitDefinition *node);
-
-  /**
-   * Updates the Module's default units:
-   */
-  void processDefaultUnitRedefinition(libsbml::UnitDefinition *node);
-
-  /**
-   * Constructs a AST representation of a UnitDefinition from the given SBML unit definition.
-   */
-  Ast::UnitDefinition *processUnitDefinition(libsbml::UnitDefinition *node);
-
-  /**
-   * Constructs a ScaledUnit from a SBML unit.
-   */
-  Ast::ScaledBaseUnit processUnit(libsbml::Unit *unit);
-
-  /**
-   * Constructs the AST representation of the given SBML reaction.
-   */
-  Ast::Reaction *processReaction(libsbml::Reaction *node);
-
-  /**
-   * Constructs a AST representation of a kinetic law for a SBML reaction using the given
-   * reaction id.
-   */
-  Ast::KineticLaw *processKineticLaw(libsbml::KineticLaw *node);
-
-  /**
-   * Dispatcher method to construct an AST representation from any SBML expression (things being
-   * evaluated to values).
-   */
-  GiNaC::ex processExpression(const libsbml::ASTNode *node);
-
-  /**
-   * Constructs a @c Ast::ConstBoolean for the given boolean constant.
-   */
-  GiNaC::ex processConstBoolean(const libsbml::ASTNode *node);
-
-  /**
-   * Constructs a @c Ast::ConstInteger for the given integer constant.
-   */
-  GiNaC::ex processConstInteger(const libsbml::ASTNode *node);
-
-  /**
-   * Constructs a @c Ast::ConstFloat for the given floating-point constant.
-   */
-  GiNaC::ex processConstFloat(const libsbml::ASTNode *node);
-
-  /**
-   * Constructs a @c Ast::ArithmeticOperator instance for the given SBML operation.
-   */
-  GiNaC::ex processArithmeticOperator(const libsbml::ASTNode *node);
-
-  /**
-   * Constructs a reference to a symbol (automatically resolved):
-   */
-  GiNaC::symbol processSymbol(const libsbml::ASTNode *node);
-
-  /**
-   * Replaces a function-call with the in-lined expression
-   */
-  GiNaC::ex processFunctionCall(const libsbml::ASTNode *node);
+  /** Returns a weak reference to the Ast::Model instance being assembled. */
+  Ast::Model &model();
 };
 
 
+
+void __process_model(libsbml::Model *model, ParserContext &ctx);
+
+Ast::VariableDefinition *__process_species_definition(libsbml::Species *node, ParserContext &ctx);
+
+Ast::FunctionDefinition *__process_function_definition(libsbml::FunctionDefinition *funcdef, ParserContext &ctx);
+
+Ast::VariableDefinition *__process_parameter_definition(libsbml::Parameter *node, ParserContext &ctx);
+
+Ast::VariableDefinition *__process_compartment_definition(libsbml::Compartment *node, ParserContext &ctx);
+
+bool __is_default_unit_redefinition(libsbml::UnitDefinition *node, ParserContext &ctx);
+
+void __process_default_unit_redefinition(libsbml::UnitDefinition *node, ParserContext &ctx);
+
+Ast::UnitDefinition *__process_unit_definition(libsbml::UnitDefinition *node, ParserContext &ctx);
+
+Ast::ScaledBaseUnit __process_unit(libsbml::Unit *unit, ParserContext &ctx);
+
+Ast::Reaction *__process_reaction(libsbml::Reaction *node, ParserContext &ctx);
+
+Ast::KineticLaw *__process_kinetic_law(libsbml::KineticLaw *node, ParserContext &ctx);
+
+GiNaC::ex __process_expression(const libsbml::ASTNode *node, ParserContext &ctx);
+GiNaC::ex __process_const_boolean(const libsbml::ASTNode *node, ParserContext &ctx);
+GiNaC::ex __process_const_integer(const libsbml::ASTNode *node, ParserContext &ctx);
+GiNaC::ex __process_const_float(const libsbml::ASTNode *node, ParserContext &ctx);
+GiNaC::ex __process_arithmetic_operator(const libsbml::ASTNode *node, ParserContext &ctx);
+GiNaC::symbol __process_symbol(const libsbml::ASTNode *node, ParserContext &ctx);
+GiNaC::ex __process_function_call(const libsbml::ASTNode *node, ParserContext &ctx);
+
+
 }
 }
 }
 
-#endif // __FLUC_COMPILER_AST_ASSEMBLER_HH__
+#endif // __FLUC_PARSER_SBML_ASSEMBLER_HH__

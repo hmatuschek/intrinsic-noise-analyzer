@@ -2,346 +2,70 @@
 #include "math.hh"
 
 
-using namespace Fluc::Ast;
+using namespace Fluc;
 using namespace Fluc::Parser::Sbml;
 
 
-Assembler::Assembler(Ast::Model &model)
-  : model(model)
+/* ********************************************************************************************* *
+ * Implementation of ParserContext...
+ * ********************************************************************************************* */
+ParserContext::ParserContext(Ast::Model &model)
+  : _model(model)
 {
   // Store pointer to module (also a scope) into scope stack:
-  this->scope_stack.push_back(&model);
+  this->_scope_stack.push_back(&_model);
 }
 
 
 void
-Assembler::processModel(libsbml::Model *model)
+ParserContext::pushScope(Ast::Scope *scope)
 {
-  // Set name of model:
-  if (model->isSetName())
-  {
-    this->model.setName(model->getName());
-  }
-
-  /*
-   * Process all function definitions in model by forwarding them to
-   * processFunctionDefinition.
-   */
-  for (size_t i=0; i<model->getNumFunctionDefinitions(); i++)
-  {
-    libsbml::FunctionDefinition *func_def = model->getFunctionDefinition(i);
-    FunctionDefinition *def = this->processFunctionDefinition(func_def);
-    this->model.addDefinition(def);
-  }
-
-  /*
-   * First of all, process unit-definitions.
-   */
-  for (size_t i=0; i<model->getNumUnitDefinitions(); i++)
-  {
-    libsbml::UnitDefinition *sbml_unit = model->getUnitDefinition(i);
-
-    if (this->isDefaultUnitRedefinition(sbml_unit))
-    {
-      this->processDefaultUnitRedefinition(sbml_unit);
-      continue;
-    }
-
-    UnitDefinition *unit = this->processUnitDefinition(sbml_unit);
-    this->model.addDefinition(unit);
-  }
-
-  /*
-   * Process all parameters of the model by forwarding them to processParameterDefinition.
-   */
-  for (size_t i=0; i<model->getNumParameters(); i++)
-  {
-    // Get parameter
-    libsbml::Parameter *sbml_param = model->getParameter(i);
-    // Turn into Ast::ParameterDefinition
-    VariableDefinition *param = this->processParameterDefinition(sbml_param);
-    // Store definition into global module:
-    this->model.addDefinition(param);
-  }
-
-  /*
-   * Process all compartments defined in the SBML model.
-   */
-  for (size_t i=0; i<model->getNumCompartments(); i++)
-  {
-    // Get SBML compartment
-    libsbml::Compartment *comp = model->getCompartment(i);
-    // Translate into AST
-    VariableDefinition *comp_def = this->processCompartmentDefinition(comp);
-    // Store in module:
-    this->model.addDefinition(comp_def);
-  }
-
-  /*
-   * Process all species defined in the model.
-   */
-  for (size_t i=0; i<model->getNumSpecies(); i++)
-  {
-    // Get species:
-    libsbml::Species *sp = model->getSpecies(i);
-    // convert
-    VariableDefinition *sp_def = this->processSpeciesDefinition(sp);
-    // store
-    this->model.addDefinition(sp_def);
-  }
-
-  /*
-   * Process all initial value assignments
-   */
-  for (size_t i=0; i<model->getNumInitialAssignments(); i++)
-  {
-    libsbml::InitialAssignment *ass = model->getInitialAssignment(i);
-    VariableDefinition *var_def = this->model.getVariable(ass->getId());
-
-    // Construct initial value expression:
-    GiNaC::ex value = this->processExpression(ass->getMath());
-
-    // Replace 'old' initial value expression:
-    var_def->setValue(value);
-  }
-
-  /*
-   * Process rules for variables:
-   */
-  for (size_t i=0; i<model->getNumRules(); i++)
-  {
-    // Get SBML rule:
-    libsbml::Rule *sbml_rule = model->getRule(i);
-    // Construct expression of rule:
-    GiNaC::ex rule_expr = this->processExpression(sbml_rule->getMath());
-
-    // Dispatch by type:
-    if (sbml_rule->isAssignment())
-    {
-      // Find variable the rule is associated with:
-      if (! this->model.hasDefinition(sbml_rule->getVariable()))
-      {
-        SymbolError err;
-        err << "Variable " << sbml_rule->getVariable()
-            << " in assignment rule not defined in module.";
-        throw err;
-      }
-
-      // Check if definition is a variable definition.
-      Ast::VariableDefinition *def = this->model.getVariable(sbml_rule->getVariable());
-
-      // Construct rule and assign it to variable:
-      def->setRule(new Ast::AssignmentRule(rule_expr));
-
-      /*std::cerr << "Construct assignment rule for: " << def->getSymbol()
-                << " with rule " << rule_expr << std::endl;*/
-    }
-    else if (sbml_rule->isRate())
-    {
-      // Find variable the rule is associated with:
-      if (! this->model.hasDefinition(sbml_rule->getVariable()))
-      {
-        SymbolError err;
-        err << "Variable " << sbml_rule->getVariable()
-            << " in rate rule not defined in module.";
-        throw err;
-      }
-
-      // Check if definition is a variable definition.
-      Ast::VariableDefinition *def = this->model.getVariable(sbml_rule->getVariable());
-
-      // Construct rule and assign it to variable:
-      def->setRule(new Ast::RateRule(rule_expr));
-    }
-    else if(sbml_rule->isAlgebraic())
-    {
-      this->model.addConstraint(new Ast::AlgebraicConstraint(rule_expr));
-    }
-    else
-    {
-      InternalError err;
-      err << "Unknown variable-rule type.";
-      throw err;
-    }
-  }
-
-  /*
-   * Process all reactions, especially all the kinetic laws of them. The identifier of the kinetic
-   * law is taken as the identifier of the reaction.
-   */
-  for (size_t i=0; i<model->getNumReactions(); i++)
-  {
-    // Get SBML Reaction object from model
-    libsbml::Reaction *reac = model->getReaction(i);
-    Reaction *ast_reac = this->processReaction(reac);
-    // store in module:
-    this->model.addDefinition(ast_reac);
-  }
-
-  /*
-   * Check if there are any Events defined, they are not supported by L. Nassa!
-   */
-  if (0 != model->getNumEvents())
-  {
-    SBMLFeatureNotSupported err;
-    err << "Can not handle event definitions. Featrue not supported.";
-    throw err;
-  }
-}
-
-
-VariableDefinition *
-Assembler::processSpeciesDefinition(libsbml::Species *node)
-{
-
-
-  /*
-  * First, get compartment of species.
-  */
-  // Get compartment for species:
-  if (! this->model.hasCompartment(node->getCompartment()))
-  {
-      // Oops:
-      SymbolError err;
-      err << "Can not assemble species definition " << node->getId()
-          << ", compartment "<< node->getCompartment() << " not defined.";
-      throw err;
-  }
-  Compartment *compartment = this->model.getCompartment(node->getCompartment());
-
-  /*
-  * Second, process unit and initial value of species.
-  */
-  Unit unit(this->model.getDefaultSubstanceUnit());
-
-  // Get unit for species:
-  if (node->isSetUnits())
-  {
-    unit = this->model.getUnit(node->getUnits());
-  }
-
-//  GiNaC::ex init_value;
-
-//  if (node->isSetInitialAmount())
-//  {
-//      init_value = GiNaC::numeric(node->getInitialAmount());
-//  }
-//  else if (node->isSetInitialConcentration())
-//  {
-
-//      init_value = GiNaC::numeric(node->getInitialConcentration());
-
-//      if(!node->getHasOnlySubstanceUnits())
-//      {
-//          // make concentration unit
-//          unit = unit / compartment->getUnit();
-//      }
-//      else
-//      {
-//         // if initial value is concentration but species has substance units
-//         init_value *= compartment->getSymbol();
-//      }
-
-//  }
-//  else
-//  {
-//      throw InternalError("Initial value of species must be set by either amount or concentration.");
-//  }
-
-
-  // If the flag "hasOnlySubstanceUnits == false" (default)
-  // => Unit(Species) = SubstanceUnit/Volume
-  if (! node->getHasOnlySubstanceUnits())
-  {
-    unit = unit / compartment->getUnit();
-  }
-
-  GiNaC::ex init_value;
-  /*
-   * Setup initial value.
-   */
-  // If unit of species is substance (mole, gram, ...)
-  if (node->getHasOnlySubstanceUnits())
-  {
-    if (node->isSetInitialAmount())
-    {
-      init_value = GiNaC::numeric(node->getInitialAmount());
-    }
-    else if (node->isSetInitialConcentration())
-    {
-      // If a concentration is given but the units of the species is amount:
-      init_value = GiNaC::numeric(node->getInitialConcentration())*compartment->getSymbol();
-    }
-  }
-  // If unit of species is concentration
-  else
-  {
-    if (node->isSetInitialAmount())
-    {
-      // If an amount is given but the unit if the species is concentration:
-      init_value = GiNaC::numeric(node->getInitialAmount())/compartment->getSymbol();
-    }
-    else if (node->isSetInitialConcentration())
-    {
-      init_value = GiNaC::numeric(node->getInitialConcentration());
-    }
-  }
-
-  // Assemble species definition
-  return new Species(node->getId(), init_value, unit, node->getHasOnlySubstanceUnits(), compartment,
-                     node->getName(), node->getConstant());
+  this->_scope_stack.push_back(scope);
 }
 
 
 void
-Assembler::pushScope(Scope *scope)
+ParserContext::popScope()
 {
-  this->scope_stack.push_back(scope);
+  this->_scope_stack.pop_back();
 }
 
 
-void
-Assembler::popScope()
+Ast::Scope *
+ParserContext::currentScope()
 {
-  this->scope_stack.pop_back();
+  return this->_scope_stack.back();
 }
 
 
-Scope *
-Assembler::currentScope()
+Ast::Species *
+ParserContext::resolveSpecies(const std::string &id)
 {
-  return this->scope_stack.back();
-}
+  Ast::VariableDefinition *var = this->resolveVariable(id);
 
-
-Species *
-Assembler::resolveSpecies(const std::string &id)
-{
-  VariableDefinition *var = this->resolveVariable(id);
-
-  if (! Node::isSpecies(var))
+  if (! Ast::Node::isSpecies(var))
   {
     SymbolError err;
     err << "There is no species named " << id << " defined.";
     throw err;
   }
 
-  return static_cast<Species *>(var);
+  return static_cast<Ast::Species *>(var);
 }
 
 
-VariableDefinition *
-Assembler::resolveVariable(const std::string &id)
+Ast::VariableDefinition *
+ParserContext::resolveVariable(const std::string &id)
 {
   // Start reverse search variable in scope stack:
-  return this->resolveVariable(id, this->scope_stack.rbegin());
+  return this->resolveVariable(id, this->_scope_stack.rbegin());
 }
 
 
-VariableDefinition *
-Assembler::resolveVariable(const std::string &id, std::list<Ast::Scope *>::reverse_iterator scope)
+Ast::VariableDefinition *
+ParserContext::resolveVariable(const std::string &id, std::list<Ast::Scope *>::reverse_iterator scope)
 {
-  if (this->scope_stack.rend() == scope)
+  if (this->_scope_stack.rend() == scope)
   {
     SymbolError err;
     err << "No symbol named " << id << " found!";
@@ -371,56 +95,265 @@ Assembler::resolveVariable(const std::string &id, std::list<Ast::Scope *>::rever
 }
 
 
-FunctionDefinition *
-Assembler::processFunctionDefinition(libsbml::FunctionDefinition *funcdef)
+Ast::Model &
+ParserContext::model() {
+  return _model;
+}
+
+
+
+/* ******************************************************************************************** *
+ * Implementation of helper functions to assemble the Ast::Model from a SBML model
+ * ******************************************************************************************** */
+void
+Parser::Sbml::__process_model(libsbml::Model *model, ParserContext &ctx)
+{
+  // Set name of model:
+  if (model->isSetName()) {
+    ctx.model().setName(model->getName());
+  }
+
+  /* Process all function definitions in model by forwarding them to
+   * __process_function_definition. */
+  for (size_t i=0; i<model->getNumFunctionDefinitions(); i++)
+  {
+    libsbml::FunctionDefinition *func_def = model->getFunctionDefinition(i);
+    Ast::FunctionDefinition *def = __process_function_definition(func_def, ctx);
+    ctx.model().addDefinition(def);
+  }
+
+  /* First of all, process unit-definitions. */
+  for (size_t i=0; i<model->getNumUnitDefinitions(); i++)
+  {
+    libsbml::UnitDefinition *sbml_unit = model->getUnitDefinition(i);
+
+    if (__is_default_unit_redefinition(sbml_unit, ctx)) {
+      __process_default_unit_redefinition(sbml_unit, ctx);
+      continue;
+    }
+
+    Ast::UnitDefinition *unit = __process_unit_definition(sbml_unit, ctx);
+    ctx.model().addDefinition(unit);
+  }
+
+  /* Process all parameters of the model by forwarding them to processParameterDefinition. */
+  for (size_t i=0; i<model->getNumParameters(); i++)
+  {
+    // Get parameter
+    libsbml::Parameter *sbml_param = model->getParameter(i);
+    // Turn into Ast::ParameterDefinition
+    Ast::VariableDefinition *param = __process_parameter_definition(sbml_param, ctx);
+    // Store definition into global module:
+    ctx.model().addDefinition(param);
+  }
+
+  /* Process all compartments defined in the SBML model. */
+  for (size_t i=0; i<model->getNumCompartments(); i++)
+  {
+    // Get SBML compartment
+    libsbml::Compartment *comp = model->getCompartment(i);
+    // Translate into AST
+    Ast::VariableDefinition *comp_def = __process_compartment_definition(comp, ctx);
+    // Store in module:
+    ctx.model().addDefinition(comp_def);
+  }
+
+  /* Process all species defined in the model. */
+  for (size_t i=0; i<model->getNumSpecies(); i++)
+  {
+    // Get species:
+    libsbml::Species *sp = model->getSpecies(i);
+    // convert
+    Ast::VariableDefinition *sp_def = __process_species_definition(sp, ctx);
+    // store
+    ctx.model().addDefinition(sp_def);
+  }
+
+  /* Process all initial value assignments */
+  for (size_t i=0; i<model->getNumInitialAssignments(); i++)
+  {
+    libsbml::InitialAssignment *ass = model->getInitialAssignment(i);
+    Ast::VariableDefinition *var_def = ctx.model().getVariable(ass->getId());
+    // Construct initial value expression:
+    GiNaC::ex value = __process_expression(ass->getMath(), ctx);
+    // Replace 'old' initial value expression:
+    var_def->setValue(value);
+  }
+
+  /* Process rules for variables: */
+  for (size_t i=0; i<model->getNumRules(); i++)
+  {
+    // Get SBML rule:
+    libsbml::Rule *sbml_rule = model->getRule(i);
+    // Construct expression of rule:
+    GiNaC::ex rule_expr = __process_expression(sbml_rule->getMath(), ctx);
+
+    // Dispatch by type:
+    if (sbml_rule->isAssignment())
+    {
+      // Find variable the rule is associated with:
+      if (! ctx.model().hasDefinition(sbml_rule->getVariable())) {
+        SymbolError err;
+        err << "Variable " << sbml_rule->getVariable()
+            << " in assignment rule not defined in module.";
+        throw err;
+      }
+
+      // Check if definition is a variable definition.
+      Ast::VariableDefinition *def = ctx.model().getVariable(sbml_rule->getVariable());
+      // Construct rule and assign it to variable:
+      def->setRule(new Ast::AssignmentRule(rule_expr));
+    }
+    else if (sbml_rule->isRate())
+    {
+      // Find variable the rule is associated with:
+      if (! ctx.model().hasDefinition(sbml_rule->getVariable()))
+      {
+        SymbolError err;
+        err << "Variable " << sbml_rule->getVariable()
+            << " in rate rule not defined in module.";
+        throw err;
+      }
+
+      // Check if definition is a variable definition.
+      Ast::VariableDefinition *def = ctx.model().getVariable(sbml_rule->getVariable());
+      // Construct rule and assign it to variable:
+      def->setRule(new Ast::RateRule(rule_expr));
+    }
+    else if(sbml_rule->isAlgebraic())
+    {
+      ctx.model().addConstraint(new Ast::AlgebraicConstraint(rule_expr));
+    }
+    else
+    {
+      InternalError err;
+      err << "Unknown variable-rule type.";
+      throw err;
+    }
+  }
+
+  /* Process all reactions, especially all the kinetic laws of them. The identifier of the kinetic
+   * law is taken as the identifier of the reaction.
+   */
+  for (size_t i=0; i<model->getNumReactions(); i++)
+  {
+    // Get SBML Reaction object from model
+    libsbml::Reaction *reac = model->getReaction(i);
+    Ast::Reaction *ast_reac = __process_reaction(reac, ctx);
+    // store in module:
+    ctx.model().addDefinition(ast_reac);
+  }
+
+  /* Check if there are any Events defined, they are not supported by iNA! */
+  if (0 != model->getNumEvents())
+  {
+    SBMLFeatureNotSupported err;
+    err << "Can not handle event definitions. Feature not supported.";
+    throw err;
+  }
+}
+
+
+Ast::VariableDefinition *
+Parser::Sbml::__process_species_definition(libsbml::Species *node, ParserContext &ctx)
+{
+  // Get compartment for species:
+  if (! ctx.model().hasCompartment(node->getCompartment())) {
+      SymbolError err;
+      err << "Can not assemble species definition " << node->getId()
+          << ", compartment "<< node->getCompartment() << " not defined.";
+      throw err;
+  }
+  Ast::Compartment *compartment = ctx.model().getCompartment(node->getCompartment());
+
+  /* Second, process unit and initial value of species. */
+  Ast::Unit unit(ctx.model().getDefaultSubstanceUnit());
+
+  // Get unit for species:
+  if (node->isSetUnits()) {
+    unit = ctx.model().getUnit(node->getUnits());
+  }
+
+  // If the flag "hasOnlySubstanceUnits == false" (default)
+  // => Unit(Species) = SubstanceUnit/Volume
+  if (! node->getHasOnlySubstanceUnits()) {
+    unit = unit / compartment->getUnit();
+  }
+
+  /* Setup initial value. */
+  GiNaC::ex init_value;
+  // If unit of species is substance (mole, gram, ...)
+  if (node->getHasOnlySubstanceUnits())
+  {
+    if (node->isSetInitialAmount()) {
+      init_value = GiNaC::numeric(node->getInitialAmount());
+    } else if (node->isSetInitialConcentration()) {
+      // If a concentration is given but the units of the species is amount:
+      init_value = GiNaC::numeric(node->getInitialConcentration())*compartment->getSymbol();
+    }
+  }
+  // If unit of species is concentration
+  else
+  {
+    if (node->isSetInitialAmount()) {
+      // If an amount is given but the unit if the species is concentration:
+      init_value = GiNaC::numeric(node->getInitialAmount())/compartment->getSymbol();
+    } else if (node->isSetInitialConcentration()) {
+      init_value = GiNaC::numeric(node->getInitialConcentration());
+    }
+  }
+
+  // Assemble species definition
+  return new Ast::Species(node->getId(), init_value, unit, node->getHasOnlySubstanceUnits(),
+                          compartment, node->getName(), node->getConstant());
+}
+
+
+Ast::FunctionDefinition *
+Parser::Sbml::__process_function_definition(libsbml::FunctionDefinition *funcdef, ParserContext &ctx)
 {
   // Extract identifier:
   std::string id = funcdef->getId();
 
   // Extract and assemble function-arguments
-  std::vector<VariableDefinition *> args(funcdef->getNumArguments());
+  std::vector<Ast::VariableDefinition *> args(funcdef->getNumArguments());
   for (size_t i=0; i<funcdef->getNumArguments(); i++) {
     // Construct a new VariableDefinition for the argument:
-    args[i]= new FunctionArgument(funcdef->getArgument(i)->getName());
+    args[i]= new Ast::FunctionArgument(funcdef->getArgument(i)->getName());
   }
 
   // Assemble and return function definition
   Ast::FunctionDefinition *def = new Ast::FunctionDefinition(id, args, GiNaC::ex());
 
   // Push scope of function, function body is processed in this scope:
-  this->pushScope(def);
+  ctx.pushScope(def);
 
   // Extract and assemble function body
-  GiNaC::ex body = this->processExpression(funcdef->getBody());
+  GiNaC::ex body = __process_expression(funcdef->getBody(), ctx);
 
   // Done. pop scope:
-  this->popScope();
+  ctx.popScope();
 
   // Set body of function:
   def->setBody(body);
 
   // Done.
   return def;
-
 }
 
 
-
-VariableDefinition *
-Assembler::processParameterDefinition(libsbml::Parameter *node)
+Ast::VariableDefinition *
+Parser::Sbml::__process_parameter_definition(libsbml::Parameter *node, ParserContext &ctx)
 {
   GiNaC::ex init_value;
-  if (node->isSetValue())
-  {
+  if (node->isSetValue()) {
     init_value = GiNaC::numeric(node->getValue());
   }
 
-  Unit unit(Unit::dimensionless());
-
   // Get units for parameter (it there is one):
-  if (node->isSetUnits())
-  {
-    unit = this->model.getUnit(node->getUnits());
+  Ast::Unit unit(Ast::Unit::dimensionless());
+  if (node->isSetUnits()) {
+    unit = ctx.model().getUnit(node->getUnits());
   }
 
   // Construct and return parameter definition (constant variable)
@@ -435,18 +368,16 @@ Assembler::processParameterDefinition(libsbml::Parameter *node)
 }
 
 
-VariableDefinition *
-Assembler::processCompartmentDefinition(libsbml::Compartment *node)
+Ast::VariableDefinition *
+Parser::Sbml::__process_compartment_definition(libsbml::Compartment *node, ParserContext &ctx)
 {
-  if (3 != node->getSpatialDimensions())
-  {
+  if (3 != node->getSpatialDimensions()) {
     SBMLFeatureNotSupported err;
     err << "Spacial dimension of compartment must be 3!";
     throw err;
   }
 
-  if (node->isSetOutside())
-  {
+  if (node->isSetOutside()) {
     SBMLFeatureNotSupported err;
     err << "No nested compartments are supported.";
     throw err;
@@ -454,23 +385,20 @@ Assembler::processCompartmentDefinition(libsbml::Compartment *node)
 
   // Check if there is an size value:
   GiNaC::ex init_value;
-  if (node->isSetSize())
-  {
+  if (node->isSetSize()) {
     init_value = GiNaC::numeric(node->getSize());
   }
 
-  Unit unit(this->model.getDefaultVolumeUnit());
+  Ast::Unit unit(ctx.model().getDefaultVolumeUnit());
 
   // Check if there is a Unit assigned to the compartment:
-  if (node->isSetUnits())
-  {
-    unit = this->model.getUnit(node->getUnits());
+  if (node->isSetUnits()) {
+    unit = ctx.model().getUnit(node->getUnits());
   }
 
   // Get Spatial dimension of compartment
   Ast::Compartment::SpatialDimension sp_dim = Ast::Compartment::VOLUME;
-  if (node->isSetSpatialDimensions())
-  {
+  if (node->isSetSpatialDimensions()) {
     switch(node->getSpatialDimensions())
     {
     case 0: sp_dim = Ast::Compartment::POINT;  break;
@@ -501,11 +429,10 @@ Assembler::processCompartmentDefinition(libsbml::Compartment *node)
 
 
 bool
-Assembler::isDefaultUnitRedefinition(libsbml::UnitDefinition *node)
+Parser::Sbml::__is_default_unit_redefinition(libsbml::UnitDefinition *node, ParserContext &ctx)
 {
   if ("substance" == node->getId() || "volume" == node->getId() || "area" == node->getId() ||
-      "length" == node->getId() || "time" == node->getId())
-  {
+      "length" == node->getId() || "time" == node->getId()) {
     return true;
   }
 
@@ -514,177 +441,150 @@ Assembler::isDefaultUnitRedefinition(libsbml::UnitDefinition *node)
 
 
 void
-Assembler::processDefaultUnitRedefinition(libsbml::UnitDefinition *node)
+Parser::Sbml::__process_default_unit_redefinition(libsbml::UnitDefinition *node, ParserContext &ctx)
 {
   // Check number of units:
-  if (1 != node->getNumUnits())
-  {
+  if (1 != node->getNumUnits()) {
     SemanticError err;
     err << "Redefinition of default unit " << node->getId() << " must contain exactly one "
         << " unit element! Found: " << node->getNumUnits();
     throw err;
   }
 
-  if ("substance" == node->getId())
-  {
-    ScaledBaseUnit unit = this->processUnit(node->getUnit(0));
-
-    if (! unit.isSubstanceUnit())
-    {
+  if ("substance" == node->getId()) {
+    Ast::ScaledBaseUnit unit = __process_unit(node->getUnit(0), ctx);
+    if (! unit.isSubstanceUnit()) {
       SemanticError err;
       err << "Redefinition of default unit " << node->getId() << " requires a substance unit.";
       throw err;
     }
-
-    this->model.setDefaultSubstanceUnit(unit);
-  }
-  else if ("volume" == node->getId())
-  {
-    ScaledBaseUnit unit = this->processUnit(node->getUnit(0));
-
-    if (! unit.isVolumeUnit())
-    {
+    ctx.model().setDefaultSubstanceUnit(unit);
+  } else if ("volume" == node->getId()) {
+    Ast::ScaledBaseUnit unit = __process_unit(node->getUnit(0), ctx);
+    if (! unit.isVolumeUnit()) {
       SemanticError err;
       err << "Redefinition of default unit " << node->getId() << " requires a volume unit.";
       throw err;
     }
-
-    this->model.setDefaultVolumeUnit(unit);
-  }
-  else if ("area" == node->getId())
-  {
-    ScaledBaseUnit unit = this->processUnit(node->getUnit(0));
-
-    if (! unit.isAreaUnit())
-    {
+    ctx.model().setDefaultVolumeUnit(unit);
+  } else if ("area" == node->getId()) {
+    Ast::ScaledBaseUnit unit = __process_unit(node->getUnit(0), ctx);
+    if (! unit.isAreaUnit()) {
       SemanticError err;
       err << "Redefinition of default unit " << node->getId() << " requires a area unit.";
       throw err;
     }
-
-    this->model.setDefaultAreaUnit(unit);
-  }
-  else if ("length" == node->getId())
-  {
-    ScaledBaseUnit unit = this->processUnit(node->getUnit(0));
-
-    if (! unit.isLengthUnit())
-    {
+    ctx.model().setDefaultAreaUnit(unit);
+  } else if ("length" == node->getId()) {
+    Ast::ScaledBaseUnit unit = __process_unit(node->getUnit(0), ctx);
+    if (! unit.isLengthUnit()) {
       SemanticError err;
       err << "Redefinition of default unit " << node->getId() << " requires a length unit.";
       throw err;
     }
-
-    this->model.setDefaultLengthUnit(unit);
-  }
-  else if ("time" == node->getId())
-  {
-    ScaledBaseUnit unit = this->processUnit(node->getUnit(0));
-
-    if (! unit.isTimeUnit())
-    {
+    ctx.model().setDefaultLengthUnit(unit);
+  } else if ("time" == node->getId()) {
+    Ast::ScaledBaseUnit unit = __process_unit(node->getUnit(0), ctx);
+    if (! unit.isTimeUnit()) {
       SemanticError err;
       err << "Redefinition of default unit " << node->getId() << " required time unit.";
       throw err;
     }
-
-    this->model.setDefaultTimeUnit(unit);
-
+    ctx.model().setDefaultTimeUnit(unit);
   }
 }
 
 
-UnitDefinition *
-Assembler::processUnitDefinition(libsbml::UnitDefinition *node)
+Ast::UnitDefinition *
+Parser::Sbml::__process_unit_definition(libsbml::UnitDefinition *node, ParserContext &ctx)
 {
   // Assemble ScaledUnits vector:
-  std::list<ScaledBaseUnit> units;
-  for (size_t i=0; i<node->getNumUnits(); i++)
-  {
-    units.push_back(this->processUnit(node->getUnit(0)));
+  std::list<Ast::ScaledBaseUnit> units;
+  for (size_t i=0; i<node->getNumUnits(); i++) {
+    units.push_back(__process_unit(node->getUnit(0), ctx));
   }
 
   // Assemble UnitDefinition:
-  return new UnitDefinition(node->getId(), units);
+  return new Ast::UnitDefinition(node->getId(), units);
 }
 
 
-ScaledBaseUnit
-Assembler::processUnit(libsbml::Unit *unit)
+Ast::ScaledBaseUnit
+Parser::Sbml::__process_unit(libsbml::Unit *unit, ParserContext &ctx)
 {
   // Dispatch by base unit:
   switch (unit->getKind())
   {
   case libsbml::UNIT_KIND_AMPERE:
-    return ScaledBaseUnit(ScaledBaseUnit::AMPERE, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::AMPERE, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case libsbml::UNIT_KIND_AVOGADRO:
-    return ScaledBaseUnit(ScaledBaseUnit::AVOGADRO, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::AVOGADRO, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case libsbml::UNIT_KIND_BECQUEREL:
-    return ScaledBaseUnit(ScaledBaseUnit::BECQUEREL, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::BECQUEREL, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case libsbml::UNIT_KIND_CANDELA:
-    return ScaledBaseUnit(ScaledBaseUnit::CANDELA, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::CANDELA, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case libsbml::UNIT_KIND_CELSIUS:
-    return ScaledBaseUnit(ScaledBaseUnit::CELSIUS, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::CELSIUS, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case libsbml::UNIT_KIND_COULOMB:
-    return ScaledBaseUnit(ScaledBaseUnit::COULOMB, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::COULOMB, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case libsbml::UNIT_KIND_DIMENSIONLESS:
-    return ScaledBaseUnit(ScaledBaseUnit::DIMENSIONLESS, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::DIMENSIONLESS, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case libsbml::UNIT_KIND_FARAD:
-    return ScaledBaseUnit(ScaledBaseUnit::FARAD, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::FARAD, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case libsbml::UNIT_KIND_GRAM:
-    return ScaledBaseUnit(ScaledBaseUnit::GRAM, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::GRAM, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case libsbml::UNIT_KIND_GRAY:
-    return ScaledBaseUnit(ScaledBaseUnit::GRAY, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::GRAY, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case libsbml::UNIT_KIND_HENRY:
-    return ScaledBaseUnit(ScaledBaseUnit::HENRY, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::HENRY, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case libsbml::UNIT_KIND_HERTZ:
-    return ScaledBaseUnit(ScaledBaseUnit::HERTZ, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::HERTZ, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case libsbml::UNIT_KIND_ITEM:
-    return ScaledBaseUnit(ScaledBaseUnit::ITEM, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::ITEM, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case libsbml::UNIT_KIND_JOULE:
-    return ScaledBaseUnit(ScaledBaseUnit::JOULE, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::JOULE, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case libsbml::UNIT_KIND_KATAL:
-    return ScaledBaseUnit(ScaledBaseUnit::KATAL, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::KATAL, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case libsbml::UNIT_KIND_KELVIN:
-    return ScaledBaseUnit(ScaledBaseUnit::KELVIN, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::KELVIN, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case libsbml::UNIT_KIND_KILOGRAM:
-    return ScaledBaseUnit(ScaledBaseUnit::KILOGRAM, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::KILOGRAM, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case libsbml::UNIT_KIND_LITER:
   case libsbml::UNIT_KIND_LITRE:
-    return ScaledBaseUnit(ScaledBaseUnit::LITRE, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::LITRE, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case libsbml::UNIT_KIND_LUMEN:
-    return ScaledBaseUnit(ScaledBaseUnit::LUMEN, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::LUMEN, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case libsbml::UNIT_KIND_LUX:
-    return ScaledBaseUnit(ScaledBaseUnit::LUX, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::LUX, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case libsbml::UNIT_KIND_METER:
   case libsbml::UNIT_KIND_METRE:
-    return ScaledBaseUnit(ScaledBaseUnit::METRE, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::METRE, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case libsbml::UNIT_KIND_MOLE:
-    return ScaledBaseUnit(ScaledBaseUnit::MOLE, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::MOLE, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case libsbml::UNIT_KIND_NEWTON:
-    return ScaledBaseUnit(ScaledBaseUnit::NEWTON, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::NEWTON, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case libsbml::UNIT_KIND_OHM:
-    return ScaledBaseUnit(ScaledBaseUnit::OHM, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::OHM, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case libsbml::UNIT_KIND_PASCAL:
-    return ScaledBaseUnit(ScaledBaseUnit::PASCAL, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::PASCAL, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case libsbml::UNIT_KIND_RADIAN:
-    return ScaledBaseUnit(ScaledBaseUnit::RADIAN, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::RADIAN, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case libsbml::UNIT_KIND_SECOND:
-    return ScaledBaseUnit(ScaledBaseUnit::SECOND, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::SECOND, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case libsbml::UNIT_KIND_SIEMENS:
-    return ScaledBaseUnit(ScaledBaseUnit::SIEMENS, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::SIEMENS, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case libsbml::UNIT_KIND_SIEVERT:
-    return ScaledBaseUnit(ScaledBaseUnit::SIEVERT, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::SIEVERT, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case libsbml::UNIT_KIND_STERADIAN:
-    return ScaledBaseUnit(ScaledBaseUnit::STERADIAN, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::STERADIAN, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case libsbml::UNIT_KIND_TESLA:
-    return ScaledBaseUnit(ScaledBaseUnit::TESLA, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::TESLA, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case libsbml::UNIT_KIND_VOLT:
-    return ScaledBaseUnit(ScaledBaseUnit::VOLT, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::VOLT, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case libsbml::UNIT_KIND_WATT:
-    return ScaledBaseUnit(ScaledBaseUnit::WATT, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::WATT, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case libsbml::UNIT_KIND_WEBER:
-    return ScaledBaseUnit(ScaledBaseUnit::WEBER, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::WEBER, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case libsbml::UNIT_KIND_INVALID:
     break;
   }
@@ -695,19 +595,17 @@ Assembler::processUnit(libsbml::Unit *unit)
 }
 
 
-
-Reaction *
-Assembler::processReaction(libsbml::Reaction *node)
+Ast::Reaction *
+Parser::Sbml::__process_reaction(libsbml::Reaction *node, ParserContext &ctx)
 {
-  if (! node->isSetKineticLaw())
-  {
+  if (! node->isSetKineticLaw()) {
     SemanticError err;
     err << "In Reaction " << node->getId() << ": A reaction needs a KineticLaw!";
     throw err;
   }
 
   // Assemble kinetic law and reaction:
-  Ast::KineticLaw *law = this->processKineticLaw(node->getKineticLaw());
+  Ast::KineticLaw *law = __process_kinetic_law(node->getKineticLaw(), ctx);
   Ast::Reaction *reaction = new Ast::Reaction(node->getId(), law, node->getReversible());
 
   // Set name if defined:
@@ -722,16 +620,13 @@ Assembler::processReaction(libsbml::Reaction *node)
     GiNaC::ex expr;
 
     // If the reactant has a complex stochiometry:
-    if (r->isSetStoichiometryMath())
-    {
-      expr = this->processExpression(r->getStoichiometryMath()->getMath());
-    }
-    else
-    {
+    if (r->isSetStoichiometryMath()) {
+      expr = __process_expression(r->getStoichiometryMath()->getMath(), ctx);
+    } else {
       expr = GiNaC::numeric(r->getStoichiometry());
     }
 
-    reaction->addReactantStoichiometry(this->resolveSpecies(r->getSpecies()), expr);
+    reaction->addReactantStoichiometry(ctx.resolveSpecies(r->getSpecies()), expr);
   }
 
 
@@ -742,47 +637,43 @@ Assembler::processReaction(libsbml::Reaction *node)
     GiNaC::ex expr;
 
     // If the product has a complex stochiometry:
-    if (r->isSetStoichiometryMath())
-    {
-      expr = this->processExpression(r->getStoichiometryMath()->getMath());
-    }
-    else
-    {
+    if (r->isSetStoichiometryMath()) {
+      expr = __process_expression(r->getStoichiometryMath()->getMath(), ctx);
+    } else {
       expr = GiNaC::numeric(r->getStoichiometry());
     }
 
-    reaction->addProductStoichiometry(this->resolveSpecies(r->getSpecies()), expr);
+    reaction->addProductStoichiometry(ctx.resolveSpecies(r->getSpecies()), expr);
   }
 
   for (size_t i=0; i<node->getNumModifiers(); i++) {
-    reaction->addModifier(this->resolveSpecies(node->getModifier(i)->getSpecies()));
+    reaction->addModifier(ctx.resolveSpecies(node->getModifier(i)->getSpecies()));
   }
 
   return reaction;
 }
 
 
-KineticLaw *
-Assembler::processKineticLaw(libsbml::KineticLaw *node)
+Ast::KineticLaw *
+Parser::Sbml::__process_kinetic_law(libsbml::KineticLaw *node, ParserContext &ctx)
 {
   // Construct kinetic law from empty expression:
   Ast::KineticLaw *law = new Ast::KineticLaw(GiNaC::ex());
 
   // A KineticLaw may have its own parameters (local scope)
-  this->pushScope(law);
+  ctx.pushScope(law);
 
   // Now populate Scope of KineticLaw with its parameters:
-  for (size_t i=0; i<node->getNumParameters(); i++)
-  {
+  for (size_t i=0; i<node->getNumParameters(); i++) {
     // Add new (local) parameter to KineticLaw
-    law->addDefinition(this->processParameterDefinition(node->getParameter(i)));
+    law->addDefinition(__process_parameter_definition(node->getParameter(i), ctx));
   }
 
   // Construct kinetic law expression
-  GiNaC::ex expr = this->processExpression(node->getMath());
+  GiNaC::ex expr = __process_expression(node->getMath(), ctx);
 
   // Done
-  this->popScope();
+  ctx.popScope();
 
   // Set correct rate law
   law->setRateLaw(expr);
@@ -792,7 +683,7 @@ Assembler::processKineticLaw(libsbml::KineticLaw *node)
 
 
 GiNaC::ex
-Assembler::processExpression(const libsbml::ASTNode *node)
+Parser::Sbml::__process_expression(const libsbml::ASTNode *node, ParserContext &ctx)
 {
   /*
    * Big dispatcher for all expression types:
@@ -808,17 +699,17 @@ Assembler::processExpression(const libsbml::ASTNode *node)
   case libsbml::AST_CONSTANT_TRUE:
   case libsbml::AST_CONSTANT_FALSE:
     // Handle boolean constants:
-    return this->processConstBoolean(node);
+    return __process_const_boolean(node, ctx);
 
   case libsbml::AST_INTEGER:
     // Handle integer constants
-    return this->processConstInteger(node);
+    return __process_const_integer(node, ctx);
 
   case libsbml::AST_REAL:
   case libsbml::AST_REAL_E:
   case libsbml::AST_RATIONAL:
     // Handle floating-point constants
-    return this->processConstFloat(node);
+    return __process_const_float(node, ctx);
 
   case libsbml::AST_PLUS:
   case libsbml::AST_MINUS:
@@ -826,39 +717,39 @@ Assembler::processExpression(const libsbml::ASTNode *node)
   case libsbml::AST_DIVIDE:
   case libsbml::AST_POWER:
     // Handle arithmetic operators:
-    return this->processArithmeticOperator(node);
+    return __process_arithmetic_operator(node, ctx);
 
   case libsbml::AST_NAME:
     // Handle variable symbols:
-    return this->processSymbol(node);
+    return __process_symbol(node, ctx);
 
   case libsbml::AST_NAME_TIME:
     // Handle "time" symbol
-    return this->model.getTime();
+    return ctx.model().getTime();
 
   case libsbml::AST_FUNCTION:
     // Handle user-defined functions
-    return this->processFunctionCall(node);
+    return __process_function_call(node, ctx);
 
   case libsbml::AST_FUNCTION_EXP:
     // Handle exponential, make sure, GiNaC handles the constant properly:
-    return GiNaC::exp(this->processExpression(node->getChild(0)));
+    return GiNaC::exp(__process_expression(node->getChild(0), ctx));
 
   case libsbml::AST_FUNCTION_POWER:
     // Handle general power as function:
-    return GiNaC::power(this->processExpression(node->getChild(0)),
-                        this->processExpression(node->getChild(1)));
+    return GiNaC::power(__process_expression(node->getChild(0), ctx),
+                        __process_expression(node->getChild(1), ctx));
 
   case libsbml::AST_FUNCTION_ROOT:
     // Handle general root:
-    return GiNaC::power(this->processExpression(node->getChild(1)),
-                        1./this->processExpression(node->getChild(0)));
+    return GiNaC::power(__process_expression(node->getChild(1), ctx),
+                        1./__process_expression(node->getChild(0), ctx));
 
   case libsbml::AST_FUNCTION_LN:
-    return GiNaC::log(this->processExpression(node->getChild(0)));
+    return GiNaC::log(__process_expression(node->getChild(0), ctx));
 
   case libsbml::AST_FUNCTION_ABS:
-    return GiNaC::abs(this->processExpression(node->getChild(0)));
+    return GiNaC::abs(__process_expression(node->getChild(0), ctx));
 
   case libsbml::AST_FUNCTION_ARCCOS:
   case libsbml::AST_FUNCTION_ARCCOSH:
@@ -945,7 +836,7 @@ Assembler::processExpression(const libsbml::ASTNode *node)
 
 
 GiNaC::ex
-Assembler::processConstBoolean(const libsbml::ASTNode *node)
+Parser::Sbml::__process_const_boolean(const libsbml::ASTNode *node, ParserContext &ctx)
 {
   bool value;
 
@@ -970,7 +861,7 @@ Assembler::processConstBoolean(const libsbml::ASTNode *node)
 
 
 GiNaC::ex
-Assembler::processConstInteger(const libsbml::ASTNode *node)
+Parser::Sbml::__process_const_integer(const libsbml::ASTNode *node, ParserContext &ctx)
 {
   // Check if given node is an integer node:
   if (libsbml::AST_INTEGER != node->getType())
@@ -985,7 +876,7 @@ Assembler::processConstInteger(const libsbml::ASTNode *node)
 
 
 GiNaC::ex
-Assembler::processConstFloat(const libsbml::ASTNode *node)
+Parser::Sbml::__process_const_float(const libsbml::ASTNode *node, ParserContext &ctx)
 {
   // Check if the given node is a floating point number (constant):
   switch (node->getType()) {
@@ -1005,29 +896,29 @@ Assembler::processConstFloat(const libsbml::ASTNode *node)
 
 
 GiNaC::ex
-Assembler::processArithmeticOperator(const libsbml::ASTNode *node)
+Parser::Sbml::__process_arithmetic_operator(const libsbml::ASTNode *node, ParserContext &ctx)
 {
   switch(node->getType())
   {
   case libsbml::AST_PLUS:
-    return this->processExpression(node->getLeftChild()) +
-        this->processExpression(node->getRightChild());
+    return __process_expression(node->getLeftChild(), ctx) +
+        __process_expression(node->getRightChild(), ctx);
 
   case libsbml::AST_MINUS:
-    return this->processExpression(node->getLeftChild()) -
-        this->processExpression(node->getRightChild());
+    return __process_expression(node->getLeftChild(), ctx) -
+        __process_expression(node->getRightChild(), ctx);
 
   case libsbml::AST_TIMES:
-    return this->processExpression(node->getLeftChild()) *
-        this->processExpression(node->getRightChild());
+    return __process_expression(node->getLeftChild(), ctx) *
+        __process_expression(node->getRightChild(), ctx);
 
   case libsbml::AST_DIVIDE:
-    return this->processExpression(node->getLeftChild()) /
-        this->processExpression(node->getRightChild());
+    return __process_expression(node->getLeftChild(), ctx) /
+        __process_expression(node->getRightChild(), ctx);
 
   case libsbml::AST_POWER:
-    return GiNaC::power(this->processExpression(node->getLeftChild()),
-                        this->processExpression(node->getRightChild()));
+    return GiNaC::power(__process_expression(node->getLeftChild(), ctx),
+                        __process_expression(node->getRightChild(), ctx));
 
   default:
     break;
@@ -1040,7 +931,7 @@ Assembler::processArithmeticOperator(const libsbml::ASTNode *node)
 
 
 GiNaC::symbol
-Assembler::processSymbol(const libsbml::ASTNode *node)
+Parser::Sbml::__process_symbol(const libsbml::ASTNode *node, ParserContext &ctx)
 {
   // Check if node is a symbol (name):
   if (libsbml::AST_NAME != node->getType())
@@ -1050,30 +941,29 @@ Assembler::processSymbol(const libsbml::ASTNode *node)
     throw err;
   }
 
-  return this->resolveVariable(node->getName())->getSymbol();
+  return ctx.resolveVariable(node->getName())->getSymbol();
 }
 
 
 GiNaC::ex
-Assembler::processFunctionCall(const libsbml::ASTNode *node)
+Parser::Sbml::__process_function_call(const libsbml::ASTNode *node, ParserContext &ctx)
 {
   // Check if node is a user-defined function-call:
-  if (libsbml::AST_FUNCTION != node->getType())
-  {
+  if (libsbml::AST_FUNCTION != node->getType()) {
     InternalError err;
     err << "Unknwon SBML function call type: " << (unsigned int) node->getType();
     throw err;
   }
 
   // Get Function by name:
-  Ast::FunctionDefinition *func = this->model.getFunction(node->getName());
+  Ast::FunctionDefinition *func = ctx.model().getFunction(node->getName());
 
   // Get function argument expressions:
   std::vector<GiNaC::ex> arguments(node->getNumChildren());
   for (size_t i=0; i<node->getNumChildren(); i++)
   {
     // construct Expression from each argument
-    arguments[i] = this->processExpression(node->getChild(i));
+    arguments[i] = __process_expression(node->getChild(i), ctx);
   }
 
   // Finally return inlined function call:

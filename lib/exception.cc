@@ -247,9 +247,26 @@ SBMLParserError::SBMLParserError(const SBMLParserError &other)
   // pass.
 }
 
-
 SBMLParserError::~SBMLParserError() throw()
 {
+  // Pass...
+}
+
+
+
+ExportError::ExportError() : Exception("Export: ") {
+  // pass.
+}
+
+ExportError::ExportError(const std::string &message) : Exception("Export: ") {
+  (*this) << message;
+}
+
+ExportError::ExportError(const ExportError &other) : Exception(other) {
+  // pass.
+}
+
+ExportError::~ExportError() throw() {
   // Pass...
 }
 

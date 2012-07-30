@@ -1,23 +1,35 @@
 #include "exporter.hh"
 #include "ast/model.hh"
+#include "ast/reaction.hh"
 #include "exception.hh"
+#include "exporter.hh"
+#include <fstream>
+
 
 using namespace Fluc;
 
-/* ********************************************************************************************* *
- * Forward declaration of helper functions.
- * ********************************************************************************************* */
-void __process_model(Ast::Model &model, std::ostream &output);
-std::string __get_base_unit_identifier(Ast::ScaledBaseUnit::BaseUnit);
-void __process_unit_definitions(Ast::Model &model, std::ostream &output);
-void __process_compartments(Ast::Model &model, std::ostream &output);
-void __process_compartment(Ast::Compartment *comp, std::ostream &output);
-void __process_species_list(Ast::Model &model, std::ostream &output);
-void __process_species(Ast::Species *species, std::ostream &output);
 
 
-/* Generates model header. */
-void __process_model(Ast::Model &model, std::ostream &output) {
+/* ******************************************************************************************** *
+ * Implementation of helper functions...
+ * ******************************************************************************************** */
+/* Dispatcher. */
+void
+Parser::Sbmlsh::__process_model(Ast::Model &model, std::ostream &output) {
+  __process_model_header(model, output);
+  __process_unit_definitions(model, output);
+  __process_compartments(model, output);
+  __process_species_list(model, output);
+  __process_parameter_list(model, output);
+  __process_reaction_list(model, output);
+  __process_event_list(model, output);
+}
+
+
+/* Serialize model header and default units. */
+void
+Parser::Sbmlsh::__process_model_header(Ast::Model &model, std::ostream &output)
+{
   /// @bug @c Ast::Model has no identifier field, used "model" as identifier here.
   output << "@model:3.1.1 = " << "model";
   if (model.hasName()) output << " \"" << model.getName() << "\"";
@@ -95,15 +107,12 @@ void __process_model(Ast::Model &model, std::ostream &output) {
        item != default_units.end(); item++) {
     output << " " << item->first << "=" << item->second;
   }
-
-  __process_unit_definitions(model, output);
-  __process_compartments(model, output);
-  __process_species_list(model, output);
 }
 
 
 /* Translates a Ast::ScaledBaseUnit::BaseUnit into its string identifier. */
-std::string __get_base_unit_identifier(Ast::ScaledBaseUnit::BaseUnit unit)
+std::string
+Parser::Sbmlsh::__get_base_unit_identifier(Ast::ScaledBaseUnit::BaseUnit unit)
 {
   switch (unit) {
   case Ast::ScaledBaseUnit::AMPERE: return "ampere";
@@ -146,30 +155,34 @@ std::string __get_base_unit_identifier(Ast::ScaledBaseUnit::BaseUnit unit)
 }
 
 /* handle unit definitions in given model. */
-void __process_unit_definitions(Ast::Model &model, std::ostream &output) {
+void
+Parser::Sbmlsh::__process_unit_definitions(Ast::Model &model, std::ostream &output) {
   /// @bug There is no way to iterate over all user-defined Units in @c Ast::Model!
 }
 
 /* Handle compartments. */
-void __process_compartments(Ast::Model &model, std::ostream &output) {
+void
+Parser::Sbmlsh::__process_compartments(Ast::Model &model, std::ostream &output) {
   if (0 == model.numCompartments()) return;
 
   output << std::endl << "@compartments";
   for (size_t i=0; i<model.numCompartments(); i++) {
-    __process_compartment(model.getCompartment(i), temp);
+    __process_compartment(model.getCompartment(i), output);
   }
 }
 
 /* Handle compartment. */
-void __process_compartment(Ast::Compartment *comp, std::ostream &output)
+void
+Parser::Sbmlsh::__process_compartment(Ast::Compartment *comp, std::ostream &output)
 {
-  ouput << std::endl << "  " << comp->getIdentifier();
+  output << std::endl << "  " << comp->getIdentifier();
   if (comp->hasValue()) { output << " = " << comp->getValue(); }
   if (comp->hasName())  { output << " \"" << comp->getName() << "\""; }
 }
 
 /* handle list of species. */
-void __process_species_list(Ast::Model &model, std::ostream &output) {
+void
+Parser::Sbmlsh::__process_species_list(Ast::Model &model, std::ostream &output) {
   if (0 == model.numSpecies()) return;
 
   output << std::endl << "@species";
@@ -179,7 +192,8 @@ void __process_species_list(Ast::Model &model, std::ostream &output) {
 }
 
 /* handle single species. */
-void __process_species(Ast::Species *species, std::ostream &output) {
+void
+Parser::Sbmlsh::__process_species(Ast::Species *species, std::ostream &output) {
   output << std::endl << "  " << species->getCompartment()->getIdentifier() << ": ";
   if (species->getUnit().isSubstanceUnit()) { output << "[" << species->getIdentifier() << "] "; }
   else { output << species->getIdentifier() << " "; }
@@ -190,3 +204,196 @@ void __process_species(Ast::Species *species, std::ostream &output) {
   if (species->hasName()) { output << " " << species->getName(); }
 }
 
+
+/* Handle parameter definition list. */
+void
+Parser::Sbmlsh::__process_parameter_list(Ast::Model &model, std::ostream &output)
+{
+  if (0 == model.numParameters()) return;
+  output << std::endl << "@parameters";
+
+  for (size_t i=0; i<model.numParameters(); i++) {
+    __process_parameter(model.getParameter(i), output);
+  }
+}
+
+/* Serialize single paramter definition. */
+void
+Parser::Sbmlsh::__process_parameter(Ast::Parameter *param, std::ostream &output)
+{
+  output << std::endl << param->getIdentifier() << "=" << param->getValue();
+  if (! param->isConst()) { output << " v"; }
+  if (param->hasName()) { output << " \"" << param->getName() << "\""; }
+}
+
+
+/* Handle list of rules. */
+void
+Parser::Sbmlsh::__process_rule_list(Ast::Model &model, std::ostream &output)
+{
+  /// @bug There is no way to iterate over rules.
+}
+
+
+/* Handle list of reactions. */
+void
+Parser::Sbmlsh::__process_reaction_list(Ast::Model &model, std::ostream &output)
+{
+  if (0 == model.numReactions()) { return; }
+  output << std::endl << "@reactions";
+  for (size_t i=0; i<model.numReactions(); i++) {
+    __process_reaction(model.getReaction(i), output);
+    __process_kinetic_law(model.getReaction(i)->getKineticLaw(), output);
+  }
+}
+
+void
+Parser::Sbmlsh::__process_reaction(Ast::Reaction *reac, std::ostream &output)
+{
+  std::stringstream temp;
+
+  if (reac->isReversible()) { output << std::endl << "@rr"; }
+  else { output << std::endl << "@r"; }
+  output << " " << reac->getIdentifier();
+  if (reac->hasName()) { output << " " << reac->getName(); }
+
+  std::list<std::string> reactants;
+  std::list<std::string> products;
+  std::list<std::string> modifiers;
+
+  // assemble list of reactants
+  for (Ast::Reaction::iterator item = reac->reacBegin(); item != reac->reacEnd(); item++)
+  {
+    if ((! GiNaC::is_a<GiNaC::numeric>(item->second)) ||
+        (! GiNaC::is_pos_integer(GiNaC::ex_to<GiNaC::numeric>(item->second))))
+    {
+      ExportError err;
+      err << "Can not export reaction " << reac->getIdentifier() << " as SBML-SH: "
+          << "Stoichiometry (" << item->second
+          << ") for reactant " << item->first->getIdentifier() << " is not an integer.";
+      throw err;
+    }
+
+    temp.str("");
+    if (1 != item->second) { temp << item->second << " "; }
+    temp << item->first->getIdentifier();
+    reactants.push_back(temp.str());
+  }
+
+  // assemble list of products
+  for (Ast::Reaction::iterator item = reac->prodBegin(); item != reac->prodEnd(); item++)
+  {
+    if ((! GiNaC::is_a<GiNaC::numeric>(item->second)) ||
+        (! GiNaC::is_pos_integer(GiNaC::ex_to<GiNaC::numeric>(item->second))))
+    {
+      ExportError err;
+      err << "Can not export reaction " << reac->getIdentifier() << " as SBML-SH: "
+          << "Stoichiometry (" << item->second
+          << ") for product " << item->first->getIdentifier() << " is not an integer.";
+      throw err;
+    }
+
+    temp.str("");
+    if (1 != item->second) { temp << item->second << " "; }
+    temp << item->first->getIdentifier();
+    products.push_back(temp.str());
+  }
+
+  // Assemble list of modifiers
+  for (Ast::Reaction::mod_iterator item = reac->modBegin(); item != reac->modEnd(); item++)
+  {
+    modifiers.push_back((*item)->getIdentifier());
+  }
+
+  // Check if there is only one modifier:
+  if (1 != modifiers.size()) {
+    ExportError err;
+    err << "Can not export reaction " << reac->getIdentifier() << " as SBML-SH: "
+        << "There are more than one modifiers for this reaction.";
+    throw err;
+  }
+
+  output << std::endl;
+  // Serialize reactants:
+  if (0 < reactants.size()) {
+    std::list<std::string>::iterator item = reactants.begin();
+    for (size_t i=0; i<(reactants.size()-1); i++, item++) {
+      output << *item << " + ";
+    }
+    output << *item;
+  }
+
+  output << " -> ";
+  // Serialize products:
+  if (0 < products.size()) {
+    std::list<std::string>::iterator item = products.begin();
+    for (size_t i=0; i<(products.size()-1); i++, item++) {
+      output << *item << " + ";
+    }
+    output << *item;
+  }
+
+  // Serialize modifier
+  if (1 == modifiers.size()) {
+    output << " : " << modifiers.front();
+  }
+}
+
+void
+Parser::Sbmlsh::__process_kinetic_law(Ast::KineticLaw *law, std::ostream &output)
+{
+  output << std::endl << law->getRateLaw();
+
+  // Serialize local parameters
+  if (0 < law->numParameters())
+  {
+    size_t i=0; Ast::Parameter *param = 0;
+    output << ": ";
+
+    for (; i<(law->numParameters()-1); i++) {
+      param = law->getParameter(i);
+      if (! param->isConst()) {
+        ExportError err;
+        err << "Can not export kinetic-law to SBML-SH: The local parameter "
+            << param->getIdentifier() << " is not constant.";
+        throw err;
+      }
+
+      if (! param->hasValue()) {
+        ExportError err;
+        err << "Can not export kinetic-law to SBML-SH: The local parameter "
+            << param->getIdentifier() << " has no value.";
+        throw err;
+      }
+
+      param = law->getParameter(i);
+      output << param->getIdentifier() << "=" << param->getValue() << ", ";
+    }
+
+    param = law->getParameter(i);
+    if (! param->isConst()) {
+      ExportError err;
+      err << "Can not export kinetic-law to SBML-SH: The local parameter "
+          << param->getIdentifier() << " is not constant.";
+      throw err;
+    }
+
+    if (! param->hasValue()) {
+      ExportError err;
+      err << "Can not export kinetic-law to SBML-SH: The local parameter "
+          << param->getIdentifier() << " has no value.";
+      throw err;
+    }
+
+    param = law->getParameter(i);
+    output << param->getIdentifier() << "=" << param->getValue();
+  }
+}
+
+
+/* Serialize events... (haha!)*/
+void
+Parser::Sbmlsh::__process_event_list(Ast::Model &model, std::ostream &output)
+{
+  /// @todo Implement serialization of event, as soon as they are supported by the @c Ast::Model.
+}
