@@ -3,13 +3,13 @@
 #include "assembler.hh"
 
 using namespace Fluc;
-using namespace Fluc::Sbmlsh;
+using namespace Fluc::Parser::Sbmlsh;
 
 
 /* ******************************************************************************************** *
  * Implementation of Parser:
  * ******************************************************************************************** */
-Parser::Parser(std::istream &input)
+Fluc::Parser::Sbmlsh::Parser::Parser(std::istream &input)
   : lexer(input), grammar(0)
 {
   // Instantiate Grammar
@@ -18,7 +18,7 @@ Parser::Parser(std::istream &input)
 
 
 void
-Parser::parse(Ast::Model &model)
+Fluc::Parser::Sbmlsh::Parser::parse(Ast::Model &model)
 {
   // Reset lexer:
   lexer.reset();
@@ -37,7 +37,7 @@ Parser::parse(Ast::Model &model)
 
 
 Ast::Model *
-Parser::parse()
+Fluc::Parser::Sbmlsh::Parser::parse()
 {
   Ast::Model *model = new Ast::Model();
   parse(*model);

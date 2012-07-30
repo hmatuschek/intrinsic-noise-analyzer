@@ -4,7 +4,7 @@
 
 
 using namespace Fluc;
-using namespace Fluc::Sbmlsh;
+using namespace Fluc::Parser::Sbmlsh;
 
 
 Assembler::Assembler(Ast::Model &model, Utils::Lexer &lexer)
@@ -81,6 +81,16 @@ Assembler::processModel(Utils::ConcreteSyntaxTree &model)
     processUnitDefinition(model[1][0][1][2]);
   }
 
+  // If there are parameter definitions...
+  if (model[4].matched()) {
+    /* EOL ParameterDefinitions       : model[4][0]
+     * ParameterDefinitions =         : model[4][0][1]
+     *   "@parameters"
+     *   EOL
+     *   ParameterDefinitionList        : model[4][0][1][2] */
+    processParameterDefinition(model[4][0][1][2]);
+  }
+
   // If there are Compartment definitions ...
   if (model[2].matched()) {
     // EOL CompartmentDefinitions  : model[2][0]
@@ -99,16 +109,6 @@ Assembler::processModel(Utils::ConcreteSyntaxTree &model)
     //   EOL
     //   SpeciesDefinitionList       : model[3][0][1][2]
     processSpeciesDefinition(model[3][0][1][2]);
-  }
-
-  // If there are parameter definitions...
-  if (model[4].matched()) {
-    /* EOL ParameterDefinitions       : model[4][0]
-     * ParameterDefinitions =         : model[4][0][1]
-     *   "@parameters"
-     *   EOL
-     *   ParameterDefinitionList        : model[4][0][1][2] */
-    processParameterDefinition(model[4][0][1][2]);
   }
 
   // Do not process Rule productions...
@@ -392,17 +392,19 @@ Assembler::processSpeciesModifierList(Utils::ConcreteSyntaxTree &spec_mod,
   const Utils::Token &token = _lexer[spec_mod[0].getTokenIdx()];
   std::string modifier = token.getValue();
 
-  if (modifier == "s") {
-    has_substance_units = true;
-  } else if (modifier == "b") {
-    has_boundary_condition = true;
-  } else if (modifier == "c") {
-    is_constant = true;
-  } else {
-    SBMLParserError err;
-    err << "Can not parse SBML SH @ line " << token.getLine()
-        << ": Invalid species modifier " << modifier << ", expected s,b or c";
-    throw err;
+  for (size_t i=0; i<modifier.size(); i++) {
+    if (modifier == "s") {
+      has_substance_units = true;
+    } else if (modifier == "b") {
+      has_boundary_condition = true;
+    } else if (modifier == "c") {
+      is_constant = true;
+    } else {
+      SBMLParserError err;
+      err << "Can not parse SBML SH @ line " << token.getLine()
+          << ": Invalid species modifier " << modifier << ", expected s,b or c";
+      throw err;
+    }
   }
 
   // Handle remaining modifiers...

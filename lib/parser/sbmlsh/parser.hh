@@ -12,6 +12,7 @@ class Model;
 }
 
 
+namespace Parser {
 namespace Sbmlsh {
 
 
@@ -125,17 +126,26 @@ namespace Sbmlsh {
 class Parser
 {
 protected:
+  /** Hold the lexer. */
   Lexer lexer;
+  /** Holds the root of the grammar. */
   Utils::Production *grammar;
 
 public:
+  /** Constructor. */
   Parser(std::istream &input);
 
+  /** Parses the input stream, given to the constructor and updates the given @c Ast::Model
+   * instance. */
   void parse(Ast::Model &model);
+
+  /** Allocates and assembles a new @c Ast::Model instance from the input stream given to the
+   * constructor. */
   Ast::Model *parse();
 };
 
 
+}
 }
 }
 #endif

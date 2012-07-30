@@ -6,11 +6,12 @@
 
 
 namespace Fluc {
+namespace Parser {
 namespace Sbmlsh {
 
 
 /**
- * Helper production to unify integers and floats to numbers:
+ * Helper production to unify integers and floats to numbers with signs.
  *
  * Number =
  *   ["-"] (INTEGER | FLOAT );
@@ -18,21 +19,15 @@ namespace Sbmlsh {
 class NumberProduction : public Utils::Production
 {
 protected:
-  /**
-   * Hidden constructor, use factory method @c get to get an instance.
-   */
+  /** Hidden constructor, use factory method @c get to get an instance. */
   NumberProduction();
 
 public:
-  /**
-   * Factory method.
-   */
+  /** Factory method. */
   static Production *get();
 
 private:
-  /**
-   * Singleton instance.
-   */
+  /** Singleton instance. */
   static NumberProduction *instance;
 };
 
@@ -68,57 +63,45 @@ private:
 /**
  * DefaultUnitIdentifier =
  *   ("s" | "t" | "v" | "a" | "l" | "e" | "c");
+ *
+ * @todo 'e' & 'c' are no default unit identifier!
  */
 class DefaultUnitIdentifierProduction : public Utils::TokenProduction
 {
 protected:
-  /**
-   * Hidden constructor.
-   */
+  /** Hidden constructor. */
   DefaultUnitIdentifierProduction();
 
 public:
-  /**
-   * Parses identifier.
-   */
+  /** Parses identifier. */
   virtual void parse(Utils::Lexer &lexer, Utils::ConcreteSyntaxTree &element);
 
 public:
-  /**
-   * Factory method.
-   */
+  /** Factory method. */
   static Utils::Production *get();
 
 private:
-  /**
-   * Singleton-instance.
-   */
+  /** Singleton-instance. */
   static DefaultUnitIdentifierProduction *instance;
 };
 
 
 /**
  * DefaultUnitDefinition =
- *   DefaultUnitIdentifier "=" QuotedString;
+ *   DefaultUnitIdentifier "=" Identifier;
  */
 class DefaultUnitDefinitionProduction : public Utils::Production
 {
 protected:
-  /**
-   * Hidden constructor.
-   */
+  /** Hidden constructor. */
   DefaultUnitDefinitionProduction();
 
 public:
-  /**
-   * Factory method.
-   */
+  /** Factory method. */
   static Utils::Production *get();
 
 private:
-  /**
-   * Singleton instance.
-   */
+  /** Singleton instance. */
   static DefaultUnitDefinitionProduction *instance;
 };
 
@@ -130,21 +113,15 @@ private:
 class DefaultUnitDefinitionsProduction : public Utils::Production
 {
 protected:
-  /**
-   * Hidden constructor.
-   */
+  /** Hidden constructor. */
   DefaultUnitDefinitionsProduction();
 
 public:
-  /**
-   * Factory method.
-   */
+  /** Factory method. */
   static Utils::Production *get();
 
 private:
-  /**
-   * Singleton instance.
-   */
+  /** Singleton instance. */
   static DefaultUnitDefinitionsProduction *instance;
 };
 
@@ -156,21 +133,15 @@ private:
 class ModelDefinitionProduction : public Utils::Production
 {
 protected:
-  /**
-   * Hidden constructor.
-   */
+  /** Hidden constructor. */
   ModelDefinitionProduction();
 
 public:
-  /**
-   * Factory method.
-   */
+  /** Factory method. */
   static Utils::Production *get();
 
 private:
-  /**
-   * Singleton instance.
-   */
+  /** Singleton instance. */
   static ModelDefinitionProduction *instance;
 };
 
@@ -182,34 +153,23 @@ private:
 class ScaledUnitIdentifierProduction : public Utils::TokenProduction
 {
 protected:
-  /**
-   * Holds all valid unit identifiers.
-   *
-   * \todo Try to make this set static.
-   */
+  /** Holds all valid unit identifiers.
+   * \todo Try to make this set static. */
   std::set<std::string> valid_units;
 
 protected:
-  /**
-   * Hidden constructor.
-   */
+  /** Hidden constructor. */
   ScaledUnitIdentifierProduction();
 
 public:
-  /**
-   * Checks if unit identifier is valid.
-   */
+  /** Checks if unit identifier is valid. */
   virtual void parse(Utils::Lexer &lexer, Utils::ConcreteSyntaxTree &element);
 
-  /**
-   * Factory method.
-   */
+  /** Factory method. */
   static Utils::Production *get();
 
 private:
-  /**
-   * Singleton instance.
-   */
+  /** Singleton instance. */
   static ScaledUnitIdentifierProduction *instance;
 };
 
@@ -221,26 +181,18 @@ private:
 class ScaledUnitModifierProduction : public Utils::TokenProduction
 {
 protected:
-  /**
-   * Hidden constructor.
-   */
+  /** Hidden constructor. */
   ScaledUnitModifierProduction();
 
 public:
-  /**
-   * Checks modifier.
-   */
+  /** Checks modifier. */
   virtual void parse(Utils::Lexer &lexer, Utils::ConcreteSyntaxTree &element);
 
-  /**
-   * Factory method.
-   */
+  /** Factory method. */
   static Utils::Production *get();
 
 private:
-  /**
-   * Singleton instance.
-   */
+  /** Singleton instance. */
   static ScaledUnitModifierProduction *instance;
 };
 
@@ -252,21 +204,15 @@ private:
 class ScaledUnitListProduction : public Utils::Production
 {
 protected:
-  /**
-   * Hidden constructor.
-   */
+  /** Hidden constructor. */
   ScaledUnitListProduction();
 
 public:
-  /**
-   * Factory method.
-   */
+  /** Factory method. */
   static Utils::Production *get();
 
 private:
-  /**
-   * Singleton instance.
-   */
+  /** Singleton instance. */
   static ScaledUnitListProduction *instance;
 };
 
@@ -278,21 +224,15 @@ private:
 class UnitDefinitionListProduction : public Utils::Production
 {
 protected:
-  /**
-   * Hidden constructor.
-   */
+  /** Hidden constructor. */
   UnitDefinitionListProduction();
 
 public:
-  /**
-   * Factory method.
-   */
+  /** Factory method. */
   static Utils::Production *get();
 
 private:
-  /**
-   * Singleton instance.
-   */
+  /** Singleton instance. */
   static UnitDefinitionListProduction *instance;
 };
 
@@ -304,21 +244,15 @@ private:
 class UnitDefinitionsProduction : public Utils::Production
 {
 protected:
-  /**
-   * Hidden constructor.
-   */
+  /** Hidden constructor. */
   UnitDefinitionsProduction();
 
 public:
-  /**
-   * Factory method.
-   */
+  /** Factory method. */
   static Utils::Production *get();
 
 private:
-  /**
-   * Singleton instance.
-   */
+  /** Singleton instance. */
   static UnitDefinitionsProduction *instance;
 };
 
@@ -330,21 +264,15 @@ private:
 class CompartmentDefinitionListProduction : public Utils::Production
 {
 protected:
-  /**
-   * hidden constructor.
-   */
+  /** hidden constructor. */
   CompartmentDefinitionListProduction();
 
 public:
-  /**
-   * Factory method.
-   */
+  /** Factory method. */
   static Utils::Production *get();
 
 private:
-  /**
-   * Singleton instance.
-   */
+  /** Singleton instance. */
   static CompartmentDefinitionListProduction *instance;
 };
 
@@ -356,15 +284,15 @@ private:
 class CompartmentDefinitionsProduction : public Utils::Production
 {
 protected:
-  /**
-   * Hidden constructor.
-   */
+  /** Hidden constructor. */
   CompartmentDefinitionsProduction();
 
 public:
+  /** Factory method. */
   static Utils::Production *get();
 
 private:
+  /** Singleton instance. */
   static CompartmentDefinitionsProduction *instance;
 };
 
@@ -376,26 +304,18 @@ private:
 class SpeciesModifierProduction : public Utils::TokenProduction
 {
 protected:
-  /**
-   * Hidden constructor.
-   */
+  /** Hidden constructor. */
   SpeciesModifierProduction();
 
 public:
-  /**
-   * Checks species modifier.
-   */
+  /** Checks species modifier. */
   virtual void parse(Utils::Lexer &lexer, Utils::ConcreteSyntaxTree &element);
 
-  /**
-   * factory method.
-   */
+  /** factory method. */
   static Utils::Production *get();
 
 private:
-  /**
-   * Singleton instance.
-   */
+  /** Singleton instance. */
   static SpeciesModifierProduction *instance;
 };
 
@@ -407,21 +327,15 @@ private:
 class SpeciesModifierListProduction : public Utils::Production
 {
 protected:
-  /**
-   * Hidden constructor.
-   */
+  /** Hidden constructor. */
   SpeciesModifierListProduction();
 
 public:
-  /**
-   * Factory method.
-   */
+  /** Factory method. */
   static Utils::Production *get();
 
 private:
-  /**
-   * Singleton instance.
-   */
+  /** Singleton instance. */
   static SpeciesModifierListProduction *instance;
 };
 
@@ -434,21 +348,15 @@ private:
 class SpeciesDefinitionListProduction : public Utils::Production
 {
 protected:
-  /**
-   * Hidden constructor.
-   */
+  /** Hidden constructor. */
   SpeciesDefinitionListProduction();
 
 public:
-  /**
-   * Factory method.
-   */
+  /** Factory method. */
   static Utils::Production *get();
 
 private:
-  /**
-   * Singleton instance.
-   */
+  /** Singleton instance. */
   static SpeciesDefinitionListProduction *instance;
 };
 
@@ -460,21 +368,15 @@ private:
 class SpeciesDefinitionsProduction : public Utils::Production
 {
 protected:
-  /**
-   * Hidden constructor.
-   */
+  /** Hidden constructor. */
   SpeciesDefinitionsProduction();
 
 public:
-  /**
-   * Factory method.
-   */
+  /** Factory method. */
   static Utils::Production *get();
 
 private:
-  /**
-   * Singleton instance.
-   */
+  /** Singleton instance. */
   static SpeciesDefinitionsProduction *instance;
 };
 
@@ -486,26 +388,18 @@ private:
 class ParameterModifierProduction : public Utils::TokenProduction
 {
 protected:
-  /**
-   * Hidden constructor.
-   */
+  /** Hidden constructor. */
   ParameterModifierProduction();
 
 public:
-  /**
-   * Checks modifier.
-   */
+  /** Checks modifier. */
   virtual void parse(Utils::Lexer &lexer, Utils::ConcreteSyntaxTree &element);
 
-  /**
-   * Factory method.
-   */
+  /** Factory method. */
   static Utils::Production *get();
 
 private:
-  /**
-   * Singleton instance.
-   */
+  /** Singleton instance. */
   static ParameterModifierProduction *instance;
 };
 
@@ -517,21 +411,15 @@ private:
 class ParameterDefinitionListProduction : public Utils::Production
 {
 protected:
-  /**
-   * Hidden constructor.
-   */
+  /** Hidden constructor. */
   ParameterDefinitionListProduction();
 
 public:
-  /**
-   * Factory method.
-   */
+  /** Factory method. */
   static Utils::Production *get();
 
 private:
-  /**
-   * Singleton instance.
-   */
+  /** Singleton instance. */
   static ParameterDefinitionListProduction *instance;
 };
 
@@ -543,21 +431,15 @@ private:
 class ParameterDefinitionsProduction : Utils::Production
 {
 protected:
-  /**
-   * Hidden constructor.
-   */
+  /** Hidden constructor. */
   ParameterDefinitionsProduction();
 
 public:
-  /**
-   * Factory method.
-   */
+  /** Factory method. */
   static Utils::Production *get();
 
 private:
-  /**
-   * Singleton instance.
-   */
+  /** Singleton instance. */
   static ParameterDefinitionsProduction *instance;
 };
 
@@ -569,21 +451,15 @@ private:
 class AtomicExpressionProduction : public Utils::AltProduction
 {
 protected:
-  /**
-   * Hidden constructor.
-   */
+  /** Hidden constructor. */
   AtomicExpressionProduction();
 
 public:
-  /**
-   * Factory method.
-   */
+  /** Factory method. */
   static Utils::Production *get();
 
 private:
-  /**
-   * Singleton instance.
-   */
+  /** Singleton instance. */
   static AtomicExpressionProduction *instance;
 };
 
@@ -595,21 +471,15 @@ private:
 class ProductExpressionProduction : public Utils::AltProduction
 {
 protected:
-  /**
-   * Hidden constructor.
-   */
+  /** Hidden constructor. */
   ProductExpressionProduction();
 
 public:
-  /**
-   * Factory method.
-   */
+  /** Factory method. */
   static Utils::Production *get();
 
 private:
-  /**
-   * Singleton instance.
-   */
+  /** Singleton instance. */
   static ProductExpressionProduction *instance;
 };
 
@@ -621,21 +491,15 @@ private:
 class ExpressionProduction : public Utils::AltProduction
 {
 protected:
-  /**
-   * Hidden constructor.
-   */
+  /** Hidden constructor. */
   ExpressionProduction();
 
 public:
-  /**
-   * factory method.
-   */
+  /** factory method. */
   static Utils::Production *get();
 
 private:
-  /**
-   * Singleton instance.
-   */
+  /** Singleton instance. */
   static ExpressionProduction *instance;
 };
 
@@ -988,4 +852,6 @@ private:
 
 }
 }
+}
+
 #endif // PRODUCTIONS_HH

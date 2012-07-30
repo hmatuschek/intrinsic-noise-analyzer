@@ -1,3 +1,17 @@
+/** @defgroup parser
+ * @ingroup utils
+ *
+ * Together with the @c Fluc::Utils::Lexer class, the @c ConctreteSyntaxTree, @c Production and is
+ * subclasses can be used to implement a recusive descending parser, to parse complex grammars.
+ *
+ * The @c Production (list), @c EmptyProduction, @c AlternativeProduction and @c OptionalProduction
+ * represent non-terminal symbols in BNF, while the @c TokenProduction represents a terminal symbol.
+ * This allows to assemble grammars in a BNF similar notation for the ease of implementation. During
+ * the parsing process a concrete syntax tree (CST, @c ConctreteSyntaxTree) is assembled, that
+ * allows to build an abstract syntax tree (AST) from it.
+ */
+
+
 #ifndef __FLUC_UTILS_PARSER_HH__
 #define __FLUC_UTILS_PARSER_HH__
 
@@ -10,9 +24,13 @@ namespace Utils {
 
 
 /**
- * Implements a concrete syntax tree node.
+ * Implements a concrete syntax tree (CST) node.
  *
- * @ingroup utils
+ * The concrete syntax tree describes the path the parser has taken through the grammar. It can
+ * be seen as the actual parsing result. Each production of a grammar generates a node of the
+ * concrete syntax tree. An assembler is then used to build an abstract syntax tree (AST).
+ *
+ * @ingroup parser
  */
 class ConcreteSyntaxTree
 {
@@ -29,9 +47,7 @@ public:
 
 
 protected:
-  /**
-   * Holds the type of the node.
-   */
+  /** Holds the type of the node, see @c Type for the possible node types. */
   Type   type;
 
   /**
@@ -42,6 +58,12 @@ protected:
 
   /**
    * Holds the vector of child-productions.
+   *
+   * If the node is a @c PRODUCTION_NODE, the vector contains the child elements. Note, if the
+   * production was an @c OptionalProduction, that generated this node, @c childen[0] contains the
+   * child of the optional production if it matched. If the production was an
+   * @c AlternativeProduction that generated this node, @c children[0] contains the alternative,
+   * that matched. A @c TokenProduction and @c EmptyProduction has no child nodes.
    */
   std::vector<ConcreteSyntaxTree> children;
 
@@ -58,7 +80,7 @@ public:
   Type getType() const;
 
   /**
-   * Returns true, if the node is not empty. This call is equivalent to
+   * Returns true, if the node is empty. This call is equivalent to
    * ConcreteSyntaxTree::EMPTY_NODE == getType().
    */
   bool isEmpty() const;
@@ -132,7 +154,12 @@ public:
 /**
  * Baseclass for all productions.
  *
- * @ingroup utils
+ * By default this class implements a list production, where all child productions must match in
+ * the given order.
+ *
+ * EBNF: (<Child_1> <Child_2> ... <Child_n>)
+ *
+ * @ingroup parser
  */
 class Production
 {
@@ -180,7 +207,7 @@ public:
 /**
  * A production of a single token.
  *
- * @ingroup utils
+ * @ingroup parser
  */
 class TokenProduction: public Production
 {
@@ -206,7 +233,11 @@ public:
 /**
  * A production of alternatives.
  *
- * @ingroup utils
+ * Exactly one child-production of the alternative must match.
+ *
+ * EBNF: (<Alt_1> | <Alt_2> | ... | <Alt_n>)
+ *
+ * @ingroup parser
  */
 class AltProduction: public Production
 {
@@ -241,9 +272,9 @@ public:
 
 
 /**
- * The empty production.
+ * The empty production, matches nothing.
  *
- * @ingroup utils
+ * @ingroup parser
  */
 class EmptyProduction : public Production
 {
@@ -261,22 +292,20 @@ public:
 
 
 /**
- * An optional production.
+ * An optional production, the child production may match.
  *
- * @ingroup utils
+ * EBNF: [<Child>]
+ *
+ * @ingroup parser
  */
 class OptionalProduction : public Production
 {
 protected:
-  /**
-   * Holds the optional production.
-   */
+  /** Holds the optional production. */
   Production *production;
 
 public:
-  /**
-   * Constructor.
-   */
+  /** Constructor. */
   OptionalProduction(Production *prod);
 
   virtual void parse(Lexer &lexer, ConcreteSyntaxTree &element);

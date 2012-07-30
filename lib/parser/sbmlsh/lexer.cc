@@ -1,7 +1,7 @@
 #include "lexer.hh"
 
 using namespace Fluc;
-using namespace Fluc::Sbmlsh;
+using namespace Fluc::Parser::Sbmlsh;
 
 
 Lexer::Lexer(std::istream &input)

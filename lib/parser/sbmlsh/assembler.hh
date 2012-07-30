@@ -20,6 +20,7 @@ class KineticLaw;
 }
 
 
+namespace Parser {
 namespace Sbmlsh {
 
 /** This class takes the concrete syntax tree (CST) of some parsed SBML-SH code and assembles a
@@ -92,6 +93,7 @@ protected:
 };
 
 
+}
 }
 }
 

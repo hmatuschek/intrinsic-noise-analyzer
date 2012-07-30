@@ -4,7 +4,7 @@
 
 
 using namespace Fluc;
-using namespace Fluc::Sbmlsh;
+using namespace Fluc::Parser::Sbmlsh;
 
 
 
@@ -621,8 +621,7 @@ SpeciesModifierListProduction::get()
 /* ******************************************************************************************** *
  * Implementation of SpeciesModifierProduction:
  *
- * SpeciesModifier =
- *   ("s" | "b" | "c")
+ * SpeciesModifier = Any series of 's', 'b' and 'c'
  * ******************************************************************************************** */
 SpeciesModifierProduction::SpeciesModifierProduction()
   : TokenProduction(T_IDENTIFIER)
@@ -633,17 +632,23 @@ SpeciesModifierProduction::SpeciesModifierProduction()
 void
 SpeciesModifierProduction::parse(Utils::Lexer &lexer, Utils::ConcreteSyntaxTree &element)
 {
+  // Get token value:
   std::string id = lexer.current().getValue();
   unsigned int line    = lexer.current().getLine();
 
+  // consume token.
   Utils::TokenProduction::parse(lexer, element);
 
   // Check if id matches:
-  if ("s" != id && "b" != id && "c" != id) {
-    Utils::SyntaxError err;
-    err << "@line " << line << ": "
-        << "Unknown species-modifier: " << id << ", expected: s, b or c.";
-    throw err;
+  for (size_t i=0; i<id.size(); i++)
+  {
+    if (('s' != id[i]) && ('b' != id[i]) && ('c' != id[i]))
+    {
+      Utils::SyntaxError err;
+      err << "@line " << line << ": "
+          << "Unknown species-modifier: " << id << ", expected: s, b or c.";
+      throw err;
+    }
   }
 }
 

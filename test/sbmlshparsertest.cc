@@ -1,11 +1,12 @@
 #include "sbmlshparsertest.hh"
 
 #include <sstream>
-#include "sbmlsh/lexer.hh"
-#include "sbmlsh/parser.hh"
+#include "parser/sbmlsh/lexer.hh"
+#include "parser/sbmlsh/parser.hh"
 
 
 using namespace Fluc;
+using namespace Fluc::Parser;
 
 
 void

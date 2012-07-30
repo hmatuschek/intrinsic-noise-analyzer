@@ -9,6 +9,7 @@ namespace Utils {
 
 /**
  * A token-rule, that parses white-spaces SPACE and TAB.
+ * @ingroup parser
  */
 class WhiteSpaceTokenRule : public TokenRule
 {
@@ -22,6 +23,7 @@ public:
 
 /**
  * A token-rule that parses EOLs ("NL", "CR", "NL CR", "CR NL").
+ * @ingroup parser
  */
 class EOLTokenRule : public TokenRule
 {
@@ -35,6 +37,7 @@ public:
 
 /**
  * A token rule to parse C-style identifier.
+ * @ingroup parser
  */
 class IdentifierTokenRule : public TokenRule
 {
@@ -48,6 +51,7 @@ public:
 
 /**
  * A token rule to parse quoted strings (without escapes).
+ * @ingroup parser
  */
 class StringTokenRule : public TokenRule
 {
@@ -61,6 +65,7 @@ public:
 
 /**
  * Simplifies token rule to parse keywords.
+ * @ingroup parser
  */
 class KeyWordTokenRule : public TokenRule
 {
@@ -74,6 +79,7 @@ public:
 
 /**
  * A token rule to parse non-negative integers.
+ * @ingroup parser
  */
 class IntegerTokenRule : public TokenRule
 {
@@ -112,6 +118,8 @@ public:
  *   sef -> sef [label="0-9"];
  * }
  * \enddot
+ *
+ * @ingroup parser
  */
 class FloatTokenRule : public TokenRule
 {

@@ -12,7 +12,7 @@ namespace Utils {
 /**
  * Represents a single token.
  *
- * @ingroup utils
+ * @ingroup parser
  */
 class Token
 {
@@ -75,7 +75,7 @@ public:
 /**
  * Base class of all token-rules.
  *
- * @ingroup utils
+ * @ingroup parser
  */
 class TokenRule : public DFA
 {
@@ -107,7 +107,7 @@ public:
 /**
  * Implements a general lexer.
  *
- * @ingroup utils
+ * @ingroup parser
  */
 class Lexer
 {
@@ -206,6 +206,7 @@ public:
    */
   const Token &current();
 
+  /** Returns the index of the current token. */
   size_t currentIndex() const;
 
   /**

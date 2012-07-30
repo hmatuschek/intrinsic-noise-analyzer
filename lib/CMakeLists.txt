@@ -39,10 +39,24 @@ SET(libina_ast_trafo_HEADERS ast/trafo/trafo.hh
     ast/trafo/assignmentruleinliner.hh ast/trafo/substitutioncollector.hh ast/trafo/modelwalker.hh
     ast/trafo/modelcopyist.hh)
 
-SET(libina_sbmlsh_SOURCES
-    sbmlsh/lexer.cc sbmlsh/parser.cc sbmlsh/productions.cc sbmlsh/assembler.cc)
-SET(libina_sbmlsh_HEADERS
-    sbmlsh/lexer.hh sbmlsh/parser.hh sbmlsh/productions.hh sbmlsh/assembler.hh)
+SET(libina_sbmlsh_parser_SOURCES
+    parser/sbmlsh/lexer.cc parser/sbmlsh/parser.cc parser/sbmlsh/productions.cc
+    parser/sbmlsh/assembler.cc parser/sbmlsh/exporter.cc)
+SET(libina_sbmlsh_parser_HEADERS
+    parser/sbmlsh/lexer.hh parser/sbmlsh/parser.hh parser/sbmlsh/productions.hh
+    parser/sbmlsh/assembler.hh parser/sbmlsh/exporter.hh)
+
+SET(libina_sbml_parser_SOURCES
+    parser/sbml/assembler.cc)
+SET(libina_sbml_parser_HEADERS
+    parser/sbml/assembler.hh)
+
+SET(libina_parser_SOURCES
+    ${libina_sbmlsh_parser_SOURCES}
+    ${libina_sbml_parser_SOURCES})
+SET(libina_parser_HEADERS
+    ${libina_sbmlsh_parser_HEADERS}
+    ${libina_sbml_parser_HEADERS})
 
 SET(libina_utils_SOURCES
     utils/exception.cc utils/automata.cc utils/lexer.cc utils/tokenrules.cc utils/parser.cc
@@ -178,7 +192,7 @@ ENDIF(WITH_EXECUTION_ENGINE_LLVM)
 SET(libina_SOURCES
     ${libina_SOURCES}
     ${libina_utils_SOURCES}
-    ${libina_sbmlsh_SOURCES}
+    ${libina_parser_SOURCES}
     ${libina_ast_SOURCES}
     ${libina_ast_trafo_SOURCES}
     ${libina_models_SOURCES}
@@ -190,7 +204,7 @@ SET(libina_SOURCES
 SET(libina_HEADERS
     ${libina_HEADERS}
     ${libina_utils_HEADERS}
-    ${libina_sbmlsh_HEADERS}
+    ${libina_parser_HEADERS}
     ${libina_ast_HEADERS}
     ${libina_ast_trafo_HEADERS}
     ${libina_models_HEADERS}
