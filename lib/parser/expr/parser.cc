@@ -75,6 +75,8 @@ Parser::Expr::parseExpression(const std::string &text, Context &ctx)
   lexer.addRule(new Utils::KeyWordTokenRule(T_PLUS, "+"));
   lexer.addRule(new Utils::KeyWordTokenRule(T_MINUS, "-"));
   lexer.addRule(new Utils::KeyWordTokenRule(T_TIMES, "*"));
+  lexer.addRule(new Utils::KeyWordTokenRule(T_POWER, "**"));
+  lexer.addRule(new Utils::KeyWordTokenRule(T_POWER, "^"));
   lexer.addRule(new Utils::KeyWordTokenRule(T_DIVIVE, "/"));
   lexer.addRule(new Utils::KeyWordTokenRule(T_LPAR, "("));
   lexer.addRule(new Utils::KeyWordTokenRule(T_RPAR, ")"));

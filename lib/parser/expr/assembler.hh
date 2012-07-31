@@ -19,7 +19,11 @@ public:
 
 protected:
   static GiNaC::ex processProduct(Utils::ConcreteSyntaxTree &expr, Context &ctx, Utils::Lexer &lexer);
+  static GiNaC::ex processPower(Utils::ConcreteSyntaxTree &expr, Context &ctx, Utils::Lexer &lexer);
   static GiNaC::ex processAtomic(Utils::ConcreteSyntaxTree &expr, Context &ctx, Utils::Lexer &lexer);
+  static GiNaC::ex processFunctionCall(Utils::ConcreteSyntaxTree &expr, Context &ctx, Utils::Lexer &lexer);
+  static void processFunctionCallArguments(
+    Utils::ConcreteSyntaxTree &expr, Context &ctx, Utils::Lexer &lexer, std::vector<GiNaC::ex> &args);
   static GiNaC::ex processNumber(Utils::ConcreteSyntaxTree &expr, Utils::Lexer &lexer);
 
   /** Tiny helper function to parse numbers from strings. */

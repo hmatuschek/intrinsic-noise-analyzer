@@ -80,7 +80,7 @@ ExpressionProduction::get()
  * Implementation of ProductExpressionProduction:
  *
  * ProductExpression =
- *   (AtomicExpression ("*" | "/") ProductExpression) | AtomicExpression;
+ *   (PowerExpression ("*" | "/") ProductExpression) | PowerExpression;
  * ******************************************************************************************** */
 ProductExpressionProduction::ProductExpressionProduction()
   : AltProduction()
@@ -91,12 +91,12 @@ ProductExpressionProduction::ProductExpressionProduction()
 
   this->alternatives[0] =
       new Utils::Production(
-        3, AtomicExpressionProduction::get(),
+        3, PowerExpressionProduction::get(),
         new Utils::AltProduction(
           2, new Utils::TokenProduction(T_TIMES), new Utils::TokenProduction(T_DIVIVE)),
         ProductExpressionProduction::get());
 
-  this->alternatives[1] = AtomicExpressionProduction::get();
+  this->alternatives[1] = PowerExpressionProduction::get();
 }
 
 ProductExpressionProduction *ProductExpressionProduction::instance = 0;
@@ -111,26 +111,113 @@ ProductExpressionProduction::get()
 }
 
 
+/* ******************************************************************************************** *
+ * Implementation of PowerExpressionProduction:
+ *
+ * PowerExpression =
+ *   (AtomicExpression ("**" | "^") PowerExpression) | AtomicExpression;
+ * ******************************************************************************************** */
+PowerExpressionProduction::PowerExpressionProduction()
+  : AltProduction()
+{
+  PowerExpressionProduction::instance = this;
+
+  this->alternatives.resize(2);
+  this->alternatives[0] =
+      new Utils::Production(
+        3, AtomicExpressionProduction::get(),new Utils::TokenProduction(T_POWER), this);
+  this->alternatives[1] = AtomicExpressionProduction::get();
+}
+
+PowerExpressionProduction *PowerExpressionProduction::instance = 0;
+
+Utils::Production *
+PowerExpressionProduction::get()
+{
+  if (0 == PowerExpressionProduction::instance)
+    return new PowerExpressionProduction();
+  return PowerExpressionProduction::instance;
+}
+
+
+/* ******************************************************************************************** *
+ * Implementation of FunctionCallArgumentsProduction:
+ *
+ * FunctionCallArguments =
+ *   Identifier [, FunctionCallArguments];
+ * ******************************************************************************************** */
+FunctionCallArgumentsProduction::FunctionCallArgumentsProduction()
+  : Utils::Production()
+{
+  FunctionCallArgumentsProduction::instance = this;
+
+  this->elements.push_back(new Utils::TokenProduction(T_IDENTIFIER));
+
+  this->elements.push_back(
+        new Utils::OptionalProduction(
+          new Utils::Production(
+            2, new Utils::TokenProduction(T_COMMA), this)));
+}
+
+FunctionCallArgumentsProduction *FunctionCallArgumentsProduction::instance = 0;
+Utils::Production *
+FunctionCallArgumentsProduction::get()
+{
+  if (0 == FunctionCallArgumentsProduction::instance)
+    return new FunctionCallArgumentsProduction();
+  return FunctionCallArgumentsProduction::instance;
+}
+
+
+/* ******************************************************************************************** *
+ * Implementation of FunctionCallProduction:
+ *
+ * FunctionCall =
+ *   Identifier "(" FunctionCallArguments ")";
+ * ******************************************************************************************** */
+FunctionCallProduction::FunctionCallProduction()
+  : Utils::Production()
+{
+  FunctionCallProduction::instance = this;
+
+  this->elements.push_back(new Utils::TokenProduction(T_IDENTIFIER));
+  this->elements.push_back(new Utils::TokenProduction(T_LPAR));
+  this->elements.push_back(FunctionCallArgumentsProduction::get());
+  this->elements.push_back(new Utils::TokenProduction(T_RPAR));
+}
+
+FunctionCallProduction *FunctionCallProduction::instance = 0;
+Utils::Production *
+FunctionCallProduction::get()
+{
+  if (0 == FunctionCallProduction::instance)
+    return new FunctionCallProduction();
+  return FunctionCallProduction::instance;
+}
+
 
 /* ******************************************************************************************** *
  * Implementation of AtomicExpressionProduction:
  *
  * AtomicExpression =
- *   Identifier | Number | ("(" Expression ")");
+ *   Number | FunctionCall | Identifier | ("(" Expression ")") | "-" AtomicExpression;
  * ******************************************************************************************** */
 AtomicExpressionProduction::AtomicExpressionProduction()
   : AltProduction()
 {
   AtomicExpressionProduction::instance = this;
 
-  this->alternatives.resize(3);
+  this->alternatives.resize(5);
 
-  this->alternatives[0] = new Utils::TokenProduction(T_IDENTIFIER);
-  this->alternatives[1] = NumberProduction::get();
-  this->alternatives[2] = new Utils::Production(
+  this->alternatives[0] = NumberProduction::get();
+  this->alternatives[1] = FunctionCallProduction::get();
+  this->alternatives[2] = new Utils::TokenProduction(T_IDENTIFIER);
+  this->alternatives[3] = new Utils::Production(
         3, new Utils::TokenProduction(T_LPAR),
         ExpressionProduction::get(),
         new Utils::TokenProduction(T_RPAR));
+  this->alternatives[4] = new Utils::Production(
+        2, new Utils::TokenProduction(T_MINUS), this);
 }
 
 AtomicExpressionProduction *AtomicExpressionProduction::instance = 0;

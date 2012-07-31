@@ -33,8 +33,47 @@ private:
 
 
 /**
+ * FunctionCallArguments =
+ *   Expression [, FunctionCallArguments]
+ */
+class FunctionCallArgumentsProduction : public Utils::Production
+{
+protected:
+  /** Hidden constructor. */
+  FunctionCallArgumentsProduction();
+
+public:
+  /** Factory method. */
+  static Utils::Production *get();
+
+protected:
+  static FunctionCallArgumentsProduction *instance;
+};
+
+
+/**
+ * FunctionCall =
+ *   Identifier "(" FunctionCallArguments ")";
+ */
+class FunctionCallProduction : public Utils::Production
+{
+protected:
+  /** Hidden constructor. */
+  FunctionCallProduction();
+
+public:
+  /** Factory method. */
+  static Utils::Production *get();
+
+protected:
+  /** Singleton instance. */
+  static FunctionCallProduction *instance;
+};
+
+
+/**
  * AtomicExpression =
- *   Identifier | Number | ("(" Expression ")");
+ *   Number | Identifier | FunctionCall | ("(" Expression ")") | "-" AtomicExpression;
  */
 class AtomicExpressionProduction : public Utils::AltProduction
 {
@@ -53,8 +92,27 @@ private:
 
 
 /**
+ * PowerExpression =
+ *   (AtomicExpression ("^"|"**") PowerExpression) | AtomicExpression.
+ */
+class PowerExpressionProduction : public Utils::AltProduction
+{
+protected:
+  /** Hidden constructor. */
+  PowerExpressionProduction();
+
+public:
+  /** Factory method. */
+  static Utils::Production *get();
+
+protected:
+  static PowerExpressionProduction *instance;
+};
+
+
+/**
  * ProductExpression =
- *   (AtomicExpression ("*" | "/") ProductExpression) | AtomicExpression;
+ *   (PowerExpression ("*" | "/") ProductExpression) | PowerExpression;
  */
 class ProductExpressionProduction : public Utils::AltProduction
 {

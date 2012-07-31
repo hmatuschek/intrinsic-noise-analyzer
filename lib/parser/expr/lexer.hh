@@ -20,9 +20,10 @@ typedef enum {
   T_PLUS,             ///< '+'
   T_MINUS,            ///< '-'
   T_TIMES,            ///< '*'
+  T_POWER,            ///< '**' or '^'
   T_DIVIVE,           ///< '/'
   T_LPAR,             ///< '('
-  T_RPAR             ///< ')'
+  T_RPAR              ///< ')'
 } TokenId;
 
 
