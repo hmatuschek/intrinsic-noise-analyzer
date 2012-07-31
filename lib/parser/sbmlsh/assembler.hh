@@ -17,6 +17,7 @@ class Model;
 class Scope;
 class Reaction;
 class KineticLaw;
+class VariableDefinition;
 }
 
 
@@ -62,6 +63,7 @@ protected:
   void processSpeciesModifierList(Utils::ConcreteSyntaxTree &spec_mod, bool &has_substance_units,
                                   bool &has_boundary_condition, bool &is_constant);
   void processParameterDefinition(Utils::ConcreteSyntaxTree &param);
+  void processRuleDefinitionList(Utils::ConcreteSyntaxTree &rules);
   void processReactionDefinitions(Utils::ConcreteSyntaxTree &reac);
   Ast::KineticLaw *processKineticLaw(Utils::ConcreteSyntaxTree &law);
   void processLocalParameters(Utils::ConcreteSyntaxTree &params);
@@ -72,7 +74,9 @@ protected:
   GiNaC::ex processExpression(Utils::ConcreteSyntaxTree &expr);
   GiNaC::ex processProductExpression(Utils::ConcreteSyntaxTree &expr);
   GiNaC::ex processAtomicExpression(Utils::ConcreteSyntaxTree &expr);
-  GiNaC::ex resolveIdentifier(const std::string &expr);
+
+  Ast::VariableDefinition *resolveVariable(const std::string &expr);
+  GiNaC::ex resolveSymbol(const std::string &expr);
   double processNumber(Utils::ConcreteSyntaxTree &num);
 
 

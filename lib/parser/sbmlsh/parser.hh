@@ -76,8 +76,10 @@ namespace Sbmlsh {
  * RuleDefinitions =
  *   "@rules" EOL RuleDefinitionList;
  *
+ * @bug Invalid implementation of grammar for rule definition! Also the documentation needs to be
+ *      fixed.
  * RuleDefinitionList =
- *   ["@rate" ":"] Identifier "=" Expression [EOL RuleDefinitionList];
+ *   ("@rate"|"@assign") ":" Identifier "=" Expression [EOL RuleDefinitionList];
  *
  * ReactionDefinitions =
  *   "@reactions" EOL ReactionDefinitionList;

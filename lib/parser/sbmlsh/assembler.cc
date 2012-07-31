@@ -113,7 +113,12 @@ Assembler::processModel(Utils::ConcreteSyntaxTree &model)
 
   // Do not process Rule productions...
   if (model[5].matched()) {
-    throw SBMLFeatureNotSupported("Can not parse SBML SH: Rule definitions are not supported yet.");
+    // EOL RuleDefinitions         : model[5][0]
+    // RuleDefinitions    =        : model[5][0][1]
+    //   '@rules'                    : model[5][0][1][0]
+    //   EOL
+    //   RuleDefinitionList          : model[5][0][1][2]
+    processRuleDefinitionList(model[5][0][1][2]);
   }
 
   // If there are reaction definitions...
@@ -347,8 +352,8 @@ Assembler::processSpeciesDefinition(Utils::ConcreteSyntaxTree &spec)
    *   ID                                : spec[0]
    *   ":"                               : spec[1]
    *   (("[" ID "]") | ID)               : spec[2]
-   *     "[" ID "]"                        : spec[2][0][1]
-   *     ID                                : spec[2][0]
+   *     "[" ID "]"                        : spec[2][0][1] -> ID
+   *     ID                                : spec[2][0]    -> ID
    *   "="                               : spec[3]
    *   Number                            : spec[4]
    *   [SpeciesModifierList]             : spec[5]
@@ -358,14 +363,17 @@ Assembler::processSpeciesDefinition(Utils::ConcreteSyntaxTree &spec)
 
   std::string compartment_id = _lexer[spec[0].getTokenIdx()].getValue();
   std::string identifier;
-  double initial_value;
+  GiNaC::ex initial_value;
   bool has_substance_units=false; bool has_boundary_condition=false; bool is_constant=false;
+  bool has_initial_amount=true;
 
   Ast::Compartment *compartment = _model.getCompartment(compartment_id);
   if (0 == spec[2].getAltIdx()) {
     identifier = _lexer[spec[2][0][1].getTokenIdx()].getValue();
+    has_initial_amount = false;
   } else {
     identifier = _lexer[spec[2][0].getTokenIdx()].getValue();
+    has_initial_amount = true;
   }
 
   initial_value = processNumber(spec[4]);
@@ -373,13 +381,28 @@ Assembler::processSpeciesDefinition(Utils::ConcreteSyntaxTree &spec)
     processSpeciesModifierList(spec[5], has_substance_units, has_boundary_condition, is_constant);
   }
 
-  Ast::Species *species;
-  if (has_substance_units) {
-    species = new Ast::Species(identifier, _model.getDefaultSubstanceUnit(), compartment, is_constant);
-  } else {
-    /// @bug Handle concentration units properly here!
-    species = new Ast::Species(identifier, _model.getDefaultSubstanceUnit(), compartment, is_constant);
+  if (has_boundary_condition) {
+    SBMLFeatureNotSupported err;
+    err << "SBML feature 'boudary condition' for species is not implemented yet.";
+    throw err;
   }
+
+  // Unit voodoo...
+  Ast::Unit spec_unit = _model.getDefaultSubstanceUnit();
+  if (has_substance_units) {
+    if (! has_initial_amount) {
+      initial_value = initial_value * compartment->getValue();
+    }
+  } else {
+    spec_unit = spec_unit/compartment->getUnit();
+    if (has_initial_amount) {
+      initial_value = initial_value/compartment->getValue();
+    }
+  }
+
+  // Create species:
+  Ast::Species *species =
+      new Ast::Species(identifier, spec_unit, compartment, is_constant);
 
   // Set initial value...
   species->setValue(initial_value);
@@ -467,6 +490,33 @@ Assembler::processParameterDefinition(Utils::ConcreteSyntaxTree &params)
   // Process remaining definitions...
   if (params[5].matched()) {
     processParameterDefinition(params[5][0][1]);
+  }
+}
+
+
+void
+Assembler::processRuleDefinitionList(Utils::ConcreteSyntaxTree &rules)
+{
+  /* RuleDefinitionList =        : rules
+   *   ["@rate" ":"]               : rules[0]
+   *   Identifier                  : rules[1]
+   *   "="
+   *   Expression                  : rules[3]
+   *   [                           : rules[4]
+   *     EOL                       : rules[4][0][0]
+   *     RuleDefinitionList];      : rules[4][0][1]  */
+
+  Ast::VariableDefinition *var = resolveVariable(_lexer[rules[1].getTokenIdx()].getValue());
+  GiNaC::ex expr = processExpression(rules[3]);
+  if (rules[0].matched()) {
+    var->setRule(new Ast::RateRule(expr));
+  } else {
+    var->setRule(new Ast::AssignmentRule(expr));
+  }
+
+  // Handle remaining rules if present:
+  if (rules[4].matched()) {
+    processRuleDefinitionList(rules[4][0][1]);
   }
 }
 
@@ -698,7 +748,7 @@ Assembler::processAtomicExpression(Utils::ConcreteSyntaxTree &expr)
 
   if (0 == expr.getAltIdx()) {
     std::string identifier = _lexer[expr[0].getTokenIdx()].getValue();
-    return resolveIdentifier(identifier);
+    return resolveSymbol(identifier);
   } else if (1 == expr.getAltIdx()) {
     return processNumber(expr[0]);
   } else {
@@ -708,7 +758,14 @@ Assembler::processAtomicExpression(Utils::ConcreteSyntaxTree &expr)
 
 
 GiNaC::ex
-Assembler::resolveIdentifier(const std::string &id)
+Assembler::resolveSymbol(const std::string &id)
+{
+  return resolveVariable(id)->getSymbol();
+}
+
+
+Ast::VariableDefinition *
+Assembler::resolveVariable(const std::string &id)
 {
   for (std::vector<Ast::Scope *>::reverse_iterator scope=_scope_stack.rbegin();
        scope != _scope_stack.rend(); scope++) {
@@ -720,7 +777,7 @@ Assembler::resolveIdentifier(const std::string &id)
         err << "Can not resolve symbol " << id << ": Identifier does not refer to a variable!";
         throw err;
       }
-      return var->getSymbol();
+      return var;
     }
 
     if ((*scope)->isClosed()) {

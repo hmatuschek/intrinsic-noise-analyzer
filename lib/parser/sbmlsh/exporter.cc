@@ -313,7 +313,34 @@ Writer::processParameter(Ast::Parameter *param, std::ostream &output)
 void
 Writer::processRuleList(Ast::Model &model, std::ostream &output)
 {
-  /// @bug There is no way to iterate over rules.
+  std::list<std::string> rules; std::stringstream temp;
+
+  // Iterate over variable definitions:
+  for (Ast::Model::iterator item=model.begin(); item!=model.end(); item++) {
+    if (! Ast::Node::isVariableDefinition(*item)) { continue; }
+    Ast::VariableDefinition *var = static_cast<Ast::VariableDefinition *>(*item);
+    if (var->hasRule()) {
+      processRule(var, temp); rules.push_back(temp.str()); temp.str("");
+    }
+  }
+
+  // Serialize...
+  output << std::endl << "@rules";
+  for (std::list<std::string>::iterator iter=rules.begin(); iter!=rules.end(); iter++) {
+    output << std::endl << "  " << *iter;
+  }
+}
+
+void
+Writer::processRule(Ast::VariableDefinition *var, std::ostream &output)
+{
+  if (Ast::Node::isAssignmentRule(var->getRule())) {
+    Ast::AssignmentRule *rule = static_cast<Ast::AssignmentRule *>(var->getRule());
+    output << var->getIdentifier() << " = " << rule->getRule();
+  } else if (Ast::Node::isRateRule(var->getRule())) {
+    Ast::RateRule *rule = static_cast<Ast::RateRule *>(var->getRule());
+    output << "@rate: " << var->getIdentifier() << " = " << rule->getRule();
+  }
 }
 
 

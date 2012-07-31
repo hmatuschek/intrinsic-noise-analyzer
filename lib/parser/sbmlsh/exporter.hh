@@ -30,7 +30,7 @@ protected:
   static void processParameterList(Ast::Model &model, std::ostream &output);
   static void processParameter(Ast::Parameter *param, std::ostream &output);
   static void processRuleList(Ast::Model &model, std::ostream &output);
-  static void processRule(Ast::Rule *rule, std::ostream &output);
+  static void processRule(Ast::VariableDefinition *var, std::ostream &output);
   static void processReactionList(Ast::Model &model, std::ostream &output);
   static void processReaction(Ast::Reaction *reac, std::ostream &output);
   static void processKineticLaw(Ast::KineticLaw *law, std::ostream &output);
