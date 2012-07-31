@@ -498,25 +498,36 @@ void
 Assembler::processRuleDefinitionList(Utils::ConcreteSyntaxTree &rules)
 {
   /* RuleDefinitionList =        : rules
-   *   ["@rate" ":"]               : rules[0]
-   *   Identifier                  : rules[1]
+   *   [("@rate"|"@assign")]       : rules[0]
+   *   ":"
+   *   Identifier                  : rules[2]
    *   "="
-   *   Expression                  : rules[3]
-   *   [                           : rules[4]
-   *     EOL                       : rules[4][0][0]
-   *     RuleDefinitionList];      : rules[4][0][1]  */
+   *   Expression                  : rules[4]
+   *   [                           : rules[5]
+   *     EOL                       : rules[5][0][0]
+   *     RuleDefinitionList];      : rules[5][0][1]  */
 
-  Ast::VariableDefinition *var = resolveVariable(_lexer[rules[1].getTokenIdx()].getValue());
-  GiNaC::ex expr = processExpression(rules[3]);
-  if (rules[0].matched()) {
-    var->setRule(new Ast::RateRule(expr));
-  } else {
+  // Get variable addressed by identifier:
+  Ast::VariableDefinition *var = resolveVariable(_lexer[rules[2].getTokenIdx()].getValue());
+  // Parse expression
+  GiNaC::ex expr = processExpression(rules[4]);
+
+  // Determine type of rule
+  if (! rules[0].matched()) {
+    // Assignment rule by default:
     var->setRule(new Ast::AssignmentRule(expr));
+  } else {
+    if (0 == rules[0][0].getAltIdx()) {
+      // If flag is given and == "@rate"
+      var->setRule(new Ast::RateRule(expr));
+    } else {
+      var->setRule(new Ast::AssignmentRule(expr));
+    }
   }
 
   // Handle remaining rules if present:
-  if (rules[4].matched()) {
-    processRuleDefinitionList(rules[4][0][1]);
+  if (rules[5].matched()) {
+    processRuleDefinitionList(rules[5][0][1]);
   }
 }
 
@@ -533,7 +544,7 @@ Assembler::processReactionDefinitions(Utils::ConcreteSyntaxTree &reac)
    *   [QuotedString]                : reac[3]
    *   EOL
    *   ReactionEquation              : reac[5]
-   *   [":" Identifier]              : reac[6]
+   *   [":" ReactionModifierList]    : reac[6], reac[6,0,1] -> ReactionModifierList
    *   EOL
    *   KineticLaw                    : reac[8]
    *   [EOL ReactionDefinitionList]; : reac[9]         */
@@ -559,10 +570,12 @@ Assembler::processReactionDefinitions(Utils::ConcreteSyntaxTree &reac)
   processReactionEquation(reac[5], reaction);
 
   // Handle modifier
+  std::list<Ast::Species *> modifier_list;
   if (reac[6].matched()) {
-    std::string modifier_id = _lexer[reac[6][0][1].getTokenIdx()].getValue();
-    Ast::Species *modifier = _model.getSpecies(modifier_id);
-    reaction->addModifier(modifier);
+    processReactionModifierList(reac[6][0][1], modifier_list);
+    for(std::list<Ast::Species *>::iterator mod=modifier_list.begin(); mod!=modifier_list.end(); mod++) {
+      reaction->addModifier(*mod);
+    }
   }
 
   // Add reaction to model:
@@ -571,6 +584,29 @@ Assembler::processReactionDefinitions(Utils::ConcreteSyntaxTree &reac)
   // Handle remaining reactions:
   if (reac[9].matched()) {
     processReactionDefinitions(reac[9][0][1]);
+  }
+}
+
+
+void
+Assembler::processReactionModifierList(Utils::ConcreteSyntaxTree &lst, std::list<Ast::Species *> &mods)
+{
+  /* ReactionModifierList          : lst
+   *   Identifier                    : lst[0]
+   *   [',', ReactionModifierList]   : lst[1], lst[1][0][1] -> ReactionModifierList  */
+
+  Ast::VariableDefinition *var = resolveVariable(_lexer[lst[0].getTokenIdx()].getValue());
+  if (! Ast::Node::isSpecies(var)) {
+    SBMLParserError err;
+    err << "@line "<< _lexer[lst[0].getTokenIdx()].getLine()
+        << ": Identifier " << var->getSymbol() << " does not name a species.";
+    throw err;
+  }
+
+  mods.push_back(static_cast<Ast::Species *>(var));
+
+  if (lst[1].matched()) {
+    processReactionModifierList(lst[1][0][1], mods);
   }
 }
 

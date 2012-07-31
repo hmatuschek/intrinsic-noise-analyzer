@@ -310,9 +310,8 @@ ScaledUnitModifierListProduction *ScaledUnitModifierListProduction::instance = 0
 Utils::Production *
 ScaledUnitModifierListProduction::get()
 {
-  if (0 == ScaledUnitModifierListProduction::instance) {
-    ScaledUnitModifierListProduction::instance = new ScaledUnitModifierListProduction();
-  }
+  if (0 == ScaledUnitModifierListProduction::instance)
+    return new ScaledUnitModifierListProduction();
   return ScaledUnitModifierListProduction::instance;
 }
 
@@ -829,21 +828,24 @@ RuleDefinitionsProduction::get()
  * Implementation of RuleDefinitionListProduction:
  *
  * RuleDefinitionList =
- *   ["@rate" ":"] Identifier "=" Expression [EOL RuleDefinitionList];
+ *   [("@rate"|"@assign")] ":" Identifier "=" Expression [EOL RuleDefinitionList];
  * ******************************************************************************************** */
 RuleDefinitionListProduction::RuleDefinitionListProduction()
   : Production()
 {
   RuleDefinitionListProduction::instance = this;
 
+  // [("@rate"|"@assign)]"
   this->elements.push_back(
         new Utils::OptionalProduction(
-          new Utils::Production(
-            2, new Utils::TokenProduction(T_RATE_KW), new Utils::TokenProduction(T_COLON))));
-
+          new Utils::AltProduction(
+            2, new Utils::TokenProduction(T_RATE_KW), new Utils::TokenProduction(T_ASSIGN_KW))));
+  // ":" Identifier "=" Expression
+  this->elements.push_back(new Utils::TokenProduction(T_COLON));
   this->elements.push_back(new Utils::TokenProduction(T_IDENTIFIER));
   this->elements.push_back(new Utils::TokenProduction(T_ASSIGN));
   this->elements.push_back(ExpressionProduction::get());
+  //  [EOL RuleDefinitionList]
   this->elements.push_back(
         new Utils::OptionalProduction(
           new Utils::Production(2, EndOfLineProduction::get(), this)));
@@ -890,13 +892,39 @@ ReactionDefinitionsProduction::get()
 }
 
 
+/* ******************************************************************************************** *
+ * Implementation of ReactionModifierListProduction:
+ *
+ * ReactionModifierList =
+ *   Identifier ["," ReactionModifierList];
+ * ******************************************************************************************** */
+ReactionModifierList::ReactionModifierList()
+  : Utils::Production()
+{
+  ReactionModifierList::instance = this;
+  this->elements.push_back(new Utils::TokenProduction(T_IDENTIFIER));
+  this->elements.push_back(
+        new Utils::OptionalProduction(
+          new Utils::Production(2, new Utils::TokenProduction(T_COMMA), this)));
+}
+
+ReactionModifierList *ReactionModifierList::instance = 0;
+
+Utils::Production *
+ReactionModifierList::get()
+{
+  if (0 == ReactionModifierList::instance)
+    return new ReactionModifierList();
+  return ReactionModifierList::instance;
+}
+
 
 /* ******************************************************************************************** *
  * Implementation of ReactionDefinitionListProduction:
  *
  * ReactionDefinitionList =
  *   ("@r" | "@rr") "=" Identifier [QuotedString] EOL
- *   ReactionEquation [":" Identifier] EOL
+ *   ReactionEquation [":" ReactionModifierList] EOL
  *   KineticLaw
  *   [EOL ReactionDefinitionList];
  * ******************************************************************************************** */
@@ -926,16 +954,16 @@ ReactionDefinitionListProduction::ReactionDefinitionListProduction()
   this->elements.push_back(EndOfLineProduction::get());
   this->elements.push_back(ReactionEquationProduction::get());
 
-  // [":" Identifier] EOL
+  // [":" ReactionModifierList]
   this->elements.push_back(
         new Utils::OptionalProduction(
           new Utils::Production(
             2,
             new Utils::TokenProduction(T_COLON),
-            new Utils::TokenProduction(T_IDENTIFIER))));
-  this->elements.push_back(EndOfLineProduction::get());
+            ReactionModifierList::get())));
 
-  // KineticLaw
+  // EOL KineticLaw
+  this->elements.push_back(EndOfLineProduction::get());
   this->elements.push_back(KineticLawProduction::get());
 
   // [EOL ReactionDefinitionList]

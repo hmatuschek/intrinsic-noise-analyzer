@@ -25,6 +25,7 @@ typedef enum {
   T_SPECIES_KW,       ///< '@Species'
   T_PARAMETERS_KW,    ///< '@parameters'
   T_RULES_KW,         ///< '@rules'
+  T_ASSIGN_KW,        ///< '@assign'
   T_RATE_KW,          ///< '@rate'
   T_REACTIONS_KW,     ///< '@reactions'
   T_R_KW,             ///< '@r'

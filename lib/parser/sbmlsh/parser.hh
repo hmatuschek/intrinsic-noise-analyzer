@@ -76,18 +76,21 @@ namespace Sbmlsh {
  * RuleDefinitions =
  *   "@rules" EOL RuleDefinitionList;
  *
- * @bug Invalid implementation of grammar for rule definition! Also the documentation needs to be
- *      fixed.
  * RuleDefinitionList =
- *   ("@rate"|"@assign") ":" Identifier "=" Expression [EOL RuleDefinitionList];
+ *   [("@rate"|"@assign")] ":" Identifier "=" Expression [EOL RuleDefinitionList];
  *
  * ReactionDefinitions =
  *   "@reactions" EOL ReactionDefinitionList;
  *
+ * @bug Wrong grammar definition/implementation for reaction definitions. Also fix grammar docs.
  * ReactionDefinitionList =
  *   ("@r" | "@rr") Identifier [QuotedString] EOL
- *   ReactionEquation ((":" Identifier) | (EOL KineticLaw))
+ *   ReactionEquation [":" ReactionModifierList]
+ *   EOL KineticLaw
  *   [EOL ReactionDefinitionList];
+ *
+ * ReactionModifierList =
+ *   Identifier ["," ReactionModifierList];
  *
  * ReactionEquation =
  *   [StoichiometrySum] "->" [StoichiometrySum];

@@ -202,7 +202,7 @@ SBML-SH allows to define rate and assignment rules for the model. This can be do
 <RuleList> ::= <EOL> <Rule> <RuleList>
   \alt <EOL> <Rule>
   
-<Rule> ::= <Identifier> '=' <Expression>
+<Rule> ::= '@assign' ':' <Identifier> '=' <Expression>
 \alt '@rate' ':' <Identifier> '=' <Expression>
 \end{grammar}
 \caption{Grammar of the rules section.} \label{tab:rules}
@@ -221,7 +221,9 @@ Reactions can be defined within the reactions section (\ref{tab:reactions}). Thi
 <ReactionList> ::= <EOL> <Reaction> <ReactionList>
   \alt <EOL> <Reaction>
   
-<Reaction> ::= ('@r' | '@rr') <Identifier> [<QuotedString>] <EOL> <ReactionEquation> [':' <Identifier>] <EOL> <KineticLaw>
+<Reaction> ::= ('@r' | '@rr') <Identifier> [<QuotedString>] <EOL> <ReactionEquation> [':' <ReactionModifierList>] <EOL> <KineticLaw>
+
+<ReactionModifierList> ::= <Identifier> [',' <ReactionModifierList>]
 \end{grammar}
 \caption{Grammar of the reactions section} \label{tab:reactions}
 \end{table}

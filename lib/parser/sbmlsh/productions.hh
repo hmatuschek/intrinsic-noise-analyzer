@@ -526,7 +526,7 @@ private:
 
 /**
  * RuleDefinitionList =
- *   ["@rate" ":"] Identifier "=" Expression [EOL RuleDefinitionList];
+ *   [("@rate"|"@assign")] ":" Identifier "=" Expression [EOL RuleDefinitionList];
  */
 class RuleDefinitionListProduction : public Utils::Production
 {
@@ -678,9 +678,29 @@ private:
 
 
 /**
+ * ReactionModifierList =
+ *   Identifier [',' ReactionModifierList];
+ */
+class ReactionModifierList : public Utils::Production
+{
+protected:
+  /** Hidden constructor.*/
+  ReactionModifierList();
+
+public:
+  /** Factory method. */
+  static Utils::Production *get();
+
+protected:
+  static ReactionModifierList *instance;
+};
+
+
+/**
  * ReactionDefinitionList =
  *   ("@r" | "@rr") Identifier [QuotedString] EOL
- *   ReactionEquation ((":" Identifier) | (EOL KineticLaw))
+ *   ReactionEquation [":" ReactionModifierList]
+ *   EOL KineticLaw
  *   [EOL ReactionDefinitionList];
  */
 class ReactionDefinitionListProduction : public Utils::Production

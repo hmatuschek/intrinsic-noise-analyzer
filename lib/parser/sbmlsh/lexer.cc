@@ -26,6 +26,8 @@ Lexer::Lexer(std::istream &input)
   this->addTokenName(T_PARAMETERS_KW, "@parameters");
   this->addRule(new Utils::KeyWordTokenRule(T_RULES_KW, "@rules"));
   this->addTokenName(T_RULES_KW, "@rules");
+  this->addRule(new Utils::KeyWordTokenRule(T_ASSIGN_KW, "@assign"));
+  this->addTokenName(T_ASSIGN_KW, "@assgin");
   this->addRule(new Utils::KeyWordTokenRule(T_RATE_KW, "@rate"));
   this->addTokenName(T_RATE_KW, "@rate");
   this->addRule(new Utils::KeyWordTokenRule(T_REACTIONS_KW, "@reactions"));

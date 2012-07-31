@@ -17,6 +17,7 @@ class Model;
 class Scope;
 class Reaction;
 class KineticLaw;
+class Species;
 class VariableDefinition;
 }
 
@@ -65,6 +66,7 @@ protected:
   void processParameterDefinition(Utils::ConcreteSyntaxTree &param);
   void processRuleDefinitionList(Utils::ConcreteSyntaxTree &rules);
   void processReactionDefinitions(Utils::ConcreteSyntaxTree &reac);
+  void processReactionModifierList(Utils::ConcreteSyntaxTree &lst, std::list<Ast::Species *> &mods);
   Ast::KineticLaw *processKineticLaw(Utils::ConcreteSyntaxTree &law);
   void processLocalParameters(Utils::ConcreteSyntaxTree &params);
   void processReactionEquation(Utils::ConcreteSyntaxTree &law, Ast::Reaction *reaction);
