@@ -239,6 +239,9 @@ public:
    */
   std::string getTokenName(unsigned id);
 
+  /** Adds a token to the list of ignored tokens. */
+  void addIgnoredToken(unsigned id);
+
   /** Returns the i-th parsed token. */
   const Token &operator[] (size_t idx) const;
 

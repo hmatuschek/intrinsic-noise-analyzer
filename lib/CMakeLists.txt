@@ -51,12 +51,19 @@ SET(libina_sbml_parser_SOURCES
 SET(libina_sbml_parser_HEADERS
     parser/sbml/sbml.hh parser/sbml/assembler.hh parser/sbml/exporter.hh)
 
+SET(libina_expr_parser_SOURCES
+    parser/expr/lexer.cc parser/expr/parser.cc parser/expr/productions.cc parser/expr/assembler.cc)
+SET(libina_expr_parser_HEADERS parser/expr/expr.hh
+    parser/expr/lexer.hh parser/expr/parser.hh parser/expr/productions.hh parser/expr/assembler.hh)
+
 SET(libina_parser_SOURCES
     ${libina_sbmlsh_parser_SOURCES}
-    ${libina_sbml_parser_SOURCES})
+    ${libina_sbml_parser_SOURCES}
+    ${libina_expr_parser_SOURCES})
 SET(libina_parser_HEADERS
     ${libina_sbmlsh_parser_HEADERS}
-    ${libina_sbml_parser_HEADERS})
+    ${libina_sbml_parser_HEADERS}
+    ${libina_expr_parser_HEADERS})
 
 SET(libina_utils_SOURCES
     utils/exception.cc utils/automata.cc utils/lexer.cc utils/tokenrules.cc utils/parser.cc

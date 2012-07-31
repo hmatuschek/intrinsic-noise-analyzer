@@ -188,6 +188,13 @@ Lexer::getTokenName(unsigned id)
 }
 
 
+void
+Lexer::addIgnoredToken(unsigned id)
+{
+  this->ignored_token.insert(id);
+}
+
+
 const Token &
 Lexer::operator [](size_t idx) const {
   return history[idx];
