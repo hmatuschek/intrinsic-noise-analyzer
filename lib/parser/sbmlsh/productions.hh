@@ -198,6 +198,26 @@ private:
 
 
 /**
+ * ScaledUnitModifierList =
+ *   ScaledUnitModifier "=" NUMBER [',' ScaledUnitModifierList];
+ */
+class ScaledUnitModifierListProduction : public Utils::Production
+{
+protected:
+  /** Hidden constructor. */
+  ScaledUnitModifierListProduction();
+
+public:
+  /** Factory method. */
+  static Utils::Production *get();
+
+private:
+  /** Singleton instance. */
+  static ScaledUnitModifierListProduction *instance;
+};
+
+
+/**
  * ScaledUnitList =
  *   ScaledUnitIdentifier [":" ScaledUnitModifier "=" NUMBER];
  */

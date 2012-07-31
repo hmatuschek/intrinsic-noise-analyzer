@@ -126,13 +126,13 @@ Within the unit section it is possible to define new units\footnote{Altough I do
 <ScaledUnitList> ::= <ScaledUnit>
   \alt <ScaledUnit> ';' <ScaledUnitList>
 
-<ScaledUnit> ::= <GenericUnit> [':' ('e'|'m'|'s') '=' <Number>]
+<ScaledUnit> ::= <GenericUnit> [':' <ScaledUnitModifiers>]
+
+<ScaledUnitModifiers> ::= ('m' | 's' | 'e' | 'o') '=' <Number> [',' <ScaledUnitModifiers>]
 \end{grammar}
 \caption{Unit definition grammar.} \label{fig:unit}
 \end{table}
 Each unit definition consists of an \emph{Identifier} specifying the unique identifier of the unit and a list of scaled generic units (\emph{ScaledUnit} production). A \emph{ScaledUnit} production consists of a generic SBML unit followed by an optional modifier specifying the exponent (\emph{e}), multiplier (\emph{m}) or scale (\emph{s}). For the definition of the \emph{GenericUnit} production, see table \ref{tab:defaultunit}.
-
-Note: To my understanding of the examples in the original specification, only one of the eponent, multiplier or scale can be specified. It would be possible to specify all modifiers without violating the grammar. Additionally an optional name could be specified in the \emph{UnitDefinition} production for consistency with other definitions.
 
 
 \subsubsection*{compartment definition}

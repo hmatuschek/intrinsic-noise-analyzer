@@ -238,7 +238,9 @@ Assembler::processScaledUnitList(Utils::ConcreteSyntaxTree &unit,
 {
   // ScaledUnitList =                      : units
   //   ScaledUnitIdentifier                  : units[0] (Token)
-  //   [":" ScaledUnitModifier "=" Number]   : units[1]
+  //   [                                     : units[1]
+  //     ":"                                   : units[1][0][0]
+  //     ScaledUnitModifierList]               : units[1][0][1]
   //   ";"
   //   [ScaledUnitList];                     : units[3]
 
@@ -257,26 +259,9 @@ Assembler::processScaledUnitList(Utils::ConcreteSyntaxTree &unit,
   Ast::ScaledBaseUnit::BaseUnit base_unit = item->second;
 
   /* Handle unit modifiers. */
-  double exponent = 1; double multiplier = 1; int scale = 0;
+  double multiplier = 1; int scale = 0; int exponent = 1;
   if (unit[1].matched()) {
-    // units[1] = ":" ScaledUnitModifier "=" Number
-    // units[1][1] = ScaledUnitModifier     (token)
-    // units[1][3] = Number
-    const Utils::Token &modifier_token = _lexer[unit[1][1].getTokenIdx()];
-
-    if (modifier_token.getValue() == "s") {
-      scale = processNumber(unit[1][3]);
-    } else if (modifier_token.getValue() == "e") {
-      exponent = processNumber(unit[1][3]);
-    } else if (modifier_token.getValue() == "m") {
-      multiplier = processNumber(unit[1][3]);
-    } else {
-      SBMLParserError err;
-      err << "Can not parse SBML SH @ line " << modifier_token.getLine()
-          << ": Unknown modifier " << modifier_token.getValue()
-          << " expected s, e or m";
-      throw err;
-    }
+    processScaledUnitModifierList(unit[1][0][1], multiplier, scale, exponent);
   }
 
   // Assemble scaled base unit:
@@ -285,6 +270,39 @@ Assembler::processScaledUnitList(Utils::ConcreteSyntaxTree &unit,
   // If there are scaled units left:
   if (unit[3].matched()) {
     processScaledUnitList(unit[3][1], unit_list);
+  }
+}
+
+
+void
+Assembler::processScaledUnitModifierList(Utils::ConcreteSyntaxTree &sulist,
+                                         double &multiplier, int &scale, int &exponent)
+{
+  /* ScaledUnitModifierList =               : sulist
+   *   ('m'|'s'|'e')                          : sulist[0]
+   *   '='
+   *   NUMBER                                 : sulist[2]
+   *   [                                      : sulist[3]
+   *     ','                                    : sulist[3][0][0]
+   *     ScaledUnitModifierList]                : sulist[3][0][1]   */
+
+  const Utils::Token &flag = _lexer[sulist[0].getTokenIdx()];
+  if ("m" == flag.getValue()) {
+    multiplier = processNumber(sulist[2]);
+  } else if ("s" == flag.getValue()) {
+    scale = int(processNumber(sulist[2]));
+  } else if ("e" == flag.getValue()) {
+    exponent = int(processNumber(sulist[2]));
+  } else {
+    SBMLParserError err;
+    err << "@line " << flag.getLine()
+        << ": Unexpected scaled unit flag " << flag.getValue();
+    throw err;
+  }
+
+  // Handle remaining flags if there are some left:
+  if (sulist[3].matched()) {
+    processScaledUnitModifierList(sulist[3][0][1], multiplier, scale, exponent);
   }
 }
 

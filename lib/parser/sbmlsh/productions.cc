@@ -285,6 +285,37 @@ UnitDefinitionListProduction::get()
 }
 
 
+/* ******************************************************************************************** *
+ * ScaledUnitModifierList =
+ *   ScaledUnitModifier "=" NUMBER [',' ScaledUnitModifierList];
+ * ******************************************************************************************** */
+ScaledUnitModifierListProduction::ScaledUnitModifierListProduction()
+  : Production()
+{
+  ScaledUnitModifierListProduction::instance = this;
+
+  // ("m" | "s" | "e") "=" NUMBER
+  this->elements.push_back(ScaledUnitModifierProduction::get());
+  this->elements.push_back(new Utils::TokenProduction(T_ASSIGN));
+  this->elements.push_back(NumberProduction::get());
+  // ["," ScaledUnitModifierList]
+  this->elements.push_back(
+        new Utils::OptionalProduction(
+          new Utils::Production(
+            2, new Utils::TokenProduction(T_COMMA), this)));
+}
+
+ScaledUnitModifierListProduction *ScaledUnitModifierListProduction::instance = 0;
+
+Utils::Production *
+ScaledUnitModifierListProduction::get()
+{
+  if (0 == ScaledUnitModifierListProduction::instance) {
+    ScaledUnitModifierListProduction::instance = new ScaledUnitModifierListProduction();
+  }
+  return ScaledUnitModifierListProduction::instance;
+}
+
 
 /* ******************************************************************************************** *
  * Implementation of ScaledUnitListProduction:
@@ -300,13 +331,11 @@ ScaledUnitListProduction::ScaledUnitListProduction()
   // ("mole" | "litre" | ...)
   this->elements.push_back(ScaledUnitIdentifierProduction::get());
 
-  // [":" ("e" | "m" | "s") "=" Number]
-  std::list<Utils::Production *> elements;
-  elements.push_back(new Utils::TokenProduction(T_COLON));
-  elements.push_back(ScaledUnitModifierProduction::get());
-  elements.push_back(new Utils::TokenProduction(T_ASSIGN));
-  elements.push_back(NumberProduction::get());
-  this->elements.push_back(new Utils::OptionalProduction(new Utils::Production(elements)));
+  // [":" ScaledUnitModifierList]
+  this->elements.push_back(
+        new Utils::OptionalProduction(
+          new Utils::Production(
+            2, new Utils::TokenProduction(T_COLON), ScaledUnitModifierListProduction::get())));
 
   // ";"
   this->elements.push_back(new Utils::TokenProduction(T_SEMICOLON));

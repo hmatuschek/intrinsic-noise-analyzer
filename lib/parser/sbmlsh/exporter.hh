@@ -10,22 +10,33 @@ namespace Fluc {
 namespace Parser {
 namespace Sbmlsh {
 
-void __process_model(Ast::Model &model, std::ostream &output);
-void __process_model_header(Ast::Model &model, std::ostream &ouput);
-std::string __get_base_unit_identifier(Ast::ScaledBaseUnit::BaseUnit);
-void __process_unit_definitions(Ast::Model &model, std::ostream &output);
-void __process_compartments(Ast::Model &model, std::ostream &output);
-void __process_compartment(Ast::Compartment *comp, std::ostream &output);
-void __process_species_list(Ast::Model &model, std::ostream &output);
-void __process_species(Ast::Species *species, std::ostream &output);
-void __process_parameter_list(Ast::Model &model, std::ostream &output);
-void __process_parameter(Ast::Parameter *param, std::ostream &output);
-void __process_rule_list(Ast::Model &model, std::ostream &output);
-void __process_rule(Ast::Rule *rule, std::ostream &output);
-void __process_reaction_list(Ast::Model &model, std::ostream &output);
-void __process_reaction(Ast::Reaction *reac, std::ostream &output);
-void __process_kinetic_law(Ast::KineticLaw *law, std::ostream &output);
-void __process_event_list(Ast::Model &model, std::ostream &output);
+/**
+ * Internal used class to serialize an @c Ast::Model instance into SBML-SH.
+ */
+class Writer {
+public:
+  static void processModel(Ast::Model &model, std::ostream &output);
+
+protected:
+  static void processModelHeader(Ast::Model &model, std::ostream &ouput);
+  static std::string getBaseUnitIdentifier(Ast::ScaledBaseUnit::BaseUnit);
+  static void processUnitDefinitions(Ast::Model &model, std::ostream &output);
+  static void processUnitDefinition(Ast::UnitDefinition *unit, std::ostream &output);
+  static void processScaledUnit(const Ast::ScaledBaseUnit &unit, std::ostream &output);
+  static void processCompartments(Ast::Model &model, std::ostream &output);
+  static void processCompartment(Ast::Compartment *comp, std::ostream &output);
+  static void processSpeciesList(Ast::Model &model, std::ostream &output);
+  static void processSpecies(Ast::Species *species, std::ostream &output);
+  static void processParameterList(Ast::Model &model, std::ostream &output);
+  static void processParameter(Ast::Parameter *param, std::ostream &output);
+  static void processRuleList(Ast::Model &model, std::ostream &output);
+  static void processRule(Ast::Rule *rule, std::ostream &output);
+  static void processReactionList(Ast::Model &model, std::ostream &output);
+  static void processReaction(Ast::Reaction *reac, std::ostream &output);
+  static void processKineticLaw(Ast::KineticLaw *law, std::ostream &output);
+  static void processEventList(Ast::Model &model, std::ostream &output);
+};
+
 
 }
 }

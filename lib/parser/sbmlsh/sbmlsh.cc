@@ -49,7 +49,7 @@ Fluc::Parser::Sbmlsh::importModel(const std::string &filename) {
 
 void
 Fluc::Parser::Sbmlsh::exportModel(Ast::Model &model, std::ostream &stream) {
-  __process_model(model, stream);
+  Writer::processModel(model, stream);
 }
 
 
@@ -63,7 +63,7 @@ Fluc::Parser::Sbmlsh::exportModel(Ast::Model &model, const std::string &filename
     throw err;
   }
 
-  __process_model(model, stream);
+  Writer::processModel(model, stream);
   stream.close();
 }
 

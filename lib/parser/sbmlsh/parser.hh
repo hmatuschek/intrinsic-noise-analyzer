@@ -47,7 +47,10 @@ namespace Sbmlsh {
  *   Identifier "=" ScaledUnit {";" ScaledUnit};
  *
  * ScaledUnit =
- *   ("mole" | "litre" | "second" | ...) [":" ("e" | "m" | "s") "=" NUMBER];
+ *   ("mole" | "litre" | "second" | ...) [":" ScaledUnitModifier];
+ *
+ * ScaledUnitModifier =
+ *   ("e" | "m" | "s" | "o") "=" NUMBER ["," ScaledUnitModifier];
  *
  * CompartmentDefinitions =
  *   "@compartments" EOL CompartmentDefinitionList;

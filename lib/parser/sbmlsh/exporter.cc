@@ -7,7 +7,7 @@
 
 
 using namespace Fluc;
-
+using namespace Fluc::Parser::Sbmlsh;
 
 
 /* ******************************************************************************************** *
@@ -15,20 +15,20 @@ using namespace Fluc;
  * ******************************************************************************************** */
 /* Dispatcher. */
 void
-Parser::Sbmlsh::__process_model(Ast::Model &model, std::ostream &output) {
-  __process_model_header(model, output);
-  __process_unit_definitions(model, output);
-  __process_compartments(model, output);
-  __process_species_list(model, output);
-  __process_parameter_list(model, output);
-  __process_reaction_list(model, output);
-  __process_event_list(model, output);
+Writer::processModel(Ast::Model &model, std::ostream &output) {
+  processModelHeader(model, output);
+  processUnitDefinitions(model, output);
+  processCompartments(model, output);
+  processSpeciesList(model, output);
+  processParameterList(model, output);
+  processReactionList(model, output);
+  processEventList(model, output);
 }
 
 
 /* Serialize model header and default units. */
 void
-Parser::Sbmlsh::__process_model_header(Ast::Model &model, std::ostream &output)
+Writer::processModelHeader(Ast::Model &model, std::ostream &output)
 {
   /// @bug @c Ast::Model has no identifier field, used "model" as identifier here.
   output << "@model:3.1.1 = " << "model";
@@ -47,7 +47,7 @@ Parser::Sbmlsh::__process_model_header(Ast::Model &model, std::ostream &output)
 
     if (unit.getBaseUnit() != Ast::ScaledBaseUnit::MOLE) {
       default_units.push_back(
-            std::pair<char, std::string>('s', __get_base_unit_identifier(unit.getBaseUnit())));
+            std::pair<char, std::string>('s', getBaseUnitIdentifier(unit.getBaseUnit())));
     }
   }
 
@@ -63,7 +63,7 @@ Parser::Sbmlsh::__process_model_header(Ast::Model &model, std::ostream &output)
 
     if (unit.getBaseUnit() != Ast::ScaledBaseUnit::SECOND) {
       default_units.push_back(
-            std::pair<char, std::string>('t', __get_base_unit_identifier(unit.getBaseUnit())));
+            std::pair<char, std::string>('t', getBaseUnitIdentifier(unit.getBaseUnit())));
     }
   }
 
@@ -79,7 +79,7 @@ Parser::Sbmlsh::__process_model_header(Ast::Model &model, std::ostream &output)
 
     if (unit.getBaseUnit() != Ast::ScaledBaseUnit::LITRE) {
       default_units.push_back(
-            std::pair<char, std::string>('v', __get_base_unit_identifier(unit.getBaseUnit())));
+            std::pair<char, std::string>('v', getBaseUnitIdentifier(unit.getBaseUnit())));
     }
   }
 
@@ -97,7 +97,7 @@ Parser::Sbmlsh::__process_model_header(Ast::Model &model, std::ostream &output)
 
     if (unit.getBaseUnit() != Ast::ScaledBaseUnit::METRE) {
       default_units.push_back(
-            std::pair<char, std::string>('l', __get_base_unit_identifier(unit.getBaseUnit())));
+            std::pair<char, std::string>('l', getBaseUnitIdentifier(unit.getBaseUnit())));
     }
   }
 
@@ -112,7 +112,7 @@ Parser::Sbmlsh::__process_model_header(Ast::Model &model, std::ostream &output)
 
 /* Translates a Ast::ScaledBaseUnit::BaseUnit into its string identifier. */
 std::string
-Parser::Sbmlsh::__get_base_unit_identifier(Ast::ScaledBaseUnit::BaseUnit unit)
+Writer::getBaseUnitIdentifier(Ast::ScaledBaseUnit::BaseUnit unit)
 {
   switch (unit) {
   case Ast::ScaledBaseUnit::AMPERE: return "ampere";
@@ -154,26 +154,108 @@ Parser::Sbmlsh::__get_base_unit_identifier(Ast::ScaledBaseUnit::BaseUnit unit)
   return "dimensionless";
 }
 
+
 /* handle unit definitions in given model. */
 void
-Parser::Sbmlsh::__process_unit_definitions(Ast::Model &model, std::ostream &output) {
-  /// @bug There is no way to iterate over all user-defined Units in @c Ast::Model!
+Writer::processUnitDefinitions(Ast::Model &model, std::ostream &output)
+{
+  std::list<std::string> units;
+  std::stringstream temp;
+
+  for(Ast::Model::iterator item = model.begin(); item != model.end(); item++) {
+    // skip non unit definitions
+    if (! Ast::Node::isUnitDefinition(*item)) { continue; }
+    // get unit-definition
+    Ast::UnitDefinition *unit = static_cast<Ast::UnitDefinition *>(*item);
+    // clear stream
+    temp.str("");
+    // process unit definition into temp stream:
+    processUnitDefinition(unit, temp);
+    // Append definition to list of unit definitions:
+    units.push_back(temp.str());
+  }
+
+  // Assemble unit definition section if there are some definitions:
+  if (0 < units.size()) {
+    output << std::endl << "@units";
+    for (std::list<std::string>::iterator row=units.begin(); row!=units.end(); row++) {
+      output << *row;
+    }
+  }
 }
+
+void
+Writer::processUnitDefinition(Ast::UnitDefinition *unit_def, std::ostream &output)
+{
+  std::list<std::string> units;
+  std::stringstream temp;
+
+  const Ast::Unit &unit = unit_def->getUnit();
+  if ( (1 != unit.getMultiplier()) || (0 != unit.getScale())) {
+    processScaledUnit(Ast::ScaledBaseUnit(
+                        Ast::ScaledBaseUnit::DIMENSIONLESS, unit.getMultiplier(),
+                        unit.getScale(), 1),
+                      temp);
+    units.push_back(temp.str()); temp.str("");
+  }
+
+  // process scaled base unit of unit:
+  for (Ast::Unit::iterator it=unit.begin(); it != unit.end(); it++) {
+    processScaledUnit(Ast::ScaledBaseUnit(it->first, 1, 0, it->second), temp);
+    units.push_back(temp.str()); temp.str();
+  }
+
+  // Serialize
+  output << std::endl << " " << unit_def->getIdentifier() << " = ";
+  std::list<std::string>::iterator item = units.begin();
+  if (0 < units.size()) {
+    for (size_t i=0; i<(units.size()-1); i++, item++) {
+      output << *item << "; ";
+    }
+    output << *item;
+  }
+}
+
+void
+Writer::processScaledUnit(const Ast::ScaledBaseUnit &unit, std::ostream &output)
+{
+  std::list<std::string> modifier; std::stringstream temp;
+  if (1 != unit.getMultiplier()) {
+    temp << "m=" << unit.getMultiplier(); modifier.push_back(temp.str()); temp.str("");
+  }
+  if (0 != unit.getScale()) {
+    temp << "s=" << unit.getScale(); modifier.push_back(temp.str()); temp.str("");
+  }
+  if (1 != unit.getExponent()) {
+    temp << "e=" << unit.getExponent(); modifier.push_back(temp.str()); temp.str("");
+  }
+
+  output << Writer::getBaseUnitIdentifier(unit.getBaseUnit());
+  if (0 < modifier.size()) {
+    output << ": ";
+    std::list<std::string>::iterator item = modifier.begin();
+    for (size_t i=0; i<(modifier.size()-1); i++, item++) {
+      output << *item << ", ";
+    }
+    output << *item;
+  }
+}
+
 
 /* Handle compartments. */
 void
-Parser::Sbmlsh::__process_compartments(Ast::Model &model, std::ostream &output) {
+Writer::processCompartments(Ast::Model &model, std::ostream &output) {
   if (0 == model.numCompartments()) return;
 
   output << std::endl << "@compartments";
   for (size_t i=0; i<model.numCompartments(); i++) {
-    __process_compartment(model.getCompartment(i), output);
+    processCompartment(model.getCompartment(i), output);
   }
 }
 
 /* Handle compartment. */
 void
-Parser::Sbmlsh::__process_compartment(Ast::Compartment *comp, std::ostream &output)
+Writer::processCompartment(Ast::Compartment *comp, std::ostream &output)
 {
   output << std::endl << "  " << comp->getIdentifier();
   if (comp->hasValue()) { output << " = " << comp->getValue(); }
@@ -182,18 +264,18 @@ Parser::Sbmlsh::__process_compartment(Ast::Compartment *comp, std::ostream &outp
 
 /* handle list of species. */
 void
-Parser::Sbmlsh::__process_species_list(Ast::Model &model, std::ostream &output) {
+Writer::processSpeciesList(Ast::Model &model, std::ostream &output) {
   if (0 == model.numSpecies()) return;
 
   output << std::endl << "@species";
   for (size_t i=0; i<model.numSpecies(); i++) {
-    __process_species(model.getSpecies(i), output);
+    processSpecies(model.getSpecies(i), output);
   }
 }
 
 /* handle single species. */
 void
-Parser::Sbmlsh::__process_species(Ast::Species *species, std::ostream &output) {
+Writer::processSpecies(Ast::Species *species, std::ostream &output) {
   output << std::endl << "  " << species->getCompartment()->getIdentifier() << ": ";
   if (species->getUnit().isSubstanceUnit()) { output << "[" << species->getIdentifier() << "] "; }
   else { output << species->getIdentifier() << " "; }
@@ -207,19 +289,19 @@ Parser::Sbmlsh::__process_species(Ast::Species *species, std::ostream &output) {
 
 /* Handle parameter definition list. */
 void
-Parser::Sbmlsh::__process_parameter_list(Ast::Model &model, std::ostream &output)
+Writer::processParameterList(Ast::Model &model, std::ostream &output)
 {
   if (0 == model.numParameters()) return;
   output << std::endl << "@parameters";
 
   for (size_t i=0; i<model.numParameters(); i++) {
-    __process_parameter(model.getParameter(i), output);
+    processParameter(model.getParameter(i), output);
   }
 }
 
 /* Serialize single paramter definition. */
 void
-Parser::Sbmlsh::__process_parameter(Ast::Parameter *param, std::ostream &output)
+Writer::processParameter(Ast::Parameter *param, std::ostream &output)
 {
   output << std::endl << param->getIdentifier() << "=" << param->getValue();
   if (! param->isConst()) { output << " v"; }
@@ -229,7 +311,7 @@ Parser::Sbmlsh::__process_parameter(Ast::Parameter *param, std::ostream &output)
 
 /* Handle list of rules. */
 void
-Parser::Sbmlsh::__process_rule_list(Ast::Model &model, std::ostream &output)
+Writer::processRuleList(Ast::Model &model, std::ostream &output)
 {
   /// @bug There is no way to iterate over rules.
 }
@@ -237,18 +319,18 @@ Parser::Sbmlsh::__process_rule_list(Ast::Model &model, std::ostream &output)
 
 /* Handle list of reactions. */
 void
-Parser::Sbmlsh::__process_reaction_list(Ast::Model &model, std::ostream &output)
+Writer::processReactionList(Ast::Model &model, std::ostream &output)
 {
   if (0 == model.numReactions()) { return; }
   output << std::endl << "@reactions";
   for (size_t i=0; i<model.numReactions(); i++) {
-    __process_reaction(model.getReaction(i), output);
-    __process_kinetic_law(model.getReaction(i)->getKineticLaw(), output);
+    processReaction(model.getReaction(i), output);
+    processKineticLaw(model.getReaction(i)->getKineticLaw(), output);
   }
 }
 
 void
-Parser::Sbmlsh::__process_reaction(Ast::Reaction *reac, std::ostream &output)
+Writer::processReaction(Ast::Reaction *reac, std::ostream &output)
 {
   std::stringstream temp;
 
@@ -340,7 +422,7 @@ Parser::Sbmlsh::__process_reaction(Ast::Reaction *reac, std::ostream &output)
 }
 
 void
-Parser::Sbmlsh::__process_kinetic_law(Ast::KineticLaw *law, std::ostream &output)
+Writer::processKineticLaw(Ast::KineticLaw *law, std::ostream &output)
 {
   output << std::endl << law->getRateLaw();
 
@@ -393,7 +475,7 @@ Parser::Sbmlsh::__process_kinetic_law(Ast::KineticLaw *law, std::ostream &output
 
 /* Serialize events... (haha!)*/
 void
-Parser::Sbmlsh::__process_event_list(Ast::Model &model, std::ostream &output)
+Writer::processEventList(Ast::Model &model, std::ostream &output)
 {
   /// @todo Implement serialization of event, as soon as they are supported by the @c Ast::Model.
 }

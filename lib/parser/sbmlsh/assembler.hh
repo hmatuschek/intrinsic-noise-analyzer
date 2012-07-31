@@ -55,6 +55,8 @@ protected:
   void processUnitDefinition(Utils::ConcreteSyntaxTree &unit);
   void processScaledUnitList(Utils::ConcreteSyntaxTree &unit,
                              std::list<Ast::ScaledBaseUnit> &unit_list);
+  void processScaledUnitModifierList(Utils::ConcreteSyntaxTree &sulist,
+                                     double &multiplier, int &scale, int &exponent);
   void processCompartmentDefinitions(Utils::ConcreteSyntaxTree &comp);
   void processSpeciesDefinition(Utils::ConcreteSyntaxTree &spec);
   void processSpeciesModifierList(Utils::ConcreteSyntaxTree &spec_mod, bool &has_substance_units,
