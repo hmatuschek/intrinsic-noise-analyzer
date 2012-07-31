@@ -9,10 +9,12 @@ namespace Parser {
 namespace Sbml {
 
 
-/** Imports an @c Ast::Model from the given SBML file. */
+/** Imports an @c Ast::Model from the given SBML file.
+ * @ingroup modelio */
 void importModel(Ast::Model &model, const std::string &filename);
 
-/** Creates and imports an @c Ast::Model from the given SBML file. */
+/** Creates and imports an @c Ast::Model from the given SBML file.
+ * @ingroup modelio */
 Ast::Model *importModel(const std::string &filename);
 
 

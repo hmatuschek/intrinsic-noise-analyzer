@@ -1,5 +1,5 @@
-#ifndef __FLUC_SBMLSH_PRODUCTIONS_HH__
-#define __FLUC_SBMLSH_PRODUCTIONS_HH__
+#ifndef __INA_PARSER_SBMLSH_PRODUCTIONS_HH__
+#define __INA_PARSER_SBMLSH_PRODUCTIONS_HH__
 
 #include "lexer.hh"
 #include <utils/parser.hh>
@@ -41,21 +41,15 @@ private:
 class EndOfLineProduction : public Utils::Production
 {
 protected:
-  /**
-   * Hidden constructor.
-   */
+  /** Hidden constructor. */
   EndOfLineProduction();
 
 public:
-  /**
-   * Factory method.
-   */
+  /** Factory method. */
   static Utils::Production *get();
 
 private:
-  /**
-   * Singleton instance.
-   */
+  /** Singleton instance. */
   static EndOfLineProduction *instance;
 };
 
@@ -64,7 +58,7 @@ private:
  * DefaultUnitIdentifier =
  *   ("s" | "t" | "v" | "a" | "l" | "e" | "c");
  *
- * @todo 'e' & 'c' are no default unit identifier!
+ * @todo 'e' & 'c' are no default unit identifiers!
  */
 class DefaultUnitIdentifierProduction : public Utils::TokenProduction
 {
@@ -531,21 +525,15 @@ private:
 class RuleDefinitionListProduction : public Utils::Production
 {
 protected:
-  /**
-   * Hidden constructor.
-   */
+  /** Hidden constructor. */
   RuleDefinitionListProduction();
 
 public:
-  /**
-   * Factory method.
-   */
+  /** Factory method. */
   static Utils::Production *get();
 
 private:
-  /**
-   * Singleton instance.
-   */
+  /** Singleton instance. */
   static RuleDefinitionListProduction *instance;
 };
 
@@ -557,21 +545,15 @@ private:
 class RuleDefinitionsProduction : public Utils::Production
 {
 protected:
-  /**
-   * Hidden constructor.
-   */
+  /** Hidden constructor. */
   RuleDefinitionsProduction();
 
 public:
-  /**
-   * Factory method.
-   */
+  /** Factory method. */
   static Utils::Production *get();
 
 private:
-  /**
-   * Singleton instance.
-   */
+  /** Singleton instance. */
   static RuleDefinitionsProduction *instance;
 };
 
@@ -583,21 +565,15 @@ private:
 class StoichiometrySumProduction : public Utils::Production
 {
 protected:
-  /**
-   * Hidden constructor.
-   */
+  /** Hidden constructor. */
   StoichiometrySumProduction();
 
 public:
-  /**
-   * Factory method.
-   */
+  /** Factory method. */
   static Utils::Production *get();
 
 private:
-  /**
-   * singleton instance.
-   */
+  /** singleton instance. */
   static StoichiometrySumProduction *instance;
 };
 
@@ -609,21 +585,15 @@ private:
 class ReactionEquationProduction : public Utils::AltProduction
 {
 protected:
-  /**
-   * Hidden constructor.
-   */
+  /** Hidden constructor. */
   ReactionEquationProduction();
 
 public:
-  /**
-   * Factory method.
-   */
+  /** Factory method. */
   static Utils::Production *get();
 
 private:
-  /**
-   * Singleton instance.
-   */
+  /** Singleton instance. */
   static ReactionEquationProduction *instance;
 };
 
@@ -681,18 +651,19 @@ private:
  * ReactionModifierList =
  *   Identifier [',' ReactionModifierList];
  */
-class ReactionModifierList : public Utils::Production
+class ReactionModifierListProduction : public Utils::Production
 {
 protected:
   /** Hidden constructor.*/
-  ReactionModifierList();
+  ReactionModifierListProduction();
 
 public:
   /** Factory method. */
   static Utils::Production *get();
 
 protected:
-  static ReactionModifierList *instance;
+  /** Singleton instance. */
+  static ReactionModifierListProduction *instance;
 };
 
 
@@ -706,21 +677,15 @@ protected:
 class ReactionDefinitionListProduction : public Utils::Production
 {
 protected:
-  /**
-   * Hidden constructor.
-   */
+  /** Hidden constructor. */
   ReactionDefinitionListProduction();
 
 public:
-  /**
-   * Factory method.
-   */
+  /** Factory method. */
   static Utils::Production *get();
 
 private:
-  /**
-   * Singleton instance.
-   */
+  /** Singleton instance. */
   static ReactionDefinitionListProduction *instance;
 };
 
@@ -732,21 +697,15 @@ private:
 class ReactionDefinitionsProduction : public Utils::Production
 {
 protected:
-  /**
-   * Hidden constructor.
-   */
+  /** Hidden constructor. */
   ReactionDefinitionsProduction();
 
 public:
-  /**
-   * Factory method.
-   */
+  /** Factory method. */
   static Utils::Production *get();
 
 private:
-  /**
-   * Singleton instance.
-   */
+  /** Singleton instance. */
   static ReactionDefinitionsProduction *instance;
 };
 
@@ -894,4 +853,4 @@ private:
 }
 }
 
-#endif // PRODUCTIONS_HH
+#endif // __INA_PARSER_SBMLSH_PRODUCTIONS_HH__

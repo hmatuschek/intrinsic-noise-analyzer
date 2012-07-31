@@ -898,24 +898,24 @@ ReactionDefinitionsProduction::get()
  * ReactionModifierList =
  *   Identifier ["," ReactionModifierList];
  * ******************************************************************************************** */
-ReactionModifierList::ReactionModifierList()
+ReactionModifierListProduction::ReactionModifierListProduction()
   : Utils::Production()
 {
-  ReactionModifierList::instance = this;
+  ReactionModifierListProduction::instance = this;
   this->elements.push_back(new Utils::TokenProduction(T_IDENTIFIER));
   this->elements.push_back(
         new Utils::OptionalProduction(
           new Utils::Production(2, new Utils::TokenProduction(T_COMMA), this)));
 }
 
-ReactionModifierList *ReactionModifierList::instance = 0;
+ReactionModifierListProduction *ReactionModifierListProduction::instance = 0;
 
 Utils::Production *
-ReactionModifierList::get()
+ReactionModifierListProduction::get()
 {
-  if (0 == ReactionModifierList::instance)
-    return new ReactionModifierList();
-  return ReactionModifierList::instance;
+  if (0 == ReactionModifierListProduction::instance)
+    return new ReactionModifierListProduction();
+  return ReactionModifierListProduction::instance;
 }
 
 
@@ -960,7 +960,7 @@ ReactionDefinitionListProduction::ReactionDefinitionListProduction()
           new Utils::Production(
             2,
             new Utils::TokenProduction(T_COLON),
-            ReactionModifierList::get())));
+            ReactionModifierListProduction::get())));
 
   // EOL KineticLaw
   this->elements.push_back(EndOfLineProduction::get());

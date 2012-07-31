@@ -414,14 +414,6 @@ Writer::processReaction(Ast::Reaction *reac, std::ostream &output)
     modifiers.push_back((*item)->getIdentifier());
   }
 
-  // Check if there is only one modifier:
-  if (1 != modifiers.size()) {
-    ExportError err;
-    err << "Can not export reaction " << reac->getIdentifier() << " as SBML-SH: "
-        << "There are more than one modifiers for this reaction.";
-    throw err;
-  }
-
   output << std::endl;
   // Serialize reactants:
   if (0 < reactants.size()) {
@@ -443,8 +435,13 @@ Writer::processReaction(Ast::Reaction *reac, std::ostream &output)
   }
 
   // Serialize modifier
-  if (1 == modifiers.size()) {
-    output << " : " << modifiers.front();
+  if (0 < modifiers.size()) {
+    output << " : ";
+    std::list<std::string>::iterator mod = modifiers.begin();
+    for (size_t i=0; i<(modifiers.size()-1); i++, mod++) {
+      output << *mod << ", ";
+    }
+    output << *mod;
   }
 }
 
