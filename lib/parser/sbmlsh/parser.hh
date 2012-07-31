@@ -82,7 +82,6 @@ namespace Sbmlsh {
  * ReactionDefinitions =
  *   "@reactions" EOL ReactionDefinitionList;
  *
- * @bug Wrong grammar definition/implementation for reaction definitions. Also fix grammar docs.
  * ReactionDefinitionList =
  *   ("@r" | "@rr") Identifier [QuotedString] EOL
  *   ReactionEquation [":" ReactionModifierList]
