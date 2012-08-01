@@ -121,7 +121,7 @@ Within the unit section it is possible to define new units\footnote{Altough I do
 <UnitDefinitionList> ::= <EOL> <UnitDefinition> <UnitDefinitionList>
   \alt <EOL> <UnitDefinition>
   
-<UnitDefinition> ::= <Identifier> '=' <ScaledUnitList> 
+<UnitDefinition> ::= <Identifier> '=' <ScaledUnitList> [<QuotedString>]
 
 <ScaledUnitList> ::= <ScaledUnit>
   \alt <ScaledUnit> ';' <ScaledUnitList>
@@ -132,7 +132,7 @@ Within the unit section it is possible to define new units\footnote{Altough I do
 \end{grammar}
 \caption{Unit definition grammar.} \label{fig:unit}
 \end{table}
-Each unit definition consists of an \emph{Identifier} specifying the unique identifier of the unit and a list of scaled generic units (\emph{ScaledUnit} production). A \emph{ScaledUnit} production consists of a generic SBML unit followed by an optional modifier specifying the exponent (\emph{e}), multiplier (\emph{m}) or scale (\emph{s}). For the definition of the \emph{GenericUnit} production, see table \ref{tab:defaultunit}.
+Each unit definition consists of an \emph{Identifier} specifying the unique identifier of the unit and a list of scaled generic units (\emph{ScaledUnit} production). A \emph{ScaledUnit} production consists of a generic SBML unit followed by an optional modifier specifying the exponent (\emph{e}), multiplier (\emph{m}) scale (\emph{s}) or offset (\emph{o}). For the definition of the \emph{GenericUnit} production, see table \ref{tab:defaultunit}.
 
 
 \subsubsection*{compartment definition}
@@ -145,7 +145,7 @@ Within the compartment section (table \ref{tab:compartment}), compartments for t
 <CompartmentList> ::= <EOL> <Compartment> <CompartmentList>
   \alt <EOL> <Compartment> 
   
-<Compartment> ::= <Identifier> ['=' <Number>] [<QuotedString>]
+<Compartment> ::= <Identifier> ['"<"'<Identifier>] ['=' <Expression>] [<QuotedString>]
 \end{grammar}
 \caption{Compartment definition grammar.} \label{tab:compartment}
 \end{table}
@@ -164,7 +164,7 @@ The species section (table \ref{tab:species}) consists of the \emph{@species} ke
 <SpeciesList> ::= <EOL> <Species> <SepeciesList> 
  \alt <EOL> <Species> 
  
-<Species> ::= <Identifier> ':' (('[' <Identifier>']') | <Identifier>) '=' <Number> [<SpeciesModifierList>] [<QuotedString>]
+<Species> ::= <Identifier> ':' (('[' <Identifier>']') | <Identifier>) '=' <Expression> [<SpeciesModifierList>] [<QuotedString>]
 
 <SpeciesModifierList> ::= <SpeciesModifier> <SpeciesModifierList>
   \alt <SpecieModifier>
@@ -187,7 +187,7 @@ The parameter section consists of the \emph{@parameters} keyword followed by a l
 <ParameterList> ::= <EOL> <Parameter> <ParameterList>
   \alt <EOL> <Parameter>
   
-<Parameter> ::= <Identifier> '=' <Number> ['v'] [QuotedString]
+<Parameter> ::= <Identifier> '=' <Expression> ['v'] [QuotedString]
 \end{grammar}
 \end{table}
 
@@ -221,7 +221,7 @@ Reactions can be defined within the reactions section (\ref{tab:reactions}). Thi
 <ReactionList> ::= <EOL> <Reaction> <ReactionList>
   \alt <EOL> <Reaction>
   
-<Reaction> ::= ('@r' | '@rr') <Identifier> [<QuotedString>] <EOL> <ReactionEquation> [':' <ReactionModifierList>] <EOL> <KineticLaw>
+<Reaction> ::= ('@r' | '@rr') '=' <Identifier> [<QuotedString>] <EOL> <ReactionEquation> [':' <ReactionModifierList>] <EOL> <KineticLaw>
 
 <ReactionModifierList> ::= <Identifier> [',' <ReactionModifierList>]
 \end{grammar}
@@ -266,14 +266,14 @@ Events can be described within the events section. This section consist of the \
 <EventList> ::= <EOL> <Event> <EOL> <EventList>
   \alt <EOL> <Event>
   
-<Event> ::= <Identifier> '=' <Condition> [';' <Number>] ':' <AssignmentList> [<QuotedString>]
+<Event> ::= <Identifier> '=' <Condition> [';' <Expression>] ':' <AssignmentList> [<QuotedString>]
 
-<Condition> ::= <Identifier> ('==' | '!=' | '>' | '>=' | '<' | '<=') <Number>;
+<Condition> ::= <Identifier> ('"=="' | '"!="' | '">"' | '">="' | '"<"' | '"<="') <Expression>;
 
 <AssignmentList> ::= <Assignment> ';' <AssignmentList>
   \alt <Assignment>
   
-<Assignment> ::= <Identifier> '=' <Number>
+<Assignment> ::= <Identifier> '=' <Expression>
 \end{grammar}
 \end{table}
 

@@ -10,6 +10,8 @@ namespace Expr {
 
 /**
  * Represents an expression context for symbol resolution.
+ *
+ * This class is used by all assemblers to perfrom symbol resolution in nested contexts.
  */
 class Context {
 protected:
@@ -41,8 +43,10 @@ public:
 };
 
 
-/** Parses an expression in the given context.
- * The scope (context) is used to resolve symbols of species, compartments and parameters. */
+/** Parses an expression in the given variable scope.
+ * The scope (context) is used to resolve symbols of species, compartments and parameters.
+ *
+ * @ingroup modelio */
 GiNaC::ex parseExpression(const std::string &text, Ast::Scope *scope);
 
 }

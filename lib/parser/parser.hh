@@ -8,6 +8,7 @@
  * from and into several model representations.
  */
 
+#include "expr/parser.hh"
 #include "sbml/sbml.hh"
 #include "sbmlsh/sbmlsh.hh"
 
