@@ -13,7 +13,7 @@ using namespace Fluc;
 using namespace Fluc::Parser::Expr;
 
 
-Context::Context(Ast::Model *model)
+Context::Context(Ast::Scope *model)
   : _scope_stack()
 {
   _scope_stack.push_back(model);
@@ -31,8 +31,16 @@ Context::popScope() {
 }
 
 
+
 GiNaC::symbol
 Context::resolve(const std::string &name)
+{
+  return resolveVariable(name)->getSymbol();
+}
+
+
+Ast::VariableDefinition *
+Context::resolveVariable(const std::string &name)
 {
   std::vector<Ast::Scope *>::reverse_iterator scope=_scope_stack.rbegin();
   for ( ; scope != _scope_stack.rend(); scope++) {
@@ -44,7 +52,7 @@ Context::resolve(const std::string &name)
         err << "Can not resolve symbol " << name << ": Identifier does not refer to a variable!";
         throw err;
       }
-      return var->getSymbol();
+      return var;
     }
 
     if ((*scope)->isClosed()) {
@@ -62,7 +70,7 @@ Context::resolve(const std::string &name)
 
 
 GiNaC::ex
-Parser::Expr::parseExpression(const std::string &text, Context &ctx)
+Parser::Expr::parseExpression(const std::string &text, Ast::Scope *scope)
 {
   std::stringstream stream(text);
 
@@ -86,5 +94,5 @@ Parser::Expr::parseExpression(const std::string &text, Context &ctx)
   ExpressionProduction::get()->parse(lexer, cst);
   ExpressionProduction::get()->notify(lexer, cst);
 
-  return Assembler::processExpression(cst, ctx, lexer);
+  return Expr::Assembler(scope, lexer).processExpression(cst);
 }

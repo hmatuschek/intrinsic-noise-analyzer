@@ -3,6 +3,7 @@
 using namespace Fluc;
 using namespace Fluc::Parser::Expr;
 
+
 #define ASSERT_UNARY_FUNCTION(name, nargs) if (1 != nargs) { \
   SBMLParserError err; err << name << "() takes exactly one argument, " << nargs << " given."; \
   throw err; }
@@ -13,8 +14,15 @@ using namespace Fluc::Parser::Expr;
 
 
 
+Assembler::Assembler(Ast::Scope *model, Utils::Lexer &lexer)
+  : Context(model), _lexer(lexer)
+{
+  // pass...
+}
+
+
 GiNaC::ex
-Assembler::processExpression(Utils::ConcreteSyntaxTree &expr, Context &ctx, Utils::Lexer &lexer)
+Assembler::processExpression(Utils::ConcreteSyntaxTree &expr)
 {
   /* Expression =               : expr
    *   (                          : expr[0]
@@ -24,8 +32,8 @@ Assembler::processExpression(Utils::ConcreteSyntaxTree &expr, Context &ctx, Util
    *    ProductExpression;        : expr[0] */
 
   if (0 == expr.getAltIdx()) {
-    GiNaC::ex lhs = processProduct(expr[0][0], ctx, lexer);
-    GiNaC::ex rhs = processExpression(expr[0][2], ctx, lexer);
+    GiNaC::ex lhs = processProduct(expr[0][0]);
+    GiNaC::ex rhs = processExpression(expr[0][2]);
     if (0 == expr[0][1].getAltIdx()) {
       return lhs + rhs;
     } else {
@@ -33,12 +41,12 @@ Assembler::processExpression(Utils::ConcreteSyntaxTree &expr, Context &ctx, Util
     }
   }
 
-  return processProduct(expr[0], ctx, lexer);
+  return processProduct(expr[0]);
 }
 
 
 GiNaC::ex
-Assembler::processProduct(Utils::ConcreteSyntaxTree &expr, Context &ctx, Utils::Lexer &lexer)
+Assembler::processProduct(Utils::ConcreteSyntaxTree &expr)
 {
   /* ProductExpression =         : expr
    *   (                         : expr[0]
@@ -48,8 +56,8 @@ Assembler::processProduct(Utils::ConcreteSyntaxTree &expr, Context &ctx, Utils::
    *   PowerExpression;         : expr[0]   */
 
    if (0 == expr.getAltIdx()) {
-     GiNaC::ex lhs = processPower(expr[0][0], ctx, lexer);
-     GiNaC::ex rhs = processProduct(expr[0][2], ctx, lexer);
+     GiNaC::ex lhs = processPower(expr[0][0]);
+     GiNaC::ex rhs = processProduct(expr[0][2]);
      if (0 == expr[0][1].getAltIdx()) {
        return lhs + rhs;
      } else {
@@ -57,28 +65,28 @@ Assembler::processProduct(Utils::ConcreteSyntaxTree &expr, Context &ctx, Utils::
      }
    }
 
-   return processPower(expr[0], ctx, lexer);
+   return processPower(expr[0]);
 }
 
 
 GiNaC::ex
-Assembler::processPower(Utils::ConcreteSyntaxTree &expr, Context &ctx, Utils::Lexer &lexer)
+Assembler::processPower(Utils::ConcreteSyntaxTree &expr)
 {
   /* PowerExpression =
    *   (AtomicExpression ("^"|"**") PowerExpression) | AtomicExpression. */
 
   if (0 == expr.getAltIdx()) {
-    GiNaC::ex lhs = processAtomic(expr[0][0], ctx, lexer);
-    GiNaC::ex rhs = processPower(expr[0][2], ctx, lexer);
+    GiNaC::ex lhs = processAtomic(expr[0][0]);
+    GiNaC::ex rhs = processPower(expr[0][2]);
     return GiNaC::pow(lhs, rhs);
   }
 
-  return processAtomic(expr[0], ctx, lexer);
+  return processAtomic(expr[0]);
 }
 
 
 GiNaC::ex
-Assembler::processAtomic(Utils::ConcreteSyntaxTree &expr, Context &ctx, Utils::Lexer &lexer)
+Assembler::processAtomic(Utils::ConcreteSyntaxTree &expr)
 {
   /* AtomicExpression =       : expr
    *   Number |                 : expr[0]
@@ -88,22 +96,22 @@ Assembler::processAtomic(Utils::ConcreteSyntaxTree &expr, Context &ctx, Utils::L
    *   "-" AtomicExpression     : expr[0]; AtomicExpression -> expr[0][1] */
 
   if (0 == expr.getAltIdx()) {
-    return processNumber(expr[0], lexer);
+    return processNumber(expr[0]);
   } else if (1 == expr.getAltIdx()) {
-    return processFunctionCall(expr[0], ctx, lexer);
+    return processFunctionCall(expr[0]);
   } else if (2 == expr.getAltIdx()) {
-    std::string identifier = lexer[expr[0].getTokenIdx()].getValue();
-    return ctx.resolve(identifier);
+    std::string identifier = _lexer[expr[0].getTokenIdx()].getValue();
+    return resolve(identifier);
   } else if (3 == expr.getAltIdx()) {
-    return processExpression(expr[0][1], ctx, lexer);
+    return processExpression(expr[0][1]);
   } else {
-    return -processAtomic(expr[0][1], ctx, lexer);
+    return -processAtomic(expr[0][1]);
   }
 }
 
 
 GiNaC::ex
-Assembler::processFunctionCall(Utils::ConcreteSyntaxTree &expr, Context &ctx, Utils::Lexer &lexer)
+Assembler::processFunctionCall(Utils::ConcreteSyntaxTree &expr)
 {
   /* FunctionCall =            : expr
    *   Identifier                : expr[0]
@@ -111,9 +119,9 @@ Assembler::processFunctionCall(Utils::ConcreteSyntaxTree &expr, Context &ctx, Ut
    *   FunctionCallArguments     : expr[2]
    *   ")";  */
   // Get function name
-  std::string name = lexer[expr[0].getTokenIdx()].getValue();
+  std::string name = _lexer[expr[0].getTokenIdx()].getValue();
   // Get function arguments
-  std::vector<GiNaC::ex> args; processFunctionCallArguments(expr[2], ctx, lexer, args);
+  std::vector<GiNaC::ex> args; processFunctionCallArguments(expr[2], args);
 
   // Dispatch...
   if ("abs" == name) {
@@ -173,20 +181,19 @@ Assembler::processFunctionCall(Utils::ConcreteSyntaxTree &expr, Context &ctx, Ut
 
 
 void
-Assembler::processFunctionCallArguments(
-  Utils::ConcreteSyntaxTree &expr, Context &ctx, Utils::Lexer &lexer, std::vector<GiNaC::ex> &args)
+Assembler::processFunctionCallArguments(Utils::ConcreteSyntaxTree &expr, std::vector<GiNaC::ex> &args)
 {
   /* FunctionCallArguments =
    *   Expression [ "," FunctionCallArguments] */
-  args.push_back(processExpression(expr[0], ctx, lexer));
+  args.push_back(processExpression(expr[0]));
   if (expr[1].matched()) {
-    processFunctionCallArguments(expr[1][0][1], ctx, lexer, args);
+    processFunctionCallArguments(expr[1][0][1], args);
   }
 }
 
 
-GiNaC::ex
-Assembler::processNumber(Utils::ConcreteSyntaxTree &num, Utils::Lexer &lexer)
+double
+Assembler::processNumber(Utils::ConcreteSyntaxTree &num)
 {
   /* Number =
    *   ["-"] (INTEGER | FLOAT); */
@@ -197,9 +204,9 @@ Assembler::processNumber(Utils::ConcreteSyntaxTree &num, Utils::Lexer &lexer)
   }
 
   if (0 == num[1].getAltIdx()) {
-    value *= toNumber<int>(lexer[num[1][0].getTokenIdx()].getValue());
+    value *= toNumber<int>(_lexer[num[1][0].getTokenIdx()].getValue());
   } else {
-    value *= toNumber<double>(lexer[num[1][0].getTokenIdx()].getValue());
+    value *= toNumber<double>(_lexer[num[1][0].getTokenIdx()].getValue());
   }
 
   return value;

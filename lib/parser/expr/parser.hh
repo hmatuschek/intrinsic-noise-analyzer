@@ -18,7 +18,7 @@ protected:
 
 public:
   /** Constructs an expression context using the given model as the global namespace/context. */
-  Context(Ast::Model *model);
+  Context(Ast::Scope *model);
 
   /** Pushes a (local) scope on the scope stack.  */
   void pushScope(Ast::Scope *scope);
@@ -31,12 +31,19 @@ public:
    * @throws SymbolError If the name can not be resolved.
    */
   GiNaC::symbol resolve(const std::string &name);
+
+  /**
+   * Resolves the given variable name using the current context.
+   *
+   * @throws SymbolError If the name can not be resolved.
+   */
+  Ast::VariableDefinition *resolveVariable(const std::string &name);
 };
 
 
 /** Parses an expression in the given context.
- * The context is used to resolve symbols of species, compartments and parameters. */
-GiNaC::ex parseExpression(const std::string &text, Context &ctx);
+ * The scope (context) is used to resolve symbols of species, compartments and parameters. */
+GiNaC::ex parseExpression(const std::string &text, Ast::Scope *scope);
 
 }
 }

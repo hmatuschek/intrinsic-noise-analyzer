@@ -5,7 +5,7 @@
 
 #include "utils/parser.hh"
 #include "utils/lexer.hh"
-#include "parser/expr/parser.hh"
+#include "parser/expr/assembler.hh"
 #include <typeinfo>
 
 
@@ -28,13 +28,9 @@ namespace Sbmlsh {
 
 /** This class takes the concrete syntax tree (CST) of some parsed SBML-SH code and assembles a
  * @c Ast::Model instance from it. */
-class Assembler : public Expr::Context
+class Assembler : public Expr::Assembler
 {
 protected:
-  /** Holds a weak reference to the lexer. The lexer instance is needed to access the values of the
-   * token. */
-  Utils::Lexer &_lexer;
-
   /** Holds a weak reference to the model being assembled. */
   Ast::Model &_model;
 
@@ -77,30 +73,6 @@ protected:
   void processReactionEquation(Utils::ConcreteSyntaxTree &law, Ast::Reaction *reaction);
   void processReactants(Utils::ConcreteSyntaxTree &sum, Ast::Reaction *reaction);
   void processProducts(Utils::ConcreteSyntaxTree &sum, Ast::Reaction *reaction);
-
-  GiNaC::ex processExpression(Utils::ConcreteSyntaxTree &expr);
-
-  GiNaC::ex resolveSymbol(const std::string &name);
-  Ast::VariableDefinition *resolveVariable(const std::string &name);
-  double processNumber(Utils::ConcreteSyntaxTree &num);
-
-
-protected:
-  /** Tiny helper function to parse numbers from strings. */
-  template <typename T>
-  static T toNumber(const std::string &string)
-  {
-    T value;
-
-    std::stringstream buffer(string);
-    if (! (buffer>>value) ) {
-      SBMLParserError err;
-      err << "Can not parse \"" << string << "\" as " << typeid(T).name();
-      throw err;
-    }
-
-    return value;
-  }
 };
 
 

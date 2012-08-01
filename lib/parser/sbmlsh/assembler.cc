@@ -9,7 +9,7 @@ using namespace Fluc::Parser::Sbmlsh;
 
 
 Assembler::Assembler(Ast::Model &model, Utils::Lexer &lexer)
-  : Context(&model), _lexer(lexer), _model(model)
+  : Expr::Assembler(&model, lexer), _model(model)
 {
   // Assemble base unit map;
   _base_unit_map["ampere"] = Ast::ScaledBaseUnit::AMPERE;
@@ -722,67 +722,4 @@ Assembler::processProducts(Utils::ConcreteSyntaxTree &sum, Ast::Reaction *reacti
   if (sum[2].matched()) {
     processProducts(sum[2][0][1], reaction);
   }
-}
-
-
-GiNaC::ex
-Assembler::processExpression(Utils::ConcreteSyntaxTree &expr)
-{
-  return Expr::Assembler::processExpression(expr, *this, _lexer);
-}
-
-GiNaC::ex
-Assembler::resolveSymbol(const std::string &id)
-{
-  return resolveVariable(id)->getSymbol();
-}
-
-
-Ast::VariableDefinition *
-Assembler::resolveVariable(const std::string &id)
-{
-  for (std::vector<Ast::Scope *>::reverse_iterator scope=_scope_stack.rbegin();
-       scope != _scope_stack.rend(); scope++) {
-    if ((*scope)->hasDefinition(id)) {
-      Ast::Definition *def = (*scope)->getDefinition(id);
-      Ast::VariableDefinition *var = 0;
-      if (0 == (var = dynamic_cast<Ast::VariableDefinition *>(def))) {
-        SymbolError err;
-        err << "Can not resolve symbol " << id << ": Identifier does not refer to a variable!";
-        throw err;
-      }
-      return var;
-    }
-
-    if ((*scope)->isClosed()) {
-      SymbolError err;
-      err << "Can not resolve symbol " << id << ": Identifier not found.";
-      throw err;
-    }
-  }
-
-  SymbolError err;
-  err << "Can not resolve symbol " << id << ": Identifier not found.";
-  throw err;
-}
-
-
-double
-Assembler::processNumber(Utils::ConcreteSyntaxTree &num)
-{
-  /* Number =
-   *   ["-"] (INTEGER | FLOAT); */
-  double value = 1.0;
-
-  if (num[0].matched()) {
-    value = -1.0;
-  }
-
-  if (0 == num[1].getAltIdx()) {
-    value *= toNumber<int>(_lexer[num[1][0].getTokenIdx()].getValue());
-  } else {
-    value *= toNumber<double>(_lexer[num[1][0].getTokenIdx()].getValue());
-  }
-
-  return value;
 }

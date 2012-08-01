@@ -2,6 +2,7 @@
 #define __FLUC_PARSER_EXPR_ASSEMBLER_HH__
 
 #include <utils/parser.hh>
+#include <ast/model.hh>
 #include "parser.hh"
 
 
@@ -9,30 +10,41 @@ namespace Fluc {
 namespace Parser {
 namespace Expr {
 
+
 /**
  * Internal used class to assemble @c GiNaC::ex expressions from CST.
+ *
+ * This class is also used by the SBML-SH parser to parse expressions.
  */
-class Assembler
+class Assembler : public Context
 {
+protected:
+  /** Holds the lexer. */
+  Utils::Lexer &_lexer;
+
+public:
+  /** Constructs the assembler for the given scope. */
+  Assembler(Ast::Scope *root, Utils::Lexer &lexer);
+
 public:
   /** Entry point to parse an expression in the given context. */
-  static GiNaC::ex processExpression(Utils::ConcreteSyntaxTree &expr, Context &ctx, Utils::Lexer &lexer);
+  GiNaC::ex processExpression(Utils::ConcreteSyntaxTree &expr);
 
 protected:
   /** Parses a product expression. */
-  static GiNaC::ex processProduct(Utils::ConcreteSyntaxTree &expr, Context &ctx, Utils::Lexer &lexer);
+  GiNaC::ex processProduct(Utils::ConcreteSyntaxTree &expr);
   /** Parses a power expression. */
-  static GiNaC::ex processPower(Utils::ConcreteSyntaxTree &expr, Context &ctx, Utils::Lexer &lexer);
+  GiNaC::ex processPower(Utils::ConcreteSyntaxTree &expr);
   /** Parses an atomic expression. */
-  static GiNaC::ex processAtomic(Utils::ConcreteSyntaxTree &expr, Context &ctx, Utils::Lexer &lexer);
+  GiNaC::ex processAtomic(Utils::ConcreteSyntaxTree &expr);
   /** Parses a function call. */
-  static GiNaC::ex processFunctionCall(Utils::ConcreteSyntaxTree &expr, Context &ctx, Utils::Lexer &lexer);
+  GiNaC::ex processFunctionCall(Utils::ConcreteSyntaxTree &expr);
   /** Parses the arguments of a function call. */
-  static void processFunctionCallArguments(
-    Utils::ConcreteSyntaxTree &expr, Context &ctx, Utils::Lexer &lexer, std::vector<GiNaC::ex> &args);
+  void processFunctionCallArguments(Utils::ConcreteSyntaxTree &expr, std::vector<GiNaC::ex> &args);
   /** Parses a number. */
-  static GiNaC::ex processNumber(Utils::ConcreteSyntaxTree &expr, Utils::Lexer &lexer);
+  double processNumber(Utils::ConcreteSyntaxTree &expr);
 
+protected:
   /** Tiny helper function to parse numbers from strings. */
   template <typename T>
   static T toNumber(const std::string &string)
