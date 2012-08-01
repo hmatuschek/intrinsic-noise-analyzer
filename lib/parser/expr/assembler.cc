@@ -3,6 +3,15 @@
 using namespace Fluc;
 using namespace Fluc::Parser::Expr;
 
+#define ASSERT_UNARY_FUNCTION(name, nargs) if (1 != nargs) { \
+  SBMLParserError err; err << name << "() takes exactly one argument, " << nargs << " given."; \
+  throw err; }
+
+#define ASSERT_BINARY_FUNCTION(name, nargs) if (2 != nargs) { \
+  SBMLParserError err; err << name << "() takes exactly two arguments, " << nargs << " given."; \
+  throw err; }
+
+
 
 GiNaC::ex
 Assembler::processExpression(Utils::ConcreteSyntaxTree &expr, Context &ctx, Utils::Lexer &lexer)
@@ -101,16 +110,60 @@ Assembler::processFunctionCall(Utils::ConcreteSyntaxTree &expr, Context &ctx, Ut
    *   "("
    *   FunctionCallArguments     : expr[2]
    *   ")";  */
+  // Get function name
   std::string name = lexer[expr[0].getTokenIdx()].getValue();
+  // Get function arguments
   std::vector<GiNaC::ex> args; processFunctionCallArguments(expr[2], ctx, lexer, args);
 
+  // Dispatch...
   if ("abs" == name) {
-    if (1 != args.size()) {
-      SBMLParserError err;
-      err << "abs() takes exactly one argument, given " << args.size();
-      throw err;
-    }
+    ASSERT_UNARY_FUNCTION("abs", args.size());
     return GiNaC::abs(args[0]);
+  } else if ("acos" == name) {
+    ASSERT_UNARY_FUNCTION("acos", args.size());
+    return GiNaC::acos(args[0]);
+  } else if ("acosh" == name) {
+    ASSERT_UNARY_FUNCTION("acosh", args.size());
+    return GiNaC::acosh(args[0]);
+  } else if ("asin" == name) {
+    ASSERT_UNARY_FUNCTION("asin", args.size());
+    return GiNaC::asin(args[0]);
+  } else if ("asinh" == name) {
+    ASSERT_UNARY_FUNCTION("asinh", args.size());
+    return GiNaC::asinh(args[0]);
+  } else if ("cos" == name) {
+    ASSERT_UNARY_FUNCTION("cos", args.size());
+    return GiNaC::cos(args[0]);
+  } else if ("cosh" == name) {
+    ASSERT_UNARY_FUNCTION("cosh", args.size());
+    return GiNaC::cosh(args[0]);
+  } else if ("exp" == name) {
+    ASSERT_UNARY_FUNCTION("exp", args.size());
+    return GiNaC::exp(args[0]);
+  } else if ("factorial" == name) {
+    ASSERT_UNARY_FUNCTION("factorial", args.size());
+    return GiNaC::factorial(args[0]);
+  } else if ("log" == name) {
+    ASSERT_UNARY_FUNCTION("log", args.size());
+    return GiNaC::log(args[0]);
+  } else if ("power" == name) {
+    ASSERT_BINARY_FUNCTION("power", args.size());
+    return GiNaC::power(args[0], args[1]);
+  } else if ("sqrt" == name) {
+    ASSERT_UNARY_FUNCTION("sqrt", args.size());
+    return GiNaC::sqrt(args[0]);
+  } else if ("sin" == name) {
+    ASSERT_UNARY_FUNCTION("sin", args.size());
+    return GiNaC::sin(args[0]);
+  } else if ("sinh" == name) {
+    ASSERT_UNARY_FUNCTION("sinh", args.size());
+    return GiNaC::sinh(args[0]);
+  } else if ("tan" == name) {
+    ASSERT_UNARY_FUNCTION("tan", args.size());
+    return GiNaC::tan(args[0]);
+  } else if ("tanh" == name) {
+    ASSERT_UNARY_FUNCTION("tanh", args.size());
+    return GiNaC::tanh(args[0]);
   }
 
   SBMLParserError err;
