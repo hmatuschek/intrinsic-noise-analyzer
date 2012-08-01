@@ -14,6 +14,8 @@ namespace Sbmlsh {
 /**
  * Defines all token types used by the SBML-SH parser
  *
+ * @todo Implement ignored "comment" token for SBML-SH lexer.
+ *
  * @ingroup sbmlsh
  */
 typedef enum {

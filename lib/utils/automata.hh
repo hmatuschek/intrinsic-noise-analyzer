@@ -2,6 +2,7 @@
 #define __FLUC_UTILS_AUTOMATA_HH__
 
 #include <list>
+#include <vector>
 #include <set>
 #include <map>
 #include <sstream>

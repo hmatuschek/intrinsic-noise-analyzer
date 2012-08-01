@@ -32,7 +32,7 @@ namespace Sbmlsh {
  *   [EOL] EndOfStream;
  *
  * ModelDefinition =
- *   "@model" ":" "3.3.1" "=" Identifier [QuotedString] [EOL DefaultUnitDefinitions];
+ *   "@model" ":" "3.1.1" "=" Identifier [QuotedString] [EOL DefaultUnitDefinitions];
  *
  * DefaultUnitDefinitions =
  *   DefaultUnitDefinition {DefaultUnitDefinition};
