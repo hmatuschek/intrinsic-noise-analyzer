@@ -219,18 +219,26 @@ Assembler::processUnitDefinition(Utils::ConcreteSyntaxTree &unit)
   //   Identifier                    :unit[0]  (Token)
   //   "="
   //   ScaledUnitList                :unit[2]
-  //   [EOL UnitDefinitionList]      :unit[3]
+  //   [QuotedString]                :unit[3]; unit[3][0] -> QuotedString
+  //   [EOL UnitDefinitionList]      :unit[4]
 
   // Collect scaled base units for this unit:
   std::list<Ast::ScaledBaseUnit> units;
   processScaledUnitList(unit[2], units);
 
-  // Add unit definition to model:
   std::string identifier = _lexer[unit[0].getTokenIdx()].getValue();
-  _model.addDefinition(new Ast::UnitDefinition(identifier, units));
+  Ast::UnitDefinition *def = new Ast::UnitDefinition(identifier, units);
+
+  if (unit[3].matched()) {
+    std::string name = _lexer[unit[3][0].getTokenIdx()].getValue();
+    def->setName(name);
+  }
+
+  // Add unit definition to model:
+  _model.addDefinition(def);
 
   // If there are some unit definitions left
-  if (unit[3].matched()) {
+  if (unit[4].matched()) {
     processUnitDefinition(unit[3][1]);
   }
 }
@@ -316,30 +324,38 @@ Assembler::processCompartmentDefinitions(Utils::ConcreteSyntaxTree &comp)
 {
   /* CompartmentDefinitionList =        : comp
    *  Identifier                          : comp[0]
-   *  ["=" Number]                        : comp[1], Number: comp[1][1]
-   *  [QuotedString]                      : comp[2]  (token)
-   *  [EOL CompartmentDefinitionList];    : comp[3] */
+   *  ["<" Identifier]                    : comp[1]
+   *  ["=" Expression]                        : comp[2], Number: comp[2][1]
+   *  [QuotedString]                      : comp[3]  (token)
+   *  [EOL CompartmentDefinitionList];    : comp[4] */
 
   std::string id = _lexer[comp[0].getTokenIdx()].getValue();
   Ast::Compartment *compartment = new Ast::Compartment(id, _model.getDefaultVolumeUnit(),
                                                        Ast::Compartment::VOLUME, true);
 
-  // Handle initial value (if defined)
+  // Handle inner/outer relation if needed:
   if (comp[1].matched()) {
-    compartment->setValue(processNumber(comp[1][0][1]));
+    SBMLFeatureNotSupported err;
+    err << "Can not define inner/outer relation for compartment " << id << ": feature not supported.";
+    throw err;
+  }
+
+  // Handle initial value (if defined)
+  if (comp[2].matched()) {
+    compartment->setValue(processExpression(comp[2][0][1]));
   }
 
   // Set name if defined:
-  if (! comp[2].matched()) {
-    compartment->setName(_lexer[comp[2][0].getTokenIdx()].getValue());
+  if (! comp[3].matched()) {
+    compartment->setName(_lexer[comp[3][0].getTokenIdx()].getValue());
   }
 
   // Add compartment to model:
   _model.addDefinition(compartment);
 
   // Process remaining compartments
-  if (comp[3].matched()) {
-    processCompartmentDefinitions(comp[3][1]);
+  if (comp[4].matched()) {
+    processCompartmentDefinitions(comp[4][1]);
   }
 }
 
@@ -354,7 +370,7 @@ Assembler::processSpeciesDefinition(Utils::ConcreteSyntaxTree &spec)
    *     "[" ID "]"                        : spec[2][0][1] -> ID
    *     ID                                : spec[2][0]    -> ID
    *   "="                               : spec[3]
-   *   Number                            : spec[4]
+   *   Expression                        : spec[4]
    *   [SpeciesModifierList]             : spec[5]
    *   [QuotedString]                    : spec[6]
    *   [EOL SpeciesDefinitionList];      : spec[7]
@@ -375,7 +391,7 @@ Assembler::processSpeciesDefinition(Utils::ConcreteSyntaxTree &spec)
     has_initial_amount = true;
   }
 
-  initial_value = processNumber(spec[4]);
+  initial_value = processExpression(spec[4]);
   if (spec[5].matched()) {
     processSpeciesModifierList(spec[5], has_substance_units, has_boundary_condition, is_constant);
   }
@@ -461,13 +477,13 @@ Assembler::processParameterDefinition(Utils::ConcreteSyntaxTree &params)
   /* ParameterDefinitionList =          : params
    *   Identifier                         : params[0]
    *   "="
-   *   Number                             : params[2]
+   *   Expression                         : params[2]
    *   [ParameterModifier]                : params[3]
    *   [QuotedString]                     : params[4]
    *   [EOL ParameterDefinitionList];     : params[5], ParameterDefinitionList = params[5][0][1] */
 
   std::string identifier = _lexer[params[0].getTokenIdx()].getValue();
-  double value = processNumber(params[1]);
+  GiNaC::ex value = processExpression(params[1]);
   bool is_constant = true;
 
   // There is just one modifier, making paramerer non-constant
@@ -544,9 +560,8 @@ Assembler::processReactionDefinitions(Utils::ConcreteSyntaxTree &reac)
    *   EOL
    *   ReactionEquation              : reac[5]
    *   [":" ReactionModifierList]    : reac[6], reac[6,0,1] -> ReactionModifierList
-   *   EOL
-   *   KineticLaw                    : reac[8]
-   *   [EOL ReactionDefinitionList]; : reac[9]         */
+   *   [EOL KineticLaw]              : reac[7], reac[7,0,1] -> KineticLaw
+   *   [EOL ReactionDefinitionList]; : reac[8]         */
   bool is_reversible = false;
   std::string identifier, name;
 
@@ -562,7 +577,13 @@ Assembler::processReactionDefinitions(Utils::ConcreteSyntaxTree &reac)
   }
 
   // Get kinetic law
-  Ast::KineticLaw *kinetic_law = processKineticLaw(reac[8]);
+  if (! reac[7].matched()) {
+    SBMLFeatureNotSupported err;
+    err << "Can not define reaction without kinetic law: Feature not supproted.";
+    throw err;
+  }
+
+  Ast::KineticLaw *kinetic_law = processKineticLaw(reac[7][0][1]);
   Ast::Reaction   *reaction = new Ast::Reaction(identifier, name, kinetic_law, is_reversible);
 
   /* Asseble Reaction Equation */
@@ -581,8 +602,8 @@ Assembler::processReactionDefinitions(Utils::ConcreteSyntaxTree &reac)
   _model.addDefinition(reaction);
 
   // Handle remaining reactions:
-  if (reac[9].matched()) {
-    processReactionDefinitions(reac[9][0][1]);
+  if (reac[8].matched()) {
+    processReactionDefinitions(reac[8][0][1]);
   }
 }
 

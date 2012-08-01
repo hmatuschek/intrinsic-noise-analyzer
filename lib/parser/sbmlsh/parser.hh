@@ -38,31 +38,34 @@ namespace Sbmlsh {
  *   DefaultUnitDefinition {DefaultUnitDefinition};
  *
  * DefaultUnitDefinition =
- *   ("s" | "t" | "v" | "a" | "l" | "e" | "c") "=" Identifier;
+ *   ("s" | "t" | "v" | "a" | "l" | "e" | "c") "=" BaseUnitIdentifier;
  *
  * UnitDefinitions =
  *   "@units" EOL UnitDefinition {EOL UnitDefinition};
  *
  * UnitDefinition =
- *   Identifier "=" ScaledUnit {";" ScaledUnit};
+ *   Identifier "=" ScaledUnit {";" ScaledUnit} [QuotedString];
  *
  * ScaledUnit =
- *   ("mole" | "litre" | "second" | ...) [":" ScaledUnitModifier];
+ *   BaseUnitIdentifier [":" ScaledUnitModifierList];
  *
- * ScaledUnitModifier =
- *   ("e" | "m" | "s" | "o") "=" NUMBER ["," ScaledUnitModifier];
+ * BaseUnitIdentifier =
+ *  ("mole" | "litre" | "second" | ...)
+ *
+ * ScaledUnitModifierList =
+ *   ("e" | "m" | "s" | "o") "=" NUMBER ["," ScaledUnitModifierList];
  *
  * CompartmentDefinitions =
  *   "@compartments" EOL CompartmentDefinitionList;
  *
  * CompartmentDefinitionList =
- *   Identifier ["=" NUMBER] [QuotedString] [EOL CompartmentDefinitionList];
+ *   Identifier ["<" Identifier] ["=" Expression] [QuotedString] [EOL CompartmentDefinitionList];
  *
  * SpeciesDefinitions =
  *   "@species" EOL SpeciesDefinitionList;
  *
  * SpeciesDefinitionList =
- *   ID ":" (("[" ID "]") | ID) "=" Number [SpeciesModifierList] [QuotedString] [EOL SpeciesDefinitionList];
+ *   ID ":" (("[" ID "]") | ID) "=" Expression [SpeciesModifierList] [QuotedString] [EOL SpeciesDefinitionList];
  *
  * SpeciesModifierList =
  *   ("s" | "b" | "c") [SpeciesModifierList];
@@ -71,7 +74,7 @@ namespace Sbmlsh {
  *   "@parameters" EOL ParameterDefinitionList;
  *
  * ParameterDefinitionList =
- *   Identifier "=" Number ["v"] [QuotedString] [EOL ParameterDefinition];
+ *   Identifier "=" Expression ["v"] [QuotedString] [EOL ParameterDefinition];
  *
  * RuleDefinitions =
  *   "@rules" EOL RuleDefinitionList;
@@ -83,7 +86,7 @@ namespace Sbmlsh {
  *   "@reactions" EOL ReactionDefinitionList;
  *
  * ReactionDefinitionList =
- *   ("@r" | "@rr") Identifier [QuotedString] EOL
+ *   ("@r" | "@rr") "=" Identifier [QuotedString] EOL
  *   ReactionEquation [":" ReactionModifierList]
  *   EOL KineticLaw
  *   [EOL ReactionDefinitionList];
@@ -107,16 +110,16 @@ namespace Sbmlsh {
  *   "@events" EOL EventDefinition {EOL EventDefinition};
  *
  * EventDefinition =
- *   Identifier "=" ConditionExpression [";" Number] ":" AssignmentList [QuotedString];
+ *   Identifier "=" ConditionExpression [";" Expression] ":" AssignmentList [QuotedString];
  *
  * ConditionExpression =
- *   Identifier ("==" | "!=" | ">" | ">=" | "<" | "<=") Number;
+ *   Identifier ("==" | "!=" | ">" | ">=" | "<" | "<=") Expression;
  *
  * AssignmentList =
  *   Assignment [";" Assignment];
  *
  * Assignment =
- *   Identifier "=" Number;
+ *   Identifier "=" Expression;
  *
  * Expression =
  *   ProductExpression | (ProductExpression "+" Expression);

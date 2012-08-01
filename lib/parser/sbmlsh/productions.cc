@@ -255,7 +255,7 @@ UnitDefinitionsProduction::get()
  * Implementation of UnitDefinitionListProduction:
  *
  * UnitDefinitionList =
- *   Identifier "=" ScaledUnitList [EOL UnitDefinitionList]
+ *   Identifier "=" ScaledUnitList [QuotedString] [EOL UnitDefinitionList]
  * ******************************************************************************************** */
 UnitDefinitionListProduction::UnitDefinitionListProduction()
   : Production()
@@ -266,6 +266,10 @@ UnitDefinitionListProduction::UnitDefinitionListProduction()
   this->elements.push_back(new Utils::TokenProduction(T_IDENTIFIER));
   this->elements.push_back(new Utils::TokenProduction(T_ASSIGN));
   this->elements.push_back(ScaledUnitListProduction::get());
+
+  // [QuotedString]
+  this->elements.push_back(
+        new Utils::OptionalProduction(new Utils::TokenProduction(T_QUOTED_STRING)));
 
   // [EOL UnitDefinitionList]
   std::list<Production *> tmp;
@@ -497,7 +501,7 @@ CompartmentDefinitionsProduction::get()
  * Implementation of ComparmentDefinitionListProduction:
  *
  * CompartmentDefinitionList =
- *   Identifier ["=" Number] [QuotedString] [EOL CompartmentDefinitionList];
+ *   Identifier ["<" Identifier] ["=" Expression] [QuotedString] [EOL CompartmentDefinitionList];
  * ******************************************************************************************** */
 CompartmentDefinitionListProduction::CompartmentDefinitionListProduction()
   : Production()
@@ -507,11 +511,17 @@ CompartmentDefinitionListProduction::CompartmentDefinitionListProduction()
   // Identifier
   this->elements.push_back(new Utils::TokenProduction(T_IDENTIFIER));
 
-  // ["=" NUMBER]
+  // ["<" Identifier]
   this->elements.push_back(
         new Utils::OptionalProduction(
           new Utils::Production(
-            2, new Utils::TokenProduction(T_ASSIGN), NumberProduction::get())));
+            2, new Utils::TokenProduction(T_LESSTHAN), new Utils::TokenProduction(T_IDENTIFIER))));
+
+  // ["=" Expression]
+  this->elements.push_back(
+        new Utils::OptionalProduction(
+          new Utils::Production(
+            2, new Utils::TokenProduction(T_ASSIGN), Expr::ExpressionProduction::get())));
 
   // [QuotedString]
   this->elements.push_back(
@@ -569,7 +579,7 @@ SpeciesDefinitionsProduction::get()
  * Implementation of SpeciesDefinitionListProduction:
  *
  * SpeciesDefinitionList =
- *   ID ":" (("[" ID "]") | ID) "=" Number [SpeciesModifierList] [QuotedString] [EOL SpeciesDefinitionList];
+ *   ID ":" (("[" ID "]") | ID) "=" Expression [SpeciesModifierList] [QuotedString] [EOL SpeciesDefinitionList];
  * ******************************************************************************************** */
 SpeciesDefinitionListProduction::SpeciesDefinitionListProduction()
   : Production()
@@ -591,7 +601,7 @@ SpeciesDefinitionListProduction::SpeciesDefinitionListProduction()
 
   // "=" Number
   this->elements.push_back(new Utils::TokenProduction(T_ASSIGN));
-  this->elements.push_back(NumberProduction::get());
+  this->elements.push_back(Expr::ExpressionProduction::get());
 
   // [SpeciesModifierList]
   this->elements.push_back(new Utils::OptionalProduction(SpeciesModifierListProduction::get()));
@@ -726,7 +736,7 @@ ParameterDefinitionsProduction::get()
  * Implementation of ParameterDefinitionListProduction:
  *
  * ParameterDefinitionList =
- *   Identifier "=" Number [ParameterModifier] [QuotedString] [EOL ParameterDefinitionList];
+ *   Identifier "=" Expression [ParameterModifierList] [QuotedString] [EOL ParameterDefinitionList];
  * ******************************************************************************************** */
 ParameterDefinitionListProduction::ParameterDefinitionListProduction()
   : Production()
@@ -735,7 +745,7 @@ ParameterDefinitionListProduction::ParameterDefinitionListProduction()
 
   this->elements.push_back(new Utils::TokenProduction(T_IDENTIFIER));
   this->elements.push_back(new Utils::TokenProduction(T_ASSIGN));
-  this->elements.push_back(NumberProduction::get());
+  this->elements.push_back(Expr::ExpressionProduction::get());
   this->elements.push_back(new Utils::OptionalProduction(ParameterModifierProduction::get()));
   this->elements.push_back(new Utils::OptionalProduction(new Utils::TokenProduction(T_QUOTED_STRING)));
   this->elements.push_back(
@@ -924,9 +934,9 @@ ReactionModifierListProduction::get()
  * Implementation of ReactionDefinitionListProduction:
  *
  * ReactionDefinitionList =
- *   ("@r" | "@rr") "=" Identifier [QuotedString] EOL
- *   ReactionEquation [":" ReactionModifierList] EOL
- *   KineticLaw
+ *   ("@r" | "@rr") "=" Identifier [QuotedString]
+ *   EOL ReactionEquation [":" ReactionModifierList]
+ *   [EOL KineticLaw]
  *   [EOL ReactionDefinitionList];
  * ******************************************************************************************** */
 ReactionDefinitionListProduction::ReactionDefinitionListProduction()
@@ -963,9 +973,11 @@ ReactionDefinitionListProduction::ReactionDefinitionListProduction()
             new Utils::TokenProduction(T_COLON),
             ReactionModifierListProduction::get())));
 
-  // EOL KineticLaw
-  this->elements.push_back(EndOfLineProduction::get());
-  this->elements.push_back(KineticLawProduction::get());
+  // [EOL KineticLaw]
+  this->elements.push_back(
+        new Utils::OptionalProduction(
+          new Utils::Production(
+            2, EndOfLineProduction::get(), KineticLawProduction::get())));
 
   // [EOL ReactionDefinitionList]
   this->elements.push_back(
@@ -1164,7 +1176,7 @@ EventDefinitionsProduction::get()
  * Implementation of EventDefinitionListProduction:
  *
  * EventDefinitionList =
- *   Identifier "=" ConditionExpression [";" Number] ":" AssignmentList [QuotedString]
+ *   Identifier "=" ConditionExpression [";" Expression] ":" AssignmentList [QuotedString]
  *   [EOL EventDefinitionList];
  * ******************************************************************************************** */
 EventDefinitionListProduction::EventDefinitionListProduction()
@@ -1181,7 +1193,7 @@ EventDefinitionListProduction::EventDefinitionListProduction()
   this->elements.push_back(
         new Utils::OptionalProduction(
           new Utils::Production(
-            2, new Utils::TokenProduction(T_SEMICOLON), NumberProduction::get())));
+            2, new Utils::TokenProduction(T_SEMICOLON), Expr::ExpressionProduction::get())));
 
   // ":" AssignmentList
   this->elements.push_back(new Utils::TokenProduction(T_COLON));
@@ -1215,7 +1227,7 @@ EventDefinitionListProduction::get()
  * Implementation of ConditionExpressionProduction:
  *
  * ConditionExpression =
- *   Identifier ("==" | "!=" | ">" | ">=" | "<" | "<=") Number;
+ *   Identifier ("==" | "!=" | ">" | ">=" | "<" | "<=") Expression;
  * ******************************************************************************************** */
 ConditionExpressionProduction::ConditionExpressionProduction()
   : Production()
@@ -1231,7 +1243,7 @@ ConditionExpressionProduction::ConditionExpressionProduction()
           new Utils::TokenProduction(T_GREATEREQUAL),
           new Utils::TokenProduction(T_LESSTHAN),
           new Utils::TokenProduction(T_LESSEQUAL)));
-  this->elements.push_back(NumberProduction::get());
+  this->elements.push_back(Expr::ExpressionProduction::get());
 }
 
 ConditionExpressionProduction *ConditionExpressionProduction::instance = 0;
@@ -1251,7 +1263,7 @@ ConditionExpressionProduction::get()
  * Implementation of AssignmentListProduction:
  *
  * AssignmentList =
- *   Identifier "=" Number [";" AssignmentList];
+ *   Identifier "=" Expression [";" AssignmentList];
  * ******************************************************************************************** */
 AssignmentListProduction::AssignmentListProduction()
   : Production()
@@ -1260,7 +1272,7 @@ AssignmentListProduction::AssignmentListProduction()
 
   this->elements.push_back(new Utils::TokenProduction(T_IDENTIFIER));
   this->elements.push_back(new Utils::TokenProduction(T_ASSIGN));
-  this->elements.push_back(NumberProduction::get());
+  this->elements.push_back(Expr::ExpressionProduction::get());
   this->elements.push_back(
         new Utils::OptionalProduction(
           new Utils::Production(
