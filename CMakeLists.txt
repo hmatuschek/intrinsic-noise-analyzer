@@ -50,7 +50,7 @@ INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/lib)
 #
 # Used libaries:
 #
-set(LIBS ${LIBS} ${GINAC_LIBRARIES} ${LIBSBML_LIBRARIES} m pthread)
+set(LIBS ${LIBS} ${GINAC_LIBRARIES} ${LIBSBML_LIBRARIES} m pthread gomp)
 
 #
 # Used headers:
