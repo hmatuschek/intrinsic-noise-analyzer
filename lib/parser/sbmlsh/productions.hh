@@ -459,66 +459,6 @@ private:
 
 
 /**
- * AtomicExpression =
- *   Identifier | Number | ("(" Expression ")");
- */
-class AtomicExpressionProduction : public Utils::AltProduction
-{
-protected:
-  /** Hidden constructor. */
-  AtomicExpressionProduction();
-
-public:
-  /** Factory method. */
-  static Utils::Production *get();
-
-private:
-  /** Singleton instance. */
-  static AtomicExpressionProduction *instance;
-};
-
-
-/**
- * ProductExpression =
- *   (AtomicExpression ("*" | "/") ProductExpression) | AtomicExpression;
- */
-class ProductExpressionProduction : public Utils::AltProduction
-{
-protected:
-  /** Hidden constructor. */
-  ProductExpressionProduction();
-
-public:
-  /** Factory method. */
-  static Utils::Production *get();
-
-private:
-  /** Singleton instance. */
-  static ProductExpressionProduction *instance;
-};
-
-
-/**
- * Expression =
- *   (ProductExpression ("+"|"-") Expression) | ProductExpression;
- */
-class ExpressionProduction : public Utils::AltProduction
-{
-protected:
-  /** Hidden constructor. */
-  ExpressionProduction();
-
-public:
-  /** factory method. */
-  static Utils::Production *get();
-
-private:
-  /** Singleton instance. */
-  static ExpressionProduction *instance;
-};
-
-
-/**
  * RuleDefinitionList =
  *   [("@rate"|"@assign")] ":" Identifier "=" Expression [EOL RuleDefinitionList];
  */

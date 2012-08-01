@@ -3,6 +3,7 @@
 
 #include "utils/lexer.hh"
 #include "utils/tokenrules.hh"
+#include <parser/expr/lexer.hh>
 
 
 namespace Fluc {
@@ -16,7 +17,19 @@ namespace Sbmlsh {
  * @ingroup sbmlsh
  */
 typedef enum {
-  T_WHITESPACE = Utils::Token::FIRST_USER_DEFINED,  ///< A white space char (SPACE, TAB)
+  T_WHITESPACE = Expr::T_WHITESPACE,  ///< A white space char (SPACE, TAB)
+  T_IDENTIFIER = Expr::T_IDENTIFIER,  ///< C-style identifier.
+  T_INTEGER = Expr::T_INTEGER,        ///< Integers (w/o) sign.
+  T_FLOAT = Expr::T_FLOAT,            ///< Floats (w/o) sign.
+  T_COMMA = Expr::T_COMMA,            ///< ','
+  T_PLUS = Expr::T_PLUS,              ///< '+'
+  T_MINUS = Expr::T_MINUS,            ///< '-'
+  T_TIMES = Expr::T_TIMES,            ///< '*'
+  T_POWER = Expr::T_POWER,            ///< '**', '^'
+  T_DIVIVE = Expr::T_DIVIVE,          ///< '/'
+  T_LPAR = Expr::T_LPAR,              ///< '('
+  T_RPAR = Expr::T_RPAR,              ///< ')'
+
   T_END_OF_LINE,  ///< Any combination of NEWLINE, LINEFEET
 
   T_MODEL_KW,         ///< '@model'
@@ -32,16 +45,10 @@ typedef enum {
   T_RR_KW,            ///< '@rr'
   T_EVENTS_KW,        ///< '@events'
 
-  T_IDENTIFIER,       ///< C-style identifier.
-
   T_QUOTED_STRING,    ///< Quoted string, w/o escapeing.
-
-  T_INTEGER,          ///< Integers (w/o) sign.
-  T_FLOAT,            ///< Floats (w/o) sign.
 
   T_COLON,            ///< ':'
   T_SEMICOLON,        ///< ';'
-  T_COMMA,            ///< ','
 
   T_ASSIGN,           ///< '='
   T_EQUAL,            ///< '=='
@@ -51,14 +58,8 @@ typedef enum {
   T_GREATERTHAN,      ///< '>'
   T_GREATEREQUAL,     ///< '>='
 
-  T_PLUS,             ///< '+'
-  T_MINUS,            ///< '-'
-  T_TIMES,            ///< '*'
-  T_DIVIVE,           ///< '/'
   T_RARROW,           ///< '->'
 
-  T_LPAR,             ///< '('
-  T_RPAR,             ///< ')'
   T_LBRAC,            ///< '['
   T_RBRAC,            ///< ']'
 

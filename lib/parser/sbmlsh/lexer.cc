@@ -80,6 +80,10 @@ Lexer::Lexer(std::istream &input)
   this->addTokenName(T_MINUS, "OP_MINUS");
   this->addRule(new Utils::KeyWordTokenRule(T_TIMES, "*"));
   this->addTokenName(T_TIMES, "OP_TIMES");
+  this->addRule(new Utils::KeyWordTokenRule(T_POWER, "**"));
+  this->addTokenName(T_POWER, "OP_POWER");
+  this->addRule(new Utils::KeyWordTokenRule(T_POWER, "^"));
+  this->addTokenName(T_POWER, "OP_POWER");
   this->addRule(new Utils::KeyWordTokenRule(T_DIVIVE, "/"));
   this->addTokenName(T_DIVIVE, "OP_DIVIDE");
   this->addRule(new Utils::KeyWordTokenRule(T_RARROW, "->"));

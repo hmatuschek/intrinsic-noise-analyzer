@@ -82,18 +82,18 @@ Assembler::processAtomic(Utils::ConcreteSyntaxTree &expr, Context &ctx, Utils::L
 {
   /* AtomicExpression =       : expr
    *   Number |                 : expr[0]
-   *   Identifier |             : expr[0]
    *   FunctionCall |           : expr[0]
+   *   Identifier |             : expr[0]
    *   ("(" Expression ")");    : expr[0]; Expression : expr[0][1]
    *   "-" AtomicExpression     : expr[0]; AtomicExpression -> expr[0][1] */
 
   if (0 == expr.getAltIdx()) {
     return processNumber(expr[0], lexer);
   } else if (1 == expr.getAltIdx()) {
+    return processFunctionCall(expr[0], ctx, lexer);
+  } else if (2 == expr.getAltIdx()) {
     std::string identifier = lexer[expr[0].getTokenIdx()].getValue();
     return ctx.resolve(identifier);
-  } else if (2 == expr.getAltIdx()) {
-    return processFunctionCall(expr[0], ctx, lexer);
   } else if (3 == expr.getAltIdx()) {
     return processExpression(expr[0][1], ctx, lexer);
   } else {

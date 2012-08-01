@@ -1,6 +1,7 @@
 #include "assembler.hh"
 #include "ast/model.hh"
 #include "ast/reaction.hh"
+#include "parser/expr/assembler.hh"
 
 
 using namespace Fluc;
@@ -8,10 +9,8 @@ using namespace Fluc::Parser::Sbmlsh;
 
 
 Assembler::Assembler(Ast::Model &model, Utils::Lexer &lexer)
-  : _lexer(lexer), _model(model), _scope_stack(1)
+  : Context(&model), _lexer(lexer), _model(model)
 {
-  _scope_stack[0] = &_model;
-
   // Assemble base unit map;
   _base_unit_map["ampere"] = Ast::ScaledBaseUnit::AMPERE;
   _base_unit_map["becquerel"] = Ast::ScaledBaseUnit::BECQUEREL;
@@ -622,7 +621,7 @@ Assembler::processKineticLaw(Utils::ConcreteSyntaxTree &law)
   Ast::KineticLaw *kinetic_law = new Ast::KineticLaw(expression);
 
   // push kinetic_law on stack of variable scopes
-  _scope_stack.push_back(kinetic_law);
+  pushScope(kinetic_law);
 
   // First, process local parameters
   if (law[1].matched()) {
@@ -633,7 +632,7 @@ Assembler::processKineticLaw(Utils::ConcreteSyntaxTree &law)
   expression = processExpression(law[0]);
 
   // Done, remove from scope stack...
-  _scope_stack.pop_back();
+  popScope();
 
   // Update kinetic_law
   kinetic_law->setRateLaw(expression);
@@ -729,69 +728,8 @@ Assembler::processProducts(Utils::ConcreteSyntaxTree &sum, Ast::Reaction *reacti
 GiNaC::ex
 Assembler::processExpression(Utils::ConcreteSyntaxTree &expr)
 {
-  /* Expression =               : expr
-   *   (                          : expr[0]
-   *     ProductExpression          : expr[0][0]
-   *     ("+"|"-")                  : expr[0][1]
-   *     Expression) |              : expr[0][2]
-   *    ProductExpression;        : expr[0] */
-
-  if (0 == expr.getAltIdx()) {
-    GiNaC::ex lhs = processProductExpression(expr[0][0]);
-    GiNaC::ex rhs = processExpression(expr[0][2]);
-    if (0 == expr[0][1].getAltIdx()) {
-      return lhs + rhs;
-    } else {
-      return lhs - rhs;
-    }
-  }
-
-  return processProductExpression(expr[0]);
+  return Expr::Assembler::processExpression(expr, *this, _lexer);
 }
-
-
-GiNaC::ex
-Assembler::processProductExpression(Utils::ConcreteSyntaxTree &expr)
-{
- /* ProductExpression =         : expr
-  *   (                         : expr[0]
-  *     AtomicExpression          : expr[0][0]
-  *     ("*" | "/")               : expr[0][1]
-  *     ProductExpression) |      : expr[0][2]
-  *   AtomicExpression;         : expr[0]   */
-
-  if (0 == expr.getAltIdx()) {
-    GiNaC::ex lhs = processAtomicExpression(expr[0][0]);
-    GiNaC::ex rhs = processProductExpression(expr[0][2]);
-    if (0 == expr[0][1].getAltIdx()) {
-      return lhs + rhs;
-    } else {
-      return lhs - rhs;
-    }
-  }
-
-  return processAtomicExpression(expr[0]);
-}
-
-
-GiNaC::ex
-Assembler::processAtomicExpression(Utils::ConcreteSyntaxTree &expr)
-{
-  /* AtomicExpression =       : expr
-   *   Identifier |           : expr[0]
-   *   Number |               : expr[0]
-   *   ("(" Expression ")");  : expr[0]; Expression : expr[0][1]; */
-
-  if (0 == expr.getAltIdx()) {
-    std::string identifier = _lexer[expr[0].getTokenIdx()].getValue();
-    return resolveSymbol(identifier);
-  } else if (1 == expr.getAltIdx()) {
-    return processNumber(expr[0]);
-  } else {
-    return processExpression(expr[0][1]);
-  }
-}
-
 
 GiNaC::ex
 Assembler::resolveSymbol(const std::string &id)

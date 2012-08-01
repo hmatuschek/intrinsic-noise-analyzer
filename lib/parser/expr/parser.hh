@@ -34,7 +34,8 @@ public:
 };
 
 
-/** Parses an expression in the given context. */
+/** Parses an expression in the given context.
+ * The context is used to resolve symbols of species, compartments and parameters. */
 GiNaC::ex parseExpression(const std::string &text, Context &ctx);
 
 }

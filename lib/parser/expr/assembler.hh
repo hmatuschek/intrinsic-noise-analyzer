@@ -15,15 +15,22 @@ namespace Expr {
 class Assembler
 {
 public:
+  /** Entry point to parse an expression in the given context. */
   static GiNaC::ex processExpression(Utils::ConcreteSyntaxTree &expr, Context &ctx, Utils::Lexer &lexer);
 
 protected:
+  /** Parses a product expression. */
   static GiNaC::ex processProduct(Utils::ConcreteSyntaxTree &expr, Context &ctx, Utils::Lexer &lexer);
+  /** Parses a power expression. */
   static GiNaC::ex processPower(Utils::ConcreteSyntaxTree &expr, Context &ctx, Utils::Lexer &lexer);
+  /** Parses an atomic expression. */
   static GiNaC::ex processAtomic(Utils::ConcreteSyntaxTree &expr, Context &ctx, Utils::Lexer &lexer);
+  /** Parses a function call. */
   static GiNaC::ex processFunctionCall(Utils::ConcreteSyntaxTree &expr, Context &ctx, Utils::Lexer &lexer);
+  /** Parses the arguments of a function call. */
   static void processFunctionCallArguments(
     Utils::ConcreteSyntaxTree &expr, Context &ctx, Utils::Lexer &lexer, std::vector<GiNaC::ex> &args);
+  /** Parses a number. */
   static GiNaC::ex processNumber(Utils::ConcreteSyntaxTree &expr, Utils::Lexer &lexer);
 
   /** Tiny helper function to parse numbers from strings. */
