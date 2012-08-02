@@ -61,9 +61,9 @@ Assembler::processProduct(Parser::ConcreteSyntaxTree &expr)
      GiNaC::ex lhs = processPower(expr[0][0]);
      GiNaC::ex rhs = processProduct(expr[0][2]);
      if (0 == expr[0][1].getAltIdx()) {
-       return lhs + rhs;
+       return lhs * rhs;
      } else {
-       return lhs - rhs;
+       return lhs / rhs;
      }
    }
 

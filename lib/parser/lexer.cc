@@ -405,8 +405,10 @@ FloatTokenRule::FloatTokenRule(unsigned id)
   onNumber(s3, s3);
   onChar('.', s3, sff);
   onChar('e', s3, sei);
+  onChar('E', s3, sei);
   onNumber(sff, sff);
   onChar('e', sff, sei);
+  onChar('E', sff, sei);
   onChar('-', sei, se1);
   onNumber(sei, sef);
   onNumber(se1, sef);
