@@ -1,7 +1,8 @@
 #ifndef __FLUC_PARSER_EXPR_ASSEMBLER_HH__
 #define __FLUC_PARSER_EXPR_ASSEMBLER_HH__
 
-#include <utils/parser.hh>
+#include <parser/lexer.hh>
+#include <parser/production.hh>
 #include <ast/model.hh>
 #include "parser.hh"
 
@@ -20,29 +21,29 @@ class Assembler : public Context
 {
 protected:
   /** Holds the lexer. */
-  Utils::Lexer &_lexer;
+  Parser::Lexer &_lexer;
 
 public:
   /** Constructs the assembler for the given scope. */
-  Assembler(Ast::Scope *root, Utils::Lexer &lexer);
+  Assembler(Ast::Scope *root, Parser::Lexer &lexer);
 
 public:
   /** Entry point to parse an expression in the given context. */
-  GiNaC::ex processExpression(Utils::ConcreteSyntaxTree &expr);
+  GiNaC::ex processExpression(Parser::ConcreteSyntaxTree &expr);
 
 protected:
   /** Parses a product expression. */
-  GiNaC::ex processProduct(Utils::ConcreteSyntaxTree &expr);
+  GiNaC::ex processProduct(Parser::ConcreteSyntaxTree &expr);
   /** Parses a power expression. */
-  GiNaC::ex processPower(Utils::ConcreteSyntaxTree &expr);
+  GiNaC::ex processPower(Parser::ConcreteSyntaxTree &expr);
   /** Parses an atomic expression. */
-  GiNaC::ex processAtomic(Utils::ConcreteSyntaxTree &expr);
+  GiNaC::ex processAtomic(Parser::ConcreteSyntaxTree &expr);
   /** Parses a function call. */
-  GiNaC::ex processFunctionCall(Utils::ConcreteSyntaxTree &expr);
+  GiNaC::ex processFunctionCall(Parser::ConcreteSyntaxTree &expr);
   /** Parses the arguments of a function call. */
-  void processFunctionCallArguments(Utils::ConcreteSyntaxTree &expr, std::vector<GiNaC::ex> &args);
+  void processFunctionCallArguments(Parser::ConcreteSyntaxTree &expr, std::vector<GiNaC::ex> &args);
   /** Parses a number. */
-  double processNumber(Utils::ConcreteSyntaxTree &expr);
+  double processNumber(Parser::ConcreteSyntaxTree &expr);
 
 protected:
   /** Tiny helper function to parse numbers from strings. */

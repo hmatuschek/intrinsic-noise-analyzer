@@ -25,7 +25,7 @@ Fluc::Parser::Sbmlsh::Parser::parse(Ast::Model &model)
   lexer.reset();
 
   // Try to parse using grammar:
-  Utils::ConcreteSyntaxTree root;
+  Fluc::Parser::ConcreteSyntaxTree root;
   // First parse the grammar
   grammar->parse(lexer, root);
   // now, assemble CST

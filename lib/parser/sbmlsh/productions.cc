@@ -1,5 +1,5 @@
 #include "productions.hh"
-#include <utils/parser.hh>
+#include <parser/production.hh>
 #include <utils/exception.hh>
 #include <parser/expr/productions.hh>
 
@@ -24,55 +24,55 @@ using namespace Fluc::Parser::Sbmlsh;
  *   [EOL] EndOfStream;
  * ******************************************************************************************** */
 ModelProduction::ModelProduction()
-  : Utils::Production()
+  : Fluc::Parser::Production()
 {
   ModelProduction::instance = this;
 
   this->elements.push_back(ModelDefinitionProduction::get());
 
   this->elements.push_back(
-        new Utils::OptionalProduction(
-          new Utils::Production(
+        new Fluc::Parser::OptionalProduction(
+          new Fluc::Parser::Production(
             2, EndOfLineProduction::get(), UnitDefinitionsProduction::get())));
 
   this->elements.push_back(
-        new Utils::OptionalProduction(
-          new Utils::Production(
+        new Fluc::Parser::OptionalProduction(
+          new Fluc::Parser::Production(
             2, EndOfLineProduction::get(), CompartmentDefinitionsProduction::get())));
 
   this->elements.push_back(
-        new Utils::OptionalProduction(
-          new Utils::Production(
+        new Fluc::Parser::OptionalProduction(
+          new Fluc::Parser::Production(
             2, EndOfLineProduction::get(), SpeciesDefinitionsProduction::get())));
 
   this->elements.push_back(
-        new Utils::OptionalProduction(
-          new Utils::Production(
+        new Fluc::Parser::OptionalProduction(
+          new Fluc::Parser::Production(
             2, EndOfLineProduction::get(), ParameterDefinitionsProduction::get())));
 
   this->elements.push_back(
-        new Utils::OptionalProduction(
-          new Utils::Production(
+        new Fluc::Parser::OptionalProduction(
+          new Fluc::Parser::Production(
             2, EndOfLineProduction::get(), RuleDefinitionsProduction::get())));
 
   this->elements.push_back(
-        new Utils::OptionalProduction(
-          new Utils::Production(
+        new Fluc::Parser::OptionalProduction(
+          new Fluc::Parser::Production(
             2, EndOfLineProduction::get(), ReactionDefinitionsProduction::get())));
 
   this->elements.push_back(
-        new Utils::OptionalProduction(
-          new Utils::Production(
+        new Fluc::Parser::OptionalProduction(
+          new Fluc::Parser::Production(
             2, EndOfLineProduction::get(), EventDefinitionsProduction::get())));
 
-  this->elements.push_back(new Utils::OptionalProduction(EndOfLineProduction::get()));
-  this->elements.push_back(new Utils::TokenProduction(Utils::Token::END_OF_INPUT));
+  this->elements.push_back(new Fluc::Parser::OptionalProduction(EndOfLineProduction::get()));
+  this->elements.push_back(new Fluc::Parser::TokenProduction(Fluc::Parser::Token::END_OF_INPUT));
 }
 
 
 ModelProduction *ModelProduction::instance = 0;
 
-Utils::Production *
+Fluc::Parser::Production *
 ModelProduction::get()
 {
   if (0 == ModelProduction::instance)
@@ -90,32 +90,32 @@ ModelProduction::get()
  *   "@model" ":" "3.3.1" "=" Identifier [QuotedString] [EOL DefaultUnitDefinitions];
  * ******************************************************************************************** */
 ModelDefinitionProduction::ModelDefinitionProduction()
-  : Utils::Production()
+  : Fluc::Parser::Production()
 {
   ModelDefinitionProduction::instance = this;
 
   // "@model" ":" "3.3.1" "=" Identifier
-  this->elements.push_back(new Utils::TokenProduction(T_MODEL_KW));
-  this->elements.push_back(new Utils::TokenProduction(T_COLON));
-  this->elements.push_back(new Utils::TokenProduction(T_VERSION_NUMBER));
-  this->elements.push_back(new Utils::TokenProduction(T_ASSIGN));
-  this->elements.push_back(new Utils::TokenProduction(T_IDENTIFIER));
+  this->elements.push_back(new Fluc::Parser::TokenProduction(T_MODEL_KW));
+  this->elements.push_back(new Fluc::Parser::TokenProduction(T_COLON));
+  this->elements.push_back(new Fluc::Parser::TokenProduction(T_VERSION_NUMBER));
+  this->elements.push_back(new Fluc::Parser::TokenProduction(T_ASSIGN));
+  this->elements.push_back(new Fluc::Parser::TokenProduction(T_IDENTIFIER));
 
   // [QuotedString]
   this->elements.push_back(
-        new Utils::OptionalProduction(
-          new Utils::TokenProduction(T_QUOTED_STRING)));
+        new Fluc::Parser::OptionalProduction(
+          new Fluc::Parser::TokenProduction(T_QUOTED_STRING)));
 
   // [EOL DefaultUnitDefinitions]
   this->elements.push_back(
-        new Utils::OptionalProduction(
+        new Fluc::Parser::OptionalProduction(
           new Production(2, EndOfLineProduction::get(),
                          DefaultUnitDefinitionsProduction::get())));
 }
 
 ModelDefinitionProduction *ModelDefinitionProduction::instance = 0;
 
-Utils::Production *
+Fluc::Parser::Production *
 ModelDefinitionProduction::get()
 {
   if (0 == ModelDefinitionProduction::instance)
@@ -133,17 +133,17 @@ ModelDefinitionProduction::get()
  *   DefaultUnitDefinition {DefaultUnitDefinitions};
  * ******************************************************************************************** */
 DefaultUnitDefinitionsProduction::DefaultUnitDefinitionsProduction()
-  : Utils::Production()
+  : Fluc::Parser::Production()
 {
   DefaultUnitDefinitionsProduction::instance = this;
 
   this->elements.push_back(DefaultUnitDefinitionProduction::get());
-  this->elements.push_back(new Utils::OptionalProduction(this));
+  this->elements.push_back(new Fluc::Parser::OptionalProduction(this));
 }
 
 DefaultUnitDefinitionsProduction *DefaultUnitDefinitionsProduction::instance = 0;
 
-Utils::Production *
+Fluc::Parser::Production *
 DefaultUnitDefinitionsProduction::get()
 {
   if (0 == DefaultUnitDefinitionsProduction::instance)
@@ -161,18 +161,18 @@ DefaultUnitDefinitionsProduction::get()
  *   DefaultUnitIdentifier "=" Identifier;
  * ******************************************************************************************** */
 DefaultUnitDefinitionProduction::DefaultUnitDefinitionProduction()
-  : Utils::Production()
+  : Fluc::Parser::Production()
 {
   DefaultUnitDefinitionProduction::instance = this;
 
   this->elements.push_back(DefaultUnitIdentifierProduction::get());
-  this->elements.push_back(new Utils::TokenProduction(T_ASSIGN));
-  this->elements.push_back(new Utils::TokenProduction(T_IDENTIFIER));
+  this->elements.push_back(new Fluc::Parser::TokenProduction(T_ASSIGN));
+  this->elements.push_back(new Fluc::Parser::TokenProduction(T_IDENTIFIER));
 }
 
 DefaultUnitDefinitionProduction *DefaultUnitDefinitionProduction::instance = 0;
 
-Utils::Production *
+Fluc::Parser::Production *
 DefaultUnitDefinitionProduction::get()
 {
   if (0 == DefaultUnitDefinitionProduction::instance)
@@ -190,13 +190,13 @@ DefaultUnitDefinitionProduction::get()
  *   ("s" | "t" | "v" | "a" | "l" | "e" | "c");
  * ******************************************************************************************** */
 DefaultUnitIdentifierProduction::DefaultUnitIdentifierProduction()
-  : Utils::TokenProduction(T_IDENTIFIER)
+  : Fluc::Parser::TokenProduction(T_IDENTIFIER)
 {
   DefaultUnitIdentifierProduction::instance = this;
 }
 
 void
-DefaultUnitIdentifierProduction::parse(Utils::Lexer &lexer, Utils::ConcreteSyntaxTree &element)
+DefaultUnitIdentifierProduction::parse(Fluc::Parser::Lexer &lexer, Fluc::Parser::ConcreteSyntaxTree &element)
 {
   std::string id = lexer.current().getValue();
   TokenProduction::parse(lexer, element);
@@ -211,7 +211,7 @@ DefaultUnitIdentifierProduction::parse(Utils::Lexer &lexer, Utils::ConcreteSynta
 
 DefaultUnitIdentifierProduction *DefaultUnitIdentifierProduction::instance = 0;
 
-Utils::Production *
+Fluc::Parser::Production *
 DefaultUnitIdentifierProduction::get()
 {
   if (0 == DefaultUnitIdentifierProduction::instance)
@@ -229,18 +229,18 @@ DefaultUnitIdentifierProduction::get()
  *   "@units" EOL UnitDefinitionList;
  * ******************************************************************************************** */
 UnitDefinitionsProduction::UnitDefinitionsProduction()
-  : Utils::Production()
+  : Fluc::Parser::Production()
 {
   UnitDefinitionsProduction::instance = this;
 
-  this->elements.push_back(new Utils::TokenProduction(T_UNITS_KW));
+  this->elements.push_back(new Fluc::Parser::TokenProduction(T_UNITS_KW));
   this->elements.push_back(EndOfLineProduction::get());
   this->elements.push_back(UnitDefinitionListProduction::get());
 }
 
 UnitDefinitionsProduction *UnitDefinitionsProduction::instance = 0;
 
-Utils::Production *
+Fluc::Parser::Production *
 UnitDefinitionsProduction::get()
 {
   if (0 == UnitDefinitionsProduction::instance)
@@ -263,24 +263,24 @@ UnitDefinitionListProduction::UnitDefinitionListProduction()
   UnitDefinitionListProduction::instance = this;
 
   // Identifier "=" ScaledUnitList
-  this->elements.push_back(new Utils::TokenProduction(T_IDENTIFIER));
-  this->elements.push_back(new Utils::TokenProduction(T_ASSIGN));
+  this->elements.push_back(new Fluc::Parser::TokenProduction(T_IDENTIFIER));
+  this->elements.push_back(new Fluc::Parser::TokenProduction(T_ASSIGN));
   this->elements.push_back(ScaledUnitListProduction::get());
 
   // [QuotedString]
   this->elements.push_back(
-        new Utils::OptionalProduction(new Utils::TokenProduction(T_QUOTED_STRING)));
+        new Fluc::Parser::OptionalProduction(new Fluc::Parser::TokenProduction(T_QUOTED_STRING)));
 
   // [EOL UnitDefinitionList]
   std::list<Production *> tmp;
   tmp.push_back(EndOfLineProduction::get());
   tmp.push_back(this);
-  this->elements.push_back(new Utils::OptionalProduction(new Production(tmp)));
+  this->elements.push_back(new Fluc::Parser::OptionalProduction(new Production(tmp)));
 }
 
 UnitDefinitionListProduction *UnitDefinitionListProduction::instance = 0;
 
-Utils::Production *
+Fluc::Parser::Production *
 UnitDefinitionListProduction::get()
 {
   if (0 == UnitDefinitionListProduction::instance)
@@ -301,18 +301,18 @@ ScaledUnitModifierListProduction::ScaledUnitModifierListProduction()
 
   // ("m" | "s" | "e") "=" NUMBER
   this->elements.push_back(ScaledUnitModifierProduction::get());
-  this->elements.push_back(new Utils::TokenProduction(T_ASSIGN));
+  this->elements.push_back(new Fluc::Parser::TokenProduction(T_ASSIGN));
   this->elements.push_back(NumberProduction::get());
   // ["," ScaledUnitModifierList]
   this->elements.push_back(
-        new Utils::OptionalProduction(
-          new Utils::Production(
-            2, new Utils::TokenProduction(T_COMMA), this)));
+        new Fluc::Parser::OptionalProduction(
+          new Fluc::Parser::Production(
+            2, new Fluc::Parser::TokenProduction(T_COMMA), this)));
 }
 
 ScaledUnitModifierListProduction *ScaledUnitModifierListProduction::instance = 0;
 
-Utils::Production *
+Fluc::Parser::Production *
 ScaledUnitModifierListProduction::get()
 {
   if (0 == ScaledUnitModifierListProduction::instance)
@@ -337,20 +337,20 @@ ScaledUnitListProduction::ScaledUnitListProduction()
 
   // [":" ScaledUnitModifierList]
   this->elements.push_back(
-        new Utils::OptionalProduction(
-          new Utils::Production(
-            2, new Utils::TokenProduction(T_COLON), ScaledUnitModifierListProduction::get())));
+        new Fluc::Parser::OptionalProduction(
+          new Fluc::Parser::Production(
+            2, new Fluc::Parser::TokenProduction(T_COLON), ScaledUnitModifierListProduction::get())));
 
   // ";"
-  this->elements.push_back(new Utils::TokenProduction(T_SEMICOLON));
+  this->elements.push_back(new Fluc::Parser::TokenProduction(T_SEMICOLON));
 
   // [ScaledUnitList]
-  this->elements.push_back(new Utils::OptionalProduction(this));
+  this->elements.push_back(new Fluc::Parser::OptionalProduction(this));
 }
 
 ScaledUnitListProduction * ScaledUnitListProduction::instance = 0;
 
-Utils::Production *
+Fluc::Parser::Production *
 ScaledUnitListProduction::get()
 {
   if (0 == ScaledUnitListProduction::instance)
@@ -387,7 +387,7 @@ ScaledUnitIdentifierProduction::ScaledUnitIdentifierProduction()
 
 
 void
-ScaledUnitIdentifierProduction::parse(Utils::Lexer &lexer, Utils::ConcreteSyntaxTree &element)
+ScaledUnitIdentifierProduction::parse(Fluc::Parser::Lexer &lexer, Fluc::Parser::ConcreteSyntaxTree &element)
 {
   // Get value of current token.
   std::string id = lexer.current().getValue();
@@ -411,7 +411,7 @@ ScaledUnitIdentifierProduction::parse(Utils::Lexer &lexer, Utils::ConcreteSyntax
 
 ScaledUnitIdentifierProduction *ScaledUnitIdentifierProduction::instance = 0;
 
-Utils::Production *
+Fluc::Parser::Production *
 ScaledUnitIdentifierProduction::get()
 {
   if (0 == ScaledUnitIdentifierProduction::instance)
@@ -436,7 +436,7 @@ ScaledUnitModifierProduction::ScaledUnitModifierProduction()
 
 
 void
-ScaledUnitModifierProduction::parse(Utils::Lexer &lexer, Utils::ConcreteSyntaxTree &element)
+ScaledUnitModifierProduction::parse(Fluc::Parser::Lexer &lexer, Fluc::Parser::ConcreteSyntaxTree &element)
 {
   // Get identifier
   std::string id = lexer.current().getValue();
@@ -457,7 +457,7 @@ ScaledUnitModifierProduction::parse(Utils::Lexer &lexer, Utils::ConcreteSyntaxTr
 
 ScaledUnitModifierProduction *ScaledUnitModifierProduction::instance = 0;
 
-Utils::Production *
+Fluc::Parser::Production *
 ScaledUnitModifierProduction::get()
 {
   if (0 == ScaledUnitModifierProduction::instance)
@@ -479,14 +479,14 @@ CompartmentDefinitionsProduction::CompartmentDefinitionsProduction()
 {
   CompartmentDefinitionsProduction::instance = this;
 
-  this->elements.push_back(new Utils::TokenProduction(T_COMPARTMENTS_KW));
-  this->elements.push_back(new Utils::TokenProduction(T_END_OF_LINE));
+  this->elements.push_back(new Fluc::Parser::TokenProduction(T_COMPARTMENTS_KW));
+  this->elements.push_back(new Fluc::Parser::TokenProduction(T_END_OF_LINE));
   this->elements.push_back(CompartmentDefinitionListProduction::get());
 }
 
 CompartmentDefinitionsProduction *CompartmentDefinitionsProduction::instance = 0;
 
-Utils::Production *
+Fluc::Parser::Production *
 CompartmentDefinitionsProduction::get()
 {
   if (0 == CompartmentDefinitionsProduction::instance)
@@ -509,33 +509,33 @@ CompartmentDefinitionListProduction::CompartmentDefinitionListProduction()
   CompartmentDefinitionListProduction::instance = this;
 
   // Identifier
-  this->elements.push_back(new Utils::TokenProduction(T_IDENTIFIER));
+  this->elements.push_back(new Fluc::Parser::TokenProduction(T_IDENTIFIER));
 
   // ["<" Identifier]
   this->elements.push_back(
-        new Utils::OptionalProduction(
-          new Utils::Production(
-            2, new Utils::TokenProduction(T_LESSTHAN), new Utils::TokenProduction(T_IDENTIFIER))));
+        new Fluc::Parser::OptionalProduction(
+          new Fluc::Parser::Production(
+            2, new Fluc::Parser::TokenProduction(T_LESSTHAN), new Fluc::Parser::TokenProduction(T_IDENTIFIER))));
 
   // ["=" Expression]
   this->elements.push_back(
-        new Utils::OptionalProduction(
-          new Utils::Production(
-            2, new Utils::TokenProduction(T_ASSIGN), Expr::ExpressionProduction::get())));
+        new Fluc::Parser::OptionalProduction(
+          new Fluc::Parser::Production(
+            2, new Fluc::Parser::TokenProduction(T_ASSIGN), Expr::ExpressionProduction::get())));
 
   // [QuotedString]
   this->elements.push_back(
-        new Utils::OptionalProduction(new Utils::TokenProduction(T_QUOTED_STRING)));
+        new Fluc::Parser::OptionalProduction(new Fluc::Parser::TokenProduction(T_QUOTED_STRING)));
 
   // [EOL CompartmentDefinitionList]
   this->elements.push_back(
-        new Utils::OptionalProduction(
-          new Utils::Production(2, EndOfLineProduction::get(), this)));
+        new Fluc::Parser::OptionalProduction(
+          new Fluc::Parser::Production(2, EndOfLineProduction::get(), this)));
 }
 
 CompartmentDefinitionListProduction *CompartmentDefinitionListProduction::instance = 0;
 
-Utils::Production *
+Fluc::Parser::Production *
 CompartmentDefinitionListProduction::get()
 {
   if (0 == CompartmentDefinitionListProduction::instance)
@@ -557,14 +557,14 @@ SpeciesDefinitionsProduction::SpeciesDefinitionsProduction()
 {
   SpeciesDefinitionsProduction::instance = this;
 
-  this->elements.push_back(new Utils::TokenProduction(T_SPECIES_KW));
+  this->elements.push_back(new Fluc::Parser::TokenProduction(T_SPECIES_KW));
   this->elements.push_back(EndOfLineProduction::get());
   this->elements.push_back(SpeciesDefinitionListProduction::get());
 }
 
 SpeciesDefinitionsProduction *SpeciesDefinitionsProduction::instance = 0;
 
-Utils::Production *
+Fluc::Parser::Production *
 SpeciesDefinitionsProduction::get()
 {
   if (0 == SpeciesDefinitionsProduction::instance)
@@ -587,38 +587,38 @@ SpeciesDefinitionListProduction::SpeciesDefinitionListProduction()
   SpeciesDefinitionListProduction::instance = this;
 
   // ID ":"
-  this->elements.push_back(new Utils::TokenProduction(T_IDENTIFIER));
-  this->elements.push_back(new Utils::TokenProduction(T_COLON));
+  this->elements.push_back(new Fluc::Parser::TokenProduction(T_IDENTIFIER));
+  this->elements.push_back(new Fluc::Parser::TokenProduction(T_COLON));
 
   // ("[" ID "]" | ID)
   this->elements.push_back(
-        new Utils::AltProduction(
-          2, new Utils::Production(
-            3, new Utils::TokenProduction(T_LBRAC),
-            new Utils::TokenProduction(T_IDENTIFIER),
-            new Utils::TokenProduction(T_RBRAC)),
-          new Utils::TokenProduction(T_IDENTIFIER)));
+        new Fluc::Parser::AltProduction(
+          2, new Fluc::Parser::Production(
+            3, new Fluc::Parser::TokenProduction(T_LBRAC),
+            new Fluc::Parser::TokenProduction(T_IDENTIFIER),
+            new Fluc::Parser::TokenProduction(T_RBRAC)),
+          new Fluc::Parser::TokenProduction(T_IDENTIFIER)));
 
   // "=" Number
-  this->elements.push_back(new Utils::TokenProduction(T_ASSIGN));
+  this->elements.push_back(new Fluc::Parser::TokenProduction(T_ASSIGN));
   this->elements.push_back(Expr::ExpressionProduction::get());
 
   // [SpeciesModifierList]
-  this->elements.push_back(new Utils::OptionalProduction(SpeciesModifierListProduction::get()));
+  this->elements.push_back(new Fluc::Parser::OptionalProduction(SpeciesModifierListProduction::get()));
 
   // [QuotedString]
   this->elements.push_back(
-        new Utils::OptionalProduction(new Utils::TokenProduction(T_QUOTED_STRING)));
+        new Fluc::Parser::OptionalProduction(new Fluc::Parser::TokenProduction(T_QUOTED_STRING)));
 
   // [EOL SpeciesDefinitionList]
   this->elements.push_back(
-        new Utils::OptionalProduction(
-          new Utils::Production(2, EndOfLineProduction::get(), this)));
+        new Fluc::Parser::OptionalProduction(
+          new Fluc::Parser::Production(2, EndOfLineProduction::get(), this)));
 }
 
 SpeciesDefinitionListProduction *SpeciesDefinitionListProduction::instance = 0;
 
-Utils::Production *
+Fluc::Parser::Production *
 SpeciesDefinitionListProduction::get()
 {
   if (0 == SpeciesDefinitionListProduction::instance)
@@ -641,12 +641,12 @@ SpeciesModifierListProduction::SpeciesModifierListProduction()
   SpeciesModifierListProduction::instance = this;
 
   this->elements.push_back(SpeciesModifierProduction::get());
-  this->elements.push_back(new Utils::OptionalProduction(this));
+  this->elements.push_back(new Fluc::Parser::OptionalProduction(this));
 }
 
 SpeciesModifierListProduction *SpeciesModifierListProduction::instance = 0;
 
-Utils::Production *
+Fluc::Parser::Production *
 SpeciesModifierListProduction::get()
 {
   if (0 == SpeciesModifierListProduction::instance)
@@ -669,14 +669,14 @@ SpeciesModifierProduction::SpeciesModifierProduction()
 }
 
 void
-SpeciesModifierProduction::parse(Utils::Lexer &lexer, Utils::ConcreteSyntaxTree &element)
+SpeciesModifierProduction::parse(Fluc::Parser::Lexer &lexer, Fluc::Parser::ConcreteSyntaxTree &element)
 {
   // Get token value:
   std::string id = lexer.current().getValue();
   unsigned int line    = lexer.current().getLine();
 
   // consume token.
-  Utils::TokenProduction::parse(lexer, element);
+  Fluc::Parser::TokenProduction::parse(lexer, element);
 
   // Check if id matches:
   for (size_t i=0; i<id.size(); i++)
@@ -693,7 +693,7 @@ SpeciesModifierProduction::parse(Utils::Lexer &lexer, Utils::ConcreteSyntaxTree 
 
 SpeciesModifierProduction *SpeciesModifierProduction::instance = 0;
 
-Utils::Production *
+Fluc::Parser::Production *
 SpeciesModifierProduction::get()
 {
   if (0 == SpeciesModifierProduction::instance)
@@ -714,14 +714,14 @@ ParameterDefinitionsProduction::ParameterDefinitionsProduction()
   : Production()
 {
   ParameterDefinitionsProduction::instance = this;
-  this->elements.push_back(new Utils::TokenProduction(T_PARAMETERS_KW));
+  this->elements.push_back(new Fluc::Parser::TokenProduction(T_PARAMETERS_KW));
   this->elements.push_back(EndOfLineProduction::get());
   this->elements.push_back(ParameterDefinitionListProduction::get());
 }
 
 ParameterDefinitionsProduction *ParameterDefinitionsProduction::instance = 0;
 
-Utils::Production *
+Fluc::Parser::Production *
 ParameterDefinitionsProduction::get()
 {
   if (0 == ParameterDefinitionsProduction::instance)
@@ -743,19 +743,19 @@ ParameterDefinitionListProduction::ParameterDefinitionListProduction()
 {
   ParameterDefinitionListProduction::instance = this;
 
-  this->elements.push_back(new Utils::TokenProduction(T_IDENTIFIER));
-  this->elements.push_back(new Utils::TokenProduction(T_ASSIGN));
+  this->elements.push_back(new Fluc::Parser::TokenProduction(T_IDENTIFIER));
+  this->elements.push_back(new Fluc::Parser::TokenProduction(T_ASSIGN));
   this->elements.push_back(Expr::ExpressionProduction::get());
-  this->elements.push_back(new Utils::OptionalProduction(ParameterModifierProduction::get()));
-  this->elements.push_back(new Utils::OptionalProduction(new Utils::TokenProduction(T_QUOTED_STRING)));
+  this->elements.push_back(new Fluc::Parser::OptionalProduction(ParameterModifierProduction::get()));
+  this->elements.push_back(new Fluc::Parser::OptionalProduction(new Fluc::Parser::TokenProduction(T_QUOTED_STRING)));
   this->elements.push_back(
-        new Utils::OptionalProduction(
-          new Utils::Production(2, EndOfLineProduction::get(), this)));
+        new Fluc::Parser::OptionalProduction(
+          new Fluc::Parser::Production(2, EndOfLineProduction::get(), this)));
 }
 
 ParameterDefinitionListProduction *ParameterDefinitionListProduction::instance = 0;
 
-Utils::Production *
+Fluc::Parser::Production *
 ParameterDefinitionListProduction::get()
 {
   if (0 == ParameterDefinitionListProduction::instance)
@@ -779,7 +779,7 @@ ParameterModifierProduction::ParameterModifierProduction()
 }
 
 void
-ParameterModifierProduction::parse(Utils::Lexer &lexer, Utils::ConcreteSyntaxTree &element)
+ParameterModifierProduction::parse(Fluc::Parser::Lexer &lexer, Fluc::Parser::ConcreteSyntaxTree &element)
 {
   std::string id = lexer.current().getValue();
   unsigned int    line = lexer.current().getLine();
@@ -797,7 +797,7 @@ ParameterModifierProduction::parse(Utils::Lexer &lexer, Utils::ConcreteSyntaxTre
 
 ParameterModifierProduction *ParameterModifierProduction::instance = 0;
 
-Utils::Production *
+Fluc::Parser::Production *
 ParameterModifierProduction::get()
 {
   if (0 == ParameterModifierProduction::instance)
@@ -815,16 +815,16 @@ ParameterModifierProduction::get()
  *   "@rules" EOL RuleDefinitionList;
  * ******************************************************************************************** */
 RuleDefinitionsProduction::RuleDefinitionsProduction()
-  : Utils::Production()
+  : Fluc::Parser::Production()
 {
   RuleDefinitionsProduction::instance = this;
-  this->elements.push_back(new Utils::TokenProduction(T_RULES_KW));
+  this->elements.push_back(new Fluc::Parser::TokenProduction(T_RULES_KW));
   this->elements.push_back(RuleDefinitionListProduction::get());
 }
 
 RuleDefinitionsProduction *RuleDefinitionsProduction::instance = 0;
 
-Utils::Production *
+Fluc::Parser::Production *
 RuleDefinitionsProduction::get()
 {
   if (0 == RuleDefinitionsProduction::instance)
@@ -848,23 +848,23 @@ RuleDefinitionListProduction::RuleDefinitionListProduction()
 
   // [("@rate"|"@assign)]"
   this->elements.push_back(
-        new Utils::OptionalProduction(
-          new Utils::AltProduction(
-            2, new Utils::TokenProduction(T_RATE_KW), new Utils::TokenProduction(T_ASSIGN_KW))));
+        new Fluc::Parser::OptionalProduction(
+          new Fluc::Parser::AltProduction(
+            2, new Fluc::Parser::TokenProduction(T_RATE_KW), new Fluc::Parser::TokenProduction(T_ASSIGN_KW))));
   // ":" Identifier "=" Expression
-  this->elements.push_back(new Utils::TokenProduction(T_COLON));
-  this->elements.push_back(new Utils::TokenProduction(T_IDENTIFIER));
-  this->elements.push_back(new Utils::TokenProduction(T_ASSIGN));
+  this->elements.push_back(new Fluc::Parser::TokenProduction(T_COLON));
+  this->elements.push_back(new Fluc::Parser::TokenProduction(T_IDENTIFIER));
+  this->elements.push_back(new Fluc::Parser::TokenProduction(T_ASSIGN));
   this->elements.push_back(Expr::ExpressionProduction::get());
   //  [EOL RuleDefinitionList]
   this->elements.push_back(
-        new Utils::OptionalProduction(
-          new Utils::Production(2, EndOfLineProduction::get(), this)));
+        new Fluc::Parser::OptionalProduction(
+          new Fluc::Parser::Production(2, EndOfLineProduction::get(), this)));
 }
 
 RuleDefinitionListProduction *RuleDefinitionListProduction::instance = 0;
 
-Utils::Production *
+Fluc::Parser::Production *
 RuleDefinitionListProduction::get()
 {
   if (0 == RuleDefinitionListProduction::instance)
@@ -886,14 +886,14 @@ ReactionDefinitionsProduction::ReactionDefinitionsProduction()
 {
   ReactionDefinitionsProduction::instance = this;
 
-  this->elements.push_back(new Utils::TokenProduction(T_REACTIONS_KW));
+  this->elements.push_back(new Fluc::Parser::TokenProduction(T_REACTIONS_KW));
   this->elements.push_back(EndOfLineProduction::get());
   this->elements.push_back(ReactionDefinitionListProduction::get());
 }
 
 ReactionDefinitionsProduction *ReactionDefinitionsProduction::instance = 0;
 
-Utils::Production *
+Fluc::Parser::Production *
 ReactionDefinitionsProduction::get()
 {
   if (0 == ReactionDefinitionsProduction::instance)
@@ -910,18 +910,18 @@ ReactionDefinitionsProduction::get()
  *   Identifier ["," ReactionModifierList];
  * ******************************************************************************************** */
 ReactionModifierListProduction::ReactionModifierListProduction()
-  : Utils::Production()
+  : Fluc::Parser::Production()
 {
   ReactionModifierListProduction::instance = this;
-  this->elements.push_back(new Utils::TokenProduction(T_IDENTIFIER));
+  this->elements.push_back(new Fluc::Parser::TokenProduction(T_IDENTIFIER));
   this->elements.push_back(
-        new Utils::OptionalProduction(
-          new Utils::Production(2, new Utils::TokenProduction(T_COMMA), this)));
+        new Fluc::Parser::OptionalProduction(
+          new Fluc::Parser::Production(2, new Fluc::Parser::TokenProduction(T_COMMA), this)));
 }
 
 ReactionModifierListProduction *ReactionModifierListProduction::instance = 0;
 
-Utils::Production *
+Fluc::Parser::Production *
 ReactionModifierListProduction::get()
 {
   if (0 == ReactionModifierListProduction::instance)
@@ -946,20 +946,20 @@ ReactionDefinitionListProduction::ReactionDefinitionListProduction()
 
   // ("@r"|"@rr")
   this->elements.push_back(
-        new Utils::AltProduction(
-          2, new Utils::TokenProduction(T_R_KW), new Utils::TokenProduction(T_RR_KW)));
+        new Fluc::Parser::AltProduction(
+          2, new Fluc::Parser::TokenProduction(T_R_KW), new Fluc::Parser::TokenProduction(T_RR_KW)));
 
   // "="
   this->elements.push_back(
-        new Utils::TokenProduction(T_ASSIGN));
+        new Fluc::Parser::TokenProduction(T_ASSIGN));
 
   // ID
   this->elements.push_back(
-        new Utils::TokenProduction(T_IDENTIFIER));
+        new Fluc::Parser::TokenProduction(T_IDENTIFIER));
 
   // [QuotedString]
   this->elements.push_back(
-        new Utils::OptionalProduction(new Utils::TokenProduction(T_QUOTED_STRING)));
+        new Fluc::Parser::OptionalProduction(new Fluc::Parser::TokenProduction(T_QUOTED_STRING)));
 
   // EOL ReactionEquation
   this->elements.push_back(EndOfLineProduction::get());
@@ -967,28 +967,28 @@ ReactionDefinitionListProduction::ReactionDefinitionListProduction()
 
   // [":" ReactionModifierList]
   this->elements.push_back(
-        new Utils::OptionalProduction(
-          new Utils::Production(
+        new Fluc::Parser::OptionalProduction(
+          new Fluc::Parser::Production(
             2,
-            new Utils::TokenProduction(T_COLON),
+            new Fluc::Parser::TokenProduction(T_COLON),
             ReactionModifierListProduction::get())));
 
   // [EOL KineticLaw]
   this->elements.push_back(
-        new Utils::OptionalProduction(
-          new Utils::Production(
+        new Fluc::Parser::OptionalProduction(
+          new Fluc::Parser::Production(
             2, EndOfLineProduction::get(), KineticLawProduction::get())));
 
   // [EOL ReactionDefinitionList]
   this->elements.push_back(
-        new Utils::OptionalProduction(
-          new Utils::Production(2, EndOfLineProduction::get(), this)));
+        new Fluc::Parser::OptionalProduction(
+          new Fluc::Parser::Production(2, EndOfLineProduction::get(), this)));
 }
 
 
 ReactionDefinitionListProduction *ReactionDefinitionListProduction::instance = 0;
 
-Utils::Production *
+Fluc::Parser::Production *
 ReactionDefinitionListProduction::get()
 {
   if (0 == ReactionDefinitionListProduction::instance)
@@ -1014,21 +1014,21 @@ ReactionEquationProduction::ReactionEquationProduction()
 
   // StoichiometrySum "-> [StoichiometrySum];
   this->alternatives[0] =
-      new Utils::Production(
+      new Fluc::Parser::Production(
         3, StoichiometrySumProduction::get(),
-        new Utils::TokenProduction(T_RARROW),
+        new Fluc::Parser::TokenProduction(T_RARROW),
         StoichiometrySumProduction::get());
 
   // "->" StoichiometrySum
   this->alternatives[1] =
-      new Utils::Production(
-        2, new Utils::TokenProduction(T_RARROW),
+      new Fluc::Parser::Production(
+        2, new Fluc::Parser::TokenProduction(T_RARROW),
         StoichiometrySumProduction::get());
 }
 
 ReactionEquationProduction *ReactionEquationProduction::instance = 0;
 
-Utils::Production *
+Fluc::Parser::Production *
 ReactionEquationProduction::get()
 {
   if (0 == ReactionEquationProduction::instance)
@@ -1052,21 +1052,21 @@ StoichiometrySumProduction::StoichiometrySumProduction()
 
   // [Integer]
   this->elements.push_back(
-        new Utils::OptionalProduction(
-          new Utils::TokenProduction(T_INTEGER)));
+        new Fluc::Parser::OptionalProduction(
+          new Fluc::Parser::TokenProduction(T_INTEGER)));
 
   // Itentifier:
-  this->elements.push_back(new Utils::TokenProduction(T_IDENTIFIER));
+  this->elements.push_back(new Fluc::Parser::TokenProduction(T_IDENTIFIER));
 
   // ["+" StoichiometrySum]
   this->elements.push_back(
-        new Utils::OptionalProduction(
-          new Utils::Production( 2, new Utils::TokenProduction(T_PLUS), this)));
+        new Fluc::Parser::OptionalProduction(
+          new Fluc::Parser::Production( 2, new Fluc::Parser::TokenProduction(T_PLUS), this)));
 }
 
 StoichiometrySumProduction *StoichiometrySumProduction::instance = 0;
 
-Utils::Production *
+Fluc::Parser::Production *
 StoichiometrySumProduction::get()
 {
   if (0 == StoichiometrySumProduction::instance)
@@ -1090,15 +1090,15 @@ KineticLawProduction::KineticLawProduction()
 
   this->elements.push_back(Expr::ExpressionProduction::get());
   this->elements.push_back(
-        new Utils::OptionalProduction(
-          new Utils::Production(
-            2, new Utils::TokenProduction(T_COLON),
+        new Fluc::Parser::OptionalProduction(
+          new Fluc::Parser::Production(
+            2, new Fluc::Parser::TokenProduction(T_COLON),
             LocalParameterListProduction::get())));
 }
 
 KineticLawProduction *KineticLawProduction::instance = 0;
 
-Utils::Production *
+Fluc::Parser::Production *
 KineticLawProduction::get()
 {
   if (0 == KineticLawProduction::instance)
@@ -1120,19 +1120,19 @@ LocalParameterListProduction::LocalParameterListProduction()
 {
   LocalParameterListProduction::instance = this;
 
-  this->elements.push_back(new Utils::TokenProduction(T_IDENTIFIER));
-  this->elements.push_back(new Utils::TokenProduction(T_ASSIGN));
+  this->elements.push_back(new Fluc::Parser::TokenProduction(T_IDENTIFIER));
+  this->elements.push_back(new Fluc::Parser::TokenProduction(T_ASSIGN));
   this->elements.push_back(Expr::ExpressionProduction::get());
 
   this->elements.push_back(
-        new Utils::OptionalProduction(
-          new Utils::Production(
-            2, new Utils::TokenProduction(T_COMMA), this)));
+        new Fluc::Parser::OptionalProduction(
+          new Fluc::Parser::Production(
+            2, new Fluc::Parser::TokenProduction(T_COMMA), this)));
 }
 
 LocalParameterListProduction *LocalParameterListProduction::instance = 0;
 
-Utils::Production *
+Fluc::Parser::Production *
 LocalParameterListProduction::get()
 {
   if (0 == LocalParameterListProduction::instance)
@@ -1154,14 +1154,14 @@ EventDefinitionsProduction::EventDefinitionsProduction()
 {
   EventDefinitionsProduction::instance = this;
 
-  this->elements.push_back(new Utils::TokenProduction(T_EVENTS_KW));
+  this->elements.push_back(new Fluc::Parser::TokenProduction(T_EVENTS_KW));
   this->elements.push_back(EndOfLineProduction::get());
   this->elements.push_back(EventDefinitionListProduction::get());
 }
 
 EventDefinitionsProduction *EventDefinitionsProduction::instance = 0;
 
-Utils::Production *
+Fluc::Parser::Production *
 EventDefinitionsProduction::get()
 {
   if (0 == EventDefinitionsProduction::instance)
@@ -1185,34 +1185,34 @@ EventDefinitionListProduction::EventDefinitionListProduction()
   EventDefinitionListProduction::instance = this;
 
   // Identifier "=" ConditionExpression
-  this->elements.push_back(new Utils::TokenProduction(T_IDENTIFIER));
-  this->elements.push_back(new Utils::TokenProduction(T_ASSIGN));
+  this->elements.push_back(new Fluc::Parser::TokenProduction(T_IDENTIFIER));
+  this->elements.push_back(new Fluc::Parser::TokenProduction(T_ASSIGN));
   this->elements.push_back(ConditionExpressionProduction::get());
 
   // [";" Number]
   this->elements.push_back(
-        new Utils::OptionalProduction(
-          new Utils::Production(
-            2, new Utils::TokenProduction(T_SEMICOLON), Expr::ExpressionProduction::get())));
+        new Fluc::Parser::OptionalProduction(
+          new Fluc::Parser::Production(
+            2, new Fluc::Parser::TokenProduction(T_SEMICOLON), Expr::ExpressionProduction::get())));
 
   // ":" AssignmentList
-  this->elements.push_back(new Utils::TokenProduction(T_COLON));
+  this->elements.push_back(new Fluc::Parser::TokenProduction(T_COLON));
   this->elements.push_back(AssignmentListProduction::get());
 
   // [QuotedString]
   this->elements.push_back(
-        new Utils::OptionalProduction(
-          new Utils::TokenProduction(T_QUOTED_STRING)));
+        new Fluc::Parser::OptionalProduction(
+          new Fluc::Parser::TokenProduction(T_QUOTED_STRING)));
 
   // [EOL EventDefinitionList]
   this->elements.push_back(
-        new Utils::OptionalProduction(
-          new Utils::Production(2, EndOfLineProduction::get(), this)));
+        new Fluc::Parser::OptionalProduction(
+          new Fluc::Parser::Production(2, EndOfLineProduction::get(), this)));
 }
 
 EventDefinitionListProduction *EventDefinitionListProduction::instance = 0;
 
-Utils::Production *
+Fluc::Parser::Production *
 EventDefinitionListProduction::get()
 {
   if (0 == EventDefinitionListProduction::instance)
@@ -1234,21 +1234,21 @@ ConditionExpressionProduction::ConditionExpressionProduction()
 {
   ConditionExpressionProduction::instance = this;
 
-  this->elements.push_back(new Utils::TokenProduction(T_IDENTIFIER));
+  this->elements.push_back(new Fluc::Parser::TokenProduction(T_IDENTIFIER));
   this->elements.push_back(
-        new Utils::AltProduction(
-          6, new Utils::TokenProduction(T_EQUAL),
-          new Utils::TokenProduction(T_NEQUAL),
-          new Utils::TokenProduction(T_GREATERTHAN),
-          new Utils::TokenProduction(T_GREATEREQUAL),
-          new Utils::TokenProduction(T_LESSTHAN),
-          new Utils::TokenProduction(T_LESSEQUAL)));
+        new Fluc::Parser::AltProduction(
+          6, new Fluc::Parser::TokenProduction(T_EQUAL),
+          new Fluc::Parser::TokenProduction(T_NEQUAL),
+          new Fluc::Parser::TokenProduction(T_GREATERTHAN),
+          new Fluc::Parser::TokenProduction(T_GREATEREQUAL),
+          new Fluc::Parser::TokenProduction(T_LESSTHAN),
+          new Fluc::Parser::TokenProduction(T_LESSEQUAL)));
   this->elements.push_back(Expr::ExpressionProduction::get());
 }
 
 ConditionExpressionProduction *ConditionExpressionProduction::instance = 0;
 
-Utils::Production *
+Fluc::Parser::Production *
 ConditionExpressionProduction::get()
 {
   if (0 == ConditionExpressionProduction::instance)
@@ -1270,18 +1270,18 @@ AssignmentListProduction::AssignmentListProduction()
 {
   AssignmentListProduction::instance = this;
 
-  this->elements.push_back(new Utils::TokenProduction(T_IDENTIFIER));
-  this->elements.push_back(new Utils::TokenProduction(T_ASSIGN));
+  this->elements.push_back(new Fluc::Parser::TokenProduction(T_IDENTIFIER));
+  this->elements.push_back(new Fluc::Parser::TokenProduction(T_ASSIGN));
   this->elements.push_back(Expr::ExpressionProduction::get());
   this->elements.push_back(
-        new Utils::OptionalProduction(
-          new Utils::Production(
-            2, new Utils::TokenProduction(T_SEMICOLON), this)));
+        new Fluc::Parser::OptionalProduction(
+          new Fluc::Parser::Production(
+            2, new Fluc::Parser::TokenProduction(T_SEMICOLON), this)));
 }
 
 AssignmentListProduction *AssignmentListProduction::instance = 0;
 
-Utils::Production *
+Fluc::Parser::Production *
 AssignmentListProduction::get()
 {
   if (0 == AssignmentListProduction::instance)
@@ -1307,17 +1307,17 @@ NumberProduction::NumberProduction()
   // Assemble grammar:
   // [-]
   this->elements.push_back(
-        new Utils::OptionalProduction(new Utils::TokenProduction(T_MINUS)));
+        new Fluc::Parser::OptionalProduction(new Fluc::Parser::TokenProduction(T_MINUS)));
 
   // (INTEGER | FLOAT)
   this->elements.push_back(
-        new Utils::AltProduction(
-          2, new Utils::TokenProduction(T_INTEGER), new Utils::TokenProduction(T_FLOAT)));
+        new Fluc::Parser::AltProduction(
+          2, new Fluc::Parser::TokenProduction(T_INTEGER), new Fluc::Parser::TokenProduction(T_FLOAT)));
 }
 
 NumberProduction *NumberProduction::instance = 0;
 
-Utils::Production *
+Fluc::Parser::Production *
 NumberProduction::get()
 {
   if (0 == NumberProduction::instance)
@@ -1339,13 +1339,13 @@ EndOfLineProduction::EndOfLineProduction()
 {
   EndOfLineProduction::instance = this;
 
-  this->elements.push_back(new Utils::TokenProduction(T_END_OF_LINE));
-  this->elements.push_back(new Utils::OptionalProduction(this));
+  this->elements.push_back(new Fluc::Parser::TokenProduction(T_END_OF_LINE));
+  this->elements.push_back(new Fluc::Parser::OptionalProduction(this));
 }
 
 EndOfLineProduction *EndOfLineProduction::instance = 0;
 
-Utils::Production *
+Fluc::Parser::Production *
 EndOfLineProduction::get()
 {
   if (0 == EndOfLineProduction::instance)

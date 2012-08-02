@@ -1,20 +1,22 @@
 #include "assembler.hh"
+#include <exception.hh>
+
 
 using namespace Fluc;
 using namespace Fluc::Parser::Expr;
 
 
 #define ASSERT_UNARY_FUNCTION(name, nargs) if (1 != nargs) { \
-  SBMLParserError err; err << name << "() takes exactly one argument, " << nargs << " given."; \
+  Fluc::SBMLParserError err; err << name << "() takes exactly one argument, " << nargs << " given."; \
   throw err; }
 
 #define ASSERT_BINARY_FUNCTION(name, nargs) if (2 != nargs) { \
-  SBMLParserError err; err << name << "() takes exactly two arguments, " << nargs << " given."; \
+  Fluc::SBMLParserError err; err << name << "() takes exactly two arguments, " << nargs << " given."; \
   throw err; }
 
 
 
-Assembler::Assembler(Ast::Scope *model, Utils::Lexer &lexer)
+Assembler::Assembler(Ast::Scope *model, Parser::Lexer &lexer)
   : Context(model), _lexer(lexer)
 {
   // pass...
@@ -22,7 +24,7 @@ Assembler::Assembler(Ast::Scope *model, Utils::Lexer &lexer)
 
 
 GiNaC::ex
-Assembler::processExpression(Utils::ConcreteSyntaxTree &expr)
+Assembler::processExpression(Parser::ConcreteSyntaxTree &expr)
 {
   /* Expression =               : expr
    *   (                          : expr[0]
@@ -46,7 +48,7 @@ Assembler::processExpression(Utils::ConcreteSyntaxTree &expr)
 
 
 GiNaC::ex
-Assembler::processProduct(Utils::ConcreteSyntaxTree &expr)
+Assembler::processProduct(Parser::ConcreteSyntaxTree &expr)
 {
   /* ProductExpression =         : expr
    *   (                         : expr[0]
@@ -70,7 +72,7 @@ Assembler::processProduct(Utils::ConcreteSyntaxTree &expr)
 
 
 GiNaC::ex
-Assembler::processPower(Utils::ConcreteSyntaxTree &expr)
+Assembler::processPower(Parser::ConcreteSyntaxTree &expr)
 {
   /* PowerExpression =
    *   (AtomicExpression ("^"|"**") PowerExpression) | AtomicExpression. */
@@ -86,7 +88,7 @@ Assembler::processPower(Utils::ConcreteSyntaxTree &expr)
 
 
 GiNaC::ex
-Assembler::processAtomic(Utils::ConcreteSyntaxTree &expr)
+Assembler::processAtomic(Parser::ConcreteSyntaxTree &expr)
 {
   /* AtomicExpression =       : expr
    *   Number |                 : expr[0]
@@ -111,7 +113,7 @@ Assembler::processAtomic(Utils::ConcreteSyntaxTree &expr)
 
 
 GiNaC::ex
-Assembler::processFunctionCall(Utils::ConcreteSyntaxTree &expr)
+Assembler::processFunctionCall(Parser::ConcreteSyntaxTree &expr)
 {
   /* FunctionCall =            : expr
    *   Identifier                : expr[0]
@@ -181,7 +183,7 @@ Assembler::processFunctionCall(Utils::ConcreteSyntaxTree &expr)
 
 
 void
-Assembler::processFunctionCallArguments(Utils::ConcreteSyntaxTree &expr, std::vector<GiNaC::ex> &args)
+Assembler::processFunctionCallArguments(Parser::ConcreteSyntaxTree &expr, std::vector<GiNaC::ex> &args)
 {
   /* FunctionCallArguments =
    *   Expression [ "," FunctionCallArguments] */
@@ -193,7 +195,7 @@ Assembler::processFunctionCallArguments(Utils::ConcreteSyntaxTree &expr, std::ve
 
 
 double
-Assembler::processNumber(Utils::ConcreteSyntaxTree &num)
+Assembler::processNumber(Parser::ConcreteSyntaxTree &num)
 {
   /* Number =
    *   ["-"] (INTEGER | FLOAT); */

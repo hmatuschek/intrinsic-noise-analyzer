@@ -1,8 +1,7 @@
 #include "parser.hh"
 #include <sstream>
-#include <utils/lexer.hh>
-#include <utils/tokenrules.hh>
-#include <utils/parser.hh>
+#include <parser/lexer.hh>
+#include <parser/production.hh>
 
 #include "lexer.hh"
 #include "productions.hh"
@@ -74,23 +73,23 @@ Parser::Expr::parseExpression(const std::string &text, Ast::Scope *scope)
 {
   std::stringstream stream(text);
 
-  Utils::Lexer lexer(stream);
-  lexer.addRule(new Utils::WhiteSpaceTokenRule(T_WHITESPACE));
-  lexer.addRule(new Utils::IdentifierTokenRule(T_IDENTIFIER));
-  lexer.addRule(new Utils::IntegerTokenRule(T_INTEGER));
-  lexer.addRule(new Utils::FloatTokenRule(T_FLOAT));
-  lexer.addRule(new Utils::KeyWordTokenRule(T_COMMA, ","));
-  lexer.addRule(new Utils::KeyWordTokenRule(T_PLUS, "+"));
-  lexer.addRule(new Utils::KeyWordTokenRule(T_MINUS, "-"));
-  lexer.addRule(new Utils::KeyWordTokenRule(T_TIMES, "*"));
-  lexer.addRule(new Utils::KeyWordTokenRule(T_POWER, "**"));
-  lexer.addRule(new Utils::KeyWordTokenRule(T_POWER, "^"));
-  lexer.addRule(new Utils::KeyWordTokenRule(T_DIVIVE, "/"));
-  lexer.addRule(new Utils::KeyWordTokenRule(T_LPAR, "("));
-  lexer.addRule(new Utils::KeyWordTokenRule(T_RPAR, ")"));
+  Fluc::Parser::Lexer lexer(stream);
+  lexer.addRule(new Parser::WhiteSpaceTokenRule(T_WHITESPACE));
+  lexer.addRule(new Parser::IdentifierTokenRule(T_IDENTIFIER));
+  lexer.addRule(new Parser::IntegerTokenRule(T_INTEGER));
+  lexer.addRule(new Parser::FloatTokenRule(T_FLOAT));
+  lexer.addRule(new Parser::KeyWordTokenRule(T_COMMA, ","));
+  lexer.addRule(new Parser::KeyWordTokenRule(T_PLUS, "+"));
+  lexer.addRule(new Parser::KeyWordTokenRule(T_MINUS, "-"));
+  lexer.addRule(new Parser::KeyWordTokenRule(T_TIMES, "*"));
+  lexer.addRule(new Parser::KeyWordTokenRule(T_POWER, "**"));
+  lexer.addRule(new Parser::KeyWordTokenRule(T_POWER, "^"));
+  lexer.addRule(new Parser::KeyWordTokenRule(T_DIVIVE, "/"));
+  lexer.addRule(new Parser::KeyWordTokenRule(T_LPAR, "("));
+  lexer.addRule(new Parser::KeyWordTokenRule(T_RPAR, ")"));
   lexer.addIgnoredToken(T_WHITESPACE);
 
-  Utils::ConcreteSyntaxTree cst;
+  Parser::ConcreteSyntaxTree cst;
   ExpressionProduction::get()->parse(lexer, cst);
   ExpressionProduction::get()->notify(lexer, cst);
 

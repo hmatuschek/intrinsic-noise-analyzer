@@ -20,17 +20,17 @@ NumberProduction::NumberProduction()
   // Assemble grammar:
   // [-]
   this->elements.push_back(
-        new Utils::OptionalProduction(new Utils::TokenProduction(T_MINUS)));
+        new Parser::OptionalProduction(new Fluc::Parser::TokenProduction(T_MINUS)));
 
   // (INTEGER | FLOAT)
   this->elements.push_back(
-        new Utils::AltProduction(
-          2, new Utils::TokenProduction(T_INTEGER), new Utils::TokenProduction(T_FLOAT)));
+        new Parser::AltProduction(
+          2, new Parser::TokenProduction(T_INTEGER), new Fluc::Parser::TokenProduction(T_FLOAT)));
 }
 
 NumberProduction *NumberProduction::instance = 0;
 
-Utils::Production *
+Parser::Production *
 NumberProduction::get()
 {
   if (0 == NumberProduction::instance)
@@ -54,10 +54,10 @@ ExpressionProduction::ExpressionProduction()
   this->alternatives.resize(2);
 
   this->alternatives[0] =
-      new Utils::Production(
+      new Fluc::Parser::Production(
         3, ProductExpressionProduction::get(),
-        new Utils::AltProduction(
-          2, new Utils::TokenProduction(T_PLUS), new Utils::TokenProduction(T_MINUS)),
+        new Parser::AltProduction(
+          2, new Parser::TokenProduction(T_PLUS), new Parser::TokenProduction(T_MINUS)),
         ExpressionProduction::get());
 
   this->alternatives[1] = ProductExpressionProduction::get();
@@ -65,7 +65,7 @@ ExpressionProduction::ExpressionProduction()
 
 ExpressionProduction *ExpressionProduction::instance = 0;
 
-Utils::Production *
+Parser::Production *
 ExpressionProduction::get()
 {
   if (0 == ExpressionProduction::instance)
@@ -90,10 +90,10 @@ ProductExpressionProduction::ProductExpressionProduction()
   this->alternatives.resize(2);
 
   this->alternatives[0] =
-      new Utils::Production(
+      new Parser::Production(
         3, PowerExpressionProduction::get(),
-        new Utils::AltProduction(
-          2, new Utils::TokenProduction(T_TIMES), new Utils::TokenProduction(T_DIVIVE)),
+        new Parser::AltProduction(
+          2, new Parser::TokenProduction(T_TIMES), new Parser::TokenProduction(T_DIVIVE)),
         ProductExpressionProduction::get());
 
   this->alternatives[1] = PowerExpressionProduction::get();
@@ -101,7 +101,7 @@ ProductExpressionProduction::ProductExpressionProduction()
 
 ProductExpressionProduction *ProductExpressionProduction::instance = 0;
 
-Utils::Production *
+Parser::Production *
 ProductExpressionProduction::get()
 {
   if (0 == ProductExpressionProduction::instance)
@@ -124,14 +124,14 @@ PowerExpressionProduction::PowerExpressionProduction()
 
   this->alternatives.resize(2);
   this->alternatives[0] =
-      new Utils::Production(
-        3, AtomicExpressionProduction::get(),new Utils::TokenProduction(T_POWER), this);
+      new Parser::Production(
+        3, AtomicExpressionProduction::get(),new Parser::TokenProduction(T_POWER), this);
   this->alternatives[1] = AtomicExpressionProduction::get();
 }
 
 PowerExpressionProduction *PowerExpressionProduction::instance = 0;
 
-Utils::Production *
+Parser::Production *
 PowerExpressionProduction::get()
 {
   if (0 == PowerExpressionProduction::instance)
@@ -147,20 +147,20 @@ PowerExpressionProduction::get()
  *   Identifier [, FunctionCallArguments];
  * ******************************************************************************************** */
 FunctionCallArgumentsProduction::FunctionCallArgumentsProduction()
-  : Utils::Production()
+  : Production()
 {
   FunctionCallArgumentsProduction::instance = this;
 
-  this->elements.push_back(new Utils::TokenProduction(T_IDENTIFIER));
+  this->elements.push_back(new Parser::TokenProduction(T_IDENTIFIER));
 
   this->elements.push_back(
-        new Utils::OptionalProduction(
-          new Utils::Production(
-            2, new Utils::TokenProduction(T_COMMA), this)));
+        new Parser::OptionalProduction(
+          new Parser::Production(
+            2, new Parser::TokenProduction(T_COMMA), this)));
 }
 
 FunctionCallArgumentsProduction *FunctionCallArgumentsProduction::instance = 0;
-Utils::Production *
+Parser::Production *
 FunctionCallArgumentsProduction::get()
 {
   if (0 == FunctionCallArgumentsProduction::instance)
@@ -176,18 +176,18 @@ FunctionCallArgumentsProduction::get()
  *   Identifier "(" FunctionCallArguments ")";
  * ******************************************************************************************** */
 FunctionCallProduction::FunctionCallProduction()
-  : Utils::Production()
+  : Production()
 {
   FunctionCallProduction::instance = this;
 
-  this->elements.push_back(new Utils::TokenProduction(T_IDENTIFIER));
-  this->elements.push_back(new Utils::TokenProduction(T_LPAR));
+  this->elements.push_back(new Parser::TokenProduction(T_IDENTIFIER));
+  this->elements.push_back(new Parser::TokenProduction(T_LPAR));
   this->elements.push_back(FunctionCallArgumentsProduction::get());
-  this->elements.push_back(new Utils::TokenProduction(T_RPAR));
+  this->elements.push_back(new Parser::TokenProduction(T_RPAR));
 }
 
 FunctionCallProduction *FunctionCallProduction::instance = 0;
-Utils::Production *
+Parser::Production *
 FunctionCallProduction::get()
 {
   if (0 == FunctionCallProduction::instance)
@@ -211,18 +211,18 @@ AtomicExpressionProduction::AtomicExpressionProduction()
 
   this->alternatives[0] = NumberProduction::get();
   this->alternatives[1] = FunctionCallProduction::get();
-  this->alternatives[2] = new Utils::TokenProduction(T_IDENTIFIER);
-  this->alternatives[3] = new Utils::Production(
-        3, new Utils::TokenProduction(T_LPAR),
+  this->alternatives[2] = new Parser::TokenProduction(T_IDENTIFIER);
+  this->alternatives[3] = new Parser::Production(
+        3, new Parser::TokenProduction(T_LPAR),
         ExpressionProduction::get(),
-        new Utils::TokenProduction(T_RPAR));
-  this->alternatives[4] = new Utils::Production(
-        2, new Utils::TokenProduction(T_MINUS), this);
+        new Parser::TokenProduction(T_RPAR));
+  this->alternatives[4] = new Parser::Production(
+        2, new Parser::TokenProduction(T_MINUS), this);
 }
 
 AtomicExpressionProduction *AtomicExpressionProduction::instance = 0;
 
-Utils::Production *
+Parser::Production *
 AtomicExpressionProduction::get()
 {
   if (0 == AtomicExpressionProduction::instance)

@@ -24,7 +24,7 @@ SBMLSHParserTest::testLexerIdentifier()
 
   UT_ASSERT_EQUAL(lexer.current().getId(), unsigned(Sbmlsh::T_END_OF_LINE)); lexer.next();
 
-  UT_ASSERT_EQUAL(lexer.current().getId(), unsigned(Utils::Token::END_OF_INPUT));
+  UT_ASSERT_EQUAL(lexer.current().getId(), unsigned(Parser::Token::END_OF_INPUT));
 }
 
 
@@ -38,7 +38,7 @@ SBMLSHParserTest::testLexerString()
   UT_ASSERT_EQUAL(lexer.current().getId(), unsigned(Sbmlsh::T_QUOTED_STRING));
   UT_ASSERT_EQUAL(lexer.current().getValue(), "\"abc\""); lexer.next();
 
-  UT_ASSERT_EQUAL(lexer.current().getId(), unsigned(Utils::Token::END_OF_INPUT));
+  UT_ASSERT_EQUAL(lexer.current().getId(), unsigned(Fluc::Parser::Token::END_OF_INPUT));
 }
 
 
@@ -51,7 +51,7 @@ SBMLSHParserTest::testLexerInteger()
   Sbmlsh::Lexer lexer(text);
   UT_ASSERT_EQUAL(lexer.current().getId(), unsigned(Sbmlsh::T_INTEGER));
   UT_ASSERT_EQUAL(lexer.current().getValue(), "1234"); lexer.next();
-  UT_ASSERT_EQUAL(lexer.current().getId(), unsigned(Utils::Token::END_OF_INPUT));
+  UT_ASSERT_EQUAL(lexer.current().getId(), unsigned(Fluc::Parser::Token::END_OF_INPUT));
 }
 
 
@@ -64,7 +64,7 @@ SBMLSHParserTest::testLexerFloat()
   Sbmlsh::Lexer lexer(text);
   UT_ASSERT_EQUAL(lexer.current().getId(), unsigned(Sbmlsh::T_FLOAT));
   UT_ASSERT_EQUAL(lexer.current().getValue(), "12.34"); lexer.next();
-  UT_ASSERT_EQUAL(lexer.current().getId(), unsigned(Utils::Token::END_OF_INPUT));
+  UT_ASSERT_EQUAL(lexer.current().getId(), unsigned(Fluc::Parser::Token::END_OF_INPUT));
 }
 
 
@@ -90,7 +90,7 @@ SBMLSHParserTest::testLexerExpFloat()
   UT_ASSERT_EQUAL(lexer.current().getId(), unsigned(Sbmlsh::T_FLOAT));
   UT_ASSERT_EQUAL(lexer.current().getValue(), "1.2e-34"); lexer.next();
 
-  UT_ASSERT_EQUAL(lexer.current().getId(), unsigned(Utils::Token::END_OF_INPUT));
+  UT_ASSERT_EQUAL(lexer.current().getId(), unsigned(Fluc::Parser::Token::END_OF_INPUT));
 }
 
 
@@ -122,7 +122,7 @@ SBMLSHParserTest::testLexerKeywords()
   UT_ASSERT_EQUAL(lexer.current().getId(), unsigned(Sbmlsh::T_R_KW)); lexer.next(); lexer.next();
   UT_ASSERT_EQUAL(lexer.current().getId(), unsigned(Sbmlsh::T_RR_KW)); lexer.next(); lexer.next();
   UT_ASSERT_EQUAL(lexer.current().getId(), unsigned(Sbmlsh::T_EVENTS_KW)); lexer.next();
-  UT_ASSERT_EQUAL(lexer.current().getId(), unsigned(Utils::Token::END_OF_INPUT));
+  UT_ASSERT_EQUAL(lexer.current().getId(), unsigned(Fluc::Parser::Token::END_OF_INPUT));
 }
 
 
@@ -134,9 +134,9 @@ SBMLSHParserTest::testParserModelDefinition()
     text << "@model:3.3.1 = ModelId \"Model Name\"";
 
     Sbmlsh::Lexer lexer(text);
-    Utils::Production *prod = Sbmlsh::ModelDefinitionProduction::get();
+    Fluc::Parser::Production *prod = Sbmlsh::ModelDefinitionProduction::get();
 
-    Utils::ConcreteSyntaxTree element;
+    Fluc::Parser::ConcreteSyntaxTree element;
     prod->parse(lexer, element);
   }
 
@@ -146,8 +146,8 @@ SBMLSHParserTest::testParserModelDefinition()
          << "  s=\"mole\" t=\"seconds\" v=\"litre\"";
 
     Sbmlsh::Lexer lexer(text);
-    Utils::Production *prod = Sbmlsh::ModelDefinitionProduction::get();
-    Utils::ConcreteSyntaxTree element;
+    Fluc::Parser::Production *prod = Sbmlsh::ModelDefinitionProduction::get();
+    Fluc::Parser::ConcreteSyntaxTree element;
     prod->parse(lexer, element);
   }
 }
@@ -165,8 +165,8 @@ SBMLSHParserTest::testParserUnitDefinition()
          << "  " << "mm = metre:s=-3;";
 
     Sbmlsh::Lexer lexer(text);
-    Utils::Production *prod = Sbmlsh::UnitDefinitionsProduction::get();
-    Utils::ConcreteSyntaxTree element;
+    Fluc::Parser::Production *prod = Sbmlsh::UnitDefinitionsProduction::get();
+    Fluc::Parser::ConcreteSyntaxTree element;
     prod->parse(lexer, element);
   }
 
@@ -176,8 +176,8 @@ SBMLSHParserTest::testParserUnitDefinition()
          << "  " << "mm = mat:s=-3;";
 
     Sbmlsh::Lexer lexer(text);
-    Utils::Production *prod = Sbmlsh::UnitDefinitionsProduction::get();
-    Utils::ConcreteSyntaxTree element;
+    Fluc::Parser::Production *prod = Sbmlsh::UnitDefinitionsProduction::get();
+    Fluc::Parser::ConcreteSyntaxTree element;
     UT_ASSERT_THROW(prod->parse(lexer, element), Utils::ParserError);
   }
 }
@@ -194,8 +194,8 @@ SBMLSHParserTest::testParserCompartmentDefinition()
          << "  " << "cell = 1" << std::endl;
 
     Sbmlsh::Lexer lexer(text);
-    Utils::Production *prod = Sbmlsh::CompartmentDefinitionsProduction::get();
-    Utils::ConcreteSyntaxTree element;
+    Fluc::Parser::Production *prod = Sbmlsh::CompartmentDefinitionsProduction::get();
+    Fluc::Parser::ConcreteSyntaxTree element;
     prod->parse(lexer, element);
   }
 }
@@ -215,8 +215,8 @@ SBMLSHParserTest::testParserSpeciesDefinition()
          << "  cell: [s] = 1 s b c";
 
     Sbmlsh::Lexer lexer(text);
-    Utils::Production *prod = Sbmlsh::SpeciesDefinitionsProduction::get();
-    Utils::ConcreteSyntaxTree element;
+    Fluc::Parser::Production *prod = Sbmlsh::SpeciesDefinitionsProduction::get();
+    Fluc::Parser::ConcreteSyntaxTree element;
     prod->parse(lexer, element);
   }
 }
@@ -260,13 +260,13 @@ SBMLSHParserTest::suite()
   UnitTest::TestSuite *s = new UnitTest::TestSuite("Tests for SBML-SH parser.");
 
   s->addTest(new UnitTest::TestCaller<SBMLSHParserTest>(
+               "Lexer: Integer", &SBMLSHParserTest::testLexerInteger));
+
+  s->addTest(new UnitTest::TestCaller<SBMLSHParserTest>(
                "Lexer: Identifier", &SBMLSHParserTest::testLexerIdentifier));
 
   s->addTest(new UnitTest::TestCaller<SBMLSHParserTest>(
                "Lexer: String", &SBMLSHParserTest::testLexerString));
-
-  s->addTest(new UnitTest::TestCaller<SBMLSHParserTest>(
-               "Lexer: Integer", &SBMLSHParserTest::testLexerInteger));
 
   s->addTest(new UnitTest::TestCaller<SBMLSHParserTest>(
                "Lexer: Float", &SBMLSHParserTest::testLexerFloat));

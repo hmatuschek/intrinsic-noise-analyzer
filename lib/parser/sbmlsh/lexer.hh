@@ -1,8 +1,6 @@
 #ifndef __FLUC_SBMLSH_LEXER_HH__
 #define __FLUC_SBMLSH_LEXER_HH__
 
-#include "utils/lexer.hh"
-#include "utils/tokenrules.hh"
 #include <parser/expr/lexer.hh>
 
 
@@ -76,7 +74,7 @@ typedef enum {
  *
  * @ingroup sbmlsh
  */
-class VersionNumberTokenRule : public Utils::TokenRule
+class VersionNumberTokenRule : public Fluc::Parser::TokenRule
 {
 public:
   /** Constructor. */
@@ -89,7 +87,7 @@ public:
  *
  * @ingroup sbmlsh
  */
-class Lexer: public Utils::Lexer
+class Lexer: public Fluc::Parser::Lexer
 {
 public:
   /** Constructor.

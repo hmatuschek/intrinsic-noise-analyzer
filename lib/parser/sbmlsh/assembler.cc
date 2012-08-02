@@ -8,7 +8,7 @@ using namespace Fluc;
 using namespace Fluc::Parser::Sbmlsh;
 
 
-Assembler::Assembler(Ast::Model &model, Utils::Lexer &lexer)
+Assembler::Assembler(Ast::Model &model, Parser::Lexer &lexer)
   : Expr::Assembler(&model, lexer), _model(model)
 {
   // Assemble base unit map;
@@ -48,7 +48,7 @@ Assembler::Assembler(Ast::Model &model, Utils::Lexer &lexer)
 
 
 void
-Assembler::process(Utils::ConcreteSyntaxTree &root)
+Assembler::process(Parser::ConcreteSyntaxTree &root)
 {
   processModel(root);
 }
@@ -56,7 +56,7 @@ Assembler::process(Utils::ConcreteSyntaxTree &root)
 
 
 void
-Assembler::processModel(Utils::ConcreteSyntaxTree &model)
+Assembler::processModel(Parser::ConcreteSyntaxTree &model)
 {
   /* Model =                          : model
    *   ModelDefinition                  : model[0]
@@ -138,7 +138,7 @@ Assembler::processModel(Utils::ConcreteSyntaxTree &model)
 
 
 void
-Assembler::processModelDefinition(Utils::ConcreteSyntaxTree &model_header)
+Assembler::processModelDefinition(Parser::ConcreteSyntaxTree &model_header)
 {
   /* ModelDefinition =               : model_header
    *   "@model"                        : model_header[0]
@@ -165,7 +165,7 @@ Assembler::processModelDefinition(Utils::ConcreteSyntaxTree &model_header)
 
 
 void
-Assembler::processDefaultUnitDefinitions(Utils::ConcreteSyntaxTree &def_units)
+Assembler::processDefaultUnitDefinitions(Parser::ConcreteSyntaxTree &def_units)
 {
   /* DefaultUnitDefinitions =   : def_units
    *   DefaultUnitDefinition      : def_units[0]
@@ -213,7 +213,7 @@ Assembler::processDefaultUnitDefinitions(Utils::ConcreteSyntaxTree &def_units)
 
 
 void
-Assembler::processUnitDefinition(Utils::ConcreteSyntaxTree &unit)
+Assembler::processUnitDefinition(Parser::ConcreteSyntaxTree &unit)
 {
   // UnitDefinitionList =          : unit
   //   Identifier                    :unit[0]  (Token)
@@ -245,7 +245,7 @@ Assembler::processUnitDefinition(Utils::ConcreteSyntaxTree &unit)
 
 
 void
-Assembler::processScaledUnitList(Utils::ConcreteSyntaxTree &unit,
+Assembler::processScaledUnitList(Parser::ConcreteSyntaxTree &unit,
                                  std::list<Ast::ScaledBaseUnit> &unit_list)
 {
   // ScaledUnitList =                      : units
@@ -257,7 +257,7 @@ Assembler::processScaledUnitList(Utils::ConcreteSyntaxTree &unit,
   //   [ScaledUnitList];                     : units[3]
 
   /* Dispatch by base unit name. */
-  const Utils::Token &uid_token = _lexer[unit[0].getTokenIdx()];
+  const Parser::Token &uid_token = _lexer[unit[0].getTokenIdx()];
   std::string base_unit_id = uid_token.getValue();
   std::map<std::string, Ast::ScaledBaseUnit::BaseUnit>::iterator item
       = _base_unit_map.find(base_unit_id);
@@ -287,7 +287,7 @@ Assembler::processScaledUnitList(Utils::ConcreteSyntaxTree &unit,
 
 
 void
-Assembler::processScaledUnitModifierList(Utils::ConcreteSyntaxTree &sulist,
+Assembler::processScaledUnitModifierList(Parser::ConcreteSyntaxTree &sulist,
                                          double &multiplier, int &scale, int &exponent)
 {
   /* ScaledUnitModifierList =               : sulist
@@ -298,7 +298,7 @@ Assembler::processScaledUnitModifierList(Utils::ConcreteSyntaxTree &sulist,
    *     ','                                    : sulist[3][0][0]
    *     ScaledUnitModifierList]                : sulist[3][0][1]   */
 
-  const Utils::Token &flag = _lexer[sulist[0].getTokenIdx()];
+  const Parser::Token &flag = _lexer[sulist[0].getTokenIdx()];
   if ("m" == flag.getValue()) {
     multiplier = processNumber(sulist[2]);
   } else if ("s" == flag.getValue()) {
@@ -320,7 +320,7 @@ Assembler::processScaledUnitModifierList(Utils::ConcreteSyntaxTree &sulist,
 
 
 void
-Assembler::processCompartmentDefinitions(Utils::ConcreteSyntaxTree &comp)
+Assembler::processCompartmentDefinitions(Parser::ConcreteSyntaxTree &comp)
 {
   /* CompartmentDefinitionList =        : comp
    *  Identifier                          : comp[0]
@@ -361,7 +361,7 @@ Assembler::processCompartmentDefinitions(Utils::ConcreteSyntaxTree &comp)
 
 
 void
-Assembler::processSpeciesDefinition(Utils::ConcreteSyntaxTree &spec)
+Assembler::processSpeciesDefinition(Parser::ConcreteSyntaxTree &spec)
 {
   /* SpeciesDefinitionList =           : spec
    *   ID                                : spec[0]
@@ -438,14 +438,14 @@ Assembler::processSpeciesDefinition(Utils::ConcreteSyntaxTree &spec)
 
 
 void
-Assembler::processSpeciesModifierList(Utils::ConcreteSyntaxTree &spec_mod,
+Assembler::processSpeciesModifierList(Parser::ConcreteSyntaxTree &spec_mod,
                                       bool &has_substance_units, bool &has_boundary_condition,
                                       bool &is_constant)
 {
   /* SpeciesModifierList =      : spec_mod
    *   SpeciesModifier            : spec_mod[0]   (token)
    *   [SpeciesModifierList];     : spec_mod[1] */
-  const Utils::Token &token = _lexer[spec_mod[0].getTokenIdx()];
+  const Parser::Token &token = _lexer[spec_mod[0].getTokenIdx()];
   std::string modifier = token.getValue();
 
   for (size_t i=0; i<modifier.size(); i++) {
@@ -472,7 +472,7 @@ Assembler::processSpeciesModifierList(Utils::ConcreteSyntaxTree &spec_mod,
 
 
 void
-Assembler::processParameterDefinition(Utils::ConcreteSyntaxTree &params)
+Assembler::processParameterDefinition(Parser::ConcreteSyntaxTree &params)
 {
   /* ParameterDefinitionList =          : params
    *   Identifier                         : params[0]
@@ -510,7 +510,7 @@ Assembler::processParameterDefinition(Utils::ConcreteSyntaxTree &params)
 
 
 void
-Assembler::processRuleDefinitionList(Utils::ConcreteSyntaxTree &rules)
+Assembler::processRuleDefinitionList(Parser::ConcreteSyntaxTree &rules)
 {
   /* RuleDefinitionList =        : rules
    *   [("@rate"|"@assign")]       : rules[0]
@@ -548,7 +548,7 @@ Assembler::processRuleDefinitionList(Utils::ConcreteSyntaxTree &rules)
 
 
 void
-Assembler::processReactionDefinitions(Utils::ConcreteSyntaxTree &reac)
+Assembler::processReactionDefinitions(Parser::ConcreteSyntaxTree &reac)
 {
   /* ReactionDefinitionList =      : reac
    *   ("@r" | "@rr")                : reac[0]
@@ -609,7 +609,7 @@ Assembler::processReactionDefinitions(Utils::ConcreteSyntaxTree &reac)
 
 
 void
-Assembler::processReactionModifierList(Utils::ConcreteSyntaxTree &lst, std::list<Ast::Species *> &mods)
+Assembler::processReactionModifierList(Parser::ConcreteSyntaxTree &lst, std::list<Ast::Species *> &mods)
 {
   /* ReactionModifierList          : lst
    *   Identifier                    : lst[0]
@@ -632,7 +632,7 @@ Assembler::processReactionModifierList(Utils::ConcreteSyntaxTree &lst, std::list
 
 
 Ast::KineticLaw *
-Assembler::processKineticLaw(Utils::ConcreteSyntaxTree &law)
+Assembler::processKineticLaw(Parser::ConcreteSyntaxTree &law)
 {
   /* KineticLaw =                           : law
    *   Expression                             : law[0]
@@ -664,7 +664,7 @@ Assembler::processKineticLaw(Utils::ConcreteSyntaxTree &law)
 
 
 void
-Assembler::processLocalParameters(Utils::ConcreteSyntaxTree &params)
+Assembler::processLocalParameters(Parser::ConcreteSyntaxTree &params)
 {
   /* LocalPrameterList =        : params
    *   Identifier                 : params[0]
@@ -685,7 +685,7 @@ Assembler::processLocalParameters(Utils::ConcreteSyntaxTree &params)
 
 
 void
-Assembler::processReactionEquation(Utils::ConcreteSyntaxTree &equ, Ast::Reaction *reaction)
+Assembler::processReactionEquation(Parser::ConcreteSyntaxTree &equ, Ast::Reaction *reaction)
 {
   /* ReactionEquation =      : equ
    *   (                       :
@@ -707,7 +707,7 @@ Assembler::processReactionEquation(Utils::ConcreteSyntaxTree &equ, Ast::Reaction
 
 
 void
-Assembler::processReactants(Utils::ConcreteSyntaxTree &sum, Ast::Reaction *reaction) {
+Assembler::processReactants(Parser::ConcreteSyntaxTree &sum, Ast::Reaction *reaction) {
   /* StochiometrySum =
    *   [INTEGER] Identifier ["+" StochiometrySum]; */
   double stoichiometry = 1;
@@ -727,7 +727,7 @@ Assembler::processReactants(Utils::ConcreteSyntaxTree &sum, Ast::Reaction *react
 
 
 void
-Assembler::processProducts(Utils::ConcreteSyntaxTree &sum, Ast::Reaction *reaction) {
+Assembler::processProducts(Parser::ConcreteSyntaxTree &sum, Ast::Reaction *reaction) {
   /* StochiometrySum =
    *   [INTEGER] Identifier ["+" StochiometrySum]; */
   double stoichiometry = 1;

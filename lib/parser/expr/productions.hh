@@ -1,8 +1,8 @@
 #ifndef __INA_PARSER_EXPR_PRODUCTIONS_HH__
 #define __INA_PARSER_EXPR_PRODUCTIONS_HH__
 
-#include <utils/lexer.hh>
-#include <utils/parser.hh>
+#include <parser/lexer.hh>
+#include <parser/production.hh>
 
 
 namespace Fluc {
@@ -16,7 +16,7 @@ namespace Expr {
  * Number =
  *   ["-"] (INTEGER | FLOAT );
  */
-class NumberProduction : public Utils::Production
+class NumberProduction : public Parser::Production
 {
 protected:
   /** Hidden constructor, use factory method @c get to get an instance. */
@@ -36,7 +36,7 @@ private:
  * FunctionCallArguments =
  *   Expression [, FunctionCallArguments]
  */
-class FunctionCallArgumentsProduction : public Utils::Production
+class FunctionCallArgumentsProduction : public Parser::Production
 {
 protected:
   /** Hidden constructor. */
@@ -44,7 +44,7 @@ protected:
 
 public:
   /** Factory method. */
-  static Utils::Production *get();
+  static Fluc::Parser::Production *get();
 
 protected:
   static FunctionCallArgumentsProduction *instance;
@@ -55,7 +55,7 @@ protected:
  * FunctionCall =
  *   Identifier "(" FunctionCallArguments ")";
  */
-class FunctionCallProduction : public Utils::Production
+class FunctionCallProduction : public Parser::Production
 {
 protected:
   /** Hidden constructor. */
@@ -63,7 +63,7 @@ protected:
 
 public:
   /** Factory method. */
-  static Utils::Production *get();
+  static Fluc::Parser::Production *get();
 
 protected:
   /** Singleton instance. */
@@ -75,7 +75,7 @@ protected:
  * AtomicExpression =
  *   Number | Identifier | FunctionCall | ("(" Expression ")") | "-" AtomicExpression;
  */
-class AtomicExpressionProduction : public Utils::AltProduction
+class AtomicExpressionProduction : public Parser::AltProduction
 {
 protected:
   /** Hidden constructor. */
@@ -83,7 +83,7 @@ protected:
 
 public:
   /** Factory method. */
-  static Utils::Production *get();
+  static Fluc::Parser::Production *get();
 
 private:
   /** Singleton instance. */
@@ -95,7 +95,7 @@ private:
  * PowerExpression =
  *   (AtomicExpression ("^"|"**") PowerExpression) | AtomicExpression.
  */
-class PowerExpressionProduction : public Utils::AltProduction
+class PowerExpressionProduction : public Parser::AltProduction
 {
 protected:
   /** Hidden constructor. */
@@ -103,7 +103,7 @@ protected:
 
 public:
   /** Factory method. */
-  static Utils::Production *get();
+  static Fluc::Parser::Production *get();
 
 protected:
   static PowerExpressionProduction *instance;
@@ -114,7 +114,7 @@ protected:
  * ProductExpression =
  *   (PowerExpression ("*" | "/") ProductExpression) | PowerExpression;
  */
-class ProductExpressionProduction : public Utils::AltProduction
+class ProductExpressionProduction : public Parser::AltProduction
 {
 protected:
   /** Hidden constructor. */
@@ -122,7 +122,7 @@ protected:
 
 public:
   /** Factory method. */
-  static Utils::Production *get();
+  static Fluc::Parser::Production *get();
 
 private:
   /** Singleton instance. */
@@ -134,7 +134,7 @@ private:
  * Expression =
  *   (ProductExpression ("+"|"-") Expression) | ProductExpression;
  */
-class ExpressionProduction : public Utils::AltProduction
+class ExpressionProduction : public Parser::AltProduction
 {
 protected:
   /** Hidden constructor. */
@@ -142,7 +142,7 @@ protected:
 
 public:
   /** factory method. */
-  static Utils::Production *get();
+  static Fluc::Parser::Production *get();
 
 private:
   /** Singleton instance. */

@@ -23,8 +23,7 @@ Token::Token(unsigned id, size_t line, const std::string &value)
 }
 
 unsigned
-Token::getId() const
-{
+Token::getId() const {
   return this->id;
 }
 
@@ -46,15 +45,21 @@ Token::getValue() const
  * Implementation of TokenRule:
  * ******************************************************************************************** */
 TokenRule::TokenRule(unsigned id)
-  : DFA<char>(), id(id), _current_value()
+  : DFA<char>(), id(id)
 {
   /* pass... */
 }
 
-Token
-TokenRule::getToken(size_t line) const
+TokenRule::TokenRule(const TokenRule &other)
+  : DFA<char>(other), id(other.id)
 {
-  return Token(this->id, line, _current_value.str());
+  // pass...
+}
+
+Token
+TokenRule::getToken(const std::string &value, size_t line) const
+{
+  return Token(this->id, line, value);
 }
 
 unsigned
@@ -64,87 +69,70 @@ TokenRule::getId() const
 }
 
 void
-TokenRule::reset()
+TokenRule::onChar(char value, State &A, State &B)
 {
-  _current_value.str("");
-  DFA<char>::reset();
-}
-
-DFA<char>::State *
-TokenRule::accept(const char &value)
-{
-  State *new_state = DFA<char>::accept(value);
-  if (0 != new_state) {
-    _current_value << value;
-  }
-  return new_state;
-}
-
-void
-TokenRule::onChar(char value, State *A, State *B)
-{
-  Condition &cond = A->createTransition(B);
+  Condition &cond = A.createTransition(B);
   cond.addOnValue(value);
 }
 
 void
-TokenRule::onNotChar(char c, State *A, State *B)
+TokenRule::onNotChar(char c, State &A, State &B)
 {
-  Condition &cond = A->createTransition(B);
+  Condition &cond = A.createTransition(B);
   cond.addOnValue(c);
   cond.addNot();
 }
 
 void
-TokenRule::onWhiteSpace(State *A, State *B)
+TokenRule::onWhiteSpace(State &A, State &B)
 {
-  Condition &cond = A->createTransition(B);
+  Condition &cond = A.createTransition(B);
   cond.addOnValue(' ');
   cond.addOnValue('\t');
   cond.AddOr();
 }
 
 void
-TokenRule::onLowerAlpha(State *A, State *B)
+TokenRule::onLowerAlpha(State &A, State &B)
 {
-  Condition &cond = A->createTransition(B);
+  Condition &cond = A.createTransition(B);
   cond.addInRange('a','z');
 }
 
 void
-TokenRule::onUpperAlpha(State *A, State *B)
+TokenRule::onUpperAlpha(State &A, State &B)
 {
-  Condition &cond = A->createTransition(B);
+  Condition &cond = A.createTransition(B);
   cond.addInRange('A','Z');
 }
 
 void
-TokenRule::onAlpha(State *A, State *B)
+TokenRule::onAlpha(State &A, State &B)
 {
-  Condition &cond = A->createTransition(B);
+  Condition &cond = A.createTransition(B);
   cond.addInRange('a','z');
   cond.addInRange('A','Z');
   cond.AddOr();
 }
 
 void
-TokenRule::onNumber(State *A, State *B)
+TokenRule::onNumber(State &A, State &B)
 {
-  Condition &cond = A->createTransition(B);
+  Condition &cond = A.createTransition(B);
   cond.addInRange('0', '9');
 }
 
 void
-TokenRule::onPosNumber(State *A, State *B)
+TokenRule::onPosNumber(State &A, State &B)
 {
-  Condition &cond = A->createTransition(B);
+  Condition &cond = A.createTransition(B);
   cond.addInRange('1', '9');
 }
 
 void
-TokenRule::onAlphaNum(State *A, State *B)
+TokenRule::onAlphaNum(State &A, State &B)
 {
-  Condition &cond = A->createTransition(B);
+  Condition &cond = A.createTransition(B);
   cond.addInRange('0','9');
   cond.addInRange('a','z');
   cond.addInRange('A','Z');
@@ -156,7 +144,7 @@ TokenRule::onAlphaNum(State *A, State *B)
  * Implementation of Lexer:
  * ******************************************************************************************** */
 Lexer::Lexer(std::istream &input)
-  : input(input), history(0)
+  : input(input), history(0), reader()
 {
   // Initialize stack of token pointer:
   this->stack.push_back(State(0,1,1));
@@ -167,47 +155,31 @@ Lexer::Lexer(std::istream &input)
 
 
 void
-Lexer::addRule(const TokenRule &token)
-{
+Lexer::addRule(TokenRule *token) {
   this->reader.addAutomata(token);
 }
-
 
 const Token &
 Lexer::next()
 {
   // Needs to read token from input?
-  if ((this->stack.back().idx+1) == this->history.size())
-  {
+  if ((this->stack.back().idx+1) == this->history.size()) {
     this->parseToken();
   }
 
   // If token already read:
   this->stack.back().idx++;
-
-  // If new token is new-line:
-  if (0 != this->new_line_token.count(this->history[this->stack.back().idx].getId()))
-  {
-    this->stack.back().line++;
-  }
-
+  // Return token from history
   return this->history[this->stack.back().idx];
 }
 
 
 const Token &
-Lexer::current()
-{
-  if (this->stack.back().idx == this->history.size())
-  {
+Lexer::current() {
+  // If there is no token parsed -> parse one more
+  if (this->stack.back().idx == this->history.size()) {
     this->parseToken();
-    // If new token is new-line:
-    if (0 != this->new_line_token.count(this->history[this->stack.back().idx].getId()))
-    {
-      this->stack.back().line++;
-    }
   }
-
   return this->history[this->stack.back().idx];
 }
 
@@ -239,10 +211,8 @@ Lexer::drop_state()
 
 
 void
-Lexer::restore_state()
-{
+Lexer::restore_state() {
   this->stack.pop_back();
-  //std::cerr << "Restore state: " << this->stack.back() << std::endl;
 }
 
 
@@ -293,74 +263,77 @@ void
 Lexer::parseToken()
 {
   // Reset NFA:
-  this->reader.reset();
+  reader.reset();
+  // Clear buffer
+  _buffer.str("");
 
   // If end of stream -> push back a EOS token
-  if (this->input.eof()) {
-    this->history.push_back(Token(Token::END_OF_INPUT, 0, ""));
+  if (input.eof()) {
+    history.push_back(Token(Token::END_OF_INPUT, 0, ""));
     return;
   }
 
   // Read chars until ROF or NFA does not accept the next char:
-  while ((!this->input.eof()) && this->reader.accepts(this->input.peek()))
+  while ((!input.eof()) && reader.accepts(input.peek()))
   {
-    char c; this->input.get(c);
-    this->reader.accept(c);
+    char c; input.get(c);
+    reader.accept(c);
+    _buffer << c;
   }
 
   // If the reader is not in a final state:
-  if (! this->reader.inFinalState()) {
-    Utils::LexerError err;
-    err << "@line: ???"
-        << "Lexer: unexpected char: " << (unsigned char)(this->input.peek());
-    return;
+  if (! reader.inFinalState()) {
+    Utils::ParserError err;
+    err << "@line: " << stack.back().line
+        << "Lexer: unexpected char: " << (unsigned char)(input.peek());
+    throw err;
   }
 
   // Cast DFA to TokenRule...
-  TokenRule *rule = static_cast<TokenRule *>(this->reader.getMatchingAutomata());
+  TokenRule *rule = static_cast<TokenRule *>(reader.getMatchingAutomata());
+
+  // Store parsed token in history:
+  Token token = rule->getToken(_buffer.str(), stack.back().line);
+
+  // If token is NEW_LINE token:
+  if (0 != new_line_token.count(token.getId())) {
+    stack.back().line++;
+  }
 
   // If parsed token is ignored -> read another one...
-  if (this->ignored_token.end() != this->ignored_token.find(rule->getId()))
-  {
+  if (this->ignored_token.end() != this->ignored_token.find(token.getId())) {
     this->parseToken();
     return;
   }
 
-  // Store parsed token in history:
-  this->history.push_back(rule->getToken(this->stack.back().line));
-
-  //std::cerr << "Parsed token " << this->history.back().getId()
-  //          << ": " << this->history.back().getValue() << std::endl;
+  history.push_back(token);
 }
 
 
 /* ********************************************************************************************* *
- * Implementation of default TokenRules:
- * ********************************************************************************************* */
-/* ********************************************************************************************* *
+ * Default TokenRules...
+ *
  * Implementation of WhiteSpaceToken rule:
  * ********************************************************************************************* */
 WhiteSpaceTokenRule::WhiteSpaceTokenRule(unsigned id)
   : TokenRule(id)
 {
-  State *s1 = createState(false);
-  State *s2 = createState(true);
+  allocStates(2);
+  State &s1 = createState(false);
+  State &s2 = createState(true);
   onWhiteSpace(s1,s2);
   onWhiteSpace(s2,s2);
 }
 
 
-
-/* ********************************************************************************************* *
- * Implementation of EOLToken rule:
- * ********************************************************************************************* */
 EOLTokenRule::EOLTokenRule(unsigned id)
   : TokenRule(id)
 {
-  State *s1 = createState(false);
-  State *s2 = createState(true);
-  State *s3 = createState(true);
-  State *s4 = createState(true);
+  allocStates(4);
+  State &s1 = createState(false);
+  State &s2 = createState(true);
+  State &s3 = createState(true);
+  State &s4 = createState(true);
   onChar('\n', s1, s2);
   onChar('\r', s1, s3);
   onChar('\r', s3, s4);
@@ -368,15 +341,12 @@ EOLTokenRule::EOLTokenRule(unsigned id)
 }
 
 
-
-/* ********************************************************************************************* *
- * Implementation of IdentifierToken rule:
- * ********************************************************************************************* */
 IdentifierTokenRule::IdentifierTokenRule(unsigned id)
   : TokenRule(id)
 {
-  State *s1 = createState(false);
-  State *s2 = createState(true);
+  allocStates(2);
+  State &s1 = createState(false);
+  State &s2 = createState(true);
   onAlpha(s1, s2);
   onChar('_', s1, s2);
   onAlphaNum(s2,s2);
@@ -384,65 +354,53 @@ IdentifierTokenRule::IdentifierTokenRule(unsigned id)
 }
 
 
-
-/* ********************************************************************************************* *
- * Implementation of StringToken rule:
- * ********************************************************************************************* */
 StringTokenRule::StringTokenRule(unsigned id)
   : TokenRule(id)
 {
-  State *si = createState(false);
-  State *s2 = createState(false);
-  State *sf = createState(true);
+  allocStates(3);
+  State &si = createState(false);
+  State &s2 = createState(false);
+  State &sf = createState(true);
   onChar('"', si, s2);
   onChar('"', s2, sf);
   onNotChar('"', s2, s2);
 }
 
 
-
-/* ********************************************************************************************* *
- * Implementation of KeyWordToken rule:
- * ********************************************************************************************* */
 KeyWordTokenRule::KeyWordTokenRule(unsigned id, const std::string &keyword)
   : TokenRule(id)
 {
-  State *state = createState(false);
+  allocStates(keyword.size()+1);
+  State *state = &createState(false);
   for (size_t i=0; i<keyword.size(); i++) {
-    State *nextState = createState((i+1)==keyword.size());
-    onChar(keyword[i], state, nextState);
+    State *nextState = &createState((i+1)==keyword.size());
+    onChar(keyword[i], *state, *nextState);
     state = nextState;
   }
 }
 
 
-
-/* ********************************************************************************************* *
- * Implementation of IntegerToken rule:
- * ********************************************************************************************* */
 IntegerTokenRule::IntegerTokenRule(unsigned id)
   : TokenRule(id)
 {
-  State *si = createState(false);
-  State *sf = createState(true);
+  allocStates(2);
+  State &si = createState(false);
+  State &sf = createState(true);
   onNumber(si, sf);
   onNumber(sf, sf);
 }
 
 
-
-/* ********************************************************************************************* *
- * Implementation of FloatToken rule:
- * ********************************************************************************************* */
 FloatTokenRule::FloatTokenRule(unsigned id)
   : TokenRule(id)
 {
-  State *si  = createState(false);
-  State *s3  = createState(false);
-  State *sff = createState(true);
-  State *sei = createState(false);
-  State *se1 = createState(false);
-  State *sef = createState(true);
+  allocStates(6);
+  State &si  = createState(false);
+  State &s3  = createState(false);
+  State &sff = createState(true);
+  State &sei = createState(false);
+  State &se1 = createState(false);
+  State &sef = createState(true);
   onNumber(si, s3);
   onNumber(s3, s3);
   onChar('.', s3, sff);

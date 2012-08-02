@@ -2,8 +2,8 @@
 #define __INA_PARSER_SBMLSH_PRODUCTIONS_HH__
 
 #include "lexer.hh"
-#include <utils/parser.hh>
-
+#include <parser/production.hh>
+#include <parser/lexer.hh>
 
 namespace Fluc {
 namespace Parser {
@@ -16,7 +16,7 @@ namespace Sbmlsh {
  * Number =
  *   ["-"] (INTEGER | FLOAT );
  */
-class NumberProduction : public Utils::Production
+class NumberProduction : public Fluc::Parser::Production
 {
 protected:
   /** Hidden constructor, use factory method @c get to get an instance. */
@@ -24,7 +24,7 @@ protected:
 
 public:
   /** Factory method. */
-  static Production *get();
+  static Fluc::Parser::Production *get();
 
 private:
   /** Singleton instance. */
@@ -38,7 +38,7 @@ private:
  * EndOfLine =
  *   EOL [EndOfLine];
  */
-class EndOfLineProduction : public Utils::Production
+class EndOfLineProduction : public Fluc::Parser::Production
 {
 protected:
   /** Hidden constructor. */
@@ -46,7 +46,7 @@ protected:
 
 public:
   /** Factory method. */
-  static Utils::Production *get();
+  static Fluc::Parser::Production *get();
 
 private:
   /** Singleton instance. */
@@ -60,7 +60,7 @@ private:
  *
  * @todo 'e' & 'c' are no default unit identifiers!
  */
-class DefaultUnitIdentifierProduction : public Utils::TokenProduction
+class DefaultUnitIdentifierProduction : public Fluc::Parser::TokenProduction
 {
 protected:
   /** Hidden constructor. */
@@ -68,11 +68,11 @@ protected:
 
 public:
   /** Parses identifier. */
-  virtual void parse(Utils::Lexer &lexer, Utils::ConcreteSyntaxTree &element);
+  virtual void parse(Fluc::Parser::Lexer &lexer, Fluc::Parser::ConcreteSyntaxTree &element);
 
 public:
   /** Factory method. */
-  static Utils::Production *get();
+  static Fluc::Parser::Production *get();
 
 private:
   /** Singleton-instance. */
@@ -84,7 +84,7 @@ private:
  * DefaultUnitDefinition =
  *   DefaultUnitIdentifier "=" Identifier;
  */
-class DefaultUnitDefinitionProduction : public Utils::Production
+class DefaultUnitDefinitionProduction : public Fluc::Parser::Production
 {
 protected:
   /** Hidden constructor. */
@@ -92,7 +92,7 @@ protected:
 
 public:
   /** Factory method. */
-  static Utils::Production *get();
+  static Fluc::Parser::Production *get();
 
 private:
   /** Singleton instance. */
@@ -104,7 +104,7 @@ private:
  * DefaultUnitDefinitions =
  *   DefaultUnitDefinition {DefaultUnitDefinitions};
  */
-class DefaultUnitDefinitionsProduction : public Utils::Production
+class DefaultUnitDefinitionsProduction : public Fluc::Parser::Production
 {
 protected:
   /** Hidden constructor. */
@@ -112,7 +112,7 @@ protected:
 
 public:
   /** Factory method. */
-  static Utils::Production *get();
+  static Fluc::Parser::Production *get();
 
 private:
   /** Singleton instance. */
@@ -124,7 +124,7 @@ private:
  * ModelDefinition =
  *   "@model" ":" "3.3.1" "=" Identifier [QuotedString] [EOL DefaultUnitDefinitions];
  */
-class ModelDefinitionProduction : public Utils::Production
+class ModelDefinitionProduction : public Fluc::Parser::Production
 {
 protected:
   /** Hidden constructor. */
@@ -132,7 +132,7 @@ protected:
 
 public:
   /** Factory method. */
-  static Utils::Production *get();
+  static Fluc::Parser::Production *get();
 
 private:
   /** Singleton instance. */
@@ -144,7 +144,7 @@ private:
  * ScaledUnitIdentifier =
  *   ("ampere" | "becquerel" | ...);
 */
-class ScaledUnitIdentifierProduction : public Utils::TokenProduction
+class ScaledUnitIdentifierProduction : public Fluc::Parser::TokenProduction
 {
 protected:
   /** Holds all valid unit identifiers.
@@ -157,10 +157,10 @@ protected:
 
 public:
   /** Checks if unit identifier is valid. */
-  virtual void parse(Utils::Lexer &lexer, Utils::ConcreteSyntaxTree &element);
+  virtual void parse(Fluc::Parser::Lexer &lexer, Fluc::Parser::ConcreteSyntaxTree &element);
 
   /** Factory method. */
-  static Utils::Production *get();
+  static Fluc::Parser::Production *get();
 
 private:
   /** Singleton instance. */
@@ -172,7 +172,7 @@ private:
  * ScaledUnitModifier =
  *   ("e" | "m" | "s");
  */
-class ScaledUnitModifierProduction : public Utils::TokenProduction
+class ScaledUnitModifierProduction : public Fluc::Parser::TokenProduction
 {
 protected:
   /** Hidden constructor. */
@@ -180,10 +180,10 @@ protected:
 
 public:
   /** Checks modifier. */
-  virtual void parse(Utils::Lexer &lexer, Utils::ConcreteSyntaxTree &element);
+  virtual void parse(Fluc::Parser::Lexer &lexer, Fluc::Parser::ConcreteSyntaxTree &element);
 
   /** Factory method. */
-  static Utils::Production *get();
+  static Fluc::Parser::Production *get();
 
 private:
   /** Singleton instance. */
@@ -195,7 +195,7 @@ private:
  * ScaledUnitModifierList =
  *   ScaledUnitModifier "=" NUMBER [',' ScaledUnitModifierList];
  */
-class ScaledUnitModifierListProduction : public Utils::Production
+class ScaledUnitModifierListProduction : public Fluc::Parser::Production
 {
 protected:
   /** Hidden constructor. */
@@ -203,7 +203,7 @@ protected:
 
 public:
   /** Factory method. */
-  static Utils::Production *get();
+  static Fluc::Parser::Production *get();
 
 private:
   /** Singleton instance. */
@@ -215,7 +215,7 @@ private:
  * ScaledUnitList =
  *   ScaledUnitIdentifier [":" ScaledUnitModifier "=" NUMBER];
  */
-class ScaledUnitListProduction : public Utils::Production
+class ScaledUnitListProduction : public Fluc::Parser::Production
 {
 protected:
   /** Hidden constructor. */
@@ -223,7 +223,7 @@ protected:
 
 public:
   /** Factory method. */
-  static Utils::Production *get();
+  static Fluc::Parser::Production *get();
 
 private:
   /** Singleton instance. */
@@ -235,7 +235,7 @@ private:
  * UnitDefinitionList =
  *   Identifier "=" ScaledUnitList [EOL UnitDefinitionList]
  */
-class UnitDefinitionListProduction : public Utils::Production
+class UnitDefinitionListProduction : public Fluc::Parser::Production
 {
 protected:
   /** Hidden constructor. */
@@ -243,7 +243,7 @@ protected:
 
 public:
   /** Factory method. */
-  static Utils::Production *get();
+  static Fluc::Parser::Production *get();
 
 private:
   /** Singleton instance. */
@@ -255,7 +255,7 @@ private:
  * UnitDefinitions =
  *   "@units" EOL UnitDefinitionList;
  */
-class UnitDefinitionsProduction : public Utils::Production
+class UnitDefinitionsProduction : public Fluc::Parser::Production
 {
 protected:
   /** Hidden constructor. */
@@ -263,7 +263,7 @@ protected:
 
 public:
   /** Factory method. */
-  static Utils::Production *get();
+  static Fluc::Parser::Production *get();
 
 private:
   /** Singleton instance. */
@@ -275,7 +275,7 @@ private:
  * CompartmentDefinitionList =
  *   Identifier ["=" NUMBER] [QuotedString] [EOL CompartmentDefinitionList];
  */
-class CompartmentDefinitionListProduction : public Utils::Production
+class CompartmentDefinitionListProduction : public Fluc::Parser::Production
 {
 protected:
   /** hidden constructor. */
@@ -283,7 +283,7 @@ protected:
 
 public:
   /** Factory method. */
-  static Utils::Production *get();
+  static Fluc::Parser::Production *get();
 
 private:
   /** Singleton instance. */
@@ -295,7 +295,7 @@ private:
  * CompartmentDefinitions =
  *   "@compartments" EOL CompartmentDefinitionList;
  */
-class CompartmentDefinitionsProduction : public Utils::Production
+class CompartmentDefinitionsProduction : public Fluc::Parser::Production
 {
 protected:
   /** Hidden constructor. */
@@ -303,7 +303,7 @@ protected:
 
 public:
   /** Factory method. */
-  static Utils::Production *get();
+  static Fluc::Parser::Production *get();
 
 private:
   /** Singleton instance. */
@@ -315,7 +315,7 @@ private:
  * SpeciesModifier =
  *   ("s" | "b" | "c")
  */
-class SpeciesModifierProduction : public Utils::TokenProduction
+class SpeciesModifierProduction : public Fluc::Parser::TokenProduction
 {
 protected:
   /** Hidden constructor. */
@@ -323,10 +323,10 @@ protected:
 
 public:
   /** Checks species modifier. */
-  virtual void parse(Utils::Lexer &lexer, Utils::ConcreteSyntaxTree &element);
+  virtual void parse(Fluc::Parser::Lexer &lexer, Fluc::Parser::ConcreteSyntaxTree &element);
 
   /** factory method. */
-  static Utils::Production *get();
+  static Fluc::Parser::Production *get();
 
 private:
   /** Singleton instance. */
@@ -338,7 +338,7 @@ private:
  * SpeciesModifierList =
  *   SpeciesModifier [SpeciesModifierList];
  */
-class SpeciesModifierListProduction : public Utils::Production
+class SpeciesModifierListProduction : public Fluc::Parser::Production
 {
 protected:
   /** Hidden constructor. */
@@ -346,7 +346,7 @@ protected:
 
 public:
   /** Factory method. */
-  static Utils::Production *get();
+  static Fluc::Parser::Production *get();
 
 private:
   /** Singleton instance. */
@@ -359,7 +359,7 @@ private:
  * SpeciesDefinitionList =
  *   ID ":" (("[" ID "]") | ID) "=" Number [SpeciesModifierList] [QuotedString] [EOL SpeciesDefinitionList];
  */
-class SpeciesDefinitionListProduction : public Utils::Production
+class SpeciesDefinitionListProduction : public Fluc::Parser::Production
 {
 protected:
   /** Hidden constructor. */
@@ -367,7 +367,7 @@ protected:
 
 public:
   /** Factory method. */
-  static Utils::Production *get();
+  static Fluc::Parser::Production *get();
 
 private:
   /** Singleton instance. */
@@ -379,7 +379,7 @@ private:
  * SpeciesDefinitions =
  *   "@species" EOL SpeciesDefinitionList;
  */
-class SpeciesDefinitionsProduction : public Utils::Production
+class SpeciesDefinitionsProduction : public Fluc::Parser::Production
 {
 protected:
   /** Hidden constructor. */
@@ -387,7 +387,7 @@ protected:
 
 public:
   /** Factory method. */
-  static Utils::Production *get();
+  static Fluc::Parser::Production *get();
 
 private:
   /** Singleton instance. */
@@ -399,7 +399,7 @@ private:
  * ParameterModifier =
  *   "v";
  */
-class ParameterModifierProduction : public Utils::TokenProduction
+class ParameterModifierProduction : public Fluc::Parser::TokenProduction
 {
 protected:
   /** Hidden constructor. */
@@ -407,10 +407,10 @@ protected:
 
 public:
   /** Checks modifier. */
-  virtual void parse(Utils::Lexer &lexer, Utils::ConcreteSyntaxTree &element);
+  virtual void parse(Fluc::Parser::Lexer &lexer, Fluc::Parser::ConcreteSyntaxTree &element);
 
   /** Factory method. */
-  static Utils::Production *get();
+  static Fluc::Parser::Production *get();
 
 private:
   /** Singleton instance. */
@@ -422,7 +422,7 @@ private:
  * ParameterDefinitionList =
  *   Identifier "=" Number [ParameterModifier] [QuotedString] [EOL ParameterDefinition];
  */
-class ParameterDefinitionListProduction : public Utils::Production
+class ParameterDefinitionListProduction : public Fluc::Parser::Production
 {
 protected:
   /** Hidden constructor. */
@@ -430,7 +430,7 @@ protected:
 
 public:
   /** Factory method. */
-  static Utils::Production *get();
+  static Fluc::Parser::Production *get();
 
 private:
   /** Singleton instance. */
@@ -442,7 +442,7 @@ private:
  * ParameterDefinitions =
  *   "@parameters" EOL ParameterDefinitionList;
  */
-class ParameterDefinitionsProduction : Utils::Production
+class ParameterDefinitionsProduction : Fluc::Parser::Production
 {
 protected:
   /** Hidden constructor. */
@@ -450,7 +450,7 @@ protected:
 
 public:
   /** Factory method. */
-  static Utils::Production *get();
+  static Fluc::Parser::Production *get();
 
 private:
   /** Singleton instance. */
@@ -462,7 +462,7 @@ private:
  * RuleDefinitionList =
  *   [("@rate"|"@assign")] ":" Identifier "=" Expression [EOL RuleDefinitionList];
  */
-class RuleDefinitionListProduction : public Utils::Production
+class RuleDefinitionListProduction : public Fluc::Parser::Production
 {
 protected:
   /** Hidden constructor. */
@@ -470,7 +470,7 @@ protected:
 
 public:
   /** Factory method. */
-  static Utils::Production *get();
+  static Fluc::Parser::Production *get();
 
 private:
   /** Singleton instance. */
@@ -482,7 +482,7 @@ private:
  * RuleDefinitions =
  *   "@rules" EOL RuleDefinitionList;
  */
-class RuleDefinitionsProduction : public Utils::Production
+class RuleDefinitionsProduction : public Fluc::Parser::Production
 {
 protected:
   /** Hidden constructor. */
@@ -490,7 +490,7 @@ protected:
 
 public:
   /** Factory method. */
-  static Utils::Production *get();
+  static Fluc::Parser::Production *get();
 
 private:
   /** Singleton instance. */
@@ -502,7 +502,7 @@ private:
  * StochiometrySum =
  *   [Integer] Identifier ["+" StochiometrySum];
  */
-class StoichiometrySumProduction : public Utils::Production
+class StoichiometrySumProduction : public Fluc::Parser::Production
 {
 protected:
   /** Hidden constructor. */
@@ -510,7 +510,7 @@ protected:
 
 public:
   /** Factory method. */
-  static Utils::Production *get();
+  static Fluc::Parser::Production *get();
 
 private:
   /** singleton instance. */
@@ -522,7 +522,7 @@ private:
  * ReactionEquation =
  *   (StoichiometrySum "->" [StoichiometrySum]) | ( "->" StoichiometrySum);
  */
-class ReactionEquationProduction : public Utils::AltProduction
+class ReactionEquationProduction : public Fluc::Parser::AltProduction
 {
 protected:
   /** Hidden constructor. */
@@ -530,7 +530,7 @@ protected:
 
 public:
   /** Factory method. */
-  static Utils::Production *get();
+  static Fluc::Parser::Production *get();
 
 private:
   /** Singleton instance. */
@@ -542,7 +542,7 @@ private:
  * LocalParameterList =
  *   Identifier "=" Expression ["," LocalParameterList];
  */
-class LocalParameterListProduction : public Utils::Production
+class LocalParameterListProduction : public Fluc::Parser::Production
 {
 protected:
   /**
@@ -554,7 +554,7 @@ public:
   /**
    * Factory method.
    */
-  static Utils::Production *get();
+  static Fluc::Parser::Production *get();
 
 private:
   /**
@@ -568,7 +568,7 @@ private:
  * KineticLaw =
  *   Expression [":" LocalParameterDefinitionList];
  */
-class KineticLawProduction : public Utils::Production
+class KineticLawProduction : public Fluc::Parser::Production
 {
 protected:
   /**
@@ -580,7 +580,7 @@ public:
   /**
    * Factory method.
    */
-  static Utils::Production *get();
+  static Fluc::Parser::Production *get();
 
 private:
   static KineticLawProduction *instance;
@@ -591,7 +591,7 @@ private:
  * ReactionModifierList =
  *   Identifier [',' ReactionModifierList];
  */
-class ReactionModifierListProduction : public Utils::Production
+class ReactionModifierListProduction : public Fluc::Parser::Production
 {
 protected:
   /** Hidden constructor.*/
@@ -599,7 +599,7 @@ protected:
 
 public:
   /** Factory method. */
-  static Utils::Production *get();
+  static Fluc::Parser::Production *get();
 
 protected:
   /** Singleton instance. */
@@ -614,7 +614,7 @@ protected:
  *   EOL KineticLaw
  *   [EOL ReactionDefinitionList];
  */
-class ReactionDefinitionListProduction : public Utils::Production
+class ReactionDefinitionListProduction : public Fluc::Parser::Production
 {
 protected:
   /** Hidden constructor. */
@@ -622,7 +622,7 @@ protected:
 
 public:
   /** Factory method. */
-  static Utils::Production *get();
+  static Fluc::Parser::Production *get();
 
 private:
   /** Singleton instance. */
@@ -634,7 +634,7 @@ private:
  * ReactionDefinitions =
  *   "@reactions" EOL ReactionDefinitionList;
  */
-class ReactionDefinitionsProduction : public Utils::Production
+class ReactionDefinitionsProduction : public Fluc::Parser::Production
 {
 protected:
   /** Hidden constructor. */
@@ -642,7 +642,7 @@ protected:
 
 public:
   /** Factory method. */
-  static Utils::Production *get();
+  static Fluc::Parser::Production *get();
 
 private:
   /** Singleton instance. */
@@ -655,7 +655,7 @@ private:
  * AssignmentList =
  *   Identifier "=" Number [";" AssignmentList];
  */
-class AssignmentListProduction : public Utils::Production
+class AssignmentListProduction : public Fluc::Parser::Production
 {
 protected:
   /**
@@ -667,7 +667,7 @@ public:
   /**
    * Factory method.
    */
-  static Utils::Production *get();
+  static Fluc::Parser::Production *get();
 
 private:
   /**
@@ -681,7 +681,7 @@ private:
  * ConditionExpression =
  *   Identifier ("==" | "!=" | ">" | ">=" | "<" | "<=") Number;
  */
-class ConditionExpressionProduction : public Utils::Production
+class ConditionExpressionProduction : public Fluc::Parser::Production
 {
 protected:
   /**
@@ -693,7 +693,7 @@ public:
   /**
    * Factory method.
    */
-  static Utils::Production *get();
+  static Fluc::Parser::Production *get();
 
 private:
   /**
@@ -708,7 +708,7 @@ private:
  *   Identifier "=" ConditionExpression [";" Number] ":" AssignmentList [QuotedString]
  *   [EOL EventDefinitionList];
  */
-class EventDefinitionListProduction : public Utils::Production
+class EventDefinitionListProduction : public Fluc::Parser::Production
 {
 protected:
   /**
@@ -720,7 +720,7 @@ public:
   /**
    * Factory method.
    */
-  static Utils::Production *get();
+  static Fluc::Parser::Production *get();
 
 private:
   /**
@@ -734,7 +734,7 @@ private:
  * EventDefinitions =
  *   "@events" EOL EventDefinitionList;
  */
-class EventDefinitionsProduction : public Utils::Production
+class EventDefinitionsProduction : public Fluc::Parser::Production
 {
 protected:
   /**
@@ -746,7 +746,7 @@ public:
   /**
    * Factory method.
    */
-  static Utils::Production *get();
+  static Fluc::Parser::Production *get();
 
 private:
   /**
@@ -767,7 +767,7 @@ private:
  *   [EOL ReactionDefinitions]
  *   [EOL EventDefinitions];
  */
-class ModelProduction : public Utils::Production
+class ModelProduction : public Fluc::Parser::Production
 {
 protected:
   /**
@@ -779,7 +779,7 @@ public:
   /**
    * Factory method.
    */
-  static Utils::Production *get();
+  static Fluc::Parser::Production *get();
 
 private:
   /**

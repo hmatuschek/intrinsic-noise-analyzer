@@ -11,11 +11,6 @@
 
 #include "exception.hh"
 
-#include "automata.hh"
-#include "lexer.hh"
-#include "tokenrules.hh"
-#include "parser.hh"
-
 #include "option_parser.hh"
 
 #include "cputime.hh"

@@ -1,7 +1,7 @@
 #ifndef __FLUC_PARSER_EXPR_LEXER_HH__
 #define __FLUC_PARSER_EXPR_LEXER_HH__
 
-#include <utils/lexer.hh>
+#include <parser/lexer.hh>
 
 
 namespace Fluc {
@@ -12,7 +12,7 @@ namespace Expr {
  * Defines all token types used by the SBML-SH parser
  */
 typedef enum {
-  T_WHITESPACE = Utils::Token::FIRST_USER_DEFINED,  ///< A white space char (SPACE, TAB)
+  T_WHITESPACE = Token::FIRST_USER_DEFINED,  ///< A white space char (SPACE, TAB)
   T_IDENTIFIER,       ///< C-style identifier.
   T_INTEGER,          ///< Integers (w/o) sign.
   T_FLOAT,            ///< Floats (w/o) sign.

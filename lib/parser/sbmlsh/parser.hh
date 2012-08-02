@@ -138,7 +138,7 @@ protected:
   /** Hold the lexer. */
   Lexer lexer;
   /** Holds the root of the grammar. */
-  Utils::Production *grammar;
+  Fluc::Parser::Production *grammar;
 
 public:
   /** Constructor. */
