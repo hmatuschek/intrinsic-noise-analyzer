@@ -40,7 +40,7 @@ protected:
 
   static void processInitialValue(Ast::VariableDefinition *var, libsbml::Model *sbml_model, Ast::Model &model);
 
-  static void processRule(Ast::VariableDefinition *var, libsbml::Model *model, Ast::Model &model);
+  static void processRule(Ast::VariableDefinition *var, libsbml::Model *sbml_model, Ast::Model &model);
 
   static bool hasDefaultUnit(Ast::VariableDefinition *var, Ast::Model &model);
   static std::string getUnitIdentifier(Ast::VariableDefinition *var, Ast::Model &model);
@@ -49,28 +49,40 @@ protected:
 };
 
 
+/** Internal used class to assemble libsbml::ASTNode instances representing a GiNaC expression. */
 class SBMLExpressionAssembler :
     public GiNaC::visitor, public GiNaC::numeric::visitor, public GiNaC::add::visitor,
     public GiNaC::mul::visitor, public GiNaC::symbol::visitor, public GiNaC::power::visitor,
     public GiNaC::function::visitor, public GiNaC::basic::visitor
 {
 protected:
+  /** A stack of sub-expressions. */
   std::list<libsbml::ASTNode *> _stack;
+  /** The Ast::Model, used to identify special symbols. */
   Ast::Model &_model;
 
 protected:
+  /** Hidden constructor, use factory method below. */
   SBMLExpressionAssembler(Ast::Model &model);
 
 public:
+  /** Handles a constant numeric value. */
   void visit(const GiNaC::numeric &value);
+  /** Handles a symbol. */
   void visit(const GiNaC::symbol &symbol);
+  /** Handles sums of expressions. */
   void visit(const GiNaC::add &sum);
+  /** Handles products of expressions. */
   void visit(const GiNaC::mul &prod);
+  /** Handles a power expression x^y. */
   void visit(const GiNaC::power &pow);
+  /** Handles function calls. */
   void visit(const GiNaC::function &function);
+  /** Throws an exception. */
   void visit(const GiNaC::basic &basic);
 
 public:
+  /** Translates a GiNaC expression into an SBML expression. */
   static libsbml::ASTNode *process(GiNaC::ex expression, Ast::Model &model);
 };
 
