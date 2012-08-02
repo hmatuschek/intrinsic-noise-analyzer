@@ -60,18 +60,30 @@ protected:
   /** Handles a list of modifiers of base units. */
   void processScaledUnitModifierList(Fluc::Parser::ConcreteSyntaxTree &sulist,
                                      double &multiplier, int &scale, int &exponent);
+  /** Handles a list of compartment definitions. */
   void processCompartmentDefinitions(Fluc::Parser::ConcreteSyntaxTree &comp);
+  /** Handles a list species definition. */
   void processSpeciesDefinition(Fluc::Parser::ConcreteSyntaxTree &spec);
+  /** Handles a list of species modifiers. */
   void processSpeciesModifierList(Fluc::Parser::ConcreteSyntaxTree &spec_mod, bool &has_substance_units,
                                   bool &has_boundary_condition, bool &is_constant);
+  /** Handles a list of parameter definitions. */
   void processParameterDefinition(Fluc::Parser::ConcreteSyntaxTree &param);
+  /** Handles a list of rule definitions. */
   void processRuleDefinitionList(Fluc::Parser::ConcreteSyntaxTree &rules);
+  /** Handles a list of reaction definitions. */
   void processReactionDefinitions(Fluc::Parser::ConcreteSyntaxTree &reac);
+  /** Handles the list of reaction modifiers. */
   void processReactionModifierList(Fluc::Parser::ConcreteSyntaxTree &lst, std::list<Ast::Species *> &mods);
+  /** Handels the kinetic law of a reaction. */
   Ast::KineticLaw *processKineticLaw(Fluc::Parser::ConcreteSyntaxTree &law);
+  /** Handles the list of local parameters of a kinetic law. */
   void processLocalParameters(Fluc::Parser::ConcreteSyntaxTree &params);
+  /** Handles a reaction equation. */
   void processReactionEquation(Fluc::Parser::ConcreteSyntaxTree &law, Ast::Reaction *reaction);
+  /** Handles the reactants of a reaction. */
   void processReactants(Fluc::Parser::ConcreteSyntaxTree &sum, Ast::Reaction *reaction);
+  /** Handles the products of a reaction. */
   void processProducts(Fluc::Parser::ConcreteSyntaxTree &sum, Ast::Reaction *reaction);
 };
 

@@ -14,37 +14,48 @@ namespace Sbml {
  */
 class Writer {
 public:
+  /** Assembles a libsbml model from the given Ast::Model. */
   static libsbml::Model *processModel(Ast::Model &model, libsbml::SBMLDocument *sbml_doc);
 
 protected:
+  /** Translates the list unit definitions. */
   static void processUnitDefinitions(Ast::Model &model, libsbml::Model *sbml_model);
+  /** Translates a single unit definition. */
   static void processUnitDefinition(const Ast::Unit &unit, libsbml::UnitDefinition *sbml_unit_def);
+  /** Translates a ScaledBaseUnit. */
   static void processUnit(const Ast::ScaledBaseUnit &unit, libsbml::UnitDefinition *sbml_unit_def);
-
+  /** Translates the list of function definitions. */
   static void processFunctionDefinitions(Ast::Model &model, libsbml::Model *sbml_model);
+  /** Translates a single function definition. */
   static void processFunctionDefinition(
     Ast::FunctionDefinition *func, libsbml::FunctionDefinition *sbml_func, Ast::Model &model);
-
+  /** Translates the list of parameters. */
   static void processParameters(Ast::Model &model, libsbml::Model *sbml_model);
+  /** Translates a single parameter definition. */
   static void processParameter(Ast::Parameter *param, libsbml::Parameter *sbml_param);
-
+  /** Translates the list of compartment definitions. */
   static void processCompartments(Ast::Model &mode, libsbml::Model *sbml_model);
+  /** Translates a single compartment definition. */
   static void processCompartment(Ast::Compartment *comp, libsbml::Compartment *sbml_comp);
-
+  /** Translates the list of species definitions. */
   static void processSpeciesList(Ast::Model &model, libsbml::Model *sbml_model);
+  /** Translates a single species definition. */
   static void processSpecies(Ast::Species *species, libsbml::Species *sbml_species);
-
+  /** Translates the list of reactions. */
   static void processReactions(Ast::Model &model, libsbml::Model *sbml_model);
+  /** Translates a single reaction. */
   static void processReaction(Ast::Reaction *reac, libsbml::Reaction *sbml_reac, Ast::Model &model);
+  /** Translates a kinetic law. */
   static void processKineticLaw(Ast::KineticLaw *law, libsbml::KineticLaw *sbml_law, Ast::Model &model);
-
+  /** Creates a initial value definition for a variable. */
   static void processInitialValue(Ast::VariableDefinition *var, libsbml::Model *sbml_model, Ast::Model &model);
-
+  /** Creates a rule for a variable. */
   static void processRule(Ast::VariableDefinition *var, libsbml::Model *sbml_model, Ast::Model &model);
-
+  /** Helper function to test if a variable has its default unit. */
   static bool hasDefaultUnit(Ast::VariableDefinition *var, Ast::Model &model);
+  /** Returns the identifier of the unit definition of a variable. */
   static std::string getUnitIdentifier(Ast::VariableDefinition *var, Ast::Model &model);
-
+  /** Translates a GiNaC expression. */
   static libsbml::ASTNode *processExpression(GiNaC::ex, Ast::Model &model);
 };
 
