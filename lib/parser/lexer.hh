@@ -80,31 +80,31 @@ public:
   unsigned getId() const;
 
   /** Assembles a transition from state A to B on a certain char. */
-  void onChar(char value, State &A, State &B);
+  void onChar(char value, State *A, State *B);
 
   /** Adds a transition for anything but the given char. */
-  void onNotChar(char c, State &A, State &B);
+  void onNotChar(char c, State *A, State *B);
 
   /** Adds a transistion on white-space input. */
-  void onWhiteSpace(State &A, State &B);
+  void onWhiteSpace(State *A, State *B);
 
   /** Adds a transition on "[a-z]". */
-  void onLowerAlpha(State &A, State &B);
+  void onLowerAlpha(State *A, State *B);
 
   /** Adds a transition on "[A-Z]". */
-  void onUpperAlpha(State &A, State &B);
+  void onUpperAlpha(State *A, State *B);
 
   /** Adds a transition on "[a-zA-Z]". */
-  void onAlpha(State &A, State &B);
+  void onAlpha(State *A, State *B);
 
   /** Adds a transition on "[0-9]". */
-  void onNumber(State &A, State &B);
+  void onNumber(State *A, State *B);
 
   /** Adds a transition on "[1-9]". */
-  void onPosNumber(State &A, State &B);
+  void onPosNumber(State *A, State *B);
 
   /** Adds a transition on "[0-9a-zA-Z]". */
-  void onAlphaNum(State &A, State &B);
+  void onAlphaNum(State *A, State *B);
 };
 
 

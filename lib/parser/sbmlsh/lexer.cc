@@ -113,10 +113,10 @@ Parser::Sbmlsh::Lexer::Lexer(std::istream &input)
 VersionNumberTokenRule::VersionNumberTokenRule()
   : TokenRule(T_VERSION_NUMBER)
 {
-  State &si = createState(false);
-  State &s1 = createState(false);
-  State &s2 = createState(false);
-  State &s3 = createState(true);
+  State *si = createState(false);
+  State *s1 = createState(false);
+  State *s2 = createState(false);
+  State *s3 = createState(true);
   onNumber(si, si);
   onChar('.', si, s1);
   onNumber(s1, s1);

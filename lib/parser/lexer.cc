@@ -69,70 +69,70 @@ TokenRule::getId() const
 }
 
 void
-TokenRule::onChar(char value, State &A, State &B)
+TokenRule::onChar(char value, State *A, State *B)
 {
-  Condition &cond = A.createTransition(B);
+  Condition &cond = A->createTransition(B);
   cond.addOnValue(value);
 }
 
 void
-TokenRule::onNotChar(char c, State &A, State &B)
+TokenRule::onNotChar(char c, State *A, State *B)
 {
-  Condition &cond = A.createTransition(B);
+  Condition &cond = A->createTransition(B);
   cond.addOnValue(c);
   cond.addNot();
 }
 
 void
-TokenRule::onWhiteSpace(State &A, State &B)
+TokenRule::onWhiteSpace(State *A, State *B)
 {
-  Condition &cond = A.createTransition(B);
+  Condition &cond = A->createTransition(B);
   cond.addOnValue(' ');
   cond.addOnValue('\t');
   cond.AddOr();
 }
 
 void
-TokenRule::onLowerAlpha(State &A, State &B)
+TokenRule::onLowerAlpha(State *A, State *B)
 {
-  Condition &cond = A.createTransition(B);
+  Condition &cond = A->createTransition(B);
   cond.addInRange('a','z');
 }
 
 void
-TokenRule::onUpperAlpha(State &A, State &B)
+TokenRule::onUpperAlpha(State *A, State *B)
 {
-  Condition &cond = A.createTransition(B);
+  Condition &cond = A->createTransition(B);
   cond.addInRange('A','Z');
 }
 
 void
-TokenRule::onAlpha(State &A, State &B)
+TokenRule::onAlpha(State *A, State *B)
 {
-  Condition &cond = A.createTransition(B);
+  Condition &cond = A->createTransition(B);
   cond.addInRange('a','z');
   cond.addInRange('A','Z');
   cond.AddOr();
 }
 
 void
-TokenRule::onNumber(State &A, State &B)
+TokenRule::onNumber(State *A, State *B)
 {
-  Condition &cond = A.createTransition(B);
+  Condition &cond = A->createTransition(B);
   cond.addInRange('0', '9');
 }
 
 void
-TokenRule::onPosNumber(State &A, State &B)
+TokenRule::onPosNumber(State *A, State *B)
 {
-  Condition &cond = A.createTransition(B);
+  Condition &cond = A->createTransition(B);
   cond.addInRange('1', '9');
 }
 
 void
-TokenRule::onAlphaNum(State &A, State &B)
+TokenRule::onAlphaNum(State *A, State *B)
 {
-  Condition &cond = A.createTransition(B);
+  Condition &cond = A->createTransition(B);
   cond.addInRange('0','9');
   cond.addInRange('a','z');
   cond.addInRange('A','Z');
@@ -319,8 +319,8 @@ WhiteSpaceTokenRule::WhiteSpaceTokenRule(unsigned id)
   : TokenRule(id)
 {
   allocStates(2);
-  State &s1 = createState(false);
-  State &s2 = createState(true);
+  State *s1 = createState(false);
+  State *s2 = createState(true);
   onWhiteSpace(s1,s2);
   onWhiteSpace(s2,s2);
 }
@@ -330,10 +330,10 @@ EOLTokenRule::EOLTokenRule(unsigned id)
   : TokenRule(id)
 {
   allocStates(4);
-  State &s1 = createState(false);
-  State &s2 = createState(true);
-  State &s3 = createState(true);
-  State &s4 = createState(true);
+  State *s1 = createState(false);
+  State *s2 = createState(true);
+  State *s3 = createState(true);
+  State *s4 = createState(true);
   onChar('\n', s1, s2);
   onChar('\r', s1, s3);
   onChar('\r', s3, s4);
@@ -345,8 +345,8 @@ IdentifierTokenRule::IdentifierTokenRule(unsigned id)
   : TokenRule(id)
 {
   allocStates(2);
-  State &s1 = createState(false);
-  State &s2 = createState(true);
+  State *s1 = createState(false);
+  State *s2 = createState(true);
   onAlpha(s1, s2);
   onChar('_', s1, s2);
   onAlphaNum(s2,s2);
@@ -358,9 +358,9 @@ StringTokenRule::StringTokenRule(unsigned id)
   : TokenRule(id)
 {
   allocStates(3);
-  State &si = createState(false);
-  State &s2 = createState(false);
-  State &sf = createState(true);
+  State *si = createState(false);
+  State *s2 = createState(false);
+  State *sf = createState(true);
   onChar('"', si, s2);
   onChar('"', s2, sf);
   onNotChar('"', s2, s2);
@@ -371,10 +371,10 @@ KeyWordTokenRule::KeyWordTokenRule(unsigned id, const std::string &keyword)
   : TokenRule(id)
 {
   allocStates(keyword.size()+1);
-  State *state = &createState(false);
+  State *state = createState(false);
   for (size_t i=0; i<keyword.size(); i++) {
-    State *nextState = &createState((i+1)==keyword.size());
-    onChar(keyword[i], *state, *nextState);
+    State *nextState = createState((i+1)==keyword.size());
+    onChar(keyword[i], state, nextState);
     state = nextState;
   }
 }
@@ -384,8 +384,8 @@ IntegerTokenRule::IntegerTokenRule(unsigned id)
   : TokenRule(id)
 {
   allocStates(2);
-  State &si = createState(false);
-  State &sf = createState(true);
+  State *si = createState(false);
+  State *sf = createState(true);
   onNumber(si, sf);
   onNumber(sf, sf);
 }
@@ -395,12 +395,12 @@ FloatTokenRule::FloatTokenRule(unsigned id)
   : TokenRule(id)
 {
   allocStates(6);
-  State &si  = createState(false);
-  State &s3  = createState(false);
-  State &sff = createState(true);
-  State &sei = createState(false);
-  State &se1 = createState(false);
-  State &sef = createState(true);
+  State *si  = createState(false);
+  State *s3  = createState(false);
+  State *sff = createState(true);
+  State *sei = createState(false);
+  State *se1 = createState(false);
+  State *sef = createState(true);
   onNumber(si, s3);
   onNumber(s3, s3);
   onChar('.', s3, sff);

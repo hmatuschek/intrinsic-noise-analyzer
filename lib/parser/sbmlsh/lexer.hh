@@ -85,6 +85,7 @@ public:
 /**
  * A lexer for the SBML-SH grammar.
  *
+ * @todo Turn this into a Production to get the actual version numbers.
  * @ingroup sbmlsh
  */
 class Lexer: public Fluc::Parser::Lexer

@@ -222,8 +222,8 @@ public:
     }
 
     /** Creates a new transition. */
-    Condition &createTransition(State &state) {
-      _transitions.push_back( Transition(state.index()) );
+    Condition &createTransition(State *state) {
+      _transitions.push_back( Transition(state->index()) );
       return _transitions.back().cond();
     }
 
@@ -282,16 +282,16 @@ public:
   /** Creates a new state for the DFA.
    * @note The first state created will be the initial state as returned by @c getInitialState.
    * @warning You should pre allocate enough states before calling this method the first time. */
-  State &createState(bool is_final=false) {
+  State *createState(bool is_final=false) {
     _states.push_back(State(_states.size(), is_final));
     if (1 == _states.size()) {
       _current_state_index = _states.back().index();
     }
-    return _states.back();
+    return &(_states.back());
   }
 
   /** Returns the initial state or NULL if no state has been created yet. */
-  State &getInitialState() {
+  State *getInitialState() {
     if (0 != _states.size()) {
       return &(_states.front());
     }
