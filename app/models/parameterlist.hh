@@ -5,6 +5,10 @@
 #include "ast/model.hh"
 
 
+/**
+ * This class implements the @c QAbstractTableModel, providing an model for a @c QTableView
+ * widget. The table model lists all paramters of a @c Ast::Model.
+ */
 class ParameterList : public QAbstractTableModel
 {
   Q_OBJECT
@@ -15,10 +19,14 @@ public:
    */
   explicit ParameterList(Fluc::Ast::Model *model, QObject *parent = 0);
 
-  /**
-   * Implementation for the QAbstractTableModel. Returns the requested data.
-   */
+  /** Implementation for the QAbstractTableModel. Returns the requested data. */
   QVariant data(const QModelIndex &index, int role) const;
+
+  /** Implements setting the parameter initial value or name. */
+  bool setData(const QModelIndex &index, const QVariant &value, int role=Qt::EditRole);
+
+  /** Returns a flag, that indicates if a cell is editable. */
+  Qt::ItemFlags flags(const QModelIndex &index) const;
 
   /**
    * Implementation of QAbstractItemMode, returns the headers for columns.

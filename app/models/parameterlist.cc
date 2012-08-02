@@ -1,4 +1,8 @@
 #include "parameterlist.hh"
+#include "exception.hh"
+#include "parser/expr/parser.hh"
+#include "utils/logger.hh"
+
 
 ParameterList::ParameterList(Fluc::Ast::Model *model, QObject *parent)
   : QAbstractTableModel(parent), model(model)
@@ -31,8 +35,7 @@ ParameterList::data(const QModelIndex &index, int role) const
     return Qt::Unchecked;
   }
 
-  if (Qt::DisplayRole != role)
-  {
+  if ((Qt::DisplayRole != role) && (Qt::EditRole != role)) {
     return QVariant();
   }
 
@@ -61,6 +64,66 @@ ParameterList::data(const QModelIndex &index, int role) const
 
   return QVariant();
 }
+
+
+bool
+ParameterList::setData(const QModelIndex &index, const QVariant &value, int role) {
+  if (index.row() >= int(model->numParameters())) return false;
+  if (index.column() >= 5) return false;
+
+  // Get paramter for index (row):
+  Fluc::Ast::Parameter *param = model->getParameter(index.row());
+
+  if (1 == index.column()) {
+    // If name is changed, get new name
+    QString new_name = value.toString();
+    // set new name
+    param->setName(new_name.toStdString());
+    // signal that data has changed:
+    emit dataChanged(index, index);
+    return true;
+  }
+
+  if (2 == index.column()) {
+    // If the initial value was changed: get expression
+    std::string expression = value.toString().toStdString();
+    // parse expression
+    GiNaC::ex new_value;
+    try { new_value = Fluc::Parser::Expr::parseExpression(expression, model); }
+    catch (Fluc::Exception &err) {
+      Fluc::Utils::Message msg = LOG_MESSAGE(Fluc::Utils::Message::INFO);
+      msg << "Can not parse expression: " << expression << ": " << err.what();
+      Fluc::Utils::Logger::get().log(msg);
+      return false;
+    }
+    // Set new "value"
+    param->setValue(new_value);
+    // Signal data changed:
+    emit dataChanged(index, index);
+    return true;
+  }
+
+  return false;
+}
+
+
+Qt::ItemFlags
+ParameterList::flags(const QModelIndex &index) const
+{
+  // Default flags:
+  Qt::ItemFlags item_flags = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+
+  // Filter invalid indices:
+  if (! index.isValid()) return Qt::NoItemFlags;
+  if (5 <= index.column()) return Qt::NoItemFlags;
+  if (int(model->numParameters()) <= index.row()) return Qt::NoItemFlags;
+
+  // Mark only column 1 & 2 editable
+  if ( (1 == index.column()) || (2 == index.column()) ) item_flags |= Qt::ItemIsEditable;
+
+  return item_flags;
+}
+
 
 
 QVariant
