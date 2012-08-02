@@ -32,7 +32,6 @@
 #include "compartment.hh"
 #include "parameter.hh"
 
-#include "assembler.hh"
 #include "evaluate.hh"
 
 #include "trafo/trafo.hh"

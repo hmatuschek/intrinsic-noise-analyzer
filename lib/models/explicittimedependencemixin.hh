@@ -2,6 +2,7 @@
 #define __FLUC_MODELS_EXPLICITTIMEDEPENDENCEMIXIN_HH__
 
 #include "basemodel.hh"
+#include "exception.hh"
 
 namespace Fluc {
 namespace Models {

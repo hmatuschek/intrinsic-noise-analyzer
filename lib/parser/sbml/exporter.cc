@@ -1,4 +1,5 @@
 #include "exporter.hh"
+#include "exception.hh"
 
 using namespace Fluc;
 using namespace Fluc::Parser::Sbml;

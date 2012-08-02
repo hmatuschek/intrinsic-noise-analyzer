@@ -3,7 +3,7 @@
 using namespace Fluc;
 using namespace Fluc::Models;
 
-SSEBaseModel::SSEBaseModel(libsbml::Model *model)
+/* SSEBaseModel::SSEBaseModel(libsbml::Model *model)
   : BaseModel(model), propensityExpansion((BaseModel &)(*this)), ConservationAnalysisMixin((BaseModel &)(*this)),
     rate_expressions(this->numReactions()),
     rate_corrections(this->numReactions()),
@@ -27,7 +27,7 @@ SSEBaseModel::SSEBaseModel(libsbml::Model *model)
     conservationConstants(this->numDepSpecies())
 {
   postConstructor();
-}
+} */
 
 
 SSEBaseModel::SSEBaseModel(const Ast::Model &model)

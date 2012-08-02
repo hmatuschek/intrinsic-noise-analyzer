@@ -55,10 +55,7 @@ public:
    */
   Model();
 
-  /**
-   * Constructs a Ast::Model instance from the SBML Model instance.
-   */
-  Model(libsbml::Model *model);
+  /* Model(libsbml::Model *model); */
 
   /**
    * Recursive copy-constructor.

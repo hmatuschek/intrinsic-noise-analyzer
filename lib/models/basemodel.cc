@@ -4,7 +4,7 @@ using namespace Fluc;
 using namespace Fluc::Models;
 
 
-BaseModel::BaseModel(libsbml::Model *sbml_model)
+/*BaseModel::BaseModel(libsbml::Model *sbml_model)
     : Ast::Model(sbml_model),
     species(numSpecies()), reactions(numReactions()),
     propensities(numReactions())
@@ -27,7 +27,7 @@ BaseModel::BaseModel(libsbml::Model *sbml_model)
     this->reactions[i]    = reac;
     this->propensities[i] = reac->getKineticLaw()->getRateLaw();
   }
-}
+}*/
 
 
 BaseModel::BaseModel(const Ast::Model &model)

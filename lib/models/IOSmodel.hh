@@ -9,7 +9,8 @@ namespace Models {
 /**
  * The IOS model.
  *
- * The model uses the System Size Expansion to derive corrections to mean and variances beyond the Linear Noise Approximation \cite grima2011.
+ * The model uses the System Size Expansion to derive corrections to mean and variances beyond the
+ * Linear Noise Approximation \cite grima2011.
  *
  * @ingroup sse
  */
@@ -29,10 +30,8 @@ private:
 
 public:
   /**
-   * Constructor...
-   */
   IOSmodel(libsbml::Model *model);
-
+  */
   /**
    * Constructor.
    */

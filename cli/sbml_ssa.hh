@@ -3,7 +3,6 @@
 
 #include <iostream>
 #include "ina.hh"
-#include <sbml/SBMLTypes.h>
 #include <eigen3/Eigen/Eigen>
 #include <ginac/ginac.h>
 

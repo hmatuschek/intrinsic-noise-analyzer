@@ -1,4 +1,5 @@
 #include "assertnoassignmentrule.hh"
+#include "exception.hh"
 
 using namespace Fluc;
 using namespace Fluc::Models;

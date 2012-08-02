@@ -4,7 +4,7 @@
 #include "reactionsitem.hh"
 #include "compartmentsitem.hh"
 
-#include<parser/parser.hh>
+#include <parser/parser.hh>
 
 using namespace Fluc;
 

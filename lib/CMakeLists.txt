@@ -19,13 +19,13 @@ SET(libina_HEADERS ina.hh smartptr.hh linkedlist.hh
 
 # Then, the AST classes:
 SET(libina_ast_SOURCES
-    ast/definition.cc ast/assembler.cc ast/functiondefinition.cc ast/node.cc ast/rule.cc
+    ast/definition.cc ast/functiondefinition.cc ast/node.cc ast/rule.cc
     ast/reaction.cc ast/scope.cc ast/variabledefinition.cc ast/constraint.cc ast/module.cc
     ast/evaluate.cc ast/unitdefinition.cc ast/species.cc ast/compartment.cc ast/parameter.cc
     ast/model.cc ast/converter.cc)
 SET(libina_ast_HEADERS
     ast/ast.hh
-    ast/definition.hh ast/assembler.hh ast/functiondefinition.hh ast/node.hh ast/rule.hh
+    ast/definition.hh ast/functiondefinition.hh ast/node.hh ast/rule.hh
     ast/reaction.hh ast/scope.hh ast/variabledefinition.hh ast/constraint.hh ast/module.hh
     ast/evaluate.hh ast/unitdefinition.hh ast/species.hh ast/compartment.hh ast/parameter.hh
     ast/model.hh ast/converter.hh)

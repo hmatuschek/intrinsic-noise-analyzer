@@ -1,4 +1,6 @@
 #include "sbml_ssa.hh"
+#include <parser/sbml/sbml.hh>
+
 
 using namespace Fluc;
 
@@ -11,23 +13,13 @@ int main(int argc, char *argv[])
     return -1;
   }
 
-  // Open document:
-  libsbml::SBMLDocument *doc = libsbml::readSBMLFromFile(argv[1]);
-
-  // Check for errors:
-  if (0 < doc->getNumErrors())
-  {
-    std::cerr << "Error while reading SBML: ";
-    doc->printErrors(std::cerr);
-    return -1;
-  }
-
   // Do the work:
   try
   {
 
     // Construct SSA model from SBML model
-    Models::OptimizedSSA model(doc->getModel(),30,1024);
+    Ast::Model sbml_model; Parser::Sbml::importModel(sbml_model, argv[1]);
+    Models::OptimizedSSA model(sbml_model, 30, 1024);
     double dt=0.1;
 
     Eigen::VectorXd state;

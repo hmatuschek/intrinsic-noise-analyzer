@@ -5,7 +5,7 @@ using namespace Fluc;
 
 using namespace Fluc::Models;
 
-StochasticSimulator::StochasticSimulator(libsbml::Model *model, int size, int seed, size_t threads)
+/*StochasticSimulator::StochasticSimulator(libsbml::Model *model, int size, int seed, size_t threads)
     : BaseModel(model),
       ParticleNumbersMixin((BaseModel &)(*this)),
       ReasonableModelMixin((BaseModel &)(*this)),
@@ -89,7 +89,7 @@ StochasticSimulator::StochasticSimulator(libsbml::Model *model, int size, int se
      this->observationMatrix.row(i)=ics;
   }
 
-}
+} */
 
 
 StochasticSimulator::StochasticSimulator(const Ast::Model &model, int size, int seed, size_t threads)

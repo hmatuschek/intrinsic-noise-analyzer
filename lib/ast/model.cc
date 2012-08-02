@@ -1,7 +1,6 @@
 #include "model.hh"
 #include "exception.hh"
 #include "reaction.hh"
-#include "assembler.hh"
 #include "converter.hh"
 #include "trafo/modelcopyist.hh"
 
@@ -16,7 +15,7 @@ Model::Model()
 }
 
 
-Model::Model(libsbml::Model *model)
+/*Model::Model(libsbml::Model *model)
   : Module()
 {
   Assembler assembler(*this);
@@ -24,7 +23,7 @@ Model::Model(libsbml::Model *model)
 
   Convert2Irreversible converter(*this);
   converter.process();
-}
+}*/
 
 
 Model::Model(const Model &other)

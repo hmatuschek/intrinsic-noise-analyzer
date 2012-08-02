@@ -39,16 +39,7 @@ protected:
   Eigen::SparseMatrix<double> sparseStoichiometry;
 
 public:
-  /**
-   * Is constructed from a SBML model.
-   *
-   * @param model Specifies the model, the construct the SSA analysis for.
-   * @param ensembleSize Specifies the ensemble size to use.
-   * @param seed A seed for the random number generator.
-   * @param opt_level Specifies the byte-code optimization level.
-   * @param num_threads Specifies the number of threads to use.
-   */
-  GenericOptimizedSSA(libsbml::Model *model, int ensembleSize, int seed,
+  /* GenericOptimizedSSA(libsbml::Model *model, int ensembleSize, int seed,
                size_t opt_level=0, size_t num_threads=OpenMP::getMaxThreads())
     : StochasticSimulator(model, ensembleSize, seed, num_threads),
       ConstantStoichiometryMixin((BaseModel &)(*this)),
@@ -105,9 +96,18 @@ public:
         if (this->stoichiometry(i,j)!=0) this->sparseStoichiometry.insertBack(i,j) = this->stoichiometry(i,j);
     }
     this->sparseStoichiometry.finalize();
-  }
+  } */
 
 
+  /**
+   * Is constructed from a SBML model.
+   *
+   * @param model Specifies the model, the construct the SSA analysis for.
+   * @param ensembleSize Specifies the ensemble size to use.
+   * @param seed A seed for the random number generator.
+   * @param opt_level Specifies the byte-code optimization level.
+   * @param num_threads Specifies the number of threads to use.
+   */
   GenericOptimizedSSA(const Ast::Model &model, int ensembleSize, int seed,
                size_t opt_level=0, size_t num_threads=OpenMP::getMaxThreads())
     : StochasticSimulator(model, ensembleSize, seed, num_threads),
