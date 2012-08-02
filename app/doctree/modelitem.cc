@@ -4,6 +4,7 @@
 #include "reactionsitem.hh"
 #include "compartmentsitem.hh"
 
+#include<parser/parser.hh>
 
 using namespace Fluc;
 
@@ -12,11 +13,12 @@ using namespace Fluc;
 /* ********************************************************************************************* *
  * Implementation of SBML Model...
  * ********************************************************************************************* */
-ModelItem::ModelItem(libsbml::SBMLDocument *document, QObject *parent) :
+ModelItem::ModelItem(const QString &file_path, QObject *parent) :
   QObject(parent), base_model(0), itemLabel("Model")
 {
   // Now, assemble a base model from SBML:
-  this->base_model = new Models::BaseModel(document->getModel());
+  Ast::Model model; Parser::Sbml::importModel(model, file_path.toStdString());
+  base_model = new Models::BaseModel(model);
 
   // Assemble child-items:
   CompartmentsItem *compartments = new CompartmentsItem(this->base_model, this);
@@ -53,15 +55,15 @@ ModelItem::getLabel() const
 }
 
 
-Fluc::Ast::Model *
+Fluc::Ast::Model &
 ModelItem::getModel()
 {
-  return this->base_model;
+  return *(this->base_model);
 }
 
 
-const Fluc::Ast::Model *
+const Fluc::Ast::Model &
 ModelItem::getModel() const
 {
-  return this->base_model;
+  return *(this->base_model);
 }
