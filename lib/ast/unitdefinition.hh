@@ -291,6 +291,9 @@ public:
    */
   bool isDimensionless() const;
 
+  /** Retunrs true if the unit is dimensionless, has multiplier 1 and scale 0. */
+  bool isExactlyDimensionless() const;
+
   /**
    * Returns the unit as a scaled base unit.
    *

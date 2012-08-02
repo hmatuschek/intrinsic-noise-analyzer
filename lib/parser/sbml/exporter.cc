@@ -12,7 +12,12 @@ Writer::processModel(Ast::Model &model, libsbml::SBMLDocument *sbml_doc)
   /// @bug Ast::Model has no identifier!
   if (model.hasName()) { sbml_model->setName(model.getName()); }
 
+  // First, serialize unit definitions:
   processUnitDefinitions(model, sbml_model);
+  // then, serialize parameter definitions:
+  processParameters(model, sbml_model);
+  // them serialize compartments
+  processCompartments(model, sbml_model);
   return sbml_model;
 }
 
@@ -172,12 +177,13 @@ Writer::processFunctionDefinitions(Ast::Model &model, libsbml::Model *sbml_model
     if (! Ast::Node::isFunctionDefinition(*item)) { continue; }
     Ast::FunctionDefinition *func = static_cast<Ast::FunctionDefinition *>(*item);
     libsbml::FunctionDefinition *sbml_func = sbml_model->createFunctionDefinition();
-    processFunctionDefinition(func, sbml_func);
+    processFunctionDefinition(func, sbml_func, model);
   }
 }
 
 void
-Writer::processFunctionDefinition(Ast::FunctionDefinition *func, libsbml::FunctionDefinition *sbml_func)
+Writer::processFunctionDefinition(
+  Ast::FunctionDefinition *func, libsbml::FunctionDefinition *sbml_func, Ast::Model &model)
 {
   libsbml::ASTNode *ast_func = new libsbml::ASTNode(libsbml::AST_LAMBDA);
   sbml_func->setId(func->getIdentifier());
@@ -190,7 +196,7 @@ Writer::processFunctionDefinition(Ast::FunctionDefinition *func, libsbml::Functi
   }
 
   // Assemble function body:
-  ast_func->addChild(processExpression(func->getBody()));
+  ast_func->addChild(processExpression(func->getBody(), model));
   sbml_func->setMath(ast_func);
 }
 
@@ -202,8 +208,8 @@ Writer::processParameters(Ast::Model &model, libsbml::Model *sbml_model)
     Ast::Parameter *param = model.getParameter(i);
     libsbml::Parameter *sbml_param = sbml_model->createParameter();
     processParameter(param, sbml_param);
-    if (param->hasValue()) { processInitialValue(param, sbml_model); }
-    if (param->hasRule()) { processRule(param, sbml_model); }
+    if (param->hasValue()) { processInitialValue(param, sbml_model, model); }
+    if (param->hasRule()) { processRule(param, sbml_model, model); }
   }
 }
 
@@ -218,31 +224,337 @@ Writer::processParameter(Ast::Parameter *param, libsbml::Parameter *sbml_param)
 
 
 void
-Writer::processInitialValue(Ast::VariableDefinition *var, libsbml::Model *sbml_model)
+Writer::processCompartments(Ast::Model &model, libsbml::Model *sbml_model)
 {
-  libsbml::InitialAssignment *init = sbml_model->createInitialAssignment();
-  init->setSymbol(var->getIdentifier());
-  init->setMath(processExpression(var->getValue()));
+  for (size_t i=0; i<model.numCompartments(); i++) {
+    Ast::Compartment *comp = model.getCompartment(i);
+    libsbml::Compartment *sbml_comp = sbml_model->createCompartment();
+    processCompartment(comp, sbml_comp);
+    if (comp->hasValue()) { processInitialValue(comp, sbml_model, model); }
+    if (comp->hasRule())  { processRule(comp, sbml_model, model); }
+    if(! hasDefaultUnit(comp, model) ) {
+      sbml_comp->setUnits(getUnitIdentifier(comp, model));
+    }
+  }
 }
 
 
 void
-Writer::processRule(Ast::VariableDefinition *var, libsbml::Model *model)
+Writer::processCompartment(Ast::Compartment *comp, libsbml::Compartment *sbml_comp)
+{
+  // Set ID,
+  sbml_comp->setId(comp->getIdentifier());
+  // name if set,
+  if (comp->hasName()) { sbml_comp->setName(comp->getName()); }
+  // if comp is constant,
+  sbml_comp->setConstant(comp->isConst());
+  // and the spacial dimension
+  switch (comp->getDimension()) {
+  case Ast::Compartment::POINT:  sbml_comp->setSpatialDimensions(unsigned(0));
+  case Ast::Compartment::LINE:   sbml_comp->setSpatialDimensions(unsigned(1));
+  case Ast::Compartment::AREA:   sbml_comp->setSpatialDimensions(unsigned(2));
+  case Ast::Compartment::VOLUME: sbml_comp->setSpatialDimensions(unsigned(3));
+  }
+}
+
+
+void
+Writer::processSpeciesList(Ast::Model &model, libsbml::Model *sbml_model)
+{
+  for (size_t i=0; i<model.numSpecies(); i++) {
+    Ast::Species *species = model.getSpecies(i);
+    libsbml::Species *sbml_species = sbml_model->createSpecies();
+    processSpecies(species, sbml_species);
+
+    sbml_species->setCompartment(species->getCompartment()->getIdentifier());
+    if (species->hasValue()) { processInitialValue(species, sbml_model, model); }
+    if (species->hasRule())  { processRule(species, sbml_model, model); }
+    if (! hasDefaultUnit(species, model)) { sbml_species->setUnits(getUnitIdentifier(species, model)); }
+  }
+}
+
+
+void
+Writer::processSpecies(Ast::Species *species, libsbml::Species *sbml_species)
+{
+  sbml_species->setId(species->getIdentifier());
+  if (species->hasName()) {sbml_species->setName(species->getName()); }
+  sbml_species->setConstant(species->isConst());
+  sbml_species->setHasOnlySubstanceUnits(species->getUnit().isSubstanceUnit());
+}
+
+
+void
+Writer::processReactions(Ast::Model &model, libsbml::Model *sbml_model)
+{
+  for (size_t i=0; i<model.numReactions(); i++) {
+    Ast::Reaction *reac = model.getReaction(i);
+    libsbml::Reaction *sbml_reac = sbml_model->createReaction();
+    processReaction(reac, sbml_reac, model);
+  }
+}
+
+void
+Writer::processReaction(Ast::Reaction *reac, libsbml::Reaction *sbml_reac, Ast::Model &model)
+{
+  // Process reactants:
+  for (Ast::Reaction::iterator item = reac->reacBegin(); item != reac->reacEnd(); item++) {
+    libsbml::SpeciesReference *sbml_r = sbml_reac->createReactant();
+    sbml_r->setSpecies(item->first->getIdentifier());
+    libsbml::StoichiometryMath *sbml_r_m = sbml_r->createStoichiometryMath();
+    sbml_r_m->setMath(processExpression(item->second, model));
+  }
+  // Process products:
+  for (Ast::Reaction::iterator item = reac->prodBegin(); item != reac->prodEnd(); item++) {
+    libsbml::SpeciesReference *sbml_p = sbml_reac->createProduct();
+    sbml_p->setSpecies(item->first->getIdentifier());
+    libsbml::StoichiometryMath *sbml_p_m = sbml_p->createStoichiometryMath();
+    sbml_p_m->setMath(processExpression(item->second, model));
+  }
+  // Process modifiers:
+  for (Ast::Reaction::mod_iterator item = reac->modBegin(); item != reac->modEnd(); item++) {
+    libsbml::ModifierSpeciesReference *sbml_r = sbml_reac->createModifier();
+    sbml_r->setSpecies((*item)->getIdentifier());
+  }
+  // process kinetic law:
+  libsbml::KineticLaw *sbml_law = sbml_reac->createKineticLaw();
+  processKineticLaw(reac->getKineticLaw(), sbml_law, model);
+}
+
+void
+Writer::processKineticLaw(Ast::KineticLaw *law, libsbml::KineticLaw *sbml_law, Ast::Model &model)
+{
+  // Handle local paramerers:
+  for (Ast::KineticLaw::iterator item=law->begin(); item != law->end(); item++) {
+    if (! Ast::Node::isParameter(*item)) {
+      ExportError err;
+      err << "Can not export KineticLaw to SBML, only parameter definitions are allowed "
+          << "in a KineticLaw definition.";
+      throw err;
+    }
+
+    Ast::Parameter *param = static_cast<Ast::Parameter *>(*item);
+    libsbml::LocalParameter *sbml_param = sbml_law->createLocalParameter();
+    sbml_param->setId(param->getIdentifier());
+    if (param->hasName()) {sbml_param->setName(param->getName()); }
+    if (! hasDefaultUnit(param, model)) {
+      sbml_param->setUnits(getUnitIdentifier(param, model));
+    }
+    if (param->hasValue()) {
+      if (! GiNaC::is_a<GiNaC::numeric>(param->getValue()) ) {
+        ExportError err;
+        err << "Can only set numeric value for intial value of local parameter "
+            << param->getIdentifier();
+        throw err;
+      }
+      sbml_param->setValue(GiNaC::ex_to<GiNaC::numeric>(param->getValue()).to_double());
+    }
+    if (param->hasRule()) {
+      ExportError err;
+      err << "Can not export local parameter definition " << param->getIdentifier() << " to SBML:"
+          << " Can not define rule for paramter.";
+      throw err;
+    }
+  }
+
+  // process law:
+  sbml_law->setMath(processExpression(law->getRateLaw(), model));
+}
+
+
+void
+Writer::processInitialValue(
+  Ast::VariableDefinition *var, libsbml::Model *sbml_model, Ast::Model &model)
+{
+  libsbml::InitialAssignment *init = sbml_model->createInitialAssignment();
+  init->setSymbol(var->getIdentifier());
+  init->setMath(processExpression(var->getValue(), model));
+}
+
+
+void
+Writer::processRule(Ast::VariableDefinition *var, libsbml::Model *sbml_model, Ast::Model &model)
 {
   if (Ast::Node::isAssignmentRule(var->getRule())) {
     Ast::AssignmentRule *rule = static_cast<Ast::AssignmentRule *>(var->getRule());
+    libsbml::AssignmentRule *sbml_rule = sbml_model->createAssignmentRule();
+    sbml_rule->setVariable(var->getIdentifier());
+    sbml_rule->setMath(processExpression(rule->getRule(), model));
   } else if (Ast::Node::isRateRule(var->getRule())) {
     Ast::RateRule * rule = static_cast<Ast::RateRule *>(var->getRule());
+    libsbml::RateRule *sbml_rule = sbml_model->createRateRule();
+    sbml_rule->setVariable(var->getIdentifier());
+    sbml_rule->setMath(processExpression(rule->getRule(), model));
   } else {
     ExportError err;
-    err << "Can not export model " << model->getName()
+    err << "Can not export model " << sbml_model->getName()
         << ": Unknown rule type for variable " << var->getIdentifier();
     throw err;
   }
 }
 
-libsbml::ASTNode *
-Writer::processExpression(GiNaC::ex)
+
+bool
+Writer::hasDefaultUnit(Ast::VariableDefinition *var, Ast::Model &model)
 {
-  return 0;
+  if (Ast::Node::isCompartment(var)) {
+    Ast::Compartment *comp = static_cast<Ast::Compartment *>(var);
+    switch (comp->getDimension()) {
+    case Ast::Compartment::POINT: return comp->getUnit().isExactlyDimensionless();
+    case Ast::Compartment::LINE: return comp->getUnit() == model.getDefaultLengthUnit();
+    case Ast::Compartment::AREA: return comp->getUnit() == model.getDefaultAreaUnit();
+    case Ast::Compartment::VOLUME: return comp->getUnit() == model.getDefaultVolumeUnit();
+    }
+  }
+
+  if (Ast::Node::isSpecies(var)) {
+    Ast::Species *species = static_cast<Ast::Species *>(var);
+    return species->getUnit() == model.getDefaultSubstanceUnit();
+  }
+
+  if (Ast::Node::isParameter(var)) {
+    return var->getUnit().isExactlyDimensionless();
+  }
+
+  return false;
+}
+
+
+std::string
+Writer::getUnitIdentifier(Ast::VariableDefinition *var, Ast::Model &model)
+{
+  if (! var->getUnit().isExactlyDimensionless()) {
+    return "dimensionless";
+  }
+
+  return model.getUnitDefinition(var->getUnit())->getIdentifier();
+}
+
+
+libsbml::ASTNode *
+Writer::processExpression(GiNaC::ex expression, Ast::Model &model)
+{
+  return SBMLExpressionAssembler::process(expression, model);
+}
+
+
+
+/* ******************************************************************************************** *
+ * Implementation of expression assembler:
+ * ******************************************************************************************** */
+SBMLExpressionAssembler::SBMLExpressionAssembler(Ast::Model &model) : _stack(), _model(model) { }
+
+void
+SBMLExpressionAssembler::visit(const GiNaC::numeric &value)
+{
+  _stack.push_back(new libsbml::ASTNode(libsbml::AST_REAL));
+  _stack.back()->setValue(value.to_double());
+}
+
+void
+SBMLExpressionAssembler::visit(const GiNaC::symbol &symbol)
+{
+  if (_model.getTime() == symbol) {
+    _stack.push_back(new libsbml::ASTNode(libsbml::AST_NAME_TIME));
+  } else {
+    _stack.push_back(new libsbml::ASTNode(libsbml::AST_NAME));
+    _stack.back()->setName(symbol.get_name().c_str());
+  }
+}
+
+void
+SBMLExpressionAssembler::visit(const GiNaC::add &sum)
+{
+  for (size_t i=0; i<sum.nops(); i++) {
+    sum.op(i).accept(*this);
+  }
+
+  // Then assemble the sum on the stack:
+  for (size_t i=1; i<sum.nops(); i++) {
+    libsbml::ASTNode *rhs = _stack.back(); _stack.pop_back();
+    libsbml::ASTNode *lhs = _stack.back(); _stack.pop_back();
+    _stack.push_back(new libsbml::ASTNode(libsbml::AST_PLUS));
+    _stack.back()->addChild(lhs);
+    _stack.back()->addChild(rhs);
+  }
+}
+
+void
+SBMLExpressionAssembler::visit(const GiNaC::mul &prod)
+{
+  for (size_t i=0; i<prod.nops(); i++) {
+    prod.op(i).accept(*this);
+  }
+
+  // Then assemble the sum on the stack:
+  for (size_t i=1; i<prod.nops(); i++) {
+    libsbml::ASTNode *rhs = _stack.back(); _stack.pop_back();
+    libsbml::ASTNode *lhs = _stack.back(); _stack.pop_back();
+    _stack.push_back(new libsbml::ASTNode(libsbml::AST_TIMES));
+    _stack.back()->addChild(lhs);
+    _stack.back()->addChild(rhs);
+  }
+}
+
+void
+SBMLExpressionAssembler::visit(const GiNaC::power &pow)
+{
+  // handle basis
+  pow.op(0).accept(*this);
+  // handle exponent
+  pow.op(1).accept(*this);
+
+  libsbml::ASTNode *exponent = _stack.back(); _stack.pop_back();
+  libsbml::ASTNode *basis = _stack.back(); _stack.pop_back();
+  _stack.push_back(new libsbml::ASTNode(libsbml::AST_POWER));
+  _stack.back()->addChild(basis); _stack.back()->addChild(exponent);
+}
+
+void
+SBMLExpressionAssembler::visit(const GiNaC::function &function)
+{
+  if (function.get_serial() == GiNaC::abs_SERIAL::serial) {
+    libsbml::ASTNode *arg = _stack.back(); _stack.pop_back();
+    _stack.push_back(new libsbml::ASTNode(libsbml::AST_FUNCTION_ABS));
+    _stack.back()->addChild(arg);
+    return;
+  } else if (function.get_serial() == GiNaC::exp_SERIAL::serial) {
+    libsbml::ASTNode *arg = _stack.back(); _stack.pop_back();
+    _stack.push_back(new libsbml::ASTNode(libsbml::AST_FUNCTION_EXP));
+    _stack.back()->addChild(arg);
+    return;
+  } else if (function.get_serial() == GiNaC::log_SERIAL::serial) {
+    libsbml::ASTNode *arg = _stack.back(); _stack.pop_back();
+    _stack.push_back(new libsbml::ASTNode(libsbml::AST_FUNCTION_LN));
+    _stack.back()->addChild(arg);
+    return;
+  }
+
+  ExportError err;
+  err << "Can not export function call " << function << " to SBML, unknown function.";
+  throw err;
+}
+
+void
+SBMLExpressionAssembler::visit(const GiNaC::basic &basic)
+{
+  ExportError err;
+  err << "Can not export expression " << basic << " to SBML, unknown expression type.";
+  throw err;
+}
+
+
+libsbml::ASTNode *
+SBMLExpressionAssembler::process(GiNaC::ex expression, Ast::Model &model) {
+  SBMLExpressionAssembler ass(model); expression.accept(ass);
+
+  libsbml::ASTNode *res = ass._stack.back(); ass._stack.pop_back();
+  if (! res->isWellFormedASTNode()) {
+    ExportError err;
+    err << "Can not export expression: " << expression << " to SBML, something went wrong: "
+        << " resulting expression is not well formed.";
+    throw err;
+  }
+
+  return res;
 }

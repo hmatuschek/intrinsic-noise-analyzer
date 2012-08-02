@@ -442,7 +442,7 @@ private:
  * ParameterDefinitions =
  *   "@parameters" EOL ParameterDefinitionList;
  */
-class ParameterDefinitionsProduction : Fluc::Parser::Production
+class ParameterDefinitionsProduction : public Fluc::Parser::Production
 {
 protected:
   /** Hidden constructor. */

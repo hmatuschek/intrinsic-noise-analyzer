@@ -1,6 +1,12 @@
 #ifndef __INA_PARSER_PARSER_HH__
 #define __INA_PARSER_PARSER_HH__
 
+/** @defgroup parser Parser & Lexer
+ *
+ * This group collects classes to assemble a recusive descending parser and lexer.
+ */
+
+
 /** @defgroup modelio Parsing and writing model definitions.
  * @ingroup models
  *

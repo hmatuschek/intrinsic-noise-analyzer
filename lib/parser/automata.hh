@@ -345,6 +345,7 @@ public:
 /**
  * Implements a non-deterministic finite automata (NFA, a collection of determinisitic finite
  * automata, @c DFA).
+ *
  * @ingroup parser
  */
 template <class Value>

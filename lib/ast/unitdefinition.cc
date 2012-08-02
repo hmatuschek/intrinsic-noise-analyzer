@@ -231,6 +231,13 @@ Unit::isDimensionless() const
 }
 
 
+bool
+Unit::isExactlyDimensionless() const
+{
+  return isDimensionless() && (1 == common_multiplier) && (0 == common_scale);
+}
+
+
 ScaledBaseUnit
 Unit::asScaledBaseUnit() const
 {

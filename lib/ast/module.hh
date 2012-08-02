@@ -234,6 +234,13 @@ public:
   UnitDefinition * const getUnitDefinition(const std::string &identifier) const;
 
   /**
+   * Returns the unit definition by matching the unit.
+   *
+   * @throws SymbolError If the unit is not associated with a unit definition.
+   */
+  UnitDefinition * const getUnitDefinition(const Unit &unit) const;
+
+  /**
    * Returns true, if the given identifier names a @c VariableDefinition.
    */
   bool hasVariable(const std::string &identifier) const;

@@ -27,6 +27,7 @@ protected:
 
   /**
    * Boolean which declares substrate units.
+   * @todo Is this flag actually needed? We handle that with units aren't we?
    */
   bool substance_units;
 

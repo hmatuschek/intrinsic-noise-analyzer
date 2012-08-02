@@ -323,6 +323,21 @@ Module::getUnitDefinition(const std::string &identifier) const
 }
 
 
+UnitDefinition * const
+Module::getUnitDefinition(const Unit &unit) const
+{
+  for (Module::const_iterator item=this->begin(); item!=this->end(); item++) {
+    if (! Ast::Node::isUnitDefinition(*item)) { continue; }
+    Ast::UnitDefinition * const unit_def = (Ast::UnitDefinition * const)(*item);
+    if (unit_def->getUnit() == unit) { return unit_def; }
+  }
+
+  SymbolError err;
+  err << "Can not find matching unit!";
+  throw err;
+}
+
+
 bool
 Module::hasVariable(const GiNaC::symbol &symbol) const
 {
