@@ -60,11 +60,11 @@ INCLUDE_DIRECTORIES(${EIGEN3_INCLUDE_DIRS} ${GINAC_INCLUDE_DIRS} ${LIBSBML_INCLU
 #
 # Compiler flags:
 #
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -Wall -frtti -fexceptions -Wno-unknown-pragmas")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${OpenMP_CXX_FLAGS} -O0 -ggdb")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${OpenMP_CXX_FLAGS} -O2")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -Wall -frtti -fexceptions -Wno-unknown-pragmas -mincoming-stack-boundary=2")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${OpenMP_CXX_FLAGS} -O0 -ggdb -mincoming-stack-boundary=2")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${OpenMP_CXX_FLAGS} -O2 -mincoming-stack-boundary=2")
 
-set(CMAKE_EXE_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS_INIT} ${OpenMP_CXX_FLAGS})
+set(CMAKE_EXE_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS_INIT} ${OpenMP_CXX_FLAGS} -mincoming-stack-boundary=2)
 set(CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS_INIT} ${OpenMP_CXX_FLAGS})
 set(CMAKE_MODULE_LINKER_FLAGS ${CMAKE_MODULE_LINKER_FLAGS_INIT} ${OpenMP_CXX_FLAGS})
 
@@ -112,7 +112,7 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}/lib)
 add_subdirectory(lib)
 add_subdirectory(app)
 add_subdirectory(cli)
-add_subdirectory(test)
+#add_subdirectory(test)
 
 #
 # Source distribution packages:

@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
     Models::OptimizedSSA model(doc->getModel(),30,1024);
     double dt=0.1;
 
-    Eigen::VectorXd state;
+    Eigen::VectorXd mean;
     Eigen::MatrixXd variance;
 
     Eigen::MatrixXd cov(model.numSpecies(),model.numSpecies());
@@ -38,8 +38,8 @@ int main(int argc, char *argv[])
     for(double t=0.; t<10.; t+=dt)
     {
 
-       //model.stats(state,variance,skewness);
-       std::cout <<t<< "\t" << state.transpose() << "\t";
+       model.stats(mean,variance,skewness);
+       std::cout <<t<< "\t" << mean.transpose() << "\t";
        std::cout << variance.diagonal().transpose() << "\t";
 
        std::cout<<std::endl;
