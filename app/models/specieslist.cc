@@ -20,7 +20,7 @@ SpeciesList::flags(const QModelIndex &index) const
   if (! index.isValid() || 6 <= index.column()) { return Qt::NoItemFlags; }
   if (int(this->model->numSpecies()) <= index.row()) { return Qt::NoItemFlags; }
 
-  if (1 == index.row() || 2 == index.row()) { flags |= Qt::ItemIsEditable; }
+  if (1 == index.column() || 2 == index.column()) { flags |= Qt::ItemIsEditable; }
 
   return flags;
 }
