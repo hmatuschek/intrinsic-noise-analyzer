@@ -67,7 +67,9 @@ ParameterList::data(const QModelIndex &index, int role) const
 
 
 bool
-ParameterList::setData(const QModelIndex &index, const QVariant &value, int role) {
+ParameterList::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+  // Filter invald indices
   if (index.row() >= int(model->numParameters())) return false;
   if (index.column() >= 5) return false;
 
