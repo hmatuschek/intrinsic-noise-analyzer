@@ -1,5 +1,6 @@
 #include "compartmentlist.hh"
 
+
 CompartmentList::CompartmentList(Fluc::Ast::Model *model, QObject *parent)
   : QAbstractTableModel(parent), model(model)
 {
@@ -7,21 +8,35 @@ CompartmentList::CompartmentList(Fluc::Ast::Model *model, QObject *parent)
 }
 
 
+Qt::ItemFlags
+CompartmentList::flags(const QModelIndex &index) const
+{
+  // Default flags:
+  Qt::ItemFlags item_flags = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+
+  // Filter invalid indices:
+  if (! index.isValid()) return Qt::NoItemFlags;
+  if (5 <= index.column()) return Qt::NoItemFlags;
+  if (int(model->numParameters()) <= index.row()) return Qt::NoItemFlags;
+
+  // Mark only column 1 & 2 editable
+  if ( (1 == index.column()) || (2 == index.column()) ) item_flags |= Qt::ItemIsEditable;
+
+  return item_flags;
+}
+
 
 QVariant
 CompartmentList::data(const QModelIndex &index, int role) const
 {
-  if (! index.isValid() || 5 <= index.column()) {
-    return QVariant();
-  }
+  // Filter invalid indices:
+  if (! index.isValid() || 4 <= index.column()) { return QVariant(); }
+  if (int(this->model->numCompartments()) <= index.row()) { return QVariant(); }
 
-  if (int(this->model->numCompartments()) <= index.row()) {
-    return QVariant();
-  }
-
+  // Get selected compartment:
   Fluc::Ast::Compartment *comp = this->model->getCompartment(index.row());
-  if (4 == index.column() && Qt::CheckStateRole == role)
-  {
+
+  if (4 == index.column() && Qt::CheckStateRole == role) {
     if (comp->isConst()) {
       return Qt::Checked;
     }
@@ -32,30 +47,33 @@ CompartmentList::data(const QModelIndex &index, int role) const
     return QVariant();
   }
 
-  switch (index.column())
-  {
-  case 0:
-    return QVariant(comp->getIdentifier().c_str());
+  // Identifier
+  if (0 == index.column()) { return QVariant(comp->getIdentifier().c_str()); }
 
-  case 1:
+  // Name
+  if (1 == index.column()) {
     if (! comp->hasName())
       return QVariant("<not set>");
     return QVariant(comp->getName().c_str());
+  }
 
-  case 2:
-    return QVariant(this->getInitialValueForCompartment(comp));
+  // Initial value:
+  if (2 == index.column()) { return QVariant(this->getInitialValueForCompartment(comp)); }
 
-  case 3:
-  {
+  // Unit
+  if (3 == index.column()) {
     std::stringstream str; comp->getUnit().dump(str);
     return QVariant(str.str().c_str());
   }
 
-  default:
-    break;
-  }
-
   return QVariant();
+}
+
+
+bool
+CompartmentList::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+  return false;
 }
 
 

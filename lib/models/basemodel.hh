@@ -50,8 +50,6 @@ protected:
 
 
 public:
-  /*BaseModel(libsbml::Model *sbml_model);*/
-
   /**
    * Constructor.
    *

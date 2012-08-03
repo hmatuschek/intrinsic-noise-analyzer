@@ -14,9 +14,7 @@ class ParameterList : public QAbstractTableModel
   Q_OBJECT
 
 public:
-  /**
-   * Constructs a parameter list from the given SBML model.
-   */
+  /** Constructs a parameter list from the given SBML model. */
   explicit ParameterList(Fluc::Ast::Model *model, QObject *parent = 0);
 
   /** Implementation for the QAbstractTableModel. Returns the requested data. */
@@ -28,33 +26,23 @@ public:
   /** Returns a flag, that indicates if a cell is editable. */
   Qt::ItemFlags flags(const QModelIndex &index) const;
 
-  /**
-   * Implementation of QAbstractItemMode, returns the headers for columns.
-   */
+  /** Implementation of QAbstractItemMode, returns the headers for columns. */
   QVariant headerData(int section, Qt::Orientation orientation, int role) const;
 
-  /**
-   * Returns the number of parameters.
-   */
+  /** Returns the number of parameters. */
   int rowCount(const QModelIndex &parent = QModelIndex()) const;
 
-  /**
-   * Returns the number of columns.
-   */
+  /** Returns the number of columns. */
   int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
 
 private:
-  /**
-   * Returns a string representation of the initial value.
-   */
+  /** Returns a string representation of the initial value. */
   QString getInitialValueForParameter(Fluc::Ast::Parameter *param) const;
 
 
 private:
-  /**
-   * Holds a weak reference to the SBML model.
-   */
+  /** Holds a weak reference to the SBML model. */
   Fluc::Ast::Model *model;
 };
 

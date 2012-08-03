@@ -150,6 +150,26 @@ private:
 };
 
 
+/**
+ * Grammar =
+ *  Expression END_OF_FILE;
+ */
+class ExpressionGrammar : public Parser::Production
+{
+protected:
+  /** Hidden constructor. */
+  ExpressionGrammar();
+
+public:
+  /** factory method. */
+  static Fluc::Parser::Production *get();
+
+private:
+  /** Singleton instance. */
+  static ExpressionGrammar *instance;
+};
+
+
 }
 }
 }

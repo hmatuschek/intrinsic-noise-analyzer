@@ -230,3 +230,26 @@ AtomicExpressionProduction::get()
 
   return AtomicExpressionProduction::instance;
 }
+
+
+/* ******************************************************************************************** *
+ * ExpressionGrammar =
+ *    Expression END_OF_LINE
+ * ******************************************************************************************** */
+ExpressionGrammar::ExpressionGrammar()
+  : Production()
+{
+  ExpressionGrammar::instance = this;
+  elements.push_back(ExpressionProduction::get());
+  elements.push_back(new TokenProduction(Token::END_OF_INPUT));
+}
+
+ExpressionGrammar *ExpressionGrammar::instance = 0;
+
+Parser::Production *
+ExpressionGrammar::get() {
+  if (0 == ExpressionGrammar::instance) {
+    return new ExpressionGrammar();
+  }
+  return ExpressionGrammar::instance;
+}

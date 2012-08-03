@@ -90,8 +90,8 @@ Parser::Expr::parseExpression(const std::string &text, Ast::Scope *scope)
   lexer.addIgnoredToken(T_WHITESPACE);
 
   Parser::ConcreteSyntaxTree cst;
-  ExpressionProduction::get()->parse(lexer, cst);
-  ExpressionProduction::get()->notify(lexer, cst);
+  ExpressionGrammar::get()->parse(lexer, cst);
+  ExpressionGrammar::get()->notify(lexer, cst);
 
-  return Expr::Assembler(scope, lexer).processExpression(cst);
+  return Expr::Assembler(scope, lexer).processExpression(cst[0]);
 }
