@@ -65,7 +65,7 @@ public:
   /**
    * Retuns the type of the node.
    */
-  virtual NodeType getNodeType();
+  virtual NodeType getNodeType() const;
 
   /** A pure-virtual method that has to be implemented by sub-sclasses.
    * This method shoud dump a simple string representation of the instance into the given stream. */
@@ -81,72 +81,72 @@ public:
   /**
    * Retunrs true, if the given node is a constraint.
    */
-  static bool isConstraint(Node *node);
+  static bool isConstraint(const Node *node);
 
   /**
    * Returns true, if the given node is an algebraic constraint.
    */
-  static bool isAlgebraicConstraint(Node *node);
+  static bool isAlgebraicConstraint(const Node *node);
 
   /**
    * Retunrs true, if given node is a definition, ie. a FunctionDefinition, etc.
    */
-  static bool isDefinition(Node *node);
+  static bool isDefinition(const Node *node);
 
   /**
    * Retunrs true, if the given node is a function definition.
    */
-  static bool isFunctionDefinition(Node *node);
+  static bool isFunctionDefinition(const Node *node);
 
   /**
    * Returns true if the given node is a variable definition.
    */
-  static bool isVariableDefinition(Node *node);
+  static bool isVariableDefinition(const Node *node);
 
   /**
    * Returns true, if the given node is a species definition.
    */
-  static bool isSpecies(Node *node);
+  static bool isSpecies(const Node *node);
 
   /**
    * Returns true, if the given node is a parameter definition.
    */
-  static bool isParameter(Node *node);
+  static bool isParameter(const Node *node);
 
   /**
    * Returns true, if the given node is a compartment definition.
    */
-  static bool isCompartment(Node *node);
+  static bool isCompartment(const Node *node);
 
   /**
    * Returns true if the given node is a reaction definition.
    */
-  static bool isReactionDefinition(Node *node);
+  static bool isReactionDefinition(const Node *node);
 
   /**
    * Returns true, if the given node is a unit-definition.
    */
-  static bool isUnitDefinition(Node *node);
+  static bool isUnitDefinition(const Node *node);
 
   /**
    * Retunrs true, if the given node is a kinetic law.
    */
-  static bool isKineticLaw(Node *node);
+  static bool isKineticLaw(const Node *node);
 
   /**
    * Retunrs true, if the given node is a rule for a variable.
    */
-  static bool isRule(Node *node);
+  static bool isRule(const Node *node);
 
   /**
    * Returns true, if the given node is an assignment rule for a variable.
    */
-  static bool isAssignmentRule(Node *node);
+  static bool isAssignmentRule(const Node *node);
 
   /**
    * Returns true, if the given node is a rate rule for a variable.
    */
-  static bool isRateRule(Node *node);
+  static bool isRateRule(const Node *node);
 };
 
 

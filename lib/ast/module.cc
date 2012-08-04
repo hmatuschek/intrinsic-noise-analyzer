@@ -54,7 +54,7 @@ Module::Module(const std::string &name)
 
 Module::~Module()
 {
-  // Free constaints:
+  // Free constraints:
   for (constraintIterator iter = this->constraints.begin();
        iter != this->constraints.end(); iter++)
   {

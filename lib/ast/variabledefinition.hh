@@ -92,17 +92,17 @@ public:
   /**
    * Returns true, if the variable is constant.
    */
-  bool isConst();
+  bool isConst() const;
 
   /**
    * Retunrs true, if the variable definition has an initial value expression.
    */
-  bool hasValue();
+  bool hasValue() const;
 
   /**
    * Retruns the initial value expression, if present. Otherwise null is returned.
    */
-  GiNaC::ex getValue();
+  GiNaC::ex getValue() const;
 
   /**
    * (re-) Sets the initial value expression.
@@ -119,10 +119,11 @@ public:
    */
   bool hasRule() const;
 
-  /**
-   * Retunrs the rule attached to the variable.
-   */
+  /** Retunrs the rule attached to the variable. */
   Rule *getRule();
+
+  /** Returns a const reference to the rule attached to the variable. */
+  const Rule *getRule() const;
 
   /**
    * (Re-) Sets the attached rule for the variable.

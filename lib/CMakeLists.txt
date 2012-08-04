@@ -39,6 +39,11 @@ SET(libina_ast_trafo_HEADERS ast/trafo/trafo.hh
     ast/trafo/assignmentruleinliner.hh ast/trafo/substitutioncollector.hh ast/trafo/modelwalker.hh
     ast/trafo/modelcopyist.hh)
 
+SET(libina_trafo_SOURCES
+    trafo/assertions.cc)
+SET(libina_trafo_HEADERS trafo/trafo.hh
+    trafo/assertions.hh)
+
 SET(libina_sbmlsh_parser_SOURCES
     parser/sbmlsh/lexer.cc parser/sbmlsh/parser.cc parser/sbmlsh/productions.cc
     parser/sbmlsh/assembler.cc parser/sbmlsh/exporter.cc parser/sbmlsh/sbmlsh.cc)
@@ -202,6 +207,7 @@ SET(libina_SOURCES
     ${libina_parser_SOURCES}
     ${libina_ast_SOURCES}
     ${libina_ast_trafo_SOURCES}
+    ${libina_trafo_SOURCES}
     ${libina_models_SOURCES}
     ${libina_nlesolve_SOURCES}
     ${libina_ode_SOURCES}
@@ -214,6 +220,7 @@ SET(libina_HEADERS
     ${libina_parser_HEADERS}
     ${libina_ast_HEADERS}
     ${libina_ast_trafo_HEADERS}
+    ${libina_trafo_HEADERS}
     ${libina_models_HEADERS}
     ${libina_nlesolve_HEADERS}
     ${libina_ode_HEADERS}

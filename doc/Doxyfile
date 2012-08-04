@@ -631,6 +631,7 @@ WARN_LOGFILE           =
 
 INPUT = ../lib/parser ../lib/parser/sbml ../lib/parser/sbmlsh \ 
         ../lib/ast ../lib/ast/trafo \
+        ../lib/trafo \
         ../lib/models ../lib/models/unsupported \
         ../lib/eval ../lib/eval/direct ../lib/eval/bci ../lib/eval/bcimp ../lib/evel/jit \
         ../lib \

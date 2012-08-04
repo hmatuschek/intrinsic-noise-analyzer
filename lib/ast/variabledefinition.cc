@@ -41,21 +41,21 @@ VariableDefinition::~VariableDefinition()
 
 
 bool
-VariableDefinition::isConst()
+VariableDefinition::isConst() const
 {
   return this->is_const;
 }
 
 
 bool
-VariableDefinition::hasValue()
+VariableDefinition::hasValue() const
 {
   return this->has_value;
 }
 
 
 GiNaC::ex
-VariableDefinition::getValue()
+VariableDefinition::getValue() const
 {
   return this->value;
 }
@@ -83,8 +83,12 @@ VariableDefinition::hasRule() const
 
 
 Rule *
-VariableDefinition::getRule()
-{
+VariableDefinition::getRule() {
+  return this->rule;
+}
+
+const Rule *
+VariableDefinition::getRule() const {
   return this->rule;
 }
 
