@@ -9,8 +9,8 @@
 /* ********************************************************************************************* *
  * Implementation of ReactionParameterModel for the local parameters of a reaction
  * ********************************************************************************************* */
-ReactionParameterList::ReactionParameterList(Fluc::Ast::KineticLaw *law, Fluc::Ast::Model *model, QObject *parent)
-  : QAbstractTableModel(parent), _kinetic_law(law), _model(model)
+ReactionParameterList::ReactionParameterList(Fluc::Ast::KineticLaw *law, QObject *parent)
+  : QAbstractTableModel(parent), _kinetic_law(law)
 {
   // Pass...
 }

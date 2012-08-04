@@ -6,8 +6,8 @@
 /* ********************************************************************************************* *
  * Implementation of ReactionWrapper a single reaction
  * ********************************************************************************************* */
-ReactionItem::ReactionItem(Fluc::Ast::Reaction *reaction, Fluc::Ast::Model *model, QObject *parent)
-  : QObject(parent), _reaction(reaction), _model(model), local_parameters(0), itemLabel()
+ReactionItem::ReactionItem(Fluc::Ast::Reaction *reaction, QObject *parent)
+  : QObject(parent), _reaction(reaction), local_parameters(0), itemLabel()
 {
   // Assemble display name
   if (reaction->hasName()){
@@ -17,7 +17,7 @@ ReactionItem::ReactionItem(Fluc::Ast::Reaction *reaction, Fluc::Ast::Model *mode
   }
 
   // Create list model of local parameters:
-  this->local_parameters = new ReactionParameterList(reaction->getKineticLaw(), _model, this);
+  this->local_parameters = new ReactionParameterList(reaction->getKineticLaw(), this);
 }
 
 

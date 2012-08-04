@@ -18,13 +18,9 @@ protected:
   /** Holds a weak reference to the @c Fluc::Ast::KineticLaw instance. */
   Fluc::Ast::KineticLaw *_kinetic_law;
 
-  /** Holds a weak reference to the @c Fluc::Ast::Model instance, this instance is used to resolve
-   * symbol-names when setting the initial value of a paramter. */
-  Fluc::Ast::Model *_model;
-
 public:
   /** Constructs a list of local paramters defined in the given @c Fluc::Ast::KineticLaw. */
-  explicit ReactionParameterList(Fluc::Ast::KineticLaw *law, Fluc::Ast::Model *model, QObject *parent=0);
+  explicit ReactionParameterList(Fluc::Ast::KineticLaw *law, QObject *parent=0);
 
   /** Signals if the given item is editable. */
   Qt::ItemFlags flags(const QModelIndex &index) const;

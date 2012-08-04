@@ -19,27 +19,31 @@ class ReactionItem : public QObject, public DocumentTreeItem
 protected:
   /** Holds a weak reference to the reaction. */
   Fluc::Ast::Reaction *_reaction;
-  /** Holds a weak reference to the model. */
-  Fluc::Ast::Model *_model;
   /** Hold an instance of the local paramter list of the kinetic law. */
   ReactionParameterList *local_parameters;
   /** Holds the display name of the reaction. */
   QString itemLabel;
 
 public:
-  explicit ReactionItem(Fluc::Ast::Reaction *_reaction, Fluc::Ast::Model *model,
-                        QObject *parent=0);
+  /** Constructor. */
+  explicit ReactionItem(Fluc::Ast::Reaction *_reaction, QObject *parent=0);
 
+  /** Retunrs the display name of the reaction. */
   virtual const QString &getLabel() const;
 
+  /** Retunrs the display name of the reaction. */
   QString getDisplayName() const;
 
+  /** Retunrs the reaction instance. */
   Fluc::Ast::Reaction *getReaction();
 
+  /** Returns the list of local paramters. */
   ReactionParameterList *localParameters();
 
+  /** Yes, there is a reaction view. */
   virtual bool providesView() const;
 
+  /** Retrns a new instance of the view. */
   virtual QWidget *createView();
 };
 
