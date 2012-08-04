@@ -7,7 +7,7 @@ using namespace Fluc::Ast;
 
 FunctionDefinition::FunctionDefinition(const std::string &id, std::vector<VariableDefinition *> &argdef,
                                        GiNaC::ex body)
-  : Definition(id, Node::FUNCTION_DEFINITION), Scope(true),
+  : Definition(id, Node::FUNCTION_DEFINITION), Scope(0, true),
     arguments(argdef.size()), function_body(body)
 {
   // get symbol for args and add argument definition to function scope:

@@ -93,8 +93,8 @@ Scope::const_iterator::operator !=(const Scope::const_iterator &other)
 /*
  * Implementation of Scope.
  */
-Scope::Scope(bool is_closed)
-  : definitions(), is_closed(is_closed)
+Scope::Scope(Scope *parent, bool is_closed)
+  : definitions(), is_closed(is_closed), _parent_scope(parent)
 {
   // Done.
 }
@@ -112,6 +112,12 @@ Scope::~Scope()
 
 
 void
+Scope::setParent(Scope *parent) {
+  _parent_scope = parent;
+}
+
+
+void
 Scope::addDefinition(Definition *def)
 {
   // Check if the if there is a definition with the same identifier:
@@ -122,6 +128,12 @@ Scope::addDefinition(Definition *def)
   } else {
     // Store definition in table
     this->definitions[def->getIdentifier()] = def;
+  }
+
+  Scope *scope = 0;
+  if (0 != (scope = dynamic_cast<Scope *>(def))) {
+    // If the definition is a scope, set scopes parent:
+    scope->setParent(this);
   }
 }
 
@@ -146,37 +158,49 @@ Scope::remDefinition(Definition *def)
 bool
 Scope::hasDefinition(const std::string &name) const throw()
 {
-  return this->definitions.end() != this->definitions.find(name);
+  if (this->definitions.end() != this->definitions.find(name))
+    return true;
+
+  if (0 != _parent_scope && !is_closed)
+    return _parent_scope->hasDefinition(name);
+
+  return false;
 }
 
 
 Definition *
 Scope::getDefinition(const std::string &name)
 {
+  // Search in this scope:
   std::map<std::string, Definition *>::iterator item = this->definitions.find(name);
+  if (definitions.end() != item) { return item->second; }
 
-  if (this->definitions.end() == item) {
-    SymbolError err;
-    err << "Symbol " << name << " not found in scope.";
-    throw err;
-  }
+  // If not closed and has parent -> search in parent scope:
+  if (0 != _parent_scope && !is_closed)
+    return _parent_scope->getDefinition(name);
 
-  return item->second;
+  // Not found...
+  SymbolError err;
+  err << "Symbol " << name << " not found in scope.";
+  throw err;
 }
 
 
 Definition * const
 Scope::getDefinition(const std::string &name) const
 {
+  // Search in this scope:
   std::map<std::string, Definition *>::const_iterator item = this->definitions.find(name);
+  if (definitions.end() != item) { return item->second; }
 
-  if (this->definitions.end() == item) {
-    SymbolError err;
-    err << "Symbol " << name << " not found in scope.";
-    throw err;
-  }
+  // If not closed and has parent -> search in parent scope:
+  if (0 != _parent_scope && !is_closed)
+    return _parent_scope->getDefinition(name);
 
-  return item->second;
+  // Not found...
+  SymbolError err;
+  err << "Symbol " << name << " not found in scope.";
+  throw err;
 }
 
 
