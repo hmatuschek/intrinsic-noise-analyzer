@@ -17,18 +17,18 @@ class ReactionItem : public QObject, public DocumentTreeItem
   Q_OBJECT
 
 protected:
-  Fluc::Ast::Reaction *reaction;
-
+  /** Holds a weak reference to the reaction. */
+  Fluc::Ast::Reaction *_reaction;
+  /** Holds a weak reference to the model. */
+  Fluc::Ast::Model *_model;
+  /** Hold an instance of the local paramter list of the kinetic law. */
   ReactionParameterList *local_parameters;
-
-  /**
-   * Holds the display name of the reaction.
-   */
+  /** Holds the display name of the reaction. */
   QString itemLabel;
 
 public:
-  explicit ReactionItem(Fluc::Ast::Reaction *reaction,
-                           QObject *parent=0);
+  explicit ReactionItem(Fluc::Ast::Reaction *_reaction, Fluc::Ast::Model *model,
+                        QObject *parent=0);
 
   virtual const QString &getLabel() const;
 

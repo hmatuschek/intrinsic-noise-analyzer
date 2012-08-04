@@ -13,7 +13,7 @@ ReactionsItem::ReactionsItem(Fluc::Ast::Model *model, QObject *parent) :
   // Populate reactions:
   for (size_t i=0; i<model->numReactions(); i++)
   {
-    ReactionItem *reaction = new ReactionItem(model->getReaction(i), this);
+    ReactionItem *reaction = new ReactionItem(model->getReaction(i), model, this);
     reaction->setTreeParent(this); this->_children.append(reaction);
   }
 
