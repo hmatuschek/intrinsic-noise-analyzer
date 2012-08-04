@@ -336,6 +336,30 @@ Reaction::dump(std::ostream &str)
 }
 
 
+void
+Reaction::accept(Ast::Visitor &visitor) const
+{
+  if (Reaction::Visitor *reac_vis = dynamic_cast<Reaction::Visitor *>(&visitor)) {
+    reac_vis->visit(this);
+  } else {
+    kinetic_law->accept(visitor);
+    Definition::accept(visitor);
+  }
+}
+
+
+void
+Reaction::apply(Ast::Operator &op)
+{
+  if (Reaction::Operator *reac_op = dynamic_cast<Reaction::Operator *>(&op)) {
+    reac_op->act(this);
+  } else {
+    kinetic_law->apply(op);
+    Definition::apply(op);
+  }
+}
+
+
 
 /* ********************************************************************************************* *
  * Implementation of kinetic law:
@@ -408,3 +432,26 @@ KineticLaw::dump(std::ostream &str)
   Scope::dump(str);
 }
 
+
+void
+KineticLaw::accept(Ast::Visitor &visitor) const
+{
+  if (KineticLaw::Visitor *law_vis = dynamic_cast<KineticLaw::Visitor *>(&visitor)) {
+    law_vis->visit(this);
+  } else {
+    Scope::accept(visitor);
+    Node::accept(visitor);
+  }
+}
+
+
+void
+KineticLaw::apply(Ast::Operator &op)
+{
+  if (KineticLaw::Operator *law_op = dynamic_cast<KineticLaw::Operator *>(&op)) {
+    law_op->act(this);
+  } else {
+    Scope::apply(op);
+    Node::apply(op);
+  }
+}

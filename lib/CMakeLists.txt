@@ -22,13 +22,13 @@ SET(libina_ast_SOURCES
     ast/definition.cc ast/functiondefinition.cc ast/node.cc ast/rule.cc
     ast/reaction.cc ast/scope.cc ast/variabledefinition.cc ast/constraint.cc ast/module.cc
     ast/evaluate.cc ast/unitdefinition.cc ast/species.cc ast/compartment.cc ast/parameter.cc
-    ast/model.cc ast/converter.cc)
+    ast/model.cc ast/converter.cc ast/visitor.cc)
 SET(libina_ast_HEADERS
     ast/ast.hh
     ast/definition.hh ast/functiondefinition.hh ast/node.hh ast/rule.hh
     ast/reaction.hh ast/scope.hh ast/variabledefinition.hh ast/constraint.hh ast/module.hh
     ast/evaluate.hh ast/unitdefinition.hh ast/species.hh ast/compartment.hh ast/parameter.hh
-    ast/model.hh ast/converter.hh)
+    ast/model.hh ast/converter.hh ast/visitor.hh)
 
 SET(libina_ast_trafo_SOURCES
     ast/trafo/walker.cc ast/trafo/pass.cc ast/trafo/constantfolder.cc ast/trafo/dump.cc

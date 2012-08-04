@@ -249,3 +249,21 @@ Scope::dump(std::ostream &str)
   }
   str << "}" << std::endl;
 }
+
+
+void
+Scope::accept(Ast::Visitor &visitor) const
+{
+  for (Scope::const_iterator iter = this->begin(); iter != this->end(); iter++) {
+    (*iter)->accept(visitor);
+  }
+}
+
+
+void
+Scope::apply(Ast::Operator &op)
+{
+  for (Scope::iterator iter = this->begin(); iter != this->end(); iter++) {
+    (*iter)->apply(op);
+  }
+}

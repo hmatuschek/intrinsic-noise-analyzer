@@ -3,6 +3,7 @@
 
 #include <map>
 #include <iostream>
+#include "visitor.hh"
 
 
 namespace Fluc {
@@ -19,9 +20,7 @@ namespace Ast {
 class Node
 {
 public:
-  /**
-   * Specifies all node types.
-   */
+  /** Specifies all node types. */
   typedef enum {
     ALGEBRAIC_CONSTRAINT,   ///< Node is an algebraic constraint.
     UNIT_DEFINITION,        ///< Node is an unit-defintion.
@@ -36,6 +35,10 @@ public:
     RATE_RULE               ///< Node is a rate rule.
   } NodeType;
 
+  /** Visitor class for all nodes. */
+  class Visitor { public: virtual void visit(const Node *node) = 0; };
+  /** Operator class for all nodes. */
+  class Operator { public: virtual void act(Node *node) = 0; };
 
 protected:
   /**
@@ -64,17 +67,16 @@ public:
    */
   virtual NodeType getNodeType();
 
-  /**
-   * A pure-virtual method that has to be implemented by sub-sclasses.
-   *
-   * This method shoud dump a simple string representation of the instance into the given stream.
-   */
+  /** A pure-virtual method that has to be implemented by sub-sclasses.
+   * This method shoud dump a simple string representation of the instance into the given stream. */
   virtual void dump(std::ostream &str) = 0;
 
+  /** Handles a vistor. */
+  virtual void accept(Ast::Visitor &visitor) const;
 
-  /*
-   * A collection of helper functions to test for AST node types.
-   */
+  /** Handles an operator. */
+  virtual void apply(Ast::Operator &op);
+
 public:
   /**
    * Retunrs true, if the given node is a constraint.

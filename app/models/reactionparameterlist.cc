@@ -115,7 +115,6 @@ ReactionParameterList::setData(const QModelIndex &index, const QVariant &value, 
     std::string expression = value.toString().toStdString();
     // parse expression
     GiNaC::ex new_value;
-    /// @bug Expression of local paramters are only resolved within the scope of the kinetic law.
     try { new_value = Fluc::Parser::Expr::parseExpression(expression, _kinetic_law); }
     catch (Fluc::Exception &err) {
       Fluc::Utils::Message msg = LOG_MESSAGE(Fluc::Utils::Message::INFO);

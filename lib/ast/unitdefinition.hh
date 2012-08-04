@@ -323,6 +323,8 @@ public:
   static Unit dimensionless();
 };
 
+
+
 /**
  * This class defines a unit as a product of scaled base units.
  *
@@ -330,37 +332,37 @@ public:
  */
 class UnitDefinition : public Definition
 {
+public:
+  /** Visitor class for unit definitions. */
+  class Visitor { public: virtual void visit(const UnitDefinition *unit) = 0; };
+  /** Operator class for unit definitions. */
+  class Operator { public: virtual void act(UnitDefinition *unit) = 0; };
+
 protected:
-  /**
-   * Holds the unit being defined.
-   */
+  /** Holds the unit being defined. */
   Unit unit;
 
 public:
-  /**
-   * Constructs a unit definition from scaled base units.
-   */
+  /** Constructs a unit definition from scaled base units. */
   UnitDefinition(const std::string &identifier, std::list<ScaledBaseUnit> units);
 
-  /**
-   * Constructs a unit definition from a unit.
-   */
+  /** Constructs a unit definition from a unit. */
   UnitDefinition(const std::string &identifier, const Unit &unit);
 
-  /**
-   * Returns true, if the unit is a linear scaled variant of the given base-unit.
-   */
+  /** Returns true, if the unit is a linear scaled variant of the given base-unit. */
   bool isVariantOf(ScaledBaseUnit::BaseUnit baseUnit);
 
-  /**
-   * Returns the unit being defined.
-   */
+  /** Returns the unit being defined. */
   const Unit &getUnit() const;
 
-  /**
-   * Simply dumps the unit-definition.
-   */
+  /** Simply dumps the unit-definition. */
   virtual void dump(std::ostream &str);
+
+  /** Handles a visitor for the unit definition. */
+  virtual void accept(Ast::Visitor &visitor) const;
+
+  /** Applies an operator on the unit definition. */
+  virtual void apply(Ast::Operator &op);
 };
 
 

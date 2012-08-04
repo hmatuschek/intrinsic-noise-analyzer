@@ -146,6 +146,12 @@ public:
 
   /** Dumps a simple string representation of the scope into the given stream. */
   virtual void dump(std::ostream &str);
+
+  /** Handles a visitor for the scope (forward for all definitions) .*/
+  virtual void accept(Ast::Visitor &visitor) const ;
+
+  /** Applies an operator on all definitinos of the scope. */
+  virtual void apply(Ast::Operator &op);
 };
 
 

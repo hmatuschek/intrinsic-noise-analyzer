@@ -47,6 +47,27 @@ UnitDefinition::dump(std::ostream &str)
 }
 
 
+void
+UnitDefinition::accept(Ast::Visitor &visitor) const
+{
+  if (UnitDefinition::Visitor *unit_vis = dynamic_cast<UnitDefinition::Visitor *>(&visitor)) {
+    unit_vis->visit(this);
+  } else {
+    Definition::accept(visitor);
+  }
+}
+
+
+void
+UnitDefinition::apply(Ast::Operator &op)
+{
+  if (UnitDefinition::Operator *unit_op = dynamic_cast<UnitDefinition::Operator *>(&op)) {
+    unit_op->act(this);
+  } else {
+    Definition::apply(op);
+  }
+}
+
 
 
 /* ********************************************************************************************* *

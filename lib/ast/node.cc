@@ -1,8 +1,12 @@
 #include "node.hh"
+#include "visitor.hh"
 
 using namespace Fluc::Ast;
 
 
+/* ********************************************************************************************* *
+ * Implementation of Ast::Node:
+ * ********************************************************************************************* */
 Node::Node(Node::NodeType node_type)
   :  node_type(node_type)
 {
@@ -12,6 +16,23 @@ Node::Node(Node::NodeType node_type)
 Node::~Node()
 {
   // Done.
+}
+
+
+void
+Node::accept(Ast::Visitor &visitor) const {
+  // If visitor implements a visitor for Ast::Node instances:
+  if (Ast::Node::Visitor *node_vis = dynamic_cast<Ast::Node::Visitor *>(&visitor)) {
+    node_vis->visit(this);
+  }
+}
+
+void
+Node::apply(Ast::Operator &op) {
+  // If operator implements an operator for Ast::Node instances:
+  if (Ast::Node::Operator *node_op = dynamic_cast<Ast::Node::Operator *>(&op)) {
+    node_op->act(this);
+  }
 }
 
 

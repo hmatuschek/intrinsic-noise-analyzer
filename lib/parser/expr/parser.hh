@@ -12,6 +12,8 @@ namespace Expr {
  * Represents an expression context for symbol resolution.
  *
  * This class is used by all assemblers to perfrom symbol resolution in nested contexts.
+ *
+ * @deprecated This class is not needed anymore, as scopes are nested.
  */
 class Context {
 protected:

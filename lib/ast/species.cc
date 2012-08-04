@@ -54,15 +54,33 @@ Species::Species(const std::string &id, const GiNaC::ex &init_val, const Unit &u
 
 
 Compartment *
-Species::getCompartment()
-{
+Species::getCompartment() {
   return this->compartment;
 }
 
 bool
-Species::hasOnlySubstanceUnits()
-{
+Species::hasOnlySubstanceUnits() {
  return this->substance_units;
 }
 
 
+void
+Species::accept(Ast::Visitor &visitor) const
+{
+  if (Species::Visitor *var_vis = dynamic_cast<Species::Visitor *>(&visitor)) {
+    var_vis->visit(this);
+  } else {
+    VariableDefinition::accept(visitor);
+  }
+}
+
+
+void
+Species::apply(Ast::Operator &op)
+{
+  if (Species::Operator *var_op = dynamic_cast<Species::Operator *>(&op)) {
+    var_op->act(this);
+  } else {
+    VariableDefinition::apply(op);
+  }
+}

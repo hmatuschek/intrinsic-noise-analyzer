@@ -19,14 +19,17 @@ namespace Ast {
  */
 class Species : public VariableDefinition
 {
+public:
+  /** Visitor class for species. */
+  class Visitor { public: virtual void visit(const Species *var) = 0; };
+  /** Operator class for species. */
+  class Operator { public: virtual void act(Species *var) = 0; };
+
 protected:
-  /**
-   * Holds a weak reference to the compartment, the species lives in.
-   */
+  /** Holds a weak reference to the compartment, the species lives in. */
   Compartment *compartment;
 
-  /**
-   * Boolean which declares substrate units.
+  /** Boolean which declares substrate units.
    * @todo Is this flag actually needed? We handle that with units aren't we?
    */
   bool substance_units;
@@ -56,15 +59,17 @@ public:
   Species(const std::string &id, const GiNaC::ex &init_val, const Unit &unit, bool only_substance_units,
           Compartment *compartment, const std::string &name, bool is_const);
 
-  /**
-   * Returns the compartment, the species lives in.
-   */
+  /** Returns the compartment, the species lives in. */
   Compartment *getCompartment();
 
-  /**
-   * Returns whether the species has been defined in units of substance.
-   */
+  /** Returns whether the species has been defined in units of substance. */
   bool hasOnlySubstanceUnits();
+
+  /** Handles a visitor for the species. */
+  virtual void accept(Ast::Visitor &visitor) const;
+
+  /** Applies an operator on the species. */
+  virtual void apply(Ast::Operator &op);
 };
 
 

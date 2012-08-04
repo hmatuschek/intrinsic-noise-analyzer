@@ -24,6 +24,12 @@ namespace Ast {
  */
 class KineticLaw : public Node, public Scope
 {
+public:
+  /** Visitor class for kinetic laws. */
+  class Visitor { public: virtual void visit(const KineticLaw *law) = 0; };
+  /** Operator class for kinetic laws. */
+  class Operator { public: virtual void act(KineticLaw *law) = 0; };
+
 protected:
   /**
    * Holds the expression of the kinetic law.
@@ -81,6 +87,11 @@ public:
    * Dumps a string representation of the kinetic law into the given stream.
    */
   virtual void dump(std::ostream &str);
+
+  /** Handles a visitor. */
+  virtual void accept(Ast::Visitor &visitor) const;
+  /** Applies an operator. */
+  virtual void apply(Ast::Operator &op);
 };
 
 
@@ -102,6 +113,12 @@ public:
    * Defines the iterator over reaction modifier.
    */
   typedef std::set<Species *>::iterator mod_iterator;
+
+  /** Visitor class for reactions. */
+  class Visitor { public: virtual void visit(const Reaction *reac) = 0; };
+
+  /** Operator class for reactions. */
+  class Operator { public: virtual void act(Reaction *reac) = 0; };
 
 
 protected:
@@ -315,6 +332,12 @@ public:
    * Dumps a string representation of the reaction into the given stream.
    */
   virtual void dump(std::ostream &str);
+
+  /** Handles a visitor for the reaction. */
+  virtual void accept(Ast::Visitor &visitor) const;
+
+  /** Applies an operator on the reaction. */
+  virtual void apply(Ast::Operator &op);
 };
 
 
