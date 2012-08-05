@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created by COPASI version 4.7 (Build 34) on 2012-01-20 13:37 with libSBML version 4.2.0. -->
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" version="4">
+  <model id="FourSubunitEnzyme" name="4-Subunit enzyme with cooperative kinetics">
+    <listOfUnitDefinitions>
+      <unitDefinition id="per_second">
+        <listOfUnits>
+          <unit kind="second" exponent="-1"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="litre_per_mole_per_second">
+        <listOfUnits>
+          <unit kind="mole" exponent="-1"/>
+          <unit kind="litre"/>
+          <unit kind="second" exponent="-1"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="substance" name="substance">
+        <listOfUnits>
+          <unit kind="mole" scale="-6"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="volume" name="volume">
+        <listOfUnits>
+          <unit kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="compartment" name="compartment" size="1e-16"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="species_S" name="S" compartment="compartment" initialConcentration="0"/>
+      <species id="species_P" name="P" compartment="compartment" initialConcentration="0"/>
+      <species id="species_E" name="E" compartment="compartment" initialConcentration="1"/>
+      <species id="species_ES" name="ES" compartment="compartment" initialConcentration="0"/>
+      <species id="species_ES2" name="ES2" compartment="compartment" initialConcentration="0"/>
+      <species id="species_ES3" name="ES3" compartment="compartment" initialConcentration="0"/>
+      <species id="species_ES4" name="ES4" compartment="compartment" initialConcentration="0"/>
+    </listOfSpecies>
+    <listOfReactions>
+      <reaction id="input" name="input" reversible="false">
+        <listOfProducts>
+          <speciesReference species="species_S"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> kin </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="kin" name="kin" value="9"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="output" name="consumption" reversible="false">
+        <listOfReactants>
+          <speciesReference species="species_P"/>
+        </listOfReactants>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> kout </ci>
+              <ci> species_P </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="kout" name="kout" value="10"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="bind1" name="bind1" reversible="false">
+        <listOfReactants>
+          <speciesReference species="species_E"/>
+          <speciesReference species="species_S"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="species_ES"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> k1 </ci>
+              <ci> species_E </ci>
+              <ci> species_S </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k1" name="k1" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="bind2" name="bind2" reversible="false">
+        <listOfReactants>
+          <speciesReference species="species_ES"/>
+          <speciesReference species="species_S"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="species_ES2"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> k2 </ci>
+              <ci> species_ES </ci>
+              <ci> species_S </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k2" name="k2" value="10"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="bind3" name="bind3" reversible="false">
+        <listOfReactants>
+          <speciesReference species="species_ES2"/>
+          <speciesReference species="species_S"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="species_ES3"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> k3 </ci>
+              <ci> species_ES2 </ci>
+              <ci> species_S </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k3" name="k3" value="100"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="bind4" name="bind4" reversible="false">
+        <listOfReactants>
+          <speciesReference species="species_ES3"/>
+          <speciesReference species="species_S"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="species_ES4"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> k4 </ci>
+              <ci> species_ES3 </ci>
+              <ci> species_S </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k4" name="k4" value="1000"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="unbind1" name="unbind1" reversible="false">
+        <listOfReactants>
+          <speciesReference species="species_ES"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="species_S"/>
+          <speciesReference species="species_E"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> km1 </ci>
+              <ci> species_ES </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="km1" name="km1" value="10"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="unbind2" name="unbind2" reversible="false">
+        <listOfReactants>
+          <speciesReference species="species_ES2"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="species_ES"/>
+          <speciesReference species="species_S"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> km2 </ci>
+              <ci> species_ES2 </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="km2" name="km2" value="10"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="unbind3" name="unbind3" reversible="false">
+        <listOfReactants>
+          <speciesReference species="species_ES3"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="species_ES2"/>
+          <speciesReference species="species_S"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> km3 </ci>
+              <ci> species_ES3 </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="km3" name="km3" value="10"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="unbind4" name="unbind4" reversible="false">
+        <listOfReactants>
+          <speciesReference species="species_ES4"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="species_ES3"/>
+          <speciesReference species="species_S"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> km4 </ci>
+              <ci> species_ES4 </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="km4" name="km4" value="10"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="vcat1" name="vcat1" reversible="false">
+        <listOfReactants>
+          <speciesReference species="species_ES"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="species_E"/>
+          <speciesReference species="species_P"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> kcat </ci>
+              <ci> species_ES </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="kcat" name="kcat" value="10"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="vcat2" name="vcat2" reversible="false">
+        <listOfReactants>
+          <speciesReference species="species_ES2"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="species_ES"/>
+          <speciesReference species="species_P"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> kcat </ci>
+              <ci> species_ES2 </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="kcat" name="kcat" value="10"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="vcat3" name="vcat3" reversible="false">
+        <listOfReactants>
+          <speciesReference species="species_ES3"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="species_ES2"/>
+          <speciesReference species="species_P"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> kcat </ci>
+              <ci> species_ES3 </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="kcat" name="kcat" value="10"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="vcat4" name="vcat4" reversible="false">
+        <listOfReactants>
+          <speciesReference species="species_ES4"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="species_ES3"/>
+          <speciesReference species="species_P"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> kcat </ci>
+              <ci> species_ES4 </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="kcat" name="kcat" value="10"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>
