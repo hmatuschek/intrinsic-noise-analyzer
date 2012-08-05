@@ -109,6 +109,74 @@ public:
   /** Checks if the given model has an algebraic constraint. */
   NoAlgebraicConstraintMixin(const Ast::Model &model);
 };
+
+
+/** This class checks if there are reversible reactions.
+ * @ingroup trafo */
+class NoReversibleReactionAssertion :
+    public Ast::Visitor, public Ast::Reaction::Visitor
+{
+public:
+  /** This method checks if the reaction is reversible. */
+  virtual void visit(const Ast::Reaction *reac);
+
+public:
+  /** This method checks if the given model has a reversible reaction. */
+  static void apply(const Ast::Model &model);
+};
+
+
+/** This class implements the @c NoReversibleReactionAssertion as a model mixin.
+ * @ingroup trafo */
+class NoReversibleReactionMixin
+{
+public:
+  /** Constructor, throws a @c SBMLFeatureNotSupported exception if there is a reaction defined as
+   * reversible. */
+  NoReversibleReactionMixin(const Ast::Model &model);
+};
+
+
+/** This class checks if all paramters are defined constant.
+ * @ingroup trafo */
+class ConstParameterAssertion :
+    public Ast::Visitor, public Ast::Parameter::Visitor
+{
+public:
+  /** Checks if the paramter is defined as constant. */
+  virtual void visit(const Ast::Parameter *param);
+
+public:
+  /** Applies the constraint on the given model. */
+  static void apply(const Ast::Model &model);
+};
+
+
+/** This class implements the @c ConstParameterAssertion as a model mixin.
+ * @ingroup trafo */
+class ConstParamteterMixin
+{
+public:
+  /** Throws an exception if there is a paramter defined, that is not constant. */
+  ConstParamteterMixin(const Ast::Model &model);
+};
+
+
+/** This class checks if all compartments are defined as constant.
+ * @ingroup trafo */
+class ConstCompartmentAssertion :
+    public Ast::Visitor, public Ast::Compartment::Visitor
+{
+public:
+  /** Checks if the given compartment is constant. */
+  virtual void visit(const Ast::Compartment *comp);
+
+public:
+  /** Applies the assertion on the given model. */
+  static void apply(const Ast::Model &model);
+};
+
+
 }
 }
 
