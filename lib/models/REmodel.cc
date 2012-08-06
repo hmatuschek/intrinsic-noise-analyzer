@@ -4,7 +4,7 @@
 using namespace Fluc;
 using namespace Fluc::Models;
 
-REmodel::REmodel(libsbml::Model *model)
+/* REmodel::REmodel(libsbml::Model *model)
   : SSEBaseModel(model),
     Link0CMatrixNumeric(numDepSpecies(), numIndSpecies()),
     LinkCMatrixNumeric(numSpecies(), numIndSpecies()),
@@ -13,7 +13,7 @@ REmodel::REmodel(libsbml::Model *model)
     interpreter(*this)
 {
   postConstructor();
-}
+} */
 
 
 REmodel::REmodel(const Ast::Model &model)

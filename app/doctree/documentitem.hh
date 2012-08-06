@@ -2,7 +2,6 @@
 #define __FLUC_GUI_DOCUMENT_WRAPPER_HH__
 
 #include <QObject>
-#include <sbml/SBMLTypes.h>
 
 #include "documenttreeitem.hh"
 #include "ast/model.hh"
@@ -31,13 +30,6 @@ protected:
    * Holds the path to the SBML file, used to identify the document.
    */
   QString file_path;
-
-  /**
-   * Holds an instance of the parsed SBML model.
-   *
-   * @deprecated Use the Ast::Model or Models::BaseModel instead.
-   */
-  libsbml::SBMLDocument *document;
 
   /**
    * Holds the instance of the model-wrapper, representing the SBML model for the application.
@@ -69,21 +61,14 @@ public:
   ~DocumentItem();
 
   /**
-   * Returns the SBML model of the SBML document.
-   *
-   * @deprecated Will be removed soon.
+   * Returns the @c Ast::Model instance associated with this document.
    */
-  libsbml::Model *getSBMLModel();
+  Fluc::Ast::Model &getModel();
 
   /**
    * Returns the @c Ast::Model instance associated with this document.
    */
-  Fluc::Ast::Model *getModel();
-
-  /**
-   * Returns the @c Ast::Model instance associated with this document.
-   */
-  const Fluc::Ast::Model *getModel() const;
+  const Fluc::Ast::Model &getModel() const;
 
   /**
    * Adds a task to the document.

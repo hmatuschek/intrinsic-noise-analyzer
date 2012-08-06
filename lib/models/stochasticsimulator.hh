@@ -177,11 +177,15 @@ protected:
 
 
 public:
+  /*
+  StochasticSimulator(libsbml::Model *model, int ensembleSize, int seed, size_t num_threads=OpenMP::getMaxThreads());
+  */
+
   /**
    * Is initialized with a model, the number of realization @c ensembleSize and a seed for the
    * random number generator
    **/
-  StochasticSimulator(libsbml::Model *model, int ensembleSize, int seed, size_t num_threads=OpenMP::getMaxThreads());
+  StochasticSimulator(const Ast::Model &model, int ensembleSize, int seed, size_t num_threads=OpenMP::getMaxThreads());
 
   /**
   * Gives number of threads used for OpenMP parallelism

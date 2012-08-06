@@ -26,7 +26,7 @@ LNASteadyStateTask::Config::setModelDocument(DocumentItem *document)
 {
   ModelSelectionTaskConfig::setModelDocument(document);
   // Construct LNA model from SBML model associated with the selected document
-  this->model = new Fluc::Models::IOSmodel(document->getSBMLModel());
+  this->model = new Fluc::Models::IOSmodel(document->getModel());
 }
 
 Fluc::Ast::Model *

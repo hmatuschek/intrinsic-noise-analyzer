@@ -41,6 +41,7 @@
 #include "ast/ast.hh"
 #include "models/models.hh"
 #include "ode/ode.hh"
+#include "parser/parser.hh"
 
 #include "utils/cputime.hh"
 #include "exception.hh"

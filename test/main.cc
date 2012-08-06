@@ -51,8 +51,8 @@ int main(int argc, char *argv[])
   }
 
   // Assemble logger:
-  Utils::Logger::get().addHandler(
-        new Utils::TextMessageHandler(std::cerr, Utils::Message::INFO));
+  //Utils::Logger::get().addHandler(
+  //      new Utils::TextMessageHandler(std::cerr, Utils::Message::INFO));
 
   // Construct test-runner
   TestRunner runner(std::cout);
@@ -68,8 +68,8 @@ int main(int argc, char *argv[])
     runner.addSuite(ODETest::suite());
   if (0 == skipped_tests.count("ModelCopy"))
     runner.addSuite(ModelCopyTest::suite());
-  if (0 == skipped_tests.count("LNA"))
-    runner.addSuite(LNATest::suite());
+  //if (0 == skipped_tests.count("LNA"))
+  //  runner.addSuite(LNATest::suite());
   if (0 == skipped_tests.count("MersenneTwister"))
     runner.addSuite(MersenneTwisterTest::suite());
   if (0 == skipped_tests.count("Regression"))

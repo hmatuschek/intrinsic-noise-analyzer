@@ -236,6 +236,33 @@ public:
 };
 
 
+/**
+ * Will be thrown if the export of an model failed.
+ */
+class ExportError: public Exception
+{
+public:
+  /**
+   * Constructs an empty exception message.
+   */
+  ExportError();
+
+  /**
+   * Constructs an exception with given message.
+   */
+  ExportError(const std::string &message);
+
+  /**
+   * Copyconstructor.
+   */
+  ExportError(const ExportError &other);
+
+  /**
+   * Destructor.
+   */
+  virtual ~ExportError() throw();
+};
+
 
 /**
  * This exception will be thrown if the Ast::Assembler instance finds a SBML element, that is

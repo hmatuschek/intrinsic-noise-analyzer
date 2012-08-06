@@ -215,7 +215,7 @@ LNASteadyStateSummaryPage::initializePage()
   LNASteadyStateWizard *wizard = static_cast<LNASteadyStateWizard *>(this->wizard());
   LNASteadyStateTask::Config &config = wizard->getConfigCast<LNASteadyStateTask::Config>();
 
-  this->model_name->setText(config.getModelDocument()->getSBMLModel()->getName().c_str());
+  this->model_name->setText(config.getModelDocument()->getModel().getName().c_str());
   QStringList species(config.getSelectedSpecies());
   this->species->setText(species.join(", "));
 

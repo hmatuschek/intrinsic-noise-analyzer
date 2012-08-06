@@ -12,30 +12,9 @@ using namespace Fluc;
 
 
 DocumentItem::DocumentItem(const QString &path, QObject *parent)
-  : QObject(parent), DocumentTreeItem(), file_path(path), document(0)
+  : QObject(parent), DocumentTreeItem(), file_path(path)
 {
-  // Read SBML document from file:
-  this->document = libsbml::readSBMLFromFile(path.toStdString().c_str());
-
-  // Check for errors:
-  if (0 != this->document->getNumErrors())
-  {
-    SBMLParserError err;
-    err << "Can not parse SBML file " << path.toStdString()
-        << ": " << this->document->getError(0)->getMessage();
-    throw err;
-  }
-
-  // Convert to l2v4:
-  if (! this->document->setLevelAndVersion(2,4))
-  {
-    SBMLParserError err;
-    err << "The model in " << path.toStdString()
-        << " is not compatible with SBML leven 2 version 4!";
-    throw err;
-  }
-
-  this->model = new ModelItem(this->document, this);
+  this->model = new ModelItem(file_path, this);
   this->model->setTreeParent(this);
 
   this->analyses = new AnalysesItem(this);
@@ -46,7 +25,7 @@ DocumentItem::DocumentItem(const QString &path, QObject *parent)
 
   // Construct label:
   this->label
-      = QString("%1 (%2)").arg(this->getModel()->getName().c_str()).arg(this->file_path);
+      = QString("%1 (%2)").arg(this->getModel().getName().c_str()).arg(this->file_path);
 
   // Construct context menu:
   this->closeAct = new QAction(tr("close document"), this);
@@ -60,29 +39,19 @@ DocumentItem::DocumentItem(const QString &path, QObject *parent)
 
 DocumentItem::~DocumentItem()
 {
-  // Free the SBML document.
-  delete this->document;
-
   // mark Context menu for deletion:
   this->contextMenu->deleteLater();
 }
 
 
-libsbml::Model *
-DocumentItem::getSBMLModel()
-{
-  return this->document->getModel();
-}
-
-
-Fluc::Ast::Model *
+Fluc::Ast::Model &
 DocumentItem::getModel()
 {
   return this->model->getModel();
 }
 
 
-const Fluc::Ast::Model *
+const Fluc::Ast::Model &
 DocumentItem::getModel() const
 {
   return this->model->getModel();

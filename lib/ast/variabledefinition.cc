@@ -41,21 +41,21 @@ VariableDefinition::~VariableDefinition()
 
 
 bool
-VariableDefinition::isConst()
+VariableDefinition::isConst() const
 {
   return this->is_const;
 }
 
 
 bool
-VariableDefinition::hasValue()
+VariableDefinition::hasValue() const
 {
   return this->has_value;
 }
 
 
 GiNaC::ex
-VariableDefinition::getValue()
+VariableDefinition::getValue() const
 {
   return this->value;
 }
@@ -76,15 +76,19 @@ VariableDefinition::getSymbol() const
 
 
 bool
-VariableDefinition::hasRule()
+VariableDefinition::hasRule() const
 {
   return 0 != this->rule;
 }
 
 
 Rule *
-VariableDefinition::getRule()
-{
+VariableDefinition::getRule() {
+  return this->rule;
+}
+
+const Rule *
+VariableDefinition::getRule() const {
   return this->rule;
 }
 
@@ -120,22 +124,41 @@ VariableDefinition::setUnit(const Unit &unit)
 void
 VariableDefinition::dump(std::ostream &str)
 {
-  if (this->is_const)
-  {
+  if (this->is_const) {
     str << "const " << this->getIdentifier();
-  }
-  else
-  {
+  } else {
     str << "var " << this->getIdentifier();
   }
 
-  if (this->hasValue())
-  {
+  if (this->hasValue()) {
     str << " = " << this->value;
   }
 
-  if (this->hasRule())
-  {
+  if (this->hasRule()) {
     this->rule->dump(str);
+  }
+}
+
+
+void
+VariableDefinition::accept(Ast::Visitor &visitor) const
+{
+  if (VariableDefinition::Visitor *var_vis = dynamic_cast<VariableDefinition::Visitor *>(&visitor)) {
+    var_vis->visit(this);
+  } else {
+    if (hasRule()) {rule->accept(visitor); }
+    Definition::accept(visitor);
+  }
+}
+
+
+void
+VariableDefinition::apply(Ast::Operator &op)
+{
+  if (VariableDefinition::Operator *var_op = dynamic_cast<VariableDefinition::Operator *>(&op)) {
+    var_op->act(this);
+  } else {
+    if (hasRule()) { rule->apply(op); }
+    Definition::apply(op);
   }
 }

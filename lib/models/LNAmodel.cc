@@ -4,11 +4,11 @@
 using namespace Fluc;
 using namespace Fluc::Models;
 
-LNAmodel::LNAmodel(libsbml::Model *model)
+/* LNAmodel::LNAmodel(libsbml::Model *model)
   : REmodel(model)
 {
   postConstructor();
-}
+} */
 
 
 LNAmodel::LNAmodel(const Ast::Model &model)

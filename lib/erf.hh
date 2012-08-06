@@ -3,10 +3,6 @@
 
 #include <cmath>
 
-/**
- * @defgroup math Mathematical Utilities
- */
-
 
 namespace Fluc
 {

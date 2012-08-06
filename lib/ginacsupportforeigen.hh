@@ -63,7 +63,6 @@ namespace Eigen {
 // Some typedefs here
 namespace Eigen{
 
-
     /**
      * matrix of Ginac expressions.
      */

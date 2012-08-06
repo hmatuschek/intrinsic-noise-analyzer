@@ -16,9 +16,7 @@ namespace Ast {
 class Compartment : public VariableDefinition
 {
 public:
-  /**
-   * Defines the possible spacial dimensions of a compartment.
-   */
+  /** Defines the possible spacial dimensions of a compartment. */
   typedef enum {
     POINT,         /// < dimension 0
     LINE,          /// < dimension 1
@@ -26,11 +24,14 @@ public:
     VOLUME         /// < dimension 3
   } SpatialDimension;
 
+  /** Visitor class for compartments. */
+  class Visitor { public: virtual void visit(const Compartment *comp) = 0; };
+
+  /** Operator class for compartments. */
+  class Operator { public: virtual void act(Compartment *comp) = 0; };
 
 protected:
-  /**
-   * Holds the spatial dimension of the compartment.
-   */
+  /** Holds the spatial dimension of the compartment. */
   SpatialDimension dimension;
 
 public:
@@ -58,10 +59,15 @@ public:
   Compartment(const std::string &id, const GiNaC::ex &init_val, const Unit &unit,
               SpatialDimension dim, bool is_const=false);
 
-  /**
-   * Returns the spacial dimension of the compartment.
-   */
+  /** Returns the spacial dimension of the compartment. */
   SpatialDimension getDimension() const;
+
+  /** Handles a visitor for the compartment. */
+  virtual void accept(Ast::Visitor &visitor) const;
+
+  /** Applies an operator on the compartment. */
+  virtual void apply(Ast::Operator &op);
+
 };
 
 

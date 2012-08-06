@@ -204,7 +204,7 @@ SSASummaryPage::initializePage()
   QStringList species(config.getSelectedSpecies());
   this->selected_species->setText(species.join(", "));
 
-  this->document->setText(QString("%1").arg(config.getModelDocument()->getSBMLModel()->getName().c_str()));
+  this->document->setText(QString("%1").arg(config.getModelDocument()->getModel().getName().c_str()));
   this->ensemble_size->setText(QString("%1").arg(config.getEnsembleSize()));
   this->final_time->setText(QString("%1").arg(config.getFinalTime()));
   this->num_samples->setText(QString("%1").arg(config.getSteps()));
@@ -241,13 +241,13 @@ SSASummaryPage::validatePage()
       switch (config.getMethod()) {
       case SSATaskConfig::DIRECT_SSA:
         simulator = new Models::GenericGillespieSSA< Eval::direct::Engine<Eigen::VectorXd> >(
-              config.getModelDocument()->getSBMLModel(), config.getEnsembleSize(), time(0),
+              config.getModelDocument()->getModel(), config.getEnsembleSize(), time(0),
               config.getOptLevel(), config.getNumEvalThreads());
         break;
 
       case SSATaskConfig::OPTIMIZED_SSA:
         simulator = new Models::GenericOptimizedSSA< Eval::direct::Engine<Eigen::VectorXd> >(
-              config.getModelDocument()->getSBMLModel(), config.getEnsembleSize(), time(0),
+              config.getModelDocument()->getModel(), config.getEnsembleSize(), time(0),
               config.getOptLevel(), config.getNumEvalThreads());
         break;
       } break;
@@ -257,13 +257,13 @@ SSASummaryPage::validatePage()
       switch (config.getMethod()) {
       case SSATaskConfig::DIRECT_SSA:
         simulator = new Models::GenericGillespieSSA< Eval::bci::Engine<Eigen::VectorXd> >(
-              config.getModelDocument()->getSBMLModel(), config.getEnsembleSize(), time(0),
+              config.getModelDocument()->getModel(), config.getEnsembleSize(), time(0),
               config.getOptLevel(), config.getNumEvalThreads());
         break;
 
       case SSATaskConfig::OPTIMIZED_SSA:
         simulator = new Models::GenericOptimizedSSA< Eval::bci::Engine<Eigen::VectorXd> >(
-              config.getModelDocument()->getSBMLModel(), config.getEnsembleSize(), time(0),
+              config.getModelDocument()->getModel(), config.getEnsembleSize(), time(0),
               config.getOptLevel(), config.getNumEvalThreads());
         break;
       } break;
@@ -272,13 +272,13 @@ SSASummaryPage::validatePage()
       switch (config.getMethod()) {
       case SSATaskConfig::DIRECT_SSA:
         simulator = new Models::GenericGillespieSSA< Eval::jit::Engine<Eigen::VectorXd> >(
-              config.getModelDocument()->getSBMLModel(), config.getEnsembleSize(), time(0),
+              config.getModelDocument()->getModel(), config.getEnsembleSize(), time(0),
               config.getOptLevel(), config.getNumEvalThreads());
         break;
 
       case SSATaskConfig::OPTIMIZED_SSA:
         simulator = new Models::GenericOptimizedSSA< Eval::jit::Engine<Eigen::VectorXd> >(
-              config.getModelDocument()->getSBMLModel(), config.getEnsembleSize(), time(0),
+              config.getModelDocument()->getModel(), config.getEnsembleSize(), time(0),
               config.getOptLevel(), config.getNumEvalThreads());
         break;
       } break;

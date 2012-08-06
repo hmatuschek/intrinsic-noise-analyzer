@@ -326,8 +326,7 @@ TestSuite::TestSuite(const std::string &desc)
 TestSuite::~TestSuite()
 {
   for(std::list<TestCallerInterface *>::iterator item = this->tests.begin();
-      item != this->tests.end(); item++)
-  {
+      item != this->tests.end(); item++) {
     delete *item;
   }
 }

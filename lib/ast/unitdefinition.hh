@@ -78,7 +78,7 @@ protected:
   /**
    * Holds the exponent of the unit.
    */
-  double exponent;
+  int exponent;
 
 
 public:
@@ -87,7 +87,7 @@ public:
    *
    * \f[ u = \left(multiplier\cdot 10^{scale}\cdot u_b\right)^{exponent} \f]
    */
-  ScaledBaseUnit(BaseUnit unit, double multiplier, int scale, double exponent);
+  ScaledBaseUnit(BaseUnit unit, double multiplier, int scale, int exponent);
 
   /**
    * Copy constructor.
@@ -112,7 +112,7 @@ public:
   /**
    * Retunrs the exponent.
    */
-  double getExponent() const;
+  int getExponent() const;
 
   /**
    * Returns the base-unit.
@@ -185,6 +185,9 @@ public:
  */
 class Unit
 {
+public:
+  typedef std::map<ScaledBaseUnit::BaseUnit, int>::const_iterator iterator;
+
 protected:
   /**
    * The common multiplier of all scaled base-units.
@@ -199,15 +202,15 @@ protected:
   /**
    * this list represents the product of scaled base-units, that build the actual unit.
    */
-  std::map<ScaledBaseUnit::BaseUnit, double> units;
+  std::map<ScaledBaseUnit::BaseUnit, int> units;
 
 
 protected:
   /**
    * Hidden constructor. Avoids direct instantiation.
    */
-  Unit(const std::map<ScaledBaseUnit::BaseUnit, double> &units,
-       double common_multiplier, double common_scale);
+  Unit(const std::map<ScaledBaseUnit::BaseUnit, int> &units,
+       double common_multiplier, int common_scale);
 
 
 public:
@@ -255,12 +258,12 @@ public:
   /**
    * Returns true, if the unit is a scaled variant of the given base-unit with given exponent
    */
-  bool isVariantOf(ScaledBaseUnit::BaseUnit baseUnit, double expo = 1.0) const;
+  bool isVariantOf(ScaledBaseUnit::BaseUnit baseUnit, int expo = 1.0) const;
 
   /**
    * Retunrs ture, if the unit contains a variant of the given base-unit with given exponent.
    */
-  bool hasVariantOf(ScaledBaseUnit::BaseUnit baseUnit, double expo = 1.0) const;
+  bool hasVariantOf(ScaledBaseUnit::BaseUnit baseUnit, int expo = 1.0) const;
 
   /**
    * Retruns true, if the unit is a linear scaled substance unit.
@@ -288,6 +291,9 @@ public:
    */
   bool isDimensionless() const;
 
+  /** Retunrs true if the unit is dimensionless, has multiplier 1 and scale 0. */
+  bool isExactlyDimensionless() const;
+
   /**
    * Returns the unit as a scaled base unit.
    *
@@ -295,6 +301,9 @@ public:
    * single scaled base unit. Otherwise it throws a @c InternalError exception.
    */
   ScaledBaseUnit asScaledBaseUnit() const;
+
+  iterator begin() const;
+  iterator end() const;
 
   /**
    * Implements simple unit manipulations.
@@ -314,6 +323,8 @@ public:
   static Unit dimensionless();
 };
 
+
+
 /**
  * This class defines a unit as a product of scaled base units.
  *
@@ -321,37 +332,37 @@ public:
  */
 class UnitDefinition : public Definition
 {
+public:
+  /** Visitor class for unit definitions. */
+  class Visitor { public: virtual void visit(const UnitDefinition *unit) = 0; };
+  /** Operator class for unit definitions. */
+  class Operator { public: virtual void act(UnitDefinition *unit) = 0; };
+
 protected:
-  /**
-   * Holds the unit being defined.
-   */
+  /** Holds the unit being defined. */
   Unit unit;
 
 public:
-  /**
-   * Constructs a unit definition from scaled base units.
-   */
+  /** Constructs a unit definition from scaled base units. */
   UnitDefinition(const std::string &identifier, std::list<ScaledBaseUnit> units);
 
-  /**
-   * Constructs a unit definition from a unit.
-   */
+  /** Constructs a unit definition from a unit. */
   UnitDefinition(const std::string &identifier, const Unit &unit);
 
-  /**
-   * Returns true, if the unit is a linear scaled variant of the given base-unit.
-   */
+  /** Returns true, if the unit is a linear scaled variant of the given base-unit. */
   bool isVariantOf(ScaledBaseUnit::BaseUnit baseUnit);
 
-  /**
-   * Returns the unit being defined.
-   */
+  /** Returns the unit being defined. */
   const Unit &getUnit() const;
 
-  /**
-   * Simply dumps the unit-definition.
-   */
+  /** Simply dumps the unit-definition. */
   virtual void dump(std::ostream &str);
+
+  /** Handles a visitor for the unit definition. */
+  virtual void accept(Ast::Visitor &visitor) const;
+
+  /** Applies an operator on the unit definition. */
+  virtual void apply(Ast::Operator &op);
 };
 
 

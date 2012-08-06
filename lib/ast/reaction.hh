@@ -24,6 +24,12 @@ namespace Ast {
  */
 class KineticLaw : public Node, public Scope
 {
+public:
+  /** Visitor class for kinetic laws. */
+  class Visitor { public: virtual void visit(const KineticLaw *law) = 0; };
+  /** Operator class for kinetic laws. */
+  class Operator { public: virtual void act(KineticLaw *law) = 0; };
+
 protected:
   /**
    * Holds the expression of the kinetic law.
@@ -52,7 +58,7 @@ public:
   /**
    * Returns the expression of the kinetic law.
    */
-  GiNaC::ex getRateLaw();
+  GiNaC::ex getRateLaw() const;
 
   /**
    * Sets the rate law expression.
@@ -81,6 +87,11 @@ public:
    * Dumps a string representation of the kinetic law into the given stream.
    */
   virtual void dump(std::ostream &str);
+
+  /** Handles a visitor. */
+  virtual void accept(Ast::Visitor &visitor) const;
+  /** Applies an operator. */
+  virtual void apply(Ast::Operator &op);
 };
 
 
@@ -93,15 +104,23 @@ public:
 class Reaction : public Definition
 {
 public:
-  /**
-   * Defines the iterator over reactants and products of the reaction.
-   */
+  /** Defines the iterator over reactants and products of the reaction. */
   typedef std::map<Species *, GiNaC::ex>::iterator iterator;
 
-  /**
-   * Defines the iterator over reaction modifier.
-   */
+  /** Defines the const iterator over reactants and products of the reaction. */
+  typedef std::map<Species *, GiNaC::ex>::const_iterator const_iterator;
+
+  /** Defines the iterator over reaction modifier. */
   typedef std::set<Species *>::iterator mod_iterator;
+
+  /** Defines the iterator over reaction modifier. */
+  typedef std::set<Species *>::const_iterator const_mod_iterator;
+
+  /** Visitor class for reactions. */
+  class Visitor { public: virtual void visit(const Reaction *reac) = 0; };
+
+  /** Operator class for reactions. */
+  class Operator { public: virtual void act(Reaction *reac) = 0; };
 
 
 protected:
@@ -281,40 +300,44 @@ public:
    */
   void setReversible(bool val);
 
-  /**
-   * Retruns an iterator pointing on the first reactant of the reaction.
-   */
+  /** Retruns an iterator pointing on the first reactant of the reaction. */
   iterator reacBegin();
-
-  /**
-   * Retunrs an iterator pointing right after the last reactant of the reaction.
-   */
+  /** Retunrs an iterator pointing right after the last reactant of the reaction. */
   iterator reacEnd();
 
-  /**
-   * Returns an iterator pointing on the first product of the reaction.
-   */
-  iterator prodBegin();
+  /** Retruns an iterator pointing on the first reactant of the reaction. */
+  const_iterator reacBegin() const;
+  /** Retunrs an iterator pointing right after the last reactant of the reaction. */
+  const_iterator reacEnd() const;
 
-  /**
-   * Returns an iterator pointing right after the last product of the reaction.
-   */
+  /** Returns an iterator pointing on the first product of the reaction. */
+  iterator prodBegin();
+  /** Returns an iterator pointing right after the last product of the reaction. */
   iterator prodEnd();
 
-  /**
-   * Retunrs an interator pointing to first modifier of the species.
-   */
-  mod_iterator modBegin();
+  /** Returns an iterator pointing on the first product of the reaction. */
+  const_iterator prodBegin() const;
+  /** Returns an iterator pointing right after the last product of the reaction. */
+  const_iterator prodEnd() const;
 
-  /**
-   * Returns an iterator pointing right after the last modifier of the reaction.
-   */
+  /** Retunrs an interator pointing to first modifier of the species. */
+  mod_iterator modBegin();
+  /** Returns an iterator pointing right after the last modifier of the reaction. */
   mod_iterator modEnd();
 
-  /**
-   * Dumps a string representation of the reaction into the given stream.
-   */
+  /** Retunrs an interator pointing to first modifier of the species. */
+  const_mod_iterator modBegin() const;
+  /** Returns an iterator pointing right after the last modifier of the reaction. */
+  const_mod_iterator modEnd() const;
+
+  /** Dumps a string representation of the reaction into the given stream. */
   virtual void dump(std::ostream &str);
+
+  /** Handles a visitor for the reaction. */
+  virtual void accept(Ast::Visitor &visitor) const;
+
+  /** Applies an operator on the reaction. */
+  virtual void apply(Ast::Operator &op);
 };
 
 

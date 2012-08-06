@@ -16,11 +16,21 @@ namespace Ast {
  */
 class Constraint : public Node
 {
+public:
+  /** Visitor class for constraints. */
+  class Visitor { public: virtual void visit(const Ast::Constraint *constraint) = 0; };
+  /** Operator class for constaints. */
+  class Operator { public: virtual void act(Ast::Constraint *constraint) = 0; };
+
 protected:
-  /**
-   * Protected constructor to avoid direct instantiation.
-   */
+  /** Protected constructor to avoid direct instantiation. */
   Constraint(Node::NodeType type);
+
+public:
+  /** Accepts a visitor for the constraint. */
+  virtual void accept(Ast::Visitor &visitor) const;
+  /** Applies an operator on the constaints. */
+  virtual void apply(Ast::Operator &op);
 };
 
 
@@ -32,6 +42,10 @@ protected:
  */
 class AlgebraicConstraint : public Constraint
 {
+public:
+  class Visitor { public: virtual void visit(const AlgebraicConstraint *node) = 0; };
+  class Operator { public: virtual void act(AlgebraicConstraint *node) = 0; };
+
 protected:
   /**
    * Holds the expression defining the constraint on the used variables.
@@ -47,6 +61,9 @@ public:
    *        the rule.
    */
   AlgebraicConstraint(GiNaC::ex rule);
+
+  virtual void accept(Ast::Visitor &visitor) const;
+  virtual void apply(Ast::Operator &op);
 
   /**
    * Returns the constraint expression.

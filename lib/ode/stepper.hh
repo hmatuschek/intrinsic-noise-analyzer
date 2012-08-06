@@ -14,8 +14,18 @@ namespace ODE {
  */
 class Stepper
 {
+
 public:
-  /**
+
+   /**
+   * Destructor
+   */
+   virtual ~Stepper()
+   {
+      //pass...
+   }
+
+   /**
    * Defines the virtual step method needed to be implemented by any stepper algorithm.
    */
   virtual void step(const Eigen::VectorXd &state, double t, Eigen::VectorXd &delta) = 0;
