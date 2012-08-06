@@ -158,7 +158,7 @@ public:
   /**
    * Returns the module-global unique time symbol.
    */
-  GiNaC::symbol getTime();
+  GiNaC::symbol getTime() const;
 
   /**
    * Retruns the default unit for substance measures.

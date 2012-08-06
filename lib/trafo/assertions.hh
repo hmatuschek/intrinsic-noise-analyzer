@@ -177,6 +177,84 @@ public:
 };
 
 
+/** This class checks if the stoichiomerty expressions are all constant.
+ * @ingroup trafo */
+class ConstStoichiometryAssertion :
+    public Ast::Visitor, public Ast::Reaction::Visitor
+{
+public:
+  /** Checks if the stoichiometry expressions of the given reaction are constant. */
+  virtual void visit(const Ast::Reaction *reac);
+
+public:
+  /** Applies the assertion on the given model. */
+  static void apply(const Ast::Model &model);
+};
+
+
+/** This class checks if any expression is explict time-dependent.
+ * @ingroup trafo */
+class NoExplicitTimeDependenceAssertion :
+    public Ast::Visitor, Ast::VariableDefinition::Visitor, Ast::Rule::Visitor, Ast::KineticLaw::Visitor
+{
+protected:
+  /** Holds a reference to the global time-symbol. */
+  GiNaC::symbol _time_symbol;
+
+public:
+  /** Constructor.
+   * @param time_symbol Specifies the global time symbol, usually the one returned by
+   *        @c Ast::Model::getTime. */
+  NoExplicitTimeDependenceAssertion(GiNaC::symbol time_symbol);
+
+public:
+  /** Checks if the initial value of the expression is explicitly time dependent.
+   * Also checks the assigned rule if there is one. */
+  virtual void visit(const Ast::VariableDefinition *var);
+  /** Checks if the rule is explicitly time-dependent. */
+  virtual void visit(const Ast::Rule *rule);
+  /** Checks if the rate law expression is explicitly time dependent. Also checks the local
+   * paramters. */
+  virtual void visit(const Ast::KineticLaw *law);
+
+public:
+  /** Applies the assertion on the given model. */
+  static void apply(const Ast::Model &model);
+};
+
+
+/** This class unifies some assertions that are required for a "reasonable" model.
+ * @ingroup trafo */
+class ReasonableModelAssertion
+    : public NoExplicitTimeDependenceAssertion,
+    public NoAlgebraicConstraintAssertion, public ConstParameterAssertion,
+    public NoAssignmentRuleAssertion, public NoRateRuleAssertion
+{
+public:
+  /** Constructor. */
+  ReasonableModelAssertion(GiNaC::symbol time_symbol);
+
+public:
+  /** Applies the @c NoRateRuleAssertion, @c NoAssignmentRuleAssertion and
+   * @c NoExplicitTimeDependenceAssertion on the variable. */
+  virtual void visit(const Ast::VariableDefinition *var);
+
+  /** Applies the @c NoAlgebraicConstraintAssertion on the given constraint. */
+  virtual void visit(const Ast::Constraint *constraint);
+
+  /** Applies the @c ConstParamterAssertion on the parameter. */
+  virtual void visit(const Ast::Parameter *param);
+
+  /** Applies the @c NoExplicitTimeDependenceAssertion on the given rule. */
+  virtual void visit(const Ast::Rule *rule);
+
+  /** Applies the @c NoExplicitTimeDependenceAssertion on the given kinetic law. */
+  virtual void visit(const Ast::KineticLaw *law);
+
+public:
+  /** Applies the assertions on the given model. */
+  static void apply(const Ast::Model &model);
+};
 }
 }
 

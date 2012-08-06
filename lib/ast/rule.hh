@@ -43,7 +43,7 @@ public:
 
   /** Returns the rule-expression. The semantic of the returned expression depends on the type
    * of the rule. */
-  GiNaC::ex getRule();
+  GiNaC::ex getRule() const;
 
   /**  (Re-) Sets the rule expression.
    * @note The replaced rule expression is not desroied, the user is responsible to do that. */

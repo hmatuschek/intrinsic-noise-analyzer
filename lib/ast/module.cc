@@ -157,7 +157,7 @@ Module::constraintEnd() const
 
 
 GiNaC::symbol
-Module::getTime()
+Module::getTime() const
 {
   return this->time_symbol;
 }

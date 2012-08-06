@@ -16,7 +16,7 @@ Rule::~Rule()
 
 
 GiNaC::ex
-Rule::getRule()
+Rule::getRule() const
 {
   return this->rule;
 }

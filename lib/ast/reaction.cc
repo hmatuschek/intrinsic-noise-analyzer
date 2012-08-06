@@ -285,6 +285,18 @@ Reaction::reacEnd()
   return this->reactants.end();
 }
 
+Reaction::const_iterator
+Reaction::reacBegin() const
+{
+  return this->reactants.begin();
+}
+
+Reaction::const_iterator
+Reaction::reacEnd() const
+{
+  return this->reactants.end();
+}
+
 
 Reaction::iterator
 Reaction::prodBegin()
@@ -294,6 +306,18 @@ Reaction::prodBegin()
 
 Reaction::iterator
 Reaction::prodEnd()
+{
+  return this->products.end();
+}
+
+Reaction::const_iterator
+Reaction::prodBegin() const
+{
+  return this->products.begin();
+}
+
+Reaction::const_iterator
+Reaction::prodEnd() const
 {
   return this->products.end();
 }
@@ -308,6 +332,19 @@ Reaction::modBegin()
 
 Reaction::mod_iterator
 Reaction::modEnd()
+{
+  return this->modifiers.end();
+}
+
+Reaction::const_mod_iterator
+Reaction::modBegin() const
+{
+  return this->modifiers.begin();
+}
+
+
+Reaction::const_mod_iterator
+Reaction::modEnd() const
 {
   return this->modifiers.end();
 }
@@ -378,7 +415,7 @@ KineticLaw::~KineticLaw()
 
 
 GiNaC::ex
-KineticLaw::getRateLaw()
+KineticLaw::getRateLaw() const
 {
   return this->expression;
 }
