@@ -2,7 +2,6 @@
 #include "utils/logger.hh"
 
 using namespace Fluc;
-
 using namespace Fluc::Models;
 
 /*StochasticSimulator::StochasticSimulator(libsbml::Model *model, int size, int seed, size_t threads)
@@ -229,9 +228,8 @@ StochasticSimulator::getHistogram(size_t speciesId,std::map<double,double> &hist
 void
 StochasticSimulator::getHistogram(size_t speciesId,Histogram<double> &hist)
 {
-
-    hist.insert(observationMatrix.col(speciesId)*Eigen::DiagonalMatrix(this->Omega).inverse());
-
+  hist.insert(observationMatrix.col(speciesId) *
+              Eigen::DiagonalMatrix<double, Eigen::Dynamic>(this->Omega).inverse());
 }
 
 void

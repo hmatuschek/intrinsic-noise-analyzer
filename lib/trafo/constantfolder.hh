@@ -13,7 +13,7 @@ namespace Trafo {
  * an @c Ast::AssignmentRule.
  * @ingroup trafo */
 class ConstSubstitutionCollector
-    : public Ast::Visitor, Ast::VariableDefinition::Visitor
+    : public Ast::Visitor, public Ast::VariableDefinition::Visitor
 {
 protected:
   /** Weak reference to the @c Substitution operator collecting the substitutions. */
@@ -33,6 +33,24 @@ public:
  * variables declared as constant or having an @c Ast::AssignmentRule. These variables are
  * collected as a @c Substitution operator that can be applied on a whole model or on single
  * expressions.
+ *
+ * @code {.cpp}
+ * Fluc::Ast::Model model;
+ * // load and process model.
+ * // ...
+ *
+ * // Create Constant folder, this does no substitution, just collect all constant substitutions
+ * ConstantFolder folder(model);
+ *
+ * // If you want to reaplace all constant in the complete model at once
+ * model.apply(folder);
+ *
+ * // Usually you want to perform the substitutions on single expressions
+ * GiNaC::ex expression;
+ * expression = expression.subs(folder.getTable());
+ * // or
+ * expression = folder.apply(expression);
+ * @endcode
  *
  * @ingroup trafo
  */

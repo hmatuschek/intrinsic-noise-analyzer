@@ -1,5 +1,6 @@
 #include "sbml_ssa.hh"
 #include <parser/sbml/sbml.hh>
+#include <fstream>
 
 using namespace Fluc;
 

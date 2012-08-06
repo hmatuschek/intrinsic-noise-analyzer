@@ -9,7 +9,7 @@
  * ease the implementation of analyses.
  *
  * The some of the model assertions and transformations rely on visitor and operator patterns
- * implemented in the model representation (@see ast). These patterns allow for a convenient
+ * implemented in the model representation (@ref ast). These patterns allow for a convenient
  * traversal of the model specification. A @c Fluc::Ast::Visitor is a simple visitor pattern, that
  * allows traverse the @c Fluc::Ast::Model tree but does not allow any modifition of it. In
  * constrast to that, the @c Fluc::Ast::Operator allows additionally modification on the
