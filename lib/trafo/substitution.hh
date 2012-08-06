@@ -34,6 +34,9 @@ public:
   /** Explicitly normalizes the substitution table. */
   void normalize();
 
+  /** Retunrs the substitution table. */
+  const GiNaC::exmap &getTable() const;
+
 public:
   /** Performs substitutions on the intial value of the variable, if defined.
    * Variables are @c Ast::Parameter, @c Ast::Compartment and @c Ast::Species definitions. */
@@ -54,8 +57,10 @@ public:
 protected:
   /** Checks if there is any substitution like 'a -> a' which is invalid. */
   void _check_substitution_table();
+
   /** Normalizes a substitution table such that 'a->b, b->c' is normalized to 'a->c, b->c'. */
   void _normalize_substitution_table();
+
   /** Returns true, if the given expression contains any part that can be substituted. */
   bool _has_substitue(GiNaC::ex expr);
 };

@@ -85,6 +85,13 @@ Substitution::normalize() {
 }
 
 
+const GiNaC::exmap &
+Substitution::getTable() const
+{
+  return _substitution_table;
+}
+
+
 void
 Substitution::act(Ast::VariableDefinition *var)
 {
