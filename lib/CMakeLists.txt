@@ -40,9 +40,9 @@ SET(libina_ast_trafo_HEADERS ast/trafo/trafo.hh
     ast/trafo/modelcopyist.hh)
 
 SET(libina_trafo_SOURCES
-    trafo/assertions.cc)
+    trafo/assertions.cc trafo/substitution.cc)
 SET(libina_trafo_HEADERS trafo/trafo.hh
-    trafo/assertions.hh)
+    trafo/assertions.hh trafo/substitution.hh)
 
 SET(libina_sbmlsh_parser_SOURCES
     parser/sbmlsh/lexer.cc parser/sbmlsh/parser.cc parser/sbmlsh/productions.cc

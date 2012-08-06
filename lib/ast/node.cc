@@ -35,6 +35,15 @@ Node::apply(Ast::Operator &op) {
   }
 }
 
+void
+Node::traverse(Ast::Visitor &visitor) const {
+  // pass...
+}
+
+void
+Node::traverse(Ast::Operator &op) {
+  // pass...
+}
 
 Node::NodeType
 Node::getNodeType() const

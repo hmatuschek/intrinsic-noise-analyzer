@@ -90,8 +90,15 @@ public:
 
   /** Handles a visitor. */
   virtual void accept(Ast::Visitor &visitor) const;
+
   /** Applies an operator. */
   virtual void apply(Ast::Operator &op);
+
+  /** Forwards the visitor to the local paramter definitions. */
+  virtual void traverse(Ast::Visitor &visitor) const;
+
+  /** Applies the visitor on the local paramter definitions. */
+  virtual void traverse(Ast::Operator &op);
 };
 
 
@@ -338,6 +345,12 @@ public:
 
   /** Applies an operator on the reaction. */
   virtual void apply(Ast::Operator &op);
+
+  /** Forwards the visitor to the kinetic law. */
+  virtual void traverse(Ast::Visitor &visitor) const;
+
+  /** Applies the operator on the kinetic law. */
+  virtual void traverse(Ast::Operator &op);
 };
 
 

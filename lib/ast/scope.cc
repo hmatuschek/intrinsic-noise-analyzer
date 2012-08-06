@@ -254,14 +254,28 @@ Scope::dump(std::ostream &str)
 void
 Scope::accept(Ast::Visitor &visitor) const
 {
-  for (Scope::const_iterator iter = this->begin(); iter != this->end(); iter++) {
-    (*iter)->accept(visitor);
-  }
+  // Default behavior, traverse scope:
+  this->traverse(visitor);
 }
 
 
 void
 Scope::apply(Ast::Operator &op)
+{
+  // Default behavior, traverse scope:
+  this->traverse(op);
+}
+
+void
+Scope::traverse(Ast::Visitor &visitor) const
+{
+  for (Scope::const_iterator iter = this->begin(); iter != this->end(); iter++) {
+    (*iter)->accept(visitor);
+  }
+}
+
+void
+Scope::traverse(Ast::Operator &op)
 {
   for (Scope::iterator iter = this->begin(); iter != this->end(); iter++) {
     (*iter)->apply(op);

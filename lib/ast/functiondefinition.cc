@@ -103,11 +103,10 @@ FunctionDefinition::accept(Ast::Visitor &visitor) const
   if (FunctionDefinition::Visitor *fun_vis = dynamic_cast<FunctionDefinition::Visitor *>(&visitor)) {
     fun_vis->visit(this);
   } else {
-    Scope::accept(visitor);
+    FunctionDefinition::traverse(visitor);
     Definition::accept(visitor);
   }
 }
-
 
 void
 FunctionDefinition::apply(Ast::Operator &op)
@@ -115,9 +114,21 @@ FunctionDefinition::apply(Ast::Operator &op)
   if (FunctionDefinition::Operator *fun_op = dynamic_cast<FunctionDefinition::Operator *>(&op)) {
     fun_op->act(this);
   } else {
-    Scope::apply(op);
+    FunctionDefinition::traverse(op);
     Definition::apply(op);
   }
+}
+
+void
+FunctionDefinition::traverse(Ast::Visitor &visitor) const
+{
+  Scope::traverse(visitor);
+}
+
+void
+FunctionDefinition::traverse(Ast::Operator &op)
+{
+  Scope::traverse(op);
 }
 
 

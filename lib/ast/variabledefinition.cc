@@ -146,7 +146,7 @@ VariableDefinition::accept(Ast::Visitor &visitor) const
   if (VariableDefinition::Visitor *var_vis = dynamic_cast<VariableDefinition::Visitor *>(&visitor)) {
     var_vis->visit(this);
   } else {
-    if (hasRule()) {rule->accept(visitor); }
+    VariableDefinition::traverse(visitor);
     Definition::accept(visitor);
   }
 }
@@ -158,7 +158,19 @@ VariableDefinition::apply(Ast::Operator &op)
   if (VariableDefinition::Operator *var_op = dynamic_cast<VariableDefinition::Operator *>(&op)) {
     var_op->act(this);
   } else {
-    if (hasRule()) { rule->apply(op); }
+    VariableDefinition::traverse(op);
     Definition::apply(op);
   }
+}
+
+void
+VariableDefinition::traverse(Ast::Visitor &visitor) const
+{
+  if (hasRule()) { rule->accept(visitor); }
+}
+
+void
+VariableDefinition::traverse(Ast::Operator &op)
+{
+  if (hasRule()) { rule->apply(op); }
 }

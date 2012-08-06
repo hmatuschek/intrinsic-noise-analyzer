@@ -136,6 +136,12 @@ public:
 
   /** Applies an operator on the function definition. */
   virtual void apply(Ast::Operator &op);
+
+  /** Forwards the visitor to function arguments. */
+  virtual void traverse(Ast::Visitor &visitor) const;
+
+  /** Applies the operator on function arguments. */
+  virtual void traverse(Ast::Operator &op);
 };
 
 }

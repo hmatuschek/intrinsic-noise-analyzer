@@ -155,6 +155,13 @@ public:
 
   /** Applies an operator on the variable definition. */
   virtual void apply(Ast::Operator &op);
+
+  /** Forwards the visitor to the rule if present. */
+  virtual void traverse(Ast::Visitor &visitor) const;
+
+  /** Applies the operator on the rule if present. */
+  virtual void traverse(Ast::Operator &op);
+
 };
 
 

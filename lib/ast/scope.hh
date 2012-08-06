@@ -152,6 +152,12 @@ public:
 
   /** Applies an operator on all definitinos of the scope. */
   virtual void apply(Ast::Operator &op);
+
+  /** Forwards the visitor to all definitions within this scope. */
+  virtual void traverse(Ast::Visitor &visitor) const;
+
+  /** Applies the operator on all definitions within this scope. */
+  virtual void traverse(Ast::Operator &op);
 };
 
 

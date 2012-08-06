@@ -77,6 +77,12 @@ public:
   /** Handles an operator. */
   virtual void apply(Ast::Operator &op);
 
+  /** Does nothing, there is nothing to traverse. */
+  virtual void traverse(Ast::Visitor &visitor) const;
+
+  /** Does nothon, there is nothing to traverse. */
+  virtual void traverse(Ast::Operator &op);
+
 public:
   /**
    * Retunrs true, if the given node is a constraint.
