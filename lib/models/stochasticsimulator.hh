@@ -15,6 +15,103 @@
 namespace Fluc {
 namespace Models {
 
+template<class T>
+struct less_second
+: std::binary_function<T,T,bool>
+{
+   inline bool operator()(const T& lhs, const T& rhs)
+   {
+      return lhs.second < rhs.second;
+   }
+};
+
+/**
+ * Implements a 1D histogram.
+ *
+ * @ingroup ssa
+ */
+
+template <typename T, typename U = T>
+class Histogram
+{
+
+public:
+
+    typedef std::map<T,U> histType;
+
+
+    histType histogram;
+
+    Histogram()
+    {
+        // pass...
+    };
+
+    void insert(const Eigen::Matrix<T, Eigen::Dynamic, 1> &observation)
+
+    {
+        for(int sid=0; sid < observation.rows(); sid++)
+        {
+            T val = observation(sid,0);
+            typename histType::iterator it = histogram.find(val);
+            if( it == histogram.end() )
+                histogram.insert( std::make_pair<T,U>(val,1.) );
+            else
+                it->second+=1.;
+        }
+    }
+
+    U getNorm()
+
+    {
+        U norm = 0.;
+        for(typename histType::iterator it=histogram.begin(); it!=histogram.end(); it++)
+            norm += it->second;
+        return norm;
+    }
+
+    histType getHistogram()
+
+    {
+        return histogram;
+    }
+
+    histType getNormalized()
+
+    {
+
+        U norm = getNorm();
+
+        histType nHist(histogram);
+        for(typename histType::iterator it=nHist.begin(); it != nHist.end(); it++)
+            it->second/=norm;
+
+        return nHist;
+
+    }
+
+    histType getDensity()
+
+    {
+
+        histType density(getNormalized());
+
+        for(typename histType::iterator it=density.begin(); it!=density.end()-1; it++)
+            it->second/=((*it).first-(*it+1).first);
+
+        // remove last element
+        density.erase(density.end());
+
+        return density;
+
+    }
+
+
+
+
+};
+
+
 /**
  * Base model for all stochastic simulators.
  *
@@ -134,13 +231,18 @@ public:
   void getHistogram(size_t specId, std::map<double,double> &hist);
 
   /**
+  *  Evaluates the histogram of a species from current state
+  **/
+  void getHistogram(size_t specId, Histogram<double> &hist);
+
+  /**
   * Returns the ensemble size
   **/
   size_t size();
  };
 
-}
 
+}
 }
 
 #endif

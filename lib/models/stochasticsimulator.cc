@@ -214,7 +214,7 @@ void
 StochasticSimulator::getHistogram(size_t speciesId,std::map<double,double> &hist)
 {
 
-    hist.clear();
+    //hist.clear();
     for(int sid=0; sid<observationMatrix.rows(); sid++)
     {
         double val = observationMatrix(sid,speciesId);
@@ -224,6 +224,14 @@ StochasticSimulator::getHistogram(size_t speciesId,std::map<double,double> &hist
         else
             it->second+=1.;
     }
+}
+
+void
+StochasticSimulator::getHistogram(size_t speciesId,Histogram<double> &hist)
+{
+
+    hist.insert(observationMatrix.col(speciesId)*Eigen::DiagonalMatrix(this->Omega).inverse());
+
 }
 
 void

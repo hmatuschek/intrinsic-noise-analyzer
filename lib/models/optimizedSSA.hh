@@ -179,6 +179,7 @@ public:
   /** Reimplement evaluate using the generic interpreter. */
   void
   evaluate(const Eigen::VectorXd &state, Eigen::VectorXd &propensities)
+
   {
 
     interpreter[0].setCode(&all_byte_code);

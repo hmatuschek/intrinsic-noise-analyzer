@@ -1,7 +1,6 @@
 #include "sbml_ssa.hh"
 #include <parser/sbml/sbml.hh>
 
-
 using namespace Fluc;
 
 int main(int argc, char *argv[])
@@ -27,16 +26,26 @@ int main(int argc, char *argv[])
 
     Eigen::MatrixXd cov(model.numSpecies(),model.numSpecies());
 
+    //std::map<double,double> hist;
+
+    Models::Histogram<double> hist;
+
+    std::ofstream histfile;
+    model.run(1);
     for(double t=0.; t<10.; t+=dt)
     {
 
-       //model.stats(state,variance,skewness);
-       std::cout <<t<< "\t" << state.transpose() << "\t";
-       std::cout << variance.diagonal().transpose() << "\t";
-
-       std::cout<<std::endl;
        model.run(dt);
+       model.getHistogram(2,hist);
+
+       histfile.open ("histogram.dat");
+       std::map<double,double> temp=hist.getNormalized();
+       for(std::map<double,double>::iterator it=temp.begin();it!=temp.end();it++)
+           histfile << it->first << "\t" << it->second << "\t"<<std::endl;
+       histfile.close();
+
     }
+
 
   }
   catch (Exception err)
