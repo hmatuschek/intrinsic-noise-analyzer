@@ -23,7 +23,7 @@ ConstSubstitutionCollector::visit(const Ast::VariableDefinition *var)
     _substitutions.add(var->getSymbol(), var->getValue(), false);
   } else if (var->hasRule() && Ast::Node::isAssignmentRule(var->getRule())) {
     // If variable has an assignement rule -> add to substitutions
-    Ast::AssignmentRule *rule = static_cast<Ast::AssignmentRule *>(var->getRule());
+    const Ast::AssignmentRule *rule = static_cast<const Ast::AssignmentRule *>(var->getRule());
     _substitutions.add(var->getSymbol(), rule->getRule());
   }
 }
@@ -53,5 +53,6 @@ ConstantFolder::apply(Ast::Model &model)
 GiNaC::ex
 ConstantFolder::apply(GiNaC::ex expr)
 {
+  // apply substitutions on expression:
   return expr.subs(this->getTable());
 }
