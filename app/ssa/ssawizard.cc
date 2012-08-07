@@ -100,6 +100,7 @@ SSAConfigPage::SSAConfigPage(SSAWizard *parent)
   method = new QComboBox();
   method->addItem(tr("Optimized SSA"), SSATaskConfig::OPTIMIZED_SSA);
   method->addItem(tr("Direct SSA"), SSATaskConfig::DIRECT_SSA);
+  method->addItem(tr("Next-Reaction SSA"), SSATaskConfig::GIBSONBRUCK_SSA);
   method->setCurrentIndex(0);
 
   QSpinBox *thread_count = new QSpinBox();
@@ -216,6 +217,10 @@ SSASummaryPage::initializePage()
   case SSATaskConfig::OPTIMIZED_SSA:
     this->method->setText("Optimized SSA");
     break;
+
+  case SSATaskConfig::GIBSONBRUCK_SSA:
+    this->method->setText("Next-Reaction SSA");
+    break;
   }
   this->thread_count->setText(QString("%1").arg(config.getNumThreads()));
   int mem_usage = 8*config.getSteps()*(1 + species.size() + (species.size()*(1+species.size()))/2);
@@ -250,7 +255,14 @@ SSASummaryPage::validatePage()
               config.getModelDocument()->getModel(), config.getEnsembleSize(), time(0),
               config.getOptLevel(), config.getNumEvalThreads());
         break;
-      } break;
+
+    case SSATaskConfig::GIBSONBRUCK_SSA:
+      simulator = new Models::GenericGibsonBruckSSA< Eval::direct::Engine<Eigen::VectorXd> >(
+            config.getModelDocument()->getModel(), config.getEnsembleSize(), time(0),
+            config.getOptLevel(), config.getNumEvalThreads());
+      break;
+    } break;
+
 
     case EngineTaskConfig::BCI_ENGINE:
     case EngineTaskConfig::BCIMP_ENGINE:
@@ -266,6 +278,13 @@ SSASummaryPage::validatePage()
               config.getModelDocument()->getModel(), config.getEnsembleSize(), time(0),
               config.getOptLevel(), config.getNumEvalThreads());
         break;
+
+      case SSATaskConfig::GIBSONBRUCK_SSA:
+        simulator = new Models::GenericGibsonBruckSSA< Eval::bci::Engine<Eigen::VectorXd> >(
+              config.getModelDocument()->getModel(), config.getEnsembleSize(), time(0),
+              config.getOptLevel(), config.getNumEvalThreads());
+        break;
+
       } break;
 
     case EngineTaskConfig::JIT_ENGINE:
@@ -281,12 +300,19 @@ SSASummaryPage::validatePage()
               config.getModelDocument()->getModel(), config.getEnsembleSize(), time(0),
               config.getOptLevel(), config.getNumEvalThreads());
         break;
+
+      case SSATaskConfig::GIBSONBRUCK_SSA:
+        simulator = new Models::GenericGibsonBruckSSA< Eval::jit::Engine<Eigen::VectorXd> >(
+              config.getModelDocument()->getModel(), config.getEnsembleSize(), time(0),
+              config.getOptLevel(), config.getNumEvalThreads());
+        break;
+
       } break;
     }
   }
   catch (Fluc::Exception &err)
   {
-    QMessageBox::warning(0, tr("Can not construct SSA anlysis: "), err.what());
+    QMessageBox::warning(0, tr("Can not construct SSA analysis: "), err.what());
     return false;
   }
 
