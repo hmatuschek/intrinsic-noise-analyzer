@@ -2,6 +2,7 @@
 #define __FLUC_TRAFO_ASSERTIONS_HH__
 
 #include "ast/ast.hh"
+#include "ginacsupportforeigen.hh"
 
 
 namespace Fluc {
@@ -255,6 +256,35 @@ public:
   /** Applies the assertions on the given model. */
   static void apply(const Ast::Model &model);
 };
+
+
+/** This class ensures, that all assignment rules are linear functions of the species.
+ * I.e.: S3 := S1 + S2, but not S3 = S1**2 + S2!
+ * @ingroup trafo */
+class LinearAssignmentRuleAssertion :
+    public Ast::Visitor, public Ast::AssignmentRule::Visitor
+{
+protected:
+  /** List of all species symbols. */
+  GiNaC::matrix _species_symbols;
+  /** Vector of expressions, assembles assingment rule as scalar product of this vector and
+   * the vector of species symbols. */
+  GiNaC::matrix _link_vector;
+
+public:
+  /** Constructor. Assembles  @c _species_list from given model. */
+  LinearAssignmentRuleAssertion(const Ast::Model &model);
+
+public:
+  /** Checks if the given @c AssignmentRule is linear in the species of the model. */
+  virtual void visit(const Ast::AssignmentRule *rule);
+
+public:
+  /** Applies the constraint on the given model. */
+  static void apply(const Ast::Model &model);
+};
+
+
 }
 }
 

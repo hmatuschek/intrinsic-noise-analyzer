@@ -342,3 +342,67 @@ ReasonableModelAssertion::apply(const Ast::Model &model)
   ReasonableModelAssertion assertion(model.getTime());
   model.accept((NoExplicitTimeDependenceAssertion &)assertion);
 }
+
+
+
+/* ********************************************************************************************* *
+ * Implements linear assignment rule assertion:
+ * ********************************************************************************************* */
+LinearAssignmentRuleAssertion::LinearAssignmentRuleAssertion(const Ast::Model &model)
+  : _species_symbols(model.numSpecies(),1), _link_vector(model.numSpecies(),1)
+{
+  // Collect list of species symbols:
+  for (size_t i=0; i<model.numSpecies(); i++) {
+    _species_symbols(i,0) = model.getSpecies(i)->getSymbol();
+  }
+}
+
+void
+LinearAssignmentRuleAssertion::visit(const Ast::AssignmentRule *rule)
+{
+  GiNaC::ex remain = rule->getRule();
+
+  // Try to transform the rule expression into a polynomial w.r.t. species variables:
+  for (size_t i=0; i<_species_symbols.rows(); i++)
+  {
+    // Check degree of each variable, and
+    if (1 < rule->getRule().degree(_species_symbols(i,0))) {
+      SBMLFeatureNotSupported err;
+      err << "Non-linear assignement rule: " << rule->getRule()
+          << ": is non-linear in " << _species_symbols(i,0);
+      throw err;
+    }
+
+    // get coeff
+    GiNaC::ex c = rule->getRule().coeff(_species_symbols(i,0), 1);
+
+    // check if coeff contains any symbols:
+    for (size_t j=0; j<_species_symbols(i,0); j++) {
+      if (c.has(_species_symbols(j,0))) {
+        SBMLFeatureNotSupported err;
+        err << "Non-linear assignement rule: " << rule->getRule()
+            << ": is non-linear in " << _species_symbols(i,0)
+            << " or " << _species_symbols(j,0);
+        throw err;
+      }
+    }
+
+    // Update remainder:
+    remain -= c*_species_symbols(i,0);
+  }
+
+  // Check if reaminder is 0:
+  if (! remain.is_zero()) {
+    SBMLFeatureNotSupported err;
+    err << "Assignment rule : " << rule->getRule()
+        << ": is not a linear combination of species: Remainder " << remain;
+    throw err;
+  }
+}
+
+void
+LinearAssignmentRuleAssertion::apply(const Ast::Model &model)
+{
+  LinearAssignmentRuleAssertion assertion(model);
+  model.accept(assertion);
+}

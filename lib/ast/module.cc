@@ -115,7 +115,7 @@ Module::remDefinition(Definition *def)
 
 
 size_t
-Module::getNumConstraints() const
+Module::numConstraints() const
 {
   return this->constraints.size();
 }
@@ -125,6 +125,11 @@ void
 Module::addConstraint(Constraint *constraint)
 {
   this->constraints.push_back(constraint);
+}
+
+void
+Module::remConstraint(Constraint *constraint) {
+  this->constraints.remove(constraint);
 }
 
 

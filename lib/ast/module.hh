@@ -128,12 +128,14 @@ public:
   /**
    * Retunrs the number of constaints applied to this module.
    */
-  size_t getNumConstraints() const;
+  size_t numConstraints() const;
 
-  /**
-   * Adds a cosntraint to the module.
-   */
+  /** Adds a cosntraint to the module. */
   void addConstraint(Constraint *constraint);
+
+  /** Removes a certain constraint from list of constraints.
+   * The user is responsible to free the constraint. */
+  void remConstraint(Constraint *constraint);
 
   /**
    * Retunrs a constraintIterator pointing to the first constraint of the module.
