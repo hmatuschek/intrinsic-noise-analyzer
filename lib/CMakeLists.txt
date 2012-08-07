@@ -93,6 +93,7 @@ SET(libina_models_SOURCES
     models/stochasticsimulator.cc
     models/gillespieSSA.cc
     models/optimizedSSA.cc
+    models/gibsonbruckSSA.cc
     models/explicittimedependencemixin.cc
     models/assertnoalgebraicconstraintmixin.cc
     models/assertnoconstantspeciesmixin.cc
@@ -119,6 +120,7 @@ SET(libina_models_HEADERS models/models.hh
     models/stochasticsimulator.hh
     models/gillespieSSA.hh
     models/optimizedSSA.hh
+    models/gibsonbruckSSA.hh
     models/partialsumSSA.hh
     models/optimizedSSAginac.hh
     models/gillespieSSAginac.hh

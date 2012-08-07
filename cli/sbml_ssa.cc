@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
     Models::OptimizedSSA model(sbml_model, 30, 1024);
     double dt=0.1;
 
-    Eigen::VectorXd state;
+    Eigen::VectorXd mean;
     Eigen::MatrixXd variance;
 
     Eigen::MatrixXd cov(model.numSpecies(),model.numSpecies());

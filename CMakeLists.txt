@@ -50,7 +50,7 @@ INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/lib)
 #
 # Used libaries:
 #
-set(LIBS ${LIBS} ${GINAC_LIBRARIES} ${LIBSBML_LIBRARIES} m pthread)
+set(LIBS ${LIBS} ${GINAC_LIBRARIES} ${LIBSBML_LIBRARIES} m pthread gomp)
 
 #
 # Used headers:
@@ -68,6 +68,20 @@ set(CMAKE_EXE_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS_INIT} ${OpenMP_CXX_FLAGS}
 set(CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS_INIT} ${OpenMP_CXX_FLAGS})
 set(CMAKE_MODULE_LINKER_FLAGS ${CMAKE_MODULE_LINKER_FLAGS_INIT} ${OpenMP_CXX_FLAGS})
 
+#
+# eigen + mingw weirdness, see
+# http://eigen.tuxfamily.org/dox/TopicWrongStackAlignment.html
+#
+
+IF(WIN32 AND WINGW)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mincoming-stack-boundary=2")
+    SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -mincoming-stack-boundary=2")
+    SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -mincoming-stack-boundary=2")
+
+    SET(CMAKE_EXE_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS} -mincoming-stack-boundary=2)
+    SET(CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS} -mincoming-stack-boundary=2)
+    SET(CMAKE_MODULE_LINKER_FLAGS ${CMAKE_MODULE_LINKER_FLAGS} -mincoming-stack-boundary=2)
+ENDIF(WIN32 AND WINGW)
 
 #
 # Define flags, libs etc if LLVM is present:
@@ -107,12 +121,18 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}/lib)
 
 
 #
-# traverse into source tree:
+# Traverse into source tree:
 #
 add_subdirectory(lib)
 add_subdirectory(app)
 add_subdirectory(cli)
-add_subdirectory(test)
+
+#
+# Exclude unit tests requiring glibc which is not available under Windows!
+#
+IF(NOT WIN32)
+    add_subdirectory(test)
+ENDIF(NOT WIN32)
 
 #
 # Source distribution packages:
