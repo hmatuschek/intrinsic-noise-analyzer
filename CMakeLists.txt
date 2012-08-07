@@ -124,7 +124,7 @@ add_subdirectory(app)
 add_subdirectory(cli)
 
 #
-# Exclude unit tests which rely on glibc which is not available under Windows!
+# Exclude unit tests requiring glibc which is not available under Windows!
 #
 IF(NOT WIN32)
     add_subdirectory(test)
