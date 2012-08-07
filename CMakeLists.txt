@@ -117,12 +117,18 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}/lib)
 
 
 #
-# traverse into source tree:
+# Traverse into source tree:
 #
 add_subdirectory(lib)
 add_subdirectory(app)
 add_subdirectory(cli)
-#add_subdirectory(test)
+
+#
+# Exclude unit tests which rely on glibc which is not available under Windows!
+#
+IF(NOT WIN32)
+    add_subdirectory(test)
+ENDIF(NOT WIN32)
 
 #
 # Source distribution packages:
