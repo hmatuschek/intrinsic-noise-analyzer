@@ -68,16 +68,20 @@ set(CMAKE_EXE_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS_INIT} ${OpenMP_CXX_FLAGS}
 set(CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS_INIT} ${OpenMP_CXX_FLAGS})
 set(CMAKE_MODULE_LINKER_FLAGS ${CMAKE_MODULE_LINKER_FLAGS_INIT} ${OpenMP_CXX_FLAGS})
 
-# eigen mingw weirdness
-IF(WINGW)
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mincoming-stack-boundary=2")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -mincoming-stack-boundary=2")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -mincoming-stack-boundary=2")
+#
+# eigen + mingw weirdness, see
+# http://eigen.tuxfamily.org/dox/TopicWrongStackAlignment.html
+#
 
-set(CMAKE_EXE_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS} -mincoming-stack-boundary=2)
-set(CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS} -mincoming-stack-boundary=2)
-set(CMAKE_MODULE_LINKER_FLAGS ${CMAKE_MODULE_LINKER_FLAGS} -mincoming-stack-boundary=2)
-ENDIF(WINGW)
+IF(WIN32 AND WINGW)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mincoming-stack-boundary=2")
+    SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -mincoming-stack-boundary=2")
+    SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -mincoming-stack-boundary=2")
+
+    SET(CMAKE_EXE_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS} -mincoming-stack-boundary=2)
+    SET(CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS} -mincoming-stack-boundary=2)
+    SET(CMAKE_MODULE_LINKER_FLAGS ${CMAKE_MODULE_LINKER_FLAGS} -mincoming-stack-boundary=2)
+ENDIF(WIN32 AND WINGW)
 
 #
 # Define flags, libs etc if LLVM is present:
