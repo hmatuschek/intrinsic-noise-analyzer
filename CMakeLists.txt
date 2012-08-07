@@ -68,6 +68,12 @@ set(CMAKE_EXE_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS_INIT} ${OpenMP_CXX_FLAGS}
 set(CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS_INIT} ${OpenMP_CXX_FLAGS})
 set(CMAKE_MODULE_LINKER_FLAGS ${CMAKE_MODULE_LINKER_FLAGS_INIT} ${OpenMP_CXX_FLAGS})
 
+
+# Let application start in its own window
+IF(WIN32)
+    SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -mwindows")
+ENDIF(WIN32)
+
 #
 # eigen + mingw weirdness, see
 # http://eigen.tuxfamily.org/dox/TopicWrongStackAlignment.html
@@ -76,7 +82,7 @@ set(CMAKE_MODULE_LINKER_FLAGS ${CMAKE_MODULE_LINKER_FLAGS_INIT} ${OpenMP_CXX_FLA
 IF(WIN32 AND WINGW)
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mincoming-stack-boundary=2")
     SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -mincoming-stack-boundary=2")
-    SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -mincoming-stack-boundary=2")
+    SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -mincoming-stack-boundary=2 -mwindows")
 
     SET(CMAKE_EXE_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS} -mincoming-stack-boundary=2)
     SET(CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS} -mincoming-stack-boundary=2)
