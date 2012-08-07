@@ -7,6 +7,8 @@
 
 /**
  * Simple wrapper class to encapsulate OpenMP.
+ *
+ * @ingroup utils
  */
 class OpenMP
 {

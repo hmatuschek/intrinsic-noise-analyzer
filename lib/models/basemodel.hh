@@ -55,11 +55,6 @@ public:
    *
    * Assembles the @c Ast::Module and performs constant folding and assignement-rule inlineing.
    * It also constructs the species <-> index tables.
-   */
-  BaseModel(libsbml::Model *sbml_model);
-
-  /**
-   * Constructor.
    *
    * Constructs a @c Model::BaseModel as copy of the given @c Ast::Model.
    */

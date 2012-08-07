@@ -1,6 +1,8 @@
 #include "particlenumbersmixin.hh"
 #include "ast/unitdefinition.hh"
 #include "math.hh"
+#include "exception.hh"
+
 
 using namespace Fluc;
 using namespace Fluc::Models;

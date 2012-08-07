@@ -54,7 +54,7 @@ Module::Module(const std::string &name)
 
 Module::~Module()
 {
-  // Free constaints:
+  // Free constraints:
   for (constraintIterator iter = this->constraints.begin();
        iter != this->constraints.end(); iter++)
   {
@@ -157,7 +157,7 @@ Module::constraintEnd() const
 
 
 GiNaC::symbol
-Module::getTime()
+Module::getTime() const
 {
   return this->time_symbol;
 }
@@ -320,6 +320,21 @@ Module::getUnitDefinition(const std::string &identifier) const
   }
 
   return static_cast<Ast::UnitDefinition * const>(def);
+}
+
+
+UnitDefinition * const
+Module::getUnitDefinition(const Unit &unit) const
+{
+  for (Module::const_iterator item=this->begin(); item!=this->end(); item++) {
+    if (! Ast::Node::isUnitDefinition(*item)) { continue; }
+    Ast::UnitDefinition * const unit_def = (Ast::UnitDefinition * const)(*item);
+    if (unit_def->getUnit() == unit) { return unit_def; }
+  }
+
+  SymbolError err;
+  err << "Can not find matching unit!";
+  throw err;
 }
 
 

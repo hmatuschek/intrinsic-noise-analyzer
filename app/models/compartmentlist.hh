@@ -22,24 +22,22 @@ public:
    */
   explicit CompartmentList(Fluc::Ast::Model *model, QObject *parent = 0);
 
-  /**
-   * Implementation for the QAbstractTableModel. Returns the requested data.
-   */
+  /** Enables the columns of the compartment names and initial value to be editable. */
+  Qt::ItemFlags flags(const QModelIndex &index) const;
+
+  /** Implementation for the QAbstractTableModel. Returns the requested data. */
   QVariant data(const QModelIndex &index, int role) const;
 
-  /**
-   * Implementation of QAbstractTableModel, returns the headers for columns.
-   */
+  /** Resets the compartment name or initial value. */
+  bool setData(const QModelIndex &index, const QVariant &value, int role);
+
+  /** Implementation of QAbstractTableModel, returns the headers for columns. */
   QVariant headerData(int section, Qt::Orientation orientation, int role) const;
 
-  /**
-   * Returns the number of compartments.
-   */
+  /** Returns the number of compartments. */
   int rowCount(const QModelIndex &parent = QModelIndex()) const;
 
-  /**
-   * Returns the number of columns.
-   */
+  /** Returns the number of columns. */
   int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
 

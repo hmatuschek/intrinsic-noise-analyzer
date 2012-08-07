@@ -43,11 +43,26 @@ private:
     std::vector< Eigen::VectorXd > prop;
 
 public:
-    /**
-     * Is initialized with a model, the number of realization @c ensembleSize and a seed for the
-     * random number generator
-     */
-    GenericGillespieSSA(libsbml::Model *model, int ensembleSize, int seed, size_t opt_level=0, size_t num_threads=1)
+    /* GenericGillespieSSA(libsbml::Model *model, int ensembleSize, int seed, size_t opt_level=0, size_t num_threads=1)
+      : StochasticSimulator(model, ensembleSize, seed, num_threads),
+        ConstantStoichiometryMixin((BaseModel &)(*this)),
+        interpreter(this->numThreads()), prop( this->numThreads(), Eigen::VectorXd::Zero(this->numReactions()) )
+    {
+      typename Engine::Compiler compiler(this->stateIndex);
+      compiler.setCode(&bytecode);
+
+      // and compile propensities for byte code evaluation
+      for(size_t i=0; i<this->numReactions(); i++)
+          compiler.compileExpressionAndStore(this->propensities[i],i);
+
+      // optimize and store
+      compiler.finalize(opt_level);
+      for(size_t i=0; i<this->numThreads(); i++) {
+          this->interpreter[i].setCode(&bytecode);
+      }
+    }*/
+
+    GenericGillespieSSA(const Ast::Model &model, int ensembleSize, int seed, size_t opt_level=0, size_t num_threads=1)
       : StochasticSimulator(model, ensembleSize, seed, num_threads),
         ConstantStoichiometryMixin((BaseModel &)(*this)),
         interpreter(this->numThreads()), prop( this->numThreads(), Eigen::VectorXd::Zero(this->numReactions()) )
@@ -65,6 +80,7 @@ public:
           this->interpreter[i].setCode(&bytecode);
       }
     }
+
 
     /**
      *  the stepper for the SSA

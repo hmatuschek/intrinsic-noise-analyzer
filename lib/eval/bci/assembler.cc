@@ -1,5 +1,7 @@
 #include "assembler.hh"
 #include "interpreter.hh"
+#include "exception.hh"
+
 
 using namespace Fluc;
 using namespace Fluc::Eval::bci;

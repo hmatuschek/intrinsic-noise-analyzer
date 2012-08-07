@@ -35,7 +35,8 @@ void
 SSATaskConfig::setModelDocument(DocumentItem *document)
 {
   ModelSelectionTaskConfig::setModelDocument(document);
-  model = new Fluc::Ast::Model(getModelDocument()->getSBMLModel());
+  // create copy of model:
+  model = new Fluc::Ast::Model(getModelDocument()->getModel());
 }
 
 

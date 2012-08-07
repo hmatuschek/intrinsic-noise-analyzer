@@ -1,7 +1,6 @@
 #include "model.hh"
 #include "exception.hh"
 #include "reaction.hh"
-#include "assembler.hh"
 #include "converter.hh"
 #include "trafo/modelcopyist.hh"
 
@@ -12,18 +11,6 @@ using namespace Fluc::Ast;
 Model::Model()
   : Module()
 {
-  // Pass...
-}
-
-
-Model::Model(libsbml::Model *model)
-  : Module()
-{
-  Assembler assembler(*this);
-  assembler.processModel(model);
-
-  Convert2Irreversible converter(*this);
-  converter.process();
 }
 
 
@@ -32,6 +19,10 @@ Model::Model(const Model &other)
 {
   // Copy "other" module into this module
   Trafo::ModelCopyist::copy(&other, this);
+
+  // Convert irreversible reactions to reversible ones:
+  Convert2Irreversible converter(*this);
+  converter.process();
 }
 
 
@@ -518,5 +509,27 @@ Model::remDefinition(Definition *def)
 
   default:
     break;
+  }
+}
+
+
+void
+Model::accept(Ast::Visitor &visitor) const
+{
+  if (Model::Visitor *mod_vis = dynamic_cast<Model::Visitor *>(&visitor)) {
+    mod_vis->visit(this);
+  } else {
+    Scope::accept(visitor);
+  }
+}
+
+
+void
+Model::apply(Ast::Operator &op)
+{
+  if (Model::Operator *mod_op = dynamic_cast<Model::Operator *>(&op)) {
+    mod_op->act(this);
+  } else {
+    Scope::apply(op);
   }
 }

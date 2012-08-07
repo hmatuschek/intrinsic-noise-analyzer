@@ -32,8 +32,8 @@
 #include "compartment.hh"
 #include "parameter.hh"
 
-#include "assembler.hh"
 #include "evaluate.hh"
+#include "visitor.hh"
 
 #include "trafo/trafo.hh"
 

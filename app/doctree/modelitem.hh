@@ -3,7 +3,6 @@
 
 #include <QObject>
 
-#include <sbml/SBMLTypes.h>
 #include "models/basemodel.hh"
 #include "documenttreeitem.hh"
 
@@ -24,7 +23,7 @@ public:
   /**
    * Constructs a model for the given SBML document.
    */
-  explicit ModelItem(libsbml::SBMLDocument *document, QObject *parent = 0);
+  explicit ModelItem(const QString &file_path, QObject *parent = 0);
 
   /**
    * Destructor. Also frees the held SBML document.
@@ -39,12 +38,12 @@ public:
   /**
    * Returns a reference to the SBML model.
    */
-  Fluc::Ast::Model *getModel();
+  Fluc::Ast::Model &getModel();
 
   /**
    * Returns a const reference to the SBML model.
    */
-  const Fluc::Ast::Model *getModel() const;
+  const Fluc::Ast::Model &getModel() const;
 
 
 private:

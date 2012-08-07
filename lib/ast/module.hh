@@ -158,7 +158,7 @@ public:
   /**
    * Returns the module-global unique time symbol.
    */
-  GiNaC::symbol getTime();
+  GiNaC::symbol getTime() const;
 
   /**
    * Retruns the default unit for substance measures.
@@ -232,6 +232,13 @@ public:
    * @throws SymbolError If the identifier is not associated with a unit definition.
    */
   UnitDefinition * const getUnitDefinition(const std::string &identifier) const;
+
+  /**
+   * Returns the unit definition by matching the unit.
+   *
+   * @throws SymbolError If the unit is not associated with a unit definition.
+   */
+  UnitDefinition * const getUnitDefinition(const Unit &unit) const;
 
   /**
    * Returns true, if the given identifier names a @c VariableDefinition.

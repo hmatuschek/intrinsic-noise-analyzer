@@ -16,3 +16,25 @@ Parameter::Parameter(const std::string &id, const GiNaC::ex &init_val, const Uni
 {
   // Pass...
 }
+
+
+void
+Parameter::accept(Ast::Visitor &visitor) const
+{
+  if (Parameter::Visitor *param_vis = dynamic_cast<Parameter::Visitor *>(&visitor)) {
+    param_vis->visit(this);
+  } else {
+    VariableDefinition::accept(visitor);
+  }
+}
+
+
+void
+Parameter::apply(Ast::Operator &op)
+{
+  if (Parameter::Operator *param_op = dynamic_cast<Parameter::Operator *>(&op)) {
+    param_op->act(this);
+  } else {
+    VariableDefinition::apply(op);
+  }
+}
