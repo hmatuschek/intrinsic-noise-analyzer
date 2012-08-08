@@ -2,6 +2,7 @@
 #define __INA_TRAFO_PARTIALMODEL_HH__
 
 #include "ast/ast.hh"
+#include "substitution.hh"
 #include "eigen3/Eigen/Eigen"
 #include "ginacsupportforeigen.hh"
 
@@ -60,17 +61,26 @@ protected:
   /** A link matrix, mapping the inpedpenden species vector to the original species vector.
    *
    * @note This matrix is a matrix of GiNaC expressions, you may need to evaluate all expressions
-   *       of this matrix to obtain a constant matrix of values. */
+   *       of this matrix to obtain a constant matrix of values.
+   * @see evaluateLinkMatrix */
   Eigen::MatrixXex linkMatrixSource;
+
+  /** This matrix will hold (after a call to @c evaluateLinkMatrix) the numeric link matrix. */
+  Eigen::MatrixXd linkMatrix;
 
 
 public:
   /** Constructor, assembles the @c permutationVector, @c permutationM and @c linkMatrixSource. */
   PartialModel(Ast::Model &model);
 
+  /** Evaluates & updates the @c linkMatrix.
+   * The argument specifies the substituions to be used i.e. a @c ConstantFolder. */
+  void evaluateLinkMatrix(Substitution &subs);
+
 
 private:
-  /** Assembles a single link vector for a dependent species. */
+  /** Assembles a single link vector for a dependent species as a linear combination of
+   * independen species. */
   Eigen::VectorXex _createLinkVector(Ast::Model &model, const Ast::Rule *rule);
 };
 

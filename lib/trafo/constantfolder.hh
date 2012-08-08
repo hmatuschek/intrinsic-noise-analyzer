@@ -9,8 +9,7 @@ namespace Fluc {
 namespace Trafo {
 
 
-/** Simple visitor to collect all substitutions for constant variables or variables having
- * an @c Ast::AssignmentRule.
+/** Simple visitor to collect all substitutions for constant variables.
  * @ingroup trafo */
 class ConstSubstitutionCollector
     : public Ast::Visitor, public Ast::VariableDefinition::Visitor
@@ -23,16 +22,15 @@ public:
   /** Constructor. */
   ConstSubstitutionCollector(Substitution &substitutions);
 
-  /** Check if the variable is constant or has an @c Ast::AssignmentRule attached. */
+  /** Check if the variable is constant. */
   virtual void visit(const Ast::VariableDefinition *var);
 };
 
 
 /**
  * This class collects all constant substitutions, means the initial values of all
- * variables declared as constant or having an @c Ast::AssignmentRule. These variables are
- * collected as a @c Substitution operator that can be applied on a whole model or on single
- * expressions.
+ * variables declared as constant. These variables are collected as a @c Substitution operator that
+ * can be applied on a whole model or on single expressions.
  *
  * @code {.cpp}
  * Fluc::Ast::Model model;

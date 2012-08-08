@@ -8,7 +8,7 @@ using namespace Fluc::Trafo;
 PartialModel::PartialModel(Ast::Model &model)
   : numInd(0), numDep(0),
     permutationVector(model.numSpecies()), permutationM(),
-    linkMatrixSource()
+    linkMatrixSource(), linkMatrix()
 {
   // index of the first independent species
   size_t idx_ind = 0;
@@ -32,6 +32,8 @@ PartialModel::PartialModel(Ast::Model &model)
   // allocate some space for the link matrix:
   linkMatrixSource.resize(model.numSpecies(), numInd);
   linkMatrixSource.setZero(model.numSpecies(), numInd);
+  linkMatrix.resize(model.numSpecies(), numInd);
+  linkMatrix.setZero(model.numSpecies(), numInd);
 
   // now, assemble link-matrix:
   for (size_t i=0; i<model.numSpecies(); i++) {
@@ -90,4 +92,28 @@ PartialModel::_createLinkVector(Ast::Model &model, const Ast::Rule *rule)
   }
 
   return link;
+}
+
+
+void
+PartialModel::evaluateLinkMatrix(Substitution &subs)
+{
+  for (int i=0; i<linkMatrixSource.rows(); i++) {
+    for (int j=0; j<linkMatrixSource.cols(); j++) {
+      // Get coefficient and apply substitutions:
+      GiNaC::ex coeff = linkMatrixSource.coeff(i,j).subs(subs.getTable()).evalf();
+
+      // Check if coefficient is a numeric value:
+      if (! GiNaC::is_a<GiNaC::numeric>(coeff)) {
+        InternalError err;
+        err << "Can not evaluate link matrix, coefficient "
+            << linkMatrixSource.coeff(i,j) << " at (" << unsigned(i) << ", " << unsigned(j) << ") "
+            << "does not evaluate to a numeric value. Minimal expression " << coeff;
+        throw err;
+      }
+
+      // store coefficient:
+      linkMatrix.coeffRef(i,j) = GiNaC::ex_to<GiNaC::numeric>(coeff).to_double();
+    }
+  }
 }

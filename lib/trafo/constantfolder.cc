@@ -21,10 +21,6 @@ ConstSubstitutionCollector::visit(const Ast::VariableDefinition *var)
   if (var->isConst() && var->hasValue()) {
     // If variable is defined as constant and has an intial value -> add to substitutions:
     _substitutions.add(var->getSymbol(), var->getValue(), false);
-  } else if (var->hasRule() && Ast::Node::isAssignmentRule(var->getRule())) {
-    // If variable has an assignement rule -> add to substitutions
-    const Ast::AssignmentRule *rule = static_cast<const Ast::AssignmentRule *>(var->getRule());
-    _substitutions.add(var->getSymbol(), rule->getRule());
   }
 }
 
