@@ -26,6 +26,8 @@ namespace Trafo {
  * As this procecudure is non-unique, the species without initial values are preferred to get an
  * assignment rule attached to minimize the chance to conflict with its initial value.
  *
+ * Further, before applying this transformations, all @c Ast::AssingmentRule must be resolved.
+ *
  * @ingroup trafo
  */
 class AlgebraicConstraintSolver
