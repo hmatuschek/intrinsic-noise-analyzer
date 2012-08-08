@@ -41,10 +41,10 @@ SET(libina_ast_trafo_HEADERS ast/trafo/trafo.hh
 
 SET(libina_trafo_SOURCES
     trafo/assertions.cc trafo/substitution.cc trafo/constantfolder.cc
-    trafo/algebraicconstraintsolver.cc trafo/partialmodel.cc)
+    trafo/algebraicconstraintsolver.cc trafo/partialmodel.cc trafo/assignmentruleinliner.cc)
 SET(libina_trafo_HEADERS trafo/trafo.hh
     trafo/assertions.hh trafo/substitution.hh trafo/constantfolder.hh
-    trafo/algebraicconstraintsolver.hh trafo/partialmodel.hh)
+    trafo/algebraicconstraintsolver.hh trafo/partialmodel.hh trafo/assignmentruleinliner.hh)
 
 SET(libina_sbmlsh_parser_SOURCES
     parser/sbmlsh/lexer.cc parser/sbmlsh/parser.cc parser/sbmlsh/productions.cc
