@@ -18,7 +18,8 @@ public:
   /** Enumerates the available methods. */
   typedef enum {
     DIRECT_SSA,
-    OPTIMIZED_SSA
+    OPTIMIZED_SSA,
+    GIBSONBRUCK_SSA
   } SSAMethod;
 
 

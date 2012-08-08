@@ -15,19 +15,18 @@ namespace Fluc {
 namespace Models {
 
 /**
- * Optimized SSA using a dependency graph for propensity updates.
+ * Gibson-Bruck SSA implements the Next-Reaction method.
  *
- * The dependency graph lists all propensities that are affected by a reaction and need to be updated.
- *
- * This is an implementation of the algorithm as described in \cite cao2004.
+ * This is an implementation of the algorithm as described in \cite gibson2000.
  *
  * @ingroup ssa
  */
 template <class Engine>
-class GenericGBSSA :
+class GenericGibsonBruckSSA :
   public StochasticSimulator,
   public ConstantStoichiometryMixin
 {
+
 protected:
   /** Holds the dependency graph in terms of bytecode. **/
   std::vector<typename Engine::Code *> byte_code;
@@ -38,6 +37,18 @@ protected:
   /** Sparse stoichiometric matrix. **/
   Eigen::SparseMatrix<double> sparseStoichiometry;
 
+
+private:
+  /** Reserves space for propensities of each threads. */
+  std::vector< Eigen::VectorXd > prop;
+
+  /** Interpreter for each thread. */
+  std::vector< typename Engine::Interpreter > interpreter;
+
+  /** Holds the reactions times of all reactions in the ensemble
+  *
+  * that is @c tau[i](j) is the reaction time of the j-th reactions in the i-th realization
+  */
   std::vector<Eigen::VectorXd> tau;
 
 public:
@@ -50,17 +61,30 @@ public:
    * @param opt_level Specifies the byte-code optimization level.
    * @param num_threads Specifies the number of threads to use.
    */
-  GenericGBSSA(libsbml::Model *model, int ensembleSize, int seed,
-               size_t opt_level=0, size_t num_threads=OpenMP::getMaxThreads())
-    : StochasticSimulator(model, ensembleSize, seed, num_threads),
-      ConstantStoichiometryMixin((BaseModel &)(*this)),
-      byte_code(this->numReactions()), all_byte_code(),
-      sparseStoichiometry(numSpecies(),numReactions()),
-      prop( this->numThreads(), Eigen::VectorXd::Zero(this->numReactions()) ),
-      interpreter( this->numThreads() ),
-      tau( this->numThreads(), Eigen::VectorXd::Zero(this->numReactions()) )
+
+
+//  GenericGibsonBruckSSA(libsbml::Model *model, int ensembleSize, int seed,
+//               size_t opt_level=0, size_t num_threads=OpenMP::getMaxThreads())
+//    : StochasticSimulator(model, ensembleSize, seed, num_threads),
+//      ConstantStoichiometryMixin((BaseModel &)(*this)),
+//      byte_code(this->numReactions()), all_byte_code(),
+//      sparseStoichiometry(numSpecies(),numReactions()),
+//      prop( this->numThreads(), Eigen::VectorXd::Zero(this->numReactions()) ),
+//      interpreter( this->numThreads() ),
+//      tau( this->numThreads(), Eigen::VectorXd::Zero(this->numReactions()) )
+
+GenericGibsonBruckSSA(const Ast::Model &model, int ensembleSize, int seed,
+             size_t opt_level=0, size_t num_threads=OpenMP::getMaxThreads())
+  : StochasticSimulator(model, ensembleSize, seed, num_threads),
+    ConstantStoichiometryMixin((BaseModel &)(*this)),
+    byte_code(this->numReactions()), all_byte_code(),
+    sparseStoichiometry(numSpecies(),numReactions()),
+    prop( this->numThreads(), Eigen::VectorXd::Zero(this->numReactions()) ),
+    interpreter( this->numThreads() ),
+    tau( ensembleSize, Eigen::VectorXd::Zero(this->numReactions()) )
+
   {
-    // First, allocate and initialize byte-code instances:
+    // First, allocate and initialize bytecode instances:
     for (size_t i=0; i<byte_code.size(); i++) {
       byte_code[i] = new typename Engine::Code();
     }
@@ -112,7 +136,7 @@ public:
 
 
   /** Destructor, also frees byte-code instances. */
-  ~GenericGBSSA()
+  ~GenericGibsonBruckSSA()
   {
     for (size_t i=0; i < this->byte_code.size(); i++) {
       delete byte_code[i];
@@ -129,17 +153,16 @@ public:
 
   }
 
-
   /**
    * The stepper for the SSA
    */
   void run(double step)
   {
     // initialization
-    double t;			// time between reactions
-    size_t reaction;			// reaction number selected
+    double t;		// time elapsed
+    size_t reaction;    // reaction number selected
 
-#pragma omp parallel for if(this->numThreads()>1) num_threads(this->numThreads()) schedule(dynamic) private(propensitySum,tau,t,reaction)
+#pragma omp parallel for if(this->numThreads()>1) num_threads(this->numThreads()) schedule(dynamic) private(t,reaction)
     for(int sid=0;sid<this->ensembleSize;sid++)
     {
       t=0;
@@ -151,7 +174,6 @@ public:
       {
 
         double mintau=0.;
-        size_t reaction;
         for(size_t j=0; j<this->numReactions(); j++)
         {
             tau[sid](j) = -std::log(this->rand[OpenMP::getThreadNum()].rand()) / prop[OpenMP::getThreadNum()](j);
@@ -172,22 +194,16 @@ public:
         interpreter[OpenMP::getThreadNum()].run(this->observationMatrix.row(sid),prop[OpenMP::getThreadNum()]);
 
         // update time
-        t += tau;
+        t += mintau;
       } //end time step loop
     } // end ensemble loop
   }
 
-private:
-    /** Reserves space for propensities of each threads. */
-    std::vector< Eigen::VectorXd > prop;
-
-    /** Interpreter for each thread. */
-    std::vector< typename Engine::Interpreter > interpreter;
 };
 
 
 /** Defines the default implementation of the optimized SSA, using the byte-code interpreter. */
-typedef GenericGBSSA< Eval::bci::Engine<Eigen::VectorXd> > GBSSA;
+typedef GenericGibsonBruckSSA< Eval::bci::Engine<Eigen::VectorXd> > GibsonBruckSSA;
 
 }
 }
