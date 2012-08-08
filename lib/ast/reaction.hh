@@ -269,6 +269,9 @@ public:
    */
   void addModifier(Species *species);
 
+  /** Removes the given species as a modifier of this reaction. */
+  void remModifier(Species *species);
+
   /**
    * Returns true, if the reaction has modifiers.
    */

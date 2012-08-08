@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.6)
 PROJECT(intrinsic-noise-analyzer)
 
+
 #
 # Register own CMake extensions:
 #
@@ -16,6 +17,11 @@ ELSE()
 SET(CMAKE_INSTALL_LIBDIR "lib")
 ENDIF(UNIX AND NOT APPLE)
 
+# Ok we need this to avoid clang compiler on MacOSX 10.8+
+IF(APPLE)
+SET(CMAKE_C_COMPILER "gcc")
+SET(CMAKE_CXX_COMPILER "g++")
+ENDIF(APPLE)
 
 #
 # Search for libraries
@@ -27,7 +33,7 @@ INCLUDE_DIRECTORIES(${QT_QTCORE_INCLUDE_DIR} ${QT_QTGUI_INCLUDE_DIR})
 
 FIND_PACKAGE(Ginac REQUIRED)
 FIND_PACKAGE(LibSBML REQUIRED)
-FIND_PACKAGE(OpenMP REQUIRED)
+FIND_PACKAGE(OpenMP)
 FIND_PACKAGE(LLVM REQUIRED)
 
 

@@ -1,6 +1,11 @@
 #ifndef __INA_TRAFO_PARTIALMODEL_HH__
 #define __INA_TRAFO_PARTIALMODEL_HH__
 
+#include "ast/ast.hh"
+#include "eigen3/Eigen/Eigen"
+#include "ginacsupportforeigen.hh"
+
+
 namespace Fluc {
 namespace Trafo {
 
@@ -35,14 +40,38 @@ namespace Trafo {
  * the (original) species such that the first @c numIndep elements of the permuted species vector
  * are independent species and the remaining elements are dependent species.
  *
- * @todo Implement: Traverse tree and assign new indices to species as they are dependent or
- *       independent. Then assemble link matrix for dependen species.
- *
  * @ingroup trafo */
 class PartialModel
 {
+protected:
+  /** Holds the number of independent species. */
+  size_t numInd;
+
+  /** Holds the number of dependent species. */
+  size_t numDep;
+
+  /** Index vector implementing permutaion from original species vector into
+   * partitioning [IndSpecies : DepSpecies]. */
+  Eigen::VectorXi permutationVector;
+
+  /** A permutation matrix constructed from the permutation vector  @c permutationVector. */
+  Eigen::PermutationMatrix<Eigen::Dynamic> permutationM;
+
+  /** A link matrix, mapping the inpedpenden species vector to the original species vector.
+   *
+   * @note This matrix is a matrix of GiNaC expressions, you may need to evaluate all expressions
+   *       of this matrix to obtain a constant matrix of values. */
+  Eigen::MatrixXex linkMatrixSource;
+
+
 public:
-  PartialModel();
+  /** Constructor, assembles the @c permutationVector, @c permutationM and @c linkMatrixSource. */
+  PartialModel(Ast::Model &model);
+
+
+private:
+  /** Assembles a single link vector for a dependent species. */
+  Eigen::VectorXex _createLinkVector(Ast::Model &model, const Ast::Rule *rule);
 };
 
 

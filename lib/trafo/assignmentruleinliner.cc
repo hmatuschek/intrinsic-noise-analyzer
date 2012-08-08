@@ -61,7 +61,7 @@ AssignmentRuleInliner::act(Ast::Reaction *reac)
 
   // Remove species from set of modifiers:
   for (std::list<Ast::Species *>::iterator item = _remove_species.begin();
-       item != _remove_species.end(); ite++) {
+       item != _remove_species.end(); item++) {
     reac->remModifier(*item);
   }
   // Add replacements for modifier:

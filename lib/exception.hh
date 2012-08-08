@@ -3,7 +3,7 @@
 
 #include <exception>
 #include <sstream>
-#include <ginac/ginac.h>
+#include <ginac.h>
 
 
 namespace Fluc

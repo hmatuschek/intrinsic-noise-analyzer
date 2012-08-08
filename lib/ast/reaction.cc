@@ -217,6 +217,13 @@ Reaction::addModifier(Species *species)
 }
 
 
+void
+Reaction::remModifier(Species *species)
+{
+  modifiers.erase(species);
+}
+
+
 bool
 Reaction::hasModifier() const
 {
