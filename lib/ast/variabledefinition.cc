@@ -65,6 +65,7 @@ void
 VariableDefinition::setValue(GiNaC::ex value)
 {
   this->value = value;
+  this->has_value = true;
 }
 
 

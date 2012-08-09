@@ -47,7 +47,7 @@ Substitution::_normalize_substitution_table()
 
     for (; item!=_substitution_table.end(); item++) {
       item->second = item->second.subs(_substitution_table);
-      can_substitute |= _has_substitue(item->second); item++;
+      can_substitute |= _has_substitue(item->second);
     }
 
     _check_substitution_table();
@@ -59,7 +59,7 @@ bool
 Substitution::_has_substitue(GiNaC::ex expr)
 {
   for (GiNaC::exmap::iterator item=_substitution_table.begin(); item!=_substitution_table.end(); item++) {
-    if (expr.has(item->second)) { return true; }
+    if (expr.has(item->first)) { return true; }
   }
 
   return false;

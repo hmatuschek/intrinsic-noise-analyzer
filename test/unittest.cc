@@ -238,7 +238,7 @@ TestCase::assertEqual(const GiNaC::ex &t, const GiNaC::ex &e, const std::string 
   if (!e.is_equal(t))
   {
       std::stringstream str;
-      str << "Ginac expressions not equal"
+      str << "Ginac expressions " << e << " and " << t << " are not equal"
           << " in file "<< file << " in line " << line;
       throw TestFailure(str.str());
   }

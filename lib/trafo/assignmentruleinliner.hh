@@ -2,6 +2,7 @@
 #define __INA_TRAFO_ASSIGNMENTRULEINLINER_HH__
 
 #include <ast/ast.hh>
+#include "filterflags.hh"
 #include "substitution.hh"
 
 
@@ -15,12 +16,6 @@ class AssignmentRuleCollector
     : public Ast::Visitor, Ast::VariableDefinition::Visitor
 {
 public:
-  /** Defines which class of variables, assignment rules are collected from. */
-  typedef enum {
-    FROM_SPECIES = 1,    ///< Collect assignment rules from species.
-    FROM_PARAMTERS = 2   ///< Collect assignment rules from paramters.
-  } Flags;
-
 protected:
   /** Substitutions are collected within this map. */
   Substitution &_substitutions;
@@ -29,7 +24,7 @@ protected:
 
 public:
   /** Constructor. */
-  AssignmentRuleCollector(Substitution &subs, unsigned flags=FROM_SPECIES);
+  AssignmentRuleCollector(Substitution &subs, unsigned flags=Filter::SPECIES);
 
   /** Handles variable definition. */
   virtual void visit(const Ast::VariableDefinition *var);
@@ -51,7 +46,7 @@ protected:
 public:
   /** Constructor, collects some assignment rules from species and/or parameters, depending
    * on @c flags. */
-  AssignmentRuleInliner(Ast::Model &model, unsigned flags=AssignmentRuleCollector::FROM_SPECIES);
+  AssignmentRuleInliner(Ast::Model &model, unsigned flags=Filter::SPECIES);
 
   /** Special handleing of reactions, as modifiers may be extendent. */
   virtual void act(Ast::Reaction *reac);
@@ -62,7 +57,7 @@ protected:
 
 public:
   /** Constructs and applies the inliner on the given model. */
-  static void apply(Ast::Model &model, unsigned flags=AssignmentRuleCollector::FROM_SPECIES);
+  static void apply(Ast::Model &model, unsigned flags=Filter::SPECIES);
 };
 
 

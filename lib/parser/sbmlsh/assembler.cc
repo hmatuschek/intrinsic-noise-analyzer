@@ -325,7 +325,7 @@ Assembler::processCompartmentDefinitions(Parser::ConcreteSyntaxTree &comp)
   /* CompartmentDefinitionList =        : comp
    *  Identifier                          : comp[0]
    *  ["<" Identifier]                    : comp[1]
-   *  ["=" Expression]                        : comp[2], Number: comp[2][1]
+   *  ["=" Expression]                        : comp[2], Expression: comp[2][0][1]
    *  [QuotedString]                      : comp[3]  (token)
    *  [EOL CompartmentDefinitionList];    : comp[4] */
 

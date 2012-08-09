@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
     runner.addSuite(ODETest::suite());
   if (0 == skipped_tests.count("ModelCopy"))
     runner.addSuite(ModelCopyTest::suite());
-  if (0 == skipped_tests.count("MersenneTwister"))
+  if (0 == skipped_tests.count("RNG"))
     runner.addSuite(MersenneTwisterTest::suite());
   if (0 == skipped_tests.count("Regression"))
     runner.addSuite(RegressionTest::suite());

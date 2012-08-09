@@ -21,10 +21,10 @@ AssignmentRuleCollector::visit(const Ast::VariableDefinition *var)
   }
 
   // If var is a species ...
-  if ( Ast::Node::isSpecies(var) && (_flags & FROM_SPECIES) ) {
-    _substitutions.add(var->getSymbol(), var->getRule()->getRule());
-  } else if ( Ast::Node::isParameter(var) && (_flags & FROM_PARAMTERS)) {
-    _substitutions.add(var->getSymbol(), var->getRule()->getRule());
+  if ( Ast::Node::isSpecies(var) && (_flags & Filter::SPECIES) ) {
+    _substitutions.add(var->getSymbol(), var->getRule()->getRule(), false);
+  } else if ( Ast::Node::isParameter(var) && (_flags & Filter::PARAMETERS)) {
+    _substitutions.add(var->getSymbol(), var->getRule()->getRule(), false);
   }
 }
 
@@ -39,6 +39,8 @@ AssignmentRuleInliner::AssignmentRuleInliner(Ast::Model &model, unsigned flags)
   // First, collect assignment rules
   AssignmentRuleCollector collector(*this, flags);
   model.accept(collector);
+  // Then normalize collected substitutions
+  this->normalize();
 }
 
 

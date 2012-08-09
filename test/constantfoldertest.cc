@@ -8,9 +8,8 @@
 using namespace Fluc;
 
 
-
 void
-ConstantFolderTest::testConstantFolder()
+ConstantFolderTest::setUp()
 {
   std::stringstream text;
 
@@ -34,21 +33,57 @@ ConstantFolderTest::testConstantFolder()
        << "    cytosol*k1*ES: k1=1" << std::endl;   //
 
   // parse model
-  Ast::Model *model = Parser::Sbmlsh::importModel(text);
-  // fold constants
-  Trafo::ConstantFolder folder(*model); folder.apply(*model);
+  _model = Parser::Sbmlsh::importModel(text);
+}
 
-  GiNaC::ex E  = model->getSpecies("E")->getSymbol();
-  GiNaC::ex S  = model->getSpecies("S")->getSymbol();
-  GiNaC::ex ES = model->getSpecies("ES")->getSymbol();
+
+void
+ConstantFolderTest::tearDown()
+{
+  delete _model;
+}
+
+
+
+void
+ConstantFolderTest::testConstantFolder()
+{
+  // fold constants
+  Trafo::ConstantFolder folder(*_model); folder.apply(*_model);
+
+  GiNaC::ex E  = _model->getSpecies("E")->getSymbol();
+  GiNaC::ex S  = _model->getSpecies("S")->getSymbol();
+  GiNaC::ex ES = _model->getSpecies("ES")->getSymbol();
 
   UT_ASSERT_EQUAL(
-        model->getReaction("veq")->getKineticLaw()->getRateLaw(),
+        _model->getReaction("veq")->getKineticLaw()->getRateLaw(),
         1e5*(1e6*E*S-0.2*ES));
 
   UT_ASSERT_EQUAL(
-        model->getReaction("vcat")->getKineticLaw()->getRateLaw(),
+        _model->getReaction("vcat")->getKineticLaw()->getRateLaw(),
         1e5*ES);
+}
+
+
+void
+ConstantFolderTest::testFolderFilter()
+{
+  // fold only constant parameters:
+  Trafo::ConstantFolder folder(*_model, Trafo::Filter::PARAMETERS);
+  folder.apply(*_model);
+
+  GiNaC::ex C  = _model->getCompartment("cytosol")->getSymbol();
+  GiNaC::ex E  = _model->getSpecies("E")->getSymbol();
+  GiNaC::ex S  = _model->getSpecies("S")->getSymbol();
+  GiNaC::ex ES = _model->getSpecies("ES")->getSymbol();
+
+  UT_ASSERT_EQUAL(
+        _model->getReaction("veq")->getKineticLaw()->getRateLaw().expand(),
+        (C*(1e6*E*S-0.2*ES)).expand());
+
+  UT_ASSERT_EQUAL(
+        _model->getReaction("vcat")->getKineticLaw()->getRateLaw().expand(),
+        (C*ES).expand());
 }
 
 
@@ -56,7 +91,12 @@ UnitTest::TestSuite *
 ConstantFolderTest::suite()
 {
   UnitTest::TestSuite *s = new UnitTest::TestSuite("Tests Trafo::ConstantFolder.");
+
   s->addTest(new UnitTest::TestCaller<ConstantFolderTest>(
-               "const paramter folding", &ConstantFolderTest::testConstantFolder));
+               "constant folding", &ConstantFolderTest::testConstantFolder));
+
+  s->addTest(new UnitTest::TestCaller<ConstantFolderTest>(
+               "const paramter folding", &ConstantFolderTest::testFolderFilter));
+
   return s;
 }

@@ -21,11 +21,11 @@ ConstSubstitutionCollector::visit(const Ast::VariableDefinition *var)
   // Skip non constant variables:
   if ( (! var->isConst()) || (! var->hasValue()) ) return;
 
-  if (Ast::Node::isSpecies(var) && (_flags & FROM_SPECIES) ) {
+  if (Ast::Node::isSpecies(var) && (_flags & Filter::SPECIES) ) {
     _substitutions.add(var->getSymbol(), var->getValue(), false);
-  } else if (Ast::Node::isParameter(var) && (_flags & FROM_PARAMTERS)) {
+  } else if (Ast::Node::isParameter(var) && (_flags & Filter::PARAMETERS)) {
     _substitutions.add(var->getSymbol(), var->getValue(), false);
-  } else if (Ast::Node::isCompartment(var) && (_flags & FROM_COMPARTMENTS)) {
+  } else if (Ast::Node::isCompartment(var) && (_flags & Filter::COMPARTMENTS)) {
     _substitutions.add(var->getSymbol(), var->getValue(), false);
   }
 }

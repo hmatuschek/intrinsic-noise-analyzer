@@ -2,6 +2,7 @@
 #define __INA_TRAFO_CONSTANTFOLDER_HH__
 
 #include "ast/ast.hh"
+#include "filterflags.hh"
 #include "substitution.hh"
 
 
@@ -16,14 +17,6 @@ namespace Trafo {
 class ConstSubstitutionCollector
     : public Ast::Visitor, public Ast::VariableDefinition::Visitor
 {
-public:
-  /** Flags to filter variable types for constant folding. */
-  typedef enum {
-    FROM_SPECIES = 1,
-    FROM_PARAMTERS = 2,
-    FROM_COMPARTMENTS = 4
-  } Flags;
-
 protected:
   /** Weak reference to the @c Substitution operator collecting the substitutions. */
   Substitution &_substitutions;
@@ -34,8 +27,7 @@ protected:
 
 public:
   /** Constructor. */
-  ConstSubstitutionCollector(Substitution &substitutions,
-                             unsigned flags=FROM_SPECIES|FROM_PARAMTERS|FROM_COMPARTMENTS);
+  ConstSubstitutionCollector(Substitution &substitutions, unsigned flags=Filter::ALL);
 
   /** Check if the variable is constant. */
   virtual void visit(const Ast::VariableDefinition *var);
@@ -72,9 +64,7 @@ class ConstantFolder
 {
 public:
   /** Constructor, collects all substitutions of constant variables and assignment rules. */
-  ConstantFolder(
-    const Ast::Model &model,
-    unsigned flags = ConstSubstitutionCollector::FROM_SPECIES|ConstSubstitutionCollector::FROM_PARAMTERS|ConstSubstitutionCollector::FROM_COMPARTMENTS);
+  ConstantFolder(const Ast::Model &model, unsigned flags = Filter::ALL);
 
   /** Tiny helper function to fold all constants in the given model. */
   void apply(Ast::Model &model);

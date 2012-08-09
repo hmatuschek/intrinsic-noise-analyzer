@@ -14,8 +14,7 @@ RegressionTest::testConstSpecies()
   Ast::Species *S1 = sbml_model->getSpecies("S1");
   UT_ASSERT(S1->isConst());
 
-  UT_ASSERT_THROW(Models::REmodel re_model(*sbml_model),
-                  Fluc::SBMLFeatureNotSupported);
+  Models::REmodel re_model(*sbml_model);
 
   delete sbml_model;
 }
