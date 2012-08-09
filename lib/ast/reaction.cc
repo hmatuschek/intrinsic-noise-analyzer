@@ -422,7 +422,7 @@ Reaction::traverse(Ast::Operator &op)
  * Implementation of kinetic law:
  * ********************************************************************************************* */
 KineticLaw::KineticLaw(GiNaC::ex expr)
-  : Node(Node::KINETIC_LAW), Scope(false), expression(expr)
+  : Node(Node::KINETIC_LAW), Scope(0, false), expression(expr)
 {
   // Done.
 }

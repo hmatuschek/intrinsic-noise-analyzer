@@ -9,7 +9,7 @@ using namespace Fluc::Ast;
 
 
 Module::Module(const std::string &name)
-  : Scope(false), name(name), time_symbol("t"),
+  : Scope(0, false), name(name), time_symbol("t"),
     substance_unit(ScaledBaseUnit(ScaledBaseUnit::MOLE, 1, 0, 1)),
     volume_unit(ScaledBaseUnit(ScaledBaseUnit::LITRE, 1, 0, 1)),
     area_unit(ScaledBaseUnit(ScaledBaseUnit::METRE, 1, 0, 2)),
