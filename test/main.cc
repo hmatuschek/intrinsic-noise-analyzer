@@ -12,6 +12,7 @@
 #include "optionparsertest.hh"
 #include "odetest.hh"
 #include "modelcopytest.hh"
+#include "constantfoldertest.hh"
 #include "benchmark.hh"
 
 #include "utils/option_parser.hh"
@@ -68,8 +69,6 @@ int main(int argc, char *argv[])
     runner.addSuite(ODETest::suite());
   if (0 == skipped_tests.count("ModelCopy"))
     runner.addSuite(ModelCopyTest::suite());
-  //if (0 == skipped_tests.count("LNA"))
-  //  runner.addSuite(LNATest::suite());
   if (0 == skipped_tests.count("MersenneTwister"))
     runner.addSuite(MersenneTwisterTest::suite());
   if (0 == skipped_tests.count("Regression"))
@@ -78,6 +77,8 @@ int main(int argc, char *argv[])
     runner.addSuite(SBMLSHParserTest::suite());
   if (0 == skipped_tests.count("OptionParser"))
     runner.addSuite(OptionParserTest::suite());
+  if (0 == skipped_tests.count("ConstantFolder"))
+    runner.addSuite(ConstantFolderTest::suite());
   if (0 == skipped_tests.count("Benchmark"))
     runner.addSuite(Benchmark::suite());
 

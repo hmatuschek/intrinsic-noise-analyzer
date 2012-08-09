@@ -421,6 +421,15 @@ Model::getReaction(size_t idx) const
   return this->reaction_vector[idx];
 }
 
+Reaction *
+Model::getReaction(const std::string &id) {
+  return Module::getReaction(id);
+}
+
+Reaction * const
+Model::getReaction(const std::string &id) const {
+  return Module::getReaction(id);
+}
 
 size_t
 Model::getReactionIdx(const std::string &id) const

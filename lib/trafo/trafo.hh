@@ -67,5 +67,11 @@
  */
 
 #include "assertions.hh"
+#include "substitution.hh"
+#include "constantfolder.hh"
+#include "assignmentruleinliner.hh"
+#include "algebraicconstraintsolver.hh"
+#include "partialmodel.hh"
+
 
 #endif

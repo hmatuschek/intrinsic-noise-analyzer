@@ -306,6 +306,12 @@ public:
    */
   Reaction *getReaction(size_t idx);
 
+  /** Returns the reaction by identifier. */
+  Reaction *getReaction(const std::string &id);
+
+  /** Returns the reaction by identifier. */
+  Reaction * const getReaction(const std::string &id) const;
+
   /**
    * Returns the reaction by index.
    */
