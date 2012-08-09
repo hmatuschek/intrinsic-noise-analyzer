@@ -1,15 +1,15 @@
-#include "importmodeldialog.hh"
+#include "exportmodeldialog.hh"
 #include <QFormLayout>
 #include <QFileInfo>
 
 
-ImportModelDialog::ImportModelDialog(QWidget *parent) :
+ExportModelDialog::ExportModelDialog(QWidget *parent) :
   QDialog(parent)
 {
-  setWindowTitle("Import Model...");
+  setWindowTitle("Export Model...");
 
   _file_selector = new FileSelector(
-        FileSelector::OpenFile,
+        FileSelector::SaveFile,
         tr("SBML models (*.xml *.sbml);;SBML-SH models (*.mod *.sbmlsh)"));
   _file_selector->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
 
@@ -19,7 +19,7 @@ ImportModelDialog::ImportModelDialog(QWidget *parent) :
   _format_selector->addItem(tr("SBML-SH Model"), unsigned(SBMLSH_MODEL));
   _format_selector->setCurrentIndex(0);
 
-  _buttons = new QDialogButtonBox(QDialogButtonBox::Open|QDialogButtonBox::Cancel);
+  _buttons = new QDialogButtonBox(QDialogButtonBox::Save|QDialogButtonBox::Cancel);
 
   QFormLayout *form_layout = new QFormLayout();
   form_layout->addRow(tr("Select a file:"), _file_selector);
@@ -41,7 +41,7 @@ ImportModelDialog::ImportModelDialog(QWidget *parent) :
 
 
 void
-ImportModelDialog::__on_filename_selected(QString filename)
+ExportModelDialog::__on_filename_selected(QString filename)
 {
   // Get file extension:
   QFileInfo info(filename);
@@ -51,24 +51,18 @@ ImportModelDialog::__on_filename_selected(QString filename)
   } else if ( ("mod" == info.suffix()) || ("sbmlsh" == info.suffix()) ){
     _format_selector->setCurrentIndex(1);
   }
-
-  if (info.exists()) {
-    _buttons->button(QDialogButtonBox::Open)->setEnabled(true);
-  } else {
-    _buttons->button(QDialogButtonBox::Open)->setEnabled(false);
-  }
 }
 
 
 QString
-ImportModelDialog::getFileName() const
+ExportModelDialog::getFileName() const
 {
   return _file_selector->getFileName();
 }
 
 
-ImportModelDialog::Format
-ImportModelDialog::getFormat() const
+ExportModelDialog::Format
+ExportModelDialog::getFormat() const
 {
   return Format(_format_selector->itemData(_format_selector->currentIndex()).toUInt());
 }

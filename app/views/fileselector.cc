@@ -3,8 +3,8 @@
 #include <QFileDialog>
 
 
-FileSelector::FileSelector(const QString &filter, QWidget *parent) :
-  QWidget(parent), _filter(filter)
+FileSelector::FileSelector(Mode mode, const QString &filter, QWidget *parent) :
+  QWidget(parent), _mode(mode), _filter(filter)
 {
   _filename = new QLineEdit();
   _choose = new QPushButton("choose");
@@ -22,8 +22,17 @@ FileSelector::FileSelector(const QString &filter, QWidget *parent) :
 
 void FileSelector::setFilter(const QString &filter) { _filter = filter; }
 
+
 void FileSelector::__on_choose_file() {
-  QString filename = QFileDialog::getOpenFileName(0, "Choose file...", "", _filter);
+  QString filename;
+  if (OpenFile == _mode) {
+    filename = QFileDialog::getOpenFileName(0, "Choose file...", "", _filter);
+  } else if (SaveFile == _mode) {
+    filename = QFileDialog::getSaveFileName(0, "Choose file...", "", _filter);
+  } else if (Directory == _mode) {
+    filename = QFileDialog::getExistingDirectory(0, "Choose directory...", "");
+  }
+
   _filename->setText(filename);
   emit fileSelected(filename);
 }

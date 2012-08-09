@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
   QApplication qapp(argc, argv);
 
   // Instantiate our own application model, holds all the data of the running application
-  Application *app = Application::factory();
+  Application *app = Application::getApp();
 
   // Create new main-window, this initializes all the view-part
   MainWindow *window = new MainWindow();

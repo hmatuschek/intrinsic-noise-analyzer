@@ -12,8 +12,13 @@ class FileSelector : public QWidget
   Q_OBJECT
 
 public:
+  typedef enum {
+    OpenFile, SaveFile, Directory
+  } Mode;
+
+public:
   /** Constructor. */
-  explicit FileSelector(const QString &filter = QString(), QWidget *parent = 0);
+  explicit FileSelector(Mode mode=OpenFile, const QString &filter = QString(), QWidget *parent = 0);
 
   /** Set filter. */
   void setFilter(const QString &filter);
@@ -32,6 +37,7 @@ private slots:
   void __on_filename_changed();
 
 private:
+  Mode _mode;
   QString _filter;
   QLineEdit *_filename;
   QPushButton *_choose;

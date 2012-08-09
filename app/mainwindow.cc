@@ -62,10 +62,6 @@ void
 MainWindow::createActions()
 {
   // Define some actions for main menu:
-  this->openModelAct = new QAction(tr("&Open"), this);
-  this->openModelAct->setShortcuts(QKeySequence::Open);
-  this->openModelAct->setStatusTip(tr("Opens a SBML file."));
-
   this->quitAct = new QAction(tr("&Quit"), this);
   this->quitAct->setShortcuts(QKeySequence::Quit);
   this->quitAct->setStatusTip(tr("Quits the application."));
@@ -81,7 +77,6 @@ MainWindow::createActions()
   this->showLogsAct->setStatusTip(tr("Shows the log window."));
 
   // Connect signals:
-  connect(this->openModelAct, SIGNAL(triggered()), this, SLOT(openModel()));
   connect(this->quitAct, SIGNAL(triggered()), this, SLOT(quit()));
   connect(this->aboutAct, SIGNAL(triggered()), this, SLOT(about()));
   connect(this->onlineHelp, SIGNAL(triggered()), this, SLOT(openTutorial()));
@@ -92,10 +87,12 @@ MainWindow::createActions()
 void
 MainWindow::createMenus()
 {
-  this->fileMenu = this->menuBar()->addMenu(tr("&File"));
-  this->fileMenu->addAction(this->openModelAct);
-  this->fileMenu->addSeparator();
-  this->fileMenu->addAction(this->quitAct);
+  fileMenu = menuBar()->addMenu(tr("&Model"));
+  fileMenu->addAction(Application::getApp()->importModelAction());
+  fileMenu->addAction(Application::getApp()->exportModelAction());
+  fileMenu->addAction(Application::getApp()->closeModelAction());
+  fileMenu->addSeparator();
+  fileMenu->addAction(quitAct);
 
   this->analysisMenu = this->menuBar()->addMenu(tr("&Analyses"));
 
@@ -113,61 +110,18 @@ MainWindow::getAnalysesMenu()
 }
 
 
-void
-MainWindow::openModel()
-{
-  // Show a file-dialog for XML files:
-  ImportModelDialog *dialog = new ImportModelDialog();
-  if (QDialog::Accepted != dialog->exec()) return;
-
-  QString fileName = dialog->getFileName();
-  ImportModelDialog::Format format = dialog->getFormat();
-  delete dialog;
-
-  DocumentItem *new_doc = 0;
-  try {
-    // Try to construct model from file:
-    if (ImportModelDialog::SBML_MODEL == format) {
-      new_doc = new DocumentItem(Parser::Sbml::importModel(fileName.toStdString()));
-    } else if (ImportModelDialog::SBMLSH_MODEL == format) {
-      new_doc = new DocumentItem(Parser::Sbmlsh::importModel(fileName.toStdString()));
-    }
-  } catch (Fluc::Exception &err) {
-    QMessageBox::warning(0, tr("Can not open SBML model"), err.what());
-    return;
-  }
-
-  // Signal application about new model:
-  Application::getApp()->docTree()->addDocument(new_doc);
-}
-
-
+void MainWindow::quit() { QApplication::exit(0); }
 
 void
-MainWindow::quit()
-{
-  QApplication::exit(0);
-}
-
-
-void
-MainWindow::about()
-{
+MainWindow::about() {
   AboutDialog about_dialog;
   about_dialog.setModal(true);
   about_dialog.exec();
 }
 
-
 void
-MainWindow::openTutorial()
-{
+MainWindow::openTutorial() {
   QDesktopServices::openUrl(QUrl("http://code.google.com/p/intrinsic-noise-analyzer/wiki/Help"));
 }
 
-
-void
-MainWindow::showLogs()
-{
-  this->logWindow->setVisible(true);
-}
+void MainWindow::showLogs() { this->logWindow->setVisible(true); }

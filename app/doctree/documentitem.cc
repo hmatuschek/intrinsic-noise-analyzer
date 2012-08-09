@@ -29,7 +29,7 @@ DocumentItem::DocumentItem(const QString &path, QObject *parent)
 
   // Construct context menu:
   this->closeAct = new QAction(tr("close document"), this);
-  QObject::connect(this->closeAct, SIGNAL(triggered()), this, SLOT(onDocumentClose()));
+  QObject::connect(this->closeAct, SIGNAL(triggered()), this, SLOT(closeDocument()));
 
   this->contextMenu = new QMenu();
   this->contextMenu->addAction(this->closeAct);
@@ -55,7 +55,7 @@ DocumentItem::DocumentItem(Fluc::Ast::Model *model, const QString &path, QObject
 
   // Construct context menu:
   this->closeAct = new QAction(tr("close document"), this);
-  QObject::connect(this->closeAct, SIGNAL(triggered()), this, SLOT(onDocumentClose()));
+  QObject::connect(this->closeAct, SIGNAL(triggered()), this, SLOT(closeDocument()));
 
   this->contextMenu = new QMenu();
   this->contextMenu->addAction(this->closeAct);
@@ -120,12 +120,11 @@ DocumentItem::getLabel() const
  * Implementation of event callbacks:
  * ******************************************************************************************** */
 void
-DocumentItem::onDocumentClose()
+DocumentItem::closeDocument()
 {
   if (this->analyses->tasksRunning())
   {
     QMessageBox::warning(0, tr("Can not close document"), tr("There are analyses in grogress."));
-
     return;
   }
 
