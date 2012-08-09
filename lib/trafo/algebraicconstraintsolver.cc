@@ -1,5 +1,6 @@
 #include "algebraicconstraintsolver.hh"
 #include "exception.hh"
+#include "utils/logger.hh"
 
 
 using namespace Fluc;
@@ -34,11 +35,7 @@ AlgebraicConstraintSolver::AlgebraicConstraintSolver(Ast::Model &model)
       throw err;
     }
     // If the species has no initial value, try to solve the system w.r.t. this species first:
-    if (! species->hasValue()) {
-      _constraint_species.prepend(species->getSymbol());
-    } else {
-      _constraint_species.append(species->getSymbol());
-    }
+    _constraint_species.append(species->getSymbol());
   }
 }
 
@@ -133,6 +130,11 @@ AlgebraicConstraintSolver::apply(Ast::Model &model)
     // Get species of symbol and add an assignment rule
     Ast::Species *species = model.getSpecies(GiNaC::ex_to<GiNaC::symbol>(lhs));
     species->setRule(new Ast::AssignmentRule(rhs));
+
+    // Log:
+    Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
+    message << "Solved constraints to assigmentrule: " << lhs << " = " << rhs;
+    Utils::Logger::get().log(message);
   }
 
   // Now remove all constraints that where processed

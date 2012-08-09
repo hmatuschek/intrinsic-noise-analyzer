@@ -364,14 +364,22 @@ Reaction::dump(std::ostream &str)
   // First, dump ractants of reaction:
   for (Reaction::iterator iter = this->reacBegin(); iter != this->reacEnd(); iter++)
   {
-    str << iter->first << "(" << iter->second << ") + ";
+    if (1 == iter->second) {
+      str << iter->first->getSymbol();
+    } else {
+      str << iter->second << " " << iter->first->getSymbol() << " + ";
+    }
   }
   str << " => ";
 
   // Then dump products:
   for (Reaction::iterator iter = this->prodBegin(); iter != this->prodEnd(); iter++)
   {
-    str << iter->first << "(" << iter->second << ") + ";
+    if (1 == iter->second) {
+      str << iter->first->getSymbol() << " + ";
+    } else {
+      str << iter->second << " " << iter->first->getSymbol() << " + ";
+    }
   }
   str << std::endl << " with rate ";
   this->kinetic_law->dump(str);

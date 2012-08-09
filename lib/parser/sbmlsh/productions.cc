@@ -1017,7 +1017,7 @@ ReactionEquationProduction::ReactionEquationProduction()
       new Fluc::Parser::Production(
         3, StoichiometrySumProduction::get(),
         new Fluc::Parser::TokenProduction(T_RARROW),
-        StoichiometrySumProduction::get());
+        new Fluc::Parser::OptionalProduction(StoichiometrySumProduction::get()));
 
   // "->" StoichiometrySum
   this->alternatives[1] =

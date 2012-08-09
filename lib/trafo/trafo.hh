@@ -71,6 +71,7 @@
 #include "constantfolder.hh"
 #include "assignmentruleinliner.hh"
 #include "algebraicconstraintsolver.hh"
+#include "conservationanalysis.hh"
 #include "partialmodel.hh"
 
 
