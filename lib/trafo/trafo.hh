@@ -72,6 +72,7 @@
 #include "assignmentruleinliner.hh"
 #include "algebraicconstraintsolver.hh"
 #include "conservationanalysis.hh"
+#include "reversiblereactionconverter.hh"
 #include "partialmodel.hh"
 
 

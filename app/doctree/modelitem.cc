@@ -40,6 +40,31 @@ ModelItem::ModelItem(const QString &file_path, QObject *parent) :
 }
 
 
+ModelItem::ModelItem(Fluc::Ast::Model *model, QObject *parent) :
+  QObject(parent), base_model(0), itemLabel("Model")
+{
+  // Now, assemble a base model from SBML:
+  base_model = new Models::BaseModel(*model);
+
+  // Assemble child-items:
+  CompartmentsItem *compartments = new CompartmentsItem(this->base_model, this);
+  compartments->setTreeParent(this);
+
+  SpeciesItem *species = new SpeciesItem(this->base_model, this);
+  species->setTreeParent(this);
+
+  ParametersItem *parameters = new ParametersItem(this->base_model, this);
+  parameters->setTreeParent(this);
+
+  ReactionsItem *reactions = new ReactionsItem(this->base_model, this);
+  reactions->setTreeParent(this);
+
+  this->_children.append(compartments);
+  this->_children.append(species);
+  this->_children.append(reactions);
+  this->_children.append(parameters);
+}
+
 
 ModelItem::~ModelItem()
 {

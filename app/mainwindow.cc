@@ -10,6 +10,7 @@
 #include "application.hh"
 #include "ina.hh"
 #include "views/aboutdialog.hh"
+#include "views/importmodeldialog.hh"
 
 
 using namespace Fluc;
@@ -116,21 +117,22 @@ void
 MainWindow::openModel()
 {
   // Show a file-dialog for XML files:
-  QString fileName = QFileDialog::getOpenFileName(this, tr("Open a SBML Model"), "", "*.xml");
-  if (fileName.isEmpty())
-  {
-    // Done.
-    return;
-  }
+  ImportModelDialog *dialog = new ImportModelDialog();
+  if (QDialog::Accepted != dialog->exec()) return;
+
+  QString fileName = dialog->getFileName();
+  ImportModelDialog::Format format = dialog->getFormat();
+  delete dialog;
 
   DocumentItem *new_doc = 0;
-  try
-  {
+  try {
     // Try to construct model from file:
-    new_doc = new DocumentItem(fileName);
-  }
-  catch (Fluc::Exception &err)
-  {
+    if (ImportModelDialog::SBML_MODEL == format) {
+      new_doc = new DocumentItem(Parser::Sbml::importModel(fileName.toStdString()));
+    } else if (ImportModelDialog::SBMLSH_MODEL == format) {
+      new_doc = new DocumentItem(Parser::Sbmlsh::importModel(fileName.toStdString()));
+    }
+  } catch (Fluc::Exception &err) {
     QMessageBox::warning(0, tr("Can not open SBML model"), err.what());
     return;
   }

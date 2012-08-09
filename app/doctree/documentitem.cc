@@ -37,6 +37,31 @@ DocumentItem::DocumentItem(const QString &path, QObject *parent)
 
 
 
+DocumentItem::DocumentItem(Fluc::Ast::Model *model, const QString &path, QObject *parent)
+  : QObject(parent), DocumentTreeItem(), file_path(path)
+{
+  this->model = new ModelItem(model, this);
+  this->model->setTreeParent(this);
+
+  this->analyses = new AnalysesItem(this);
+  this->analyses->setTreeParent(this);
+
+  this->_children.append(this->model);
+  this->_children.append(this->analyses);
+
+  // Construct label:
+  this->label
+      = QString("%1 (%2)").arg(this->getModel().getName().c_str()).arg(this->file_path);
+
+  // Construct context menu:
+  this->closeAct = new QAction(tr("close document"), this);
+  QObject::connect(this->closeAct, SIGNAL(triggered()), this, SLOT(onDocumentClose()));
+
+  this->contextMenu = new QMenu();
+  this->contextMenu->addAction(this->closeAct);
+}
+
+
 DocumentItem::~DocumentItem()
 {
   // mark Context menu for deletion:

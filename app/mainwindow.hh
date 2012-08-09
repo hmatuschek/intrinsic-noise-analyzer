@@ -43,9 +43,7 @@ public slots:
 
 
 private slots:
-  /**
-   * When triggered, shows a "open model" dialog.
-   */
+  /** When triggered, shows a "open model" dialog. */
   void openModel();
 
   /**

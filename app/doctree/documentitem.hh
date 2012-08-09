@@ -43,15 +43,22 @@ protected:
 
 
 public:
-  /**
-   * Constructor.
-   *
+  /** Constructor.
    * The constructor will parse the given SBML file and constructs an @c Models::BaseModel instance.
    *
    * @param path Specifies the path of the SBML file to be parsed.
    * @param parent Specifies the "logical" parent of the instance.
    */
   explicit DocumentItem(const QString &path, QObject *parent=0);
+
+  /** Constructor.
+   * The constructor will parse the given SBML file and constructs an @c Models::BaseModel instance.
+   *
+   * @param model The parsed Model.
+   * @param path Specifies the path of the file.
+   * @param parent Specifies the "logical" parent of the instance.
+   */
+  explicit DocumentItem(Fluc::Ast::Model *model, const QString &path=QString(), QObject *parent=0);
 
   /**
    * Destructor.

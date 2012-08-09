@@ -79,12 +79,14 @@ SET(ina_app_views_SOURCES
     views/documentsview.cc views/parameterview.cc views/reactionview.cc
     views/reactionequationrenderer.cc views/compartmentview.cc views/speciesview.cc
     views/plotview.cc views/taskerrorwidget.cc views/aboutdialog.cc
-    views/taskview.cc views/generaltaskwizard.cc views/varianceplot.cc views/logwindow.cc)
+    views/taskview.cc views/generaltaskwizard.cc views/varianceplot.cc views/logwindow.cc
+    views/fileselector.cc views/importmodeldialog.cc)
 SET(ina_app_views_HEADERS
     views/documentsview.hh views/parameterview.hh views/reactionview.hh
     views/reactionequationrenderer.hh views/compartmentview.hh views/speciesview.hh
     views/plotview.hh views/taskerrorwidget.hh views/aboutdialog.hh
-    views/taskview.hh views/generaltaskwizard.hh views/varianceplot.hh views/logwindow.hh)
+    views/taskview.hh views/generaltaskwizard.hh views/varianceplot.hh views/logwindow.hh
+    views/fileselector.hh views/importmodeldialog.hh)
 
 
 SET(ina_app_SOURCES

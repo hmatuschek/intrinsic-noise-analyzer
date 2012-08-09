@@ -20,10 +20,11 @@ class ModelItem : public QObject, public DocumentTreeItem
   Q_OBJECT
 
 public:
-  /**
-   * Constructs a model for the given SBML document.
-   */
+  /** Constructs a model for the given SBML document. */
   explicit ModelItem(const QString &file_path, QObject *parent = 0);
+
+  /** Constructs a model for the given SBML document. */
+  explicit ModelItem(Fluc::Ast::Model *model, QObject *parent = 0);
 
   /**
    * Destructor. Also frees the held SBML document.
