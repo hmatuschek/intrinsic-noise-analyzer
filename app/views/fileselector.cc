@@ -1,6 +1,8 @@
 #include "fileselector.hh"
 #include <QHBoxLayout>
 #include <QFileDialog>
+#include <QCompleter>
+#include <QFileSystemModel>
 
 
 FileSelector::FileSelector(Mode mode, const QString &filter, QWidget *parent) :
@@ -9,6 +11,16 @@ FileSelector::FileSelector(Mode mode, const QString &filter, QWidget *parent) :
   _filename = new QLineEdit();
   _choose = new QPushButton("choose");
 
+  // Orgastic cmd-line experience:
+  QCompleter *completer = new QCompleter(this);
+  QFileSystemModel *fsmodel = new QFileSystemModel(completer);
+  fsmodel->setRootPath(QDir::rootPath());
+  completer->setModel(fsmodel);
+  completer->setCompletionMode(QCompleter::InlineCompletion);
+  _filename->setCompleter(completer);
+  _filename->setMinimumWidth(300);
+
+  // Assemble layout
   QHBoxLayout *layout = new QHBoxLayout();
   layout->setMargin(0);
   layout->addWidget(_filename);

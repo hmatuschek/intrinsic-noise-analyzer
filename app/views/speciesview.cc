@@ -20,9 +20,11 @@ SpeciesView::SpeciesView(SpeciesItem *species ,QWidget *parent) :
   // Create buttons:
   _addSpeciesButton = new QPushButton("+");
   _addSpeciesButton->setToolTip(tr("Adds a new species."));
+  _addSpeciesButton->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
   _remSpeciesButton = new QPushButton("-");
   _remSpeciesButton->setToolTip(tr("Deletes the selected species"));
   _remSpeciesButton->setEnabled(false);
+  _remSpeciesButton->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
   // Create delegate for compartments:
   compartmentDelegate = new CompartmentDelegate(species->species()->model(), this);
@@ -43,7 +45,7 @@ SpeciesView::SpeciesView(SpeciesItem *species ,QWidget *parent) :
   QHBoxLayout *header = new QHBoxLayout();
   header->addWidget(_addSpeciesButton, 0, Qt::AlignLeft);
   header->addWidget(_remSpeciesButton, 0, Qt::AlignLeft);
-  header->addWidget(label, 0, Qt::AlignRight);
+  header->addWidget(label, 1, Qt::AlignRight);
 
   QVBoxLayout *layout = new QVBoxLayout();
   layout->addLayout(header, 0);
@@ -98,4 +100,6 @@ SpeciesView::onSelectionChanged(const QItemSelection &selected, const QItemSelec
   if (1 != indices.size()) { _remSpeciesButton->setEnabled(false); return; }
   QModelIndex index = indices.front();
   if (0 != index.column()) { _remSpeciesButton->setEnabled(false); return; }
+  // ok, allow removal of species:
+  _remSpeciesButton->setEnabled(true);
 }
