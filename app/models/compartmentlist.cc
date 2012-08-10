@@ -5,7 +5,7 @@
 
 
 CompartmentList::CompartmentList(Fluc::Ast::Model *model, QObject *parent)
-  : QAbstractTableModel(parent), model(model)
+  : QAbstractTableModel(parent), _model(model)
 {
   // Pass...
 }
@@ -20,7 +20,7 @@ CompartmentList::flags(const QModelIndex &index) const
   // Filter invalid indices:
   if (! index.isValid()) return Qt::NoItemFlags;
   if (5 <= index.column()) return Qt::NoItemFlags;
-  if (int(model->numParameters()) <= index.row()) return Qt::NoItemFlags;
+  if (int(_model->numParameters()) <= index.row()) return Qt::NoItemFlags;
 
   // Mark only column 1 & 2 editable
   if ( (1 == index.column()) || (2 == index.column()) ) item_flags |= Qt::ItemIsEditable;
@@ -34,10 +34,10 @@ CompartmentList::data(const QModelIndex &index, int role) const
 {
   // Filter invalid indices:
   if (! index.isValid() || 5 <= index.column()) { return QVariant(); }
-  if (int(this->model->numCompartments()) <= index.row()) { return QVariant(); }
+  if (int(this->_model->numCompartments()) <= index.row()) { return QVariant(); }
 
   // Get selected compartment:
-  Fluc::Ast::Compartment *comp = this->model->getCompartment(index.row());
+  Fluc::Ast::Compartment *comp = this->_model->getCompartment(index.row());
 
   // handle is-const flag:
   if (4 == index.column() && Qt::CheckStateRole == role) {
@@ -85,11 +85,11 @@ bool
 CompartmentList::setData(const QModelIndex &index, const QVariant &value, int role)
 {
   // Filter invald indices:
-  if (index.row() >= int(model->numCompartments())) return false;
+  if (index.row() >= int(_model->numCompartments())) return false;
   if (index.column() >= 5) return false;
 
   // Get compartment:
-  Fluc::Ast::Compartment *comp = model->getCompartment(index.row());
+  Fluc::Ast::Compartment *comp = _model->getCompartment(index.row());
 
   // If name is set
   if (1 == index.column()) {
@@ -104,7 +104,7 @@ CompartmentList::setData(const QModelIndex &index, const QVariant &value, int ro
     std::string expression = value.toString().toStdString();
     // parse expression
     GiNaC::ex new_value;
-    try { new_value = Fluc::Parser::Expr::parseExpression(expression, model); }
+    try { new_value = Fluc::Parser::Expr::parseExpression(expression, _model); }
     catch (Fluc::Exception &err) {
       Fluc::Utils::Message msg = LOG_MESSAGE(Fluc::Utils::Message::INFO);
       msg << "Can not parse expression: " << expression << ": " << err.what();
@@ -145,7 +145,7 @@ CompartmentList::headerData(int section, Qt::Orientation orientation, int role) 
 int
 CompartmentList::rowCount(const QModelIndex &parent) const
 {
-  return this->model->numCompartments();
+  return this->_model->numCompartments();
 }
 
 

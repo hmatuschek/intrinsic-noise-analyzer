@@ -40,84 +40,56 @@ VariableDefinition::~VariableDefinition()
 }
 
 
-bool
-VariableDefinition::isConst() const
-{
+bool VariableDefinition::isConst() const {
   return this->is_const;
 }
 
+void VariableDefinition::setConst(bool is_const) {
+  this->is_const = is_const;
+}
 
-bool
-VariableDefinition::hasValue() const
-{
+bool VariableDefinition::hasValue() const {
   return this->has_value;
 }
 
-
-GiNaC::ex
-VariableDefinition::getValue() const
-{
+GiNaC::ex VariableDefinition::getValue() const {
   return this->value;
 }
 
-
-void
-VariableDefinition::setValue(GiNaC::ex value)
-{
+void VariableDefinition::setValue(GiNaC::ex value) {
   this->value = value;
   this->has_value = true;
 }
 
-
-const GiNaC::symbol &
-VariableDefinition::getSymbol() const
-{
+const GiNaC::symbol & VariableDefinition::getSymbol() const {
   return this->symbol;
 }
 
-
-bool
-VariableDefinition::hasRule() const
-{
+bool VariableDefinition::hasRule() const {
   return 0 != this->rule;
 }
 
-
-Rule *
-VariableDefinition::getRule() {
+Rule * VariableDefinition::getRule() {
   return this->rule;
 }
 
-const Rule *
-VariableDefinition::getRule() const {
+const Rule * VariableDefinition::getRule() const {
   return this->rule;
 }
 
-
-void
-VariableDefinition::setRule(Rule *rule)
-{
+void VariableDefinition::setRule(Rule *rule) {
   this->rule = rule;
 }
 
-
-bool
-VariableDefinition::isDimensionLess() const
-{
+bool VariableDefinition::isDimensionLess() const {
   return this->unit.isDimensionless();
 }
 
-
-const Unit &
-VariableDefinition::getUnit() const
-{
+const Unit & VariableDefinition::getUnit() const {
   return this->unit;
 }
 
-
-void
-VariableDefinition::setUnit(const Unit &unit)
-{
+void VariableDefinition::setUnit(const Unit &unit) {
   this->unit = unit;
 }
 

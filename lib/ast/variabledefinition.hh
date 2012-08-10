@@ -94,6 +94,9 @@ public:
    */
   bool isConst() const;
 
+  /** Resets if a variable is constant. */
+  void setConst(bool is_const);
+
   /**
    * Retunrs true, if the variable definition has an initial value expression.
    */

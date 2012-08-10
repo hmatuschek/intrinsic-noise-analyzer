@@ -25,8 +25,13 @@ SpeciesList::flags(const QModelIndex &index) const
   if (! index.isValid() || columnCount() <= index.column()) { return Qt::NoItemFlags; }
   if (int(this->_model->numSpecies()) <= index.row()) { return Qt::NoItemFlags; }
 
-  if (1==index.column() || 2==index.column() || 5==index.column() || 6==index.column()) {
+  if (1==index.column() || 2==index.column() ||
+      5==index.column() || 6==index.column()) {
     flags |= Qt::ItemIsEditable;
+  }
+
+  if (4 == index.column()) {
+    flags |= Qt::ItemIsUserCheckable;
   }
 
   return flags;
@@ -43,63 +48,15 @@ SpeciesList::data(const QModelIndex &index, int role) const
   // Get selected species by row
   Fluc::Ast::Species *spec = this->_model->getSpecies(index.row());
 
-  // Handle constant flag:
-  if (4 == index.column() && Qt::CheckStateRole == role) {
-    if (spec->isConst()) {
-      return Qt::Checked;
-    }
-    return Qt::Unchecked;
-  }
-
-  // Handle display role:
-  if (Qt::DisplayRole == role) {
-    // Handle identifier
-    if (0 == index.column()) { return QVariant(spec->getIdentifier().c_str()); }
-    // Handle name
-    if (1 == index.column()) {
-      if (! spec->hasName())
-        return QVariant("<not set>");
-      return QVariant(spec->getName().c_str());
-    }
-    // Handle initial value
-    if (2 == index.column()) { return QVariant(this->getInitialValueForSpecies(spec)); }
-    // Handle unit
-    if (3 == index.column()) {
-      std::stringstream str; spec->getUnit().dump(str);
-      return QVariant(str.str().c_str());
-    }
-    // Handle compartment
-    if (5 == index.column()) {
-      if (spec->getCompartment()->hasName())
-        return QVariant(spec->getCompartment()->getName().c_str());
-      return QVariant(spec->getCompartment()->getIdentifier().c_str());
-    }
-    // Handle rules:
-    if (6 == index.column()) {
-      if (spec->hasRule()) {
-        std::stringstream stream; stream << spec->getRule()->getRule();
-        if (Fluc::Ast::Node::isAssignmentRule(spec->getRule())) {
-          return QVariant(QString("%1=%2").arg(spec->getIdentifier().c_str(), stream.str().c_str()));
-        } else {
-          return QVariant(QString("d%1/dt=%2").arg(spec->getIdentifier().c_str(), stream.str().c_str()));
-        }
-      } else {
-        return QVariant("<none>");
-      }
-    }
-  }
-
-  // Handle edit role:
-  if (Qt::EditRole == role) {
-    // Handle name
-    if (1 == index.column()) {
-      if (! spec->hasName()) { return QVariant(""); }
-      return QVariant(spec->getName().c_str());
-    }
-    // Handle initial value
-    if (2 == index.column()) { return QVariant(this->getInitialValueForSpecies(spec)); }
-    // Handle compartment value:
-    if (5 == index.column()) { return QVariant(spec->getCompartment()->getIdentifier().c_str()); }
+  switch (index.column()) {
+  case 0: return _getIdentifier(spec, role);
+  case 1: return _getName(spec, role);
+  case 2: return _getInitialValue(spec, role);
+  case 3: return _getUnit(spec, role);
+  case 4: return _getConstFlag(spec, role);
+  case 5: return _getCompartment(spec, role);
+  case 6: return _getRule(spec, role);
+  default: break;
   }
 
   return QVariant();
@@ -117,26 +74,28 @@ SpeciesList::setData(const QModelIndex &index, const QVariant &value, int role)
   Fluc::Ast::Species *species = _model->getSpecies(index.row());
 
   // Dispatch by column:
-  if (1 == index.column()) {
-    if (_updateName(species, value)) {
-      emit dataChanged(index, index); return true;
-    }
-    return false;
-  } else if (2 == index.column()) {
-    if (_updateInitialValue(species, value)) {
-      emit dataChanged(index, index); return true;
-    }
-    return false;
-  } else if (5 == index.column()) {
-    if (_updateCompartment(species, value)) {
-      emit dataChanged(index, index); return true;
-    }
-    return true;
-  } else if (6 == index.column()) {
-    if (_updateRule(species, value)) {
-      emit dataChanged(index, index); return true;
-    }
-    return false;
+  switch (index.column()) {
+  case 1:
+    if (_updateName(species, value)) { emit dataChanged(index, index); return true; }
+    break;
+
+  case 2:
+    if (_updateInitialValue(species, value)) { emit dataChanged(index, index); return true; }
+    break;
+
+  case 4:
+    if (_updateConstFlag(species, value)) { emit dataChanged(index, index); return true; }
+    break;
+
+  case 5:
+    if (_updateCompartment(species, value)) { emit dataChanged(index, index); return true; }
+    break;
+
+  case 6:
+    if (_updateRule(species, value)) { emit dataChanged(index, index); return true; }
+    break;
+
+  default: break;
   }
 
   return false;
@@ -171,6 +130,27 @@ int SpeciesList::columnCount(const QModelIndex &parent) const { return 7; }
 Fluc::Ast::Model & SpeciesList::model() { return *_model; }
 
 
+QVariant
+SpeciesList::_getIdentifier(Fluc::Ast::Species *species, int role) const {
+  if (Qt::DisplayRole != role) { return QVariant(); }
+  return QVariant(species->getIdentifier().c_str());
+}
+
+
+QVariant
+SpeciesList::_getName(Fluc::Ast::Species *species, int role) const
+{
+  if ( (Qt::DisplayRole != role) && (Qt::EditRole != role) ) { return QVariant(); }
+
+  if (species->hasName()) {
+    return QString(species->getName().c_str());
+  } else {
+    if (Qt::DisplayRole == role) { return QString("<none>"); }
+  }
+
+  return QString();
+}
+
 bool
 SpeciesList::_updateName(Fluc::Ast::Species *species, const QVariant &value)
 {
@@ -186,6 +166,17 @@ SpeciesList::_updateName(Fluc::Ast::Species *species, const QVariant &value)
   species->setName(new_name.toStdString());
   // All ok;
   return true;
+}
+
+QVariant
+SpeciesList::_getInitialValue(Fluc::Ast::Species *species, int role) const
+{
+  if ( (Qt::EditRole != role) && (Qt::DisplayRole != role) ) { return QVariant(); }
+  std::stringstream str;
+  if (species->hasValue())
+    str << species->getValue();
+  QString init_val(str.str().c_str());
+  return init_val;
 }
 
 bool
@@ -207,6 +198,48 @@ SpeciesList::_updateInitialValue(Fluc::Ast::Species *species, const QVariant &va
   return true;
 }
 
+
+QVariant
+SpeciesList::_getUnit(Fluc::Ast::Species *species, int role) const
+{
+  if (Qt::DisplayRole != role) { return QVariant(); }
+
+  std::stringstream str; species->getUnit().dump(str);
+  return QVariant(str.str().c_str());
+}
+
+
+QVariant
+SpeciesList::_getConstFlag(Fluc::Ast::Species *species, int role) const
+{
+  if (Qt::CheckStateRole != role) { return QVariant(); }
+  if (species->isConst()) { return Qt::Checked; }
+  return Qt::Unchecked;
+}
+
+bool
+SpeciesList::_updateConstFlag(Fluc::Ast::Species *species, const QVariant &value)
+{
+  if (value == Qt::Checked) {
+    species->setConst(true);
+  } else {
+    species->setConst(false);
+  }
+  return true;
+}
+
+
+QVariant
+SpeciesList::_getCompartment(Fluc::Ast::Species *species, int role) const
+{
+  if ( (Qt::DisplayRole != role) && (Qt::EditRole != role)) { return QVariant(); }
+  QString id = species->getCompartment()->getIdentifier().c_str();
+  if ( (Qt::DisplayRole == role) && species->getCompartment()->hasName()) {
+    return QString("%1 (%2)").arg(species->getCompartment()->getName().c_str(), id);
+  }
+  return id;
+}
+
 bool
 SpeciesList::_updateCompartment(Fluc::Ast::Species *species, const QVariant &value)
 {
@@ -216,6 +249,24 @@ SpeciesList::_updateCompartment(Fluc::Ast::Species *species, const QVariant &val
       _model->getCompartment(value.toString().toStdString());
   species->setCompartment(compartment);
   return true;
+}
+
+
+QVariant
+SpeciesList::_getRule(Fluc::Ast::Species *species, int role) const
+{
+  if (Qt::DisplayRole != role) {  return QVariant(); }
+
+  if (species->hasRule()) {
+    std::stringstream stream; stream << species->getRule()->getRule();
+    if (Fluc::Ast::Node::isAssignmentRule(species->getRule())) {
+      return QVariant(QString("%1=%2").arg(species->getIdentifier().c_str(), stream.str().c_str()));
+    } else {
+      return QVariant(QString("d%1/dt=%2").arg(species->getIdentifier().c_str(), stream.str().c_str()));
+    }
+  } else {
+    return QVariant("<none>");
+  }
 }
 
 bool
@@ -259,17 +310,6 @@ SpeciesList::_updateRule(Fluc::Ast::Species *species, const QVariant &value)
   }
   species->setRule(rule);
   return true;
-}
-
-
-QString
-SpeciesList::getInitialValueForSpecies(Fluc::Ast::Species *spec) const
-{
-  std::stringstream str;
-  if (spec->hasValue())
-    str << spec->getValue();
-  QString init_val(str.str().c_str());
-  return init_val;
 }
 
 
