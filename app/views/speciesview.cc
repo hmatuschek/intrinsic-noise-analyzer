@@ -26,6 +26,8 @@ SpeciesView::SpeciesView(SpeciesItem *species ,QWidget *parent) :
   _remSpeciesButton->setEnabled(false);
   _remSpeciesButton->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
+  // Create delegate for expressions:
+  expressionDelegate  = new ExpressionDelegate(species->species()->model(), this);
   // Create delegate for compartments:
   compartmentDelegate = new CompartmentDelegate(species->species()->model(), this);
   // Create delegate for rules:
@@ -38,6 +40,7 @@ SpeciesView::SpeciesView(SpeciesItem *species ,QWidget *parent) :
   _specTable->verticalHeader()->hide();
 
   // Register delegates for columns:
+  _specTable->setItemDelegateForColumn(2, expressionDelegate);
   _specTable->setItemDelegateForColumn(5, compartmentDelegate);
   _specTable->setItemDelegateForColumn(6, ruleDelegate);
 

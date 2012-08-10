@@ -111,6 +111,21 @@ Scope::~Scope()
 }
 
 
+bool
+Scope::hasParentScope() const {
+  return 0 != _parent_scope;
+}
+
+Scope *
+Scope::getParentScope() {
+  return _parent_scope;
+}
+
+const Scope *
+Scope::getParentScope() const {
+  return _parent_scope;
+}
+
 void
 Scope::setParent(Scope *parent) {
   _parent_scope = parent;

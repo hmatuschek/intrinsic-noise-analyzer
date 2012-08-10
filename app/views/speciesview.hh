@@ -5,6 +5,7 @@
 #include <QTableView>
 #include <QPushButton>
 #include "../doctree/speciesitem.hh"
+#include "../models/expressiondelegate.hh"
 #include "../models/compartmentdelegate.hh"
 #include "../models/variableruledelegate.hh"
 
@@ -36,6 +37,8 @@ private slots:
 private:
   /** Holds a weak reference to the species item. */
   SpeciesItem *_species;
+  /** Holds the ExpressionDelegate, allows to edit expressions. */
+  ExpressionDelegate *expressionDelegate;
   /** Holds the CompartmentDelegate, shows a combobox for compartment selection. */
   CompartmentDelegate *compartmentDelegate;
   /** Holds the SpeciesRuleDelegate, shows a simple editor for the species rule. */

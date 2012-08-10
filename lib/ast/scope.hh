@@ -102,6 +102,15 @@ public:
   /** Destroyes the scope and all members. */
   virtual ~Scope();
 
+  /** Returns true, if this scope has a parent scope. */
+  bool hasParentScope() const;
+
+  /** Returns the parent scope. */
+  Scope *getParentScope();
+
+  /** Retunrs a const parent scope. */
+  const Scope *getParentScope() const;
+
   /** (Re-) Sets the parent scope of this scope. */
   void setParent(Scope *parent);
 
