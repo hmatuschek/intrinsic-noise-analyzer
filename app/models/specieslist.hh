@@ -11,7 +11,7 @@ class SpeciesList : public QAbstractTableModel
 
 public:
   /** Constructor. */
-  explicit SpeciesList(Fluc::Ast::Model *model, QObject *parent = 0);
+  explicit SpeciesList(Fluc::Ast::Model *_model, QObject *parent = 0);
 
   /** Signals, if a cell is editable. */
   Qt::ItemFlags flags(const QModelIndex &index) const;
@@ -31,6 +31,8 @@ public:
   /** Returns the number of columns. */
   int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
+  /** Returns the underlying @c Ast::Model */
+  Fluc::Ast::Model &model();
 
 private:
   /** Internal used function to assemble a string representation of the initial value of a species. */
@@ -38,7 +40,7 @@ private:
 
 private:
   /** Holds a weak reference to the SBML model. */
-  Fluc::Ast::Model *model;
+  Fluc::Ast::Model *_model;
 };
 
 

@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QTableView>
 #include "../doctree/speciesitem.hh"
+#include "../models/compartmentdelegate.hh"
 
 
 /**
@@ -16,9 +17,7 @@ class SpeciesView : public QWidget
   Q_OBJECT
 
 public:
-  /**
-   * Constructs a new view for the given species item.
-   */
+  /** Constructs a new view for the given species item. */
   explicit SpeciesView(SpeciesItem *species, QWidget *parent = 0);
 
 
@@ -31,10 +30,11 @@ private slots:
 
 
 private:
-  /**
-   * Holds the QTableView.
-   */
-  QTableView *specTable;
+  /** Holds the CompartmentDelegate, shows a combobox for compartment selection. */
+  CompartmentDelegate *compartmentDelegate;
+
+  /** Holds the QTableView. */
+  QTableView *_specTable;
 };
 
 

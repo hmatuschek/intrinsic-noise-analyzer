@@ -67,8 +67,7 @@ public slots:
 
   /** Opens an item in the document tree.
    * This method checks if the item has an associated view, if so, the item is displayed on
-   * the main-panel using that view.
-   */
+   * the main-panel using that view. It also sets the currently selected item. */
   void itemSelected(const QModelIndex &index);
 
 

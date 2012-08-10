@@ -5,7 +5,7 @@
 
 
 SpeciesList::SpeciesList(Fluc::Ast::Model *model, QObject *parent)
-  : QAbstractTableModel(parent), model(model)
+  : QAbstractTableModel(parent), _model(model)
 {
   // Pass...
 }
@@ -17,10 +17,10 @@ SpeciesList::flags(const QModelIndex &index) const
   Qt::ItemFlags flags =  Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 
   // Filter invalid indices:
-  if (! index.isValid() || 6 <= index.column()) { return Qt::NoItemFlags; }
-  if (int(this->model->numSpecies()) <= index.row()) { return Qt::NoItemFlags; }
+  if (! index.isValid() || columnCount() <= index.column()) { return Qt::NoItemFlags; }
+  if (int(this->_model->numSpecies()) <= index.row()) { return Qt::NoItemFlags; }
 
-  if (1 == index.column() || 2 == index.column()) { flags |= Qt::ItemIsEditable; }
+  if (1==index.column() || 2==index.column() || 5==index.column()) { flags |= Qt::ItemIsEditable; }
 
   return flags;
 }
@@ -30,11 +30,11 @@ QVariant
 SpeciesList::data(const QModelIndex &index, int role) const
 {
   // Filter invalid indices:
-  if (! index.isValid() || 6 <= index.column()) { return QVariant(); }
-  if (int(this->model->numSpecies()) <= index.row()) { return QVariant(); }
+  if (! index.isValid() || columnCount() <= index.column()) { return QVariant(); }
+  if (int(this->_model->numSpecies()) <= index.row()) { return QVariant(); }
 
   // Get selected species by row
-  Fluc::Ast::Species *spec = this->model->getSpecies(index.row());
+  Fluc::Ast::Species *spec = this->_model->getSpecies(index.row());
 
   // Handle constant flag:
   if (4 == index.column() && Qt::CheckStateRole == role) {
@@ -67,6 +67,19 @@ SpeciesList::data(const QModelIndex &index, int role) const
         return QVariant(spec->getCompartment()->getName().c_str());
       return QVariant(spec->getCompartment()->getIdentifier().c_str());
     }
+    // Handle rules:
+    if (6 == index.column()) {
+      if (spec->hasRule()) {
+        std::stringstream stream; stream << spec->getRule()->getRule();
+        if (Fluc::Ast::Node::isAssignmentRule(spec->getRule())) {
+          return QVariant(QString("{1}={2}").arg(spec->getIdentifier().c_str(), stream.str().c_str()));
+        } else {
+          return QVariant(QString("d{1}/dt={2}").arg(spec->getIdentifier().c_str(), stream.str().c_str()));
+        }
+      } else {
+        return QVariant("<none>");
+      }
+    }
   }
 
   // Handle edit role:
@@ -78,6 +91,8 @@ SpeciesList::data(const QModelIndex &index, int role) const
     }
     // Handle initial value
     if (2 == index.column()) { return QVariant(this->getInitialValueForSpecies(spec)); }
+    // Handle compartment value:
+    if (5 == index.column()) { return QVariant(spec->getCompartment()->getIdentifier().c_str()); }
   }
 
   return QVariant();
@@ -88,11 +103,11 @@ bool
 SpeciesList::setData(const QModelIndex &index, const QVariant &value, int role)
 {
   // Filter invalid items:
-  if (index.row() >= int(model->numParameters())) return false;
-  if (index.column() >= 5) return false;
+  if (index.row() >= int(_model->numParameters())) return false;
+  if (columnCount() <= index.column()) return false;
 
   // Get paramter for index (row):
-  Fluc::Ast::Species *species = model->getSpecies(index.row());
+  Fluc::Ast::Species *species = _model->getSpecies(index.row());
 
   if (1 == index.column()) {
     // If name is changed, get new name
@@ -109,7 +124,7 @@ SpeciesList::setData(const QModelIndex &index, const QVariant &value, int role)
     std::string expression = value.toString().toStdString();
     // parse expression
     GiNaC::ex new_value;
-    try { new_value = Fluc::Parser::Expr::parseExpression(expression, model); }
+    try { new_value = Fluc::Parser::Expr::parseExpression(expression, _model); }
     catch (Fluc::Exception &err) {
       Fluc::Utils::Message msg = LOG_MESSAGE(Fluc::Utils::Message::INFO);
       msg << "Can not parse expression: " << expression << ": " << err.what();
@@ -123,6 +138,15 @@ SpeciesList::setData(const QModelIndex &index, const QVariant &value, int role)
     return true;
   }
 
+  if (5 == index.column()) {
+    // Get compartment by identifier:
+    if (! _model->hasCompartment(value.toString().toStdString())) { return false; }
+    Fluc::Ast::Compartment *compartment =
+        _model->getCompartment(value.toString().toStdString());
+    species->setCompartment(compartment);
+    return true;
+  }
+
   return false;
 }
 
@@ -130,7 +154,7 @@ SpeciesList::setData(const QModelIndex &index, const QVariant &value, int role)
 QVariant
 SpeciesList::headerData(int section, Qt::Orientation orientation, int role) const
 {
-  if (Qt::DisplayRole != role || orientation != Qt::Horizontal || 6 <= section) {
+  if (Qt::DisplayRole != role || orientation != Qt::Horizontal || columnCount() <= section) {
     return QAbstractTableModel::headerData(section, orientation, role);
   }
 
@@ -141,6 +165,7 @@ SpeciesList::headerData(int section, Qt::Orientation orientation, int role) cons
   case 3: return QVariant("Unit");
   case 4: return QVariant("Constant");
   case 5: return QVariant("Compartment");
+  case 6: return QVariant("Rule");
   default: break;
   }
 
@@ -148,19 +173,10 @@ SpeciesList::headerData(int section, Qt::Orientation orientation, int role) cons
 }
 
 
-int
-SpeciesList::rowCount(const QModelIndex &parent) const
-{
-  return this->model->numSpecies();
-}
+int SpeciesList::rowCount(const QModelIndex &parent) const { return _model->numSpecies(); }
+int SpeciesList::columnCount(const QModelIndex &parent) const { return 7; }
 
-
-int
-SpeciesList::columnCount(const QModelIndex &parent) const
-{
-  return 6;
-}
-
+Fluc::Ast::Model & SpeciesList::model() { return *_model; }
 
 QString
 SpeciesList::getInitialValueForSpecies(Fluc::Ast::Species *spec) const

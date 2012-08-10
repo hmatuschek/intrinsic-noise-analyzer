@@ -69,11 +69,11 @@ SET(ina_app_doctree_HEADERS
 SET(ina_app_models_SOURCES
     models/parameterlist.cc models/specieslist.cc models/compartmentlist.cc
     models/reactionparameterlist.cc models/taskerror.cc models/tablewrapper.cc
-    models/generaltaskconfig.cc)
+    models/generaltaskconfig.cc models/compartmentdelegate.cc)
 SET(ina_app_models_HEADERS
     models/parameterlist.hh models/specieslist.hh models/compartmentlist.hh
     models/reactionparameterlist.hh models/taskerror.hh models/tablewrapper.hh
-    models/generaltaskconfig.hh)
+    models/generaltaskconfig.hh models/compartmentdelegate.hh)
 
 SET(ina_app_views_SOURCES
     views/documentsview.cc views/parameterview.cc views/reactionview.cc

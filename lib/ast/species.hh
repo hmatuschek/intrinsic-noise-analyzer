@@ -62,6 +62,9 @@ public:
   /** Returns the compartment, the species lives in. */
   Compartment *getCompartment();
 
+  /** (Re-) Sets the compartment. */
+  void setCompartment(Compartment *compartment);
+
   /** Returns whether the species has been defined in units of substance. */
   bool hasOnlySubstanceUnits();
 

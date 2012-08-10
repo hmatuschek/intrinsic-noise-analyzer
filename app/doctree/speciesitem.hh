@@ -12,7 +12,7 @@ class Application;
 
 
 /**
- * Wraps the list of species as a TreeItem (@c Wrapper).
+ * Wraps the list of species as a TreeItem (@c DocumentTreeItem).
  *
  * @ingroup gui
  */
@@ -21,16 +21,11 @@ class SpeciesItem : public QObject, public DocumentTreeItem
   Q_OBJECT
 
 protected:
-  /**
-   * Holds the list of species.
-   */
+  /** Holds the list of species. */
   SpeciesList *_species;
 
-  /**
-   * Holds the display name of the tree item, this will be shown in the left application-panel.
-   */
-  QString itemLabel;
-
+  /** Holds the display name of the tree item, this will be shown in the left application-panel. */
+  QString _itemLabel;
 
 public:
   /**

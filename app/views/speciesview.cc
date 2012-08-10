@@ -15,14 +15,19 @@ SpeciesView::SpeciesView(SpeciesItem *species ,QWidget *parent) :
   label->setFont(Application::getApp()->getH1Font());
   label->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
 
-  this->specTable = new QTableView();
-  this->specTable->setModel(species->species());
-  this->specTable->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
-  this->specTable->verticalHeader()->hide();
+  // Create delegate for compartments:
+  compartmentDelegate = new CompartmentDelegate(species->species()->model(), this);
+
+  // Assemble view:
+  _specTable = new QTableView();
+  _specTable->setModel(species->species());
+  _specTable->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
+  _specTable->verticalHeader()->hide();
+  _specTable->setItemDelegateForColumn(5, compartmentDelegate);
 
   QVBoxLayout *layout = new QVBoxLayout();
   layout->addWidget(label, 0, Qt::AlignRight);
-  layout->addWidget(this->specTable, 0);
+  layout->addWidget(this->_specTable, 0);
   this->setLayout(layout);
 
   // Connect signals:

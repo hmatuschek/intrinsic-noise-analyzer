@@ -53,15 +53,11 @@ Species::Species(const std::string &id, const GiNaC::ex &init_val, const Unit &u
 }
 
 
-Compartment *
-Species::getCompartment() {
-  return this->compartment;
-}
+Compartment * Species::getCompartment() { return this->compartment; }
 
-bool
-Species::hasOnlySubstanceUnits() {
- return this->substance_units;
-}
+void Species::setCompartment(Compartment *compartment) { this->compartment = compartment; }
+
+bool Species::hasOnlySubstanceUnits() { return this->substance_units; }
 
 
 void
