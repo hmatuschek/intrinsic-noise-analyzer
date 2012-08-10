@@ -1,19 +1,20 @@
-#ifndef __INA_APP_MODELS_COMPARTMENTDELEGATE_HH__
-#define __INA_APP_MODELS_COMPARTMENTDELEGATE_HH__
+#ifndef __INA_APP_MODELS_VARIABLERULEDELEGATE_HH__
+#define __INA_APP_MODELS_VARIABLERULEDELEGATE_HH__
 
 #include <QItemDelegate>
+
+#include "specieslist.hh"
 #include "ast/model.hh"
 
 
-/** This class implements a simple delegate to enable a QComboBox for compartment selection. */
-class CompartmentDelegate : public QItemDelegate
+/** Simple editor delegate for species rules. */
+class SpeciesRuleDelegate : public QItemDelegate
 {
   Q_OBJECT
 
 public:
-  /** Constructor.
-   * The available compartments are taken from the given model. */
-  explicit CompartmentDelegate(Fluc::Ast::Model &model, QObject *parent = 0);
+  /** Constructor. */
+  explicit SpeciesRuleDelegate(Fluc::Ast::Model &model, QObject *parent = 0);
 
   /** Creates the editor widget. */
   QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const;
@@ -27,8 +28,9 @@ public:
   void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
 
 private:
-   /** Holds a weak reference to the model. */
-   Fluc::Ast::Model &_model;
+  /** Holds the model. */
+  Fluc::Ast::Model &_model;
 };
 
-#endif // COMPARTMENTDELEGATE_HH
+
+#endif // __INA_APP_MODELS_VARIABLERULEDELEGATE_HH__

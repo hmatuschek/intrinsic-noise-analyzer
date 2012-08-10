@@ -135,6 +135,9 @@ public:
    * definitions outside the scope. */
   bool isClosed();
 
+  /** Finds a similar identifer that is not in use. */
+  std::string getNewIdentifier(const std::string &base_name);
+
   /** Retunrs an @c iterator pointing to the first definition in the scope. */
   iterator begin();
   /** Returns a @c const_iterator pointing to the first definition in the scope. */

@@ -204,10 +204,17 @@ Scope::getDefinition(const std::string &name) const
 }
 
 
-bool
-Scope::isClosed()
+bool Scope::isClosed() { return is_closed; }
+
+std::string
+Scope::getNewIdentifier(const std::string &base_name)
 {
-  return is_closed;
+  std::stringstream buffer(base_name);
+  size_t count = 1;
+  while (hasDefinition(buffer.str())) {
+    buffer.str(base_name); buffer << count; count++;
+  }
+  return buffer.str();
 }
 
 

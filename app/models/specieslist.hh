@@ -34,7 +34,25 @@ public:
   /** Returns the underlying @c Ast::Model */
   Fluc::Ast::Model &model();
 
+public slots:
+  /** Adds a dummy species to the model. */
+  void addSpecies();
+  /** Tries to remove a species from the model. */
+  void remSpecies(int row);
+
 private:
+  /** Internal function to update the species name. */
+  bool _updateName(Fluc::Ast::Species *species, const QVariant &value);
+
+  /** Internal function to update the initial value of the species. */
+  bool _updateInitialValue(Fluc::Ast::Species *species, const QVariant &value);
+
+  /** Internal function to update the compartment of the species. */
+  bool _updateCompartment(Fluc::Ast::Species *species, const QVariant &value);
+
+  /** Internal function to update the rule of the species. */
+  bool _updateRule(Fluc::Ast::Species *species, const QVariant &value);
+
   /** Internal used function to assemble a string representation of the initial value of a species. */
   QString getInitialValueForSpecies(Fluc::Ast::Species *species) const;
 

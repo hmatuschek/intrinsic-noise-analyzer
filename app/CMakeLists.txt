@@ -69,24 +69,28 @@ SET(ina_app_doctree_HEADERS
 SET(ina_app_models_SOURCES
     models/parameterlist.cc models/specieslist.cc models/compartmentlist.cc
     models/reactionparameterlist.cc models/taskerror.cc models/tablewrapper.cc
-    models/generaltaskconfig.cc models/compartmentdelegate.cc)
+    models/generaltaskconfig.cc models/compartmentdelegate.cc models/variableruledelegate.cc
+    models/variableruledata.cc)
 SET(ina_app_models_HEADERS
     models/parameterlist.hh models/specieslist.hh models/compartmentlist.hh
     models/reactionparameterlist.hh models/taskerror.hh models/tablewrapper.hh
-    models/generaltaskconfig.hh models/compartmentdelegate.hh)
+    models/generaltaskconfig.hh models/compartmentdelegate.hh models/variableruledelegate.hh
+    models/variableruledata.hh)
 
 SET(ina_app_views_SOURCES
     views/documentsview.cc views/parameterview.cc views/reactionview.cc
     views/reactionequationrenderer.cc views/compartmentview.cc views/speciesview.cc
     views/plotview.cc views/taskerrorwidget.cc views/aboutdialog.cc
     views/taskview.cc views/generaltaskwizard.cc views/varianceplot.cc views/logwindow.cc
-    views/fileselector.cc views/importmodeldialog.cc views/exportmodeldialog.cc)
+    views/fileselector.cc views/importmodeldialog.cc views/exportmodeldialog.cc
+    views/variableruleeditor.cc)
 SET(ina_app_views_HEADERS
     views/documentsview.hh views/parameterview.hh views/reactionview.hh
     views/reactionequationrenderer.hh views/compartmentview.hh views/speciesview.hh
     views/plotview.hh views/taskerrorwidget.hh views/aboutdialog.hh
     views/taskview.hh views/generaltaskwizard.hh views/varianceplot.hh views/logwindow.hh
-    views/fileselector.hh views/importmodeldialog.hh views/exportmodeldialog.hh)
+    views/fileselector.hh views/importmodeldialog.hh views/exportmodeldialog.hh
+    views/variableruleeditor.hh)
 
 
 SET(ina_app_SOURCES
