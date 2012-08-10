@@ -54,6 +54,7 @@ Species::Species(const std::string &id, const GiNaC::ex &init_val, const Unit &u
 
 
 Compartment * Species::getCompartment() { return this->compartment; }
+const Compartment * Species::getCompartment() const { return this->compartment; }
 
 void Species::setCompartment(Compartment *compartment) { this->compartment = compartment; }
 

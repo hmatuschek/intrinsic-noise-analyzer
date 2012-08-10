@@ -62,6 +62,9 @@ public:
   /** Returns the compartment, the species lives in. */
   Compartment *getCompartment();
 
+  /** Returns a const reference to the compartment. */
+  const Compartment *getCompartment() const;
+
   /** (Re-) Sets the compartment. */
   void setCompartment(Compartment *compartment);
 

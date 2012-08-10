@@ -70,12 +70,12 @@ SET(ina_app_models_SOURCES
     models/parameterlist.cc models/specieslist.cc models/compartmentlist.cc
     models/reactionparameterlist.cc models/taskerror.cc models/tablewrapper.cc
     models/generaltaskconfig.cc models/compartmentdelegate.cc models/variableruledelegate.cc
-    models/variableruledata.cc)
+    models/variableruledata.cc models/referencecounter.cc)
 SET(ina_app_models_HEADERS
     models/parameterlist.hh models/specieslist.hh models/compartmentlist.hh
     models/reactionparameterlist.hh models/taskerror.hh models/tablewrapper.hh
     models/generaltaskconfig.hh models/compartmentdelegate.hh models/variableruledelegate.hh
-    models/variableruledata.hh)
+    models/variableruledata.hh models/referencecounter.hh)
 
 SET(ina_app_views_SOURCES
     views/documentsview.cc views/parameterview.cc views/reactionview.cc

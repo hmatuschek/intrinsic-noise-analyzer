@@ -61,7 +61,7 @@ AlgebraicConstraint::apply(Ast::Operator &op)
 
 
 GiNaC::ex
-AlgebraicConstraint::getConstraint()
+AlgebraicConstraint::getConstraint() const
 {
   return this->constraint;
 }

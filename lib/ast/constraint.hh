@@ -65,10 +65,8 @@ public:
   virtual void accept(Ast::Visitor &visitor) const;
   virtual void apply(Ast::Operator &op);
 
-  /**
-   * Returns the constraint expression.
-   */
-  GiNaC::ex getConstraint();
+  /** Returns the constraint expression. */
+  GiNaC::ex getConstraint() const;
 
   /**
    * (Re-) Sets the constraint expression. The replaced expression is not freed.

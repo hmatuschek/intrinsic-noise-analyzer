@@ -3,6 +3,8 @@
 #include "exception.hh"
 #include "utils/logger.hh"
 #include "variableruledata.hh"
+#include "referencecounter.hh"
+
 #include <QMessageBox>
 
 
@@ -300,5 +302,21 @@ SpeciesList::remSpecies(int row)
 {
   if (row >= int(_model->numSpecies())) { return; }
 
-  QMessageBox::information(0, tr("Not implemented yet."), tr(".. working on it."));
+  // Get Species and count its references:
+  Fluc::Ast::Species *species = _model->getSpecies(row);
+  ReferenceCounter refs(species); _model->accept(refs);
+
+  // Show message id
+  if (0 < refs.references().size()) {
+    QMessageBox::information(
+          0, tr("Can not delete species."),
+          tr("Can not delete species as it is referenced %1").arg(
+            QStringList(refs.references()).join(", ")));
+    return;
+  }
+
+  // otherwise, remove species
+  beginRemoveRows(QModelIndex(), row, row);
+  _model->remDefinition(species);
+  endRemoveRows();
 }
