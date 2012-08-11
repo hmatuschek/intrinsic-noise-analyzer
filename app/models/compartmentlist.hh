@@ -34,10 +34,39 @@ public:
   /** Returns the number of columns. */
   int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
+  /** Returns a weak reference to the Ast::Model. */
+  Fluc::Ast::Model &model();
+
+
+public slots:
+  /** Adds a new compartment to the model. */
+  void addCompartment();
+
+  /** Removes the compartment from the model. */
+  void remCompartment(int row);
+
 
 private:
-  /** Internal used method to serialize initial value. */
-  QString getInitialValueForCompartment(Fluc::Ast::Compartment *comp) const;
+  /** Returns the identifier. */
+  QVariant _getIdentifier(Fluc::Ast::Compartment *compartment, int role) const;
+
+  /** Returns the name of the compartment. */
+  QVariant _getName(Fluc::Ast::Compartment *compartment, int role) const;
+  /** Updates the name of the compartment. */
+  bool _updateName(Fluc::Ast::Compartment *compartment, const QVariant &value);
+
+  /** Returns the initial value of the compartment. */
+  QVariant _getInitValue(Fluc::Ast::Compartment *compartment, int role) const;
+  /** Updates the initial value of the compartment. */
+  bool _updateInitValue(Fluc::Ast::Compartment *compartment, const QVariant &value);
+
+  /** Returns the unit of the compartment. */
+  QVariant _getUnit(Fluc::Ast::Compartment *compartment, int role) const;
+
+  /** Returns the const flag of the compartment. */
+  QVariant _getConstFlag(Fluc::Ast::Compartment *compartment, int role) const;
+  /** Updates the const flag of the compartment. */
+  bool _updateConstFlag(Fluc::Ast::Compartment *compartment, const QVariant &value);
 
 
 private:

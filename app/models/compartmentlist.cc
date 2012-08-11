@@ -2,6 +2,8 @@
 #include "parser/parser.hh"
 #include "exception.hh"
 #include "utils/logger.hh"
+#include "referencecounter.hh"
+#include <QMessageBox>
 
 
 CompartmentList::CompartmentList(Fluc::Ast::Model *model, QObject *parent)
@@ -19,7 +21,7 @@ CompartmentList::flags(const QModelIndex &index) const
 
   // Filter invalid indices:
   if (! index.isValid()) return Qt::NoItemFlags;
-  if (5 <= index.column()) return Qt::NoItemFlags;
+  if (columnCount() <= index.column()) return Qt::NoItemFlags;
   if (int(_model->numParameters()) <= index.row()) return Qt::NoItemFlags;
 
   // Mark only column 1 & 2 editable
@@ -33,48 +35,20 @@ QVariant
 CompartmentList::data(const QModelIndex &index, int role) const
 {
   // Filter invalid indices:
-  if (! index.isValid() || 5 <= index.column()) { return QVariant(); }
+  if (! index.isValid() || columnCount() <= index.column()) { return QVariant(); }
   if (int(this->_model->numCompartments()) <= index.row()) { return QVariant(); }
 
   // Get selected compartment:
   Fluc::Ast::Compartment *comp = this->_model->getCompartment(index.row());
 
-  // handle is-const flag:
-  if (4 == index.column() && Qt::CheckStateRole == role) {
-    if (comp->isConst()) { return Qt::Checked; }
-    return Qt::Unchecked;
-  }
-
-  // Return data for display:
-  if (Qt::DisplayRole == role) {
-    // on identifier
-    if (0 == index.column()) { return QVariant(comp->getIdentifier().c_str()); }
-    // on name
-    if (1 == index.column()) {
-      if (! comp->hasName())
-        return QVariant("<not set>");
-      return QVariant(comp->getName().c_str());
-    }
-    // on initial value:
-    if (2 == index.column()) { return QVariant(this->getInitialValueForCompartment(comp)); }
-    // on unit
-    if (3 == index.column()) {
-      std::stringstream str; comp->getUnit().dump(str);
-      return QVariant(str.str().c_str());
-    }
-    // else
-    return QVariant();
-  } else if (Qt::EditRole == role) {
-    // on name
-    if (1 == index.column()) {
-      if (! comp->hasName())
-        return QVariant("<not set>");
-      return QVariant(comp->getName().c_str());
-    }
-    // on initial value
-    if (2 == index.column()) {
-      return QVariant(this->getInitialValueForCompartment(comp));
-    }
+  // Dispatch:
+  switch (index.column()) {
+  case 0: return _getIdentifier(comp, role);
+  case 1: return _getName(comp, role);
+  case 2: return _getInitValue(comp, role);
+  case 3: return _getUnit(comp, role);
+  case 4: return _getConstFlag(comp, role);
+  default: break;
   }
 
   return QVariant();
@@ -86,39 +60,23 @@ CompartmentList::setData(const QModelIndex &index, const QVariant &value, int ro
 {
   // Filter invald indices:
   if (index.row() >= int(_model->numCompartments())) return false;
-  if (index.column() >= 5) return false;
+  if (index.column() >= columnCount()) return false;
 
   // Get compartment:
   Fluc::Ast::Compartment *comp = _model->getCompartment(index.row());
 
-  // If name is set
-  if (1 == index.column()) {
-    comp->setName(value.toString().toStdString());
-    emit dataChanged(index, index);
-    return true;
+  // Dispatch
+  bool success = false;
+  switch(index.column()) {
+  case 1: success = _updateName(comp, value); break;
+  case 2: success = _updateInitValue(comp, value); break;
+  case 4: success = _updateConstFlag(comp, value); break;
+  default: break;
   }
 
-  // If initial value is set:
-  if (2 == index.column()) {
-    // If the initial value was changed: get expression
-    std::string expression = value.toString().toStdString();
-    // parse expression
-    GiNaC::ex new_value;
-    try { new_value = Fluc::Parser::Expr::parseExpression(expression, _model); }
-    catch (Fluc::Exception &err) {
-      Fluc::Utils::Message msg = LOG_MESSAGE(Fluc::Utils::Message::INFO);
-      msg << "Can not parse expression: " << expression << ": " << err.what();
-      Fluc::Utils::Logger::get().log(msg);
-      return false;
-    }
-    // Set new "value"
-    comp->setValue(new_value);
-    // Signal data changed:
-    emit dataChanged(index, index);
-    return true;
-  }
-
-  return false;
+  // on success, signal view that data has changed:
+  if (success) { emit dataChanged(index, index); }
+  return success;
 }
 
 
@@ -142,24 +100,137 @@ CompartmentList::headerData(int section, Qt::Orientation orientation, int role) 
 }
 
 
-int
-CompartmentList::rowCount(const QModelIndex &parent) const
-{
+int CompartmentList::rowCount(const QModelIndex &parent) const {
   return this->_model->numCompartments();
 }
 
 
-int
-CompartmentList::columnCount(const QModelIndex &parent) const
-{
+int CompartmentList::columnCount(const QModelIndex &parent) const {
   return 5;
 }
 
+Fluc::Ast::Model &
+CompartmentList::model() {
+  return *_model;
+}
 
-QString
-CompartmentList::getInitialValueForCompartment(Fluc::Ast::Compartment *comp) const
+
+QVariant
+CompartmentList::_getIdentifier(Fluc::Ast::Compartment *compartment, int role) const
 {
+  if (Qt::DisplayRole != role) { return QVariant(); }
+  return QString(compartment->getIdentifier().c_str());
+}
+
+
+QVariant
+CompartmentList::_getName(Fluc::Ast::Compartment *compartment, int role) const
+{
+  if ( (Qt::DisplayRole != role) && (Qt::EditRole != role)) { return QVariant(); }
+
+  if (compartment->hasName()) { return QString(compartment->getName().c_str()); }
+  if (Qt::DisplayRole == role) { return QString("<none>"); }
+
+  return QString("");
+}
+
+bool
+CompartmentList::_updateName(Fluc::Ast::Compartment *compartment, const QVariant &value)
+{
+  compartment->setName(value.toString().toStdString());
+  return true;
+}
+
+
+QVariant
+CompartmentList::_getInitValue(Fluc::Ast::Compartment *comp, int role) const
+{
+  if ( (Qt::DisplayRole != role) && (Qt::EditRole != role)) { return QVariant(); }
   std::stringstream str; str << comp->getValue();
-  QString init_val(str.str().c_str());
-  return init_val;
+  return QString(str.str().c_str());
+}
+
+bool
+CompartmentList::_updateInitValue(Fluc::Ast::Compartment *compartment, const QVariant &value)
+{
+  // If the initial value was changed: get expression
+  std::string expression = value.toString().toStdString();
+  // parse expression
+  GiNaC::ex new_value;
+  try { new_value = Fluc::Parser::Expr::parseExpression(expression, _model); }
+  catch (Fluc::Exception &err) {
+    Fluc::Utils::Message msg = LOG_MESSAGE(Fluc::Utils::Message::INFO);
+    msg << "Can not parse expression: " << expression << ": " << err.what();
+    Fluc::Utils::Logger::get().log(msg);
+    return false;
+  }
+  // Set new "value"
+  compartment->setValue(new_value);
+  return true;
+}
+
+
+QVariant
+CompartmentList::_getUnit(Fluc::Ast::Compartment *compartment, int role) const
+{
+  if (Qt::DisplayRole != role) { return QVariant(); }
+  std::stringstream str; compartment->getUnit().dump(str);
+  return QVariant(str.str().c_str());
+}
+
+
+QVariant
+CompartmentList::_getConstFlag(Fluc::Ast::Compartment *compartment, int role) const
+{
+  if (Qt::CheckStateRole != role) { return QVariant(); }
+  if (compartment->isConst()) { return Qt::Checked; }
+  return Qt::Unchecked;
+}
+
+bool
+CompartmentList::_updateConstFlag(Fluc::Ast::Compartment *compartment, const QVariant &value)
+{
+  if (Qt::Checked == value) { compartment->setConst(true); }
+  else { compartment->setConst(false); }
+  return true;
+}
+
+
+void
+CompartmentList::addCompartment()
+{
+  std::string identifier = _model->getNewIdentifier("compartment");
+  int new_idx = _model->numSpecies();
+
+  // Signal views and add compartment:
+  beginInsertRows(QModelIndex(), new_idx, new_idx);
+  _model->addDefinition(
+        new Fluc::Ast::Compartment(
+          identifier, _model->getDefaultVolumeUnit(), Fluc::Ast::Compartment::VOLUME, true));
+  endInsertRows();
+}
+
+
+void
+CompartmentList::remCompartment(int row)
+{
+  if (row >= rowCount()) { return; }
+  // Get compartment and count its references:
+  Fluc::Ast::Compartment *compartment = _model->getCompartment(row);
+  ReferenceCounter refs(compartment); _model->accept(refs);
+
+  // Show message id
+  if (0 < refs.references().size()) {
+    QMessageBox::information(
+          0, tr("Can not delete compartment."),
+          tr("Can not delete compartment as it is referenced %1").arg(
+            QStringList(refs.references()).join(", ")));
+    return;
+  }
+
+  // otherwise, remove compartment
+  beginRemoveRows(QModelIndex(), row, row);
+  _model->remDefinition(compartment);
+  endRemoveRows();
+
 }

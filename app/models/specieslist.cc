@@ -4,7 +4,7 @@
 #include "utils/logger.hh"
 #include "variableruledata.hh"
 #include "referencecounter.hh"
-
+#include "../views/unitrenderer.hh"
 #include <QMessageBox>
 
 
@@ -202,10 +202,15 @@ SpeciesList::_updateInitialValue(Fluc::Ast::Species *species, const QVariant &va
 QVariant
 SpeciesList::_getUnit(Fluc::Ast::Species *species, int role) const
 {
-  if (Qt::DisplayRole != role) { return QVariant(); }
+  if ((Qt::DisplayRole != role) && (Qt::DecorationRole != role)) { return QVariant(); }
 
-  std::stringstream str; species->getUnit().dump(str);
-  return QVariant(str.str().c_str());
+  if (Qt::DisplayRole == role) {
+    std::stringstream str; species->getUnit().dump(str);
+    return QVariant(str.str().c_str());
+  }
+
+  UnitRenderer renderer(species->getUnit());
+  return renderer.render();
 }
 
 
