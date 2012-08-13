@@ -132,9 +132,13 @@ MathFormula::layout(const MathContext &context, QGraphicsItem *parent)
   }
 
   _metrics.setWidth(tot_width); _metrics.setAscent(max_ascent); _metrics.setDescent(max_descent);
-  _metrics.setBBSize(_metrics.size());
+  if (0 < _items.size()) {
+    _metrics.setLeftBearing(_items.front()->metrics().leftBearing());
+    _metrics.setRightBearing(_items.back()->metrics().rightBearing());
+  }
 
-  qDebug() << "Layout formular " << _metrics.bbWidth() << "x" << _metrics.bbHeight();
+  qDebug() << "Layout formula " << _metrics.bbWidth() << "x" << _metrics.bbHeight();
+
   // Done:
   return item_group;
 }
@@ -179,10 +183,10 @@ MathFraction::layout(const MathContext &context, QGraphicsItem *parent)
   // Update own metrics:
   _metrics.setWidth(tot_width);
   _metrics.setAscent(_nominator->metrics().bbHeight()+space+_denominator->metrics().ascent());
-  _metrics.setBBSize(_metrics.size());
+  _metrics.setLeftBearing(0); _metrics.setRightBearing(0);
 
-  nom_item->setPos((tot_width - _nominator->metrics().width())/2, 0);
-  denom_item->setPos((tot_width-_denominator->metrics().width())/2,
+  nom_item->setPos((tot_width - _nominator->metrics().bbWidth())/2, 0);
+  denom_item->setPos((tot_width-_denominator->metrics().bbWidth())/2,
                      space+_nominator->metrics().bbHeight());
   line->setLine(0, tot_height/2, tot_width, tot_height/2);
 
@@ -218,13 +222,14 @@ MathText::layout(const MathContext &context, QGraphicsItem *parent)
   _metrics.setWidth(font_metrics.width(_text));
   _metrics.setAscent(font_metrics.ascent());
   _metrics.setDescent(font_metrics.descent());
-  _metrics.setBBSize(font_metrics.boundingRect(_text).size());
+  if ( 0 < _text.size() ) {
+    _metrics.setLeftBearing(font_metrics.leftBearing(_text[0]));
+    _metrics.setRightBearing(font_metrics.rightBearing(_text[_text.size()-1]));
+  }
 
   // Update item:
   item->setFont(font);
   item->setPlainText(_text);
-
-  qDebug() << QString("Layout text %1: %2x%3").arg(_text).arg(_metrics.bbWidth()).arg(_metrics.bbHeight());
   return item;
 }
 
@@ -270,10 +275,8 @@ MathSup::layout(const MathContext &context, QGraphicsItem *parent)
   _metrics.setWidth(_base->metrics().width() + _upper->metrics().width());
   _metrics.setAscent(_base->metrics().ascent() + _upper->metrics().height()/2);
   _metrics.setDescent(_base->metrics().descent());
-
-  _metrics.setBBSize(
-        QSizeF(_base->metrics().width() + _upper->metrics().width(),
-               _base->metrics().bbHeight() + _upper->metrics().bbHeight()/2));
+  _metrics.setLeftBearing(_base->metrics().leftBearing());
+  _metrics.setRightBearing(0);
 
   return item_group;
 }
@@ -320,10 +323,8 @@ MathSub::layout(const MathContext &context, QGraphicsItem *parent)
   _metrics.setWidth(_base->metrics().width() + _lower->metrics().width());
   _metrics.setAscent(_base->metrics().ascent());
   _metrics.setDescent(_base->metrics().descent()+_lower->metrics().height()/2);
-
-  _metrics.setBBSize(
-        QSizeF(_base->metrics().width() + _lower->metrics().width(),
-               _base->metrics().bbHeight() + _lower->metrics().bbHeight()/2));
+  _metrics.setLeftBearing(_base->metrics().leftBearing());
+  _metrics.setRightBearing(0);
 
   return item_group;
 }

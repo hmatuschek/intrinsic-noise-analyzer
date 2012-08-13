@@ -18,10 +18,14 @@ public:
   /** copy constructor. */
   MathContext(const MathContext &other);
 
+  /** Returns the size of the current font in pixel. */
   qreal pixelSize() const;
+  /** Returns the current fontsize. */
   qreal fontSize() const;
+  /** Sets the current font size. */
   void setFontSize(qreal size);
 
+  /** Fontsize dependent line width. */
   qreal lineWidth() const;
 
 protected:
@@ -57,12 +61,9 @@ public:
   inline void setLeftBearing(qreal value) { _left_bearing = value; }
   inline void setRightBearing(qreal value) { _right_bearing = value; }
 
-  inline const QSizeF &bbSize() const { return _bb_size; }
-  inline qreal bbWidth() const { return _bb_size.width(); }
-  inline qreal bbHeight() const { return _bb_size.height(); }
-  inline void setBBSize(const QSizeF &size) { _bb_size=size; }
-  inline void setBBWidth(qreal width) { _bb_size.setWidth(width); }
-  inline void setBBHeight(qreal height) { _bb_size.setHeight(height); }
+  inline QSizeF bbSize() const { return QSizeF(bbWidth(), bbHeight()); }
+  inline qreal bbWidth() const { return _width-_left_bearing-_right_bearing; }
+  inline qreal bbHeight() const { return height(); }
 
 protected:
   qreal _ascent;
