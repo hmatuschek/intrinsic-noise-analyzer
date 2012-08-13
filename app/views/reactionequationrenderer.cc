@@ -28,7 +28,7 @@ ReactionEquationRenderer::ReactionEquationRenderer(Fluc::Ast::Reaction *reac, QO
   reaction.appendItem(reactants);
 
   // ->
-  reaction.appendItem(new MathText(QChar(0x20D1)));
+  reaction.appendItem(new MathText(QChar(0x21C0)));
 
   // handle products
   for (Ast::Reaction::iterator item=reac->prodBegin(); item!=reac->prodEnd(); item++) {

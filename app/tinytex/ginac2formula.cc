@@ -115,7 +115,7 @@ Ginac2Formula::visit(const GiNaC::mul &node)
 
   formula->appendItem(_stack.back()); _stack.pop_back();
   for (size_t i=1; i<node.nops(); i++) {
-    formula->appendItem(new MathText("*"));
+    formula->appendItem(new MathText(" "));
     formula->appendItem(_stack.back()); _stack.pop_back();
   }
 

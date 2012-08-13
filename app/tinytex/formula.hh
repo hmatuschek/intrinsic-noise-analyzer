@@ -1,6 +1,7 @@
 #ifndef __INA_APP_TINYTEX_FORMULA_HH__
 #define __INA_APP_TINYTEX_FORMULA_HH__
 
+#include <QFont>
 #include <QGraphicsItem>
 #include <QGraphicsItemGroup>
 #include <QGraphicsTextItem>
@@ -15,8 +16,14 @@ public:
   /** copy constructor. */
   MathContext(const MathContext &other);
 
-  /** The current font-size. */
-  int fontSize;
+  qreal fontSize() const;
+  void setFontSize(qreal size);
+
+  int lineWidth() const;
+
+protected:
+  /** Holds the base-font of the context. */
+  QFont _font;
 };
 
 
