@@ -1,5 +1,5 @@
-#ifndef __INA_APP_VIEWS_FORMULA_HH__
-#define __INA_APP_VIEWS_FORMULA_HH__
+#ifndef __INA_APP_TINYTEX_FORMULA_HH__
+#define __INA_APP_TINYTEX_FORMULA_HH__
 
 #include <QGraphicsItem>
 #include <QGraphicsItemGroup>
@@ -20,13 +20,35 @@ public:
 };
 
 
-/** A class describing the metrics of a MathFormulaItem. */
+/** A class describing the metrics of a MathFormulaItem.
+ * This class is essential for the layout of the formula, as it describes important measures
+ * of a formula item. */
 class MathMetrics {
 public:
+  /** Empty contructor. */
   MathMetrics();
+  /** Copy constructor. */
   MathMetrics(const MathMetrics &other);
-  double width;
-  double height;
+
+  inline const QSizeF &size() const { return _size; }
+  inline qreal width() const { return _size.width(); }
+  inline qreal height() const { return _size.height(); }
+  inline void setSize(const QSizeF &size) { _size=size; }
+  inline void setWidth(qreal width) { _size.setWidth(width); }
+  inline void setHeight(qreal height) { _size.setHeight(height); }
+
+  inline const QSizeF &bbSize() const { return _bb_size; }
+  inline qreal bbWidth() const { return _bb_size.width(); }
+  inline qreal bbHeight() const { return _bb_size.height(); }
+  inline void setBBSize(const QSizeF &size) { _bb_size=size; }
+  inline void setBBWidth(qreal width) { _bb_size.setWidth(width); }
+  inline void setBBHeight(qreal height) { _bb_size.setHeight(height); }
+
+protected:
+  /** Tight size of the item. */
+  QSizeF _size;
+  /** Bounding box of the item. */
+  QSizeF _bb_size;
 };
 
 
@@ -59,7 +81,8 @@ public:
   MathFormula();
   virtual ~MathFormula();
 
-  void addItem(MathFormulaItem *item);
+  void appendItem(MathFormulaItem *item);
+  void prependItem(MathFormulaItem *item);
 
   QGraphicsItem *layout(const MathContext &context, QGraphicsItem *parent=0);
 
@@ -82,6 +105,7 @@ private:
 };
 
 
+/** Simple pain text element. */
 class MathText : public MathFormulaItem
 {
 public:
@@ -93,7 +117,7 @@ private:
   QString _text;
 };
 
-
+/** Simple X^Y formula element. */
 class MathSup : public MathFormulaItem
 {
 public:
@@ -117,4 +141,4 @@ private:
   MathFormulaItem *_lower;
 };*/
 
-#endif // __INA_APP_VIEWS_FORMULA_HH__
+#endif // __INA_APP_TINYTEX_FORMULA_HH__

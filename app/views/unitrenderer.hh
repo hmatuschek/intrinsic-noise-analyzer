@@ -3,7 +3,7 @@
 
 #include <QPixmap>
 #include <QList>
-#include "formula.hh"
+#include "../tinytex/formula.hh"
 
 #include "ast/unitdefinition.hh"
 #include <QGraphicsScene>

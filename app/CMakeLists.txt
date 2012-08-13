@@ -79,7 +79,7 @@ SET(ina_app_models_HEADERS
     models/variableruledata.hh models/referencecounter.hh models/scopeitemmodel.hh
     models/expressiondelegate.hh)
 
-SET(ina_app_views_SOURCES views/formula.cc
+SET(ina_app_views_SOURCES
     views/documentsview.cc views/parameterview.cc views/reactionview.cc
     views/reactionequationrenderer.cc views/compartmentview.cc views/speciesview.cc
     views/plotview.cc views/taskerrorwidget.cc views/aboutdialog.cc
@@ -94,6 +94,9 @@ SET(ina_app_views_HEADERS
     views/fileselector.hh views/importmodeldialog.hh views/exportmodeldialog.hh
     views/variableruleeditor.hh views/expressioneditor.hh views/unitrenderer.hh)
 
+SET(ina_app_tinytex_SOURCES
+    tinytex/tinytex.cc tinytex/formula.cc tinytex/ginac2formula.cc)
+SET(ina_app_tinytex_HEADERS)
 
 SET(ina_app_SOURCES
     ${ina_app_base_SOURCES}
@@ -101,9 +104,7 @@ SET(ina_app_SOURCES
     ${ina_app_models_SOURCES}
     ${ina_app_views_SOURCES}
     ${ina_app_plot_SOURCES}
-    #${ina_app_re_SOURCES}
-    #${ina_app_lna_SOURCES}
-    #${ina_app_ios_SOURCES}
+    ${ina_app_tinytex_SOURCES}
     ${ina_app_sse_SOURCES}
     ${ina_app_steadystate_SOURCES}
     ${ina_app_ssa_SOURCES})
@@ -113,9 +114,7 @@ SET(ina_app_HEADERS
     ${ina_app_models_HEADERS}
     ${ina_app_views_HEADERS}
     ${ina_app_plot_HEADERS}
-    #${ina_app_re_HEADERS}
-    #${ina_app_lna_HEADERS}
-    #${ina_app_ios_HEADERS}
+    ${ina_app_tinytex_HEADERS}
     ${ina_app_sse_HEADERS}
     ${ina_app_steadystate_HEADERS}
     ${ina_app_ssa_HEADERS})

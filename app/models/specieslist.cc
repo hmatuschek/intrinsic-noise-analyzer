@@ -5,7 +5,9 @@
 #include "variableruledata.hh"
 #include "referencecounter.hh"
 #include "../views/unitrenderer.hh"
+#include "../tinytex/ginac2formula.hh"
 #include <QMessageBox>
+#include <QPainter>
 
 
 
@@ -171,7 +173,25 @@ SpeciesList::_updateName(Fluc::Ast::Species *species, const QVariant &value)
 QVariant
 SpeciesList::_getInitialValue(Fluc::Ast::Species *species, int role) const
 {
-  if ( (Qt::EditRole != role) && (Qt::DisplayRole != role) ) { return QVariant(); }
+  if ( (Qt::EditRole != role) && (Qt::DisplayRole != role) && (Qt::DecorationRole != role))
+  { return QVariant(); }
+
+  if (Qt::DecorationRole == role) {
+    if (! species->hasValue()) { return QVariant(); }
+    Ginac2Formula converter(*_model, true); species->getValue().accept(converter);
+    MathFormulaItem *formula = converter.getFormula();
+    QGraphicsItem *rendered_formula = formula->layout(MathContext());
+    QGraphicsScene *scene = new QGraphicsScene();
+    scene->addItem(rendered_formula);
+    QSize size = scene->sceneRect().size().toSize();
+    QPixmap pixmap(size.width(), size.height());
+    QPainter painter(&pixmap);
+    painter.fillRect(0,0, size.width(), size.height(), QColor(255,255,255));
+    scene->render(&painter);
+    delete scene;
+    return pixmap;
+  }
+
   std::stringstream str;
   if (species->hasValue())
     str << species->getValue();

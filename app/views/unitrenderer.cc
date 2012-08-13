@@ -7,11 +7,11 @@ UnitRenderer::UnitRenderer(const Fluc::Ast::Unit &unit, QObject *parent)
 {
   _formula = new MathFormula();
   if (1 != unit.getMultiplier()) {
-    _formula->addItem(new MathText(QString("%2").arg(unit.getMultiplier())));
+    _formula->appendItem(new MathText(QString("%2").arg(unit.getMultiplier())));
   }
   if (0 != unit.getScale()) {
     MathFormulaItem *item = new MathText(QString("%2").arg(unit.getScale()));
-    _formula->addItem(new MathSup(new MathText("10"), item));
+    _formula->appendItem(new MathSup(new MathText("10"), item));
   }
 
   QList<MathFormulaItem *> nominator;
@@ -39,7 +39,7 @@ UnitRenderer::UnitRenderer(const Fluc::Ast::Unit &unit, QObject *parent)
   }
 
   if ( (0 == nominator.size()) && (0 == denominator.size()) ) {
-    _formula->addItem(new MathText("a.u."));
+    _formula->appendItem(new MathText("a.u."));
     return;
   }
 
@@ -47,22 +47,22 @@ UnitRenderer::UnitRenderer(const Fluc::Ast::Unit &unit, QObject *parent)
 
   if (0 == denominator.size()) {
     for (QList<MathFormulaItem *>::iterator item=nominator.begin(); item!=nominator.end(); item++) {
-      _formula->addItem(*item);
+      _formula->appendItem(*item);
     }
     return;
   }
 
   MathFormula *nom = new MathFormula();
   for (QList<MathFormulaItem *>::iterator item=nominator.begin(); item!=nominator.end(); item++) {
-    nom->addItem(*item);
+    nom->appendItem(*item);
   }
 
   MathFormula *denom = new MathFormula();
   for (QList<MathFormulaItem *>::iterator item=denominator.begin(); item!=denominator.end(); item++) {
-    denom->addItem(*item);
+    denom->appendItem(*item);
   }
 
-  _formula->addItem(new MathFraction(nom, denom));
+  _formula->appendItem(new MathFraction(nom, denom));
 }
 
 
