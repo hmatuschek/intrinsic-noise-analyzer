@@ -24,7 +24,7 @@ ReactionView::ReactionView(ReactionItem *reaction, QWidget *parent) :
   layout->addWidget(label, 0, Qt::AlignRight);
 
   QGraphicsView *equation_view = new QGraphicsView();
-  ReactionEquationRenderer *renderer = new ReactionEquationRenderer();
+  ReactionEquationRenderer *renderer = new ReactionEquationRenderer(reaction->getReaction());
   equation_view->setScene(renderer);
   layout->addWidget(equation_view);
 
@@ -33,50 +33,6 @@ ReactionView::ReactionView(ReactionItem *reaction, QWidget *parent) :
   layout->addWidget(table_view);
 
   this->setLayout(layout);
-
-  // Assemble reaction equation:
-  Fluc::Ast::Reaction *reac = reaction->getReaction();
-
-  for (Fluc::Ast::Reaction::iterator iter = reac->reacBegin(); iter != reac->reacEnd(); iter++)
-  {
-    std::stringstream symbol;
-    std::stringstream stoi;
-
-    if (iter->first->hasName()) {
-      symbol << iter->first->getName();
-    } else {
-      symbol << iter->first->getIdentifier();
-    }
-
-    if (1 != iter->second)
-    {
-      stoi << iter->second;
-    }
-
-    renderer->addReactant(stoi.str(), symbol.str());
-  }
-
-  for (Fluc::Ast::Reaction::iterator iter = reac->prodBegin(); iter != reac->prodEnd(); iter++)
-  {
-    std::stringstream symbol;
-    std::stringstream stoi;
-
-    if (iter->first->hasName()) {
-      symbol << iter->first->getName();
-    } else {
-      symbol << iter->first->getIdentifier();
-    }
-
-    if (1 != iter->second)
-    {
-      stoi << iter->second;
-    }
-
-    renderer->addProduct(stoi.str(), symbol.str());
-  }
-
-  std::stringstream rate; rate << reac->getKineticLaw()->getRateLaw();
-  renderer->setRate(rate.str());
 
   // Connect signals:
   QObject::connect(reaction, SIGNAL(destroyed()), this, SLOT(reactionDestroyed()));

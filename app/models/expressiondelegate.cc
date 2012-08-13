@@ -56,13 +56,14 @@ void
 ExpressionDelegate::paint(
   QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
-  QStyleOptionViewItemV4 myOption = option;
+  /*QStyleOptionViewItemV4 myOption = option;
   QVariant icon = index.model()->data(index, Qt::DecorationRole);
   if (icon.isValid()) {
     myOption.icon = icon.value<QPixmap>();
   }
   myOption.text = index.model()->data(index, Qt::DisplayRole).toString();
 
-  QApplication::style()->drawControl(QStyle::CE_ItemViewItem, &myOption, painter);
+  QApplication::style()->drawControl(QStyle::CE_ItemViewItem, &myOption, painter);*/
+  QStyledItemDelegate::paint(painter, option, index);
 }
 

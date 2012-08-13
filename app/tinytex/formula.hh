@@ -81,6 +81,7 @@ public:
   MathFormula();
   virtual ~MathFormula();
 
+  size_t size() const;
   void appendItem(MathFormulaItem *item);
   void prependItem(MathFormulaItem *item);
 

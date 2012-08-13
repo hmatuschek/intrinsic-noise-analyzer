@@ -73,6 +73,11 @@ MathFormula::~MathFormula()
   }
 }
 
+size_t
+MathFormula::size() const {
+  return _items.size();
+}
+
 void
 MathFormula::appendItem(MathFormulaItem *item) {
   _items.append(item);

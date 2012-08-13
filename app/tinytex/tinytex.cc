@@ -6,6 +6,22 @@ using namespace Fluc;
 
 
 /* ******************************************************************************************** *
+ * Exception class
+ * ******************************************************************************************** */
+TinyTex::Error::Error() : Exception() {
+  // pass
+}
+
+TinyTex::Error::Error(const Error &other) : Exception(other) {
+  // pass...
+}
+
+TinyTex::Error::~Error() throw () {
+  // pass...
+}
+
+
+/* ******************************************************************************************** *
  * Token rules for tinyTeX lexer
  * ******************************************************************************************** */
 TinyTex::WordTokenRule::WordTokenRule(unsigned id)
@@ -26,7 +42,7 @@ TinyTex::SymbolTokenRule::SymbolTokenRule(unsigned id)
   State *s1 = createState(false);
   State *s2 = createState(false);
   State *s3 = createState(true);
-  onChar('\'', s1, s2);
+  onChar('\\', s1, s2);
   onAlpha(s2, s3);
   onAlpha(s3, s3);
 }
@@ -198,11 +214,18 @@ TinyTex::parse(const std::string &source)
 
   Parser::Production *grammar = GrammarProduction::factory();
   Parser::ConcreteSyntaxTree cst;
-  grammar->parse(lexer, cst);
-  grammar->notify(lexer, cst);
 
-  TinyTex parser(lexer);
-  return parser.parseFormula(cst[0]);
+  MathFormulaItem *item = 0;
+  try {
+    grammar->parse(lexer, cst);
+    grammar->notify(lexer, cst);
+    TinyTex parser(lexer);
+    item = parser.parseFormula(cst[0]);
+  } catch (Exception &err) {
+    Error texerr; texerr << err.what(); throw err;
+  }
+
+  return item;
 }
 
 
@@ -213,7 +236,7 @@ TinyTex::parseFormula(Fluc::Parser::ConcreteSyntaxTree &node)
   MathFormula *formula = 0;
 
   if (node[1].matched()) {
-    formula = parseFormula(node[0][1][0]);
+    formula = parseFormula(node[1][0]);
     formula->prependItem(parseSupSub(node[0]));
   } else {
     MathFormulaItem *item = parseSupSub(node[0]);

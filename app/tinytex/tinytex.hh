@@ -4,13 +4,27 @@
 #include "formula.hh"
 #include "parser/lexer.hh"
 #include "parser/production.hh"
+#include "exception.hh"
 
 
 /** This class implements a trivial parser for a minimal subset of TeX to layout
  * formulas. This is used to handle @c Ast::VariableDefinition names as tex or to render
- * reaction equations. */
+ * reaction equations.
+ *
+ * Although named TeX it is not compatible to TeX, it only handles expressions similar. It only
+ * provides super and sup scripts and greek letters and some arrow symbols.
+ */
 class TinyTex
 {
+public:
+  /** Exception class for all tinyTeX errors. */
+  class Error : public Fluc::Exception {
+  public:
+    Error();
+    Error(const Error &other);
+    ~Error() throw ();
+  };
+
 public:
   /** Parses a simple formula and returns the equivalent MathFormulaItem. */
   static MathFormulaItem *parse(const std::string &source);

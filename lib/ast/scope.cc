@@ -150,6 +150,13 @@ Scope::addDefinition(Definition *def)
     // If the definition is a scope, set scopes parent:
     scope->setParent(this);
   }
+
+  Reaction *reaction = 0;
+  if (0 != (reaction = dynamic_cast<Reaction *>(def))) {
+    // If the definition is a reaction, set parent of kinetic law:
+    reaction->getKineticLaw()->setParent(this);
+  }
+
 }
 
 

@@ -1,5 +1,9 @@
 #include "ginac2formula.hh"
 #include "tinytex.hh"
+#include <QGraphicsScene>
+#include <QPainter>
+#include <QPixmap>
+#include "utils/logger.hh"
 
 
 using namespace Fluc;
@@ -16,6 +20,10 @@ void
 Ginac2Formula::visit(const GiNaC::symbol &node)
 {
   if (! _scope.hasDefinition(node.get_name())) {
+    Fluc::Utils::Message msg = LOG_MESSAGE(Fluc::Utils::Message::INFO);
+    msg << "Can not resolve symbol: " << node;
+    Fluc::Utils::Logger::get().log(msg);
+
     _stack.push_back(new MathText(node.get_name().c_str()));
     return;
   }
@@ -24,8 +32,12 @@ Ginac2Formula::visit(const GiNaC::symbol &node)
 
   Ast::VariableDefinition *var = 0;
   if (0 == (var = dynamic_cast<Ast::VariableDefinition *>(def))) {
-      _stack.push_back(new MathText(node.get_name().c_str()));
-      return;
+    Fluc::Utils::Message msg = LOG_MESSAGE(Fluc::Utils::Message::INFO);
+    msg << "Symbol : " << node << " does not refer to a variable.";
+    Fluc::Utils::Logger::get().log(msg);
+
+    _stack.push_back(new MathText(node.get_name().c_str()));
+    return;
   }
 
   if (var->hasName()) {
@@ -141,3 +153,44 @@ Ginac2Formula::getFormula()
   return item;
 }
 
+
+MathFormulaItem *
+Ginac2Formula::toFormula(GiNaC::ex expression, Ast::Scope &scope, bool tex_names)
+{
+  MathFormulaItem *formula = 0;
+  try {
+    // Assemble formula from GiNaC expression
+    Ginac2Formula converter(scope, tex_names); expression.accept(converter);
+    formula = converter.getFormula();
+  } catch (Exception &err) {
+    std::stringstream buffer; buffer << expression;
+    formula = new MathText(buffer.str().c_str());
+
+    Fluc::Utils::Message msg = LOG_MESSAGE(Fluc::Utils::Message::WARN);
+    msg << "Can not layout expression: " << expression << ": " << err.what();
+    Fluc::Utils::Logger::get().log(msg);
+
+  }
+
+  return formula;
+}
+
+
+QVariant
+Ginac2Formula::toPixmap(GiNaC::ex expression, Ast::Scope &scope, bool tex_names)
+{
+  // Assemble formula from GiNaC expression
+  MathFormulaItem *formula = toFormula(expression, scope, tex_names);
+  // Render formula
+  QGraphicsItem *rendered_formula = formula->layout(MathContext());
+  // Draw formula into pixmap:
+  QGraphicsScene *scene = new QGraphicsScene();
+  scene->addItem(rendered_formula);
+  QSize size = scene->sceneRect().size().toSize();
+  QPixmap pixmap(size.width(), size.height());
+  QPainter painter(&pixmap);
+  painter.fillRect(0,0, size.width(), size.height(), QColor(255,255,255));
+  scene->render(&painter);
+  delete formula; delete scene;
+  return pixmap;
+}

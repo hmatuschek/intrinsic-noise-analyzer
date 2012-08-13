@@ -173,23 +173,12 @@ SpeciesList::_updateName(Fluc::Ast::Species *species, const QVariant &value)
 QVariant
 SpeciesList::_getInitialValue(Fluc::Ast::Species *species, int role) const
 {
-  if ( (Qt::EditRole != role) && (Qt::DisplayRole != role) && (Qt::DecorationRole != role))
+  if ( (Qt::EditRole != role) && (Qt::DecorationRole != role))
   { return QVariant(); }
 
   if (Qt::DecorationRole == role) {
     if (! species->hasValue()) { return QVariant(); }
-    Ginac2Formula converter(*_model, true); species->getValue().accept(converter);
-    MathFormulaItem *formula = converter.getFormula();
-    QGraphicsItem *rendered_formula = formula->layout(MathContext());
-    QGraphicsScene *scene = new QGraphicsScene();
-    scene->addItem(rendered_formula);
-    QSize size = scene->sceneRect().size().toSize();
-    QPixmap pixmap(size.width(), size.height());
-    QPainter painter(&pixmap);
-    painter.fillRect(0,0, size.width(), size.height(), QColor(255,255,255));
-    scene->render(&painter);
-    delete scene;
-    return pixmap;
+    return Ginac2Formula::toPixmap(species->getValue(), *_model);
   }
 
   std::stringstream str;
@@ -222,12 +211,7 @@ SpeciesList::_updateInitialValue(Fluc::Ast::Species *species, const QVariant &va
 QVariant
 SpeciesList::_getUnit(Fluc::Ast::Species *species, int role) const
 {
-  if ((Qt::DisplayRole != role) && (Qt::DecorationRole != role)) { return QVariant(); }
-
-  if (Qt::DisplayRole == role) {
-    std::stringstream str; species->getUnit().dump(str);
-    return QVariant(str.str().c_str());
-  }
+  if ((Qt::DecorationRole != role)) { return QVariant(); }
 
   UnitRenderer renderer(species->getUnit());
   return renderer.render();
