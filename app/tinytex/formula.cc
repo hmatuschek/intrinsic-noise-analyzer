@@ -1,6 +1,6 @@
 #include "formula.hh"
 #include <QFont>
-#include <QFontMetrics>
+#include <QFontMetricsF>
 #include <QGraphicsEllipseItem>
 #include <QPen>
 #include <QDebug>
@@ -23,26 +23,26 @@ MathContext::MathContext(const MathContext &other)
   // Pass...
 }
 
+
+qreal MathContext::pixelSize() const { return _font.pixelSize(); }
 qreal MathContext::fontSize() const { return _font.pointSizeF(); }
 void MathContext::setFontSize(qreal size) { _font.setPointSizeF(size); }
-
-int MathContext::lineWidth() const {
-  QFontMetrics metrics(_font);
-  return metrics.lineWidth();
-}
+qreal MathContext::lineWidth() const { return QFontMetricsF(_font).lineWidth(); }
 
 
 /* ******************************************************************************************** *
  * Implementation of MathMetrics
  * ******************************************************************************************** */
 MathMetrics::MathMetrics()
-  : _size(0,0), _bb_size(0,0)
+  : _ascent(0), _descent(0), _width(0), _left_bearing(0), _right_bearing(0), _bb_size(0,0)
 {
   // pass...
 }
 
 MathMetrics::MathMetrics(const MathMetrics &other)
-  : _size(other._size), _bb_size(other._bb_size)
+  : _ascent(other._ascent), _descent(other._descent), _width(other._width),
+    _left_bearing(other._left_bearing), _right_bearing(other._right_bearing),
+    _bb_size(other._bb_size)
 {
   // pass...
 }
@@ -104,32 +104,34 @@ MathFormula::prependItem(MathFormulaItem *item) {
 QGraphicsItem*
 MathFormula::layout(const MathContext &context, QGraphicsItem *parent)
 {
-  qreal current_offset = 0, space=0;
-  qreal max_height = 0; qreal tot_width = 0;
+  qreal current_offset = 0;
+  qreal max_ascent = 0;
+  qreal max_descent = 0;
+  qreal tot_width = 0;
 
   QGraphicsItemGroup *item_group = new QGraphicsItemGroup(parent); item_group->setPos(0,0);
-  //item_group->addToGroup(new QGraphicsEllipseItem(0,0,2,2));
 
   QList<QGraphicsItem *> item_list;
   // First traverse into all sub-elements with the same context and get max height of all elements:
   for (QList<MathFormulaItem *>::iterator item=_items.begin(); item!=_items.end(); item++) {
     QGraphicsItem *gitem = (*item)->layout(context, item_group);
     gitem->setPos(0,0); item_list.append(gitem);
-    max_height = std::max(max_height, (*item)->metrics().bbHeight());
-    tot_width += (*item)->metrics().width()+space;
+    max_ascent = std::max(max_ascent, (*item)->metrics().ascent());
+    max_descent = std::max(max_descent, (*item)->metrics().descent());
+    tot_width += (*item)->metrics().width();
   }
 
   // Now arrange item on center-line
   QList<MathFormulaItem*>::iterator fitem = _items.begin();
   QList<QGraphicsItem *>::iterator gitem = item_list.begin();
   for (; fitem!=_items.end(); fitem++, gitem++) {
-    qreal ih = (*fitem)->metrics().bbHeight();
+    qreal ia = (*fitem)->metrics().ascent();
     qreal iw = (*fitem)->metrics().width();
-    (*gitem)->setPos(current_offset, (max_height - ih)/2);
-    current_offset += iw + space;
+    (*gitem)->setPos(current_offset, (max_ascent - ia));
+    current_offset += iw;
   }
 
-  _metrics.setSize(QSizeF(tot_width, max_height));
+  _metrics.setWidth(tot_width); _metrics.setAscent(max_ascent); _metrics.setDescent(max_descent);
   _metrics.setBBSize(_metrics.size());
 
   qDebug() << "Layout formular " << _metrics.bbWidth() << "x" << _metrics.bbHeight();
@@ -175,7 +177,8 @@ MathFraction::layout(const MathContext &context, QGraphicsItem *parent)
   qreal tot_width  = std::max(_nominator->metrics().bbWidth(), _denominator->metrics().bbWidth());
 
   // Update own metrics:
-  _metrics.setSize(QSizeF(tot_width, tot_height));
+  _metrics.setWidth(tot_width);
+  _metrics.setAscent(_nominator->metrics().bbHeight()+space+_denominator->metrics().ascent());
   _metrics.setBBSize(_metrics.size());
 
   nom_item->setPos((tot_width - _nominator->metrics().width())/2, 0);
@@ -211,8 +214,10 @@ MathText::layout(const MathContext &context, QGraphicsItem *parent)
   QFont font(item->font()); font.setPointSizeF(context.fontSize());
 
   // Update metrics:
-  QFontMetrics font_metrics(font);
-  _metrics.setSize(QSizeF(font_metrics.width(_text), font_metrics.height()));
+  QFontMetricsF font_metrics(font);
+  _metrics.setWidth(font_metrics.width(_text));
+  _metrics.setAscent(font_metrics.ascent());
+  _metrics.setDescent(font_metrics.descent());
   _metrics.setBBSize(font_metrics.boundingRect(_text).size());
 
   // Update item:
@@ -262,9 +267,10 @@ MathSup::layout(const MathContext &context, QGraphicsItem *parent)
   upper_item->setPos(base_width, 0);
 
   // Update metric:
-  _metrics.setSize(
-        QSizeF(_base->metrics().width() + _upper->metrics().width(),
-               _base->metrics().height() + _upper->metrics().height()/2));
+  _metrics.setWidth(_base->metrics().width() + _upper->metrics().width());
+  _metrics.setAscent(_base->metrics().ascent() + _upper->metrics().height()/2);
+  _metrics.setDescent(_base->metrics().descent());
+
   _metrics.setBBSize(
         QSizeF(_base->metrics().width() + _upper->metrics().width(),
                _base->metrics().bbHeight() + _upper->metrics().bbHeight()/2));
@@ -311,9 +317,10 @@ MathSub::layout(const MathContext &context, QGraphicsItem *parent)
   lower_item->setPos(base_width, _base->metrics().bbHeight()-lower_height/2);
 
   // Update metric:
-  _metrics.setSize(
-        QSizeF(_base->metrics().width() + _lower->metrics().width(),
-               _base->metrics().height() + _lower->metrics().height()/2));
+  _metrics.setWidth(_base->metrics().width() + _lower->metrics().width());
+  _metrics.setAscent(_base->metrics().ascent());
+  _metrics.setDescent(_base->metrics().descent()+_lower->metrics().height()/2);
+
   _metrics.setBBSize(
         QSizeF(_base->metrics().width() + _lower->metrics().width(),
                _base->metrics().bbHeight() + _lower->metrics().bbHeight()/2));

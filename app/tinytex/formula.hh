@@ -7,6 +7,8 @@
 #include <QGraphicsTextItem>
 #include <QGraphicsLineItem>
 
+/** @todo Implement spaceing: ',' -> 3/18 quad, ':' -> 4/18, ';' -> 5/18, 'quad' -> font size in pt */
+/** @todo Implement alignment w.r.t. the base line. */
 
 /** A couple of settings for the rendering. */
 class MathContext {
@@ -16,10 +18,11 @@ public:
   /** copy constructor. */
   MathContext(const MathContext &other);
 
+  qreal pixelSize() const;
   qreal fontSize() const;
   void setFontSize(qreal size);
 
-  int lineWidth() const;
+  qreal lineWidth() const;
 
 protected:
   /** Holds the base-font of the context. */
@@ -37,12 +40,22 @@ public:
   /** Copy constructor. */
   MathMetrics(const MathMetrics &other);
 
-  inline const QSizeF &size() const { return _size; }
-  inline qreal width() const { return _size.width(); }
-  inline qreal height() const { return _size.height(); }
-  inline void setSize(const QSizeF &size) { _size=size; }
-  inline void setWidth(qreal width) { _size.setWidth(width); }
-  inline void setHeight(qreal height) { _size.setHeight(height); }
+  /** Returns the logical size of the item. */
+  inline QSizeF size() const { return QSizeF(width(), height()); }
+  /** Returns the logical width. */
+  inline qreal width() const { return _width; }
+  inline qreal leftBearing() const { return _left_bearing; }
+  inline qreal rightBearing() const { return _right_bearing; }
+  /** Returns the logical height = ascent() + descent() + 1; */
+  inline qreal height() const { return _ascent + _descent + 1; }
+  inline qreal ascent() const { return _ascent; }
+  inline qreal descent() const { return _descent; }
+  /** Sets the logical width of the item. */
+  inline void setWidth(qreal width) { _width = width; }
+  inline void setAscent(qreal value) { _ascent = value; }
+  inline void setDescent(qreal value) { _descent = value; }
+  inline void setLeftBearing(qreal value) { _left_bearing = value; }
+  inline void setRightBearing(qreal value) { _right_bearing = value; }
 
   inline const QSizeF &bbSize() const { return _bb_size; }
   inline qreal bbWidth() const { return _bb_size.width(); }
@@ -52,8 +65,12 @@ public:
   inline void setBBHeight(qreal height) { _bb_size.setHeight(height); }
 
 protected:
-  /** Tight size of the item. */
-  QSizeF _size;
+  qreal _ascent;
+  qreal _descent;
+  qreal _width;
+  qreal _left_bearing;
+  qreal _right_bearing;
+
   /** Bounding box of the item. */
   QSizeF _bb_size;
 };
