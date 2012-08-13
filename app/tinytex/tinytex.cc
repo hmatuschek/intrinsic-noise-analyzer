@@ -1,4 +1,6 @@
 #include "tinytex.hh"
+#include "exception.hh"
+#include <sstream>
 
 using namespace Fluc;
 
@@ -129,6 +131,38 @@ TinyTex::ElementProduction::factory() {
 /* ******************************************************************************************** *
  * The tinyTeX parser
  * ******************************************************************************************** */
+TinyTex::TinyTex(Parser::Lexer &lexer)
+  : _lexer(lexer), _symbol_table()
+{
+  // Uppercase greek letters:
+  _symbol_table["\\Alpha"] = QChar(0x0391); _symbol_table["\\Beta"] = QChar(0x0392);
+  _symbol_table["\\Gamma"] = QChar(0x0393); _symbol_table["\\Delta"] = QChar(0x0394);
+  _symbol_table["\\Epsilon"] = QChar(0x0395); _symbol_table["\\Zeta"] = QChar(0x0396);
+  _symbol_table["\\Eta"] = QChar(0x0397); _symbol_table["\\Theta"] = QChar(0x0398);
+  _symbol_table["\\Iota"] = QChar(0x0399); _symbol_table["\\Kappa"] = QChar(0x039A);
+  _symbol_table["\\Lambda"] = QChar(0x039B); _symbol_table["\\Mu"] = QChar(0x039C);
+  _symbol_table["\\Nu"] = QChar(0x039D); _symbol_table["\\Xi"] = QChar(0x039E);
+  _symbol_table["\\Omicron"] = QChar(0x039F); _symbol_table["\\Pi"] = QChar(0x03A0);
+  _symbol_table["\\Roh"] = QChar(0x03A1); _symbol_table["\\Sigma"] = QChar(0x03A3);
+  _symbol_table["\\Tau"] = QChar(0x03A4); _symbol_table["\\Upsilon"] = QChar(0x03A5);
+  _symbol_table["\\Phi"] = QChar(0x03A6); _symbol_table["\\Chi"] = QChar(0x03A7);
+  _symbol_table["\\Psi"] = QChar(0x03A8); _symbol_table["\\Omega"] = QChar(0x03A9);
+
+  // Lowercase greek letters:
+  _symbol_table["\\alpha"] = QChar(0x03B1); _symbol_table["\\beta"] = QChar(0x03B2);
+  _symbol_table["\\gamma"] = QChar(0x03B3); _symbol_table["\\delta"] = QChar(0x03B4);
+  _symbol_table["\\epsilon"] = QChar(0x03B5); _symbol_table["\\zeta"] = QChar(0x03B6);
+  _symbol_table["\\eta"] = QChar(0x03B7); _symbol_table["\\theta"] = QChar(0x03B8);
+  _symbol_table["\\iota"] = QChar(0x03B9); _symbol_table["\\kappa"] = QChar(0x03BA);
+  _symbol_table["\\lambda"] = QChar(0x03BB); _symbol_table["\\mu"] = QChar(0x03BC);
+  _symbol_table["\\nu"] = QChar(0x03BD); _symbol_table["\\xi"] = QChar(0x03BE);
+  _symbol_table["\\omicron"] = QChar(0x03BF); _symbol_table["\\pi"] = QChar(0x03C0);
+  _symbol_table["\\roh"] = QChar(0x03C1); _symbol_table["\\sigma"] = QChar(0x03C3);
+  _symbol_table["\\tau"] = QChar(0x03C4); _symbol_table["\\upsilon"] = QChar(0x03C5);
+  _symbol_table["\\phi"] = QChar(0x03C6); _symbol_table["\\chi"] = QChar(0x03C7);
+  _symbol_table["\\psi"] = QChar(0x03C8); _symbol_table["\\omega"] = QChar(0x03C9);
+}
+
 MathFormulaItem *
 TinyTex::parse(const std::string &source)
 {
@@ -140,21 +174,22 @@ TinyTex::parse(const std::string &source)
   grammar->parse(lexer, cst);
   grammar->notify(lexer, cst);
 
-  return parseFormula(cst[0], lexer);
+  TinyTex parser(lexer);
+  return parser.parseFormula(cst[0]);
 }
 
 
 MathFormula *
-TinyTex::parseFormula(Fluc::Parser::ConcreteSyntaxTree &node, Lexer &lexer)
+TinyTex::parseFormula(Fluc::Parser::ConcreteSyntaxTree &node)
 {
   /* Formula = Element [Formula] */
   MathFormula *formula = 0;
 
   if (node[1].matched()) {
-    formula = parseFormula(node[0][1][0], lexer);
-    formula->prependItem(parseElement(node[0], lexer));
+    formula = parseFormula(node[0][1][0]);
+    formula->prependItem(parseElement(node[0]));
   } else {
-    MathFormulaItem *item = parseElement(node[0], lexer);
+    MathFormulaItem *item = parseElement(node[0]);
     if (0 == dynamic_cast<MathFormula *>(item)) {
       formula = new MathFormula(); formula->appendItem(item);
     } else {
@@ -167,27 +202,44 @@ TinyTex::parseFormula(Fluc::Parser::ConcreteSyntaxTree &node, Lexer &lexer)
 
 
 MathFormulaItem *
-TinyTex::parseElement(Fluc::Parser::ConcreteSyntaxTree &node, Lexer &lexer)
+TinyTex::parseElement(Fluc::Parser::ConcreteSyntaxTree &node)
 {
   switch (node.getAltIdx()) {
   case 0: // WORD
-  case 1: // SYMBOL
   case 2: // NUMBER
-    return new MathText(lexer[node[0].getTokenIdx()].getValue().c_str());
+    return new MathText(_lexer[node[0].getTokenIdx()].getValue().c_str());
+
+  case 1:
+    return processSymbol(_lexer[node[0].getTokenIdx()].getValue());
 
   case 3: { // Element ('^'|'_') Element
-    MathFormulaItem *lhs = parseElement(node[0][0], lexer);
-    MathFormulaItem *rhs = parseElement(node[0][2], lexer);
+    MathFormulaItem *lhs = parseElement(node[0][0]);
+    MathFormulaItem *rhs = parseElement(node[0][2]);
     if (0 == node[0][1].getAltIdx()) { return new MathSup(lhs, rhs); }
     else { return new MathSup(lhs, rhs); }
   }
 
   case 4: { // '{' Formula  '}'
-    return parseFormula(node[0][1], lexer);
+    return parseFormula(node[0][1]);
   }
 
   default: break;
   }
 
   return 0;
+}
+
+
+MathFormulaItem *
+TinyTex::processSymbol(const std::string &symbol)
+{
+  std::map<std::string, QString>::iterator item=_symbol_table.find(symbol);
+
+  if (_symbol_table.end() == item) {
+    SymbolError err;
+    err << "Can not parse expression: Unknown TinyTeX symbol " << symbol;
+    throw err;
+  }
+
+  return new MathText(item->second);
 }

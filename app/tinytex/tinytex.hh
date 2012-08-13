@@ -10,6 +10,20 @@
  * formulas. This is used to handle @c Ast::VariableDefinition names as tex. */
 class TinyTex
 {
+protected:
+  /** A weak reference to the lexer. */
+  Fluc::Parser::Lexer &_lexer;
+  /** A table to map symbols to its unicode string. */
+  std::map<std::string, QString> _symbol_table;
+
+protected:
+  /** Hidden constructor, use @parse. */
+  TinyTex(Fluc::Parser::Lexer &lexer);
+
+  MathFormula *parseFormula(Fluc::Parser::ConcreteSyntaxTree &node);
+  MathFormulaItem *parseElement(Fluc::Parser::ConcreteSyntaxTree &node);
+  MathFormulaItem *processSymbol(const std::string &symbol);
+
 public:
   /** Parses a simple formula and returns the equivalent MathFormulaItem. */
   static MathFormulaItem *parse(const std::string &source);
@@ -83,11 +97,6 @@ protected:
   private:
     static ElementProduction *instance;
   };
-
-protected:
-  static MathFormula *parseFormula(Fluc::Parser::ConcreteSyntaxTree &node, Lexer &lexer);
-  static MathFormulaItem *parseElement(Fluc::Parser::ConcreteSyntaxTree &node, Lexer &lexer);
-
 };
 
 #endif // __INA_APP_TINYTEX_TINYTEX_HH__
