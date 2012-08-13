@@ -317,12 +317,12 @@ MathSub::layout(const MathContext &context, QGraphicsItem *parent)
   qreal lower_height = _lower->metrics().bbHeight();
 
   base_item->setPos(0, 0);
-  lower_item->setPos(base_width, _base->metrics().bbHeight()-lower_height/2);
+  lower_item->setPos(base_width, _base->metrics().ascent()-lower_height/2);
 
   // Update metric:
   _metrics.setWidth(_base->metrics().width() + _lower->metrics().width());
   _metrics.setAscent(_base->metrics().ascent());
-  _metrics.setDescent(_base->metrics().descent()+_lower->metrics().height()/2);
+  _metrics.setDescent(std::max(_base->metrics().descent(), _lower->metrics().height()/2));
   _metrics.setLeftBearing(_base->metrics().leftBearing());
   _metrics.setRightBearing(0);
 

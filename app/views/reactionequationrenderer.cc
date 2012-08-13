@@ -48,5 +48,6 @@ ReactionEquationRenderer::ReactionEquationRenderer(Fluc::Ast::Reaction *reac, QO
   reaction.appendItem(Ginac2Formula::toFormula(reac->getKineticLaw()->getRateLaw(), scope));
 
   // layout equation and add to this graphics scene...
-  this->addItem(reaction.layout(MathContext()));
+  MathContext ctx; ctx.setFontSize(ctx.fontSize()+4);
+  this->addItem(reaction.layout(ctx));
 }
