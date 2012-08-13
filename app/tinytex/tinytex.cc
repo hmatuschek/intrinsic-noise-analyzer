@@ -78,7 +78,7 @@ TinyTex::FormulaProduction::FormulaProduction()
 {
   FormulaProduction::instance = this;
 
-  elements.push_back(ElementProduction::factory());
+  elements.push_back(SupSubScriptProduction::factory());
   elements.push_back(new Parser::OptionalProduction(this));
 }
 
@@ -93,6 +93,32 @@ TinyTex::FormulaProduction::factory() {
 }
 
 
+TinyTex::SupSubScriptProduction::SupSubScriptProduction()
+  : Parser::Production()
+{
+  SupSubScriptProduction::instance = this;
+
+  elements.push_back(ElementProduction::factory());
+  elements.push_back(
+        new Parser::OptionalProduction(
+          new Parser::Production(
+            2, new Parser::AltProduction(
+              2, new Parser::TokenProduction(Lexer::SUP_TOKEN),
+              new Parser::TokenProduction(Lexer::SUB_TOKEN)),
+            ElementProduction::factory())));
+}
+
+TinyTex::SupSubScriptProduction *TinyTex::SupSubScriptProduction::instance = 0;
+
+Parser::Production *
+TinyTex::SupSubScriptProduction::factory() {
+  if (0 == SupSubScriptProduction::instance) {
+    return new SupSubScriptProduction();
+  }
+  return SupSubScriptProduction::instance;
+}
+
+
 TinyTex::ElementProduction::ElementProduction()
   : Parser::AltProduction()
 {
@@ -101,14 +127,6 @@ TinyTex::ElementProduction::ElementProduction()
   alternatives.push_back(new Parser::TokenProduction(Lexer::WORD_TOKEN));
   alternatives.push_back(new Parser::TokenProduction(Lexer::SYMBOL_TOKEN));
   alternatives.push_back(new Parser::TokenProduction(Lexer::NUMBER_TOKEN));
-  // Element ('^' | '_') Element
-  alternatives.push_back(
-        new Parser::Production(
-          3, this,
-          new Parser::AltProduction(
-            2, new Parser::TokenProduction(Lexer::SUP_TOKEN),
-            new Parser::TokenProduction(Lexer::SUB_TOKEN)),
-          this));
   // '{' Formula '}'
   alternatives.push_back(
         new Parser::Production(
@@ -161,6 +179,15 @@ TinyTex::TinyTex(Parser::Lexer &lexer)
   _symbol_table["\\tau"] = QChar(0x03C4); _symbol_table["\\upsilon"] = QChar(0x03C5);
   _symbol_table["\\phi"] = QChar(0x03C6); _symbol_table["\\chi"] = QChar(0x03C7);
   _symbol_table["\\psi"] = QChar(0x03C8); _symbol_table["\\omega"] = QChar(0x03C9);
+
+  // Arrow symbols:
+  _symbol_table["\\leftarrow"] = QChar(0x2190);
+  _symbol_table["\\rightarrow"] = QChar(0x2192);
+  _symbol_table["\\leftrightarrow"] = QChar(0x2194);
+  _symbol_table["\\leftharpoonup"] = QChar(0x21BC);
+  _symbol_table["\\rightleftharpoons"] = QChar(0x21CC);
+  _symbol_table["\\Leftarrow"] = QChar(0x21D0);
+  _symbol_table["\\Leftrightarrow"] = QChar(0x21D4);
 }
 
 MathFormulaItem *
@@ -182,14 +209,14 @@ TinyTex::parse(const std::string &source)
 MathFormula *
 TinyTex::parseFormula(Fluc::Parser::ConcreteSyntaxTree &node)
 {
-  /* Formula = Element [Formula] */
+  /* Formula = SupSubScript [Formula] */
   MathFormula *formula = 0;
 
   if (node[1].matched()) {
     formula = parseFormula(node[0][1][0]);
-    formula->prependItem(parseElement(node[0]));
+    formula->prependItem(parseSupSub(node[0]));
   } else {
-    MathFormulaItem *item = parseElement(node[0]);
+    MathFormulaItem *item = parseSupSub(node[0]);
     if (0 == dynamic_cast<MathFormula *>(item)) {
       formula = new MathFormula(); formula->appendItem(item);
     } else {
@@ -198,6 +225,25 @@ TinyTex::parseFormula(Fluc::Parser::ConcreteSyntaxTree &node)
   }
 
   return formula;
+}
+
+
+MathFormulaItem *
+TinyTex::parseSupSub(Parser::ConcreteSyntaxTree &node)
+{
+  /** := Element [('^'|'_') Element] */
+  MathFormulaItem *item = parseElement(node[0]);
+
+  if (node[1].matched()) {
+    MathFormulaItem *rhs = parseElement(node[1][0][1]);
+    if (0 == node[1][0][0].getAltIdx()) {
+      item = new MathSup(item, rhs);
+    } else {
+      item = new MathSub(item, rhs);
+    }
+  }
+
+  return item;
 }
 
 
@@ -212,14 +258,7 @@ TinyTex::parseElement(Fluc::Parser::ConcreteSyntaxTree &node)
   case 1:
     return processSymbol(_lexer[node[0].getTokenIdx()].getValue());
 
-  case 3: { // Element ('^'|'_') Element
-    MathFormulaItem *lhs = parseElement(node[0][0]);
-    MathFormulaItem *rhs = parseElement(node[0][2]);
-    if (0 == node[0][1].getAltIdx()) { return new MathSup(lhs, rhs); }
-    else { return new MathSup(lhs, rhs); }
-  }
-
-  case 4: { // '{' Formula  '}'
+  case 3: { // '{' Formula  '}'
     return parseFormula(node[0][1]);
   }
 

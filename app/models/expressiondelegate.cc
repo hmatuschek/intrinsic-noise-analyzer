@@ -8,7 +8,7 @@
 
 
 ExpressionDelegate::ExpressionDelegate(Fluc::Ast::Scope &scope, QObject *parent)
-  : QItemDelegate(parent), _scope(scope)
+  : QStyledItemDelegate(parent), _scope(scope)
 {
   // pass...
 }
@@ -57,7 +57,12 @@ ExpressionDelegate::paint(
   QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
   QStyleOptionViewItemV4 myOption = option;
+  QVariant icon = index.model()->data(index, Qt::DecorationRole);
+  if (icon.isValid()) {
+    myOption.icon = icon.value<QPixmap>();
+  }
   myOption.text = index.model()->data(index, Qt::DisplayRole).toString();
+
   QApplication::style()->drawControl(QStyle::CE_ItemViewItem, &myOption, painter);
 }
 

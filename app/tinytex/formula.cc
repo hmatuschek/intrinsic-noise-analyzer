@@ -241,3 +241,47 @@ MathSup::layout(const MathContext &context, QGraphicsItem *parent)
 
   return item_group;
 }
+
+
+
+/* ******************************************************************************************** *
+ * Implementation of MathSub: X_Y
+ * ******************************************************************************************** */
+MathSub::MathSub(MathFormulaItem *base, MathFormulaItem *lower)
+  : MathFormulaItem(), _base(base), _lower(lower)
+{
+  // pass...
+}
+
+MathSub::~MathSub() {
+  delete _base;
+  delete _lower;
+}
+
+QGraphicsItem*
+MathSub::layout(const MathContext &context, QGraphicsItem *parent)
+{
+  QGraphicsItemGroup *item_group = new QGraphicsItemGroup(parent);
+  MathContext sub_ctx(context); if (sub_ctx.fontSize > 2) { sub_ctx.fontSize -= sub_ctx.fontSize/3; }
+
+  // Layout sub-elements:
+  QGraphicsItem *base_item = _base->layout(context, item_group);
+  QGraphicsItem *lower_item = _lower->layout(sub_ctx, item_group);
+
+  base_item->setPos(0,0); item_group->addToGroup(base_item);
+  lower_item->setPos(0,0); item_group->addToGroup(lower_item);
+
+  qreal base_width = _base->metrics().width();
+  qreal lower_height = _lower->metrics().height();
+
+  base_item->setPos(0, 0);
+  lower_item->setPos(base_width, _base->metrics().height()-lower_height/2);
+
+  // Update metric:
+  _metrics.setSize(
+        QSizeF(_base->metrics().width() + _lower->metrics().width(),
+               _base->metrics().height() + _lower->metrics().height()/2));
+  _metrics.setBBSize(_metrics.size());
+
+  return item_group;
+}

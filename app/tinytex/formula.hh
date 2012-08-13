@@ -131,14 +131,16 @@ private:
 };
 
 
-/*class MathSub : public MathFormulaItem, public QGraphicsItemGroup
+class MathSub : public MathFormulaItem, public QGraphicsItemGroup
 {
 public:
-  MathSub();
+  MathSub(MathFormulaItem *base, MathFormulaItem *lower);
+  virtual ~MathSub();
+  QGraphicsItem *layout(const MathContext &context, QGraphicsItem *parent);
 
 private:
   MathFormulaItem *_base;
   MathFormulaItem *_lower;
-};*/
+};
 
 #endif // __INA_APP_TINYTEX_FORMULA_HH__

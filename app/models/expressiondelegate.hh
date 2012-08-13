@@ -1,12 +1,12 @@
 #ifndef __INA_APP_MODELS_EXPRESSIONDELEGATE_HH__
 #define __INA_APP_MODELS_EXPRESSIONDELEGATE_HH__
 
-#include <QItemDelegate>
+#include <QStyledItemDelegate>
 #include "ast/scope.hh"
 
 
 /** This class implements a delegate for expressions to provide a specialized editor. */
-class ExpressionDelegate : public QItemDelegate
+class ExpressionDelegate : public QStyledItemDelegate
 {
   Q_OBJECT
 
