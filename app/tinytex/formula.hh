@@ -48,30 +48,35 @@ public:
   inline qreal width() const { return _width; }
   inline qreal leftBearing() const { return _left_bearing; }
   inline qreal rightBearing() const { return _right_bearing; }
-  /** Returns the logical height = ascent() + descent() + 1; */
-  inline qreal height() const { return _ascent + _descent + 1; }
+  /** Returns the logical height = ascent() + descent(); */
+  inline qreal height() const { return _height; }
   inline qreal ascent() const { return _ascent; }
-  inline qreal descent() const { return _descent; }
+  inline qreal descent() const { return _height-_ascent; }
+  inline qreal center() const { return _center; }
+  inline qreal tail() const { return _height-_center; }
   /** Sets the logical width of the item. */
   inline void setWidth(qreal width) { _width = width; }
+  inline void setHeight(qreal value) { _height = value; }
   inline void setAscent(qreal value) { _ascent = value; }
-  inline void setDescent(qreal value) { _descent = value; }
+  inline void setCenter(qreal value) { _center = value; }
   inline void setLeftBearing(qreal value) { _left_bearing = value; }
   inline void setRightBearing(qreal value) { _right_bearing = value; }
 
-  inline QSizeF bbSize() const { return QSizeF(bbWidth(), bbHeight()); }
-  inline qreal bbWidth() const { return _width+_left_bearing+_right_bearing; }
-  inline qreal bbHeight() const { return height(); }
+  inline const QRectF &bb() const { return _bbox; }
+  inline QSizeF bbSize() const { return _bbox.size(); }
+  inline qreal bbWidth() const { return _bbox.width(); }
+  inline qreal bbHeight() const { return _bbox.height(); }
+  inline qreal bbAscent() const { return ascent(); }
+  inline void setBB(const QRectF &bb) { _bbox = bb; }
 
 protected:
-  qreal _ascent;
-  qreal _descent;
+  qreal _height;
   qreal _width;
+  qreal _ascent;
+  qreal _center;
   qreal _left_bearing;
   qreal _right_bearing;
-
-  /** Bounding box of the item. */
-  QSizeF _bb_size;
+  QRectF _bbox;
 };
 
 

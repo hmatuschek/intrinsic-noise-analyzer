@@ -30,21 +30,28 @@ ReactionEquationRenderer::ReactionEquationRenderer(Fluc::Ast::Reaction *reac, QO
 
   // " -> "
   reaction.appendItem(new MathSpace(MathSpace::THICK_SPACE));
-  reaction.appendItem(new MathText(QChar(0x21C0)));
+  if (reac->isReversible()) {
+    reaction.appendItem(new MathText(QChar(0x21CC)));
+  } else {
+    reaction.appendItem(new MathText(QChar(0x2192)));
+  }
   reaction.appendItem(new MathSpace(MathSpace::THICK_SPACE));
 
   // handle products
   if (0 == reac->numProducts()) { products->appendItem(new MathText(QChar(0x2205))); }
   for (Ast::Reaction::iterator item=reac->prodBegin(); item!=reac->prodEnd(); item++) {
+    // Prepent "+" sign
     if (0 != products->size()) {
       products->appendItem(new MathSpace(MathSpace::MEDIUM_SPACE));
       products->appendItem(new MathText("+"));
       products->appendItem(new MathSpace(MathSpace::MEDIUM_SPACE));
     }
+    // Prepren stoichiometry if != 1:
     if (1 != item->second) {
       products->appendItem(Ginac2Formula::toFormula(item->second, scope));
       products->appendItem(new MathSpace(MathSpace::THIN_SPACE));
     }
+    // render species symbol.
     products->appendItem(Ginac2Formula::toFormula(item->first->getSymbol(), scope));
   }
   reaction.appendItem(products);

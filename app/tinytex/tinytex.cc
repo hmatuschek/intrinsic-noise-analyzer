@@ -204,6 +204,11 @@ TinyTex::TinyTex(Parser::Lexer &lexer)
   _symbol_table["\\rightleftharpoons"] = QChar(0x21CC);
   _symbol_table["\\Leftarrow"] = QChar(0x21D0);
   _symbol_table["\\Leftrightarrow"] = QChar(0x21D4);
+
+  // Operators
+  _symbol_table["\\cdot"] = QChar(0x00B7);
+  _symbol_table["\\times"] = QChar(0x00D7);
+  _symbol_table["\\ast"] = QChar(0x2217);
 }
 
 MathFormulaItem *

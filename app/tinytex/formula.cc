@@ -35,15 +35,16 @@ qreal MathContext::lineWidth() const { return QFontMetricsF(_font).lineWidth(); 
  * Implementation of MathMetrics
  * ******************************************************************************************** */
 MathMetrics::MathMetrics()
-  : _ascent(0), _descent(0), _width(0), _left_bearing(0), _right_bearing(0), _bb_size(0,0)
+  : _height(0), _width(0), _ascent(0), _center(0), _left_bearing(0), _right_bearing(0),
+    _bbox(0,0,0,0)
 {
   // pass...
 }
 
 MathMetrics::MathMetrics(const MathMetrics &other)
-  : _ascent(other._ascent), _descent(other._descent), _width(other._width),
+  : _height(other._height), _width(other._width), _ascent(other._ascent), _center(other._center),
     _left_bearing(other._left_bearing), _right_bearing(other._right_bearing),
-    _bb_size(other._bb_size)
+    _bbox(other._bbox)
 {
   // pass...
 }
@@ -99,7 +100,8 @@ MathFormula::layout(const MathContext &context, QGraphicsItem *parent)
 {
   qreal current_offset = 0;
   qreal max_ascent = 0;
-  qreal max_descent = 0;
+  qreal max_center = 0;
+  qreal max_tail = 0;
   qreal tot_width = 0;
 
   QGraphicsItemGroup *item_group = new QGraphicsItemGroup(parent); item_group->setPos(0,0);
@@ -107,27 +109,46 @@ MathFormula::layout(const MathContext &context, QGraphicsItem *parent)
   QList<QGraphicsItem *> item_list;
   // First traverse into all sub-elements with the same context and get max height of all elements:
   for (QList<MathFormulaItem *>::iterator item=_items.begin(); item!=_items.end(); item++) {
+    // Layout formula item:
     QGraphicsItem *gitem = (*item)->layout(context, item_group);
+    // add to list of graphics items:
     gitem->setPos(0,0); item_list.append(gitem);
+    // Update measures depending on alignment of the item
     max_ascent = std::max(max_ascent, (*item)->metrics().ascent());
-    max_descent = std::max(max_descent, (*item)->metrics().descent());
-    tot_width += (*item)->metrics().bbWidth();
+    max_center = std::max(max_center, (*item)->metrics().center());
+    max_tail = std::max(max_tail, (*item)->metrics().center());
+    tot_width += (*item)->metrics().width();
   }
 
+  // Update width of forumla with bearings of the first and last element
+  if (0 < _items.size()) {
+    tot_width += -_items.first()->metrics().leftBearing();
+    tot_width += -_items.back()->metrics().rightBearing();
+    current_offset = -_items.first()->metrics().leftBearing();
+  }
+
+
   // Now arrange item on base-line
+  QRectF my_bb = _metrics.bb();
   QList<MathFormulaItem*>::iterator fitem = _items.begin();
   QList<QGraphicsItem *>::iterator gitem = item_list.begin();
   for (; fitem!=_items.end(); fitem++, gitem++) {
-    qreal ia = (*fitem)->metrics().ascent();
-    qreal iw = (*fitem)->metrics().bbWidth();
-    (*gitem)->setPos(current_offset, (max_ascent - ia));
-    current_offset += iw;
+    qreal iw = (*fitem)->metrics().width();
+    qreal ic = (*fitem)->metrics().center();
+    QPointF item_pos;
+    item_pos = QPointF(current_offset, max_center-ic);
+
+    (*gitem)->setPos(item_pos);
+    QRectF item_bb = (*fitem)->metrics().bb(); item_bb.translate(item_pos);
+    my_bb = my_bb.unite(item_bb); current_offset += iw;
   }
 
-  _metrics.setWidth(tot_width); _metrics.setAscent(max_ascent); _metrics.setDescent(max_descent);
+  _metrics.setWidth(tot_width);
+  _metrics.setHeight(max_center+max_tail);
+  _metrics.setAscent(max_ascent);
   _metrics.setLeftBearing(0); _metrics.setRightBearing(0);
-
-  qDebug() << "Layout formula " << _metrics.bbWidth() << "x" << _metrics.bbHeight();
+  _metrics.setBB(my_bb);
+  _metrics.setCenter(max_center);
 
   // Done:
   return item_group;
@@ -157,11 +178,10 @@ MathSpace::~MathSpace() {
 QGraphicsItem *
 MathSpace::layout(const MathContext &context, QGraphicsItem *parent)
 {
-  _metrics.setAscent(0); _metrics.setDescent(0);
+  _metrics.setHeight(1); _metrics.setAscent(1);
   _metrics.setWidth(context.pixelSize()*_factor);
   _metrics.setLeftBearing(0); _metrics.setRightBearing(0);
-
-  std::cerr << "Layout space " << _metrics.bbHeight() << "x" << _metrics.bbWidth() << std::endl;
+  _metrics.setBB(QRectF(0,0,_metrics.width(),_metrics.height()));
   return new QGraphicsTextItem(parent);
 }
 
@@ -185,7 +205,6 @@ QGraphicsItem*
 MathFraction::layout(const MathContext &context, QGraphicsItem *parent)
 {
   QGraphicsItemGroup *item_group = new QGraphicsItemGroup(parent); item_group->setPos(0,0);
-  //item_group->addToGroup(new QGraphicsEllipseItem(0,0,2,2));
 
   MathContext sub_ctx(context); if (sub_ctx.fontSize() > 2) {
     sub_ctx.setFontSize(sub_ctx.fontSize()*0.75);
@@ -193,26 +212,33 @@ MathFraction::layout(const MathContext &context, QGraphicsItem *parent)
 
   QGraphicsItem *nom_item = _nominator->layout(sub_ctx, item_group);
   QGraphicsItem *denom_item = _denominator->layout(sub_ctx, item_group);
-  QGraphicsLineItem *line = new QGraphicsLineItem(item_group);
-  QPen pen = line->pen(); pen.setWidth(sub_ctx.lineWidth()); line->setPen(pen);
-  nom_item->setPos(0,0); denom_item->setPos(0,0); line->setPos(0,0);
+  nom_item->setPos(0,0); denom_item->setPos(0,0);
 
-  qreal space=5;
-  qreal tot_height = _nominator->metrics().bbHeight() + space + _denominator->metrics().bbHeight();
+  qreal tot_height = _nominator->metrics().bbHeight() + _denominator->metrics().bbHeight() + sub_ctx.lineWidth();
   qreal tot_width  = std::max(_nominator->metrics().bbWidth(), _denominator->metrics().bbWidth());
 
+  QPointF nom_pos((tot_width - _nominator->metrics().bbWidth())/2, 0);
+
+  QPointF denom_pos((tot_width-_denominator->metrics().bbWidth())/2,
+                    _nominator->metrics().bbHeight());
+
+  QRectF nom_bb = _nominator->metrics().bb(); nom_bb.translate(nom_pos);
+  QRectF denom_bb = _nominator->metrics().bb(); denom_bb.translate(nom_pos);
+
   // Update own metrics:
+  _metrics.setBB(nom_bb.unite(denom_bb));
   _metrics.setWidth(tot_width);
-  _metrics.setAscent(_nominator->metrics().bbHeight()+space+_denominator->metrics().ascent());
-  _metrics.setDescent(_denominator->metrics().descent());
+  _metrics.setHeight(tot_height);
+  _metrics.setAscent(_nominator->metrics().bbHeight() + _denominator->metrics().bbAscent());
+  _metrics.setCenter(_nominator->metrics().bbHeight() + sub_ctx.lineWidth()/2);
   _metrics.setLeftBearing(0); _metrics.setRightBearing(0);
 
-  nom_item->setPos((tot_width - _nominator->metrics().bbWidth())/2, 0);
-  denom_item->setPos((tot_width-_denominator->metrics().bbWidth())/2,
-                     space+_nominator->metrics().bbHeight());
-  line->setLine(0, tot_height/2, tot_width, tot_height/2);
+  nom_item->setPos(nom_pos);
+  denom_item->setPos(denom_pos);
 
-  std::cerr << "Layout frac: " << _metrics.bbWidth() << "x" << _metrics.bbHeight() << std::endl;
+  QGraphicsLineItem *line = new QGraphicsLineItem(0, 0, tot_width, 0, item_group);
+  QPen pen = line->pen(); pen.setWidth(sub_ctx.lineWidth()); line->setPen(pen);
+  line->setPos(0, _nominator->metrics().bbHeight());
 
   return item_group;
 }
@@ -236,22 +262,26 @@ QGraphicsItem *
 MathText::layout(const MathContext &context, QGraphicsItem *parent)
 {
   // Create item and get font:
-  QGraphicsTextItem *item = new QGraphicsTextItem(parent); item->setPos(0,0);
+  QGraphicsSimpleTextItem *item = new QGraphicsSimpleTextItem(parent); item->setPos(0,0);
   QFont font(item->font()); font.setPointSizeF(context.fontSize());
 
   // Update metrics:
   QFontMetricsF font_metrics(font);
-  _metrics.setWidth(font_metrics.width(_text));
-  _metrics.setAscent(font_metrics.ascent());
-  _metrics.setDescent(font_metrics.descent());
+  QRectF bb = font_metrics.boundingRect(_text);
   if ( 0 < _text.size() ) {
     _metrics.setLeftBearing(font_metrics.leftBearing(_text[0]));
     _metrics.setRightBearing(font_metrics.rightBearing(_text[_text.size()-1]));
   }
+  _metrics.setWidth(bb.width()+_metrics.leftBearing()+_metrics.rightBearing());
+  _metrics.setHeight(bb.height());
+  _metrics.setAscent(-bb.top());
+  _metrics.setBB(bb.translated(-bb.topLeft()));
+  _metrics.setCenter(_metrics.ascent()/2);
 
   // Update item:
   item->setFont(font);
-  item->setPlainText(_text);
+  item->setText(_text);
+
   return item;
 }
 
@@ -290,15 +320,23 @@ MathSup::layout(const MathContext &context, QGraphicsItem *parent)
   qreal base_width = _base->metrics().width();
   qreal upper_height = _upper->metrics().bbHeight();
 
-  base_item->setPos(0, upper_height/2);
-  upper_item->setPos(base_width, 0);
+  QPointF base_pos(0, upper_height/2);
+  QPointF upper_pos(base_width, 0);
+
+  QRectF base_bb = _base->metrics().bb(); base_bb.translate(base_pos);
+  QRectF upper_bb = _upper->metrics().bb(); upper_bb.translate(upper_pos);
+
+  base_item->setPos(base_pos);
+  upper_item->setPos(upper_pos);
 
   // Update metric:
   _metrics.setWidth(_base->metrics().width() + _upper->metrics().width());
+  _metrics.setHeight(_base->metrics().height() + _upper->metrics().height()/2);
   _metrics.setAscent(_base->metrics().ascent() + _upper->metrics().height()/2);
-  _metrics.setDescent(_base->metrics().descent());
   _metrics.setLeftBearing(_base->metrics().leftBearing());
-  _metrics.setRightBearing(0);
+  _metrics.setRightBearing(_upper->metrics().rightBearing());
+  _metrics.setBB(base_bb.unite(upper_bb));
+  _metrics.setCenter(_base->metrics().center() + _upper->metrics().bbHeight()/2);
 
   return item_group;
 }
@@ -338,15 +376,22 @@ MathSub::layout(const MathContext &context, QGraphicsItem *parent)
   qreal base_width = _base->metrics().width();
   qreal lower_height = _lower->metrics().bbHeight();
 
-  base_item->setPos(0, 0);
-  lower_item->setPos(base_width, _base->metrics().ascent()-lower_height/2);
+  QPointF base_pos(0,0);
+  QPointF lower_pos(base_width, _base->metrics().ascent()-lower_height/2);
+  QRectF base_bb(_base->metrics().bb()); base_bb.translate(base_pos);
+  QRectF lower_bb(_lower->metrics().bb()); lower_bb.translate(lower_pos);
+  base_item->setPos(base_pos);
+  lower_item->setPos(lower_pos);
 
   // Update metric:
   _metrics.setWidth(_base->metrics().width() + _lower->metrics().width());
+  _metrics.setHeight(_base->metrics().ascent() +
+                     std::max(_base->metrics().descent(), _lower->metrics().height()/2));
   _metrics.setAscent(_base->metrics().ascent());
-  _metrics.setDescent(std::max(_base->metrics().descent(), _lower->metrics().height()/2));
   _metrics.setLeftBearing(_base->metrics().leftBearing());
-  _metrics.setRightBearing(0);
+  _metrics.setRightBearing(_lower->metrics().rightBearing());
+  _metrics.setBB(base_bb.united(lower_bb));
+  _metrics.setCenter(_base->metrics().center());
 
   return item_group;
 }
