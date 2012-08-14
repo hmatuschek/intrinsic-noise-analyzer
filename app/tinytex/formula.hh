@@ -7,8 +7,6 @@
 #include <QGraphicsTextItem>
 #include <QGraphicsLineItem>
 
-/** @todo Implement spaceing: ',' -> 3/18 quad, ':' -> 4/18, ';' -> 5/18, 'quad' -> font size in pt */
-/** @todo Implement alignment w.r.t. the base line. */
 
 /** A couple of settings for the rendering. */
 class MathContext {
@@ -62,7 +60,7 @@ public:
   inline void setRightBearing(qreal value) { _right_bearing = value; }
 
   inline QSizeF bbSize() const { return QSizeF(bbWidth(), bbHeight()); }
-  inline qreal bbWidth() const { return _width-_left_bearing-_right_bearing; }
+  inline qreal bbWidth() const { return _width+_left_bearing+_right_bearing; }
   inline qreal bbHeight() const { return height(); }
 
 protected:
@@ -114,6 +112,30 @@ public:
 
 private:
   QList<MathFormulaItem *> _items;
+};
+
+
+/** Simple class to implement certain spaces. */
+class MathSpace : public MathFormulaItem {
+public:
+  /** Some common spaces in TeX mathmode. */
+  typedef enum {
+    THIN_SPACE,    ///< "\,"
+    MEDIUM_SPACE,  ///< "\:"
+    THICK_SPACE,   ///< "\;"
+    QUAD_SPACE     ///< "\quad"
+  } TeXSpace;
+
+public:
+  MathSpace(TeXSpace tex_space);
+  MathSpace(qreal factor);
+  virtual ~MathSpace();
+
+  QGraphicsItem *layout(const MathContext &context, QGraphicsItem *parent);
+
+private:
+  /** The actual space factor. */
+  qreal _factor;
 };
 
 

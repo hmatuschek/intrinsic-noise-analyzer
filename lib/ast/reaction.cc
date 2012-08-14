@@ -75,6 +75,10 @@ Reaction::hasReactant(GiNaC::symbol id)
 }
 
 
+size_t
+Reaction::numReactants() const {
+  return reactants.size();
+}
 
 GiNaC::ex
 Reaction::getReactantStoichiometry(Species *species)
@@ -154,6 +158,12 @@ Reaction::hasProduct(GiNaC::symbol id)
 }
 
 
+size_t
+Reaction::numProducts() const {
+  return products.size();
+}
+
+
 GiNaC::ex
 Reaction::getProductStoichiometry(Species *species)
 {
@@ -228,6 +238,12 @@ bool
 Reaction::hasModifier() const
 {
   return 0 == this->modifiers.size();
+}
+
+
+size_t
+Reaction::numModifier() const {
+  return modifiers.size();
 }
 
 

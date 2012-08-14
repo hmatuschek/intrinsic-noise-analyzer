@@ -214,6 +214,9 @@ public:
    */
   bool hasReactant(GiNaC::symbol id);
 
+  /** Returns the number of reactants for the reaction. */
+  size_t numReactants() const;
+
   /**
    * Returns the stoichiometric expression of the given reactant.
    */
@@ -243,6 +246,9 @@ public:
    * Retunrs true if the given symbol specifies a product of the reaction.
    */
   bool hasProduct(GiNaC::symbol symbol);
+
+  /** Returns the number of products. */
+  size_t numProducts() const;
 
   /**
    * Returns the stoichiometric expression for the given reaction product.
@@ -276,6 +282,9 @@ public:
    * Returns true, if the reaction has modifiers.
    */
   bool hasModifier() const;
+
+  /** Returns the number of modifier species for this reaction. */
+  size_t numModifier() const;
 
   /**
    * Returns true if the given species is a modifier of the reaction.
