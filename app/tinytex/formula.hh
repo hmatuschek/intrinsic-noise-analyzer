@@ -170,6 +170,20 @@ private:
   QString _text;
 };
 
+
+/** Simple symbol element, similar to MathText but with an different alignment. */
+class MathSymbol : public MathFormulaItem
+{
+public:
+  MathSymbol(QChar symbol);
+  virtual ~MathSymbol();
+  QGraphicsItem* layout(const MathContext &context, QGraphicsItem *parent);
+
+private:
+  QChar _symbol;
+};
+
+
 /** Simple X^Y formula element. */
 class MathSup : public MathFormulaItem
 {

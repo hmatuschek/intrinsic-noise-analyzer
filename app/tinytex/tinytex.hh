@@ -52,10 +52,10 @@ protected:
 
 protected:
   /** Represents a simple word consisting of at least one char regexp: "[a-zA-Z]+". */
-  class WordTokenRule : public Fluc::Parser::TokenRule {
+  class TextTokenRule : public Fluc::Parser::TokenRule {
   public:
     /** Constructor. */
-    WordTokenRule(unsigned id);
+    TextTokenRule(unsigned id);
   };
 
   /** Represents a single symbol token regexp: "'\'[a-zA-Z]+" */
@@ -70,13 +70,12 @@ protected:
   public:
     /** Enumerates all token identifiers. */
     typedef enum {
-      WORD_TOKEN = Fluc::Parser::Token::FIRST_USER_DEFINED, ///< A word.
+      TEXT_TOKEN = Fluc::Parser::Token::FIRST_USER_DEFINED, ///< A word.
       SYMBOL_TOKEN,       ///< A symbol "\SYMBOLNAME"
-      NUMBER_TOKEN,       ///< An integer.
       SUP_TOKEN,          ///< '^'
       SUB_TOKEN,          ///< '_'
       LBRA_TOKEN,         ///< '{'
-      RBRA_TOKEN,         ///< ']'
+      RBRA_TOKEN,         ///< '}'
       WHITESPACE_TOKEN    ///< any whitespace
     } TokenId;
 
@@ -130,7 +129,7 @@ protected:
     static SupSubScriptProduction *instance;
   };
 
-  /** Element := (WORD | SYMBOL | NUMBER | '{' Formula '}') */
+  /** Element := (TEXT | SYMBOL | '{' Formula '}') */
   class ElementProduction : public Fluc::Parser::AltProduction {
   protected:
     /** Hidden constructor. */

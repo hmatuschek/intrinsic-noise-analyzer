@@ -144,7 +144,7 @@ public:
     }
 
     /** Add a OR instruction. */
-    void AddOr() {
+    void addOr() {
       _code.push_back(Instruction::createOr());
     }
 

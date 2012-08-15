@@ -116,7 +116,7 @@ MathFormula::layout(const MathContext &context, QGraphicsItem *parent)
     // Update measures depending on alignment of the item
     max_ascent = std::max(max_ascent, (*item)->metrics().ascent());
     max_center = std::max(max_center, (*item)->metrics().center());
-    max_tail = std::max(max_tail, (*item)->metrics().center());
+    max_tail = std::max(max_tail, (*item)->metrics().tail());
     tot_width += (*item)->metrics().width();
   }
 
@@ -149,6 +149,10 @@ MathFormula::layout(const MathContext &context, QGraphicsItem *parent)
   _metrics.setLeftBearing(0); _metrics.setRightBearing(0);
   _metrics.setBB(my_bb);
   _metrics.setCenter(max_center);
+
+  //new QGraphicsLineItem(0, max_center, tot_width, max_center, item_group);
+  //QGraphicsLineItem *aline = new QGraphicsLineItem(0, max_ascent, tot_width, max_ascent, item_group);
+  //QPen pen(aline->pen()); pen.setColor(QColor(255,0,0)); aline->setPen(pen);
 
   // Done:
   return item_group;
@@ -281,6 +285,53 @@ MathText::layout(const MathContext &context, QGraphicsItem *parent)
   // Update item:
   item->setFont(font);
   item->setText(_text);
+
+  return item;
+}
+
+
+
+/* ******************************************************************************************** *
+ * Implementation of MathText
+ * ******************************************************************************************** */
+MathSymbol::MathSymbol(QChar symbol)
+  : MathFormulaItem(), _symbol(symbol) {
+  // pass...
+}
+
+MathSymbol::~MathSymbol() {
+  // Pass...
+}
+
+QGraphicsItem *
+MathSymbol::layout(const MathContext &context, QGraphicsItem *parent)
+{
+  // Create item and get font:
+  QGraphicsSimpleTextItem *item = new QGraphicsSimpleTextItem(parent); item->setPos(0,0);
+  QFont font(item->font()); font.setPointSizeF(context.fontSize());
+
+  // Update metrics:
+  QFontMetricsF font_metrics(font);
+  QRectF char_bb = font_metrics.boundingRect(_symbol);
+  QRectF str_bb = font_metrics.boundingRect(QString(_symbol));
+  qreal voffset = -char_bb.top()-char_bb.height();
+
+  qDebug() << "MathSymbol " << _symbol << " : " << char_bb;
+  qDebug() << "  as string: " << str_bb;
+  qDebug() << "  voffset: " << voffset;
+  qDebug() << "  string ascent: " << -(str_bb.top()+voffset);
+  qDebug() << "  string center: " << -(str_bb.top()+voffset+char_bb.height()/2);
+  _metrics.setLeftBearing(font_metrics.leftBearing(_symbol));
+  _metrics.setRightBearing(font_metrics.rightBearing(_symbol));
+  _metrics.setWidth(str_bb.width()+_metrics.leftBearing()+_metrics.rightBearing());
+  _metrics.setHeight(str_bb.height());
+  _metrics.setAscent(-str_bb.top());
+  _metrics.setBB(char_bb.translated(-char_bb.topLeft()));
+  _metrics.setCenter(_metrics.ascent()-voffset-char_bb.height()/2);
+  qDebug() << " final bb: " << _metrics.bb();
+  // Update item:
+  item->setFont(font);
+  item->setText(_symbol);
 
   return item;
 }

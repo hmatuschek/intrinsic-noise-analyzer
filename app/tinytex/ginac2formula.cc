@@ -103,23 +103,63 @@ Ginac2Formula::visit(const GiNaC::mul &node)
   _current_precedence = 2;
 
   MathFormula *formula = new MathFormula();
+  QList<MathFormulaItem *> numerator, denumerator;
 
-  if (old_precedence > _current_precedence) {
+  // Handle factors:
+  for (size_t i=0; i<node.nops(); i++) {
+    // Process factor
+    node.op(i).accept(*this);
+    // Add factor to the formula:
+    if (GiNaC::is_a<GiNaC::power>(node.op(i))) {
+      // Get exponent
+      GiNaC::ex exponent = GiNaC::ex_to<GiNaC::power>(node.op(i)).op(1);
+      if (GiNaC::is_a<GiNaC::numeric>(exponent)) {
+        // get numeric value
+        GiNaC::numeric value = GiNaC::ex_to<GiNaC::numeric>(exponent);
+        // If expoent is negative integer:
+        if (value.is_integer() && value.is_negative()) {
+          (1/node.op(i)).accept(*this);
+          if (0 < denumerator.size()) { denumerator.append(new MathText(QChar(0x00B7))); }
+          denumerator.append(_stack.back()); _stack.pop_back();
+        }
+      }
+    } else {
+      node.op(i).accept(*this);
+      if (0 < numerator.size()) { numerator.append(new MathText(QChar(0x00B7))); }
+      numerator.append(_stack.back()); _stack.pop_back();
+    }
+  }
+
+  /*
+   * Now, assemble formula (product/quotient)
+   */
+  if ((old_precedence > _current_precedence) && (node.nops()>1)) {
     formula->appendItem(new MathText("("));
   }
 
-  // Handle summands:
-  for (size_t i=0; i<node.nops(); i++) {
-    node.op(i).accept(*this);
+  // If there are no numerator elements:
+  if (0 == numerator.size()) {
+    numerator.append(new MathText("1"));
   }
 
-  formula->appendItem(_stack.back()); _stack.pop_back();
-  for (size_t i=1; i<node.nops(); i++) {
-    formula->appendItem(new MathText(QChar(0x00B7)));
-    formula->appendItem(_stack.back()); _stack.pop_back();
+  // if there are no denumerator elements:
+  if (0 == denumerator.size()) {
+    for (QList<MathFormulaItem *>::iterator item=numerator.begin(); item!=numerator.end(); item++) {
+      formula->appendItem(*item);
+    }
+  } else {
+    MathFormula *num = new MathFormula();
+    MathFormula *denum = new MathFormula();
+    for (QList<MathFormulaItem *>::iterator item=numerator.begin(); item!=numerator.end(); item++) {
+      num->appendItem(*item);
+    }
+    for (QList<MathFormulaItem *>::iterator item=denumerator.begin(); item!=denumerator.end(); item++) {
+      denum->appendItem(*item);
+    }
+    formula->appendItem(new MathFraction(num, denum));
   }
 
-  if (old_precedence > _current_precedence) {
+  if ((old_precedence > _current_precedence) && (node.nops()>1)) {
     formula->appendItem(new MathText(")"));
   }
   _current_precedence = old_precedence;

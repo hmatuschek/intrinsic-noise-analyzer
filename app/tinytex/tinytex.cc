@@ -24,14 +24,30 @@ TinyTex::Error::~Error() throw () {
 /* ******************************************************************************************** *
  * Token rules for tinyTeX lexer
  * ******************************************************************************************** */
-TinyTex::WordTokenRule::WordTokenRule(unsigned id)
+TinyTex::TextTokenRule::TextTokenRule(unsigned id)
   : Parser::TokenRule(id)
 {
   allocStates(2);
   State *s1 = createState(false);
   State *s2 = createState(true);
-  onAlpha(s1, s2);
-  onAlpha(s2, s2);
+
+  Condition &cond12 = s1->createTransition(s2);
+  cond12.addOnValue('\\'); cond12.addOnValue('_'); cond12.addOr();
+  cond12.addOnValue('^');  cond12.addOr();
+  cond12.addOnValue(' ');  cond12.addOr();
+  cond12.addOnValue('\t'); cond12.addOr();
+  cond12.addOnValue('{');  cond12.addOr();
+  cond12.addOnValue('}');  cond12.addOr();
+  cond12.addNot();
+
+  Condition &cond22 = s2->createTransition(s2);
+  cond22.addOnValue('\\'); cond22.addOnValue('_'); cond22.addOr();
+  cond22.addOnValue('^');  cond22.addOr();
+  cond22.addOnValue(' ');  cond22.addOr();
+  cond22.addOnValue('\t'); cond22.addOr();
+  cond22.addOnValue('{');  cond22.addOr();
+  cond22.addOnValue('}');  cond22.addOr();
+  cond22.addNot();
 }
 
 
@@ -54,9 +70,8 @@ TinyTex::SymbolTokenRule::SymbolTokenRule(unsigned id)
 TinyTex::Lexer::Lexer(std::istream &input)
   : Parser::Lexer(input)
 {
-  addRule(new TinyTex::WordTokenRule(WORD_TOKEN));
+  addRule(new TinyTex::TextTokenRule(TEXT_TOKEN));
   addRule(new TinyTex::SymbolTokenRule(SYMBOL_TOKEN));
-  addRule(new Parser::IntegerTokenRule(NUMBER_TOKEN));
   addRule(new Parser::KeyWordTokenRule(SUP_TOKEN, "^"));
   addRule(new Parser::KeyWordTokenRule(SUB_TOKEN, "_"));
   addRule(new Parser::KeyWordTokenRule(LBRA_TOKEN, "{"));
@@ -140,9 +155,8 @@ TinyTex::ElementProduction::ElementProduction()
 {
   ElementProduction::instance = this;
 
-  alternatives.push_back(new Parser::TokenProduction(Lexer::WORD_TOKEN));
+  alternatives.push_back(new Parser::TokenProduction(Lexer::TEXT_TOKEN));
   alternatives.push_back(new Parser::TokenProduction(Lexer::SYMBOL_TOKEN));
-  alternatives.push_back(new Parser::TokenProduction(Lexer::NUMBER_TOKEN));
   // '{' Formula '}'
   alternatives.push_back(
         new Parser::Production(
@@ -279,14 +293,15 @@ MathFormulaItem *
 TinyTex::parseElement(Fluc::Parser::ConcreteSyntaxTree &node)
 {
   switch (node.getAltIdx()) {
-  case 0: // WORD
-  case 2: // NUMBER
-    return new MathText(_lexer[node[0].getTokenIdx()].getValue().c_str());
+  case 0: // Text
+    return new MathText(
+          QString::fromAscii(_lexer[node[0].getTokenIdx()].getValue().c_str(),
+                             _lexer[node[0].getTokenIdx()].getValue().size()));
 
-  case 1:
+  case 1: // Symbol
     return processSymbol(_lexer[node[0].getTokenIdx()].getValue());
 
-  case 3: { // '{' Formula  '}'
+  case 2: { // '{' Formula  '}'
     return parseFormula(node[0][1]);
   }
 

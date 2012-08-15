@@ -89,7 +89,7 @@ TokenRule::onWhiteSpace(State *A, State *B)
   Condition &cond = A->createTransition(B);
   cond.addOnValue(' ');
   cond.addOnValue('\t');
-  cond.AddOr();
+  cond.addOr();
 }
 
 void
@@ -112,7 +112,7 @@ TokenRule::onAlpha(State *A, State *B)
   Condition &cond = A->createTransition(B);
   cond.addInRange('a','z');
   cond.addInRange('A','Z');
-  cond.AddOr();
+  cond.addOr();
 }
 
 void
@@ -136,8 +136,8 @@ TokenRule::onAlphaNum(State *A, State *B)
   cond.addInRange('0','9');
   cond.addInRange('a','z');
   cond.addInRange('A','Z');
-  cond.AddOr();
-  cond.AddOr();
+  cond.addOr();
+  cond.addOr();
 }
 
 /* ******************************************************************************************** *
@@ -273,10 +273,11 @@ Lexer::parseToken()
     return;
   }
 
-  // Read chars until ROF or NFA does not accept the next char:
-  while ((!input.eof()) && reader.accepts(input.peek()))
+  input.peek();
+  // Read chars until EOF or NFA does not accept the next char:
+  while ((!input.eof()) &&reader.accepts(input.peek()))
   {
-    char c; input.get(c);
+    char c; input.get(c); input.peek();
     reader.accept(c);
     _buffer << c;
   }
