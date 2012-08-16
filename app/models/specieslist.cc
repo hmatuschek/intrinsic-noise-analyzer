@@ -10,6 +10,7 @@
 
 #include <QMessageBox>
 #include <QPainter>
+#include <QDebug>
 
 
 
@@ -274,17 +275,39 @@ SpeciesList::_updateCompartment(Fluc::Ast::Species *species, const QVariant &val
 QVariant
 SpeciesList::_getRule(Fluc::Ast::Species *species, int role) const
 {
-  if (Qt::DisplayRole != role) {  return QVariant(); }
+  if (Qt::DecorationRole != role) {  return QVariant(); }
 
   if (species->hasRule()) {
-    std::stringstream stream; stream << species->getRule()->getRule();
+    // Translate ginac expression into formula:
+    MathFormula *formula = new MathFormula();
     if (Fluc::Ast::Node::isAssignmentRule(species->getRule())) {
-      return QVariant(QString("%1=%2").arg(species->getIdentifier().c_str(), stream.str().c_str()));
+      formula->appendItem(
+            Ginac2Formula::toFormula(species->getSymbol(), *_model));
+      formula->appendItem(new MathText("="));
     } else {
-      return QVariant(QString("d%1/dt=%2").arg(species->getIdentifier().c_str(), stream.str().c_str()));
+      formula->appendItem(
+            new MathSub(new MathText(QChar(0x2202)), new MathText("t")));
+      formula->appendItem(
+            Ginac2Formula::toFormula(species->getSymbol(), *_model));
+      formula->appendItem(new MathText("="));
     }
+    formula->appendItem(Ginac2Formula::toFormula(
+                          species->getRule()->getRule(), *_model));
+
+    // Draw formula into pixmap:
+    QGraphicsItem *rendered = formula->layout(MathContext());
+    QGraphicsScene *scene = new QGraphicsScene();
+    scene->addItem(rendered);
+    QSize size = scene->sceneRect().size().toSize();
+    QPixmap pixmap(size.width(), size.height());
+    QPainter painter(&pixmap);
+    painter.fillRect(0,0, size.width(), size.height(), QColor(255,255,255));
+    scene->render(&painter);
+    delete formula; delete scene;
+    qDebug() << "Return pixmap for rule: " << pixmap.rect();
+    return pixmap;
   } else {
-    return QVariant("<none>");
+    return QVariant(TinyTex::toPixmap("<none>"));
   }
 }
 

@@ -229,6 +229,7 @@ TinyTex::TinyTex(Parser::Lexer &lexer)
   _symbol_table["\\cdot"] = QChar(0x00B7);
   _symbol_table["\\times"] = QChar(0x00D7);
   _symbol_table["\\ast"] = QChar(0x2217);
+  _symbol_table["\\partial"] = QChar(0x2202);
 }
 
 MathFormulaItem *
