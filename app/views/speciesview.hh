@@ -5,11 +5,6 @@
 #include <QTableView>
 #include <QPushButton>
 #include "../doctree/speciesitem.hh"
-#include "../models/expressiondelegate.hh"
-#include "../models/compartmentdelegate.hh"
-#include "../models/variableruledelegate.hh"
-#include "../models/tinytexdelegate.hh"
-
 
 /**
  * Displays the list of species held by a @c SpeciesItem.
@@ -38,14 +33,6 @@ private slots:
 private:
   /** Holds a weak reference to the species item. */
   SpeciesItem *_species;
-  /** Holds a simple tinyTex rendering delegate. */
-  TinyTexDelegate *tinyTexDelegate;
-  /** Holds the ExpressionDelegate, allows to edit expressions. */
-  ExpressionDelegate *expressionDelegate;
-  /** Holds the CompartmentDelegate, shows a combobox for compartment selection. */
-  CompartmentDelegate *compartmentDelegate;
-  /** Holds the SpeciesRuleDelegate, shows a simple editor for the species rule. */
-  SpeciesRuleDelegate *ruleDelegate;
   /** Holds the QTableView. */
   QTableView *_specTable;
   /** Add species button. */

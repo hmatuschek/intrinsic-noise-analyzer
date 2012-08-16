@@ -5,6 +5,14 @@
 #include "ast/scope.hh"
 
 
+/** Trivial container to pass GiNaC::ex expressions. */
+class ExpressionContainer {
+public:
+  ExpressionContainer(GiNaC::ex expr) : expression(expr) { }
+  GiNaC::ex expression;
+};
+
+
 /** This class implements a delegate for expressions to provide a specialized editor. */
 class ExpressionDelegate : public QStyledItemDelegate
 {

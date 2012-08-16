@@ -4,6 +4,11 @@
 #include <QLabel>
 #include <QHeaderView>
 
+#include "../models/variableruledata.hh"
+#include "../models/expressiondelegate.hh"
+#include "../models/compartmentdelegate.hh"
+#include "../models/variableruledelegate.hh"
+
 
 
 /* ********************************************************************************************* *
@@ -21,6 +26,12 @@ ParameterView::ParameterView(ParametersItem *parameters, QWidget *parent) :
 
   this->paramTable = new ParameterTable(parameters->parmeters());
   this->paramTable->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
+
+  // Register delegates for columns:
+  paramTable->setItemDelegateForColumn(
+        1, new ExpressionDelegate(parameters->parmeters()->model(), paramTable));
+  paramTable->setItemDelegateForColumn(
+        2, new ExpressionDelegate(parameters->parmeters()->model(), paramTable));
 
   QVBoxLayout *layout = new QVBoxLayout();
   layout->addWidget(label, 0, Qt::AlignRight);

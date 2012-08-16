@@ -4,6 +4,11 @@
 #include <QVBoxLayout>
 #include <QHeaderView>
 
+#include "../models/variableruledata.hh"
+#include "../models/expressiondelegate.hh"
+#include "../models/compartmentdelegate.hh"
+#include "../models/variableruledelegate.hh"
+
 
 SpeciesView::SpeciesView(SpeciesItem *species ,QWidget *parent) :
   QWidget(parent), _species(species)
@@ -26,12 +31,6 @@ SpeciesView::SpeciesView(SpeciesItem *species ,QWidget *parent) :
   _remSpeciesButton->setEnabled(false);
   _remSpeciesButton->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
-  // Create delegates:
-  tinyTexDelegate = new TinyTexDelegate(this);
-  expressionDelegate  = new ExpressionDelegate(species->species()->model(), this);
-  compartmentDelegate = new CompartmentDelegate(species->species()->model(), this);
-  ruleDelegate = new SpeciesRuleDelegate(species->species()->model(), this);
-
   // Assemble view:
   _specTable = new QTableView();
   _specTable->setModel(_species->species());
@@ -39,10 +38,14 @@ SpeciesView::SpeciesView(SpeciesItem *species ,QWidget *parent) :
   _specTable->verticalHeader()->hide();
 
   // Register delegates for columns:
-  _specTable->setItemDelegateForColumn(1, tinyTexDelegate);
-  _specTable->setItemDelegateForColumn(2, expressionDelegate);
-  _specTable->setItemDelegateForColumn(5, compartmentDelegate);
-  _specTable->setItemDelegateForColumn(6, ruleDelegate);
+  _specTable->setItemDelegateForColumn(
+        1, new ExpressionDelegate(_species->species()->model(), _specTable));
+  _specTable->setItemDelegateForColumn(
+        2, new ExpressionDelegate(_species->species()->model(), _specTable));
+  _specTable->setItemDelegateForColumn(
+        5, new CompartmentDelegate(_species->species()->model(), _specTable));
+  _specTable->setItemDelegateForColumn(
+        6, new SpeciesRuleDelegate(_species->species()->model(), _specTable));
 
   // Assemble widget layout
   QHBoxLayout *header = new QHBoxLayout();

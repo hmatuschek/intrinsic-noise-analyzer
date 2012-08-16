@@ -64,11 +64,12 @@ TinyTexDelegate::paint(
   painter->setClipRect(myoptions.rect);
   // Fill background:
   painter->fillRect(myoptions.rect, myoptions.backgroundBrush);
-  int yoff = 0, xoff=0;
-  if (image.height() < myoptions.rect.height()) {
-    yoff = (myoptions.rect.height() - image.height())/2;
-  }
+  // Center horizontally
+  int yoff = (myoptions.rect.height() - image.height())/2;
+  // Just some small offset
+  int xoff = 3;
   // Render text into given painter:
   painter->drawPixmap(QPoint(myoptions.rect.left()+xoff,myoptions.rect.top()+yoff), image);
+  // restore painter
   painter->restore();
 }

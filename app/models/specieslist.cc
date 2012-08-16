@@ -2,11 +2,12 @@
 #include "parser/parser.hh"
 #include "exception.hh"
 #include "utils/logger.hh"
-#include "variableruledata.hh"
 #include "referencecounter.hh"
+#include "variableruledata.hh"
 #include "../views/unitrenderer.hh"
 #include "../tinytex/tinytex.hh"
 #include "../tinytex/ginac2formula.hh"
+
 #include <QMessageBox>
 #include <QPainter>
 
@@ -145,11 +146,13 @@ SpeciesList::_getName(Fluc::Ast::Species *species, int role) const
 {
   if ( (Qt::DisplayRole != role) && (Qt::EditRole != role) ) { return QVariant(); }
 
-  if (species->hasName()) {
-    return QString(species->getName().c_str());
+  if (Qt::EditRole == role) {
+    return species->getName().c_str();
   } else {
-    if (Qt::DisplayRole == role) {
-      return QString("<none>");
+    if (species->hasName()) {
+      return TinyTex::toPixmap(species->getName().c_str());
+    } else {
+      return TinyTex::toPixmap("<none>");
     }
   }
 
@@ -177,14 +180,17 @@ SpeciesList::_updateName(Fluc::Ast::Species *species, const QVariant &value)
 QVariant
 SpeciesList::_getInitialValue(Fluc::Ast::Species *species, int role) const
 {
-  if ( (Qt::EditRole != role) && (Qt::DecorationRole != role))
+  // filter by display role
+  if ( (Qt::EditRole != role) && (Qt::DisplayRole != role))
   { return QVariant(); }
 
-  if (Qt::DecorationRole == role) {
+  // Try to render formula as pixmap
+  if (Qt::DisplayRole == role) {
     if (! species->hasValue()) { return QVariant(); }
-    return Ginac2Formula::toPixmap(species->getValue(), *_model);
+    return QVariant(Ginac2Formula::toPixmap(species->getValue(), *_model));
   }
 
+  // Export formula as string
   std::stringstream str;
   if (species->hasValue())
     str << species->getValue();
