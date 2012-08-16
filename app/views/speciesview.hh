@@ -8,6 +8,7 @@
 #include "../models/expressiondelegate.hh"
 #include "../models/compartmentdelegate.hh"
 #include "../models/variableruledelegate.hh"
+#include "../models/tinytexdelegate.hh"
 
 
 /**
@@ -37,6 +38,8 @@ private slots:
 private:
   /** Holds a weak reference to the species item. */
   SpeciesItem *_species;
+  /** Holds a simple tinyTex rendering delegate. */
+  TinyTexDelegate *tinyTexDelegate;
   /** Holds the ExpressionDelegate, allows to edit expressions. */
   ExpressionDelegate *expressionDelegate;
   /** Holds the CompartmentDelegate, shows a combobox for compartment selection. */

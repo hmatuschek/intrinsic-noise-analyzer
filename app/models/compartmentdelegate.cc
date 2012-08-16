@@ -55,13 +55,3 @@ CompartmentDelegate::updateEditorGeometry(
 {
   editor->setGeometry(option.rect);
 }
-
-
-void
-CompartmentDelegate::paint(
-  QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
-{
-  QStyleOptionViewItemV4 myOption = option;
-  myOption.text = index.model()->data(index, Qt::DisplayRole).toString();
-  QApplication::style()->drawControl(QStyle::CE_ItemViewItem, &myOption, painter);
-}

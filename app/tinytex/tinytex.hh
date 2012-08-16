@@ -5,6 +5,7 @@
 #include "parser/lexer.hh"
 #include "parser/production.hh"
 #include "exception.hh"
+#include <QVariant>
 
 
 /** This class implements a trivial parser for a minimal subset of TeX to layout
@@ -29,6 +30,9 @@ public:
   /** Parses a simple formula and returns the equivalent MathFormulaItem. */
   static MathFormulaItem *parse(const std::string &source);
 
+  /** Parses the given formula and returns the rendered pixmap, if rendering fails,
+   * it returns the given source. */
+  static QVariant toPixmap(const std::string &source);
 
 protected:
   /** A weak reference to the lexer. */

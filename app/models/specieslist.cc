@@ -5,6 +5,7 @@
 #include "variableruledata.hh"
 #include "referencecounter.hh"
 #include "../views/unitrenderer.hh"
+#include "../tinytex/tinytex.hh"
 #include "../tinytex/ginac2formula.hh"
 #include <QMessageBox>
 #include <QPainter>
@@ -147,11 +148,14 @@ SpeciesList::_getName(Fluc::Ast::Species *species, int role) const
   if (species->hasName()) {
     return QString(species->getName().c_str());
   } else {
-    if (Qt::DisplayRole == role) { return QString("<none>"); }
+    if (Qt::DisplayRole == role) {
+      return QString("<none>");
+    }
   }
 
-  return QString();
+  return QVariant();
 }
+
 
 bool
 SpeciesList::_updateName(Fluc::Ast::Species *species, const QVariant &value)

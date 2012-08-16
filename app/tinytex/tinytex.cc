@@ -1,6 +1,12 @@
 #include "tinytex.hh"
 #include "exception.hh"
+#include "formula.hh"
+
 #include <sstream>
+#include <QGraphicsScene>
+#include <QGraphicsItem>
+#include <QPainter>
+#include <QDebug>
 
 using namespace Fluc;
 
@@ -324,4 +330,29 @@ TinyTex::processSymbol(const std::string &symbol)
   }
 
   return new MathText(item->second);
+}
+
+
+QVariant
+TinyTex::toPixmap(const std::string &source)
+{
+  MathFormulaItem *item = 0;
+  try {
+    item = TinyTex::parse(source);
+  } catch (TinyTex::Error &error) {
+    item = new MathText(source.c_str());
+  }
+
+  QGraphicsItem *rendered_item = item->layout(MathContext());
+  // Draw formula into pixmap:
+  QGraphicsScene *scene = new QGraphicsScene();
+  scene->addItem(rendered_item);
+  QSize size = scene->sceneRect().size().toSize();
+  QPixmap pixmap(size.width(), size.height());
+  QPainter painter(&pixmap);
+  painter.fillRect(0,0, size.width(), size.height(), QColor(255,255,255));
+  scene->render(&painter);
+  delete item; delete scene;
+
+  return pixmap;
 }
