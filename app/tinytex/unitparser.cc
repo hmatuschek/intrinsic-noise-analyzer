@@ -4,7 +4,14 @@
 using namespace Fluc;
 
 
-UnitParser::UnitParser()
+UnitParser::Lexer::Lexer(std::istream &input)
+  : Parser::Lexer(input) {
+  /// \todo Implement!!!
+}
+
+
+
+  UnitParser::UnitParser()
   : _unit_table()
 {
   _unit_table["ampere"] = Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::AMPERE);
@@ -65,19 +72,21 @@ UnitParser::parse(std::istream &unit)
 
   // Else, parse unit...
   UnitParser parser;
-  return parser.processUnit(cst[0][0]);
+  // Grammar := [Unit] EOS
+  return parser.processUnit(cst[0][0], lexer);
 }
 
 
 Ast::Unit
-UnitParser::processUnit(Parser::ConcreteSyntaxTree &node) {
-  Ast::Unit unit = processBaseUnit(node[0]);
+UnitParser::processUnit(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer) {
+  // Unit := BaseUnit [("*"|"/") Unit];
+  Ast::Unit unit = processBaseUnit(node[0], lexer);
 
   if (node[1].matched()) {
     if (0 == node[1][0][0].getAltIdx()) {
-      unit = unit * processUnit(node[1][0][1]);
+      unit = unit * processUnit(node[1][0][1], lexer);
     } else {
-      unit = unit / processUnit(node[1][0][1]);
+      unit = unit / processUnit(node[1][0][1], lexer);
     }
   }
 
@@ -86,8 +95,179 @@ UnitParser::processUnit(Parser::ConcreteSyntaxTree &node) {
 
 
 Ast::Unit
-UnitParser::processBaseUnit(Fluc::Parser::ConcreteSyntaxTree &node)
+UnitParser::processBaseUnit(Fluc::Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer)
 {
-  /// \todo Implement!!!
+  // BaseUnit := (Scale | Pow | "(" Unit ")")
+  if (0 == node.getAltIdx()) {
+    return processScale(node[0], lexer);
+  } else if (1 == node.getAltIdx()) {
+    return processPow(node[0], lexer);
+  } else if (2 == node.getAltIdx()) {
+    return processUnit(node[0][1], lexer);
+  }
+
   return Ast::Unit();
+}
+
+
+Ast::Unit
+UnitParser::processScale(Fluc::Parser::ConcreteSyntaxTree &node, Fluc::Parser::Lexer &lexer)
+{
+  /** Scale = FLOAT [("e"|"E") INTEGER] */
+  int scale = 0;
+  double multiplier = 1.0;
+
+  std::stringstream buffer;
+  buffer.str(lexer[node[0].getTokenIdx()].getValue()); buffer >> multiplier;
+
+  if (node[1].matched()) {
+    buffer.str(lexer[node[1][0][1].getTokenIdx()].getValue()); buffer >> scale;
+  }
+
+  return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::DIMENSIONLESS, multiplier, scale, 1);
+}
+
+
+Ast::Unit
+UnitParser::processPow(Fluc::Parser::ConcreteSyntaxTree &node, Fluc::Parser::Lexer &lexer)
+{
+  // PowProduction := UnitId [('**'|'^') INTEGER]
+  std::string baseunit = lexer[node[0].getTokenIdx()].getValue();
+
+  std::map<std::string, Ast::ScaledBaseUnit>::iterator item = _unit_table.find(baseunit);
+  if (_unit_table.end() == item) {
+    SymbolError err;
+    err << "Can not resolve unit name " << baseunit;
+    throw err;
+  }
+
+  Ast::ScaledBaseUnit unit = item->second;
+  if (node[1].matched()) {
+    int exponent=1;
+    std::stringstream buffer(lexer[node[1][0][1].getTokenIdx()].getValue()); buffer >> exponent;
+    //unit.setExponent(exponent);
+  }
+
+  return unit;
+}
+
+
+UnitParser::GrammarProduction::GrammarProduction()
+  : Parser::Production()
+{
+  GrammarProduction::instance = this;
+
+  elements.push_back(UnitProduction::factory());
+  elements.push_back(new Parser::TokenProduction(Parser::Token::END_OF_INPUT));
+}
+
+UnitParser::GrammarProduction *UnitParser::GrammarProduction::instance = 0;
+
+Parser::Production *
+UnitParser::GrammarProduction::factory() {
+  if ( 0 == GrammarProduction::instance) {
+    return new GrammarProduction();
+  }
+  return GrammarProduction::instance;
+}
+
+
+UnitParser::UnitProduction::UnitProduction()
+  : Parser::Production()
+{
+  UnitProduction::instance = this;
+
+  elements.push_back(BaseUnitProduction::factory());
+  elements.push_back(
+        new Parser::OptionalProduction(
+          new Parser::Production(
+            2, new Parser::AltProduction(
+              2, new Parser::TokenProduction(Lexer::TIMES_TOKEN),
+              new Parser::TokenProduction(Lexer::DIVIDE_TOKEN)),
+            this)));
+}
+
+UnitParser::UnitProduction *UnitParser::UnitProduction::instance = 0;
+
+Parser::Production *
+UnitParser::UnitProduction::factory() {
+  if (0 == UnitProduction::instance) {
+    return new UnitProduction();
+  }
+
+  return UnitProduction::instance = 0;
+}
+
+
+UnitParser::BaseUnitProduction::BaseUnitProduction()
+  : Parser::AltProduction()
+{
+  BaseUnitProduction::instance = this;
+
+  alternatives.push_back(ScaleProduction::factory());
+  alternatives.push_back(PowProduction::factory());
+  alternatives.push_back(
+        new Parser::Production(
+          3, new Parser::TokenProduction(Lexer::LPAR_TOKEN), UnitProduction::factory(),
+          new Parser::TokenProduction(Lexer::RPAR_TOKEN)));
+}
+
+UnitParser::BaseUnitProduction *UnitParser::BaseUnitProduction::instance = 0;
+
+Parser::Production *
+UnitParser::BaseUnitProduction::factory() {
+  if (0 == BaseUnitProduction::instance) {
+    return new BaseUnitProduction();
+  }
+
+  return BaseUnitProduction::instance;
+}
+
+
+UnitParser::ScaleProduction::ScaleProduction()
+  : Parser::Production()
+{
+  ScaleProduction::instance = this;
+
+  elements.push_back(new Parser::TokenProduction(Lexer::FLOAT_TOKEN));
+  elements.push_back(
+        new Parser::OptionalProduction(
+          new Parser::Production(
+            2, new Parser::TokenProduction(Lexer::EXP_TOKEN),
+            new Parser::TokenProduction(Lexer::INTEGER_TOKEN))));
+}
+
+UnitParser::ScaleProduction *UnitParser::ScaleProduction::instance = 0;
+
+Parser::Production *
+UnitParser::ScaleProduction::factory()
+{
+  if (0 == ScaleProduction::instance) {
+    return new ScaleProduction();
+  }
+  return ScaleProduction::instance;
+}
+
+
+UnitParser::PowProduction::PowProduction()
+  : Parser::Production()
+{
+  PowProduction::instance = this;
+
+  elements.push_back(new Parser::TokenProduction(Lexer::UNIT_TOKEN));
+  elements.push_back(
+        new Parser::OptionalProduction(
+          new Parser::Production(
+            2, new Parser::TokenProduction(Lexer::POW_TOKEN),
+            new Parser::TokenProduction(Lexer::INTEGER_TOKEN))));
+}
+
+UnitParser::PowProduction *UnitParser::PowProduction::instance = 0;
+
+Parser::Production *
+UnitParser::PowProduction::factory() {
+  if (0 == PowProduction::instance) {
+    new PowProduction();
+  }
+  return PowProduction::instance;
 }

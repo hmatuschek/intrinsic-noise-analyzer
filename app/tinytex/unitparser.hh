@@ -20,10 +20,10 @@ protected:
   /** Hidden constructor. */
   UnitParser();
 
-  /** Assembles a unit form the given concrete syntax tree. */
-  Fluc::Ast::Unit processUnit(Fluc::Parser::ConcreteSyntaxTree &node);
-  /** Assembles a scaled base unit (as a Ast::Unit) given the concrete syntax tree. */
-  Fluc::Ast::Unit processBaseUnit(Fluc::Parser::ConcreteSyntaxTree &node);
+  Fluc::Ast::Unit processUnit(Fluc::Parser::ConcreteSyntaxTree &node, Fluc::Parser::Lexer &lexer);
+  Fluc::Ast::Unit processBaseUnit(Fluc::Parser::ConcreteSyntaxTree &node, Fluc::Parser::Lexer &lexer);
+  Fluc::Ast::Unit processScale(Fluc::Parser::ConcreteSyntaxTree &node, Fluc::Parser::Lexer &lexer);
+  Fluc::Ast::Unit processPow(Fluc::Parser::ConcreteSyntaxTree &node, Fluc::Parser::Lexer &lexer);
 
 
 private:
@@ -39,6 +39,7 @@ protected:
       UNIT_TOKEN = Fluc::Parser::Token::FIRST_USER_DEFINED, ///< An identifier for base units.
       FLOAT_TOKEN,   ///< A floating point number.
       INTEGER_TOKEN, ///< A Signed integer token.
+      EXP_TOKEN,     ///< 'e'|'E'
       TIMES_TOKEN,   ///< "*"
       DIVIDE_TOKEN,  ///< "/"
       POW_TOKEN,     ///< "**" | "^"
@@ -108,6 +109,20 @@ protected:
     BaseUnitProduction();
     /** Singleton instance. */
     static BaseUnitProduction *instance;
+  };
+
+  /** ScaleProduction = FLOAT [('e'|'E') INTEGER] */
+  class ScaleProduction : public Fluc::Parser::Production
+  {
+  public:
+    /** Factory method. */
+    static Fluc::Parser::Production *factory();
+
+  protected:
+    /** Hidden constructor, use factory method. */
+    ScaleProduction();
+    /** Singleton instance. */
+    static ScaleProduction *instance;
   };
 
   /** PowProduction := UnitId [('**'|'^') INTEGER] */
