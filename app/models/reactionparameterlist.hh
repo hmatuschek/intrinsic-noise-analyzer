@@ -39,6 +39,23 @@ public:
 
   /** Returns the number of columns. */
   int columnCount(const QModelIndex &parent = QModelIndex()) const;
+
+  Fluc::Ast::KineticLaw &kineticLaw();
+
+private:
+  /** Retruns the identifier of the local paramter. */
+  QVariant _getIdentifier(Fluc::Ast::Parameter *param, int role) const;
+  /** Returns the name of the paramter. */
+  QVariant _getName(Fluc::Ast::Parameter *param, int role) const;
+  /** Updates the name of the parameter. */
+  bool _updateName(Fluc::Ast::Parameter *param, const QVariant &value);
+  /** Returns the initial value of the parameter. */
+  QVariant _getInitialValue(Fluc::Ast::Parameter *param, int role) const;
+  /** Updates the initial value of the paramter. */
+  bool _updateInitialValue(Fluc::Ast::Parameter *param, const QVariant &value);
+  QVariant _getUnit(Fluc::Ast::Parameter *param, int role) const;
+  QVariant _getConstFlag(Fluc::Ast::Parameter *param, int role) const;
+  bool _updateConstFlag(Fluc::Ast::Parameter *param, const QVariant &value);
 };
 
 

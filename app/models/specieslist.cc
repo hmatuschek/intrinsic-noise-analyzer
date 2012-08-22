@@ -225,7 +225,7 @@ SpeciesList::_getUnit(Fluc::Ast::Species *species, int role) const
   if ((Qt::DecorationRole != role)) { return QVariant(); }
 
   UnitRenderer renderer(species->getUnit());
-  return renderer.render();
+  return renderer.toPixmap();
 }
 
 

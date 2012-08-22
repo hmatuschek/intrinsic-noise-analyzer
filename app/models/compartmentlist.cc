@@ -5,6 +5,7 @@
 #include "referencecounter.hh"
 #include "../tinytex/ginac2formula.hh"
 #include "../tinytex/tinytex.hh"
+#include "../views/unitrenderer.hh"
 #include <QMessageBox>
 
 
@@ -190,9 +191,10 @@ CompartmentList::_updateInitValue(Fluc::Ast::Compartment *compartment, const QVa
 QVariant
 CompartmentList::_getUnit(Fluc::Ast::Compartment *compartment, int role) const
 {
-  if (Qt::DisplayRole != role) { return QVariant(); }
-  std::stringstream str; compartment->getUnit().dump(str);
-  return QVariant(str.str().c_str());
+  if ((Qt::DecorationRole != role)) { return QVariant(); }
+
+  UnitRenderer renderer(compartment->getUnit());
+  return renderer.toPixmap();
 }
 
 

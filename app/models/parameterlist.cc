@@ -195,7 +195,7 @@ ParameterList::_getUnit(Fluc::Ast::Parameter *param, int role) const
   if ((Qt::DecorationRole != role)) { return QVariant(); }
 
   UnitRenderer renderer(param->getUnit());
-  return renderer.render();
+  return renderer.toPixmap();
 }
 
 QVariant

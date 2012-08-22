@@ -18,7 +18,7 @@ public:
   explicit UnitRenderer(const Fluc::Ast::Unit &unit, QObject *parent = 0);
   virtual ~UnitRenderer();
 
-  const QPixmap &render();
+  const QPixmap &toPixmap();
 
 private:
   MathFormula *_formula;
