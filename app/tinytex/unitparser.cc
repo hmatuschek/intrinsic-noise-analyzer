@@ -132,8 +132,9 @@ Ast::Unit
 UnitParser::processPow(Fluc::Parser::ConcreteSyntaxTree &node, Fluc::Parser::Lexer &lexer)
 {
   // PowProduction := UnitId [('**'|'^') INTEGER]
-  std::string baseunit = lexer[node[0].getTokenIdx()].getValue();
 
+  // Get unit ide and try to resolve it to a scaled base unit:
+  std::string baseunit = lexer[node[0].getTokenIdx()].getValue();
   std::map<std::string, Ast::ScaledBaseUnit>::iterator item = _unit_table.find(baseunit);
   if (_unit_table.end() == item) {
     SymbolError err;
@@ -142,10 +143,14 @@ UnitParser::processPow(Fluc::Parser::ConcreteSyntaxTree &node, Fluc::Parser::Lex
   }
 
   Ast::ScaledBaseUnit unit = item->second;
+
   if (node[1].matched()) {
-    int exponent=1;
-    std::stringstream buffer(lexer[node[1][0][1].getTokenIdx()].getValue()); buffer >> exponent;
-    //unit.setExponent(exponent);
+    // Parse exponent:
+    int exponent=1; std::stringstream buffer(lexer[node[1][0][1].getTokenIdx()].getValue());
+    buffer >> exponent;
+    // Modify unit:
+    unit = Ast::ScaledBaseUnit(unit.getBaseUnit(), unit.getMultiplier(), unit.getScale(),
+                               unit.getExponent()*exponent);
   }
 
   return unit;

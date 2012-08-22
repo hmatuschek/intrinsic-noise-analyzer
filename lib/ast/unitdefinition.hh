@@ -85,8 +85,7 @@ public:
   /** Default constructor, equivalent to call: ScaledBaseUnit(DIMENSIONLESS, 1, 0, 1). */
   ScaledBaseUnit();
 
-  /**
-   * Constructs a unit from a base-unit and scaling as:
+  /** Constructs a unit from a base-unit and scaling as:
    *
    * \f[ u = \left(multiplier\cdot 10^{scale}\cdot u_b\right)^{exponent} \f]
    */
@@ -95,89 +94,57 @@ public:
   /** Trivial constructor from base unit, equivalent to ScaledBaseUnit(unit, 1, 0, 1). */
   explicit ScaledBaseUnit(BaseUnit unit);
 
-  /**
-   * Copy constructor.
-   */
+  /** Copy constructor. */
   ScaledBaseUnit(const ScaledBaseUnit &other);
 
-  /**
-   * Implements the assignment operator for scaled units.
-   */
+  /** Implements the assignment operator for scaled units. */
   const ScaledBaseUnit &operator =(const ScaledBaseUnit &other);
 
-  /**
-   * Returns the multiplier of unit.
-   */
+  /** Returns the multiplier of unit. */
   double getMultiplier() const;
 
-  /**
-   * Returns the scale of unit.
-   */
+  /** Returns the scale of unit. */
   int getScale() const;
 
-  /**
-   * Retunrs the exponent.
-   */
+  /** Retunrs the exponent. */
   int getExponent() const;
 
-  /**
-   * Returns the base-unit.
-   */
+  /** Returns the base-unit. */
   ScaledBaseUnit::BaseUnit getBaseUnit() const;
 
-  /**
-   * Aka. is exponent == 1? Means if the unit is a linear scaling of a base unit.
-   */
+  /** Aka. is exponent == 1? Means if the unit is a linear scaling of a base unit. */
   bool isLinScaling() const;
 
-  /**
-   * Returns true, if the ScaledUnit is a proper unit for substances,
-   *
-   * i.e., if the unit is a linear scaling of either: @c ScaledUnit::MOLE, @c ScaledUnit::ITEM,
-   * @c ScaledUnit::GRAM, @c ScaledUnit::KILOGRAM or @c ScaledUnit::DIMENSIONLESS.
-   */
+  /** Returns true, if the ScaledUnit is a proper unit for substances.
+   * I.e., if the unit is a linear scaling of either: @c ScaledUnit::MOLE, @c ScaledUnit::ITEM,
+   * @c ScaledUnit::GRAM, @c ScaledUnit::KILOGRAM or @c ScaledUnit::DIMENSIONLESS. */
   bool isSubstanceUnit() const;
 
-  /**
-   * Returns true, if the ScaledUnit is a proper unit for volumes,
-   *
-   * i.e. if the unit is a linear scaling of @c ScaledUnit::LITRE or @c ScaledUnit::DIMENSIONLESS
-   * or if it is a qubic scaling of @c ScaledUnit::METRE.
-   */
+  /** Returns true, if the ScaledUnit is a proper unit for volumes.
+   * I.e. if the unit is a linear scaling of @c ScaledUnit::LITRE or @c ScaledUnit::DIMENSIONLESS
+   * or if it is a qubic scaling of @c ScaledUnit::METRE. */
   bool isVolumeUnit() const;
 
-  /**
-   * Returns true, if the ScaledUnit is a proper unit for areas,
-   *
-   * i.e., if the unit is a linear scaling of @c ScaledUnit::DIMENSIONLESS or a quadratic scaling
-   * of @c ScaledUnit::METRE.
-   */
+  /** Returns true, if the ScaledUnit is a proper unit for areas.
+   * I.e., if the unit is a linear scaling of @c ScaledUnit::DIMENSIONLESS or a quadratic scaling
+   * of @c ScaledUnit::METRE. */
   bool isAreaUnit() const;
 
-  /**
-   * Returns true, if the ScaledUnit is a proper unit for length,
-   *
-   * i.e. if the unit is a linear scaling of @c ScaledUnit::METRE or @c ScaledUnit::DIMENSIONLESS.
-   */
+  /** Returns true, if the ScaledUnit is a proper unit for length.
+   * i.e. if the unit is a linear scaling of @c ScaledUnit::METRE or
+   * @c ScaledUnit::DIMENSIONLESS. */
   bool isLengthUnit() const;
 
-  /**
-   * Returns true, if the ScaledUnit is a proper unit of for time.
-   *
-   * Ie. if the unit is a linear scaling of @c ScaledUnit::TIME or @c ScaledUnit::DIMENSIONLESS.
-   */
+  /** Returns true, if the ScaledUnit is a proper unit of for time.
+   * I.e. if the unit is a linear scaling of @c ScaledUnit::TIME or @c ScaledUnit::DIMENSIONLESS. */
   bool isTimeUnit() const;
 
-  /**
-   * Dums a string representation of the unit into the given stream.
-   */
+  /** Dums a string representation of the unit into the given stream. */
   void dump(std::ostream &str) const;
 
 
 public:
-  /**
-   * Helper function to get a string representation of a base-unit.
-   */
+  /** Helper function to get a string representation of a base-unit. */
   static std::string baseUnitRepr(ScaledBaseUnit::BaseUnit base);
 };
 
