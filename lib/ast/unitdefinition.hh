@@ -82,12 +82,18 @@ protected:
 
 
 public:
+  /** Default constructor, equivalent to call: ScaledBaseUnit(DIMENSIONLESS, 1, 0, 1). */
+  ScaledBaseUnit();
+
   /**
    * Constructs a unit from a base-unit and scaling as:
    *
    * \f[ u = \left(multiplier\cdot 10^{scale}\cdot u_b\right)^{exponent} \f]
    */
   ScaledBaseUnit(BaseUnit unit, double multiplier, int scale, int exponent);
+
+  /** Trivial constructor from base unit, equivalent to ScaledBaseUnit(unit, 1, 0, 1). */
+  explicit ScaledBaseUnit(BaseUnit unit);
 
   /**
    * Copy constructor.

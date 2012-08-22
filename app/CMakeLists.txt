@@ -95,7 +95,7 @@ SET(ina_app_views_HEADERS
     views/variableruleeditor.hh views/expressioneditor.hh views/unitrenderer.hh)
 
 SET(ina_app_tinytex_SOURCES
-    tinytex/tinytex.cc tinytex/formula.cc tinytex/ginac2formula.cc)
+    tinytex/tinytex.cc tinytex/formula.cc tinytex/ginac2formula.cc tinytex/unitparser.cc)
 SET(ina_app_tinytex_HEADERS)
 
 SET(ina_app_SOURCES
