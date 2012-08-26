@@ -85,6 +85,8 @@ protected:
   void processReactants(Fluc::Parser::ConcreteSyntaxTree &sum, Ast::Reaction *reaction);
   /** Handles the products of a reaction. */
   void processProducts(Fluc::Parser::ConcreteSyntaxTree &sum, Ast::Reaction *reaction);
+  /** Removes the quotes. */
+  void unquote(std::string &name);
 };
 
 
