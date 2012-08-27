@@ -183,11 +183,7 @@ private:
     void postConstructor();
 
 public:
-<<<<<<< HEAD
 
-
-=======
->>>>>>> 300d7f40ce96482d78c2c0f749da33f6d5cdc07c
     /**
      * Constructor from @c Ast::Model.
      */
