@@ -8,30 +8,12 @@
 namespace Fluc {
 namespace Models {
 
-
-/**
- * The System Size Expansion base model.
- *
- * Provides all coefficients of the SSE in an uncontrained base.
- *
- * @ingroup sse
- */
-class SSEBaseModel :
-    public BaseModel,    
+class ConservationConstants :
+    public BaseModel,
     public propensityExpansion,
     public ConservationAnalysisMixin
 {
-
 protected:
-
-    Eigen::VectorXex rate_expressions;
-    Eigen::VectorXex rate_corrections;
-    Eigen::MatrixXex rates_gradient;
-    Eigen::MatrixXex rates_gradientO1;
-    Eigen::MatrixXex rates_hessian;
-    Eigen::MatrixXex rates_3rd;
-
-private:
 
     /**
     *  \f$ \Omega \f$-vector for independent species
@@ -47,6 +29,11 @@ private:
 protected:
 
     /**
+    * Holds symbols of constants arising from conservation laws
+    */
+    Eigen::VectorXex conservationConstants;
+
+    /**
     * Expression for Link zero matrix linking independent and dependent concentrations.
     */
     Eigen::MatrixXex Link0CMatrix;
@@ -55,6 +42,61 @@ protected:
     * Expression for Link matrix linking concentrations.
     */
     Eigen::MatrixXex LinkCMatrix;
+
+    GiNaC::exmap dependentSpecies;
+
+    /**
+    * A method that folds all constants arising from conservation laws in a given expression
+    */
+    template<typename T>
+    void foldConservationConstants(const Eigen::VectorXd &conserved_cycles, Eigen::MatrixBase<T> &vec)
+
+    {
+
+        // generate substitution table
+        GiNaC::exmap subs_table = generateConservationConstantsTable(conserved_cycles);
+
+        // ... and fold all constants due to conservation laws
+        for (int i=0; i<vec.rows(); i++)
+        for (int j=0; j<vec.cols(); j++)
+                vec(i,j)=vec(i,j).subs(subs_table);
+
+    }
+
+    /**
+    * A method that generates a substituation table for all conservation laws arising from the model
+    */
+    GiNaC::exmap generateConservationConstantsTable(const Eigen::VectorXd &conserved_cycles);
+
+
+public:
+
+    ConservationConstants(const Ast::Model &model);
+
+};
+
+/**
+ * The System Size Expansion base model.
+ *
+ * Provides all coefficients of the SSE in an uncontrained base.
+ *
+ * @ingroup sse
+ */
+class SSEBaseModel :
+    public ConservationConstants
+{
+
+protected:
+
+    Eigen::VectorXex rate_expressions;
+    Eigen::VectorXex rate_corrections;
+    Eigen::MatrixXex rates_gradient;
+    Eigen::MatrixXex rates_gradientO1;
+    Eigen::MatrixXex rates_hessian;
+    Eigen::MatrixXex rates_3rd;
+
+
+protected:
 
     /**
     * Expressions of Rate Equations in unconstrained base.
@@ -121,38 +163,12 @@ protected:
     */
     Eigen::MatrixXex PhilippianM;
 
-    /**
-    * holds symbols of constants arising from conservation laws
-    */
-    Eigen::VectorXex conservationConstants;
 
     /**
     * Expressions of Hessian of objective function for optimization.
     */
     Eigen::MatrixXex fHessian;
 
-    /**
-    * A method that folds all constants arising from conservation laws in a given expression
-    */
-    template<typename T>
-    void foldConservationConstants(const Eigen::VectorXd &conserved_cycles, Eigen::MatrixBase<T> &vec)
-
-    {
-
-        // generate substitution table
-        GiNaC::exmap subs_table = generateConservationConstantsTable(conserved_cycles);
-
-        // ... and fold all constants due to conservation laws
-        for (int i=0; i<vec.rows(); i++)
-        for (int j=0; j<vec.cols(); j++)
-                vec(i,j)=vec(i,j).subs(subs_table);
-
-    }
-
-    /**
-    * A method that generates a substituation table for all conservation laws arising from the model
-    */
-    GiNaC::exmap generateConservationConstantsTable(const Eigen::VectorXd &conserved_cycles);
 
     /**
     * Generates a vertex of the system size expansion from list of lower and upper indices.
@@ -167,7 +183,7 @@ private:
     void postConstructor();
 
 public:
-    /* SSEBaseModel(libsbml::Model *model); */
+
 
     /**
      * Constructor from @c Ast::Model.

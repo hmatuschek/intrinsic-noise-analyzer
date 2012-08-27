@@ -3,72 +3,22 @@
 using namespace Fluc;
 using namespace Fluc::Models;
 
-/* SSEBaseModel::SSEBaseModel(libsbml::Model *model)
-  : BaseModel(model), propensityExpansion((BaseModel &)(*this)), ConservationAnalysisMixin((BaseModel &)(*this)),
-    rate_expressions(this->numReactions()),
-    rate_corrections(this->numReactions()),
-    rates_gradient(this->numReactions(),this->numIndSpecies()),
-    rates_gradientO1(this->numReactions(),this->numIndSpecies()),
-    rates_hessian(this->numReactions(),this->numIndSpecies()*(this->numIndSpecies()+1)/2),
-    rates_3rd(this->numReactions(),this->numIndSpecies()*(this->numIndSpecies()+1)*(this->numIndSpecies()+2)/6),
-    Link0CMatrix(this->numDepSpecies(),this->numIndSpecies()),
-    LinkCMatrix(this->numSpecies(),this->numIndSpecies()),
-    REs(this->numIndSpecies()), REcorrections(this->numIndSpecies()),
-    JacobianM(this->numIndSpecies(),this->numIndSpecies()),
-    Hessian(this->numIndSpecies(), (this->numIndSpecies()*(this->numIndSpecies()+1))/2),
-    DiffusionMatrix(this->numIndSpecies(),this->numIndSpecies()),    
-    DiffusionMatrixO1(this->numIndSpecies(),this->numIndSpecies()),
-    DiffusionVec(numIndSpecies()*numIndSpecies()),
-    DiffusionJacM(numIndSpecies()*(numIndSpecies()+1)/2,numIndSpecies()),
-    DiffusionJacMO1(numIndSpecies()*(numIndSpecies()+1)/2,numIndSpecies()),
-    Diffusion3Tensor(numIndSpecies()*(numIndSpecies()+1)*(numIndSpecies()+2)/6),
-    DiffusionHessianM(numIndSpecies()*(numIndSpecies()+1)/2,numIndSpecies()*(numIndSpecies()+1)/2),
-    PhilippianM(numIndSpecies()*(numIndSpecies()+1)*(numIndSpecies()+2)/6,numIndSpecies()*(numIndSpecies()+1)*(numIndSpecies()+2)/6),
-    conservationConstants(this->numDepSpecies())
+ConservationConstants::ConservationConstants(const Ast::Model &model)
+    : BaseModel(model),
+      propensityExpansion((BaseModel &)(*this)),
+      ConservationAnalysisMixin((BaseModel &)(*this)),
+      conservationConstants(this->numDepSpecies()),
+      Link0CMatrix(this->numDepSpecies(),this->numIndSpecies()),
+      LinkCMatrix(this->numSpecies(),this->numIndSpecies())
 {
-  postConstructor();
-} */
-
-
-SSEBaseModel::SSEBaseModel(const Ast::Model &model)
-  : BaseModel(model), propensityExpansion((BaseModel &)(*this)), ConservationAnalysisMixin((BaseModel &)(*this)),
-    rate_expressions(this->numReactions()),
-    rate_corrections(this->numReactions()),
-    rates_gradient(this->numReactions(),this->numIndSpecies()),
-    rates_gradientO1(this->numReactions(),this->numIndSpecies()),
-    rates_hessian(this->numReactions(),this->numIndSpecies()*(this->numIndSpecies()+1)/2),
-    rates_3rd(this->numReactions(),this->numIndSpecies()*(this->numIndSpecies()+1)*(this->numIndSpecies()+2)/6),
-    Link0CMatrix(this->numDepSpecies(),this->numIndSpecies()),
-    LinkCMatrix(this->numSpecies(),this->numIndSpecies()),
-    REs(this->numIndSpecies()), REcorrections(this->numIndSpecies()),
-    JacobianM(this->numIndSpecies(),this->numIndSpecies()),
-    Hessian(this->numIndSpecies(), (this->numIndSpecies()*(this->numIndSpecies()+1))/2),
-    DiffusionMatrix(this->numIndSpecies(),this->numIndSpecies()),
-    DiffusionMatrixO1(this->numIndSpecies(),this->numIndSpecies()),
-    DiffusionVec(numIndSpecies()*numIndSpecies()),
-    DiffusionJacM(numIndSpecies()*(numIndSpecies()+1)/2,numIndSpecies()),
-    DiffusionJacMO1(numIndSpecies()*(numIndSpecies()+1)/2,numIndSpecies()),
-    Diffusion3Tensor(numIndSpecies()*(numIndSpecies()+1)*(numIndSpecies()+2)/6),
-    DiffusionHessianM(numIndSpecies()*(numIndSpecies()+1)/2,numIndSpecies()*(numIndSpecies()+1)/2),
-    PhilippianM(numIndSpecies()*(numIndSpecies()+1)*(numIndSpecies()+2)/6,numIndSpecies()*(numIndSpecies()+1)*(numIndSpecies()+2)/6),
-    conservationConstants(this->numDepSpecies())
-{
-  postConstructor();
-}
-
-
-void
-SSEBaseModel::postConstructor()
-{
-  /* @todo conservationConstants should have a seperate class */
 
     // get Omega vectors for dependent and independent species
     this->Omega_ind = (this->PermutationM.cast<GiNaC::ex>()*this->volumes).head(this->numIndSpecies());
     this->Omega_dep = (this->PermutationM.cast<GiNaC::ex>()*this->volumes).tail(this->numDepSpecies());
 
-  // initalize symbols as placeholders for constants arising from conservation laws
-  for(size_t i=0;i<numDepSpecies();i++)
-    conservationConstants(i) = GiNaC::symbol();
+    // initalize symbols as placeholders for constants arising from conservation laws
+    for(size_t i=0;i<numDepSpecies();i++)
+        conservationConstants(i) = GiNaC::symbol();
 
     // construct Link zero matrix for concentrations
     this->Link0CMatrix = this->Omega_dep.asDiagonal().inverse()*this->link_zero_matrix.cast<GiNaC::ex>()*this->Omega_ind.asDiagonal();
@@ -93,18 +43,66 @@ SSEBaseModel::postConstructor()
 
     // generate substitution table to remove dependent species
 
+    GiNaC::exmap dependentSpecies;
+    for (size_t s=0; s<this->numDepSpecies(); s++)
+        dependentSpecies.insert( std::pair<GiNaC::ex,GiNaC::ex>( dep_species(s), dependence(s) ) );
+
+
+}
+
+
+GiNaC::exmap
+ConservationConstants::generateConservationConstantsTable(const Eigen::VectorXd &conserved_cycles)
+{
+
+    // generate substitution table
     GiNaC::exmap subs_table;
     for (size_t s=0; s<this->numDepSpecies(); s++)
-        subs_table.insert( std::pair<GiNaC::ex,GiNaC::ex>( dep_species(s), dependence(s) ) );
+    {
+        subs_table.insert( std::pair<GiNaC::ex,GiNaC::ex>( this->conservationConstants(s), conserved_cycles(s) ) );
+    }
+    return subs_table;
+
+}
+
+SSEBaseModel::SSEBaseModel(const Ast::Model &model)
+  : ConservationConstants(model),
+    rate_expressions(this->numReactions()),
+    rate_corrections(this->numReactions()),
+    rates_gradient(this->numReactions(),this->numIndSpecies()),
+    rates_gradientO1(this->numReactions(),this->numIndSpecies()),
+    rates_hessian(this->numReactions(),this->numIndSpecies()*(this->numIndSpecies()+1)/2),
+    rates_3rd(this->numReactions(),this->numIndSpecies()*(this->numIndSpecies()+1)*(this->numIndSpecies()+2)/6),
+    REs(this->numIndSpecies()), REcorrections(this->numIndSpecies()),
+    JacobianM(this->numIndSpecies(),this->numIndSpecies()),
+    Hessian(this->numIndSpecies(), (this->numIndSpecies()*(this->numIndSpecies()+1))/2),
+    DiffusionMatrix(this->numIndSpecies(),this->numIndSpecies()),
+    DiffusionMatrixO1(this->numIndSpecies(),this->numIndSpecies()),
+    DiffusionVec(numIndSpecies()*numIndSpecies()),
+    DiffusionJacM(numIndSpecies()*(numIndSpecies()+1)/2,numIndSpecies()),
+    DiffusionJacMO1(numIndSpecies()*(numIndSpecies()+1)/2,numIndSpecies()),
+    Diffusion3Tensor(numIndSpecies()*(numIndSpecies()+1)*(numIndSpecies()+2)/6),
+    DiffusionHessianM(numIndSpecies()*(numIndSpecies()+1)/2,numIndSpecies()*(numIndSpecies()+1)/2),
+    PhilippianM(numIndSpecies()*(numIndSpecies()+1)*(numIndSpecies()+2)/6,numIndSpecies()*(numIndSpecies()+1)*(numIndSpecies()+2)/6)
+{
+  postConstructor();
+}
+
+
+void
+SSEBaseModel::postConstructor()
+{
+  /* @todo conservationConstants should have a seperate class */
+
 
     // get gradient/hessian of rates
     for (size_t i=0; i<this->numReactions(); i++)
     {
 
       // substitute conservation relations
-      rate_expressions(i) = this->rates[i].subs(subs_table);
+      rate_expressions(i) = this->rates[i].subs(dependentSpecies);
       // substitute conservation relations
-      rate_corrections(i) = this->rates1[i].subs(subs_table);
+      rate_corrections(i) = this->rates1[i].subs(dependentSpecies);
 
       int idx=0;
       int idy=0;
@@ -234,19 +232,6 @@ SSEBaseModel::postConstructor()
 
 }
 
-GiNaC::exmap
-SSEBaseModel::generateConservationConstantsTable(const Eigen::VectorXd &conserved_cycles)
-{
-
-    // generate substitution table
-    GiNaC::exmap subs_table;
-    for (size_t s=0; s<this->numDepSpecies(); s++)
-    {
-        subs_table.insert( std::pair<GiNaC::ex,GiNaC::ex>( this->conservationConstants(s), conserved_cycles(s) ) );
-    }
-    return subs_table;
-
-}
 
 GiNaC::ex
 SSEBaseModel::vertex(std::list<size_t> &lower, std::list<size_t> &upper, size_t order)

@@ -5,18 +5,6 @@
 using namespace Fluc;
 using namespace Fluc::Models;
 
-/* REmodel::REmodel(libsbml::Model *model)
-  : SSEBaseModel(model),
-    Link0CMatrixNumeric(numDepSpecies(), numIndSpecies()),
-    LinkCMatrixNumeric(numSpecies(), numIndSpecies()),
-    Omega(numSpecies()),
-    updateVector(numIndSpecies()),
-    interpreter(*this)
-{
-  postConstructor();
-} */
-
-
 REmodel::REmodel(const Ast::Model &model)
   : SSEBaseModel(model),
     Link0CMatrixNumeric(numDepSpecies(), numIndSpecies()),
@@ -72,7 +60,6 @@ REmodel::postConstructor()
     // and combine to update vector
     this->updateVector = this->REs;
     this->foldConservationConstants(conserved_cycles,this->updateVector);
-
     this->foldConservationConstants(this->conserved_cycles,this->JacobianM);
 
 }
