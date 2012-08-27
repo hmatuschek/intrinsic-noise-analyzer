@@ -11,7 +11,7 @@ namespace Fluc {
 namespace Trafo {
 
 
-typedef std::set<GiNaC::ex, GiNaC::ex_is_less> excludeType;
+typedef GiNaC::exmap excludeType;
 
 /** Simple visitor to collect all substitutions for constant variables.
  * It is possible to specify which classes of variables are processed. This allows for example to
@@ -80,6 +80,21 @@ public:
 
   /** Tiny helper function to fold all constants in the given vector expression. */
   void apply(Eigen::VectorXex &expr);
+
+
+  Eigen::MatrixXex apply(const Eigen::MatrixXex &vecIn)
+  {
+
+      Eigen::MatrixXex vecOut;
+      vecOut.resize(vecIn.rows(),vecIn.cols());
+
+      for (int i=0; i<vecIn.rows(); i++)
+      for (int j=0; j<vecIn.cols(); j++)
+              vecOut(i,j)=vecIn(i,j).subs(this->getTable());
+
+      return vecOut;
+
+  }
 
 };
 

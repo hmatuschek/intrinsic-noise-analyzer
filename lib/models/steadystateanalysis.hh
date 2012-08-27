@@ -8,6 +8,45 @@
 namespace Fluc {
 namespace Models {
 
+/**
+* Folds a set of given constants from an parameter set.
+*/
+class ParameterFolder
+{
+
+    /**
+    * Holds a reference to the substitutions.
+    */
+    GiNaC::exmap &_substitutions;
+
+public:
+    /**
+    * Constructor
+    */
+    ParameterFolder(GiNaC::exmap &constants)
+        : _substitutions(constants)
+    {
+
+    }
+
+    /**
+    * A method that folds all constants in a vector or matrix.
+    */
+    Eigen::MatrixXex apply(const Eigen::MatrixXex &vecIn)
+    {
+
+        Eigen::MatrixXex vecOut(vecIn.rows(),vecIn.cols());
+        // ... and fold all constants due to conservation laws
+        for (int i=0; i<vecIn.rows(); i++)
+        for (int j=0; j<vecIn.cols(); j++)
+                vecOut(i,j)=vecIn(i,j).subs(_substitutions);
+
+        return vecOut;
+
+    }
+
+};
+
 template <typename M>
 class SteadyStateAnalysis
 {
@@ -54,7 +93,6 @@ public:
       this->setMaxIterations(iter);
     }
 
-
     /**
     * Set the precision of the root finding algorithm
     */
@@ -73,7 +111,6 @@ public:
           this->solver.parameters.maxIterations = maxiter;
     }
 
-
     /**
      * Solves rate equations for steady state concentrations in @c conc and returns the number
      * of function evalutions.
@@ -81,6 +118,7 @@ public:
     int calcConcentrations(Eigen::VectorXd &conc)
 
     {
+
         // solve it
         switch(this->solver.solve(conc, max_time, min_time_step))
         {
@@ -96,15 +134,11 @@ public:
 
         // test for negative concentrations
         if((conc.array()<0).any())
-        {
             throw NumericError("iNA encountered negative concentrations. The system may not have a positive root.");
-        }
 
         // ... and test for stability
         if ((solver.getJacobianM().eigenvalues().real().array()>=0.).array().any())
-        {
             throw NumericError("iNA has found a steady state which is unstable.");
-        }
 
         // return number of iterations
         return solver.getIterations();
@@ -207,6 +241,104 @@ public:
         return iter;
     }
 
+
+    /**
+     * Solves for steady state of the reduced state vector and returns number of function evaluations
+     * used.
+     *
+     * @param parameterSets: Vector of parameter sets to perform analysis for.
+     * @param resultSet: Outputs the steady state concentrations, covariance and EMRE vector in reduced
+     *        coordinates. Contents will be overwritten.
+     */
+    int parameterScan(std::vector<GiNaC::exmap> &parameterSets, Eigen::MatrixXd &resultSet)
+
+    {
+
+        // first make space
+        resultSet.resize(parameterSets.size(),sseModel.getDimension());
+
+        // initialize with initial concentrations
+        Eigen::VectorXd x(sseModel.getDimension());
+        sseModel.getInitialState(x);
+        Eigen::VectorXd conc=x.head(sseModel.numIndSpecies());
+
+        // get the SSE vector
+        size_t offset = sseModel.numIndSpecies();
+        //size_t lnaLength = offset*(offset+1)/2;
+        size_t sseLength = sseModel.getUpdateVector().size()-sseModel.numIndSpecies();
+
+        Eigen::VectorXex updateVector;
+
+        int iter;
+
+        // iterate over all parameter sets
+        for(size_t j = 0; j < parameterSets.size(); j++)
+        {
+
+            // collect all the values of constant parameters except variable parameters
+            Trafo::ConstantFolder constants(sseModel, Trafo::Filter::ALL, parameterSets[j]);
+            // collect the variable parameters
+            ParameterFolder parameters(parameterSets[j]);
+
+            // fold variable parameters first and then all the rest as constant parameters
+            updateVector = constants.apply( parameters.apply( sseModel.getUpdateVector() ) );
+            Eigen::VectorXex REs = updateVector.head(offset);
+            Eigen::VectorXex sseUpdate = updateVector.segment(offset,sseLength);
+            Eigen::MatrixXex Jacobian = constants.apply( parameters.apply(sseModel.getJacobian()) );
+
+            // setup solver and solve for RE concentrations
+            solver.set(sseModel.stateIndex,REs,Jacobian);
+            iter = this->calcConcentrations(conc);
+            x.head(offset) = conc;
+
+            // ... and substitute RE concentrations
+            GiNaC::exmap subs_table;
+            for (size_t s=0; s<sseModel.numIndSpecies(); s++)
+                subs_table.insert( std::pair<GiNaC::ex,GiNaC::ex>( sseModel.getREvar(s), conc(s) ) );
+            for (size_t i=0; i<sseLength; i++)
+                sseUpdate(i) = sseUpdate(i).subs(subs_table);
+
+            // calc LNA & IOS
+            calcLNA(x,sseUpdate);
+            calcIOS(x,sseUpdate);
+
+            // save result in matrix
+            resultSet.row(j) = x;
+
+        }
+
+        return iter;
+    }
+
+    void
+    calcIOS(Eigen::VectorXd &x, const Eigen::VectorXex &sseUpdate)
+    {
+
+        // get the SSE vector
+        size_t offset = sseModel.numIndSpecies();
+        size_t lnaLength = offset*(offset+1)/2;
+        size_t sseLength = sseModel.getUpdateVector().size()-sseModel.numIndSpecies();
+
+        // calc coefficient matrices
+        Eigen::VectorXd A(sseLength-lnaLength);
+        Eigen::MatrixXd B(sseLength-lnaLength,sseLength-lnaLength);
+
+        GiNaC::exmap subs_table;
+        for (size_t i=lnaLength; i<sseLength; i++)
+            subs_table.insert( std::pair<GiNaC::ex,GiNaC::ex>( sseModel.getSSEvar(i), 0 ) );
+        for(size_t i=lnaLength; i<sseLength; i++)
+        {
+            A(i-lnaLength) = GiNaC::ex_to<GiNaC::numeric>( sseUpdate(i).subs(subs_table) ).to_double();
+            for(size_t j=lnaLength; j<sseLength; j++)
+            {
+               B(i-lnaLength,j-lnaLength) = GiNaC::ex_to<GiNaC::numeric>( sseUpdate(i).diff(sseModel.getSSEvar(j)) ).to_double();
+            }
+        }
+
+        x.tail(sseLength-lnaLength) = B.lu().solve(-A);
+
+    }
+
     int
     calcSteadyStateOld(Eigen::VectorXd &x)
 
@@ -307,6 +439,7 @@ public:
     }
 
 };
+
 
 }} // close namespaces
 

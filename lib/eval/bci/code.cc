@@ -22,6 +22,11 @@ Code::Code(const Code &other)
   // Pass...
 }
 
+void
+Code::clear()
+{
+    code.clear();
+}
 
 
 const Code &

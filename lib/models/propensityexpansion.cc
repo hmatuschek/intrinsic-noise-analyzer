@@ -64,11 +64,6 @@ propensityExpansion::propensityExpansion(BaseModel &base):
      }
     }
 
-    /* @todo fold constants later */
-    // and fold all constants
-    this->rates[i]  = base.foldConstants(this->rates[i]);
-    this->rates1[i] = base.foldConstants(this->rates1[i]);
-
     // ...done
 
   }

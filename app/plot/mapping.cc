@@ -1,8 +1,23 @@
 #include "mapping.hh"
+#include <iostream>
 
 using namespace Plot;
 
+/**
+* Helper that rounds to n leading digits
+*/
+double roundRange(double num, int n) {
+    if(num == 0) {
+        return 0;
+    }
 
+    double d = std::ceil(std::log10(num < 0 ? -num: num));
+    int power = n - (int) d;
+
+    double magnitude = std::pow(10, power);
+    long shifted = std::floor(num*magnitude+0.5);
+    return shifted/magnitude;
+}
 
 
 /* ********************************************************************************************* *
@@ -115,7 +130,6 @@ LinearMapFunction::LinearMapFunction(const Range &range, const RangePolicy &poli
   // Pass...
 }
 
-
 void
 LinearMapFunction::updateRange(const Range &range)
 {
@@ -123,8 +137,8 @@ LinearMapFunction::updateRange(const Range &range)
   double prec = std::ceil(std::log(range.delta())/std::log(10))-1;
 
   // Round to that pecision
-  double rmin = std::floor(range.min()*pow(10, -prec))/pow(10, -prec);
-  double rmax = std::ceil(range.max()*pow(10, -prec))/pow(10, -prec);
+  double rmin = roundRange(range.min(),2);
+  double rmax = roundRange(range.max(),2);
 
   if (RangePolicy::FIXED == this->_policy.getMinPolicy())
   {

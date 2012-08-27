@@ -1,5 +1,6 @@
 #include "REmodel.hh"
 #include "ode/ode.hh"
+#include "trafo/constantfolder.hh"
 
 using namespace Fluc;
 using namespace Fluc::Models;

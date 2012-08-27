@@ -92,7 +92,6 @@ StochasticSimulator::StochasticSimulator(const Ast::Model &model, int size, int 
 }
 
 
-
 StochasticSimulator::~StochasticSimulator()
 
 {
