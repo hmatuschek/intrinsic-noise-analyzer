@@ -202,7 +202,7 @@ void
 TokenProduction::parse(Lexer &lexer, ConcreteSyntaxTree &element)
 {
   if (this->id != lexer.current().getId()) {
-    Utils::SyntaxError err;
+    SyntaxError err(lexer.current().getLine());
     err << "@line "<< lexer.current().getLine() << ": "
         << "Unexpected token: " << lexer.getTokenName(lexer.current().getId())
         << " expected: " << lexer.getTokenName(this->id);
@@ -275,13 +275,13 @@ AltProduction::parse(Lexer &lexer, ConcreteSyntaxTree &element)
       // And return
       return;
     }
-    catch (Utils::ParserError &err) {
+    catch (ParserError &err) {
       // On error, reset lexer
       lexer.restore_state();
 
       // If this was the last try -> abort no alternative matched
       if ((i+1) == this->alternatives.size()) {
-        throw;
+        throw err;
       }
     }
   }
@@ -341,7 +341,7 @@ OptionalProduction::parse(Lexer &lexer, ConcreteSyntaxTree &element)
     this->production->parse(lexer, element[0]);
     lexer.drop_state();
     element.setMatched(true);
-  } catch (Utils::ParserError &err) {
+  } catch (ParserError &err) {
     lexer.restore_state();
     element.setMatched(false);
   }

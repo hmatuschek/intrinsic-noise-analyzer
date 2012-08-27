@@ -2,7 +2,11 @@
 #include "mainwindow.hh"
 #include "views/importmodeldialog.hh"
 #include "views/exportmodeldialog.hh"
+
 #include <QMessageBox>
+
+#include "views/sbmlsheditordialog.hh"
+
 
 #include "parser/parser.hh"
 #include "exception.hh"
@@ -62,10 +66,14 @@ Application::Application() :
   _closeModel = new QAction(tr("Close model"), this);
   _closeModel->setEnabled(false);
 
+  _editModel = new QAction(tr("Edit model"), this);
+  _editModel->setEnabled(false);
+
   // Connect signals
   QObject::connect(_importModel, SIGNAL(triggered()), this, SLOT(onImportModel()));
   QObject::connect(_exportModel, SIGNAL(triggered()), this, SLOT(onExportModel()));
   QObject::connect(_closeModel, SIGNAL(triggered()), this, SLOT(onCloseModel()));
+  QObject::connect(_editModel, SIGNAL(triggered()), this, SLOT(onEditModel()));
 }
 
 
@@ -104,6 +112,7 @@ void
 Application::resetSelectedItem() {
   _selected_item = 0;
   _exportModel->setEnabled(false);
+  _editModel->setEnabled(false);
   _closeModel->setEnabled(false);
 }
 
@@ -128,9 +137,11 @@ Application::itemSelected(const QModelIndex &index)
   // If selected item is a document item -> enabled exportModel menu item:
   if (0 != dynamic_cast<DocumentItem *>(wrapper)) {
     _exportModel->setEnabled(true);
+    _editModel->setEnabled(true);
     _closeModel->setEnabled(true);
   } else {
     _exportModel->setEnabled(false);
+    _editModel->setEnabled(false);
     _closeModel->setEnabled(false);
   }
 
@@ -159,6 +170,7 @@ DocumentTree * Application::docTree() { return this->document_tree; }
 QAction *Application::importModelAction() { return _importModel; }
 QAction *Application::exportModelAction() { return _exportModel; }
 QAction *Application::closeModelAction()  { return _closeModel; }
+QAction *Application::editModelAction()   { return _editModel; }
 
 
 /* ******************************************************************************************** *
@@ -229,4 +241,24 @@ void Application::onCloseModel()
   if (0 == (document = dynamic_cast<DocumentItem *>(_selected_item))) { return; }
   // signal document to close
   document->closeDocument();
+}
+
+
+void Application::onEditModel()
+{
+  DocumentItem *document = 0;
+
+  if (0 == _selected_item) { return; }
+  if (0 == (document = dynamic_cast<DocumentItem *>(_selected_item))) { return; }
+
+  // Create model editor dialog:
+  SbmlshEditorDialog *dialog = new SbmlshEditorDialog();
+  dialog->setModel(document->getModel());
+  if (QDialog::Accepted != dialog->exec()) { delete dialog; return; }
+
+  // Obtain model from dialog
+  Fluc::Ast::Model *new_model = dialog->takeModel(); delete dialog;
+  // Assemble new document item and add it to the tree...
+  DocumentItem *new_doc = new DocumentItem(new_model);
+  docTree()->addDocument(new_doc);
 }

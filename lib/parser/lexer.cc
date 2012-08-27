@@ -1,6 +1,5 @@
 #include "lexer.hh"
 #include "exception.hh"
-#include "utils/exception.hh"
 
 
 using namespace Fluc::Parser;
@@ -284,7 +283,7 @@ Lexer::parseToken()
 
   // If the reader is not in a final state:
   if (! reader.inFinalState()) {
-    Utils::ParserError err;
+    ParserError err(stack.back().line);
     err << "@line: " << stack.back().line
         << "Lexer: unexpected char: " << (unsigned char)(input.peek());
     throw err;

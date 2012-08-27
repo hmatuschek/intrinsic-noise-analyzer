@@ -1,6 +1,6 @@
 #include "productions.hh"
 #include <parser/production.hh>
-#include <utils/exception.hh>
+#include "exception.hh"
 #include <parser/expr/productions.hh>
 
 
@@ -203,7 +203,7 @@ DefaultUnitIdentifierProduction::parse(Fluc::Parser::Lexer &lexer, Fluc::Parser:
 
   if ("s" != id && "t" != id && "v" != id && "a" != id && "l" != id && "e" != id && "c" != id)
   {
-    Utils::SyntaxError err;
+    Parser::SyntaxError err(lexer.current().getLine());
     err << "Unexpected identifier " << id << " expected s, t, v, a, l, e or c.";
     throw err;
   }
@@ -400,7 +400,7 @@ ScaledUnitIdentifierProduction::parse(Fluc::Parser::Lexer &lexer, Fluc::Parser::
   // Check if identifier not matches:
   if (this->valid_units.end() == this->valid_units.find(id))
   {
-    Utils::SyntaxError err;
+    Parser::SyntaxError err(line);
     err << "@line " << line << ": "
         << "Invalid (base-) unit " << id;
     throw err;
@@ -446,7 +446,7 @@ ScaledUnitModifierProduction::parse(Fluc::Parser::Lexer &lexer, Fluc::Parser::Co
 
   // Check identifier:
   if ("e" != id && "m" != id && "s" != id) {
-    Utils::SyntaxError err;
+    Parser::SyntaxError err(line);
     err << "@line " << line << ": "
         << "Invalid unit-modifier: " << id;
     throw err;
@@ -682,7 +682,7 @@ SpeciesModifierProduction::parse(Fluc::Parser::Lexer &lexer, Fluc::Parser::Concr
   {
     if (('s' != id[i]) && ('b' != id[i]) && ('c' != id[i]))
     {
-      Utils::SyntaxError err;
+      Parser::SyntaxError err(line);
       err << "@line " << line << ": "
           << "Unknown species-modifier: " << id << ", expected: s, b or c.";
       throw err;
@@ -787,7 +787,7 @@ ParameterModifierProduction::parse(Fluc::Parser::Lexer &lexer, Fluc::Parser::Con
   TokenProduction::parse(lexer, element);
 
   if ("v" != id) {
-    Utils::SyntaxError err;
+    Parser::SyntaxError err(line);
     err << "@line " << line << ": "
         << "Unknown parameter modifier " << id << " expected v.";
     throw err;

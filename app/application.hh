@@ -57,6 +57,8 @@ public:
   QAction *importModelAction();
   /** Returns a weak reference to the "export model" menu action. */
   QAction *exportModelAction();
+  /** Returns a weak reference to the "edit model" menu action. */
+  QAction *editModelAction();
   /** Retunrs a weak reference to the "close model" menu action. */
   QAction *closeModelAction();
 
@@ -89,6 +91,9 @@ private slots:
   /** Handler for "remove model" action. */
   void onCloseModel();
 
+  /** Handler for the "edit model" action. */
+  void onEditModel();
+
 
 private:
   /** Holds the only reference to the application running. */
@@ -110,6 +115,8 @@ private:
   QAction *_exportModel;
   /** The "close model" menu action. */
   QAction *_closeModel;
+  /** The "edit model" menu action. */
+  QAction *_editModel;
 };
 
 
