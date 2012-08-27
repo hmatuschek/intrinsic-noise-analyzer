@@ -1,5 +1,6 @@
 #include "specieslist.hh"
 #include "parser/parser.hh"
+#include "parser/expr/writer.hh"
 #include "exception.hh"
 #include "utils/logger.hh"
 #include "referencecounter.hh"
@@ -192,11 +193,11 @@ SpeciesList::_getInitialValue(Fluc::Ast::Species *species, int role) const
   }
 
   // Export formula as string
-  std::stringstream str;
-  if (species->hasValue())
-    str << species->getValue();
-  QString init_val(str.str().c_str());
-  return init_val;
+  std::stringstream buffer;
+  if (species->hasValue()) {
+    Fluc::Parser::Expr::Writer::write(species->getValue(), *_model, buffer);
+  }
+  return QString(buffer.str().c_str());
 }
 
 bool

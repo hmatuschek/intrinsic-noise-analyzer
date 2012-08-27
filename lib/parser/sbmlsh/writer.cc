@@ -1,8 +1,8 @@
-#include "exporter.hh"
+#include "writer.hh"
 #include "ast/model.hh"
 #include "ast/reaction.hh"
 #include "exception.hh"
-#include "exporter.hh"
+#include "parser/expr/writer.hh"
 #include <fstream>
 
 
@@ -210,17 +210,22 @@ Writer::processCompartments(Ast::Model &model, std::ostream &output) {
 
   output << std::endl << "@compartments";
   for (size_t i=0; i<model.numCompartments(); i++) {
-    processCompartment(model.getCompartment(i), output);
+    processCompartment(model.getCompartment(i), model, output);
   }
   output << std::endl;
 }
 
 /* Handle compartment. */
 void
-Writer::processCompartment(Ast::Compartment *comp, std::ostream &output)
+Writer::processCompartment(Ast::Compartment *comp, const Ast::Model &scope, std::ostream &output)
 {
   output << std::endl << " " << comp->getIdentifier();
-  if (comp->hasValue()) { output << " = " << comp->getValue(); }
+
+  if (comp->hasValue()) {
+    output << " = ";
+    Parser::Expr::Writer::write(comp->getValue(), scope, output);
+  }
+
   if (comp->hasName())  { output << " \"" << comp->getName() << "\""; }
 }
 
@@ -231,18 +236,18 @@ Writer::processSpeciesList(Ast::Model &model, std::ostream &output) {
 
   output << std::endl << "@species";
   for (size_t i=0; i<model.numSpecies(); i++) {
-    processSpecies(model.getSpecies(i), output);
+    processSpecies(model.getSpecies(i), model, output);
   }
   output << std::endl;
 }
 
 /* handle single species. */
 void
-Writer::processSpecies(Ast::Species *species, std::ostream &output) {
-  output << std::endl << "  " << species->getCompartment()->getIdentifier() << ": ";
+Writer::processSpecies(Ast::Species *species, const Ast::Model &model, std::ostream &output) {
+  output << std::endl << " " << species->getCompartment()->getIdentifier() << ": ";
   if (species->getUnit().isSubstanceUnit()) { output << species->getIdentifier() << " "; }
   else {output << "[" << species->getIdentifier() << "] "; }
-  output << " = " << species->getValue() << " ";
+  output << " = "; Parser::Expr::Writer::write(species->getValue(), model, output); output << " ";
   if (species->getUnit().isSubstanceUnit()) { output << "s"; }
   /// @bug There is no "species has boundary condition" flag.
   if (species->isConst()) { output << "c"; }
@@ -258,16 +263,17 @@ Writer::processParameterList(Ast::Model &model, std::ostream &output)
   output << std::endl << "@parameters";
 
   for (size_t i=0; i<model.numParameters(); i++) {
-    processParameter(model.getParameter(i), output);
+    processParameter(model.getParameter(i), model, output);
   }
   output << std::endl;
 }
 
 /* Serialize single paramter definition. */
 void
-Writer::processParameter(Ast::Parameter *param, std::ostream &output)
+Writer::processParameter(Ast::Parameter *param, const Ast::Model &model, std::ostream &output)
 {
-  output << std::endl << " " << param->getIdentifier() << "=" << param->getValue();
+  output << std::endl << " " << param->getIdentifier() << "=";
+  Parser::Expr::Writer::write(param->getValue(), model, output);
   if (! param->isConst()) { output << " v"; }
   if (param->hasName()) { output << " \"" << param->getName() << "\""; }
 }
@@ -284,7 +290,7 @@ Writer::processRuleList(Ast::Model &model, std::ostream &output)
     if (! Ast::Node::isVariableDefinition(*item)) { continue; }
     Ast::VariableDefinition *var = static_cast<Ast::VariableDefinition *>(*item);
     if (var->hasRule()) {
-      processRule(var, temp); rules.push_back(temp.str()); temp.str("");
+      processRule(var, model, temp); rules.push_back(temp.str()); temp.str("");
     }
   }
 
@@ -297,14 +303,15 @@ Writer::processRuleList(Ast::Model &model, std::ostream &output)
 }
 
 void
-Writer::processRule(Ast::VariableDefinition *var, std::ostream &output)
+Writer::processRule(Ast::VariableDefinition *var, const Ast::Model &model, std::ostream &output)
 {
   if (Ast::Node::isAssignmentRule(var->getRule())) {
     Ast::AssignmentRule *rule = static_cast<Ast::AssignmentRule *>(var->getRule());
     output << var->getIdentifier() << " = " << rule->getRule();
   } else if (Ast::Node::isRateRule(var->getRule())) {
     Ast::RateRule *rule = static_cast<Ast::RateRule *>(var->getRule());
-    output << "@rate: " << var->getIdentifier() << " = " << rule->getRule();
+    output << "@rate: " << var->getIdentifier() << " = ";
+    Parser::Expr::Writer::write(rule->getRule(), model, output);
   }
 }
 
@@ -318,8 +325,8 @@ Writer::processReactionList(Ast::Model &model, std::ostream &output)
   for (size_t i=0; i<model.numReactions(); i++) {
     processReaction(model.getReaction(i), output);
     processKineticLaw(model.getReaction(i)->getKineticLaw(), output);
+    output << std::endl;
   }
-  output << std::endl;
 }
 
 void
@@ -412,7 +419,8 @@ Writer::processReaction(Ast::Reaction *reac, std::ostream &output)
 void
 Writer::processKineticLaw(Ast::KineticLaw *law, std::ostream &output)
 {
-  output << std::endl << "  " << law->getRateLaw();
+  output << std::endl << "  ";
+  Parser::Expr::Writer::write(law->getRateLaw(), *law, output);
 
   // Serialize local parameters
   if (0 < law->numParameters())
@@ -437,7 +445,9 @@ Writer::processKineticLaw(Ast::KineticLaw *law, std::ostream &output)
       }
 
       param = law->getParameter(i);
-      output << param->getIdentifier() << "=" << param->getValue() << ", ";
+      output << param->getIdentifier() << "=";
+      Parser::Expr::Writer::write(param->getValue(), *law, output);
+      output << ", ";
     }
 
     param = law->getParameter(i);
@@ -456,7 +466,8 @@ Writer::processKineticLaw(Ast::KineticLaw *law, std::ostream &output)
     }
 
     param = law->getParameter(i);
-    output << param->getIdentifier() << "=" << param->getValue();
+    output << param->getIdentifier() << "=";
+    Parser::Expr::Writer::write(param->getValue(), *law, output);
   }
 }
 

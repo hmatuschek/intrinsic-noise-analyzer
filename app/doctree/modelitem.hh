@@ -8,7 +8,7 @@
 
 
 /**
- * Represents a libsbml::Model and associated analysis results for the GUI. Its a containter for
+ * Represents a @c Ast::Model and associated analysis results for the GUI. Its a containter for
  * everything, that is associated with a certain SBML model.
  *
  * A SBMLModel is also a TreeItem, that allows to browse through model items and results.

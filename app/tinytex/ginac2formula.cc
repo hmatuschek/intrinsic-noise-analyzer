@@ -41,12 +41,12 @@ Ginac2Formula::visit(const GiNaC::symbol &node)
   }
 
   if (var->hasName()) {
-    if (_tex_names) {
-      _stack.push_back(TinyTex::parse(var->getName()));
-      return;
+    if (TinyTex::isTexQuoted(var->getName())) {
+      _stack.push_back(TinyTex::parse(TinyTex::texUnquote(var->getName())));
     } else {
       _stack.push_back(new MathText(var->getName().c_str()));
     }
+    return;
   }
 
   _stack.push_back(new MathText(var->getIdentifier().c_str()));
@@ -117,17 +117,18 @@ Ginac2Formula::visit(const GiNaC::mul &node)
         // get numeric value
         GiNaC::numeric value = GiNaC::ex_to<GiNaC::numeric>(exponent);
         // If expoent is negative integer:
-        if (value.is_integer() && value.is_negative()) {
+        if (value.info(GiNaC::info_flags::integer) && value.is_negative()) {
           (1/node.op(i)).accept(*this);
           if (0 < denumerator.size()) { denumerator.append(new MathText(QChar(0x00B7))); }
           denumerator.append(_stack.back()); _stack.pop_back();
+          continue;
         }
       }
-    } else {
-      node.op(i).accept(*this);
-      if (0 < numerator.size()) { numerator.append(new MathText(QChar(0x00B7))); }
-      numerator.append(_stack.back()); _stack.pop_back();
     }
+
+    node.op(i).accept(*this);
+    if (0 < numerator.size()) { numerator.append(new MathText(QChar(0x00B7))); }
+    numerator.append(_stack.back()); _stack.pop_back();
   }
 
   /*

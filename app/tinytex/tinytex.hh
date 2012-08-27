@@ -19,10 +19,11 @@ class TinyTex
 {
 public:
   /** Exception class for all tinyTeX errors. */
-  class Error : public Fluc::Exception {
+  class Error : public Fluc::Parser::ParserError {
   public:
     Error();
     Error(const Error &other);
+    Error(const Fluc::Parser::ParserError &other);
     ~Error() throw ();
   };
 
@@ -33,6 +34,12 @@ public:
   /** Parses the given formula and returns the rendered pixmap, if rendering fails,
    * it returns the given source. */
   static QVariant toPixmap(const std::string &source);
+
+  /** Returns true if the string starts and ends with an '$'. */
+  static bool isTexQuoted(const std::string &source);
+
+  /** Removes the first and last '$'. */
+  static std::string texUnquote(const std::string &source);
 
 protected:
   /** A weak reference to the lexer. */

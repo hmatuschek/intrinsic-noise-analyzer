@@ -85,6 +85,8 @@ public:
 protected:
   /** Holds the members of the scope. */
   std::map<std::string, Definition *> definitions;
+  /** Holds map @c GiNaC::symbol -> @c VariableDefinition. */
+  std::map<GiNaC::symbol, VariableDefinition *, GiNaC::ex_is_less> symbol_table;
   /** If this flag is true, no reference within this scope can be resolved to a defintion outside of
    * this scope. */
   bool is_closed;
@@ -140,9 +142,28 @@ public:
   /** Returns a const reference to the definition. */
   Definition * const getDefinition(const std::string &name) const;
 
+  /** Returns true, if the given identifier names a @c VariableDefinition. */
+  bool hasVariable(const std::string &identifier) const;
+  /** Returns true, if the given symbol belongs to a variable definition. */
+  bool hasVariable(const GiNaC::symbol &symbol) const;
+  /** Returns the variable definition by name.
+   * Is equivalent to call @c getVariable(getSymbol(const std::string &identifier).
+   * @throws SymbolError If identifier is not associated with a variable. */
+  VariableDefinition *getVariable(const std::string &identifier);
+  /** Returns the variable definition by name.
+   * Is equivalent to call @c getVariable(getSymbol(const std::string &identifier).
+   * @throws SymbolError If identifier is not associated with a variable. */
+  VariableDefinition * const getVariable(const std::string &identifier) const;
+  /** Returns the variable definition associated with the given symbol.
+   * @throws SymbolError If the symbol is not associated with a variable definition. */
+  VariableDefinition *getVariable(const GiNaC::symbol &symbol);
+  /** Returns the variable definition associated with the given symbol.
+   * @throws SymbolError If the symbol is not associated with a variable definition. */
+  VariableDefinition * const getVariable(const GiNaC::symbol &symbol) const;
+
   /** Returns true, if the scope is closed. This means if references within the scope can not access
    * definitions outside the scope. */
-  bool isClosed();
+  bool isClosed() const;
 
   /** Finds a similar identifer that is not in use. */
   std::string getNewIdentifier(const std::string &base_name);

@@ -3,13 +3,6 @@
 using namespace Fluc;
 using namespace Fluc::Models;
 
-/*IOSmodel::IOSmodel(libsbml::Model *model)
-  : LNAmodel(model)
-{
-  postConstructor();
-}*/
-
-
 IOSmodel::IOSmodel(const Ast::Model &model)
   : LNAmodel(model)
 {

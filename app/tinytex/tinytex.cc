@@ -14,11 +14,15 @@ using namespace Fluc;
 /* ******************************************************************************************** *
  * Exception class
  * ******************************************************************************************** */
-TinyTex::Error::Error() : Exception() {
+TinyTex::Error::Error() : ParserError() {
   // pass
 }
 
-TinyTex::Error::Error(const Error &other) : Exception(other) {
+TinyTex::Error::Error(const Error &other) : ParserError(other) {
+  // pass...
+}
+
+TinyTex::Error::Error(const Fluc::Parser::ParserError &other) : ParserError(other) {
   // pass...
 }
 
@@ -83,6 +87,10 @@ TinyTex::Lexer::Lexer(std::istream &input)
   addRule(new Parser::KeyWordTokenRule(LBRA_TOKEN, "{"));
   addRule(new Parser::KeyWordTokenRule(RBRA_TOKEN, "}"));
   addRule(new Parser::WhiteSpaceTokenRule(WHITESPACE_TOKEN));
+
+  addTokenName(TEXT_TOKEN, "TEXT"); addTokenName(SYMBOL_TOKEN, "SYMBOL");
+  addTokenName(SUP_TOKEN, "^"); addTokenName(SUB_TOKEN, "_");
+  addTokenName(LBRA_TOKEN, "{"); addTokenName(RBRA_TOKEN, "}");
 
   addIgnoredToken(WHITESPACE_TOKEN);
 }
@@ -247,8 +255,8 @@ TinyTex::parse(const std::string &source)
     grammar->notify(lexer, cst);
     TinyTex parser(lexer);
     item = parser.parseFormula(cst[0]);
-  } catch (Exception &err) {
-    TinyTex::Error texerr; texerr << err.what(); throw err;
+  } catch (Fluc::Parser::ParserError &err) {
+    throw TinyTex::Error(err);
   }
 
   return item;
@@ -339,7 +347,11 @@ TinyTex::toPixmap(const std::string &source)
 {
   MathFormulaItem *item = 0;
   try {
-    item = TinyTex::parse(source);
+    if (TinyTex::isTexQuoted(source)) {
+      item = TinyTex::parse(TinyTex::texUnquote(source));
+    } else {
+      item = new MathText(source.c_str());
+    }
   } catch (TinyTex::Error &error) {
     item = new MathText(source.c_str());
   }
@@ -356,4 +368,21 @@ TinyTex::toPixmap(const std::string &source)
   delete item; delete scene;
 
   return pixmap;
+}
+
+
+bool
+TinyTex::isTexQuoted(const std::string &source)
+{
+  if (2 >= source.size()) { return false; }
+  if ('$' != source[0]) { return false; }
+  if ('$' != source[source.size()-1]) { return false; }
+  return true;
+}
+
+std::string
+TinyTex::texUnquote(const std::string &source)
+{
+  if (! isTexQuoted(source)) { return source; }
+  return source.substr(1, source.size()-2);
 }

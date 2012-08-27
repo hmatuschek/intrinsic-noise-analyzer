@@ -56,8 +56,6 @@ private:
   void postConstructor();
 
 public:
-  /* REmodel(libsbml::Model *model); */
-
   /**
    * Constructor.
    */

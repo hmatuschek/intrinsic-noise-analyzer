@@ -4,6 +4,7 @@
 #include "functiondefinition.hh"
 
 
+using namespace Fluc;
 using namespace Fluc::Ast;
 
 
@@ -94,7 +95,7 @@ Scope::const_iterator::operator !=(const Scope::const_iterator &other)
  * Implementation of Scope.
  */
 Scope::Scope(Scope *parent, bool is_closed)
-  : definitions(), is_closed(is_closed), _parent_scope(parent)
+  : definitions(), symbol_table(), is_closed(is_closed), _parent_scope(parent)
 {
   // Done.
 }
@@ -157,6 +158,11 @@ Scope::addDefinition(Definition *def)
     reaction->getKineticLaw()->setParent(this);
   }
 
+  VariableDefinition *var = 0;
+  if (0 != (var = dynamic_cast<VariableDefinition *>(def))) {
+    // If the definition is a variable definition -> store symbol of variable in symbol_table.
+    symbol_table[var->getSymbol()] = var;
+  }
 }
 
 
@@ -174,6 +180,10 @@ Scope::remDefinition(Definition *def)
   }
 
   this->definitions.erase(def->getIdentifier());
+
+  if (Node::isVariableDefinition(def)) {
+    symbol_table.erase(static_cast<VariableDefinition *>(def)->getSymbol());
+  }
 }
 
 
@@ -226,7 +236,94 @@ Scope::getDefinition(const std::string &name) const
 }
 
 
-bool Scope::isClosed() { return is_closed; }
+bool
+Scope::hasVariable(const GiNaC::symbol &symbol) const
+{
+  if (this->symbol_table.end() != this->symbol_table.find(symbol)) { return true; }
+  if (! hasParentScope() || isClosed()) { return false; }
+  return _parent_scope->hasVariable(symbol);
+}
+
+
+bool
+Scope::hasVariable(const std::string &identifier) const
+{
+  return this->hasDefinition(identifier) && Node::isVariableDefinition(this->getDefinition(identifier));
+}
+
+
+VariableDefinition *
+Scope::getVariable(const std::string &identifier)
+{
+  Ast::Definition *def = this->getDefinition(identifier);
+
+  if (! Node::isVariableDefinition(def))
+  {
+    SymbolError err;
+    err << "Symbol " << identifier << " does not name a variable.";
+    throw err;
+  }
+
+  return static_cast<Ast::VariableDefinition *>(def);
+}
+
+
+VariableDefinition * const
+Scope::getVariable(const std::string &identifier) const
+{
+  Ast::Definition *def = this->getDefinition(identifier);
+
+  if (! Node::isVariableDefinition(def)) {
+    SymbolError err;
+    err << "Symbol " << identifier << " does not name a variable.";
+    throw err;
+  }
+
+  return static_cast<Ast::VariableDefinition *>(def);
+}
+
+
+VariableDefinition *
+Scope::getVariable(const GiNaC::symbol &symbol)
+{
+  std::map<GiNaC::symbol, VariableDefinition *, GiNaC::ex_is_less>::iterator item
+      = this->symbol_table.find(symbol);
+
+  if (this->symbol_table.end() == item) {
+    if (isClosed() || ! hasParentScope()) {
+      SymbolError err;
+      err << "Symbol " << symbol << " does not name a variable.";
+      throw err;
+    }
+
+    return _parent_scope->getVariable(symbol);
+  }
+
+  return item->second;
+}
+
+
+VariableDefinition * const
+Scope::getVariable(const GiNaC::symbol &symbol) const
+{
+  std::map<GiNaC::symbol, VariableDefinition *, GiNaC::ex_is_less>::const_iterator item
+      = this->symbol_table.find(symbol);
+
+  if (this->symbol_table.end() == item) {
+    if (isClosed() || ! hasParentScope()) {
+      SymbolError err;
+      err << "Symbol " << symbol << " does not name a variable.";
+      throw err;
+    }
+
+    return _parent_scope->getVariable(symbol);
+  }
+
+  return item->second;
+}
+
+
+bool Scope::isClosed() const { return is_closed; }
 
 
 std::string

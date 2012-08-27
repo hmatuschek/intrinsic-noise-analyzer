@@ -68,7 +68,7 @@ ModelItem::ModelItem(Fluc::Ast::Model *model, QObject *parent) :
 
 ModelItem::~ModelItem()
 {
-  // Free libsbml::SBMLDocument instance:
+  // Free model instance:
   delete this->base_model;
 }
 
