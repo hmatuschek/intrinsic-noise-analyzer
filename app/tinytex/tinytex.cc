@@ -88,6 +88,10 @@ TinyTex::Lexer::Lexer(std::istream &input)
   addRule(new Parser::KeyWordTokenRule(RBRA_TOKEN, "}"));
   addRule(new Parser::WhiteSpaceTokenRule(WHITESPACE_TOKEN));
 
+  addTokenName(TEXT_TOKEN, "TEXT"); addTokenName(SYMBOL_TOKEN, "SYMBOL");
+  addTokenName(SUP_TOKEN, "^"); addTokenName(SUB_TOKEN, "_");
+  addTokenName(LBRA_TOKEN, "{"); addTokenName(RBRA_TOKEN, "}");
+
   addIgnoredToken(WHITESPACE_TOKEN);
 }
 
@@ -343,7 +347,11 @@ TinyTex::toPixmap(const std::string &source)
 {
   MathFormulaItem *item = 0;
   try {
-    item = TinyTex::parse(source);
+    if (TinyTex::isTexQuoted(source)) {
+      item = TinyTex::parse(TinyTex::texUnquote(source));
+    } else {
+      item = new MathText(source.c_str());
+    }
   } catch (TinyTex::Error &error) {
     item = new MathText(source.c_str());
   }
@@ -360,4 +368,21 @@ TinyTex::toPixmap(const std::string &source)
   delete item; delete scene;
 
   return pixmap;
+}
+
+
+bool
+TinyTex::isTexQuoted(const std::string &source)
+{
+  if (2 >= source.size()) { return false; }
+  if ('$' != source[0]) { return false; }
+  if ('$' != source[source.size()-1]) { return false; }
+  return true;
+}
+
+std::string
+TinyTex::texUnquote(const std::string &source)
+{
+  if (! isTexQuoted(source)) { return source; }
+  return source.substr(1, source.size()-2);
 }

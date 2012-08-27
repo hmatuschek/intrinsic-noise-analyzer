@@ -41,12 +41,12 @@ Ginac2Formula::visit(const GiNaC::symbol &node)
   }
 
   if (var->hasName()) {
-    if (_tex_names) {
-      _stack.push_back(TinyTex::parse(var->getName()));
-      return;
+    if (TinyTex::isTexQuoted(var->getName())) {
+      _stack.push_back(TinyTex::parse(TinyTex::texUnquote(var->getName())));
     } else {
       _stack.push_back(new MathText(var->getName().c_str()));
     }
+    return;
   }
 
   _stack.push_back(new MathText(var->getIdentifier().c_str()));

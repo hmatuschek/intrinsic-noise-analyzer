@@ -35,6 +35,12 @@ public:
    * it returns the given source. */
   static QVariant toPixmap(const std::string &source);
 
+  /** Returns true if the string starts and ends with an '$'. */
+  static bool isTexQuoted(const std::string &source);
+
+  /** Removes the first and last '$'. */
+  static std::string texUnquote(const std::string &source);
+
 protected:
   /** A weak reference to the lexer. */
   Fluc::Parser::Lexer &_lexer;

@@ -19,9 +19,9 @@ ReactionEquationRenderer::ReactionEquationRenderer(Fluc::Ast::Reaction *reac, QO
   if (0 == reac->numReactants()) { reactants->appendItem(new MathText(QChar(0x2205))); }
   for (Ast::Reaction::iterator item=reac->reacBegin(); item!=reac->reacEnd(); item++) {
     if (0 != reactants->size()) {
-      products->appendItem(new MathSpace(MathSpace::MEDIUM_SPACE));
+      reactants->appendItem(new MathSpace(MathSpace::MEDIUM_SPACE));
       reactants->appendItem(new MathText("+"));
-      products->appendItem(new MathSpace(MathSpace::MEDIUM_SPACE));
+      reactants->appendItem(new MathSpace(MathSpace::MEDIUM_SPACE));
     }
     if (1 != item->second) {
       reactants->appendItem(Ginac2Formula::toFormula(item->second, scope));
