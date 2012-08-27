@@ -140,10 +140,6 @@ LinearMapFunction::updateRange(const Range &range)
   double rmin = roundRange(range.min(),2);
   double rmax = roundRange(range.max(),2);
 
-  std::cerr << range.delta() << std::endl;
-  std::cerr << "prec = " << prec <<std::endl;
-  std::cerr << "rmax = " << rmax <<std::endl;
-
   if (RangePolicy::FIXED == this->_policy.getMinPolicy())
   {
     // Keep old value:
