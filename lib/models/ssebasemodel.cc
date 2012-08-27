@@ -3,32 +3,6 @@
 using namespace Fluc;
 using namespace Fluc::Models;
 
-/* SSEBaseModel::SSEBaseModel(libsbml::Model *model)
-  : BaseModel(model), propensityExpansion((BaseModel &)(*this)), ConservationAnalysisMixin((BaseModel &)(*this)),
-    rate_expressions(this->numReactions()),
-    rate_corrections(this->numReactions()),
-    rates_gradient(this->numReactions(),this->numIndSpecies()),
-    rates_gradientO1(this->numReactions(),this->numIndSpecies()),
-    rates_hessian(this->numReactions(),this->numIndSpecies()*(this->numIndSpecies()+1)/2),
-    rates_3rd(this->numReactions(),this->numIndSpecies()*(this->numIndSpecies()+1)*(this->numIndSpecies()+2)/6),
-    Link0CMatrix(this->numDepSpecies(),this->numIndSpecies()),
-    LinkCMatrix(this->numSpecies(),this->numIndSpecies()),
-    REs(this->numIndSpecies()), REcorrections(this->numIndSpecies()),
-    JacobianM(this->numIndSpecies(),this->numIndSpecies()),
-    Hessian(this->numIndSpecies(), (this->numIndSpecies()*(this->numIndSpecies()+1))/2),
-    DiffusionMatrix(this->numIndSpecies(),this->numIndSpecies()),    
-    DiffusionMatrixO1(this->numIndSpecies(),this->numIndSpecies()),
-    DiffusionVec(numIndSpecies()*numIndSpecies()),
-    DiffusionJacM(numIndSpecies()*(numIndSpecies()+1)/2,numIndSpecies()),
-    DiffusionJacMO1(numIndSpecies()*(numIndSpecies()+1)/2,numIndSpecies()),
-    Diffusion3Tensor(numIndSpecies()*(numIndSpecies()+1)*(numIndSpecies()+2)/6),
-    DiffusionHessianM(numIndSpecies()*(numIndSpecies()+1)/2,numIndSpecies()*(numIndSpecies()+1)/2),
-    PhilippianM(numIndSpecies()*(numIndSpecies()+1)*(numIndSpecies()+2)/6,numIndSpecies()*(numIndSpecies()+1)*(numIndSpecies()+2)/6),
-    conservationConstants(this->numDepSpecies())
-{
-  postConstructor();
-} */
-
 
 SSEBaseModel::SSEBaseModel(const Ast::Model &model)
   : BaseModel(model), propensityExpansion((BaseModel &)(*this)), ConservationAnalysisMixin((BaseModel &)(*this)),

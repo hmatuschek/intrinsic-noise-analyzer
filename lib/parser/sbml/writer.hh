@@ -61,7 +61,7 @@ protected:
 };
 
 
-/** Internal used class to assemble libsbml::ASTNode instances representing a GiNaC expression. */
+/** Internal used class to assemble ASTNode instances representing a GiNaC expression. */
 class SBMLExpressionAssembler :
     public GiNaC::visitor, public GiNaC::numeric::visitor, public GiNaC::add::visitor,
     public GiNaC::mul::visitor, public GiNaC::symbol::visitor, public GiNaC::power::visitor,

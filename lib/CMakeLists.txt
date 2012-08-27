@@ -56,9 +56,9 @@ SET(libina_sbmlsh_parser_HEADERS
     parser/sbmlsh/assembler.hh parser/sbmlsh/writer.hh parser/sbmlsh/sbmlsh.hh)
 
 SET(libina_sbml_parser_SOURCES
-    parser/sbml/sbml.cc parser/sbml/assembler.cc parser/sbml/exporter.cc)
+    parser/sbml/sbml.cc parser/sbml/assembler.cc parser/sbml/writer.cc)
 SET(libina_sbml_parser_HEADERS
-    parser/sbml/sbml.hh parser/sbml/assembler.hh parser/sbml/exporter.hh)
+    parser/sbml/sbml.hh parser/sbml/assembler.hh parser/sbml/writer.hh)
 
 SET(libina_expr_parser_SOURCES
     parser/expr/lexer.cc parser/expr/parser.cc parser/expr/productions.cc parser/expr/assembler.cc

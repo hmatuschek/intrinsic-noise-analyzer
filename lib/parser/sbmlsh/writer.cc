@@ -325,8 +325,8 @@ Writer::processReactionList(Ast::Model &model, std::ostream &output)
   for (size_t i=0; i<model.numReactions(); i++) {
     processReaction(model.getReaction(i), output);
     processKineticLaw(model.getReaction(i)->getKineticLaw(), output);
+    output << std::endl;
   }
-  output << std::endl;
 }
 
 void

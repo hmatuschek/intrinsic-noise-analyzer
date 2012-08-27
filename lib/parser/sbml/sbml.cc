@@ -1,6 +1,6 @@
 #include "sbml.hh"
 #include "assembler.hh"
-#include "exporter.hh"
+#include "writer.hh"
 #include <sbml/SBMLTypes.h>
 
 
@@ -13,7 +13,7 @@ void
 Parser::Sbml::importModel(Ast::Model &model, const std::string &filename)
 {
   // Read SBML document from file:
-  libsbml::SBMLDocument *document = libsbml::readSBMLFromFile(filename.c_str());
+  LIBSBML_CPP_NAMESPACE_QUALIFIER SBMLDocument *document = LIBSBML_CPP_NAMESPACE_QUALIFIER readSBMLFromFile(filename.c_str());
 
   // Check for errors:
   if (0 != document->getNumErrors()) {
@@ -47,11 +47,11 @@ void
 Parser::Sbml::exportModel(Ast::Model &model, const std::string &filename)
 {
   // Create SBML document leven 2 version 4:
-  libsbml::SBMLDocument *document = new libsbml::SBMLDocument(2,4);
+  LIBSBML_CPP_NAMESPACE_QUALIFIER SBMLDocument *document = new LIBSBML_CPP_NAMESPACE_QUALIFIER SBMLDocument(2,4);
   // Assemble SBML model from Ast::Model:
   Writer::processModel(model, document);
   // Write SBML into file:
-  libsbml::SBMLWriter writer; writer.writeSBMLToFile(document, filename);
+  LIBSBML_CPP_NAMESPACE_QUALIFIER SBMLWriter writer; writer.writeSBMLToFile(document, filename);
   // free document:
   delete document;
 }

@@ -1,5 +1,5 @@
-#ifndef __INA_PARSER_SBMLSH_EXPORTER_HH__
-#define __INA_PARSER_SBMLSH_EXPORTER_HH__
+#ifndef __INA_PARSER_SBMLSH_WRITER_HH__
+#define __INA_PARSER_SBMLSH_WRITER_HH__
 
 #include <ostream>
 #include <ast/model.hh>
@@ -60,4 +60,4 @@ protected:
 }
 }
 
-#endif // __INA_PARSER_SBMLSH_EXPORTER_HH__
+#endif // __INA_PARSER_SBMLSH_WRITER_HH__

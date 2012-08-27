@@ -30,9 +30,6 @@ private:
 
 public:
   /**
-  IOSmodel(libsbml::Model *model);
-  */
-  /**
    * Constructor.
    */
   explicit IOSmodel(const Ast::Model &model);

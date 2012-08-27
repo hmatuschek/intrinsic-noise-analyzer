@@ -167,8 +167,6 @@ private:
     void postConstructor();
 
 public:
-    /* SSEBaseModel(libsbml::Model *model); */
-
     /**
      * Constructor from @c Ast::Model.
      */

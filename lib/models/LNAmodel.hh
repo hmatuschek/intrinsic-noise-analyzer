@@ -39,8 +39,6 @@ private:
 
 
 public:
-  /* LNAmodel(libsbml::Model *model); */
-
   /**
    * Constructor.
    */

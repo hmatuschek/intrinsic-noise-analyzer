@@ -63,16 +63,6 @@ public:
    */
 
 
-//  GenericGibsonBruckSSA(libsbml::Model *model, int ensembleSize, int seed,
-//               size_t opt_level=0, size_t num_threads=OpenMP::getMaxThreads())
-//    : StochasticSimulator(model, ensembleSize, seed, num_threads),
-//      ConstantStoichiometryMixin((BaseModel &)(*this)),
-//      byte_code(this->numReactions()), all_byte_code(),
-//      sparseStoichiometry(numSpecies(),numReactions()),
-//      prop( this->numThreads(), Eigen::VectorXd::Zero(this->numReactions()) ),
-//      interpreter( this->numThreads() ),
-//      tau( this->numThreads(), Eigen::VectorXd::Zero(this->numReactions()) )
-
 GenericGibsonBruckSSA(const Ast::Model &model, int ensembleSize, int seed,
              size_t opt_level=0, size_t num_threads=OpenMP::getMaxThreads())
   : StochasticSimulator(model, ensembleSize, seed, num_threads),
