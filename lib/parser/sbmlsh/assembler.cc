@@ -220,7 +220,7 @@ Assembler::processUnitDefinition(Parser::ConcreteSyntaxTree &unit)
   //   "="
   //   ScaledUnitList                :unit[2]
   //   [QuotedString]                :unit[3]; unit[3][0] -> QuotedString
-  //   [EOL UnitDefinitionList]      :unit[4]
+  //   [EOL UnitDefinitionList]      :unit[4]; 4.0.1
 
   // Collect scaled base units for this unit:
   std::list<Ast::ScaledBaseUnit> units;
@@ -231,15 +231,27 @@ Assembler::processUnitDefinition(Parser::ConcreteSyntaxTree &unit)
 
   if (unit[3].matched()) {
     std::string name = _lexer[unit[3][0].getTokenIdx()].getValue();
-    def->setName(name);
+    unquote(name); def->setName(name);
   }
 
-  // Add unit definition to model:
-  _model.addDefinition(def);
+  if ("substance" == identifier) {
+    _model.setDefaultSubstanceUnit(def->getUnit().asScaledBaseUnit()); delete def;
+  } else if ("volume" == identifier) {
+    _model.setDefaultVolumeUnit(def->getUnit().asScaledBaseUnit()); delete def;
+  } else if ("area" == identifier) {
+    _model.setDefaultAreaUnit(def->getUnit().asScaledBaseUnit()); delete def;
+  } else if ("length" == identifier) {
+    _model.setDefaultLengthUnit(def->getUnit().asScaledBaseUnit()); delete def;
+  } else if ("time" == identifier) {
+    _model.setDefaultTimeUnit(def->getUnit().asScaledBaseUnit()); delete def;
+  } else {
+    // Add unit definition to model:
+    _model.addDefinition(def);
+  }
 
   // If there are some unit definitions left
   if (unit[4].matched()) {
-    processUnitDefinition(unit[3][1]);
+    processUnitDefinition(unit[4][0][1]);
   }
 }
 
@@ -253,8 +265,7 @@ Assembler::processScaledUnitList(Parser::ConcreteSyntaxTree &unit,
   //   [                                     : units[1]
   //     ":"                                   : units[1][0][0]
   //     ScaledUnitModifierList]               : units[1][0][1]
-  //   ";"
-  //   [ScaledUnitList];                     : units[3]
+  //   [";" ScaledUnitList];                   : units[2] 2,0,1
 
   /* Dispatch by base unit name. */
   const Parser::Token &uid_token = _lexer[unit[0].getTokenIdx()];
@@ -280,8 +291,8 @@ Assembler::processScaledUnitList(Parser::ConcreteSyntaxTree &unit,
   unit_list.push_back(Ast::ScaledBaseUnit(base_unit, multiplier, scale, exponent));
 
   // If there are scaled units left:
-  if (unit[3].matched()) {
-    processScaledUnitList(unit[3][1], unit_list);
+  if (unit[2].matched()) {
+    processScaledUnitList(unit[2][0][1], unit_list);
   }
 }
 
@@ -325,7 +336,7 @@ Assembler::processCompartmentDefinitions(Parser::ConcreteSyntaxTree &comp)
   /* CompartmentDefinitionList =        : comp
    *  Identifier                          : comp[0]
    *  ["<" Identifier]                    : comp[1]
-   *  ["=" Expression]                        : comp[2], Expression: comp[2][0][1]
+   *  ["=" Expression]                    : comp[2], Expression: comp[2][0][1]
    *  [QuotedString]                      : comp[3]  (token)
    *  [EOL CompartmentDefinitionList];    : comp[4] */
 
@@ -346,8 +357,9 @@ Assembler::processCompartmentDefinitions(Parser::ConcreteSyntaxTree &comp)
   }
 
   // Set name if defined:
-  if (! comp[3].matched()) {
-    compartment->setName(_lexer[comp[3][0].getTokenIdx()].getValue());
+  if (comp[3].matched()) {
+    std::string name = _lexer[comp[3][0].getTokenIdx()].getValue();
+    unquote(name); compartment->setName(name);
   }
 
   // Add compartment to model:
@@ -355,7 +367,7 @@ Assembler::processCompartmentDefinitions(Parser::ConcreteSyntaxTree &comp)
 
   // Process remaining compartments
   if (comp[4].matched()) {
-    processCompartmentDefinitions(comp[4][1]);
+    processCompartmentDefinitions(comp[4][0][1]);
   }
 }
 
@@ -424,7 +436,8 @@ Assembler::processSpeciesDefinition(Parser::ConcreteSyntaxTree &spec)
 
   // Handle name
   if (spec[6].matched()) {
-    species->setName(_lexer[spec[6][0].getTokenIdx()].getValue());
+    std::string name = _lexer[spec[6][0].getTokenIdx()].getValue();
+    unquote(name); species->setName(name);
   }
 
   // Add species definition to model:
@@ -496,7 +509,8 @@ Assembler::processParameterDefinition(Parser::ConcreteSyntaxTree &params)
 
   // If a name is given
   if (params[4].matched()) {
-    parameter->setName(_lexer[params[4][0].getTokenIdx()].getValue());
+    std::string name = _lexer[params[4][0].getTokenIdx()].getValue();
+    unquote(name); parameter->setName(name);
   }
 
   // Add parameter to model:
@@ -573,7 +587,7 @@ Assembler::processReactionDefinitions(Parser::ConcreteSyntaxTree &reac)
 
   // Handle name if present
   if (reac[3].matched()) {
-    name = _lexer[reac[3][0].getTokenIdx()].getValue();
+    name = _lexer[reac[3][0].getTokenIdx()].getValue(); unquote(name);
   }
 
   // Get kinetic law
@@ -743,4 +757,11 @@ Assembler::processProducts(Parser::ConcreteSyntaxTree &sum, Ast::Reaction *react
   if (sum[2].matched()) {
     processProducts(sum[2][0][1], reaction);
   }
+}
+
+
+void
+Assembler::unquote(std::string &name)
+{
+  name = name.substr(1, name.size()-2);
 }

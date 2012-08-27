@@ -307,6 +307,7 @@ Lexer::parseToken()
     return;
   }
 
+  //std::cerr << "Parsed token " << token.getValue() << std::endl;
   history.push_back(token);
 }
 
