@@ -14,11 +14,15 @@ using namespace Fluc;
 /* ******************************************************************************************** *
  * Exception class
  * ******************************************************************************************** */
-TinyTex::Error::Error() : Exception() {
+TinyTex::Error::Error() : ParserError() {
   // pass
 }
 
-TinyTex::Error::Error(const Error &other) : Exception(other) {
+TinyTex::Error::Error(const Error &other) : ParserError(other) {
+  // pass...
+}
+
+TinyTex::Error::Error(const Fluc::Parser::ParserError &other) : ParserError(other) {
   // pass...
 }
 
@@ -247,8 +251,8 @@ TinyTex::parse(const std::string &source)
     grammar->notify(lexer, cst);
     TinyTex parser(lexer);
     item = parser.parseFormula(cst[0]);
-  } catch (Exception &err) {
-    TinyTex::Error texerr; texerr << err.what(); throw err;
+  } catch (Fluc::Parser::ParserError &err) {
+    throw TinyTex::Error(err);
   }
 
   return item;

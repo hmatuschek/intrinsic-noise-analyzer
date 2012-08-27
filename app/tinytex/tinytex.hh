@@ -19,10 +19,11 @@ class TinyTex
 {
 public:
   /** Exception class for all tinyTeX errors. */
-  class Error : public Fluc::Exception {
+  class Error : public Fluc::Parser::ParserError {
   public:
     Error();
     Error(const Error &other);
+    Error(const Fluc::Parser::ParserError &other);
     ~Error() throw ();
   };
 
