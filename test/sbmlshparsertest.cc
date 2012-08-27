@@ -178,7 +178,7 @@ SBMLSHParserTest::testParserUnitDefinition()
     Sbmlsh::Lexer lexer(text);
     Fluc::Parser::Production *prod = Sbmlsh::UnitDefinitionsProduction::get();
     Fluc::Parser::ConcreteSyntaxTree element;
-    UT_ASSERT_THROW(prod->parse(lexer, element), Utils::ParserError);
+    UT_ASSERT_THROW(prod->parse(lexer, element), Parser::ParserError);
   }
 }
 

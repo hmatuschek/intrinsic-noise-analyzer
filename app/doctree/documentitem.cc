@@ -106,7 +106,7 @@ DocumentItem::showContextMenu(const QPoint &global_pos)
 
 
 /* ******************************************************************************************** *
- * Implementation of the Wrapper interface.
+ * Implementation of the TreeItem interface.
  * ******************************************************************************************** */
 const QString &
 DocumentItem::getLabel() const

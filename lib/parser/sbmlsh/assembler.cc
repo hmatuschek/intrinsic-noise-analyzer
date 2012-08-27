@@ -143,7 +143,7 @@ Assembler::processModelDefinition(Parser::ConcreteSyntaxTree &model_header)
   /* ModelDefinition =               : model_header
    *   "@model"                        : model_header[0]
    *   ":"
-   *   "3.3.1"
+   *   "3.1.1"
    *   "="
    *   Identifier                      : model_header[4]
    *   [QuotedString]                  : model_header[5]
@@ -154,12 +154,13 @@ Assembler::processModelDefinition(Parser::ConcreteSyntaxTree &model_header)
 
   // Set name if defined
   if (model_header[5].matched()) {
-    _model.setName(_lexer[model_header[5][0].getTokenIdx()].getValue());
+    std::string name = _lexer[model_header[5][0].getTokenIdx()].getValue();
+    unquote(name); _model.setName(name);
   }
 
   // Handle default units if defined:
   if (model_header[6].matched()) {
-    processDefaultUnitDefinitions(model_header[6][0]);
+    processDefaultUnitDefinitions(model_header[6][0][1]);
   }
 }
 

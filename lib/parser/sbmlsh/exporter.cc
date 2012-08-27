@@ -41,6 +41,7 @@ Writer::processModelHeader(Ast::Model &model, std::ostream &output)
        item != default_units.end(); item++) {
     output << " " << item->first << "=" << item->second;
   }
+  output << std::endl;
 }
 
 
@@ -140,6 +141,7 @@ Writer::processUnitDefinitions(Ast::Model &model, std::ostream &output)
     for (std::list<std::string>::iterator row=units.begin(); row!=units.end(); row++) {
       output << *row;
     }
+    output << std::endl;
   }
 }
 
@@ -210,13 +212,14 @@ Writer::processCompartments(Ast::Model &model, std::ostream &output) {
   for (size_t i=0; i<model.numCompartments(); i++) {
     processCompartment(model.getCompartment(i), output);
   }
+  output << std::endl;
 }
 
 /* Handle compartment. */
 void
 Writer::processCompartment(Ast::Compartment *comp, std::ostream &output)
 {
-  output << std::endl << "  " << comp->getIdentifier();
+  output << std::endl << " " << comp->getIdentifier();
   if (comp->hasValue()) { output << " = " << comp->getValue(); }
   if (comp->hasName())  { output << " \"" << comp->getName() << "\""; }
 }
@@ -230,6 +233,7 @@ Writer::processSpeciesList(Ast::Model &model, std::ostream &output) {
   for (size_t i=0; i<model.numSpecies(); i++) {
     processSpecies(model.getSpecies(i), output);
   }
+  output << std::endl;
 }
 
 /* handle single species. */
@@ -256,13 +260,14 @@ Writer::processParameterList(Ast::Model &model, std::ostream &output)
   for (size_t i=0; i<model.numParameters(); i++) {
     processParameter(model.getParameter(i), output);
   }
+  output << std::endl;
 }
 
 /* Serialize single paramter definition. */
 void
 Writer::processParameter(Ast::Parameter *param, std::ostream &output)
 {
-  output << std::endl << param->getIdentifier() << "=" << param->getValue();
+  output << std::endl << " " << param->getIdentifier() << "=" << param->getValue();
   if (! param->isConst()) { output << " v"; }
   if (param->hasName()) { output << " \"" << param->getName() << "\""; }
 }
@@ -288,6 +293,7 @@ Writer::processRuleList(Ast::Model &model, std::ostream &output)
   for (std::list<std::string>::iterator iter=rules.begin(); iter!=rules.end(); iter++) {
     output << std::endl << "  " << *iter;
   }
+  output << std::endl;
 }
 
 void
@@ -313,6 +319,7 @@ Writer::processReactionList(Ast::Model &model, std::ostream &output)
     processReaction(model.getReaction(i), output);
     processKineticLaw(model.getReaction(i)->getKineticLaw(), output);
   }
+  output << std::endl;
 }
 
 void
@@ -320,8 +327,8 @@ Writer::processReaction(Ast::Reaction *reac, std::ostream &output)
 {
   std::stringstream temp;
 
-  if (reac->isReversible()) { output << std::endl << "@rr="; }
-  else { output << std::endl << "@r="; }
+  if (reac->isReversible()) { output << std::endl << " @rr="; }
+  else { output << std::endl << " @r="; }
   output << " " << reac->getIdentifier();
   if (reac->hasName()) { output << " \"" << reac->getName()<<"\""; }
 
@@ -371,7 +378,7 @@ Writer::processReaction(Ast::Reaction *reac, std::ostream &output)
     modifiers.push_back((*item)->getIdentifier());
   }
 
-  output << std::endl;
+  output << std::endl << "  ";
   // Serialize reactants:
   if (0 < reactants.size()) {
     std::list<std::string>::iterator item = reactants.begin();
@@ -405,7 +412,7 @@ Writer::processReaction(Ast::Reaction *reac, std::ostream &output)
 void
 Writer::processKineticLaw(Ast::KineticLaw *law, std::ostream &output)
 {
-  output << std::endl << law->getRateLaw();
+  output << std::endl << "  " << law->getRateLaw();
 
   // Serialize local parameters
   if (0 < law->numParameters())

@@ -23,6 +23,9 @@ ModelCopyist::copy(const Ast::Model *src, Ast::Model *dest, GiNaC::exmap &transl
   // Table of species copies:
   std::map<Species *, Species *> species_table;
 
+  // Set name:
+  dest->setName(src->getName());
+
   // Sorry, iteration is quiet in-efficient, however:
 
   // Copy function definitions:

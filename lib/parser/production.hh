@@ -2,8 +2,7 @@
 #define __FLUC_PARSER_PRODUCTION_HH__
 
 #include "lexer.hh"
-#include <exception.hh>
-#include <utils/exception.hh>
+#include "exception.hh"
 
 
 namespace Fluc {

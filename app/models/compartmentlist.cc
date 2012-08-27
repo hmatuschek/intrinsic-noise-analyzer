@@ -25,7 +25,7 @@ CompartmentList::flags(const QModelIndex &index) const
   // Filter invalid indices:
   if (! index.isValid()) return Qt::NoItemFlags;
   if (columnCount() <= index.column()) return Qt::NoItemFlags;
-  if (int(_model->numParameters()) <= index.row()) return Qt::NoItemFlags;
+  if (rowCount() <= index.row()) return Qt::NoItemFlags;
 
   // Mark only column 1 & 2 editable
   if ( (1 == index.column()) || (2 == index.column()) ) item_flags |= Qt::ItemIsEditable;
@@ -39,7 +39,7 @@ CompartmentList::data(const QModelIndex &index, int role) const
 {
   // Filter invalid indices:
   if (! index.isValid() || columnCount() <= index.column()) { return QVariant(); }
-  if (int(this->_model->numCompartments()) <= index.row()) { return QVariant(); }
+  if (rowCount() <= index.row()) { return QVariant(); }
 
   // Get selected compartment:
   Fluc::Ast::Compartment *comp = this->_model->getCompartment(index.row());
@@ -62,7 +62,7 @@ bool
 CompartmentList::setData(const QModelIndex &index, const QVariant &value, int role)
 {
   // Filter invald indices:
-  if (index.row() >= int(_model->numCompartments())) return false;
+  if (index.row() >= rowCount()) return false;
   if (index.column() >= columnCount()) return false;
 
   // Get compartment:
@@ -86,7 +86,7 @@ CompartmentList::setData(const QModelIndex &index, const QVariant &value, int ro
 QVariant
 CompartmentList::headerData(int section, Qt::Orientation orientation, int role) const
 {
-  if (Qt::DisplayRole != role || orientation != Qt::Horizontal || 5 <= section) {
+  if (Qt::DisplayRole != role || orientation != Qt::Horizontal || columnCount() <= section) {
     return QAbstractTableModel::headerData(section, orientation, role);
   }
 

@@ -90,6 +90,7 @@ MainWindow::createMenus()
   fileMenu = menuBar()->addMenu(tr("&Model"));
   fileMenu->addAction(Application::getApp()->importModelAction());
   fileMenu->addAction(Application::getApp()->exportModelAction());
+  fileMenu->addAction(Application::getApp()->editModelAction());
   fileMenu->addAction(Application::getApp()->closeModelAction());
   fileMenu->addSeparator();
   fileMenu->addAction(quitAct);
