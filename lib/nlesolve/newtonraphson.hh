@@ -28,44 +28,118 @@ namespace NLEsolve {
     };
 
 
+template<typename T>
+class NLEsolver
+{
+
+
+
+protected:
+
+    size_t dim;
+
+    Eigen::VectorXd ODEs;
+    Eigen::MatrixXd JacobianM;
+
+     /**
+     * The bytecode interpreter instance to evaluate the ODEs.
+     */
+     size_t iterations;
+
+     /**
+      * The bytecode interpreter instance to evaluate the ODEs.
+      */
+     Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Interpreter interpreter;
+
+     /**
+      * Holds the interpreter to evaluate the Jacobian.
+      */
+     Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Interpreter jacobian_interpreter;
+
+     /**
+      * The bytecode for the ODE.
+      */
+     Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Code ODEcode;
+
+     /**
+      * The bytecode for the Jacobian.
+      */
+     Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Code jacobianCode;
+
+public:
+
+     NLEsolver(T &model)
+         : dim(model.numIndSpecies()), ODEs(dim), JacobianM(dim,dim)
+     {
+
+     }
+
+
+     /**
+      * Returns the reduced dimension of the ODE system.
+      */
+     inline size_t
+     getDimension()
+     {
+        return this->dim;
+     }
+
+     /**
+      * Returns no. of iterations...
+      */
+     int getIterations()
+     {
+         return this->iterations;
+     }
+
+     /**
+      * Every solver has to implement its own method...
+      */
+     virtual Status solve(Eigen::VectorXd &state)=0;
+
+     /**
+      * Sets the ODE and Jacobian code...
+      */
+
+     void set(std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> &indexTable,
+              Eigen::VectorXex &updateVector, Eigen::MatrixXex &Jacobian)
+     {
+
+         // clean up
+         this->iterations = 0;
+         this->ODEcode.clear();
+         this->jacobianCode.clear();
+
+         // Compile expressions
+         Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Compiler compiler(indexTable);
+         compiler.setCode(&this->ODEcode);
+         compiler.compileVector(updateVector);
+         compiler.finalize(0);
+
+         // Set bytecode for interpreter
+         this->interpreter.setCode(&(this->ODEcode));
+         this->jacobian_interpreter.setCode(&(this->jacobianCode));
+
+         // Compile jacobian:
+         Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Compiler jacobian_compiler(indexTable);
+         jacobian_compiler.setCode(&jacobianCode);
+         jacobian_compiler.compileMatrix(Jacobian);
+         jacobian_compiler.finalize(0);
+
+     }
+
+
+};
+
 /**
  * Nonlinear algebraic equation solver using the Newton-Raphson method with linesearch.
  * @ingroup nlesolve
  */
 template<typename T>
 class NewtonRaphson
+    : public NLEsolver<T>
 {
 protected:
-  /**
-   * Holds a reference to an instance of LinearNoiseApproximation.
-   */
-   T &that;
-
-   Eigen::VectorXd REs;
-   Eigen::MatrixXd JacobianM;
-
-   size_t iterations;
-
-
-   /**
-    * The bytecode interpreter instance to evaluate the ODEs.
-    */
-   Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Interpreter interpreter;
-
-   /**
-    * Holds the interpreter to evaluate the Jacobian.
-    */
-   Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Interpreter jacobian_interpreter;
-
-   /**
-    * The bytecode to interprete.
-    */
-   Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Code bytecode;
-
-   /**
-    * The bytecode to interprete.
-    */
-   Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Code jacobianCode;
 
 public:
 
@@ -91,15 +165,15 @@ public:
    */
 
   NewtonRaphson(T &model)
-      : that(model),
-        REs(model.numIndSpecies()),JacobianM(model.numIndSpecies(),model.numIndSpecies()),
+      : NLEsolver<T>(model),
         parameters(model.numIndSpecies())
+
   {
 
       Eigen::VectorXex updateVector(model.numIndSpecies());
       Eigen::MatrixXex Jac(model.numIndSpecies(),model.numIndSpecies());
 
-      // Fold constants and get update vector
+      // Fold all constants and get update vector
       Trafo::ConstantFolder constants(model);
       for(size_t i=0; i<model.numIndSpecies(); i++)
       {
@@ -108,64 +182,32 @@ public:
               Jac(i,j) = constants.apply(model.getJacobian()(i,j));
       }
 
-      // Compile expressions
-      Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Compiler compiler(model.stateIndex);
-      compiler.setCode(&this->bytecode);
-      compiler.compileVector(updateVector);
-      compiler.finalize(0);
-
-      // Set bytecode for interpreter
-      this->interpreter.setCode(&(this->bytecode));
-      this->jacobian_interpreter.setCode(&(this->jacobianCode));
-
-      // Compile jacobian:
-      Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Compiler jacobian_compiler(model.stateIndex);
-      jacobian_compiler.setCode(&jacobianCode);
-      jacobian_compiler.compileMatrix(Jac);
-      jacobian_compiler.finalize(0);
+      set(model.stateIndex, updateVector, Jac);
 
   }
-
 
   /**
    * Constructor...
    */
 
   NewtonRaphson(T &model, Eigen::VectorXex &updateVector, Eigen::MatrixXex &Jacobian)
-      : REs(model.numIndSpecies()),JacobianM(model.numIndSpecies(),model.numIndSpecies()),
+      : NLEsolver<T>(model),
         parameters(model.numIndSpecies())
+
   {
-
-      // Compile expressions
-      Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Compiler compiler(model.stateIndex);
-      compiler.setCode(&this->bytecode);
-      compiler.compileVector(updateVector);
-      compiler.finalize(0);
-
-      // Set bytecode for interpreter
-      this->interpreter.setCode(&(this->bytecode));
-      this->jacobian_interpreter.setCode(&(this->jacobianCode));
-
-      // Compile jacobian:
-      Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Compiler jacobian_compiler(model.stateIndex);
-      jacobian_compiler.setCode(&jacobianCode);
-      jacobian_compiler.compileMatrix(Jacobian);
-      jacobian_compiler.finalize(0);
-
+      set(model.stateIndex, updateVector, Jacobian);
   }
-
 
   const Eigen::MatrixXd&
   getJacobianM()
+
   {
      return this->JacobianM;
   }
 
-  int getIterations()
-  { return this->iterations; }
-
-  Status
+  virtual Status
   solve(Eigen::VectorXd &conc)
+
   {
 
       double test,temp;
@@ -176,7 +218,7 @@ public:
       Eigen::VectorXd dx;
 
       // evaluate rate equations
-      interpreter.run(conc,REs);
+      this->interpreter.run(conc,this->ODEs);
 
       // dimension
       size_t dim = conc.size();
@@ -184,11 +226,13 @@ public:
       // calc max step
       const double stpmax=this->parameters.STPMX*std::max(conc.norm(),double(dim));
 
+      //Eigen::MatrixXd REs;
+
       for(this->iterations=1;this->iterations<this->parameters.maxIterations;this->iterations++)
       {
 
           // evaluate rate equations
-          interpreter.run(conc,REs);
+          this->interpreter.run(conc,this->ODEs);
 
           conc_old = conc;
 
@@ -201,7 +245,7 @@ public:
           }
 
           // test for convergence of REs
-          if ( REs.lpNorm<Eigen::Infinity>() < this->parameters.TOLF)
+          if ( maxNorm(this->ODEs) < this->parameters.TOLF )
           {
              return Success;
           }
@@ -237,7 +281,8 @@ public:
   }
 
   LineSearchStatus
-  newtonStep(const Eigen::VectorXd &inState, Eigen::VectorXd &outState,double stpmax)
+  newtonStep(const Eigen::VectorXd &inState, Eigen::VectorXd &outState ,double stpmax)
+
   {
 
       double f,fold;
@@ -250,20 +295,20 @@ public:
       Eigen::VectorXd dx;
 
       // construct Jacobian matrix
-      interpreter.run(inState,REs);
-      jacobian_interpreter.run(inState,JacobianM);
+      this->interpreter.run(inState,this->ODEs);
+      this->jacobian_interpreter.run(inState,this->JacobianM);
 
       // compute f to minimize
-      f = .5*(REs.squaredNorm());
+      f = .5*(this->ODEs.squaredNorm());
       // calculate steepest descent direction
-      nablaf = JacobianM.transpose()*REs;
+      nablaf = this->JacobianM.transpose()*this->ODEs;
 
       // store also old f
       fold = f;
 
       // solve JacobianM*dx=-REs
       //dx = JacobianM.fullPivLu().solve(-REs);
-      dx = JacobianM.lu().solve(-REs);
+      dx = this->JacobianM.lu().solve(-this->ODEs);
 
       LineSearchStatus lcheck;
 
@@ -352,9 +397,9 @@ public:
           x = xold+lambda*dx;
 
           // evaluate rate equations
-          this->interpreter.run(x,this->REs);
+          this->interpreter.run(x,this->ODEs);
 
-          f = 0.5*(REs.squaredNorm());
+          f = 0.5*(this->ODEs.squaredNorm());
 
           if (lambda < lambdamin)
           {
@@ -426,9 +471,9 @@ public:
 
           x = xold+lambda*dx;
 
-          interpreter.run(x,REs);
+          this->interpreter.run(x,this->ODEs);
 
-          f = 0.5*this->REs.squaredNorm();
+          f = 0.5*this->ODEs.squaredNorm();
 
           // take half step size
           lambda *= 0.5;
@@ -446,6 +491,13 @@ public:
   }
 
 };
+
+inline double
+maxNorm(const Eigen::VectorXd &vector)
+
+{
+    return vector.lpNorm<Eigen::Infinity>();
+}
 
 
 }

@@ -196,6 +196,8 @@ public:
 
   size_t getCodeSize() const;
 
+  void clear();
+
   /**
    * Returns an iterator to the first instruction of the bytecode.
    */

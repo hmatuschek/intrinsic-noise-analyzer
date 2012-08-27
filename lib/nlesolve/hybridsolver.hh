@@ -98,12 +98,9 @@ public:
 
 public:
 
-  /**
-   * Returns the reduced dimension of the ODE system.
-   */
-  inline size_t getDimension()
+  size_t getDimension()
   {
-    return this->that.numIndSpecies();
+    return NLEsolver<Sys>::getDimension();
   }
 
   /**
@@ -163,7 +160,7 @@ public:
           test = 0.;
           for(size_t i=0;i<dim;i++)
           {
-              temp = std::abs(this->REs(i));
+              temp = std::abs(this->ODEs(i));
               if (temp > test) test = temp;
           }
           if ( test < this->parameters.TOLF)
