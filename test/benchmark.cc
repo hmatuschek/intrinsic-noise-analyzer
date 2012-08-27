@@ -39,6 +39,11 @@ double Benchmark::eps_rel = 1e-6;
 double Benchmark::t_end   = 5.0;
 size_t Benchmark::ensemble_size = 300; // 3000
 
+Benchmark::~Benchmark()
+{
+ // pass
+}
+
 void
 Benchmark::setUp()
 {

@@ -44,7 +44,6 @@ public:
       // Pass...
     }
 
-
     /**
     * Constructor
     */

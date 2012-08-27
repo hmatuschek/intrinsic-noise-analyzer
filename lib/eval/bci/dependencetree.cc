@@ -71,6 +71,10 @@ Value::Value(const Instruction &instruction, const std::vector< SmartPtr<Value> 
   // Pass...
 }
 
+Value::~Value()
+{
+  // Pass...
+}
 
 Instruction::OpCode
 Value::opCode() const

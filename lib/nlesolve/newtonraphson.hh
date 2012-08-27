@@ -2,6 +2,7 @@
 #define __FLUC_MODELS_NEWTONRAPHSON_HH
 
 #include "eval/eval.hh"
+#include "trafo/constantfolder.hh"
 
 namespace Fluc {
 namespace NLEsolve {
@@ -66,7 +67,6 @@ protected:
     */
    Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Code jacobianCode;
 
-
 public:
 
    struct params {
@@ -95,10 +95,23 @@ public:
         REs(model.numIndSpecies()),JacobianM(model.numIndSpecies(),model.numIndSpecies()),
         parameters(model.numIndSpecies())
   {
+
+      Eigen::VectorXex updateVector(model.numIndSpecies());
+      Eigen::MatrixXex Jac(model.numIndSpecies(),model.numIndSpecies());
+
+      // Fold constants and get update vector
+      Trafo::ConstantFolder constants(model);
+      for(size_t i=0; i<model.numIndSpecies(); i++)
+      {
+          updateVector(i) = constants.apply(model.getUpdateVector()(i));
+          for(size_t j=0; j<model.numIndSpecies(); j++)
+              Jac(i,j) = constants.apply(model.getJacobian()(i,j));
+      }
+
       // Compile expressions
       Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Compiler compiler(model.stateIndex);
       compiler.setCode(&this->bytecode);
-      compiler.compileVector(model.getUpdateVector().head(model.numIndSpecies()));
+      compiler.compileVector(updateVector);
       compiler.finalize(0);
 
       // Set bytecode for interpreter
@@ -108,12 +121,39 @@ public:
       // Compile jacobian:
       Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Compiler jacobian_compiler(model.stateIndex);
       jacobian_compiler.setCode(&jacobianCode);
-      jacobian_compiler.compileMatrix(model.getJacobian());
+      jacobian_compiler.compileMatrix(Jac);
       jacobian_compiler.finalize(0);
 
+  }
 
+
+  /**
+   * Constructor...
+   */
+
+  NewtonRaphson(T &model, Eigen::VectorXex &updateVector, Eigen::MatrixXex &Jacobian)
+      : REs(model.numIndSpecies()),JacobianM(model.numIndSpecies(),model.numIndSpecies()),
+        parameters(model.numIndSpecies())
+  {
+
+      // Compile expressions
+      Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Compiler compiler(model.stateIndex);
+      compiler.setCode(&this->bytecode);
+      compiler.compileVector(updateVector);
+      compiler.finalize(0);
+
+      // Set bytecode for interpreter
+      this->interpreter.setCode(&(this->bytecode));
+      this->jacobian_interpreter.setCode(&(this->jacobianCode));
+
+      // Compile jacobian:
+      Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Compiler jacobian_compiler(model.stateIndex);
+      jacobian_compiler.setCode(&jacobianCode);
+      jacobian_compiler.compileMatrix(Jacobian);
+      jacobian_compiler.finalize(0);
 
   }
+
 
   const Eigen::MatrixXd&
   getJacobianM()

@@ -9,7 +9,10 @@
 
 using namespace Fluc;
 
-
+LNATest::~LNATest()
+{
+ //pass
+}
 
 void
 LNATest::testEnzymeKineticsOpen()

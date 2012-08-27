@@ -14,6 +14,8 @@ protected:
   Ast::Model *_model;
 
 public:
+  virtual ~ConstantFolderTest();
+
   void setUp();
   void tearDown();
 

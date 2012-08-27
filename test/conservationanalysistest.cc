@@ -6,7 +6,8 @@
 
 using namespace Fluc;
 
-
+ConservationAnalysisTest::~ConservationAnalysisTest()
+{}
 
 void
 ConservationAnalysisTest::setUp()

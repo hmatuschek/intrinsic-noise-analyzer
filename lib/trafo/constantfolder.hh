@@ -4,11 +4,14 @@
 #include "ast/ast.hh"
 #include "filterflags.hh"
 #include "substitution.hh"
+#include "ginacsupportforeigen.hh"
 
 
 namespace Fluc {
 namespace Trafo {
 
+
+typedef std::set<GiNaC::ex, GiNaC::ex_is_less> excludeType;
 
 /** Simple visitor to collect all substitutions for constant variables.
  * It is possible to specify which classes of variables are processed. This allows for example to
@@ -24,10 +27,13 @@ protected:
   /** Holds the flags to filter which variables are processed. */
   unsigned _flags;
 
+  /** Holds the variables to be excluded from substitution. */
+  excludeType _excludes;
 
 public:
+
   /** Constructor. */
-  ConstSubstitutionCollector(Substitution &substitutions, unsigned flags=Filter::ALL);
+  ConstSubstitutionCollector(Substitution &substitutions, unsigned flags=Filter::ALL, const excludeType &excludes=excludeType());
 
   /** Check if the variable is constant. */
   virtual void visit(const Ast::VariableDefinition *var);
@@ -64,13 +70,17 @@ class ConstantFolder
 {
 public:
   /** Constructor, collects all substitutions of constant variables and assignment rules. */
-  ConstantFolder(const Ast::Model &model, unsigned flags = Filter::ALL);
+    ConstantFolder(const Ast::Model &model, unsigned flags = Filter::ALL, const excludeType &excludes=excludeType());
 
   /** Tiny helper function to fold all constants in the given model. */
   void apply(Ast::Model &model);
 
   /** Tiny helper function to fold all constants in the given expression. */
   GiNaC::ex apply(GiNaC::ex expr);
+
+  /** Tiny helper function to fold all constants in the given vector expression. */
+  void apply(Eigen::VectorXex &expr);
+
 };
 
 

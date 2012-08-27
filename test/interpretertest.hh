@@ -67,8 +67,13 @@ protected:
   void testAllReal(Eigen::VectorXex &symbols, Eigen::VectorXex &expression,
                    const Eigen::VectorXd &values);
 
+
+
 public:
   static UnitTest::TestSuite *suite();
+
+  virtual ~InterpreterTest();
+
 };
 
 

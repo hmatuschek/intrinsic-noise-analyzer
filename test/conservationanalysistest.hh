@@ -13,6 +13,8 @@ protected:
   Ast::Model *_model;
 
 public:
+  virtual ~ConservationAnalysisTest();
+
   void setUp();
   void tearDown();
 

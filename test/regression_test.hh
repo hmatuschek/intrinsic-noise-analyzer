@@ -19,6 +19,9 @@ public:
 
 public:
   static UnitTest::TestSuite *suite();
+
+  virtual ~RegressionTest();
+
 };
 
 
