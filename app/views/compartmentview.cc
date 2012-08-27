@@ -36,15 +36,17 @@ CompartmentView::CompartmentView(CompartmentsItem *compartments, QWidget *parent
   header->addWidget(_remCompartment, 0, Qt::AlignLeft);
   header->addWidget(label, 1, Qt::AlignRight);
 
-  // Create delegate for expressions:
-  _expressionDelegate  = new ExpressionDelegate(_compartments->compartments()->model(), this);
-
   // Create table view:
   _compTable = new QTableView();
   _compTable->setModel(this->_compartments->compartments());
   _compTable->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
   _compTable->verticalHeader()->hide();
-  _compTable->setItemDelegateForColumn(2, _expressionDelegate);
+
+  // Create delegate for expressions:
+  _compTable->setItemDelegateForColumn(
+        1, new ExpressionDelegate(_compartments->compartments()->model(), this));
+  _compTable->setItemDelegateForColumn(
+        2, new ExpressionDelegate(_compartments->compartments()->model(), this));
 
   // Assemble layout
   QVBoxLayout *layout = new QVBoxLayout();

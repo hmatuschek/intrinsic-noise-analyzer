@@ -533,16 +533,23 @@ Unit::dimensionless()
 /* ********************************************************************************************* *
  * Implementation of ScaledUnit
  * ********************************************************************************************* */
-ScaledBaseUnit::ScaledBaseUnit(BaseUnit unit, double multiplier, int scale, int exponent)
-  : unit(unit), multiplier(multiplier), scale(scale), exponent(exponent)
-{
+ScaledBaseUnit::ScaledBaseUnit()
+  : unit(DIMENSIONLESS), multiplier(1), scale(0), exponent(1) {
   // Done...
 }
 
+ScaledBaseUnit::ScaledBaseUnit(BaseUnit unit, double multiplier, int scale, int exponent)
+  : unit(unit), multiplier(multiplier), scale(scale), exponent(exponent) {
+  // Done...
+}
+
+ScaledBaseUnit::ScaledBaseUnit(BaseUnit unit)
+  : unit(unit), multiplier(1), scale(0), exponent(1) {
+  // Done...
+}
 
 ScaledBaseUnit::ScaledBaseUnit(const ScaledBaseUnit &other)
-  : unit(other.unit), multiplier(other.multiplier), scale(other.scale), exponent(other.exponent)
-{
+  : unit(other.unit), multiplier(other.multiplier), scale(other.scale), exponent(other.exponent) {
   // Done...
 }
 

@@ -7,6 +7,10 @@
 
 using namespace Fluc;
 
+ConstantFolderTest::~ConstantFolderTest()
+{
+
+}
 
 void
 ConstantFolderTest::setUp()

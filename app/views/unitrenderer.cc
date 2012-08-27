@@ -73,7 +73,7 @@ UnitRenderer::~UnitRenderer()
 
 
 const QPixmap &
-UnitRenderer::render()
+UnitRenderer::toPixmap()
 {
   if (0 != _pixmap) { return *_pixmap; }
 

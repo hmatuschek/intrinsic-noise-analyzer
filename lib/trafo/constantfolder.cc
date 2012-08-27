@@ -8,8 +8,8 @@ using namespace Fluc::Trafo;
 /* ********************************************************************************************* *
  * Implementation of ConstSubstitutionCollector visitor.
  * ********************************************************************************************* */
-ConstSubstitutionCollector::ConstSubstitutionCollector(Substitution &substitutions, unsigned flags)
-  : _substitutions(substitutions), _flags(flags)
+ConstSubstitutionCollector::ConstSubstitutionCollector(Substitution &substitutions, unsigned flags, const excludeType &excludes)
+    : _substitutions(substitutions), _flags(flags) , _excludes(excludes)
 {
   // pass...
 }
@@ -18,6 +18,10 @@ ConstSubstitutionCollector::ConstSubstitutionCollector(Substitution &substitutio
 void
 ConstSubstitutionCollector::visit(const Ast::VariableDefinition *var)
 {
+
+  // Skip to exclude
+  if(_excludes.find(var->getSymbol())!=_excludes.end()) return;
+
   // Skip non constant variables:
   if ( (! var->isConst()) || (! var->hasValue()) ) return;
 
@@ -35,11 +39,11 @@ ConstSubstitutionCollector::visit(const Ast::VariableDefinition *var)
 /* ********************************************************************************************* *
  * Implementation of ConstantFolder
  * ********************************************************************************************* */
-ConstantFolder::ConstantFolder(const Ast::Model &model, unsigned flags)
+ConstantFolder::ConstantFolder(const Ast::Model &model, unsigned flags, const excludeType &excludes)
   : Substitution()
 {
   // Apply const subs. collector on model
-  ConstSubstitutionCollector collector(*this, flags);
+  ConstSubstitutionCollector collector(*this, flags, excludes);
   model.accept(collector);
   // normalize collected substitutions:
   this->normalize();
@@ -58,3 +62,12 @@ ConstantFolder::apply(GiNaC::ex expr)
   // apply substitutions on expression:
   return expr.subs(this->getTable());
 }
+
+void
+ConstantFolder::apply(Eigen::VectorXex &expr)
+{
+  // apply substitutions to vector:
+    for(int i=0;i<expr.size();i++)
+        expr(i)=expr(i).subs(this->getTable());
+}
+

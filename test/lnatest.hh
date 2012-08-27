@@ -14,9 +14,13 @@ namespace Fluc {
 class LNATest : public UnitTest::TestCase
 {
 public:
+
+  virtual ~LNATest();
   void testEnzymeKineticsOpen();
   void testDimerization();
   void testDimerization2();
+
+
 
 
 public:

@@ -39,8 +39,6 @@ private:
   QPushButton *_addCompartment;
   /** The "delete compartment" button. */
   QPushButton *_remCompartment;
-  /** A expression editor delegate for the initial values. */
-  ExpressionDelegate *_expressionDelegate;
 };
 
 

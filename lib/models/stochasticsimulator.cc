@@ -1,5 +1,7 @@
 #include "stochasticsimulator.hh"
+#include "trafo/constantfolder.hh"
 #include "utils/logger.hh"
+
 
 using namespace Fluc;
 using namespace Fluc::Models;
@@ -118,10 +120,9 @@ StochasticSimulator::StochasticSimulator(const Ast::Model &model, int size, int 
      this->stateIndex.insert(std::make_pair(this->getSpecies(i)->getSymbol(),i));
 
   // fold all constants
+  Trafo::ConstantFolder constants(*this);
   for(size_t i=0;i<this->propensities.size();i++)
-  {
-      this->propensities[i]=this->foldConstants(this->propensities[i]);
-  }
+        this->propensities[i] = constants.apply(this->propensities[i]);
 
   // evaluate initial concentrations & get volumes
   Ast::EvaluateInitialValue evICs(*this);

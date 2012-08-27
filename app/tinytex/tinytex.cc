@@ -248,7 +248,7 @@ TinyTex::parse(const std::string &source)
     TinyTex parser(lexer);
     item = parser.parseFormula(cst[0]);
   } catch (Exception &err) {
-    Error texerr; texerr << err.what(); throw err;
+    TinyTex::Error texerr; texerr << err.what(); throw err;
   }
 
   return item;
@@ -325,7 +325,7 @@ TinyTex::processSymbol(const std::string &symbol)
   std::map<std::string, QString>::iterator item=_symbol_table.find(symbol);
 
   if (_symbol_table.end() == item) {
-    SymbolError err;
+    TinyTex::Error err;
     err << "Can not parse expression: Unknown TinyTeX symbol " << symbol;
     throw err;
   }

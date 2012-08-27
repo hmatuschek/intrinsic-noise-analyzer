@@ -6,6 +6,7 @@
 #include "IOSmodel.hh"
 #include "eval/eval.hh"
 #include "eval/bcimp/engine.hh"
+#include "trafo/constantfolder.hh"
 
 namespace Fluc {
 namespace Models {
@@ -68,6 +69,12 @@ protected:
    size_t opt_level;
 
 
+   /**
+    * Holds the update vector with constants folded.
+    */
+   Eigen::VectorXex updateVector;
+
+
 public:
   /**
    * Constructor.
@@ -84,10 +91,16 @@ public:
     : sseModel(model), bytecode(num_threads), jacobianCode(num_threads),
       hasJacobian(false), opt_level(opt_level)
   {
+
+    // Fold constants and get update vector
+    Trafo::ConstantFolder constants(sseModel);
+    updateVector = sseModel.getUpdateVector();
+    constants.apply(updateVector);
+
     // Compile expressions
     typename SysEngine::Compiler compiler(sseModel.stateIndex);
     compiler.setCode(&this->bytecode);
-    compiler.compileVector(sseModel.getUpdateVector());
+    compiler.compileVector(updateVector);
     compiler.finalize(opt_level);
 
     // Set bytecode for interpreter

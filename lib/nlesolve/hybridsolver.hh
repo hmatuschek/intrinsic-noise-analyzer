@@ -52,6 +52,35 @@ public:
     }
  }
 
+  /**
+   * Constructor.
+   *
+   * @param system Specifies the ODE system to integrate.
+   * @param epsilon_abs Specifies the absolute error for the step.
+   */
+  HybridSolver(Sys &system, Eigen::VectorXex &update, Eigen::MatrixXex &Jacobian)
+      : NewtonRaphson<Sys>(system, update, Jacobian), LSODA()
+  {
+
+    //parameters.epsilon=epsilon;
+
+    this->parameters.maxIterations=100;
+
+    istate=1;
+
+    ywork = new double[3 * (getDimension() + 1)];
+    atolwork = ywork + getDimension() + 1;
+    rtolwork = atolwork + getDimension() + 1;
+
+    /* @todo use to define staged errors using the system size */
+    for (size_t i = 1; i <= getDimension(); ++i)
+    {
+        rtolwork[i] = this->parameters.epsilon;
+        atolwork[i] = this->parameters.epsilon;
+    }
+  }
+
+
   void ODEStep(Eigen::VectorXd &state, double t, double dt)
   {
       lsoda(getDimension(), state.data()-1, &t, t+dt, 2, rtolwork, atolwork, 1, &istate, 0, 2);

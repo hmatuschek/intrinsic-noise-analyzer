@@ -8,6 +8,7 @@
 #include <QTableView>
 
 #include "reactionequationrenderer.hh"
+#include "../models/expressiondelegate.hh"
 
 
 ReactionView::ReactionView(ReactionItem *reaction, QWidget *parent) :
@@ -30,6 +31,11 @@ ReactionView::ReactionView(ReactionItem *reaction, QWidget *parent) :
 
   QTableView *table_view = new QTableView();
   table_view->setModel(reaction->localParameters());
+  table_view->setItemDelegateForColumn(
+        1, new ExpressionDelegate(reaction->localParameters()->kineticLaw(), table_view));
+  table_view->setItemDelegateForColumn(
+        2, new ExpressionDelegate(reaction->localParameters()->kineticLaw(), table_view));
+
   layout->addWidget(table_view);
 
   this->setLayout(layout);

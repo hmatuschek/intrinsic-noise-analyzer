@@ -94,11 +94,6 @@ public:
   void getOmega(Eigen::VectorXd &om);
 
   /**
-   * Get the conservation laws.
-   */
-  void getConservedCycles(std::vector<GiNaC::ex> &cLaw);
-
-  /**
    * Get the values of the conservation constants.
    */
   void getConservedCycles(Eigen::VectorXd &consc);

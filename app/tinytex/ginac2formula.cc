@@ -209,7 +209,6 @@ Ginac2Formula::toFormula(GiNaC::ex expression, Ast::Scope &scope, bool tex_names
     Fluc::Utils::Message msg = LOG_MESSAGE(Fluc::Utils::Message::WARN);
     msg << "Can not layout expression: " << expression << ": " << err.what();
     Fluc::Utils::Logger::get().log(msg);
-
   }
 
   return formula;

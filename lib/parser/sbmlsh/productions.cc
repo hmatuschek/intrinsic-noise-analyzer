@@ -272,10 +272,9 @@ UnitDefinitionListProduction::UnitDefinitionListProduction()
         new Fluc::Parser::OptionalProduction(new Fluc::Parser::TokenProduction(T_QUOTED_STRING)));
 
   // [EOL UnitDefinitionList]
-  std::list<Production *> tmp;
-  tmp.push_back(EndOfLineProduction::get());
-  tmp.push_back(this);
-  this->elements.push_back(new Fluc::Parser::OptionalProduction(new Production(tmp)));
+  this->elements.push_back(
+        new Fluc::Parser::OptionalProduction(
+          new Production(2, EndOfLineProduction::get(), this)));
 }
 
 UnitDefinitionListProduction *UnitDefinitionListProduction::instance = 0;
@@ -325,7 +324,7 @@ ScaledUnitModifierListProduction::get()
  * Implementation of ScaledUnitListProduction:
  *
  * ScaledUnitList =
- *   ScaledUnitIdentifier [":" ScaledUnitModifier "=" Number] ";" [ScaledUnitList];
+ *   ScaledUnitIdentifier [":" ScaledUnitModifierList] [";" ScaledUnitList];
  * ******************************************************************************************** */
 ScaledUnitListProduction::ScaledUnitListProduction()
   : Production()
@@ -341,11 +340,11 @@ ScaledUnitListProduction::ScaledUnitListProduction()
           new Fluc::Parser::Production(
             2, new Fluc::Parser::TokenProduction(T_COLON), ScaledUnitModifierListProduction::get())));
 
-  // ";"
-  this->elements.push_back(new Fluc::Parser::TokenProduction(T_SEMICOLON));
-
-  // [ScaledUnitList]
-  this->elements.push_back(new Fluc::Parser::OptionalProduction(this));
+  // [";" ScaledUnitList]
+  this->elements.push_back(
+        new Fluc::Parser::OptionalProduction(
+          new Fluc::Parser::Production(
+            2, new Fluc::Parser::TokenProduction(T_SEMICOLON), this)));
 }
 
 ScaledUnitListProduction * ScaledUnitListProduction::instance = 0;

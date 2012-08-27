@@ -150,39 +150,39 @@ REmodel::getOmega(Eigen::VectorXd &om)
   om = this->Omega;
 }
 
-void
-REmodel::getConservedCycles(std::vector<GiNaC::ex> &cLaw)
-{
-  // permute species vector
-  std::vector<GiNaC::ex> SpecPermutated(this->species.size(),0);
-  for (size_t i=0; i<this->species.size(); i++)
-  {
-    for (size_t j=0; j<this->species.size(); j++)
-    {
-      SpecPermutated[i]+=this->PermutationM(i,j)*this->species[j];
-    }
-  }
+//void
+//REmodel::getConservedCycles(std::vector<GiNaC::ex> &cLaw)
+//{
+//  // permute species vector
+//  std::vector<GiNaC::ex> SpecPermutated(this->species.size(),0);
+//  for (size_t i=0; i<this->species.size(); i++)
+//  {
+//    for (size_t j=0; j<this->species.size(); j++)
+//    {
+//      SpecPermutated[i]+=this->PermutationM(i,j)*this->species[j];
+//    }
+//  }
 
-  // number of conservation laws
-  size_t dimKernel = this->conservation_matrix.rows();
+//  // number of conservation laws
+//  size_t dimKernel = this->conservation_matrix.rows();
 
-  if(dimKernel)
-  {
-    //report conservation laws
-    std::vector<GiNaC::ex> cand(dimKernel);
+//  if(dimKernel)
+//  {
+//    //report conservation laws
+//    std::vector<GiNaC::ex> cand(dimKernel);
 
-    for (size_t i=0; i<dimKernel; i++)
-    {
-      for (size_t j=0; j<this->species.size(); j++)
-      {
-        cand[i]=cand[i]+this->conservation_matrix(i,j)*SpecPermutated[j];
-      }
-    }
+//    for (size_t i=0; i<dimKernel; i++)
+//    {
+//      for (size_t j=0; j<this->species.size(); j++)
+//      {
+//        cand[i]=cand[i]+this->conservation_matrix(i,j)*SpecPermutated[j];
+//      }
+//    }
 
-    cLaw = cand;
-  }
+//    cLaw = cand;
+//  }
 
-}
+//}
 
 const Eigen::VectorXex &
 REmodel::getUpdateVector() const {

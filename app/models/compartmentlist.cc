@@ -3,6 +3,9 @@
 #include "exception.hh"
 #include "utils/logger.hh"
 #include "referencecounter.hh"
+#include "../tinytex/ginac2formula.hh"
+#include "../tinytex/tinytex.hh"
+#include "../views/unitrenderer.hh"
 #include <QMessageBox>
 
 
@@ -128,8 +131,16 @@ CompartmentList::_getName(Fluc::Ast::Compartment *compartment, int role) const
 {
   if ( (Qt::DisplayRole != role) && (Qt::EditRole != role)) { return QVariant(); }
 
-  if (compartment->hasName()) { return QString(compartment->getName().c_str()); }
-  if (Qt::DisplayRole == role) { return QString("<none>"); }
+  if (Qt::DisplayRole == role) {
+    if (compartment->hasName()) {
+      return TinyTex::toPixmap(compartment->getName().c_str());
+    }
+    return TinyTex::toPixmap("<none>");
+  } else {
+    if (compartment->hasName() ) {
+      return QString(compartment->getName().c_str());
+    }
+  }
 
   return QString("");
 }
@@ -145,9 +156,16 @@ CompartmentList::_updateName(Fluc::Ast::Compartment *compartment, const QVariant
 QVariant
 CompartmentList::_getInitValue(Fluc::Ast::Compartment *comp, int role) const
 {
-  if ( (Qt::DisplayRole != role) && (Qt::EditRole != role)) { return QVariant(); }
-  std::stringstream str; str << comp->getValue();
-  return QString(str.str().c_str());
+  if (Qt::DisplayRole == role) {
+    // Render initial value:
+    return Ginac2Formula::toPixmap(comp->getValue(), *_model);
+  } else if (Qt::EditRole == role) {
+    // Serialize expression for editing:
+    std::stringstream buffer; buffer << comp->getValue();
+    return QString(buffer.str().c_str());
+  }
+
+  return QVariant();
 }
 
 bool
@@ -173,9 +191,10 @@ CompartmentList::_updateInitValue(Fluc::Ast::Compartment *compartment, const QVa
 QVariant
 CompartmentList::_getUnit(Fluc::Ast::Compartment *compartment, int role) const
 {
-  if (Qt::DisplayRole != role) { return QVariant(); }
-  std::stringstream str; compartment->getUnit().dump(str);
-  return QVariant(str.str().c_str());
+  if ((Qt::DecorationRole != role)) { return QVariant(); }
+
+  UnitRenderer renderer(compartment->getUnit());
+  return renderer.toPixmap();
 }
 
 

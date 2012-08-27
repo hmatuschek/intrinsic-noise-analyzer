@@ -28,6 +28,8 @@ typedef Matrix<std::complex<double>, Dynamic, Dynamic> MatrixXc;
 
 using namespace Fluc;
 
+InterpreterTest::~InterpreterTest()
+{};
 
 void
 InterpreterTest::testDirectPolynomial()

@@ -4,6 +4,10 @@
 
 using namespace Fluc;
 
+RegressionTest::~RegressionTest()
+{
+
+}
 
 void
 RegressionTest::testConstSpecies()

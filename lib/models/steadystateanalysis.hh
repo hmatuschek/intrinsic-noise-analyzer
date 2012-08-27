@@ -44,7 +44,6 @@ public:
       // Pass...
     }
 
-
     /**
     * Constructor
     */
@@ -169,15 +168,15 @@ public:
         sseModel.getInitialState(x);
         conc=x.head(sseModel.numIndSpecies());
 
-
         size_t offset = sseModel.numIndSpecies();
         size_t lnaLength = offset*(offset+1)/2;
         size_t sseLength = sseModel.getUpdateVector().size()-sseModel.numIndSpecies();
 
         Eigen::VectorXex sseUpdate = sseModel.getUpdateVector().segment(offset,sseLength);
 
-        // substitute RE concentrations
+        // calc
         int iter = this->calcConcentrations(conc);
+        // ... and substitute RE concentrations
         GiNaC::exmap subs_table;
         for (size_t s=0; s<sseModel.numIndSpecies(); s++)
             subs_table.insert( std::pair<GiNaC::ex,GiNaC::ex>( sseModel.getREvar(s), conc(s) ) );
