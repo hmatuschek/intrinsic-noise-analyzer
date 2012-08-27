@@ -80,11 +80,6 @@ protected:
    */
   std::map<std::string, Unit> predefined_units;
 
-  /**
-   * Holds map @c GiNaC::symbol -> @c VariableDefinition.
-   */
-  std::map<GiNaC::symbol, VariableDefinition *, GiNaC::ex_is_less> symbol_table;
-
 
 public:
   /**
@@ -241,48 +236,6 @@ public:
    * @throws SymbolError If the unit is not associated with a unit definition.
    */
   UnitDefinition * const getUnitDefinition(const Unit &unit) const;
-
-  /**
-   * Returns true, if the given identifier names a @c VariableDefinition.
-   */
-  bool hasVariable(const std::string &identifier) const;
-
-  /**
-   * Returns true, if the given symbol belongs to a variable definition.
-   */
-  bool hasVariable(const GiNaC::symbol &symbol) const;
-
-  /**
-   * Returns the variable definition by name.
-   *
-   * Is equivalent to call @c getVariable(getSymbol(const std::string &identifier).
-   *
-   * @throws SymbolError If identifier is not associated with a variable.
-   */
-  VariableDefinition *getVariable(const std::string &identifier);
-
-  /**
-   * Returns the variable definition by name.
-   *
-   * Is equivalent to call @c getVariable(getSymbol(const std::string &identifier).
-   *
-   * @throws SymbolError If identifier is not associated with a variable.
-   */
-  VariableDefinition * const getVariable(const std::string &identifier) const;
-
-  /**
-   * Returns the variable definition associated with the given symbol.
-   *
-   * @throws SymbolError If the symbol is not associated with a variable definition.
-   */
-  VariableDefinition *getVariable(const GiNaC::symbol &symbol);
-
-  /**
-   * Returns the variable definition associated with the given symbol.
-   *
-   * @throws SymbolError If the symbol is not associated with a variable definition.
-   */
-  VariableDefinition * const getVariable(const GiNaC::symbol &symbol) const;
 
   /**
    * Returns the reaction definition by identifier.

@@ -50,10 +50,10 @@ SET(libina_trafo_HEADERS trafo/trafo.hh
 
 SET(libina_sbmlsh_parser_SOURCES
     parser/sbmlsh/lexer.cc parser/sbmlsh/parser.cc parser/sbmlsh/productions.cc
-    parser/sbmlsh/assembler.cc parser/sbmlsh/exporter.cc parser/sbmlsh/sbmlsh.cc)
+    parser/sbmlsh/assembler.cc parser/sbmlsh/writer.cc parser/sbmlsh/sbmlsh.cc)
 SET(libina_sbmlsh_parser_HEADERS
     parser/sbmlsh/lexer.hh parser/sbmlsh/parser.hh parser/sbmlsh/productions.hh
-    parser/sbmlsh/assembler.hh parser/sbmlsh/exporter.hh parser/sbmlsh/sbmlsh.hh)
+    parser/sbmlsh/assembler.hh parser/sbmlsh/writer.hh parser/sbmlsh/sbmlsh.hh)
 
 SET(libina_sbml_parser_SOURCES
     parser/sbml/sbml.cc parser/sbml/assembler.cc parser/sbml/exporter.cc)
@@ -61,9 +61,11 @@ SET(libina_sbml_parser_HEADERS
     parser/sbml/sbml.hh parser/sbml/assembler.hh parser/sbml/exporter.hh)
 
 SET(libina_expr_parser_SOURCES
-    parser/expr/lexer.cc parser/expr/parser.cc parser/expr/productions.cc parser/expr/assembler.cc)
+    parser/expr/lexer.cc parser/expr/parser.cc parser/expr/productions.cc parser/expr/assembler.cc
+    parser/expr/writer.cc)
 SET(libina_expr_parser_HEADERS parser/expr/expr.hh
-    parser/expr/lexer.hh parser/expr/parser.hh parser/expr/productions.hh parser/expr/assembler.hh)
+    parser/expr/lexer.hh parser/expr/parser.hh parser/expr/productions.hh parser/expr/assembler.hh
+    parser/expr/writer.hh)
 
 SET(libina_parser_SOURCES
     parser/automata.cc parser/lexer.cc parser/production.cc parser/exception.cc

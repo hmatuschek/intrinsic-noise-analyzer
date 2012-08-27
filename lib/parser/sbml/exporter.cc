@@ -6,10 +6,10 @@ using namespace Fluc::Parser::Sbml;
 
 
 
-libsbml::Model *
-Writer::processModel(Ast::Model &model, libsbml::SBMLDocument *sbml_doc)
+LIBSBML_CPP_NAMESPACE_QUALIFIER Model *
+Writer::processModel(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIER SBMLDocument *sbml_doc)
 {
-  libsbml::Model *sbml_model = sbml_doc->createModel();
+  LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model = sbml_doc->createModel();
   /// @bug Ast::Model has no identifier!
   if (model.hasName()) { sbml_model->setName(model.getName()); }
 
@@ -24,14 +24,14 @@ Writer::processModel(Ast::Model &model, libsbml::SBMLDocument *sbml_doc)
 
 
 void
-Writer::processUnitDefinitions(Ast::Model &model, libsbml::Model *sbml_model)
+Writer::processUnitDefinitions(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model)
 {
   for (Ast::Model::iterator item=model.begin(); item!=model.end(); item++) {
     // Skip non unit definitions:
     if (! Ast::Node::isUnitDefinition(*item)) { continue; }
 
     Ast::UnitDefinition *unit_def = static_cast<Ast::UnitDefinition *>(*item);
-    libsbml::UnitDefinition *sbml_unit = sbml_model->createUnitDefinition();
+    LIBSBML_CPP_NAMESPACE_QUALIFIER UnitDefinition *sbml_unit = sbml_model->createUnitDefinition();
     sbml_unit->setId(unit_def->getIdentifier());
     if (unit_def->hasName()) { sbml_unit->setName(unit_def->getName()); }
     processUnitDefinition(unit_def->getUnit(), sbml_unit);
@@ -40,7 +40,7 @@ Writer::processUnitDefinitions(Ast::Model &model, libsbml::Model *sbml_model)
 
 
 void
-Writer::processUnitDefinition(const Ast::Unit &unit, libsbml::UnitDefinition *sbml_unit_def)
+Writer::processUnitDefinition(const Ast::Unit &unit, LIBSBML_CPP_NAMESPACE_QUALIFIER UnitDefinition *sbml_unit_def)
 {
   if ( (1 != unit.getMultiplier()) || (0 != unit.getScale()) ) {
     processUnit(
@@ -56,112 +56,112 @@ Writer::processUnitDefinition(const Ast::Unit &unit, libsbml::UnitDefinition *sb
 
 
 void
-Writer::processUnit(const Ast::ScaledBaseUnit &unit, libsbml::UnitDefinition *sbml_unit_def)
+Writer::processUnit(const Ast::ScaledBaseUnit &unit, LIBSBML_CPP_NAMESPACE_QUALIFIER UnitDefinition *sbml_unit_def)
 {
-  libsbml::Unit *sbml_unit = sbml_unit_def->createUnit();
+  LIBSBML_CPP_NAMESPACE_QUALIFIER Unit *sbml_unit = sbml_unit_def->createUnit();
 
   switch(unit.getBaseUnit()) {
   case Ast::ScaledBaseUnit::AMPERE:
-    sbml_unit->setKind(libsbml::UNIT_KIND_AMPERE);
+    sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_AMPERE);
     break;
   case Ast::ScaledBaseUnit::AVOGADRO:
-    sbml_unit->setKind(libsbml::UNIT_KIND_AVOGADRO);
+    sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_AVOGADRO);
     break;
   case Ast::ScaledBaseUnit::BECQUEREL:
-    sbml_unit->setKind(libsbml::UNIT_KIND_BECQUEREL);
+    sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_BECQUEREL);
     break;
   case Ast::ScaledBaseUnit::CANDELA:
-    sbml_unit->setKind(libsbml::UNIT_KIND_CANDELA);
+    sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_CANDELA);
     break;
   case Ast::ScaledBaseUnit::CELSIUS:
-    sbml_unit->setKind(libsbml::UNIT_KIND_CELSIUS);
+    sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_CELSIUS);
     break;
   case Ast::ScaledBaseUnit::COULOMB:
-    sbml_unit->setKind(libsbml::UNIT_KIND_COULOMB);
+    sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_COULOMB);
     break;
   case Ast::ScaledBaseUnit::DIMENSIONLESS:
-    sbml_unit->setKind(libsbml::UNIT_KIND_DIMENSIONLESS);
+    sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_DIMENSIONLESS);
     break;
   case Ast::ScaledBaseUnit::FARAD:
-    sbml_unit->setKind(libsbml::UNIT_KIND_FARAD);
+    sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_FARAD);
     break;
   case Ast::ScaledBaseUnit::GRAM:
-    sbml_unit->setKind(libsbml::UNIT_KIND_GRAM);
+    sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_GRAM);
     break;
   case Ast::ScaledBaseUnit::GRAY:
-    sbml_unit->setKind(libsbml::UNIT_KIND_GRAY);
+    sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_GRAY);
     break;
   case Ast::ScaledBaseUnit::HENRY:
-    sbml_unit->setKind(libsbml::UNIT_KIND_HENRY);
+    sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_HENRY);
     break;
   case Ast::ScaledBaseUnit::HERTZ:
-    sbml_unit->setKind(libsbml::UNIT_KIND_HERTZ);
+    sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_HERTZ);
     break;
   case Ast::ScaledBaseUnit::ITEM:
-    sbml_unit->setKind(libsbml::UNIT_KIND_ITEM);
+    sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_ITEM);
     break;
   case Ast::ScaledBaseUnit::JOULE:
-    sbml_unit->setKind(libsbml::UNIT_KIND_JOULE);
+    sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_JOULE);
     break;
   case Ast::ScaledBaseUnit::KATAL:
-    sbml_unit->setKind(libsbml::UNIT_KIND_KATAL);
+    sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_KATAL);
     break;
   case Ast::ScaledBaseUnit::KELVIN:
-    sbml_unit->setKind(libsbml::UNIT_KIND_KELVIN);
+    sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_KELVIN);
     break;
   case Ast::ScaledBaseUnit::KILOGRAM:
-    sbml_unit->setKind(libsbml::UNIT_KIND_KILOGRAM);
+    sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_KILOGRAM);
     break;
   case Ast::ScaledBaseUnit::LITRE:
-    sbml_unit->setKind(libsbml::UNIT_KIND_LITRE);
+    sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_LITRE);
     break;
   case Ast::ScaledBaseUnit::LUMEN:
-    sbml_unit->setKind(libsbml::UNIT_KIND_LUMEN);
+    sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_LUMEN);
     break;
   case Ast::ScaledBaseUnit::LUX:
-    sbml_unit->setKind(libsbml::UNIT_KIND_LUX);
+    sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_LUX);
     break;
   case Ast::ScaledBaseUnit::METRE:
-    sbml_unit->setKind(libsbml::UNIT_KIND_METRE);
+    sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_METRE);
     break;
   case Ast::ScaledBaseUnit::MOLE:
-    sbml_unit->setKind(libsbml::UNIT_KIND_MOLE);
+    sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_MOLE);
     break;
   case Ast::ScaledBaseUnit::NEWTON:
-    sbml_unit->setKind(libsbml::UNIT_KIND_NEWTON);
+    sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_NEWTON);
     break;
   case Ast::ScaledBaseUnit::OHM:
-    sbml_unit->setKind(libsbml::UNIT_KIND_OHM);
+    sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_OHM);
     break;
   case Ast::ScaledBaseUnit::PASCAL:
-    sbml_unit->setKind(libsbml::UNIT_KIND_PASCAL);
+    sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_PASCAL);
     break;
   case Ast::ScaledBaseUnit::RADIAN:
-    sbml_unit->setKind(libsbml::UNIT_KIND_RADIAN);
+    sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_RADIAN);
     break;
   case Ast::ScaledBaseUnit::SECOND:
-    sbml_unit->setKind(libsbml::UNIT_KIND_SECOND);
+    sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_SECOND);
     break;
   case Ast::ScaledBaseUnit::SIEMENS:
-    sbml_unit->setKind(libsbml::UNIT_KIND_SIEMENS);
+    sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_SIEMENS);
     break;
   case Ast::ScaledBaseUnit::SIEVERT:
-    sbml_unit->setKind(libsbml::UNIT_KIND_SIEVERT);
+    sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_SIEVERT);
     break;
   case Ast::ScaledBaseUnit::STERADIAN:
-    sbml_unit->setKind(libsbml::UNIT_KIND_STERADIAN);
+    sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_STERADIAN);
     break;
   case Ast::ScaledBaseUnit::TESLA:
-    sbml_unit->setKind(libsbml::UNIT_KIND_TESLA);
+    sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_TESLA);
     break;
   case Ast::ScaledBaseUnit::VOLT:
-    sbml_unit->setKind(libsbml::UNIT_KIND_VOLT);
+    sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_VOLT);
     break;
   case Ast::ScaledBaseUnit::WATT:
-    sbml_unit->setKind(libsbml::UNIT_KIND_WATT);
+    sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_WATT);
     break;
   case Ast::ScaledBaseUnit::WEBER:
-    sbml_unit->setKind(libsbml::UNIT_KIND_WEBER);
+    sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_WEBER);
     break;
   }
 
@@ -172,26 +172,26 @@ Writer::processUnit(const Ast::ScaledBaseUnit &unit, libsbml::UnitDefinition *sb
 
 
 void
-Writer::processFunctionDefinitions(Ast::Model &model, libsbml::Model *sbml_model)
+Writer::processFunctionDefinitions(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model)
 {
   for(Ast::Model::iterator item = model.begin(); item != model.end(); item++) {
     if (! Ast::Node::isFunctionDefinition(*item)) { continue; }
     Ast::FunctionDefinition *func = static_cast<Ast::FunctionDefinition *>(*item);
-    libsbml::FunctionDefinition *sbml_func = sbml_model->createFunctionDefinition();
+    LIBSBML_CPP_NAMESPACE_QUALIFIER FunctionDefinition *sbml_func = sbml_model->createFunctionDefinition();
     processFunctionDefinition(func, sbml_func, model);
   }
 }
 
 void
 Writer::processFunctionDefinition(
-  Ast::FunctionDefinition *func, libsbml::FunctionDefinition *sbml_func, Ast::Model &model)
+  Ast::FunctionDefinition *func, LIBSBML_CPP_NAMESPACE_QUALIFIER FunctionDefinition *sbml_func, Ast::Model &model)
 {
-  libsbml::ASTNode *ast_func = new libsbml::ASTNode(libsbml::AST_LAMBDA);
+  LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *ast_func = new LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode(LIBSBML_CPP_NAMESPACE_QUALIFIER AST_LAMBDA);
   sbml_func->setId(func->getIdentifier());
 
   // Assemble function arguments:
   for(size_t i=0; i<func->getNumArgs(); i++) {
-    libsbml::ASTNode *arg = new libsbml::ASTNode(libsbml::AST_NAME);
+    LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *arg = new LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode(LIBSBML_CPP_NAMESPACE_QUALIFIER AST_NAME);
     arg->setName(func->getArgByIdx(i).get_name().c_str());
     ast_func->addChild(arg);
   }
@@ -203,11 +203,11 @@ Writer::processFunctionDefinition(
 
 
 void
-Writer::processParameters(Ast::Model &model, libsbml::Model *sbml_model)
+Writer::processParameters(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model)
 {
   for (size_t i=0; i<model.numParameters(); i++) {
     Ast::Parameter *param = model.getParameter(i);
-    libsbml::Parameter *sbml_param = sbml_model->createParameter();
+    LIBSBML_CPP_NAMESPACE_QUALIFIER Parameter *sbml_param = sbml_model->createParameter();
     processParameter(param, sbml_param);
     if (param->hasValue()) { processInitialValue(param, sbml_model, model); }
     if (param->hasRule()) { processRule(param, sbml_model, model); }
@@ -216,7 +216,7 @@ Writer::processParameters(Ast::Model &model, libsbml::Model *sbml_model)
 
 
 void
-Writer::processParameter(Ast::Parameter *param, libsbml::Parameter *sbml_param)
+Writer::processParameter(Ast::Parameter *param, LIBSBML_CPP_NAMESPACE_QUALIFIER Parameter *sbml_param)
 {
   sbml_param->setId(param->getIdentifier());
   if (param->hasName()) { sbml_param->setName(param->getName()); }
@@ -225,11 +225,11 @@ Writer::processParameter(Ast::Parameter *param, libsbml::Parameter *sbml_param)
 
 
 void
-Writer::processCompartments(Ast::Model &model, libsbml::Model *sbml_model)
+Writer::processCompartments(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model)
 {
   for (size_t i=0; i<model.numCompartments(); i++) {
     Ast::Compartment *comp = model.getCompartment(i);
-    libsbml::Compartment *sbml_comp = sbml_model->createCompartment();
+    LIBSBML_CPP_NAMESPACE_QUALIFIER Compartment *sbml_comp = sbml_model->createCompartment();
     processCompartment(comp, sbml_comp);
     if (comp->hasValue()) { processInitialValue(comp, sbml_model, model); }
     if (comp->hasRule())  { processRule(comp, sbml_model, model); }
@@ -241,7 +241,7 @@ Writer::processCompartments(Ast::Model &model, libsbml::Model *sbml_model)
 
 
 void
-Writer::processCompartment(Ast::Compartment *comp, libsbml::Compartment *sbml_comp)
+Writer::processCompartment(Ast::Compartment *comp, LIBSBML_CPP_NAMESPACE_QUALIFIER Compartment *sbml_comp)
 {
   // Set ID,
   sbml_comp->setId(comp->getIdentifier());
@@ -260,11 +260,11 @@ Writer::processCompartment(Ast::Compartment *comp, libsbml::Compartment *sbml_co
 
 
 void
-Writer::processSpeciesList(Ast::Model &model, libsbml::Model *sbml_model)
+Writer::processSpeciesList(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model)
 {
   for (size_t i=0; i<model.numSpecies(); i++) {
     Ast::Species *species = model.getSpecies(i);
-    libsbml::Species *sbml_species = sbml_model->createSpecies();
+    LIBSBML_CPP_NAMESPACE_QUALIFIER Species *sbml_species = sbml_model->createSpecies();
     processSpecies(species, sbml_species);
 
     sbml_species->setCompartment(species->getCompartment()->getIdentifier());
@@ -276,7 +276,7 @@ Writer::processSpeciesList(Ast::Model &model, libsbml::Model *sbml_model)
 
 
 void
-Writer::processSpecies(Ast::Species *species, libsbml::Species *sbml_species)
+Writer::processSpecies(Ast::Species *species, LIBSBML_CPP_NAMESPACE_QUALIFIER Species *sbml_species)
 {
   sbml_species->setId(species->getIdentifier());
   if (species->hasName()) {sbml_species->setName(species->getName()); }
@@ -286,44 +286,44 @@ Writer::processSpecies(Ast::Species *species, libsbml::Species *sbml_species)
 
 
 void
-Writer::processReactions(Ast::Model &model, libsbml::Model *sbml_model)
+Writer::processReactions(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model)
 {
   for (size_t i=0; i<model.numReactions(); i++) {
     Ast::Reaction *reac = model.getReaction(i);
-    libsbml::Reaction *sbml_reac = sbml_model->createReaction();
+    LIBSBML_CPP_NAMESPACE_QUALIFIER Reaction *sbml_reac = sbml_model->createReaction();
     processReaction(reac, sbml_reac, model);
   }
 }
 
 void
-Writer::processReaction(Ast::Reaction *reac, libsbml::Reaction *sbml_reac, Ast::Model &model)
+Writer::processReaction(Ast::Reaction *reac, LIBSBML_CPP_NAMESPACE_QUALIFIER Reaction *sbml_reac, Ast::Model &model)
 {
   // Process reactants:
   for (Ast::Reaction::iterator item = reac->reacBegin(); item != reac->reacEnd(); item++) {
-    libsbml::SpeciesReference *sbml_r = sbml_reac->createReactant();
+    LIBSBML_CPP_NAMESPACE_QUALIFIER SpeciesReference *sbml_r = sbml_reac->createReactant();
     sbml_r->setSpecies(item->first->getIdentifier());
-    libsbml::StoichiometryMath *sbml_r_m = sbml_r->createStoichiometryMath();
+    LIBSBML_CPP_NAMESPACE_QUALIFIER StoichiometryMath *sbml_r_m = sbml_r->createStoichiometryMath();
     sbml_r_m->setMath(processExpression(item->second, model));
   }
   // Process products:
   for (Ast::Reaction::iterator item = reac->prodBegin(); item != reac->prodEnd(); item++) {
-    libsbml::SpeciesReference *sbml_p = sbml_reac->createProduct();
+    LIBSBML_CPP_NAMESPACE_QUALIFIER SpeciesReference *sbml_p = sbml_reac->createProduct();
     sbml_p->setSpecies(item->first->getIdentifier());
-    libsbml::StoichiometryMath *sbml_p_m = sbml_p->createStoichiometryMath();
+    LIBSBML_CPP_NAMESPACE_QUALIFIER StoichiometryMath *sbml_p_m = sbml_p->createStoichiometryMath();
     sbml_p_m->setMath(processExpression(item->second, model));
   }
   // Process modifiers:
   for (Ast::Reaction::mod_iterator item = reac->modBegin(); item != reac->modEnd(); item++) {
-    libsbml::ModifierSpeciesReference *sbml_r = sbml_reac->createModifier();
+    LIBSBML_CPP_NAMESPACE_QUALIFIER ModifierSpeciesReference *sbml_r = sbml_reac->createModifier();
     sbml_r->setSpecies((*item)->getIdentifier());
   }
   // process kinetic law:
-  libsbml::KineticLaw *sbml_law = sbml_reac->createKineticLaw();
+  LIBSBML_CPP_NAMESPACE_QUALIFIER KineticLaw *sbml_law = sbml_reac->createKineticLaw();
   processKineticLaw(reac->getKineticLaw(), sbml_law, model);
 }
 
 void
-Writer::processKineticLaw(Ast::KineticLaw *law, libsbml::KineticLaw *sbml_law, Ast::Model &model)
+Writer::processKineticLaw(Ast::KineticLaw *law, LIBSBML_CPP_NAMESPACE_QUALIFIER KineticLaw *sbml_law, Ast::Model &model)
 {
   // Handle local paramerers:
   for (Ast::KineticLaw::iterator item=law->begin(); item != law->end(); item++) {
@@ -335,7 +335,7 @@ Writer::processKineticLaw(Ast::KineticLaw *law, libsbml::KineticLaw *sbml_law, A
     }
 
     Ast::Parameter *param = static_cast<Ast::Parameter *>(*item);
-    libsbml::LocalParameter *sbml_param = sbml_law->createLocalParameter();
+    LIBSBML_CPP_NAMESPACE_QUALIFIER LocalParameter *sbml_param = sbml_law->createLocalParameter();
     sbml_param->setId(param->getIdentifier());
     if (param->hasName()) {sbml_param->setName(param->getName()); }
     if (! hasDefaultUnit(param, model)) {
@@ -365,25 +365,25 @@ Writer::processKineticLaw(Ast::KineticLaw *law, libsbml::KineticLaw *sbml_law, A
 
 void
 Writer::processInitialValue(
-  Ast::VariableDefinition *var, libsbml::Model *sbml_model, Ast::Model &model)
+  Ast::VariableDefinition *var, LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model, Ast::Model &model)
 {
-  libsbml::InitialAssignment *init = sbml_model->createInitialAssignment();
+  LIBSBML_CPP_NAMESPACE_QUALIFIER InitialAssignment *init = sbml_model->createInitialAssignment();
   init->setSymbol(var->getIdentifier());
   init->setMath(processExpression(var->getValue(), model));
 }
 
 
 void
-Writer::processRule(Ast::VariableDefinition *var, libsbml::Model *sbml_model, Ast::Model &model)
+Writer::processRule(Ast::VariableDefinition *var, LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model, Ast::Model &model)
 {
   if (Ast::Node::isAssignmentRule(var->getRule())) {
     Ast::AssignmentRule *rule = static_cast<Ast::AssignmentRule *>(var->getRule());
-    libsbml::AssignmentRule *sbml_rule = sbml_model->createAssignmentRule();
+    LIBSBML_CPP_NAMESPACE_QUALIFIER AssignmentRule *sbml_rule = sbml_model->createAssignmentRule();
     sbml_rule->setVariable(var->getIdentifier());
     sbml_rule->setMath(processExpression(rule->getRule(), model));
   } else if (Ast::Node::isRateRule(var->getRule())) {
     Ast::RateRule * rule = static_cast<Ast::RateRule *>(var->getRule());
-    libsbml::RateRule *sbml_rule = sbml_model->createRateRule();
+    LIBSBML_CPP_NAMESPACE_QUALIFIER RateRule *sbml_rule = sbml_model->createRateRule();
     sbml_rule->setVariable(var->getIdentifier());
     sbml_rule->setMath(processExpression(rule->getRule(), model));
   } else {
@@ -432,7 +432,7 @@ Writer::getUnitIdentifier(Ast::VariableDefinition *var, Ast::Model &model)
 }
 
 
-libsbml::ASTNode *
+LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *
 Writer::processExpression(GiNaC::ex expression, Ast::Model &model)
 {
   return SBMLExpressionAssembler::process(expression, model);
@@ -448,7 +448,7 @@ SBMLExpressionAssembler::SBMLExpressionAssembler(Ast::Model &model) : _stack(), 
 void
 SBMLExpressionAssembler::visit(const GiNaC::numeric &value)
 {
-  _stack.push_back(new libsbml::ASTNode(libsbml::AST_REAL));
+  _stack.push_back(new LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode(LIBSBML_CPP_NAMESPACE_QUALIFIER AST_REAL));
   _stack.back()->setValue(value.to_double());
 }
 
@@ -456,9 +456,9 @@ void
 SBMLExpressionAssembler::visit(const GiNaC::symbol &symbol)
 {
   if (_model.getTime() == symbol) {
-    _stack.push_back(new libsbml::ASTNode(libsbml::AST_NAME_TIME));
+    _stack.push_back(new LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode(LIBSBML_CPP_NAMESPACE_QUALIFIER AST_NAME_TIME));
   } else {
-    _stack.push_back(new libsbml::ASTNode(libsbml::AST_NAME));
+    _stack.push_back(new LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode(LIBSBML_CPP_NAMESPACE_QUALIFIER AST_NAME));
     _stack.back()->setName(symbol.get_name().c_str());
   }
 }
@@ -472,9 +472,9 @@ SBMLExpressionAssembler::visit(const GiNaC::add &sum)
 
   // Then assemble the sum on the stack:
   for (size_t i=1; i<sum.nops(); i++) {
-    libsbml::ASTNode *rhs = _stack.back(); _stack.pop_back();
-    libsbml::ASTNode *lhs = _stack.back(); _stack.pop_back();
-    _stack.push_back(new libsbml::ASTNode(libsbml::AST_PLUS));
+    LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *rhs = _stack.back(); _stack.pop_back();
+    LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *lhs = _stack.back(); _stack.pop_back();
+    _stack.push_back(new LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode(LIBSBML_CPP_NAMESPACE_QUALIFIER AST_PLUS));
     _stack.back()->addChild(lhs);
     _stack.back()->addChild(rhs);
   }
@@ -489,9 +489,9 @@ SBMLExpressionAssembler::visit(const GiNaC::mul &prod)
 
   // Then assemble the sum on the stack:
   for (size_t i=1; i<prod.nops(); i++) {
-    libsbml::ASTNode *rhs = _stack.back(); _stack.pop_back();
-    libsbml::ASTNode *lhs = _stack.back(); _stack.pop_back();
-    _stack.push_back(new libsbml::ASTNode(libsbml::AST_TIMES));
+    LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *rhs = _stack.back(); _stack.pop_back();
+    LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *lhs = _stack.back(); _stack.pop_back();
+    _stack.push_back(new LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode(LIBSBML_CPP_NAMESPACE_QUALIFIER AST_TIMES));
     _stack.back()->addChild(lhs);
     _stack.back()->addChild(rhs);
   }
@@ -505,9 +505,9 @@ SBMLExpressionAssembler::visit(const GiNaC::power &pow)
   // handle exponent
   pow.op(1).accept(*this);
 
-  libsbml::ASTNode *exponent = _stack.back(); _stack.pop_back();
-  libsbml::ASTNode *basis = _stack.back(); _stack.pop_back();
-  _stack.push_back(new libsbml::ASTNode(libsbml::AST_POWER));
+  LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *exponent = _stack.back(); _stack.pop_back();
+  LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *basis = _stack.back(); _stack.pop_back();
+  _stack.push_back(new LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode(LIBSBML_CPP_NAMESPACE_QUALIFIER AST_POWER));
   _stack.back()->addChild(basis); _stack.back()->addChild(exponent);
 }
 
@@ -515,18 +515,18 @@ void
 SBMLExpressionAssembler::visit(const GiNaC::function &function)
 {
   if (function.get_serial() == GiNaC::abs_SERIAL::serial) {
-    libsbml::ASTNode *arg = _stack.back(); _stack.pop_back();
-    _stack.push_back(new libsbml::ASTNode(libsbml::AST_FUNCTION_ABS));
+    LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *arg = _stack.back(); _stack.pop_back();
+    _stack.push_back(new LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode(LIBSBML_CPP_NAMESPACE_QUALIFIER AST_FUNCTION_ABS));
     _stack.back()->addChild(arg);
     return;
   } else if (function.get_serial() == GiNaC::exp_SERIAL::serial) {
-    libsbml::ASTNode *arg = _stack.back(); _stack.pop_back();
-    _stack.push_back(new libsbml::ASTNode(libsbml::AST_FUNCTION_EXP));
+    LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *arg = _stack.back(); _stack.pop_back();
+    _stack.push_back(new LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode(LIBSBML_CPP_NAMESPACE_QUALIFIER AST_FUNCTION_EXP));
     _stack.back()->addChild(arg);
     return;
   } else if (function.get_serial() == GiNaC::log_SERIAL::serial) {
-    libsbml::ASTNode *arg = _stack.back(); _stack.pop_back();
-    _stack.push_back(new libsbml::ASTNode(libsbml::AST_FUNCTION_LN));
+    LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *arg = _stack.back(); _stack.pop_back();
+    _stack.push_back(new LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode(LIBSBML_CPP_NAMESPACE_QUALIFIER AST_FUNCTION_LN));
     _stack.back()->addChild(arg);
     return;
   }
@@ -545,11 +545,11 @@ SBMLExpressionAssembler::visit(const GiNaC::basic &basic)
 }
 
 
-libsbml::ASTNode *
+LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *
 SBMLExpressionAssembler::process(GiNaC::ex expression, Ast::Model &model) {
   SBMLExpressionAssembler ass(model); expression.accept(ass);
 
-  libsbml::ASTNode *res = ass._stack.back(); ass._stack.pop_back();
+  LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *res = ass._stack.back(); ass._stack.pop_back();
   if (! res->isWellFormedASTNode()) {
     ExportError err;
     err << "Can not export expression: " << expression << " to SBML, something went wrong: "

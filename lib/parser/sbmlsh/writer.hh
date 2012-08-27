@@ -32,19 +32,19 @@ protected:
   /** Serializes the list of compartments. */
   static void processCompartments(Ast::Model &model, std::ostream &output);
   /** Serializes a single compartement. */
-  static void processCompartment(Ast::Compartment *comp, std::ostream &output);
+  static void processCompartment(Ast::Compartment *comp, const Ast::Model &model, std::ostream &output);
   /** Serializes the list of species definitions. */
   static void processSpeciesList(Ast::Model &model, std::ostream &output);
   /** Serializes a single species definition. */
-  static void processSpecies(Ast::Species *species, std::ostream &output);
+  static void processSpecies(Ast::Species *species, const Ast::Model &model, std::ostream &output);
   /** Serializes the list of parameter definitions. */
   static void processParameterList(Ast::Model &model, std::ostream &output);
   /** Serializes a single parameter definition. */
-  static void processParameter(Ast::Parameter *param, std::ostream &output);
+  static void processParameter(Ast::Parameter *param, const Ast::Model &model, std::ostream &output);
   /** Serializes the list of rules. */
   static void processRuleList(Ast::Model &model, std::ostream &output);
   /** Serializes a single rule. */
-  static void processRule(Ast::VariableDefinition *var, std::ostream &output);
+  static void processRule(Ast::VariableDefinition *var, const Ast::Model &model, std::ostream &output);
   /** Serializes the list of reactions. */
   static void processReactionList(Ast::Model &model, std::ostream &output);
   /** Serializes a single reaction. */

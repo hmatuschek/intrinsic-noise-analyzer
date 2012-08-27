@@ -15,48 +15,49 @@ namespace Sbml {
 class Writer {
 public:
   /** Assembles a libsbml model from the given Ast::Model. */
-  static libsbml::Model *processModel(Ast::Model &model, libsbml::SBMLDocument *sbml_doc);
+  static LIBSBML_CPP_NAMESPACE_QUALIFIER Model *processModel(
+    Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIER SBMLDocument *sbml_doc);
 
 protected:
   /** Translates the list unit definitions. */
-  static void processUnitDefinitions(Ast::Model &model, libsbml::Model *sbml_model);
+  static void processUnitDefinitions(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model);
   /** Translates a single unit definition. */
-  static void processUnitDefinition(const Ast::Unit &unit, libsbml::UnitDefinition *sbml_unit_def);
+  static void processUnitDefinition(const Ast::Unit &unit, LIBSBML_CPP_NAMESPACE_QUALIFIER UnitDefinition *sbml_unit_def);
   /** Translates a ScaledBaseUnit. */
-  static void processUnit(const Ast::ScaledBaseUnit &unit, libsbml::UnitDefinition *sbml_unit_def);
+  static void processUnit(const Ast::ScaledBaseUnit &unit, LIBSBML_CPP_NAMESPACE_QUALIFIER UnitDefinition *sbml_unit_def);
   /** Translates the list of function definitions. */
-  static void processFunctionDefinitions(Ast::Model &model, libsbml::Model *sbml_model);
+  static void processFunctionDefinitions(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model);
   /** Translates a single function definition. */
   static void processFunctionDefinition(
-    Ast::FunctionDefinition *func, libsbml::FunctionDefinition *sbml_func, Ast::Model &model);
+    Ast::FunctionDefinition *func, LIBSBML_CPP_NAMESPACE_QUALIFIER FunctionDefinition *sbml_func, Ast::Model &model);
   /** Translates the list of parameters. */
-  static void processParameters(Ast::Model &model, libsbml::Model *sbml_model);
+  static void processParameters(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model);
   /** Translates a single parameter definition. */
-  static void processParameter(Ast::Parameter *param, libsbml::Parameter *sbml_param);
+  static void processParameter(Ast::Parameter *param, LIBSBML_CPP_NAMESPACE_QUALIFIER Parameter *sbml_param);
   /** Translates the list of compartment definitions. */
-  static void processCompartments(Ast::Model &mode, libsbml::Model *sbml_model);
+  static void processCompartments(Ast::Model &mode, LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model);
   /** Translates a single compartment definition. */
-  static void processCompartment(Ast::Compartment *comp, libsbml::Compartment *sbml_comp);
+  static void processCompartment(Ast::Compartment *comp, LIBSBML_CPP_NAMESPACE_QUALIFIER Compartment *sbml_comp);
   /** Translates the list of species definitions. */
-  static void processSpeciesList(Ast::Model &model, libsbml::Model *sbml_model);
+  static void processSpeciesList(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model);
   /** Translates a single species definition. */
-  static void processSpecies(Ast::Species *species, libsbml::Species *sbml_species);
+  static void processSpecies(Ast::Species *species, LIBSBML_CPP_NAMESPACE_QUALIFIER Species *sbml_species);
   /** Translates the list of reactions. */
-  static void processReactions(Ast::Model &model, libsbml::Model *sbml_model);
+  static void processReactions(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model);
   /** Translates a single reaction. */
-  static void processReaction(Ast::Reaction *reac, libsbml::Reaction *sbml_reac, Ast::Model &model);
+  static void processReaction(Ast::Reaction *reac, LIBSBML_CPP_NAMESPACE_QUALIFIER Reaction *sbml_reac, Ast::Model &model);
   /** Translates a kinetic law. */
-  static void processKineticLaw(Ast::KineticLaw *law, libsbml::KineticLaw *sbml_law, Ast::Model &model);
+  static void processKineticLaw(Ast::KineticLaw *law, LIBSBML_CPP_NAMESPACE_QUALIFIER KineticLaw *sbml_law, Ast::Model &model);
   /** Creates a initial value definition for a variable. */
-  static void processInitialValue(Ast::VariableDefinition *var, libsbml::Model *sbml_model, Ast::Model &model);
+  static void processInitialValue(Ast::VariableDefinition *var, LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model, Ast::Model &model);
   /** Creates a rule for a variable. */
-  static void processRule(Ast::VariableDefinition *var, libsbml::Model *sbml_model, Ast::Model &model);
+  static void processRule(Ast::VariableDefinition *var, LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model, Ast::Model &model);
   /** Helper function to test if a variable has its default unit. */
   static bool hasDefaultUnit(Ast::VariableDefinition *var, Ast::Model &model);
   /** Returns the identifier of the unit definition of a variable. */
   static std::string getUnitIdentifier(Ast::VariableDefinition *var, Ast::Model &model);
   /** Translates a GiNaC expression. */
-  static libsbml::ASTNode *processExpression(GiNaC::ex, Ast::Model &model);
+  static LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *processExpression(GiNaC::ex, Ast::Model &model);
 };
 
 
@@ -68,7 +69,7 @@ class SBMLExpressionAssembler :
 {
 protected:
   /** A stack of sub-expressions. */
-  std::list<libsbml::ASTNode *> _stack;
+  std::list<LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *> _stack;
   /** The Ast::Model, used to identify special symbols. */
   Ast::Model &_model;
 
@@ -94,7 +95,7 @@ public:
 
 public:
   /** Translates a GiNaC expression into an SBML expression. */
-  static libsbml::ASTNode *process(GiNaC::ex expression, Ast::Model &model);
+  static LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *process(GiNaC::ex expression, Ast::Model &model);
 };
 
 

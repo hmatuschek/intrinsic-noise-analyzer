@@ -1,7 +1,7 @@
 #include "sbmlsh.hh"
 #include <exception.hh>
 #include "parser/sbmlsh/parser.hh"
-#include "parser/sbmlsh/exporter.hh"
+#include "parser/sbmlsh/writer.hh"
 
 #include <fstream>
 
