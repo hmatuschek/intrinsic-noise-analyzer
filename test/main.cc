@@ -54,8 +54,8 @@ int main(int argc, char *argv[])
   }
 
   // Assemble logger:
-  Utils::Logger::get().addHandler(
-        new Utils::TextMessageHandler(std::cerr, Utils::Message::INFO));
+  /*Utils::Logger::get().addHandler(
+        new Utils::TextMessageHandler(std::cerr, Utils::Message::INFO));*/
 
   // Construct test-runner
   TestRunner runner(std::cout);

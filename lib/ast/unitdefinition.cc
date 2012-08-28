@@ -767,7 +767,7 @@ ScaledBaseUnit::baseUnitByName(const std::string &name) {
 
 bool
 ScaledBaseUnit::isBaseUnitName(const std::string &name) {
-  return ScaledBaseUnit::_name_to_unit.end() == ScaledBaseUnit::_name_to_unit.find(name);
+  return ScaledBaseUnit::_name_to_unit.end() != ScaledBaseUnit::_name_to_unit.find(name);
 }
 
 

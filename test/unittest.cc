@@ -423,13 +423,13 @@ TestRunner::operator ()()
         this->stream << "   reason: " << fail.what() << std::endl;
         tests_failed++;
       }
-      /*catch (std::exception &err)
+      catch (std::exception &err)
       {
         this->stream << " exception" << std::endl;
         this->stream << "   what(): " << err.what() << std::endl;
-        //this->printTraceBack();
+        this->printTraceBack();
         tests_error++;
-      }*/
+      }
     }
 
     this->stream << std::endl;

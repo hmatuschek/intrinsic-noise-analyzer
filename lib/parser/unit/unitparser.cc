@@ -178,7 +178,7 @@ UnitParser::processBaseUnit(Fluc::Parser::ConcreteSyntaxTree &node, Parser::Lexe
     return processUnit(node[0][1], lexer);
   }
 
-  return Ast::Unit();
+  throw InternalError("Unknown alternative in processBaseUnit()!");
 }
 
 
