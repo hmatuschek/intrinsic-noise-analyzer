@@ -129,6 +129,14 @@ UnitParser::write(const Ast::Unit &unit, std::ostream &output)
 }
 
 
+std::string
+UnitParser::write(const Ast::Unit &unit) {
+  std::stringstream buffer;
+  UnitParser::write(unit, buffer);
+  return buffer.str();
+}
+
+
 Ast::Unit
 UnitParser::processUnit(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer) {
   // Unit := BaseUnit [(("*"|"/") Unit)];

@@ -1,6 +1,7 @@
 #include "specieslist.hh"
 #include "parser/parser.hh"
 #include "parser/expr/writer.hh"
+#include "parser/unit/unitparser.hh"
 #include "exception.hh"
 #include "utils/logger.hh"
 #include "referencecounter.hh"
@@ -32,7 +33,7 @@ SpeciesList::flags(const QModelIndex &index) const
   if (int(this->_model->numSpecies()) <= index.row()) { return Qt::NoItemFlags; }
 
   if (1==index.column() || 2==index.column() ||
-      5==index.column() || 6==index.column()) {
+      5==index.column() || 3==index.column()) {
     flags |= Qt::ItemIsEditable;
   }
 
@@ -61,7 +62,6 @@ SpeciesList::data(const QModelIndex &index, int role) const
   case 3: return _getUnit(spec, role);
   case 4: return _getConstFlag(spec, role);
   case 5: return _getCompartment(spec, role);
-  //case 6: return _getRule(spec, role);
   default: break;
   }
 
@@ -89,6 +89,10 @@ SpeciesList::setData(const QModelIndex &index, const QVariant &value, int role)
     if (_updateInitialValue(species, value)) { emit dataChanged(index, index); return true; }
     break;
 
+  case 3:
+    if (_updateUnit(species, value)) { emit dataChanged(index, index); return true; }
+    break;
+
   case 4:
     if (_updateConstFlag(species, value)) { emit dataChanged(index, index); return true; }
     break;
@@ -96,10 +100,6 @@ SpeciesList::setData(const QModelIndex &index, const QVariant &value, int role)
   case 5:
     if (_updateCompartment(species, value)) { emit dataChanged(index, index); return true; }
     break;
-
-/*  case 6:
-    if (_updateRule(species, value)) { emit dataChanged(index, index); return true; }
-    break; */
 
   default: break;
   }
@@ -223,10 +223,29 @@ SpeciesList::_updateInitialValue(Fluc::Ast::Species *species, const QVariant &va
 QVariant
 SpeciesList::_getUnit(Fluc::Ast::Species *species, int role) const
 {
-  if ((Qt::DecorationRole != role)) { return QVariant(); }
+  if ((Qt::DecorationRole != role) && (Qt::EditRole != role)) { return QVariant(); }
 
-  UnitRenderer renderer(species->getUnit());
-  return renderer.toPixmap();
+  // If decoration role -> return pixmap of rendered unit:
+  if (Qt::DecorationRole == role) {
+    UnitRenderer renderer(species->getUnit());
+    return renderer.toPixmap();
+  }
+
+  // Otherwise (edit) return string representation of unit:
+  return Fluc::Parser::Unit::UnitParser::write(species->getUnit()).c_str();
+}
+
+bool
+SpeciesList::_updateUnit(Fluc::Ast::Species *species, const QVariant &value)
+{
+  // Try to parse the unit from string:
+  try {
+    Fluc::Ast::Unit unit = Fluc::Parser::Unit::UnitParser::parse(value.toString().toStdString());
+    species->setUnit(unit);
+  } catch (const Fluc::Parser::ParserError &err) {
+    return false;
+  }
+  return true;
 }
 
 

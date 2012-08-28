@@ -22,6 +22,9 @@ public:
 
   /** Serializes a unit into the given stream. */
   static void write(const Ast::Unit &unit, std::ostream &output);
+  /** Serializes a unit as a string and returns it. */
+  static std::string write(const Ast::Unit &unit);
+
 
 protected:
   /** Hidden constructor. */
