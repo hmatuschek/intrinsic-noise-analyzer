@@ -14,7 +14,7 @@ double roundRange(double num, int n) {
     double d = std::ceil(std::log10(num < 0 ? -num: num));
     int power = n - (int) d;
 
-    double magnitude = std::pow(10, power);
+    double magnitude = std::pow(10.0, power);
     long shifted = std::floor(num*magnitude+0.5);
     return shifted/magnitude;
 }
@@ -133,10 +133,7 @@ LinearMapFunction::LinearMapFunction(const Range &range, const RangePolicy &poli
 void
 LinearMapFunction::updateRange(const Range &range)
 {
-  // Determine precision (-1 relative to order of magnitude of values)
-  double prec = std::ceil(std::log(range.delta())/std::log(10))-1;
-
-  // Round to that pecision
+  // Round to pecision of 2
   double rmin = roundRange(range.min(),2);
   double rmax = roundRange(range.max(),2);
 

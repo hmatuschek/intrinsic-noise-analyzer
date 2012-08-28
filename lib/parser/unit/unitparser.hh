@@ -5,8 +5,13 @@
 #include "parser/lexer.hh"
 #include "parser/production.hh"
 
+namespace Fluc {
+namespace Parser {
+namespace Unit {
 
-/** This class assembles a unit from its textual representation. */
+
+/** This class assembles a unit from its textual representation.
+ * @todo Maybe move that into lib/parser. */
 class UnitParser
 {
 public:
@@ -15,6 +20,8 @@ public:
   /** Parses and assembles a unit from the text in the given stream. */
   static Fluc::Ast::Unit parse(std::istream &unit);
 
+  /** Serializes a unit into the given stream. */
+  static void write(const Ast::Unit &unit, std::ostream &output);
 
 protected:
   /** Hidden constructor. */
@@ -27,8 +34,10 @@ protected:
 
 
 private:
-  /** Maps base unit identifier to numeric base unit IDs. */
-  std::map<std::string, Fluc::Ast::ScaledBaseUnit> _unit_table;
+  /** Tiny helper function to convert a string into a value. */
+  template <typename Scalar> static Scalar asValue(const std::string &text) {
+    std::stringstream buffer(text); Scalar value; buffer >> value; return value;
+  }
 
 
 protected:
@@ -37,14 +46,14 @@ protected:
   public:
     typedef enum {
       UNIT_TOKEN = Fluc::Parser::Token::FIRST_USER_DEFINED, ///< An identifier for base units.
-      FLOAT_TOKEN,   ///< A floating point number.
+      FLOAT_TOKEN,   ///< A signed floating point number including exponent
       INTEGER_TOKEN, ///< A Signed integer token.
-      EXP_TOKEN,     ///< 'e'|'E'
       TIMES_TOKEN,   ///< "*"
       DIVIDE_TOKEN,  ///< "/"
-      POW_TOKEN,     ///< "**" | "^"
+      POW_TOKEN,     ///< "^" | "**"
       LPAR_TOKEN,    ///< "("
-      RPAR_TOKEN     ///< ")"
+      RPAR_TOKEN,    ///< ")"
+      WHITESPACE_TOKEN ///< Any whitespace
     } TokenId;
 
   public:
@@ -111,20 +120,6 @@ protected:
     static BaseUnitProduction *instance;
   };
 
-  /** ScaleProduction = FLOAT [('e'|'E') INTEGER] */
-  class ScaleProduction : public Fluc::Parser::Production
-  {
-  public:
-    /** Factory method. */
-    static Fluc::Parser::Production *factory();
-
-  protected:
-    /** Hidden constructor, use factory method. */
-    ScaleProduction();
-    /** Singleton instance. */
-    static ScaleProduction *instance;
-  };
-
   /** PowProduction := UnitId [('**'|'^') INTEGER] */
   class PowProduction : public Fluc::Parser::Production {
   public:
@@ -138,6 +133,11 @@ protected:
     static PowProduction *instance;
   };
 };
+
+
+}
+}
+}
 
 
 

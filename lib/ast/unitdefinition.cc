@@ -6,6 +6,18 @@
 using namespace Fluc;
 using namespace Fluc::Ast;
 
+/** Tiny helper class to create static maps. Just ignore. */
+template <typename T, typename U> class create_map
+{
+private:
+  std::map<T, U> m_map;
+public:
+  create_map(const T& key, const U& val){ m_map[key] = val; }
+  create_map<T, U>& operator()(const T& key, const U& val) { m_map[key] = val; return *this; }
+  operator std::map<T, U>() { return m_map; }
+};
+
+
 
 /* ********************************************************************************************* *
  * Implementation of UnitDefinition
@@ -742,3 +754,53 @@ ScaledBaseUnit::baseUnitRepr(ScaledBaseUnit::BaseUnit base)
 
   return "?";
 }
+
+std::string
+ScaledBaseUnit::baseUnitName(ScaledBaseUnit::BaseUnit base) {
+  return ScaledBaseUnit::_unit_to_name[base];
+}
+
+ScaledBaseUnit::BaseUnit
+ScaledBaseUnit::baseUnitByName(const std::string &name) {
+  return ScaledBaseUnit::_name_to_unit[name];
+}
+
+bool
+ScaledBaseUnit::isBaseUnitName(const std::string &name) {
+  return ScaledBaseUnit::_name_to_unit.end() == ScaledBaseUnit::_name_to_unit.find(name);
+}
+
+
+std::map<ScaledBaseUnit::BaseUnit, std::string> ScaledBaseUnit::_unit_to_name = \
+create_map<ScaledBaseUnit::BaseUnit, std::string> (ScaledBaseUnit::AMPERE, "ampere") \
+(ScaledBaseUnit::BECQUEREL, "becquerel") (ScaledBaseUnit::CANDELA, "candela") \
+(ScaledBaseUnit::COULOMB, "coulomb") (ScaledBaseUnit::DIMENSIONLESS, "dimensionless") \
+(ScaledBaseUnit::FARAD, "farad") (ScaledBaseUnit::GRAM, "gram") (ScaledBaseUnit::KATAL, "katal") \
+(ScaledBaseUnit::GRAY, "gray") (ScaledBaseUnit::KELVIN, "kelvin") (ScaledBaseUnit::HENRY, "henry") \
+(ScaledBaseUnit::KILOGRAM, "kilogram") (ScaledBaseUnit::HERTZ, "herz") \
+(ScaledBaseUnit::LITRE, "litre") (ScaledBaseUnit::ITEM, "item") (ScaledBaseUnit::LUMEN, "lumen") \
+(ScaledBaseUnit::JOULE, "joule") (ScaledBaseUnit::LUX, "lux") (ScaledBaseUnit::METRE, "metre") \
+(ScaledBaseUnit::MOLE, "mole") (ScaledBaseUnit::NEWTON, "newton") (ScaledBaseUnit::OHM, "ohm") \
+(ScaledBaseUnit::PASCAL, "pascal") (ScaledBaseUnit::RADIAN, "radian") \
+(ScaledBaseUnit::SECOND, "second") (ScaledBaseUnit::WATT, "watt") \
+(ScaledBaseUnit::SIEMENS, "siemens") (ScaledBaseUnit::WEBER, "weber") \
+(ScaledBaseUnit::SIEVERT, "sievert") (ScaledBaseUnit::STERADIAN, "steradian") \
+(ScaledBaseUnit::TESLA, "tesla") (ScaledBaseUnit::VOLT, "volt");
+
+
+std::map<std::string, ScaledBaseUnit::BaseUnit> ScaledBaseUnit::_name_to_unit = \
+create_map<std::string, ScaledBaseUnit::BaseUnit> ("ampere", ScaledBaseUnit::AMPERE) \
+("becquerel", ScaledBaseUnit::BECQUEREL) ("candela", ScaledBaseUnit::CANDELA) \
+("coulomb", ScaledBaseUnit::COULOMB) ("dimensionless", ScaledBaseUnit::DIMENSIONLESS) \
+("farad", ScaledBaseUnit::FARAD) ("gram", ScaledBaseUnit::GRAM) ("katal", ScaledBaseUnit::KATAL) \
+("gray", ScaledBaseUnit::GRAY) ("kelvin", ScaledBaseUnit::KELVIN) ("henry", ScaledBaseUnit::HENRY) \
+("kilogram", ScaledBaseUnit::KILOGRAM) ("herz", ScaledBaseUnit::HERTZ) \
+("litre", ScaledBaseUnit::LITRE) ("item", ScaledBaseUnit::ITEM) ("lumen", ScaledBaseUnit::LUMEN) \
+("joule", ScaledBaseUnit::JOULE) ("lux", ScaledBaseUnit::LUX) ("metre", ScaledBaseUnit::METRE) \
+("mole", ScaledBaseUnit::MOLE) ("newton", ScaledBaseUnit::NEWTON) ("ohm", ScaledBaseUnit::OHM) \
+("pascal", ScaledBaseUnit::PASCAL) ("radian", ScaledBaseUnit::RADIAN) \
+("second", ScaledBaseUnit::SECOND) ("watt", ScaledBaseUnit::WATT) \
+("siemens", ScaledBaseUnit::SIEMENS) ("weber", ScaledBaseUnit::WEBER) \
+("sievert", ScaledBaseUnit::SIEVERT) ("steradian", ScaledBaseUnit::STERADIAN) \
+("tesla", ScaledBaseUnit::TESLA) ("volt", ScaledBaseUnit::VOLT);
+

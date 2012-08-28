@@ -97,7 +97,7 @@ SET(ina_app_views_HEADERS
     views/sbmlsheditordialog.hh)
 
 SET(ina_app_tinytex_SOURCES
-    tinytex/tinytex.cc tinytex/formula.cc tinytex/ginac2formula.cc tinytex/unitparser.cc)
+    tinytex/tinytex.cc tinytex/formula.cc tinytex/ginac2formula.cc)
 SET(ina_app_tinytex_HEADERS)
 
 SET(ina_app_SOURCES
