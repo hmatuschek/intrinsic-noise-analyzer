@@ -109,7 +109,7 @@ protected:
     static UnitProduction *instance;
   };
 
-  /** BaseUnit := (Scale | Pow | "(" Unit ")") */
+  /** BaseUnit := (INT | FLOAT | Pow | "(" Unit ")") */
   class BaseUnitProduction : Fluc::Parser::AltProduction
   {
   public:

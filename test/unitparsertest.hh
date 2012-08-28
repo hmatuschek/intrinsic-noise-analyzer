@@ -9,6 +9,7 @@ class UnitParserTest : public UnitTest::TestCase
 {
 public:
   void testSimple();
+  void testPow();
 
 public:
   static UnitTest::TestSuite *suite();

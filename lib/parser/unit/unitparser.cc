@@ -8,8 +8,8 @@ UnitParser::Lexer::Lexer(std::istream &input)
   : Parser::Lexer(input)
 {
   addRule(new Fluc::Parser::IdentifierTokenRule(UNIT_TOKEN));
-  addRule(new UnitParser::FloatTokenRule(FLOAT_TOKEN));
   addRule(new UnitParser::IntegerTokenRule(INTEGER_TOKEN));
+  addRule(new UnitParser::FloatTokenRule(FLOAT_TOKEN));
   addRule(new Fluc::Parser::KeyWordTokenRule(TIMES_TOKEN, "*"));
   addRule(new Fluc::Parser::KeyWordTokenRule(DIVIDE_TOKEN, "/"));
   addRule(new Fluc::Parser::KeyWordTokenRule(POW_TOKEN, "^"));
@@ -17,6 +17,11 @@ UnitParser::Lexer::Lexer(std::istream &input)
   addRule(new Fluc::Parser::KeyWordTokenRule(LPAR_TOKEN, "("));
   addRule(new Fluc::Parser::KeyWordTokenRule(RPAR_TOKEN, ")"));
   addRule(new Fluc::Parser::WhiteSpaceTokenRule(WHITESPACE_TOKEN));
+
+  addTokenName(UNIT_TOKEN, "unit-name"); addTokenName(FLOAT_TOKEN, "FLOAT");
+  addTokenName(INTEGER_TOKEN, "INTEGER"); addTokenName(TIMES_TOKEN, "*");
+  addTokenName(DIVIDE_TOKEN, "/"); addTokenName(POW_TOKEN, "^");
+  addTokenName(LPAR_TOKEN, "("); addTokenName(RPAR_TOKEN, ")");
 
   addIgnoredToken(WHITESPACE_TOKEN);
 }
@@ -158,8 +163,12 @@ UnitParser::processUnit(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer) 
 Ast::Unit
 UnitParser::processBaseUnit(Fluc::Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer)
 {
-  // BaseUnit := (FLOAT | Pow | "(" Unit ")")
+  // BaseUnit := (INT | FLOAT | Pow | "(" Unit ")")
   if (0 == node.getAltIdx()) {
+    std::string value = lexer[node[0].getTokenIdx()].getValue();
+    return Fluc::Ast::ScaledBaseUnit(
+          Fluc::Ast::ScaledBaseUnit::DIMENSIONLESS, UnitParser::asValue<double>(value), 0, 1);
+  } else if (1 == node.getAltIdx()) {
     std::string value = lexer[node[0].getTokenIdx()].getValue();
     size_t split_idx = value.find_first_of("eE");
     double mult = 1.0; int scale = 0;
@@ -173,9 +182,9 @@ UnitParser::processBaseUnit(Fluc::Parser::ConcreteSyntaxTree &node, Parser::Lexe
 
     return Fluc::Ast::ScaledBaseUnit(
           Fluc::Ast::ScaledBaseUnit::DIMENSIONLESS, mult, scale, 1);
-  } else if (1 == node.getAltIdx()) {
-    return processPow(node[0], lexer);
   } else if (2 == node.getAltIdx()) {
+    return processPow(node[0], lexer);
+  } else if (3 == node.getAltIdx()) {
     return processUnit(node[0][1], lexer);
   }
 
@@ -191,7 +200,7 @@ UnitParser::processPow(Fluc::Parser::ConcreteSyntaxTree &node, Fluc::Parser::Lex
   // Get unit ide and try to resolve it to a scaled base unit:
   std::string baseunit = lexer[node[0].getTokenIdx()].getValue();
   if (! Ast::ScaledBaseUnit::isBaseUnitName(baseunit)) {
-    SymbolError err;
+    Parser::ParserError err(lexer[node[0].getTokenIdx()].getLine());
     err << "Can not resolve unit name " << baseunit;
     throw err;
   }
@@ -202,9 +211,8 @@ UnitParser::processPow(Fluc::Parser::ConcreteSyntaxTree &node, Fluc::Parser::Lex
   if (node[1].matched()) {
     // Parse exponent:
     int exponent = UnitParser::asValue<int>(lexer[node[1][0][1].getTokenIdx()].getValue());
-    // Modify unit:
-    unit = Ast::ScaledBaseUnit(unit.getBaseUnit(), unit.getMultiplier(), unit.getScale(),
-                               unit.getExponent()*exponent);
+    // Modify unit, note that this only works since multiplier is 1 and scale 0!!!
+    unit = Ast::ScaledBaseUnit(unit.getBaseUnit(), unit.getMultiplier(), unit.getScale(), exponent);
   }
 
   return unit;
@@ -265,6 +273,7 @@ UnitParser::BaseUnitProduction::BaseUnitProduction()
 {
   BaseUnitProduction::instance = this;
 
+  alternatives.push_back(new Fluc::Parser::TokenProduction(UnitParser::Lexer::INTEGER_TOKEN));
   alternatives.push_back(new Fluc::Parser::TokenProduction(UnitParser::Lexer::FLOAT_TOKEN));
   alternatives.push_back(PowProduction::factory());
   alternatives.push_back(
