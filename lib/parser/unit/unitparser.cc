@@ -116,12 +116,13 @@ UnitParser::write(const Ast::Unit &unit, std::ostream &output)
     Ast::ScaledBaseUnit::BaseUnit bunit = iter->first; int exp = iter->second;
     buffer.str(""); buffer << Ast::ScaledBaseUnit::baseUnitName(bunit);
     if (1 != exp) { buffer << "^" << exp; }
+    factors.push_back(buffer.str());
   }
 
   // Serialize
   if (factors.size() > 0) {
     std::list<std::string>::iterator factor = factors.begin();
-    output << *factor;
+    output << *factor; factor++;
     for(;factors.end() != factor; factor++) {
       output << "*" << *factor;
     }
