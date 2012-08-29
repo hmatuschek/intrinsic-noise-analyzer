@@ -92,3 +92,11 @@ UnitRenderer::toPixmap()
 
   return *_pixmap;
 }
+
+
+QPixmap
+UnitRenderer::toPixmap(const Fluc::Ast::Unit &unit)
+{
+  UnitRenderer renderer(unit); return renderer.toPixmap();
+}
+

@@ -40,7 +40,14 @@ public:
   /** Returns the number of columns. */
   int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
+  /** Returns a weak reference to the kinetic law instance. */
   Fluc::Ast::KineticLaw &kineticLaw();
+
+  /** Add a new "empty" parameter to the kinetic law. */
+  void addParameter();
+  /** Removes the i-th parameter. */
+  void remParameter(int idx);
+
 
 private:
   /** Retruns the identifier of the local paramter. */
@@ -53,8 +60,11 @@ private:
   QVariant _getInitialValue(Fluc::Ast::Parameter *param, int role) const;
   /** Updates the initial value of the paramter. */
   bool _updateInitialValue(Fluc::Ast::Parameter *param, const QVariant &value);
+  /** Retunrs the unit (rendered). */
   QVariant _getUnit(Fluc::Ast::Parameter *param, int role) const;
+  /** Returns the const flag of the parameter. Should always be constant. */
   QVariant _getConstFlag(Fluc::Ast::Parameter *param, int role) const;
+  /** Returns the const flag of the parameter. Should always be constant. */
   bool _updateConstFlag(Fluc::Ast::Parameter *param, const QVariant &value);
 };
 

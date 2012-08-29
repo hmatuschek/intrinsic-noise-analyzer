@@ -20,6 +20,9 @@ public:
 
   const QPixmap &toPixmap();
 
+public:
+  static QPixmap toPixmap(const Fluc::Ast::Unit &unit);
+
 private:
   MathFormula *_formula;
   QPixmap *_pixmap;

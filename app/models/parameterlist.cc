@@ -5,6 +5,8 @@
 #include "../tinytex/tinytex.hh"
 #include "../tinytex/ginac2formula.hh"
 #include "../views/unitrenderer.hh"
+#include "referencecounter.hh"
+#include <QMessageBox>
 
 
 ParameterList::ParameterList(Fluc::Ast::Model *model, QObject *parent)
@@ -45,22 +47,20 @@ ParameterList::setData(const QModelIndex &index, const QVariant &value, int role
   // Get paramter for index (row):
   Fluc::Ast::Parameter *param = _model->getParameter(index.row());
 
-  if (1 == index.column()) {
-    if (_updateName(param, value)) {
-      emit dataChanged(index, index);
-      return true;
-    }
-  } else if (2 == index.column()) {
-    if (_updateInitialValue(param, value)) {
-      emit dataChanged(index, index);
-      return true;
-    }
-    // Signal data changed:
-    emit dataChanged(index, index);
-    return true;
+  // Dispatch
+  bool success = false;
+  switch (index.column()) {
+  case 1: success = _updateName(param, value); break;
+  case 2: success = _updateInitialValue(param, value); break;
+  case 4: success = _updateConstFlag(param, value); break;
+  default: break;
   }
 
-  return false;
+  // Emmit data-changed on success:
+  if (success) { emit dataChanged(index, index); }
+
+  // done.
+  return success;
 }
 
 
@@ -119,6 +119,46 @@ ParameterList::columnCount(const QModelIndex &parent) const {
 Fluc::Ast::Model &
 ParameterList::model() {
   return *_model;
+}
+
+void
+ParameterList::addParameter() {
+  // Get new, unique identifier for parameter
+  std::string identifier = _model->getNewIdentifier("parameter");
+  // Get index of new parameter
+  int new_idx = _model->numParameters();
+
+  // Add paramter to model and update table
+  beginInsertRows(QModelIndex(), new_idx, new_idx);
+  _model->addDefinition(
+        new Fluc::Ast::Parameter(identifier, 0, Fluc::Ast::Unit::dimensionless(), true));
+  endInsertRows();
+}
+
+
+void
+ParameterList::remParameter(int row)
+{
+  // skip invalid rows
+  if ((0 > row) || (row >= int(_model->numParameters()))) { return; }
+
+  // Get param and count its references:
+  Fluc::Ast::Parameter *parameter = _model->getParameter(row);
+  ReferenceCounter refs(parameter); _model->accept(refs);
+
+  // Show message id
+  if (0 < refs.references().size()) {
+    QMessageBox::information(
+          0, tr("Can not delete parameter."),
+          tr("Can not delete parameter as it is referenced %1").arg(
+            QStringList(refs.references()).join(", ")));
+    return;
+  }
+
+  // otherwise, remove parameter
+  beginRemoveRows(QModelIndex(), row, row);
+  _model->remDefinition(parameter);
+  endRemoveRows();
 }
 
 

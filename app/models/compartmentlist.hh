@@ -62,6 +62,8 @@ private:
 
   /** Returns the unit of the compartment. */
   QVariant _getUnit(Fluc::Ast::Compartment *compartment, int role) const;
+  /** Updates the unit of the compartment. */
+  bool _updateUnit(Fluc::Ast::Compartment *compartment, const QVariant &value);
 
   /** Returns the const flag of the compartment. */
   QVariant _getConstFlag(Fluc::Ast::Compartment *compartment, int role) const;

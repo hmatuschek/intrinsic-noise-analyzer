@@ -1,5 +1,6 @@
 #include "compartmentlist.hh"
 #include "parser/parser.hh"
+#include "parser/unit/unitparser.hh"
 #include "exception.hh"
 #include "utils/logger.hh"
 #include "referencecounter.hh"
@@ -28,7 +29,8 @@ CompartmentList::flags(const QModelIndex &index) const
   if (rowCount() <= index.row()) return Qt::NoItemFlags;
 
   // Mark only column 1 & 2 editable
-  if ( (1 == index.column()) || (2 == index.column()) ) item_flags |= Qt::ItemIsEditable;
+  if ( (1 == index.column()) || (2 == index.column()) || (3 == index.column()) )
+    item_flags |= Qt::ItemIsEditable;
 
   return item_flags;
 }
@@ -73,6 +75,7 @@ CompartmentList::setData(const QModelIndex &index, const QVariant &value, int ro
   switch(index.column()) {
   case 1: success = _updateName(comp, value); break;
   case 2: success = _updateInitValue(comp, value); break;
+  case 3: success = _updateUnit(comp, value); break;
   case 4: success = _updateConstFlag(comp, value); break;
   default: break;
   }
@@ -191,12 +194,31 @@ CompartmentList::_updateInitValue(Fluc::Ast::Compartment *compartment, const QVa
 QVariant
 CompartmentList::_getUnit(Fluc::Ast::Compartment *compartment, int role) const
 {
-  if ((Qt::DecorationRole != role)) { return QVariant(); }
+  if ((Qt::DecorationRole != role) || (Qt::EditRole == role)) { return QVariant(); }
 
-  UnitRenderer renderer(compartment->getUnit());
-  return renderer.toPixmap();
+  // Return rendered unit for decoration role:
+  if (Qt::DecorationRole == role) {
+    UnitRenderer renderer(compartment->getUnit());
+    return renderer.toPixmap();
+  }
+
+  // Return serialized unit for edit role:
+  return Fluc::Parser::Unit::UnitParser::write(compartment->getUnit()).c_str();
 }
 
+
+bool
+CompartmentList::_updateUnit(Fluc::Ast::Compartment *compartment, const QVariant &value)
+{
+  // Try to parse the unit from string:
+  try {
+    Fluc::Ast::Unit unit = Fluc::Parser::Unit::UnitParser::parse(value.toString().toStdString());
+    compartment->setUnit(unit);
+  } catch (const Fluc::Parser::ParserError &err) {
+    return false;
+  }
+  return true;
+}
 
 QVariant
 CompartmentList::_getConstFlag(Fluc::Ast::Compartment *compartment, int role) const

@@ -3,10 +3,11 @@
 #include "parser/parser.hh"
 #include "utils/logger.hh"
 #include "exception.hh"
+#include "referencecounter.hh"
 #include "../tinytex/tinytex.hh"
 #include "../tinytex/ginac2formula.hh"
 #include "../views/unitrenderer.hh"
-
+#include <QMessageBox>
 
 
 
@@ -71,25 +72,17 @@ ReactionParameterList::setData(const QModelIndex &index, const QVariant &value, 
   // Get paramter for index (row):
   Fluc::Ast::Parameter *param = _kinetic_law->getParameter(index.row());
 
-  // Handle names
-  if (1 == index.column()) {
-    if (_updateName(param, value)) {
-      emit dataChanged(index, index);
-      return true;
-    }
-    return false;
+  // Dispatch...
+  bool success = false;
+  switch (index.column()) {
+  case 1: success = _updateName(param, value); break;
+  case 2: success = _updateInitialValue(param, value); break;
+  default: break;
   }
 
-  // Handle initial values:
-  if (2 == index.column()) {
-    if (_updateInitialValue(param, value)) {
-      emit dataChanged(index, index);
-      return true;
-    }
-    return false;
-  }
-
-  return false;
+  // Emit dataChanged on success
+  if (success) { emit dataChanged(index, index); }
+  return success;
 }
 
 
@@ -127,6 +120,47 @@ ReactionParameterList::columnCount(const QModelIndex &parent) const {
 Fluc::Ast::KineticLaw &
 ReactionParameterList::kineticLaw() {
   return *_kinetic_law;
+}
+
+
+void
+ReactionParameterList::addParameter()
+{
+  // get new unique identifier
+  std::string identifier = _kinetic_law->getNewIdentifier("parameter");
+
+  // Signal views and add sepecies:
+  int new_idx = _kinetic_law->numParameters();
+  beginInsertRows(QModelIndex(), new_idx, new_idx);
+  _kinetic_law->addDefinition(
+        new Fluc::Ast::Parameter(identifier, 0, Fluc::Ast::Unit::dimensionless(), true));
+  endInsertRows();
+}
+
+
+void
+ReactionParameterList::remParameter(int row)
+{
+  // skip invalid rows
+  if ((0 > row) || (row >= int(_kinetic_law->numParameters()))) { return; }
+
+  // Get param and count its references:
+  Fluc::Ast::Parameter *parameter = _kinetic_law->getParameter(row);
+  ReferenceCounter refs(parameter); _kinetic_law->accept(refs);
+
+  // Show message id
+  if (0 < refs.references().size()) {
+    QMessageBox::information(
+          0, tr("Can not delete parameter."),
+          tr("Can not delete parameter as it is referenced %1").arg(
+            QStringList(refs.references()).join(", ")));
+    return;
+  }
+
+  // otherwise, remove parameter
+  beginRemoveRows(QModelIndex(), row, row);
+  _kinetic_law->remDefinition(parameter);
+  endRemoveRows();
 }
 
 

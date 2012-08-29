@@ -14,6 +14,7 @@
 #include "modelcopytest.hh"
 #include "constantfoldertest.hh"
 #include "conservationanalysistest.hh"
+#include "unitparsertest.hh"
 #include "benchmark.hh"
 
 #include "utils/option_parser.hh"
@@ -53,8 +54,8 @@ int main(int argc, char *argv[])
   }
 
   // Assemble logger:
-  Utils::Logger::get().addHandler(
-        new Utils::TextMessageHandler(std::cerr, Utils::Message::INFO));
+  /*Utils::Logger::get().addHandler(
+        new Utils::TextMessageHandler(std::cerr, Utils::Message::INFO));*/
 
   // Construct test-runner
   TestRunner runner(std::cout);
@@ -82,6 +83,8 @@ int main(int argc, char *argv[])
     runner.addSuite(ConstantFolderTest::suite());
   if (0 == skipped_tests.count("ConservationAnalysis"))
     runner.addSuite(ConservationAnalysisTest::suite());
+  if (0 == skipped_tests.count("UnitParser"))
+    runner.addSuite(UnitParserTest::suite());
   if (0 == skipped_tests.count("Benchmark"))
     runner.addSuite(Benchmark::suite());
 

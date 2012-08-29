@@ -57,6 +57,8 @@ private:
 
   /** Internal function to get the unit. */
   QVariant _getUnit(Fluc::Ast::Species *species, int role) const;
+  /** Updates the unit of the species. */
+  bool _updateUnit(Fluc::Ast::Species *species, const QVariant &value);
 
   /** Internal function to get const flag. */
   QVariant _getConstFlag(Fluc::Ast::Species *species, int role) const;

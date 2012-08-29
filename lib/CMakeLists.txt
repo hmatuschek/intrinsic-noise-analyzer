@@ -22,13 +22,13 @@ SET(libina_ast_SOURCES
     ast/definition.cc ast/functiondefinition.cc ast/node.cc ast/rule.cc
     ast/reaction.cc ast/scope.cc ast/variabledefinition.cc ast/constraint.cc ast/module.cc
     ast/evaluate.cc ast/unitdefinition.cc ast/species.cc ast/compartment.cc ast/parameter.cc
-    ast/model.cc ast/converter.cc ast/visitor.cc)
+    ast/model.cc ast/converter.cc ast/visitor.cc ast/unitconverter.cc)
 SET(libina_ast_HEADERS
     ast/ast.hh
     ast/definition.hh ast/functiondefinition.hh ast/node.hh ast/rule.hh
     ast/reaction.hh ast/scope.hh ast/variabledefinition.hh ast/constraint.hh ast/module.hh
     ast/evaluate.hh ast/unitdefinition.hh ast/species.hh ast/compartment.hh ast/parameter.hh
-    ast/model.hh ast/converter.hh ast/visitor.hh)
+    ast/model.hh ast/converter.hh ast/visitor.hh ast/unitconverter.hh)
 
 SET(libina_ast_trafo_SOURCES
     ast/trafo/walker.cc ast/trafo/pass.cc ast/trafo/constantfolder.cc ast/trafo/dump.cc
@@ -67,16 +67,23 @@ SET(libina_expr_parser_HEADERS parser/expr/expr.hh
     parser/expr/lexer.hh parser/expr/parser.hh parser/expr/productions.hh parser/expr/assembler.hh
     parser/expr/writer.hh)
 
+SET(libina_unit_parser_SOURCES
+    parser/unit/unitparser.cc)
+SET(libina_unit_parser_HEADERS
+    parser/unit/unitparser.hh)
+
 SET(libina_parser_SOURCES
     parser/automata.cc parser/lexer.cc parser/production.cc parser/exception.cc
     ${libina_sbmlsh_parser_SOURCES}
     ${libina_sbml_parser_SOURCES}
-    ${libina_expr_parser_SOURCES})
+    ${libina_expr_parser_SOURCES}
+    ${libina_unit_parser_SOURCES})
 SET(libina_parser_HEADERS
     parser/automata.hh parser/lexer.hh parser/production.hh parser/exception.hh
     ${libina_sbmlsh_parser_HEADERS}
     ${libina_sbml_parser_HEADERS}
-    ${libina_expr_parser_HEADERS})
+    ${libina_expr_parser_HEADERS}
+    ${libina_unit_parser_HEADERS})
 
 SET(libina_utils_SOURCES
     utils/exception.cc utils/unittest.cc utils/option_parser.cc utils/cputime.cc utils/logger.cc)

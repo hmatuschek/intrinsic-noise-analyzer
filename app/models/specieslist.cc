@@ -1,6 +1,7 @@
 #include "specieslist.hh"
 #include "parser/parser.hh"
 #include "parser/expr/writer.hh"
+#include "parser/unit/unitparser.hh"
 #include "exception.hh"
 #include "utils/logger.hh"
 #include "referencecounter.hh"
@@ -31,8 +32,7 @@ SpeciesList::flags(const QModelIndex &index) const
   if (! index.isValid() || columnCount() <= index.column()) { return Qt::NoItemFlags; }
   if (int(this->_model->numSpecies()) <= index.row()) { return Qt::NoItemFlags; }
 
-  if (1==index.column() || 2==index.column() ||
-      5==index.column() || 6==index.column()) {
+  if (1==index.column() || 2==index.column() || 5==index.column()) {
     flags |= Qt::ItemIsEditable;
   }
 
@@ -61,7 +61,6 @@ SpeciesList::data(const QModelIndex &index, int role) const
   case 3: return _getUnit(spec, role);
   case 4: return _getConstFlag(spec, role);
   case 5: return _getCompartment(spec, role);
-  case 6: return _getRule(spec, role);
   default: break;
   }
 
@@ -89,16 +88,16 @@ SpeciesList::setData(const QModelIndex &index, const QVariant &value, int role)
     if (_updateInitialValue(species, value)) { emit dataChanged(index, index); return true; }
     break;
 
+  case 3:
+    if (_updateUnit(species, value)) { emit dataChanged(index, index); return true; }
+    break;
+
   case 4:
     if (_updateConstFlag(species, value)) { emit dataChanged(index, index); return true; }
     break;
 
   case 5:
     if (_updateCompartment(species, value)) { emit dataChanged(index, index); return true; }
-    break;
-
-  case 6:
-    if (_updateRule(species, value)) { emit dataChanged(index, index); return true; }
     break;
 
   default: break;
@@ -122,7 +121,7 @@ SpeciesList::headerData(int section, Qt::Orientation orientation, int role) cons
   case 3: return QVariant("Unit");
   case 4: return QVariant("Constant");
   case 5: return QVariant("Compartment");
-  case 6: return QVariant("Rule");
+  //case 6: return QVariant("Rule");
   default: break;
   }
 
@@ -131,7 +130,7 @@ SpeciesList::headerData(int section, Qt::Orientation orientation, int role) cons
 
 
 int SpeciesList::rowCount(const QModelIndex &parent) const { return _model->numSpecies(); }
-int SpeciesList::columnCount(const QModelIndex &parent) const { return 7; }
+int SpeciesList::columnCount(const QModelIndex &parent) const { return 6; }
 
 Fluc::Ast::Model & SpeciesList::model() { return *_model; }
 
@@ -230,6 +229,13 @@ SpeciesList::_getUnit(Fluc::Ast::Species *species, int role) const
 }
 
 
+bool
+SpeciesList::_updateUnit(Fluc::Ast::Species *species, const QVariant &value)
+{
+  return false;
+}
+
+
 QVariant
 SpeciesList::_getConstFlag(Fluc::Ast::Species *species, int role) const
 {
@@ -253,10 +259,15 @@ SpeciesList::_updateConstFlag(Fluc::Ast::Species *species, const QVariant &value
 QVariant
 SpeciesList::_getCompartment(Fluc::Ast::Species *species, int role) const
 {
-  if ( (Qt::DisplayRole != role) && (Qt::EditRole != role)) { return QVariant(); }
+  if ( (Qt::DecorationRole != role) && (Qt::EditRole != role)) { return QVariant(); }
+
   QString id = species->getCompartment()->getIdentifier().c_str();
-  if ( (Qt::DisplayRole == role) && species->getCompartment()->hasName()) {
-    return QString("%1 (%2)").arg(species->getCompartment()->getName().c_str(), id);
+
+  if ( Qt::DecorationRole == role ) {
+    if (species->getCompartment()->hasName()) {
+      return TinyTex::toPixmap(species->getCompartment()->getName());
+    }
+    return TinyTex::toPixmap(id.toStdString());
   }
   return id;
 }
