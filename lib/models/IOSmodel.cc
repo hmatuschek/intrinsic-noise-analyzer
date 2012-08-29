@@ -265,9 +265,9 @@ IOSmodel::postConstructor()
     Eigen::VectorXex EMREiosUpdate = ((this->JacobianM*iosemreVariables)+Delta);
 
     // fold conservation constants
-    this->foldConservationConstants(conserved_cycles,ThirdMomentUpdate);
-    this->foldConservationConstants(conserved_cycles,iosUpdate);
-    this->foldConservationConstants(conserved_cycles,EMREiosUpdate);
+    this->foldConservationConstants(ThirdMomentUpdate);
+    this->foldConservationConstants(iosUpdate);
+    this->foldConservationConstants(EMREiosUpdate);
 
     // and attach to update vector
     this->updateVector.head(dimold) = LNAupdate;
@@ -441,8 +441,8 @@ IOSmodel::fluxAnalysis(const Eigen::VectorXd &state, Eigen::VectorXd &flux, Eige
     Eigen::MatrixXd rateHessian(this->numReactions(),this->dimCOV);
     Eigen::MatrixXd rate1Jac(this->rates_gradient.rows(),this->rates_gradient.cols());
 
-    this->foldConservationConstants(conserved_cycles,rates_gradient);
-    this->foldConservationConstants(conserved_cycles,rate_corrections);
+    this->foldConservationConstants(rates_gradient);
+    this->foldConservationConstants(rate_corrections);
 
     for(int i=0;i<this->rates_gradient.rows();i++)
     {

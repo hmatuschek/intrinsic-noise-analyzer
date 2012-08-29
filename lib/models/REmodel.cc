@@ -21,13 +21,13 @@ ConservationConstantCollector::ConservationConstantCollector(SSEBaseModel &model
     //this->Omega = model.PermutationM*this->Omega;
     //this->ICsPermuted = model.PermutationM*ICs;
 
-//    for(size_t i=0;i<model.numSpecies();i++)
-//        for(size_t j=0;j<model.numIndSpecies();j++)
-//            this->LinkCMatrixNumeric(i,j) = GiNaC::ex_to<GiNaC::numeric>( model.LinkCMatrix(i,j) ).to_double();
+    for(size_t i=0;i<model.numSpecies();i++)
+        for(size_t j=0;j<model.numIndSpecies();j++)
+            this->LinkCMatrixNumeric(i,j) = GiNaC::ex_to<GiNaC::numeric>( model.getLinkCMatrix()(i,j) ).to_double();
 
-//    for(size_t i=0;i<model.numDepSpecies();i++)
-//        for(size_t j=0;j<model.numIndSpecies();j++)
-//            this->Link0CMatrixNumeric(i,j) = GiNaC::ex_to<GiNaC::numeric>( model.Link0CMatrix(i,j) ).to_double();
+    for(size_t i=0;i<model.numDepSpecies();i++)
+        for(size_t j=0;j<model.numIndSpecies();j++)
+            this->Link0CMatrixNumeric(i,j) = GiNaC::ex_to<GiNaC::numeric>( model.getLink0CMatrix()(i,j) ).to_double();
 
 //    /**
 //    * @todo the omega business is ugly and workaround at the moment
@@ -59,7 +59,7 @@ ConservationConstantCollector::getInitialState(Eigen::VectorXd &x)
 void
 ConservationConstantCollector::getConservedCycles(Eigen::VectorXd &cycles)
 {
-  cycles = this->conserved_cycles;
+  //cycles = this->conserved_cycles;
 }
 
 void
@@ -75,8 +75,8 @@ REmodel::postConstructor()
     // and combine to update vector
     this->updateVector = this->REs;
 
-    this->foldConservationConstants(conserved_cycles,this->updateVector);
-    this->foldConservationConstants(conserved_cycles,this->JacobianM);
+    this->foldConservationConstants(this->updateVector);
+    this->foldConservationConstants(this->JacobianM);
 
 }
 
@@ -89,26 +89,19 @@ REmodel::REmodel(const Ast::Model &model)
 void
 REmodel::fullState(const Eigen::VectorXd &state, Eigen::VectorXd &full_state)
 {
-  // full state vector permutated
-  Eigen::VectorXd Species_all(this->numSpecies());
+
+  // make space
+  full_state.resize(this->numSpecies());
+  full_state.head(this->numIndSpecies()) = state.head(this->numIndSpecies());
 
   if(this->numDepSpecies()>0){
+      full_state.tail(this->numDepSpecies()) =
+              Eigen::ex2double(this->conserved_cycles)
+              + this->Link0CMatrixNumeric*state.head(this->numIndSpecies());
+  }
 
-    // reconstruct dependent species
-    Eigen::VectorXd Species_dep;
-    Species_dep=this->conserved_cycles+this->Link0CMatrixNumeric*state.head(this->numIndSpecies());
-
-    // fill full state
-    Species_all<<state.head(this->numIndSpecies()),Species_dep;
-
-   }
-   else
-   {
-     Species_all<<state.head(this->numIndSpecies());
-   }
-
-   // restore original order and return
-   full_state = (this->PermutationM.transpose())*Species_all;
+  // restore original order and return
+  full_state = (this->PermutationM.transpose())*full_state;
 
 }
 
@@ -128,7 +121,7 @@ REmodel::getFlux(const Eigen::VectorXd &state, Eigen::VectorXd &flux)
     for(size_t s=0; s<this->numIndSpecies(); s++)
         subtab.insert( std::pair<GiNaC::ex,GiNaC::ex>( getREvar(s), state(s) ) );
 
-    this->foldConservationConstants(conserved_cycles,this->rate_expressions);
+    this->foldConservationConstants(this->rate_expressions);
 
     for(size_t i=0; i<numReactions();i++)
         flux(i)=GiNaC::ex_to<GiNaC::numeric>(constants.apply(this->rate_expressions(i)).subs(subtab)).to_double();
@@ -145,11 +138,11 @@ REmodel::getDimension()
 }
 
 
-void
-REmodel::getOmega(Eigen::VectorXd &om)
-{
-  om = this->Omega;
-}
+//void
+//REmodel::getOmega(Eigen::VectorXd &om)
+//{
+//  om = this->Omega;
+//}
 
 void
 REmodel::getInitialState(Eigen::VectorXd &x)

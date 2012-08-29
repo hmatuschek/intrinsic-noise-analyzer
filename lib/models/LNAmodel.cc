@@ -97,8 +97,8 @@ LNAmodel::postConstructor()
     EMREUpdate = ((this->JacobianM*emreVariables)+Delta);
 
     // fold constants
-    this->foldConservationConstants(conserved_cycles,CovUpdate);
-    this->foldConservationConstants(conserved_cycles,EMREUpdate);
+    this->foldConservationConstants(CovUpdate);
+    this->foldConservationConstants(EMREUpdate);
 
     // and combine to update vector
     this->updateVector.head(this->numIndSpecies())=REupdate;
@@ -204,7 +204,7 @@ LNAmodel::fluxAnalysis(const Eigen::VectorXd &state, Eigen::VectorXd &flux,
     Eigen::MatrixXd rateJac(this->rates_gradient.rows(),this->rates_gradient.cols());
     Eigen::MatrixXd rateHessian(this->numReactions(),this->dimCOV);
 
-    this->foldConservationConstants(conserved_cycles,rates_gradient);
+    this->foldConservationConstants(rates_gradient);
     for(int i=0;i<this->rates_gradient.rows();i++)
     {
       for(int j=0;j<this->rates_gradient.cols();j++)

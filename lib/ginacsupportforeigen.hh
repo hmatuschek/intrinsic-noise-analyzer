@@ -73,6 +73,22 @@ namespace Eigen{
      */
     typedef Eigen::Matrix< GiNaC::ex , Dynamic, 1> VectorXex;
 
+    /**
+    * Simple inline evaluator
+    */
+    inline Eigen::MatrixXd ex2double(const Eigen::MatrixXex &In)
+    {
+
+        Eigen::MatrixXd Out(In.rows(),In.cols());
+        // ... and fold all constants due to conservation laws
+        for (int i=0; i<In.rows(); i++)
+        for (int j=0; j<In.cols(); j++)
+            Out(i,j)=GiNaC::ex_to<GiNaC::numeric>(In(i,j)).to_double();
+
+        return Out;
+
+    }
+
 }
 
 #endif // EIGENGINACSUPPORT_HH

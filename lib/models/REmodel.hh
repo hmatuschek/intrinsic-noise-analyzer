@@ -122,7 +122,7 @@ public:
   /**
    * Evaluate the full Omega (volumes) vector.
    */
-  void getOmega(Eigen::VectorXd &om);
+//  void getOmega(Eigen::VectorXd &om);
 
   double foldVertex(std::list<int> lower, std::list<int> upper);
 
@@ -130,21 +130,6 @@ public:
    * Interface for the integrator: get initial state vector.
    */
   virtual void getInitialState(Eigen::VectorXd &x);
-
-  /**
-  * A method that folds all constants arising from conservation laws in a given expression
-  */
-  template<typename T>
-  void foldConservationConstants(const Eigen::VectorXd &conserved_cycles, Eigen::MatrixBase<T> &vec)
-
-  {
-
-      // ... and fold all constants due to conservation laws
-      for (int i=0; i<vec.rows(); i++)
-      for (int j=0; j<vec.cols(); j++)
-              vec(i,j)=vec(i,j).subs(this->substitutions);
-
-  }
 
 };
 

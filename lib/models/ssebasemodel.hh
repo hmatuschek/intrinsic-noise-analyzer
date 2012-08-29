@@ -8,7 +8,7 @@
 namespace Fluc {
 namespace Models {
 
-class ConservationConstants :
+class ConservationAnalysis:
     public BaseModel,
     public propensityExpansion,
     public ConservationAnalysisMixin
@@ -48,21 +48,27 @@ protected:
     /**
     * A method that generates a substituation table for all conservation laws arising from the model
     */
-    GiNaC::exmap getConservationConstants(const Eigen::VectorXd &conserved_cycles);
+    GiNaC::exmap getConservationConstants(const Eigen::VectorXex &conserved_cycles);
 
-
-public:
-
-    ConservationConstants(const Ast::Model &model);
-
+private:
 
     GiNaC::exmap substitutions;
 
+public:
+
+    ConservationAnalysis(const Ast::Model &model);
+
+    const Eigen::MatrixXex & getLink0CMatrix();
+
+    const Eigen::MatrixXex & getLinkCMatrix();
+
+    Eigen::MatrixXex getConservedCycles(const Eigen::VectorXd &ICs);
+
+    Eigen::VectorXex conserved_cycles;
+
+    Eigen::VectorXex Omega;
+
     Eigen::VectorXd ICsPermuted;
-
-    Eigen::VectorXd conserved_cycles;
-
-    Eigen::VectorXd Omega;
 
     Eigen::MatrixXd Link0CMatrixNumeric;
 
@@ -72,15 +78,13 @@ public:
     * A method that folds all constants arising from conservation laws in a given expression
     */
     template<typename T>
-    void foldConservationConstants(const Eigen::VectorXd &conserved_cycles, Eigen::MatrixBase<T> &vec)
+    void foldConservationConstants(Eigen::MatrixBase<T> &vec)
 
     {
-
         // ... and fold all constants due to conservation laws
         for (int i=0; i<vec.rows(); i++)
         for (int j=0; j<vec.cols(); j++)
                 vec(i,j)=vec(i,j).subs(this->substitutions);
-
     }
 
 };
@@ -93,7 +97,7 @@ public:
  * @ingroup sse
  */
 class SSEBaseModel :
-    public ConservationConstants
+    public ConservationAnalysis
 {
 
 protected:
