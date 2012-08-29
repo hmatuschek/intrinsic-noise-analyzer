@@ -20,9 +20,9 @@ protected:
   /** Holds a weak reference to the reaction. */
   Fluc::Ast::Reaction *_reaction;
   /** Hold an instance of the local paramter list of the kinetic law. */
-  ReactionParameterList *local_parameters;
+  ReactionParameterList *_local_parameters;
   /** Holds the display name of the reaction. */
-  QString itemLabel;
+  QString _itemLabel;
 
 public:
   /** Constructor. */

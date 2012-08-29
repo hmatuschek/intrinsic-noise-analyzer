@@ -44,8 +44,6 @@ SpeciesView::SpeciesView(SpeciesItem *species ,QWidget *parent) :
         2, new ExpressionDelegate(_species->species()->model(), _specTable));
   _specTable->setItemDelegateForColumn(
         5, new CompartmentDelegate(_species->species()->model(), _specTable));
-  /*_specTable->setItemDelegateForColumn(
-        6, new SpeciesRuleDelegate(_species->species()->model(), _specTable));*/
 
   // Assemble widget layout
   QHBoxLayout *header = new QHBoxLayout();

@@ -38,6 +38,11 @@ public:
   /** Returns a weak reference to the model instance. */
   Fluc::Ast::Model &model();
 
+  /** Adds a new paramter to the list of paramters. */
+  void addParameter();
+  /** Removes a parameter if it is not in use. */
+  void remParameter(int row);
+
 private:
   /** Retunrs the identifier of the parameter. */
   QVariant _getIdentifier(Fluc::Ast::Parameter *param, int role) const;

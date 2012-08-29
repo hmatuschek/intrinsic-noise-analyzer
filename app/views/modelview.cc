@@ -13,14 +13,19 @@
 ModelView::ModelView(ModelItem *model_item, QWidget *parent)
   : QWidget(parent), _model(&(model_item->getModel()))
 {
+  // Basic layout
   this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
   this->setBackgroundRole(QPalette::Window);
 
-  QLabel *label = new QLabel(tr("Model Parameters"));
+  // label
+  QLabel *label = new QLabel(tr("Model %1").arg(_model->getName().c_str()));
   label->setFont(Application::getApp()->getH1Font());
   label->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
+  label->setAlignment(Qt::AlignRight);
 
+  // Unit box
   QGroupBox *unit_frame = new QGroupBox(tr("Units"));
+  unit_frame->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
   QFormLayout *unit_layout = new QFormLayout();
   unit_layout->addRow(tr("Substance unit"), new UnitEditor(_model->getDefaultSubstanceUnit()));
   unit_layout->addRow(tr("Volume unit"), new UnitEditor(_model->getDefaultVolumeUnit()));
@@ -29,9 +34,10 @@ ModelView::ModelView(ModelItem *model_item, QWidget *parent)
   unit_layout->addRow(tr("Time unit"), new UnitEditor(_model->getDefaultTimeUnit()));
   unit_frame->setLayout(unit_layout);
 
+  // Layout
   QVBoxLayout *layout = new QVBoxLayout();
-  layout->addWidget(label);
-  layout->addWidget(unit_frame);
+  layout->addWidget(label, 0);
+  layout->addWidget(unit_frame, 1);
   setLayout(layout);
 
   // Connect to "desroyed" signal of model_item to close view.

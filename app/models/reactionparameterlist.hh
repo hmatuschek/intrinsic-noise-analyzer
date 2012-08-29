@@ -43,6 +43,12 @@ public:
   /** Returns a weak reference to the kinetic law instance. */
   Fluc::Ast::KineticLaw &kineticLaw();
 
+  /** Add a new "empty" parameter to the kinetic law. */
+  void addParameter();
+  /** Removes the i-th parameter. */
+  void remParameter(int idx);
+
+
 private:
   /** Retruns the identifier of the local paramter. */
   QVariant _getIdentifier(Fluc::Ast::Parameter *param, int role) const;
