@@ -534,9 +534,9 @@ Unit::operator /(const Unit &other) const
 
 
 Unit
-Unit::dimensionless()
+Unit::dimensionless(double multiplier, int scale)
 {
-  return Unit();
+  return Unit(ScaledBaseUnit(ScaledBaseUnit::DIMENSIONLESS, multiplier, scale, 1));
 }
 
 

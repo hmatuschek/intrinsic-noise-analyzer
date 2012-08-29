@@ -45,22 +45,20 @@ ParameterList::setData(const QModelIndex &index, const QVariant &value, int role
   // Get paramter for index (row):
   Fluc::Ast::Parameter *param = _model->getParameter(index.row());
 
-  if (1 == index.column()) {
-    if (_updateName(param, value)) {
-      emit dataChanged(index, index);
-      return true;
-    }
-  } else if (2 == index.column()) {
-    if (_updateInitialValue(param, value)) {
-      emit dataChanged(index, index);
-      return true;
-    }
-    // Signal data changed:
-    emit dataChanged(index, index);
-    return true;
+  // Dispatch
+  bool success = false;
+  switch (index.column()) {
+  case 1: success = _updateName(param, value); break;
+  case 2: success = _updateInitialValue(param, value); break;
+  case 4: success = _updateConstFlag(param, value); break;
+  default: break;
   }
 
-  return false;
+  // Emmit data-changed on success:
+  if (success) { emit dataChanged(index, index); }
+
+  // done.
+  return success;
 }
 
 

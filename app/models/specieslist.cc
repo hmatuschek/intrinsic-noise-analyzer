@@ -32,8 +32,7 @@ SpeciesList::flags(const QModelIndex &index) const
   if (! index.isValid() || columnCount() <= index.column()) { return Qt::NoItemFlags; }
   if (int(this->_model->numSpecies()) <= index.row()) { return Qt::NoItemFlags; }
 
-  if (1==index.column() || 2==index.column() ||
-      5==index.column() || 3==index.column()) {
+  if (1==index.column() || 2==index.column() || 5==index.column()) {
     flags |= Qt::ItemIsEditable;
   }
 
@@ -223,29 +222,17 @@ SpeciesList::_updateInitialValue(Fluc::Ast::Species *species, const QVariant &va
 QVariant
 SpeciesList::_getUnit(Fluc::Ast::Species *species, int role) const
 {
-  if ((Qt::DecorationRole != role) && (Qt::EditRole != role)) { return QVariant(); }
+  if ((Qt::DecorationRole != role)) { return QVariant(); }
 
-  // If decoration role -> return pixmap of rendered unit:
-  if (Qt::DecorationRole == role) {
-    UnitRenderer renderer(species->getUnit());
-    return renderer.toPixmap();
-  }
-
-  // Otherwise (edit) return string representation of unit:
-  return Fluc::Parser::Unit::UnitParser::write(species->getUnit()).c_str();
+  UnitRenderer renderer(species->getUnit());
+  return renderer.toPixmap();
 }
+
 
 bool
 SpeciesList::_updateUnit(Fluc::Ast::Species *species, const QVariant &value)
 {
-  // Try to parse the unit from string:
-  try {
-    Fluc::Ast::Unit unit = Fluc::Parser::Unit::UnitParser::parse(value.toString().toStdString());
-    species->setUnit(unit);
-  } catch (const Fluc::Parser::ParserError &err) {
-    return false;
-  }
-  return true;
+  return false;
 }
 
 

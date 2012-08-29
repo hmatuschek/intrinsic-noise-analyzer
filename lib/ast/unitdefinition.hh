@@ -232,7 +232,7 @@ public:
 
 public:
   /** Constructs a dimensionless unit. */
-  static Unit dimensionless();
+  static Unit dimensionless(double multiplier=1.0, int scale=0);
 };
 
 

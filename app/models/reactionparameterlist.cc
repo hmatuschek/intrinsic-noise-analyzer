@@ -71,25 +71,17 @@ ReactionParameterList::setData(const QModelIndex &index, const QVariant &value, 
   // Get paramter for index (row):
   Fluc::Ast::Parameter *param = _kinetic_law->getParameter(index.row());
 
-  // Handle names
-  if (1 == index.column()) {
-    if (_updateName(param, value)) {
-      emit dataChanged(index, index);
-      return true;
-    }
-    return false;
+  // Dispatch...
+  bool success = false;
+  switch (index.column()) {
+  case 1: success = _updateName(param, value); break;
+  case 2: success = _updateInitialValue(param, value); break;
+  default: break;
   }
 
-  // Handle initial values:
-  if (2 == index.column()) {
-    if (_updateInitialValue(param, value)) {
-      emit dataChanged(index, index);
-      return true;
-    }
-    return false;
-  }
-
-  return false;
+  // Emit dataChanged on success
+  if (success) { emit dataChanged(index, index); }
+  return success;
 }
 
 

@@ -4,6 +4,8 @@
 #include "reactionsitem.hh"
 #include "compartmentsitem.hh"
 
+#include "../views/modelview.hh"
+
 #include <parser/parser.hh>
 
 using namespace Fluc;
@@ -91,4 +93,12 @@ const Fluc::Ast::Model &
 ModelItem::getModel() const
 {
   return *(this->base_model);
+}
+
+
+bool ModelItem::providesView() const { return true; }
+
+QWidget *
+ModelItem::createView() {
+  return new ModelView(this);
 }
