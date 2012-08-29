@@ -114,7 +114,7 @@ public:
 
   /**
    * Derives and compiles the Jacobian from the ODEs.
-   * If the Jacobian was allready compiled, this method does nothing.
+   * If the Jacobian was already compiled, this method does nothing.
    */
   void compileJacobian()
   {
@@ -127,7 +127,7 @@ public:
       for(it = sseModel.stateIndex.begin(); it != sseModel.stateIndex.end(); ++it)
       {
         for (size_t i=0; i<sseModel.getDimension(); i++)
-          jacobian(i,(*it).second) = sseModel.getUpdateVector()(i).diff((*it).first);
+          jacobian(i,(*it).second) = updateVector(i).diff((*it).first);
       }
     }
 

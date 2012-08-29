@@ -1,5 +1,6 @@
 #include "ssebasemodel.hh"
 
+
 using namespace Fluc;
 using namespace Fluc::Models;
 
@@ -9,7 +10,10 @@ ConservationConstants::ConservationConstants(const Ast::Model &model)
       ConservationAnalysisMixin((BaseModel &)(*this)),
       conservationConstants(this->numDepSpecies()),
       Link0CMatrix(this->numDepSpecies(),this->numIndSpecies()),
-      LinkCMatrix(this->numSpecies(),this->numIndSpecies())
+      LinkCMatrix(this->numSpecies(),this->numIndSpecies()),
+      Omega(this->numSpecies()),
+      Link0CMatrixNumeric(this->numDepSpecies(),this->numIndSpecies()),
+      LinkCMatrixNumeric(this->numSpecies(),this->numIndSpecies())
 {
 
     // get Omega vectors for dependent and independent species
@@ -42,17 +46,50 @@ ConservationConstants::ConservationConstants(const Ast::Model &model)
     Eigen::VectorXex dependence = conservationConstants + this->Link0CMatrix.cast<GiNaC::ex>()*ind_species;
 
     // generate substitution table to remove dependent species
-
-    GiNaC::exmap dependentSpecies;
     for (size_t s=0; s<this->numDepSpecies(); s++)
-        dependentSpecies.insert( std::pair<GiNaC::ex,GiNaC::ex>( dep_species(s), dependence(s) ) );
+        this->dependentSpecies.insert( std::pair<GiNaC::ex,GiNaC::ex>( dep_species(s), dependence(s) ) );
 
+
+    // Evaluate initial concentrations and evaluate volumes:
+    Ast::EvaluateInitialValue evICs(*this);
+    Eigen::VectorXd ICs(species.size());
+    for(size_t i=0; i<species.size();i++){
+       ICs(i)=evICs.evaluate(this->species[i]);
+       this->Omega(i)=evICs.evaluate(this->volumes(i));
+    }
+
+    //store in permutated base
+    this->Omega = this->PermutationM*this->Omega;
+    this->ICsPermuted = this->PermutationM*ICs;
+
+    //evaluate the link matrices
+    for(size_t i=0;i<this->numSpecies();i++)
+        for(size_t j=0;j<numIndSpecies();j++)
+            this->LinkCMatrixNumeric(i,j) = GiNaC::ex_to<GiNaC::numeric>( LinkCMatrix(i,j) ).to_double();
+
+    for(size_t i=0;i<numDepSpecies();i++)
+        for(size_t j=0;j<numIndSpecies();j++)
+            this->Link0CMatrixNumeric(i,j) = GiNaC::ex_to<GiNaC::numeric>( Link0CMatrix(i,j) ).to_double();
+
+    /**
+    * @todo the omega business is ugly and workaround at the moment
+    */
+
+    if(numDepSpecies()>0){
+        Eigen::VectorXd om_dep=this->Omega.tail(numDepSpecies());
+        // compute conserved cycles in permutated base and store in conserved_cycles
+        this->conserved_cycles = om_dep.asDiagonal().inverse()*conservation_matrix*(this->Omega.asDiagonal())*this->ICsPermuted;
+    }
+
+
+    // generate substitution table
+    substitutions = getConservationConstants(conserved_cycles);
 
 }
 
 
 GiNaC::exmap
-ConservationConstants::generateConservationConstantsTable(const Eigen::VectorXd &conserved_cycles)
+ConservationConstants::getConservationConstants(const Eigen::VectorXd &conserved_cycles)
 {
 
     // generate substitution table
@@ -64,6 +101,8 @@ ConservationConstants::generateConservationConstantsTable(const Eigen::VectorXd 
     return subs_table;
 
 }
+
+
 
 SSEBaseModel::SSEBaseModel(const Ast::Model &model)
   : ConservationConstants(model),

@@ -1,5 +1,6 @@
 #include "LNAmodel.hh"
 #include "ode/ode.hh"
+#include "trafo/constantfolder.hh"
 
 using namespace Fluc;
 using namespace Fluc::Models;
@@ -169,6 +170,10 @@ LNAmodel::fluxAnalysis(const Eigen::VectorXd &state, Eigen::VectorXd &flux,
 
 {
 
+
+    // collect all the values of constant parameters except variable parameters
+    Trafo::ConstantFolder constants(*this);
+
     fluxLNA.resize(this->numReactions(),this->numReactions());
 
     // reconstruct full concentration vector and covariances in original permutation order
@@ -203,9 +208,9 @@ LNAmodel::fluxAnalysis(const Eigen::VectorXd &state, Eigen::VectorXd &flux,
     for(int i=0;i<this->rates_gradient.rows();i++)
     {
       for(int j=0;j<this->rates_gradient.cols();j++)
-          rateJac(i,j)=GiNaC::ex_to<GiNaC::numeric>(rates_gradient(i,j).subs(subtab)).to_double();
+          rateJac(i,j)=GiNaC::ex_to<GiNaC::numeric>(constants.apply(rates_gradient(i,j)).subs(subtab)).to_double();
       for(int j=0;j<this->rates_hessian.cols();j++)
-          rateHessian(i,j)=GiNaC::ex_to<GiNaC::numeric>(rates_hessian(i,j).subs(subtab)).to_double();
+          rateHessian(i,j)=GiNaC::ex_to<GiNaC::numeric>(constants.apply(rates_hessian(i,j)).subs(subtab)).to_double();
     }
 
     fluxLNA = rateJac*covLNA*rateJac.transpose();

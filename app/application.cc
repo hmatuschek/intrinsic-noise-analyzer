@@ -54,14 +54,15 @@ Application::Application() :
   _selected_item = 0;
 
   // Assemble menu actions:
-  _importModel = new QAction(tr("Import model..."), this);
+  _importModel = new QAction(tr("Open model..."), this);
   _importModel->setEnabled(true);
-  _importModel->setStatusTip(tr("Imports a model description file."));
+  _importModel->setStatusTip(tr("Open a model description file"));
   _importModel->setShortcut(QKeySequence::Open);
 
   _exportModel = new QAction(tr("Export model..."), this);
   _exportModel->setEnabled(false);
-  _exportModel->setShortcut(QKeySequence::SaveAs);
+  _exportModel->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_E));
+  _exportModel->setStatusTip(tr("Export a model to a file"));
 
   _closeModel = new QAction(tr("Close model"), this);
   _closeModel->setEnabled(false);

@@ -1,4 +1,5 @@
 #include "IOSmodel.hh"
+#include "trafo/constantfolder.hh"
 
 using namespace Fluc;
 using namespace Fluc::Models;
@@ -385,6 +386,10 @@ IOSmodel::fluxAnalysis(const Eigen::VectorXd &state, Eigen::VectorXd &flux, Eige
 
 {
 
+
+    // collect all the values of constant parameters except variable parameters
+    Trafo::ConstantFolder constants(*this);
+
     fluxEMRE.resize(this->numReactions());
     fluxIOS.resize(this->numReactions(),this->numReactions());
 
@@ -443,12 +448,12 @@ IOSmodel::fluxAnalysis(const Eigen::VectorXd &state, Eigen::VectorXd &flux, Eige
     {
       for(int j=0;j<this->rates_gradient.cols();j++)
       {
-          rate1Jac(i,j)=GiNaC::ex_to<GiNaC::numeric>(rates_gradientO1(i,j).subs(subtab)).to_double();
-          rateJac(i,j)=GiNaC::ex_to<GiNaC::numeric>(rates_gradient(i,j).subs(subtab)).to_double();
+          rate1Jac(i,j)=GiNaC::ex_to<GiNaC::numeric>(constants.apply(rates_gradientO1(i,j)).subs(subtab)).to_double();
+          rateJac(i,j)=GiNaC::ex_to<GiNaC::numeric>(constants.apply(rates_gradient(i,j)).subs(subtab)).to_double();
       }
       for(int j=0;j<this->rates_hessian.cols();j++)
       {
-          rateHessian(i,j)=GiNaC::ex_to<GiNaC::numeric>(rates_hessian(i,j).subs(subtab)).to_double();
+          rateHessian(i,j)=GiNaC::ex_to<GiNaC::numeric>(constants.apply(rates_hessian(i,j)).subs(subtab)).to_double();
       }
     }
 
@@ -456,7 +461,7 @@ IOSmodel::fluxAnalysis(const Eigen::VectorXd &state, Eigen::VectorXd &flux, Eige
     fluxEMRE = rateJac*emre;
 
     for(size_t i=0;i<this->numReactions();i++)
-      fluxEMRE(i) += GiNaC::ex_to<GiNaC::numeric>(rate_corrections(i).subs(subtab)).to_double();
+      fluxEMRE(i) += GiNaC::ex_to<GiNaC::numeric>(constants.apply(rate_corrections(i)).subs(subtab)).to_double();
 
     for(size_t j=0; j<this->numReactions(); j++)
     {

@@ -64,17 +64,17 @@ MainWindow::createActions()
   // Define some actions for main menu:
   this->quitAct = new QAction(tr("&Quit"), this);
   this->quitAct->setShortcuts(QKeySequence::Quit);
-  this->quitAct->setStatusTip(tr("Quits the application."));
+  this->quitAct->setStatusTip(tr("Quit the application"));
 
   this->aboutAct = new QAction(tr("&About"), this);
   this->aboutAct->setMenuRole(QAction::AboutRole);
 
   this->onlineHelp = new QAction(tr("&Help"), this);
   this->onlineHelp->setShortcuts(QKeySequence::HelpContents);
-  this->onlineHelp->setStatusTip(tr("Opens the onlin-help."));
+  this->onlineHelp->setStatusTip(tr("Open the online-help"));
 
   this->showLogsAct = new QAction(tr("Show log"), this);
-  this->showLogsAct->setStatusTip(tr("Shows the log window."));
+  this->showLogsAct->setStatusTip(tr("Show the log window"));
 
   // Connect signals:
   connect(this->quitAct, SIGNAL(triggered()), this, SLOT(quit()));
@@ -87,7 +87,7 @@ MainWindow::createActions()
 void
 MainWindow::createMenus()
 {
-  fileMenu = menuBar()->addMenu(tr("&Model"));
+  fileMenu = menuBar()->addMenu(tr("&File"));
   fileMenu->addAction(Application::getApp()->importModelAction());
   fileMenu->addAction(Application::getApp()->exportModelAction());
   fileMenu->addAction(Application::getApp()->editModelAction());

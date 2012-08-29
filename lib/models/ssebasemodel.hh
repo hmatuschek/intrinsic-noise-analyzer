@@ -46,6 +46,29 @@ protected:
     GiNaC::exmap dependentSpecies;
 
     /**
+    * A method that generates a substituation table for all conservation laws arising from the model
+    */
+    GiNaC::exmap getConservationConstants(const Eigen::VectorXd &conserved_cycles);
+
+
+public:
+
+    ConservationConstants(const Ast::Model &model);
+
+
+    GiNaC::exmap substitutions;
+
+    Eigen::VectorXd ICsPermuted;
+
+    Eigen::VectorXd conserved_cycles;
+
+    Eigen::VectorXd Omega;
+
+    Eigen::MatrixXd Link0CMatrixNumeric;
+
+    Eigen::MatrixXd LinkCMatrixNumeric;
+
+    /**
     * A method that folds all constants arising from conservation laws in a given expression
     */
     template<typename T>
@@ -53,25 +76,12 @@ protected:
 
     {
 
-        // generate substitution table
-        GiNaC::exmap subs_table = generateConservationConstantsTable(conserved_cycles);
-
         // ... and fold all constants due to conservation laws
         for (int i=0; i<vec.rows(); i++)
         for (int j=0; j<vec.cols(); j++)
-                vec(i,j)=vec(i,j).subs(subs_table);
+                vec(i,j)=vec(i,j).subs(this->substitutions);
 
     }
-
-    /**
-    * A method that generates a substituation table for all conservation laws arising from the model
-    */
-    GiNaC::exmap generateConservationConstantsTable(const Eigen::VectorXd &conserved_cycles);
-
-
-public:
-
-    ConservationConstants(const Ast::Model &model);
 
 };
 
@@ -97,6 +107,7 @@ protected:
 
 
 protected:
+
 
     /**
     * Expressions of Rate Equations in unconstrained base.

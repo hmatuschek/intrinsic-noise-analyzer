@@ -7,6 +7,54 @@
 namespace Fluc {
 namespace Models {
 
+class ConservationConstantCollector
+
+{
+
+    /**
+     * Constructor.
+     */
+    ConservationConstantCollector(SSEBaseModel &model);
+
+
+    GiNaC::exmap substitutions;
+
+    Eigen::MatrixXd Link0CMatrixNumeric;
+    Eigen::MatrixXd LinkCMatrixNumeric;
+
+    Eigen::VectorXd  Omega;
+
+    Eigen::VectorXd  conserved_cycles;
+    Eigen::VectorXd  ICsPermuted;
+
+
+    /**
+     * Interface for the integrator: get initial state vector.
+     */
+    virtual void getInitialState(Eigen::VectorXd &x);
+
+    /**
+     * Get the values of the conservation constants.
+     */
+    void getConservedCycles(Eigen::VectorXd &consc);
+
+    /**
+    * A method that folds all constants arising from conservation laws in a given expression
+    */
+    template<typename T>
+    void foldConservationConstants(const Eigen::VectorXd &conserved_cycles, Eigen::MatrixBase<T> &vec)
+
+    {
+
+        // ... and fold all constants due to conservation laws
+        for (int i=0; i<vec.rows(); i++)
+        for (int j=0; j<vec.cols(); j++)
+                vec(i,j)=vec(i,j).subs(this->substitutions);
+
+    }
+
+};
+
 /**
  * The RE model.
  *
@@ -22,22 +70,12 @@ protected:
 
   size_t dim;
 
-  Eigen::MatrixXd Link0CMatrixNumeric;
-  Eigen::MatrixXd LinkCMatrixNumeric;
-
-  Eigen::VectorXd  Omega;
-
-  Eigen::VectorXd  conserved_cycles;
-  Eigen::VectorXd  ICsPermuted;
-
   std::vector<GiNaC::symbol> stateVariables;
+
+ // Eigen::MatrixXd Link0CMatrixNumeric;
+ // Eigen::MatrixXd LinkCMatrixNumeric;
+
   Eigen::VectorXex updateVector;
-
-  /**
-   * Used to evaluate the initial values.
-   */
-  Ast::EvaluateModel interpreter;
-
 
 public:
 
@@ -72,11 +110,6 @@ public:
   size_t getDimension();
 
   /**
-   * Interface for the integrator: get initial state vector.
-   */
-  virtual void getInitialState(Eigen::VectorXd &x);
-
-  /**
    * Reconstruct concentration vector from state vector.
    *
    * @param state The reduced state.
@@ -91,17 +124,27 @@ public:
    */
   void getOmega(Eigen::VectorXd &om);
 
-  /**
-   * Get the values of the conservation constants.
-   */
-  void getConservedCycles(Eigen::VectorXd &consc);
-
   double foldVertex(std::list<int> lower, std::list<int> upper);
 
   /**
-   * Just dumps the RE internals.
+   * Interface for the integrator: get initial state vector.
    */
-  virtual void dump(std::ostream &str);
+  virtual void getInitialState(Eigen::VectorXd &x);
+
+  /**
+  * A method that folds all constants arising from conservation laws in a given expression
+  */
+  template<typename T>
+  void foldConservationConstants(const Eigen::VectorXd &conserved_cycles, Eigen::MatrixBase<T> &vec)
+
+  {
+
+      // ... and fold all constants due to conservation laws
+      for (int i=0; i<vec.rows(); i++)
+      for (int j=0; j<vec.cols(); j++)
+              vec(i,j)=vec(i,j).subs(this->substitutions);
+
+  }
 
 };
 

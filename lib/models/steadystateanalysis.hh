@@ -197,6 +197,12 @@ public:
 
     {
 
+
+        // collect all the values of constant parameters except variable parameters
+        Trafo::ConstantFolder constants(sseModel);
+        // fold variable parameters first and then all the rest as constant parameters
+        Eigen::VectorXex updateVector = constants.apply( sseModel.getUpdateVector() );
+
         // initialize with initial concentrations
         Eigen::VectorXd conc(sseModel.getDimension());
         sseModel.getInitialState(x);
@@ -204,9 +210,10 @@ public:
 
         size_t offset = sseModel.numIndSpecies();
         size_t lnaLength = offset*(offset+1)/2;
-        size_t sseLength = sseModel.getUpdateVector().size()-sseModel.numIndSpecies();
+        size_t sseLength = updateVector.size()-sseModel.numIndSpecies();
 
-        Eigen::VectorXex sseUpdate = sseModel.getUpdateVector().segment(offset,sseLength);
+        Eigen::VectorXex sseUpdate = updateVector.segment(offset,sseLength);
+
 
         // calc
         int iter = this->calcConcentrations(conc);

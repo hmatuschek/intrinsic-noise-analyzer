@@ -70,7 +70,7 @@ class ConstantFolder
 {
 public:
   /** Constructor, collects all substitutions of constant variables and assignment rules. */
-    ConstantFolder(const Ast::Model &model, unsigned flags = Filter::ALL, const excludeType &excludes=excludeType());
+  ConstantFolder(const Ast::Model &model, unsigned flags = Filter::ALL, const excludeType &excludes=excludeType());
 
   /** Tiny helper function to fold all constants in the given model. */
   void apply(Ast::Model &model);
