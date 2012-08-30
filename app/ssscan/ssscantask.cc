@@ -136,7 +136,7 @@ SSScanTask::process()
   this->setProgress(0);
 
   // Construct parameter sets
-  std::vector<GiNaC::exmap> parameterSets;
+  std::vector<GiNaC::exmap> parameterSets(config.getSteps());
   size_t j=0;
   for(double val=config.getStartValue(); val<=config.getEndValue(); val+=config.getStepSize())
   {
