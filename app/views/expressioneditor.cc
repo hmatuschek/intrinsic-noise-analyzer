@@ -30,6 +30,15 @@ ExpressionEditor::keyPressEvent(QKeyEvent *event)
   if (Qt::Key_Right == event->key()) {
     // If cursor is at last position
     if (cursorPosition() == text().size()) {
+      if (cursorPosition()==0 || text().at(cursorPosition()-1).isSpace()) {
+        completer->setCompletionPrefix("");
+      } else {
+        QString prefix; int idx = cursorPosition()-1;
+        while ((idx > 0) || !(text().at(idx).isSpace())) {
+          prefix.prepend(text().at(idx)); idx--;
+        }
+        completer->setCompletionPrefix(prefix);
+      }
       completer->complete(); return;
     }
   }

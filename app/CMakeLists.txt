@@ -55,6 +55,11 @@ SET(ina_app_ssa_HEADERS
     ssa/ssamodule.hh ssa/ssatask.hh ssa/ssawizard.hh ssa/ssataskwrapper.hh ssa/ssaplot.hh
     ssa/ssaview.hh)
 
+SET(ina_app_ssscan_SOURCES
+    ssscan/ssscantask.cc)
+SET(ina_app_ssscan_HEADERS
+    ssscan/ssscantask.hh)
+
 SET(ina_app_doctree_SOURCES doctree/documenttreeitem.cc doctree/treeitem.cc
     doctree/compartmentsitem.cc doctree/documenttree.cc doctree/speciesitem.cc
     doctree/parametersitem.cc doctree/reactionitem.cc doctree/reactionsitem.cc
@@ -113,7 +118,8 @@ SET(ina_app_SOURCES
     ${ina_app_tinytex_SOURCES}
     ${ina_app_sse_SOURCES}
     ${ina_app_steadystate_SOURCES}
-    ${ina_app_ssa_SOURCES})
+    ${ina_app_ssa_SOURCES}
+    ${ina_app_ssscan_SOURCES})
 SET(ina_app_HEADERS
     ${ina_app_base_HEADERS}
     ${ina_app_doctree_HEADERS}
@@ -123,7 +129,8 @@ SET(ina_app_HEADERS
     ${ina_app_tinytex_HEADERS}
     ${ina_app_sse_HEADERS}
     ${ina_app_steadystate_HEADERS}
-    ${ina_app_ssa_HEADERS})
+    ${ina_app_ssa_HEADERS}
+    ${ina_app_ssscan_HEADERS})
 
 
 QT4_WRAP_CPP(ina_app_HEADERS_MOC ${ina_app_HEADERS})
