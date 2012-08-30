@@ -10,6 +10,7 @@ class ExpressionEditor : public QLineEdit
   Q_OBJECT
 
 public:
+  /** Trivial constructor. */
   explicit ExpressionEditor(QWidget *parent = 0);
 
 protected:

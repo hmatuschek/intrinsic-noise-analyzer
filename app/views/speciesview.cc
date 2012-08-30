@@ -38,8 +38,7 @@ SpeciesView::SpeciesView(SpeciesItem *species ,QWidget *parent) :
   _specTable->verticalHeader()->hide();
 
   // Register delegates for columns:
-  _specTable->setItemDelegateForColumn(
-        1, new ExpressionDelegate(_species->species()->model(), _specTable));
+  _specTable->setItemDelegateForColumn(1, new PixmapDelegate(_specTable));
   _specTable->setItemDelegateForColumn(
         2, new ExpressionDelegate(_species->species()->model(), _specTable));
   _specTable->setItemDelegateForColumn(

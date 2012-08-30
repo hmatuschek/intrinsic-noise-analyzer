@@ -1,7 +1,9 @@
 #include "reactioneditor.hh"
 #include <QFormLayout>
 #include <QHBoxLayout>
+#include <QCompleter>
 #include "../tinytex/tinytex.hh"
+#include "../models/scopeitemmodel.hh"
 
 
 ReactionCreator::ReactionCreator(Fluc::Ast::Model &model, QWidget *parent)
@@ -18,6 +20,8 @@ ReactionCreator::ReactionCreator(Fluc::Ast::Model &model, QWidget *parent)
   // The reactants stoichiometry
   _equation = new QLineEdit();
   _equation->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
+  QCompleter *completer = new QCompleter(ScopeItemModel::collectIdentifiers(model, ScopeItemModel::SELECT_ALL));
+  _equation->setCompleter(completer);
 
   // The kinetic law expression
   _autoupdate = new QCheckBox("mass action");
