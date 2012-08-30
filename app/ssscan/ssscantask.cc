@@ -93,10 +93,10 @@ SSScanTask::SSScanTask(const Config &config, QObject *parent)
     for (int i=0; i<(int)config.getNumSpecies(); i++, column++)
     {
       // fill index table
-      this->index_table[i] = config.getModel()->getSpeciesIdx(this->species[i].toStdString());
-
       QString species_id = config.getSelectedSpecies().value(i);
       iNA::Ast::Species *species = config.getModel()->getSpecies(species_id.toStdString());
+      this->index_table[i] = config.getModel()->getSpeciesIdx(species_id.toStdString());
+
 
       if (species->hasName())
         species_name[i] = QString("%1").arg(species->getName().c_str());
