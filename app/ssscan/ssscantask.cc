@@ -108,11 +108,8 @@ SSScanTask::SSScanTask(const Config &config, QObject *parent)
 
     for (int i=0; i<(int)config.getNumSpecies(); i++)
     {
-      for (int j=i; j<(int)config.getNumSpecies(); j++, column++)
-      {
         this->parameterScan.setColumnName(
-              column,QString("cov(%1,%2)").arg(species_name[i]).arg(species_name[j]));
-      }
+              column,QString("var(%1)").arg(species_name[i]));
     }
 
     for (int i=0; i<(int)config.getNumSpecies(); i++, column++)
@@ -123,13 +120,9 @@ SSScanTask::SSScanTask(const Config &config, QObject *parent)
 
     for (int i=0; i<(int)config.getNumSpecies(); i++)
     {
-      for (int j=i; j<(int)config.getNumSpecies(); j++, column++)
-      {
         this->parameterScan.setColumnName(
-              column,QString("cov(%1,%2)").arg(species_name[i]).arg(species_name[j]));
-      }
+              column,QString("var(%1)").arg(species_name[i]));
     }
-
 
 }
 
@@ -138,6 +131,7 @@ SSScanTask::SSScanTask(const Config &config, QObject *parent)
 void
 SSScanTask::process()
 {
+
   this->setState(Task::INITIALIZED);
   this->setProgress(0);
 
