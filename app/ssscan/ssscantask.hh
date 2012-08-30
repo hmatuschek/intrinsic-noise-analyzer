@@ -28,11 +28,6 @@ public:
     double max_time_step;
     double epsilon;
 
-    bool auto_frequencies;
-    double min_frequency;
-    double max_frequency;
-    size_t num_frequency;
-
     iNA::Ast::Parameter * parameter;
     double start_value;
     double end_value;
@@ -84,16 +79,14 @@ protected:
   Config config;
   /** Holds an instance of the analysis. */
   iNA::Models::SteadyStateAnalysis<iNA::Models::IOSmodel> steady_state;
-  Eigen::VectorXd concentrations;
-  Eigen::VectorXd emre_corrections;
-  Eigen::VectorXd ios_corrections;
-  Eigen::MatrixXd lna_covariances;
-  Eigen::MatrixXd ios_covariances;
+  std::vector<Eigen::VectorXd> concentrations;
+  std::vector<Eigen::VectorXd> emre_corrections;
+  std::vector<Eigen::VectorXd> lna_variances;
+  std::vector<Eigen::VectorXd> ios_variances;
   QVector<QString> species;
   QVector<QString> species_name;
 
-  //Eigen::VectorXd frequencies;
-  Table spectrum;
+  Table parameterScan;
 
   QVector<size_t> index_table;
 

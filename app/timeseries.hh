@@ -259,8 +259,8 @@ public:
   /**
    * Returns the value at the @c i -th row and @c j -th column.
    */
-  double operator() (size_t i, size_t j) const;
-
+  const double &operator() (size_t i, size_t j) const;
+  double &operator() (size_t i, size_t j);
   /**
    * Saves the table as text-file.
    */
