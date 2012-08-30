@@ -386,3 +386,18 @@ TinyTex::texUnquote(const std::string &source)
   if (! isTexQuoted(source)) { return source; }
   return source.substr(1, source.size()-2);
 }
+
+MathFormulaItem *
+TinyTex::parseQuoted(const std::string &source) {
+  if (isTexQuoted(source)) {
+    return parse(texUnquote(source));
+  }
+  return new MathText(source.c_str());
+}
+
+MathFormulaItem *
+TinyTex::parseVariable(const Fluc::Ast::VariableDefinition *var)
+{
+  if (var->hasName()) { return TinyTex::parseQuoted(var->getName()); }
+  return new MathText(var->getIdentifier().c_str());
+}

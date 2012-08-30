@@ -85,6 +85,8 @@ class MathFormulaItem {
 public:
   /** Default constructor. */
   MathFormulaItem();
+  /** Copy constructor. */
+  MathFormulaItem(const MathFormulaItem &other);
 
   /** To ensure this class is virtual. */
   virtual ~MathFormulaItem();
@@ -92,6 +94,9 @@ public:
   /** Layouts the element and renders it into a graphics item and also updates the
    * metrics of the item. */
   virtual QGraphicsItem *layout(const MathContext &context, QGraphicsItem *parent=0) = 0;
+
+  /** Copy method. */
+  virtual MathFormulaItem *copy() const = 0;
 
   /** Returns the metrics of the item. */
   const MathMetrics &metrics() const;
@@ -110,6 +115,8 @@ class MathFormula : public MathFormulaItem
 {
 public:
   MathFormula();
+  MathFormula(const MathFormula &other);
+
   virtual ~MathFormula();
 
   size_t size() const;
@@ -117,6 +124,7 @@ public:
   void prependItem(MathFormulaItem *item);
 
   QGraphicsItem *layout(const MathContext &context, QGraphicsItem *parent=0);
+  MathFormulaItem *copy() const;
 
 private:
   QList<MathFormulaItem *> _items;
@@ -137,9 +145,11 @@ public:
 public:
   MathSpace(TeXSpace tex_space);
   MathSpace(qreal factor);
+  MathSpace(const MathSpace &other);
   virtual ~MathSpace();
 
   QGraphicsItem *layout(const MathContext &context, QGraphicsItem *parent);
+  MathFormulaItem *copy() const;
 
 private:
   /** The actual space factor. */
@@ -152,8 +162,11 @@ class MathFraction : public MathFormulaItem
 {
 public:
   MathFraction(MathFormulaItem *nom, MathFormulaItem *denom);
+  MathFraction(const MathFraction &other);
   virtual ~MathFraction();
+
   virtual QGraphicsItem* layout(const MathContext &context, QGraphicsItem *parent=0);
+  virtual MathFormulaItem *copy() const;
 
 private:
   MathFormulaItem *_nominator;
@@ -166,8 +179,11 @@ class MathText : public MathFormulaItem
 {
 public:
   MathText(const QString &text);
+  MathText(const MathText &other);
   virtual ~MathText();
+
   QGraphicsItem* layout(const MathContext &context, QGraphicsItem *parent=0);
+  MathFormulaItem *copy() const;
 
 private:
   QString _text;
@@ -179,8 +195,11 @@ class MathSymbol : public MathFormulaItem
 {
 public:
   MathSymbol(QChar symbol);
+  MathSymbol(const MathSymbol &symbol);
   virtual ~MathSymbol();
+
   QGraphicsItem* layout(const MathContext &context, QGraphicsItem *parent);
+  MathFormulaItem *copy() const;
 
 private:
   QChar _symbol;
@@ -192,8 +211,11 @@ class MathSup : public MathFormulaItem
 {
 public:
   MathSup(MathFormulaItem *base, MathFormulaItem *upper);
+  MathSup(const MathSup &other);
   virtual ~MathSup();
+
   QGraphicsItem* layout(const MathContext &context, QGraphicsItem *parent=0);
+  MathFormulaItem *copy() const;
 
 private:
   MathFormulaItem *_base;
@@ -205,8 +227,11 @@ class MathSub : public MathFormulaItem, public QGraphicsItemGroup
 {
 public:
   MathSub(MathFormulaItem *base, MathFormulaItem *lower);
+  MathSub(const MathSub &other);
   virtual ~MathSub();
+
   QGraphicsItem *layout(const MathContext &context, QGraphicsItem *parent);
+  MathFormulaItem *copy() const;
 
 private:
   MathFormulaItem *_base;

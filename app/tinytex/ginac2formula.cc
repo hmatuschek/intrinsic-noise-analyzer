@@ -46,10 +46,19 @@ Ginac2Formula::visit(const GiNaC::symbol &node)
     } else {
       _stack.push_back(new MathText(var->getName().c_str()));
     }
-    return;
+  } else {
+    _stack.push_back(new MathText(var->getIdentifier().c_str()));
   }
 
-  _stack.push_back(new MathText(var->getIdentifier().c_str()));
+  // Now, the name has been rendered -> if variable was a species with concentration untis ->
+  // put name in brackets:
+  if (Fluc::Ast::Node::isSpecies(var) && var->getUnit().isConcentrationUnit()) {
+    MathFormula *tmp = new MathFormula();
+    tmp->appendItem(new MathText("["));
+    tmp->appendItem(_stack.back()); _stack.pop_back();
+    tmp->appendItem(new MathText("]"));
+    _stack.push_back(tmp);
+  }
 }
 
 

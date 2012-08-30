@@ -6,6 +6,8 @@
 #include "parser/production.hh"
 #include "exception.hh"
 #include <QVariant>
+#include <ast/variabledefinition.hh>
+
 
 
 /** This class implements a trivial parser for a minimal subset of TeX to layout
@@ -40,6 +42,14 @@ public:
 
   /** Removes the first and last '$'. */
   static std::string texUnquote(const std::string &source);
+
+  /** Handles quoted strings. */
+  static MathFormulaItem *parseQuoted(const std::string &source);
+
+  /** Parses the name of a @c Ast::VariableDefinition if set otherwise the
+   * identifier. */
+  static MathFormulaItem *parseVariable(const Fluc::Ast::VariableDefinition *var);
+
 
 protected:
   /** A weak reference to the lexer. */

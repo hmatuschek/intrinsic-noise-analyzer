@@ -58,6 +58,10 @@ MathFormulaItem::MathFormulaItem() : _metrics() {
   // pass..
 }
 
+MathFormulaItem::MathFormulaItem(const MathFormulaItem &other) : _metrics(other._metrics) {
+  /* pass... */
+}
+
 MathFormulaItem::~MathFormulaItem() {
   // pass...
 }
@@ -85,6 +89,16 @@ MathFormulaItem::renderItem(const MathContext &ctx)
  * ******************************************************************************************** */
 MathFormula::MathFormula() : MathFormulaItem() {
   // pass...
+}
+
+MathFormula::MathFormula(const MathFormula &other)
+  : MathFormulaItem(other)
+{
+  for (QList<MathFormulaItem *>::const_iterator item=other._items.begin();
+       item!=other._items.end(); item++)
+  {
+    _items.append((*item)->copy());
+  }
 }
 
 MathFormula::~MathFormula() {
@@ -163,13 +177,12 @@ MathFormula::layout(const MathContext &context, QGraphicsItem *parent)
   _metrics.setBB(my_bb);
   _metrics.setCenter(max_center);
 
-  //new QGraphicsLineItem(0, max_center, tot_width, max_center, item_group);
-  //QGraphicsLineItem *aline = new QGraphicsLineItem(0, max_ascent, tot_width, max_ascent, item_group);
-  //QPen pen(aline->pen()); pen.setColor(QColor(255,0,0)); aline->setPen(pen);
-
   // Done:
   return item_group;
 }
+
+
+MathFormulaItem * MathFormula::copy() const { return new MathFormula(*this); }
 
 
 /* ******************************************************************************************** *
@@ -188,6 +201,12 @@ MathSpace::MathSpace(qreal factor) : _factor(factor) {
   // Pass...
 }
 
+MathSpace::MathSpace(const MathSpace &other) :
+  MathFormulaItem(other), _factor(other._factor)
+{
+  // pass...
+}
+
 MathSpace::~MathSpace() {
   // pass...
 }
@@ -202,6 +221,8 @@ MathSpace::layout(const MathContext &context, QGraphicsItem *parent)
   return new QGraphicsTextItem(parent);
 }
 
+MathFormulaItem *MathSpace::copy() const { return new MathSpace(*this); }
+
 
 /* ******************************************************************************************** *
  * Implementation of MathFraction
@@ -209,6 +230,12 @@ MathSpace::layout(const MathContext &context, QGraphicsItem *parent)
 MathFraction::MathFraction(MathFormulaItem *nom, MathFormulaItem *denom)
   : MathFormulaItem(), _nominator(nom), _denominator(denom)
 {
+}
+
+MathFraction::MathFraction(const MathFraction &other)
+  : MathFormulaItem(other), _nominator(other._nominator->copy()),
+    _denominator(other._denominator->copy()) {
+  // Pass...
 }
 
 MathFraction::~MathFraction()
@@ -261,6 +288,11 @@ MathFraction::layout(const MathContext &context, QGraphicsItem *parent)
 }
 
 
+MathFormulaItem *
+MathFraction::copy() const {
+  return new MathFraction(*this);
+}
+
 
 /* ******************************************************************************************** *
  * Implementation of MathText
@@ -268,6 +300,13 @@ MathFraction::layout(const MathContext &context, QGraphicsItem *parent)
 MathText::MathText(const QString &text)
   : MathFormulaItem(), _text(text)
 {
+  // Pass...
+}
+
+MathText::MathText(const MathText &other)
+  : MathFormulaItem(other), _text(other._text)
+{
+  // Pass...
 }
 
 MathText::~MathText()
@@ -302,6 +341,8 @@ MathText::layout(const MathContext &context, QGraphicsItem *parent)
   return item;
 }
 
+MathFormulaItem * MathText::copy() const { return new MathText(*this); }
+
 
 
 /* ******************************************************************************************** *
@@ -309,6 +350,11 @@ MathText::layout(const MathContext &context, QGraphicsItem *parent)
  * ******************************************************************************************** */
 MathSymbol::MathSymbol(QChar symbol)
   : MathFormulaItem(), _symbol(symbol) {
+  // pass...
+}
+
+MathSymbol::MathSymbol(const MathSymbol &other)
+  : MathFormulaItem(other), _symbol(other._symbol) {
   // pass...
 }
 
@@ -349,6 +395,8 @@ MathSymbol::layout(const MathContext &context, QGraphicsItem *parent)
   return item;
 }
 
+MathFormulaItem * MathSymbol::copy() const { return new MathSymbol(*this); }
+
 
 
 /* ******************************************************************************************** *
@@ -358,6 +406,12 @@ MathSup::MathSup(MathFormulaItem *base, MathFormulaItem *upper)
   : MathFormulaItem(), _base(base), _upper(upper)
 {
   // pass...
+}
+
+MathSup::MathSup(const MathSup &other)
+  : MathFormulaItem(other), _base(other._base->copy()), _upper(other._upper->copy())
+{
+  // Pass...
 }
 
 MathSup::~MathSup() {
@@ -406,6 +460,9 @@ MathSup::layout(const MathContext &context, QGraphicsItem *parent)
 }
 
 
+MathFormulaItem *MathSup::copy() const { return new MathSup(*this); }
+
+
 
 /* ******************************************************************************************** *
  * Implementation of MathSub: X_Y
@@ -414,6 +471,12 @@ MathSub::MathSub(MathFormulaItem *base, MathFormulaItem *lower)
   : MathFormulaItem(), _base(base), _lower(lower)
 {
   // pass...
+}
+
+MathSub::MathSub(const MathSub &other)
+  : MathFormulaItem(other), _base(other._base->copy()), _lower(other._lower->copy())
+{
+  // Pass...
 }
 
 MathSub::~MathSub() {
@@ -459,3 +522,6 @@ MathSub::layout(const MathContext &context, QGraphicsItem *parent)
 
   return item_group;
 }
+
+
+MathFormulaItem * MathSub::copy() const { return new MathSub(*this); }

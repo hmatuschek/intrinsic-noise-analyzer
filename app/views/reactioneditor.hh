@@ -4,12 +4,14 @@
 #include <QDialog>
 #include <QLineEdit>
 #include <QCheckBox>
-#include <ast/reaction.hh>
 #include <QList>
 #include <QPair>
 #include <QStackedWidget>
 #include <QLabel>
 #include <QTimer>
+
+#include <ast/model.hh>
+#include "../tinytex/formula.hh"
 
 
 /** Simple editor dialog to create/modify a reaction. */
@@ -19,27 +21,47 @@ class ReactionCreator : public QDialog
 
 public:
   /** Constructor. */
-  ReactionCreator(QWidget *parent = 0);
+  ReactionCreator(Fluc::Ast::Model &model, QWidget *parent = 0);
 
 private slots:
+  /** Called if the automatic update of the kinetic law is toggled. */
   void onMassActionToggled(bool state);
+
+  /** Implements the automatic update of the kinetic law. */
   void updateKineticLaw();
 
 private:
+  /** Parses a (incomplete) reaction equation. */
   bool parseEquation(const QString &text, QList< QPair<int, QString> > &reactants,
                      QList< QPair<int, QString> > &product, bool &reversible);
-
+  /** Parses a single stoichiometry expression. */
   bool parseStoichiometry(const QString &text, QList< QPair<int, QString> > &stoichiometry);
+  /** Helper function to parse identifier. */
+  bool parseIdentifier(QString &text);
+
+  /** Helper function to render a factor. */
+  MathFormulaItem *assembleFactor(QString &id, int exponent);
+  MathFormulaItem *assembleCompartment();
+  MathFormulaItem *assembleName(const QString &id);
 
 private:
-  Fluc::Ast::Reaction *_reaction;
+  /** Holds a weak reference to the model. */
+  Fluc::Ast::Model &_model;
+  /** Line edit for the model name. */
   QLineEdit *_name;
+  /** Line editor for the reaction equation. */
   QLineEdit *_equation;
+  /** Holds a line edit and a view for the kinetic law. */
   QStackedWidget *_kineticLaw;
+  /** The line-editor to edit the kinetic law directly. */
   QLineEdit *_kineticLawEditor;
+  /** View of the kinetic law. */
   QLabel    *_kineticLawFormula;
+  /** Checkbox to enable the automatic update of the kinetic law. */
   QCheckBox *_autoupdate;
+  /** A delay timer for the update function. */
   QTimer    *_delayTimer;
 };
+
 
 #endif // REACTIONEDITOR_HH

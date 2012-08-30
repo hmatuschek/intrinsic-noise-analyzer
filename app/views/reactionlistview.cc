@@ -46,6 +46,6 @@ ReactionListView::ReactionListView(ReactionsItem *reactions, QWidget *parent)
 
 void
 ReactionListView::onNewReaction() {
-  ReactionCreator editor;
+  ReactionCreator editor(_reactions->getModel());
   editor.exec();
 }

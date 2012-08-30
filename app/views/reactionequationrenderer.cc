@@ -2,6 +2,7 @@
 #include <QGraphicsItem>
 #include <QGraphicsTextItem>
 #include <QPainter>
+#include "../tinytex/tinytex.hh"
 #include "../tinytex/ginac2formula.hh"
 #include "ast/reaction.hh"
 
@@ -43,7 +44,8 @@ ReactionEquationRenderer::assembleReactionEquation(Fluc::Ast::Reaction *reac)
       reactants->appendItem(Ginac2Formula::toFormula(item->second, scope));
       reactants->appendItem(new MathSpace(MathSpace::THIN_SPACE));
     }
-    reactants->appendItem(Ginac2Formula::toFormula(item->first->getSymbol(), scope));
+    // Render species symbol
+    reactants->appendItem(TinyTex::parseVariable(item->first));
   }
   reaction->appendItem(reactants);
 
@@ -71,7 +73,7 @@ ReactionEquationRenderer::assembleReactionEquation(Fluc::Ast::Reaction *reac)
       products->appendItem(new MathSpace(MathSpace::THIN_SPACE));
     }
     // render species symbol.
-    products->appendItem(Ginac2Formula::toFormula(item->first->getSymbol(), scope));
+    products->appendItem(TinyTex::parseVariable(item->first));
   }
   reaction->appendItem(products);
 
