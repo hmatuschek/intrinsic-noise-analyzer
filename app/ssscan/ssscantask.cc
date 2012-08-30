@@ -26,7 +26,7 @@ void
 SSScanTask::Config::setModelDocument(DocumentItem *document)
 {
   ModelSelectionTaskConfig::setModelDocument(document);
-  // Construct LNA model from SBML model associated with the selected document
+  // Construct IOS model from SBML model associated with the selected document
   this->model = new iNA::Models::IOSmodel(document->getModel());
 }
 
@@ -141,8 +141,7 @@ SSScanTask::process()
   this->setState(Task::INITIALIZED);
   this->setProgress(0);
 
-  // construct parameter sets
-
+  // Construct parameter sets
   std::vector<GiNaC::exmap> parameterSets;
   size_t j=0;
   for(double val=config.getStartValue(); val<=config.getEndValue(); val+=config.getStepSize())
@@ -150,13 +149,14 @@ SSScanTask::process()
      parameterSets[j++].insert(std::pair<GiNaC::ex,GiNaC::ex>(config.getParameter().getSymbol(),val));
   }
 
+  // Take model
   iNA::Models::IOSmodel *lna_model
       = dynamic_cast<iNA::Models::IOSmodel *>(config.getModel());
 
   // Allocate result matrix (of unified state vectors)
   std::vector<Eigen::VectorXd> scanResult(lna_model->getDimension());
 
-  // Calc steadystate:
+  // Do parameter scan
   this->steady_state.parameterScan(parameterSets,scanResult);
 
   // Check if task shall terminate:
@@ -167,7 +167,7 @@ SSScanTask::process()
   }
 
 
-  // Get full state and covariance and EMRE corrections for steady state;
+  // Some temporary vectors for the result of the analysis
   Eigen::VectorXd concentrations(config.getModel()->numSpecies());
   Eigen::VectorXd emre_corrections(config.getModel()->numSpecies());
   Eigen::VectorXd iosemre_corrections(config.getModel()->numSpecies());
@@ -175,6 +175,7 @@ SSScanTask::process()
   Eigen::MatrixXd ios_covariances(config.getModel()->numSpecies(), config.getModel()->numSpecies());
   Eigen::VectorXd thirdOrder(config.getModel()->numSpecies());
 
+  // Fill table
   for(size_t j=0; j<scanResult.size(); j++)
   {
       lna_model->fullState(scanResult[j], concentrations, lna_covariances, emre_corrections,
@@ -183,7 +184,6 @@ SSScanTask::process()
       parameterScan(0,j) = GiNaC::ex_to<GiNaC::numeric>(parameterSets[j][config.getParameter().getSymbol()]).to_double();
 
       int col=1;
-      // fill table
       for (int i=0; i<this->species.size(); i++)
         parameterScan(col++,j) = concentrations(index_table[i]);
       for (int i=0; i<this->species.size(); i++)
@@ -194,7 +194,6 @@ SSScanTask::process()
         parameterScan(col++,j) = lna_covariances(index_table[i], index_table[i])+ios_covariances(index_table[i], index_table[i]);
 
   }
-
 
   // Done...
   this->setState(Task::DONE);
