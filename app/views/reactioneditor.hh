@@ -21,7 +21,7 @@ class ReactionCreator : public QDialog
 
 public:
   /** Constructor. */
-  ReactionCreator(Fluc::Ast::Model &model, QWidget *parent = 0);
+  ReactionCreator(iNA::Ast::Model &model, QWidget *parent = 0);
 
 private slots:
   /** Called if the automatic update of the kinetic law is toggled. */
@@ -48,7 +48,7 @@ private:
 
 private:
   /** Holds a weak reference to the model. */
-  Fluc::Ast::Model &_model;
+  iNA::Ast::Model &_model;
   /** Line edit for the model name. */
   QLineEdit *_name;
   /** Line editor for the reaction equation. */

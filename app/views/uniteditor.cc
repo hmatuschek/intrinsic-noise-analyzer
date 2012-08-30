@@ -11,7 +11,7 @@ UnitEditor::UnitEditor(QWidget *parent)
   postConstructor();
 }
 
-UnitEditor::UnitEditor(const Fluc::Ast::Unit &unit, QWidget *parent)
+UnitEditor::UnitEditor(const iNA::Ast::Unit &unit, QWidget *parent)
   : QStackedWidget(parent), _unit(unit), _unitDisplay(0), _unitEditor(0)
 {
   postConstructor();
@@ -21,7 +21,7 @@ void UnitEditor::postConstructor()
 {
   // Assemble editor and display
   _unitDisplay = new QLabel(); _unitDisplay->setPixmap(UnitRenderer::toPixmap(_unit));
-  _unitEditor  = new QLineEdit(Fluc::Parser::Unit::UnitParser::write(_unit).c_str());
+  _unitEditor  = new QLineEdit(iNA::Parser::Unit::UnitParser::write(_unit).c_str());
 
   // Assemble stacked widgets
   addWidget(_unitDisplay);
@@ -33,16 +33,16 @@ void UnitEditor::postConstructor()
 }
 
 
-const Fluc::Ast::Unit &UnitEditor::unit() const {
+const iNA::Ast::Unit &UnitEditor::unit() const {
   return _unit;
 }
 
-void UnitEditor::setUnit(const Fluc::Ast::Unit &unit) {
+void UnitEditor::setUnit(const iNA::Ast::Unit &unit) {
   // Store unit
   _unit = unit;
   // Update display and editor widgets:
   _unitDisplay->setPixmap(UnitRenderer::toPixmap(_unit));
-  _unitEditor->setText(Fluc::Parser::Unit::UnitParser::write(_unit).c_str());
+  _unitEditor->setText(iNA::Parser::Unit::UnitParser::write(_unit).c_str());
 }
 
 
@@ -64,10 +64,10 @@ UnitEditor::onEditingFinished() {
 
   try {
     // parse unit:
-    _unit = Fluc::Parser::Unit::UnitParser::parse(unit_code);
-  } catch (const Fluc::Parser::ParserError &err) {
+    _unit = iNA::Parser::Unit::UnitParser::parse(unit_code);
+  } catch (const iNA::Parser::ParserError &err) {
     // Reset to current unit:
-    _unitEditor->setText(Fluc::Parser::Unit::UnitParser::write(_unit).c_str());
+    _unitEditor->setText(iNA::Parser::Unit::UnitParser::write(_unit).c_str());
     QMessageBox::critical(0, "Can not set unit.", err.what());
     return;
   }

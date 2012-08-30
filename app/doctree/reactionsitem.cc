@@ -7,7 +7,7 @@
 /* ********************************************************************************************* *
  * Implementation of ReactionsWrapper (list of reactions)
  * ********************************************************************************************* */
-ReactionsItem::ReactionsItem(Fluc::Ast::Model *model, QObject *parent) :
+ReactionsItem::ReactionsItem(iNA::Ast::Model *model, QObject *parent) :
   QObject(parent), _itemLabel("Reactions"), _reactionList(model)
 {
   // Populate reactions:

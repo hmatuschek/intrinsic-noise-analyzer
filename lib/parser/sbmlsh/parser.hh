@@ -4,7 +4,7 @@
 #include "productions.hh"
 
 
-namespace Fluc {
+namespace iNA {
 
 namespace Ast {
 // Forward declaration.
@@ -138,7 +138,7 @@ protected:
   /** Hold the lexer. */
   Lexer lexer;
   /** Holds the root of the grammar. */
-  Fluc::Parser::Production *grammar;
+  iNA::Parser::Production *grammar;
 
 public:
   /** Constructor. */

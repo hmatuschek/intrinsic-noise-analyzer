@@ -1,6 +1,6 @@
 #include "exception.hh"
 
-using namespace Fluc;
+using namespace iNA;
 
 
 Exception::Exception()

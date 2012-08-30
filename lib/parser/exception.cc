@@ -1,27 +1,27 @@
 #include "exception.hh"
 
-using namespace Fluc::Parser;
+using namespace iNA::Parser;
 
 
 /* ******************************************************************************************** *
  * Implementation of parser error:
  * ******************************************************************************************** */
 ParserError::ParserError(int line)
-  : Fluc::Exception(), _line(line)
+  : iNA::Exception(), _line(line)
 {
   // Pass...
 }
 
 
 ParserError::ParserError(const std::string &message, int line)
-  : Fluc::Exception(message), _line(line)
+  : iNA::Exception(message), _line(line)
 {
   // pass...
 }
 
 
 ParserError::ParserError(const ParserError &other)
-  : Fluc::Exception(other), _line(other._line)
+  : iNA::Exception(other), _line(other._line)
 {
   // pass...
 }

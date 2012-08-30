@@ -4,7 +4,7 @@
 #include <cmath>
 
 
-namespace Fluc
+namespace iNA
 {
 /**
  * Implements the error function defined as:

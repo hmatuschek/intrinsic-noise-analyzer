@@ -3,7 +3,7 @@
 
 #include "unittest.hh"
 
-namespace Fluc {
+namespace iNA {
 
 
 class MathTest : public UnitTest::TestCase

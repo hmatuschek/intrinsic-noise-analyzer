@@ -15,7 +15,7 @@ class ReactionsItem : public QObject, public DocumentTreeItem
 
 public:
   /** Constructor. */
-  explicit ReactionsItem(Fluc::Ast::Model *model, QObject *parent = 0);
+  explicit ReactionsItem(iNA::Ast::Model *model, QObject *parent = 0);
 
   /** Returns true. */
   virtual bool providesView() const;

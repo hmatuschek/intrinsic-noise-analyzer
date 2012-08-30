@@ -4,7 +4,7 @@
 #include <parser/lexer.hh>
 
 
-namespace Fluc {
+namespace iNA {
 namespace Parser {
 namespace Expr {
 

@@ -2,8 +2,8 @@
 #include "ode/ode.hh"
 #include "trafo/constantfolder.hh"
 
-using namespace Fluc;
-using namespace Fluc::Models;
+using namespace iNA;
+using namespace iNA::Models;
 
 ConservationConstantCollector::ConservationConstantCollector(SSEBaseModel &model)
 

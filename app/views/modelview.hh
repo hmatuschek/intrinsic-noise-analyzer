@@ -16,7 +16,7 @@ public:
 
 private:
   /** Holds a weak reference to the model instance. */
-  Fluc::Ast::Model *_model;
+  iNA::Ast::Model *_model;
 };
 
 #endif // MODELVIEW_HH

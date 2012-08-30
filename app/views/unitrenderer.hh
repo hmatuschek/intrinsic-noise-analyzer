@@ -15,13 +15,13 @@ class UnitRenderer : QObject
   Q_OBJECT
 
 public:
-  explicit UnitRenderer(const Fluc::Ast::Unit &unit, QObject *parent = 0);
+  explicit UnitRenderer(const iNA::Ast::Unit &unit, QObject *parent = 0);
   virtual ~UnitRenderer();
 
   const QPixmap &toPixmap();
 
 public:
-  static QPixmap toPixmap(const Fluc::Ast::Unit &unit);
+  static QPixmap toPixmap(const iNA::Ast::Unit &unit);
 
 private:
   MathFormula *_formula;

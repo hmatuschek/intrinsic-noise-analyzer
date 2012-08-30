@@ -22,12 +22,12 @@ class Ginac2Formula :
     public GiNaC::add::visitor, public GiNaC::mul::visitor, public GiNaC::power::visitor
 {
   QList<MathFormulaItem *> _stack;
-  Fluc::Ast::Scope &_scope;
+  iNA::Ast::Scope &_scope;
   bool _tex_names;
   int _current_precedence;
 
 public:
-  Ginac2Formula(Fluc::Ast::Scope &scope, bool tex_names=true);
+  Ginac2Formula(iNA::Ast::Scope &scope, bool tex_names=true);
 
   virtual void visit(const GiNaC::symbol &node);
   virtual void visit(const GiNaC::numeric &node);
@@ -39,11 +39,11 @@ public:
 
 public:
   /** Renders an expression as a Formula. */
-  static MathFormulaItem *toFormula(GiNaC::ex expression, Fluc::Ast::Scope &scope, bool tex_names=true);
+  static MathFormulaItem *toFormula(GiNaC::ex expression, iNA::Ast::Scope &scope, bool tex_names=true);
 
   /** Very helpful function to render a given expression into a formula. The formula is returned
    * inside a QVariant as a pixmap or an invald QVariant if there was an error during rendering. */
-  static QVariant toPixmap(GiNaC::ex expression, Fluc::Ast::Scope &scope, bool tex_names=true);
+  static QVariant toPixmap(GiNaC::ex expression, iNA::Ast::Scope &scope, bool tex_names=true);
 };
 
 #endif // GINAC2FORMULA_HH

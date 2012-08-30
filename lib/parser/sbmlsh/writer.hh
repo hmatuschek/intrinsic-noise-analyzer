@@ -6,7 +6,7 @@
 #include <ast/reaction.hh>
 
 
-namespace Fluc {
+namespace iNA {
 namespace Parser {
 namespace Sbmlsh {
 

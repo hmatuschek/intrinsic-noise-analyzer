@@ -29,7 +29,7 @@ Task::run()
   try {
     this->start_time = clock();
     this->process();
-  } catch (Fluc::Exception &err)
+  } catch (iNA::Exception &err)
   {
     std::cerr << "Task:: Caught exception: " << err.what() << std::endl;
     this->error_message.setTitle("Exception during analysis.");

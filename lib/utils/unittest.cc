@@ -5,7 +5,7 @@
 #include <cmath>
 #include "cputime.hh"
 
-using namespace Fluc::Utils::UnitTest;
+using namespace iNA::Utils::UnitTest;
 
 
 

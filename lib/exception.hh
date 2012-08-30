@@ -6,7 +6,7 @@
 #include <ginac.h>
 
 
-namespace Fluc
+namespace iNA
 {
 
 /**

@@ -6,7 +6,7 @@
 #include "../models/scopeitemmodel.hh"
 
 
-ReactionCreator::ReactionCreator(Fluc::Ast::Model &model, QWidget *parent)
+ReactionCreator::ReactionCreator(iNA::Ast::Model &model, QWidget *parent)
   : QDialog(parent), _model(model)
 {
   // General Dialog config:
@@ -237,7 +237,7 @@ ReactionCreator::assembleCompartment()
   }
 
   // Otherwise, get first compartment and take its name (if present)
-  Fluc::Ast::Compartment *comp = _model.getCompartment(0);
+  iNA::Ast::Compartment *comp = _model.getCompartment(0);
   if (comp->hasName()) { return TinyTex::parseQuoted(comp->getName().c_str()); }
 
   // If compartment has no name -> use identifier
@@ -250,8 +250,8 @@ ReactionCreator::assembleName(const QString &id)
 {
   // Assemble name of the factor
   if (_model.hasVariable(id.toStdString())) {
-    Fluc::Ast::VariableDefinition *var = _model.getVariable(id.toStdString());
-    if (Fluc::Ast::Node::isSpecies(var) && var->hasName()) {
+    iNA::Ast::VariableDefinition *var = _model.getVariable(id.toStdString());
+    if (iNA::Ast::Node::isSpecies(var) && var->hasName()) {
       return TinyTex::parseQuoted(var->getName());
     }
   }

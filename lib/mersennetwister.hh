@@ -52,7 +52,7 @@
 #include <climits>
 
 
-namespace Fluc {
+namespace iNA {
 
 /**
  * This is a 64-bit version of Mersenne Twister pseudo random number

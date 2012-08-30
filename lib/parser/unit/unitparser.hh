@@ -5,7 +5,7 @@
 #include "parser/lexer.hh"
 #include "parser/production.hh"
 
-namespace Fluc {
+namespace iNA {
 namespace Parser {
 namespace Unit {
 
@@ -16,9 +16,9 @@ class UnitParser
 {
 public:
   /** Parses and assembles a unit from the given text. */
-  static Fluc::Ast::Unit parse(const std::string &unit);
+  static iNA::Ast::Unit parse(const std::string &unit);
   /** Parses and assembles a unit from the text in the given stream. */
-  static Fluc::Ast::Unit parse(std::istream &unit);
+  static iNA::Ast::Unit parse(std::istream &unit);
 
   /** Serializes a unit into the given stream. */
   static void write(const Ast::Unit &unit, std::ostream &output);
@@ -30,10 +30,10 @@ protected:
   /** Hidden constructor. */
   UnitParser();
 
-  Fluc::Ast::Unit processUnit(Fluc::Parser::ConcreteSyntaxTree &node, Fluc::Parser::Lexer &lexer);
-  Fluc::Ast::Unit processBaseUnit(Fluc::Parser::ConcreteSyntaxTree &node, Fluc::Parser::Lexer &lexer);
-  Fluc::Ast::Unit processScale(Fluc::Parser::ConcreteSyntaxTree &node, Fluc::Parser::Lexer &lexer);
-  Fluc::Ast::Unit processPow(Fluc::Parser::ConcreteSyntaxTree &node, Fluc::Parser::Lexer &lexer);
+  iNA::Ast::Unit processUnit(iNA::Parser::ConcreteSyntaxTree &node, iNA::Parser::Lexer &lexer);
+  iNA::Ast::Unit processBaseUnit(iNA::Parser::ConcreteSyntaxTree &node, iNA::Parser::Lexer &lexer);
+  iNA::Ast::Unit processScale(iNA::Parser::ConcreteSyntaxTree &node, iNA::Parser::Lexer &lexer);
+  iNA::Ast::Unit processPow(iNA::Parser::ConcreteSyntaxTree &node, iNA::Parser::Lexer &lexer);
 
 
 private:
@@ -45,10 +45,10 @@ private:
 
 protected:
   /** Lexer for units. */
-  class Lexer : public Fluc::Parser::Lexer {
+  class Lexer : public iNA::Parser::Lexer {
   public:
     typedef enum {
-      UNIT_TOKEN = Fluc::Parser::Token::FIRST_USER_DEFINED, ///< An identifier for base units.
+      UNIT_TOKEN = iNA::Parser::Token::FIRST_USER_DEFINED, ///< An identifier for base units.
       FLOAT_TOKEN,   ///< A signed floating point number including exponent
       INTEGER_TOKEN, ///< A Signed integer token.
       TIMES_TOKEN,   ///< "*"
@@ -66,7 +66,7 @@ protected:
   };
 
   /** Simple token rule to lex floating point numbers w/o sign. */
-  class FloatTokenRule : public Fluc::Parser::TokenRule
+  class FloatTokenRule : public iNA::Parser::TokenRule
   {
   public:
     /** Constrcutor. */
@@ -74,7 +74,7 @@ protected:
   };
 
   /** Simple token rule to lex signed integers. */
-  class IntegerTokenRule : public Fluc::Parser::TokenRule
+  class IntegerTokenRule : public iNA::Parser::TokenRule
   {
   public:
     /** Constructor. */
@@ -82,11 +82,11 @@ protected:
   };
 
   /** Grammar := [Unit] END_OF_INPUT */
-  class GrammarProduction : public Fluc::Parser::Production
+  class GrammarProduction : public iNA::Parser::Production
   {
   public:
     /** Factory method. */
-    static Fluc::Parser::Production *factory();
+    static iNA::Parser::Production *factory();
 
   protected:
     /** Hidden constructor, use factory method. */
@@ -96,11 +96,11 @@ protected:
   };
 
   /** Unit := BaseUnit [("*"|"/") Unit]; */
-  class UnitProduction : public Fluc::Parser::Production
+  class UnitProduction : public iNA::Parser::Production
   {
   public:
     /** Factory method. */
-    static Fluc::Parser::Production *factory();
+    static iNA::Parser::Production *factory();
 
   protected:
     /** Hidden constructor. */
@@ -110,11 +110,11 @@ protected:
   };
 
   /** BaseUnit := (INT | FLOAT | Pow | "(" Unit ")") */
-  class BaseUnitProduction : Fluc::Parser::AltProduction
+  class BaseUnitProduction : iNA::Parser::AltProduction
   {
   public:
     /** Factory method. */
-    static Fluc::Parser::Production *factory();
+    static iNA::Parser::Production *factory();
 
   protected:
     /** Hidden constructor, use factory method. */
@@ -124,10 +124,10 @@ protected:
   };
 
   /** PowProduction := UnitId [('**'|'^') INTEGER] */
-  class PowProduction : public Fluc::Parser::Production {
+  class PowProduction : public iNA::Parser::Production {
   public:
     /** Factory method. */
-    static Fluc::Parser::Production *factory();
+    static iNA::Parser::Production *factory();
 
   protected:
     /** Hidden constructor. */

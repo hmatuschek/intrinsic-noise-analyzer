@@ -3,8 +3,8 @@
 #include "exception.hh"
 
 
-using namespace Fluc;
-using namespace Fluc::Eval::bci;
+using namespace iNA;
+using namespace iNA::Eval::bci;
 
 
 

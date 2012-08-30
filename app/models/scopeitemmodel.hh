@@ -25,7 +25,7 @@ public:
   } TypeSelection;
 
 public:
-  explicit ScopeItemModel(const Fluc::Ast::Scope &scope, QObject *parent = 0);
+  explicit ScopeItemModel(const iNA::Ast::Scope &scope, QObject *parent = 0);
 
   int rowCount(const QModelIndex &parent=QModelIndex()) const;
 
@@ -37,7 +37,7 @@ public:
 public:
   /** Assembles a list of identifiers of all variables defined in the given scope that match the
    * given type selection. */
-  static QStringList collectIdentifiers(const Fluc::Ast::Scope &scope, unsigned selection);
+  static QStringList collectIdentifiers(const iNA::Ast::Scope &scope, unsigned selection);
 
 private:
   /** Holds a vector <name, id> of each variable defined in the scope. */

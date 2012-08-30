@@ -1,7 +1,7 @@
 #include "retask.hh"
 #include "ode/ode.hh"
 
-using namespace Fluc;
+using namespace iNA;
 
 
 /*
@@ -28,7 +28,7 @@ RETask::RETask(const SSETaskConfig &config, QObject *parent) :
     interpreter = new Models::GenericSSEinterpreter<
         Models::REmodel, Eval::direct::Engine<Eigen::VectorXd, Eigen::VectorXd>,
         Eval::direct::Engine<Eigen::VectorXd, Eigen::MatrixXd> >(
-          *config.getModelAs<Fluc::Models::REmodel>(),
+          *config.getModelAs<iNA::Models::REmodel>(),
           config.getOptLevel(), config.getNumEvalThreads(), false);
 
     // Instantiate integrator for that engine:
@@ -101,7 +101,7 @@ RETask::RETask(const SSETaskConfig &config, QObject *parent) :
       interpreter = new Models::GenericSSEinterpreter<
           Models::REmodel, Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>,
           Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd> >(
-            *config.getModelAs<Fluc::Models::REmodel>(),
+            *config.getModelAs<iNA::Models::REmodel>(),
             config.getOptLevel(), config.getNumEvalThreads(), false);
 
       // Instantiate integrator for that engine:
@@ -174,7 +174,7 @@ RETask::RETask(const SSETaskConfig &config, QObject *parent) :
     interpreter = new Models::GenericSSEinterpreter<
         Models::REmodel, Eval::bcimp::Engine<Eigen::VectorXd, Eigen::VectorXd>,
         Eval::bcimp::Engine<Eigen::VectorXd, Eigen::MatrixXd> >(
-          *config.getModelAs<Fluc::Models::REmodel>(),
+          *config.getModelAs<iNA::Models::REmodel>(),
           config.getOptLevel(), config.getNumEvalThreads(), false);
 
     // Instantiate integrator for that engine:
@@ -248,7 +248,7 @@ RETask::RETask(const SSETaskConfig &config, QObject *parent) :
     interpreter = new Models::GenericSSEinterpreter<
         Models::REmodel, Eval::jit::Engine<Eigen::VectorXd, Eigen::VectorXd>,
         Eval::jit::Engine<Eigen::VectorXd, Eigen::MatrixXd> >(
-          *config.getModelAs<Fluc::Models::REmodel>(),
+          *config.getModelAs<iNA::Models::REmodel>(),
           config.getOptLevel(), config.getNumEvalThreads(), false);
 
     // Instantiate integrator for that engine:
@@ -323,7 +323,7 @@ RETask::RETask(const SSETaskConfig &config, QObject *parent) :
   for (int i=0; i<(int)config.getNumSpecies(); i++, column++)
   {
     QString species_id = config.getSelectedSpecies().value(i);
-    Fluc::Ast::Species *species = config.getModel()->getSpecies(species_id.toStdString());
+    iNA::Ast::Species *species = config.getModel()->getSpecies(species_id.toStdString());
 
     if (species->hasName())
       species_names[i] = QString("%1").arg(species->getName().c_str());
@@ -352,9 +352,9 @@ void
 RETask::process()
 {
   // Holds the current system state (reduced state)
-  Eigen::VectorXd x(config.getModelAs<Fluc::Models::REmodel>()->getDimension());
+  Eigen::VectorXd x(config.getModelAs<iNA::Models::REmodel>()->getDimension());
   // Holds the update to the next state (reduced state)
-  Eigen::VectorXd dx(config.getModelAs<Fluc::Models::REmodel>()->getDimension());
+  Eigen::VectorXd dx(config.getModelAs<iNA::Models::REmodel>()->getDimension());
 
   // Holds the concentrations for each species (full state)
   Eigen::VectorXd concentrations(config.getModel()->numSpecies());
@@ -372,9 +372,9 @@ RETask::process()
   }
 
   // initialize (reduced) state
-  config.getModelAs<Fluc::Models::REmodel>()->getInitialState(x);
+  config.getModelAs<iNA::Models::REmodel>()->getInitialState(x);
   // get full initial concentrations and covariance
-  config.getModelAs<Fluc::Models::REmodel>()->fullState(x, concentrations);
+  config.getModelAs<iNA::Models::REmodel>()->fullState(x, concentrations);
 
   this->setState(Task::RUNNING);
 
@@ -419,7 +419,7 @@ RETask::process()
       continue;
 
     // Get full state:
-    config.getModelAs<Fluc::Models::REmodel>()->fullState(x, concentrations);
+    config.getModelAs<iNA::Models::REmodel>()->fullState(x, concentrations);
 
     // Store new time:
     output_vector(0) = t;
@@ -461,15 +461,15 @@ RETask::getSelectedSpecies() const
 }
 
 
-const Fluc::Ast::Unit &
+const iNA::Ast::Unit &
 RETask::getSpeciesUnit() const
 {
-  return this->config.getModelAs<Fluc::Models::REmodel>()->getConcentrationUnit();
+  return this->config.getModelAs<iNA::Models::REmodel>()->getConcentrationUnit();
 }
 
 
-const Fluc::Ast::Unit &
+const iNA::Ast::Unit &
 RETask::getTimeUnit() const
 {
-  return this->config.getModelAs<Fluc::Models::REmodel>()->getTimeUnit();
+  return this->config.getModelAs<iNA::Models::REmodel>()->getTimeUnit();
 }

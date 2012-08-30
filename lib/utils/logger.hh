@@ -6,7 +6,7 @@
 #include <ctime>
 
 
-namespace Fluc {
+namespace iNA {
 namespace Utils {
 
 
@@ -123,7 +123,7 @@ private:
 
 
 /** Simple macro to create a log-message at source location. */
-#define LOG_MESSAGE(level) Fluc::Utils::Message(level, __FILE__, __LINE__)
+#define LOG_MESSAGE(level) iNA::Utils::Message(level, __FILE__, __LINE__)
 
 
 

@@ -18,7 +18,7 @@
 #include <llvm/Support/IRBuilder.h>
 
 
-namespace Fluc {
+namespace iNA {
 namespace Eval {
 namespace jit {
 

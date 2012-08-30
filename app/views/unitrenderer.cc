@@ -2,7 +2,7 @@
 #include <QPaintEngine>
 
 
-UnitRenderer::UnitRenderer(const Fluc::Ast::Unit &unit, QObject *parent)
+UnitRenderer::UnitRenderer(const iNA::Ast::Unit &unit, QObject *parent)
   : QObject(parent), _formula(0), _pixmap(0)
 {
   _formula = new MathFormula();
@@ -16,22 +16,22 @@ UnitRenderer::UnitRenderer(const Fluc::Ast::Unit &unit, QObject *parent)
 
   QList<MathFormulaItem *> nominator;
   QList<MathFormulaItem *> denominator;
-  for (Fluc::Ast::Unit::iterator item=unit.begin(); item != unit.end(); item++) {
+  for (iNA::Ast::Unit::iterator item=unit.begin(); item != unit.end(); item++) {
     if (0 < item->second) {
       if (item->second==1) {
-        QString base = Fluc::Ast::ScaledBaseUnit::baseUnitRepr(item->first).c_str();
+        QString base = iNA::Ast::ScaledBaseUnit::baseUnitRepr(item->first).c_str();
         nominator.push_back(new MathText(base));
       } else {
-        QString base = Fluc::Ast::ScaledBaseUnit::baseUnitRepr(item->first).c_str();
+        QString base = iNA::Ast::ScaledBaseUnit::baseUnitRepr(item->first).c_str();
         QString exponent = QString("%1").arg(item->second);
         nominator.push_back(new MathSup(new MathText(base),new MathText(exponent)));
       }
     } else {
       if (item->second==-1) {
-        QString base = Fluc::Ast::ScaledBaseUnit::baseUnitRepr(item->first).c_str();
+        QString base = iNA::Ast::ScaledBaseUnit::baseUnitRepr(item->first).c_str();
         denominator.push_back(new MathText(base));
       } else {
-        QString base = Fluc::Ast::ScaledBaseUnit::baseUnitRepr(item->first).c_str();
+        QString base = iNA::Ast::ScaledBaseUnit::baseUnitRepr(item->first).c_str();
         QString exponent = QString("%1").arg(std::abs(item->second));
         denominator.push_back(new MathSup(new MathText(base),new MathText(exponent)));
       }
@@ -95,7 +95,7 @@ UnitRenderer::toPixmap()
 
 
 QPixmap
-UnitRenderer::toPixmap(const Fluc::Ast::Unit &unit)
+UnitRenderer::toPixmap(const iNA::Ast::Unit &unit)
 {
   UnitRenderer renderer(unit); return renderer.toPixmap();
 }

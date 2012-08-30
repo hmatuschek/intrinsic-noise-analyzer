@@ -1,7 +1,7 @@
 #include "unitconverter.hh"
 
-using namespace Fluc;
-using namespace Fluc::Ast;
+using namespace iNA;
+using namespace iNA::Ast;
 
 
 UnitConverter::Error::Error() : Exception() { }

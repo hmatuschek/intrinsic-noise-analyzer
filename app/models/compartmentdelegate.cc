@@ -3,10 +3,10 @@
 #include <QApplication>
 #include <QComboBox>
 
-using namespace Fluc;
+using namespace iNA;
 
 
-CompartmentDelegate::CompartmentDelegate(Fluc::Ast::Model &model, QObject *parent)
+CompartmentDelegate::CompartmentDelegate(iNA::Ast::Model &model, QObject *parent)
   : QItemDelegate(parent), _model(model)
 {
   // Pass...

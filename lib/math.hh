@@ -12,7 +12,7 @@
 #include "kroneckerproduct.hh"
 
 
-namespace Fluc {
+namespace iNA {
 
 /**
  * Important constants.

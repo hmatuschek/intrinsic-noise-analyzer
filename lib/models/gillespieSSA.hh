@@ -10,7 +10,7 @@
 #include <omp.h>
 
 
-namespace Fluc {
+namespace iNA {
 namespace Models {
 
 /**

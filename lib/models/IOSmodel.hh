@@ -3,7 +3,7 @@
 
 #include "LNAmodel.hh"
 
-namespace Fluc {
+namespace iNA {
 namespace Models {
 
 /**

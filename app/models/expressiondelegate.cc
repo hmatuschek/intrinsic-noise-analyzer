@@ -9,7 +9,7 @@
 
 
 
-ExpressionDelegate::ExpressionDelegate(Fluc::Ast::Scope &scope, QObject *parent)
+ExpressionDelegate::ExpressionDelegate(iNA::Ast::Scope &scope, QObject *parent)
   : PixmapDelegate(parent), _scope(scope)
 {
   // pass...

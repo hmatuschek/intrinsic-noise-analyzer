@@ -7,7 +7,7 @@
 #include "ginacsupportforeigen.hh"
 
 
-namespace Fluc {
+namespace iNA {
 namespace Trafo {
 
 

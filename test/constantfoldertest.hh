@@ -5,7 +5,7 @@
 #include "unittest.hh"
 
 
-namespace Fluc {
+namespace iNA {
 
 /** Simple class to test @c Trafo::ConstantFolder. */
 class ConstantFolderTest : public UnitTest::TestCase

@@ -1,6 +1,6 @@
 #include "variabledefinition.hh"
 
-using namespace Fluc::Ast;
+using namespace iNA::Ast;
 
 
 VariableDefinition::VariableDefinition(Node::NodeType type, const std::string &id,

@@ -1,22 +1,22 @@
 #include "unitparser.hh"
 #include "math.hh"
 
-using namespace Fluc;
-using namespace Fluc::Parser::Unit;
+using namespace iNA;
+using namespace iNA::Parser::Unit;
 
 UnitParser::Lexer::Lexer(std::istream &input)
   : Parser::Lexer(input)
 {
-  addRule(new Fluc::Parser::IdentifierTokenRule(UNIT_TOKEN));
+  addRule(new iNA::Parser::IdentifierTokenRule(UNIT_TOKEN));
   addRule(new UnitParser::IntegerTokenRule(INTEGER_TOKEN));
   addRule(new UnitParser::FloatTokenRule(FLOAT_TOKEN));
-  addRule(new Fluc::Parser::KeyWordTokenRule(TIMES_TOKEN, "*"));
-  addRule(new Fluc::Parser::KeyWordTokenRule(DIVIDE_TOKEN, "/"));
-  addRule(new Fluc::Parser::KeyWordTokenRule(POW_TOKEN, "^"));
-  addRule(new Fluc::Parser::KeyWordTokenRule(POW_TOKEN, "**"));
-  addRule(new Fluc::Parser::KeyWordTokenRule(LPAR_TOKEN, "("));
-  addRule(new Fluc::Parser::KeyWordTokenRule(RPAR_TOKEN, ")"));
-  addRule(new Fluc::Parser::WhiteSpaceTokenRule(WHITESPACE_TOKEN));
+  addRule(new iNA::Parser::KeyWordTokenRule(TIMES_TOKEN, "*"));
+  addRule(new iNA::Parser::KeyWordTokenRule(DIVIDE_TOKEN, "/"));
+  addRule(new iNA::Parser::KeyWordTokenRule(POW_TOKEN, "^"));
+  addRule(new iNA::Parser::KeyWordTokenRule(POW_TOKEN, "**"));
+  addRule(new iNA::Parser::KeyWordTokenRule(LPAR_TOKEN, "("));
+  addRule(new iNA::Parser::KeyWordTokenRule(RPAR_TOKEN, ")"));
+  addRule(new iNA::Parser::WhiteSpaceTokenRule(WHITESPACE_TOKEN));
 
   addTokenName(UNIT_TOKEN, "unit-name"); addTokenName(FLOAT_TOKEN, "FLOAT");
   addTokenName(INTEGER_TOKEN, "INTEGER"); addTokenName(TIMES_TOKEN, "*");
@@ -28,7 +28,7 @@ UnitParser::Lexer::Lexer(std::istream &input)
 
 
 UnitParser::FloatTokenRule::FloatTokenRule(unsigned id)
-  : Fluc::Parser::TokenRule(id)
+  : iNA::Parser::TokenRule(id)
 {
   allocStates(7);
 
@@ -58,7 +58,7 @@ UnitParser::FloatTokenRule::FloatTokenRule(unsigned id)
 
 
 UnitParser::IntegerTokenRule::IntegerTokenRule(unsigned id)
-  : Fluc::Parser::TokenRule(id)
+  : iNA::Parser::TokenRule(id)
 {
   allocStates(3);
   State *start = createState(false);
@@ -161,13 +161,13 @@ UnitParser::processUnit(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer) 
 
 
 Ast::Unit
-UnitParser::processBaseUnit(Fluc::Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer)
+UnitParser::processBaseUnit(iNA::Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer)
 {
   // BaseUnit := (INT | FLOAT | Pow | "(" Unit ")")
   if (0 == node.getAltIdx()) {
     std::string value = lexer[node[0].getTokenIdx()].getValue();
-    return Fluc::Ast::ScaledBaseUnit(
-          Fluc::Ast::ScaledBaseUnit::DIMENSIONLESS, UnitParser::asValue<double>(value), 0, 1);
+    return iNA::Ast::ScaledBaseUnit(
+          iNA::Ast::ScaledBaseUnit::DIMENSIONLESS, UnitParser::asValue<double>(value), 0, 1);
   } else if (1 == node.getAltIdx()) {
     std::string value = lexer[node[0].getTokenIdx()].getValue();
     size_t split_idx = value.find_first_of("eE");
@@ -180,8 +180,8 @@ UnitParser::processBaseUnit(Fluc::Parser::ConcreteSyntaxTree &node, Parser::Lexe
       mult = UnitParser::asValue<double>(value);
     }
 
-    return Fluc::Ast::ScaledBaseUnit(
-          Fluc::Ast::ScaledBaseUnit::DIMENSIONLESS, mult, scale, 1);
+    return iNA::Ast::ScaledBaseUnit(
+          iNA::Ast::ScaledBaseUnit::DIMENSIONLESS, mult, scale, 1);
   } else if (2 == node.getAltIdx()) {
     return processPow(node[0], lexer);
   } else if (3 == node.getAltIdx()) {
@@ -193,7 +193,7 @@ UnitParser::processBaseUnit(Fluc::Parser::ConcreteSyntaxTree &node, Parser::Lexe
 
 
 Ast::Unit
-UnitParser::processPow(Fluc::Parser::ConcreteSyntaxTree &node, Fluc::Parser::Lexer &lexer)
+UnitParser::processPow(iNA::Parser::ConcreteSyntaxTree &node, iNA::Parser::Lexer &lexer)
 {
   // PowProduction := UnitId [('**'|'^') INTEGER]
 
@@ -273,8 +273,8 @@ UnitParser::BaseUnitProduction::BaseUnitProduction()
 {
   BaseUnitProduction::instance = this;
 
-  alternatives.push_back(new Fluc::Parser::TokenProduction(UnitParser::Lexer::INTEGER_TOKEN));
-  alternatives.push_back(new Fluc::Parser::TokenProduction(UnitParser::Lexer::FLOAT_TOKEN));
+  alternatives.push_back(new iNA::Parser::TokenProduction(UnitParser::Lexer::INTEGER_TOKEN));
+  alternatives.push_back(new iNA::Parser::TokenProduction(UnitParser::Lexer::FLOAT_TOKEN));
   alternatives.push_back(PowProduction::factory());
   alternatives.push_back(
         new Parser::Production(

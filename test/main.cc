@@ -21,8 +21,8 @@
 #include "utils/logger.hh"
 
 
-using namespace Fluc;
-using namespace Fluc::UnitTest;
+using namespace iNA;
+using namespace iNA::UnitTest;
 
 
 int main(int argc, char *argv[])

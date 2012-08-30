@@ -6,7 +6,7 @@
 #include "openmp.hh"
 
 
-namespace Fluc {
+namespace iNA {
 namespace Eval {
 namespace bcimp {
 

@@ -1,8 +1,8 @@
 #include "productions.hh"
 #include "lexer.hh"
 
-using namespace Fluc;
-using namespace Fluc::Parser::Expr;
+using namespace iNA;
+using namespace iNA::Parser::Expr;
 
 
 /* ******************************************************************************************** *
@@ -20,12 +20,12 @@ NumberProduction::NumberProduction()
   // Assemble grammar:
   // [-]
   this->elements.push_back(
-        new Parser::OptionalProduction(new Fluc::Parser::TokenProduction(T_MINUS)));
+        new Parser::OptionalProduction(new iNA::Parser::TokenProduction(T_MINUS)));
 
   // (INTEGER | FLOAT)
   this->elements.push_back(
         new Parser::AltProduction(
-          2, new Parser::TokenProduction(T_INTEGER), new Fluc::Parser::TokenProduction(T_FLOAT)));
+          2, new Parser::TokenProduction(T_INTEGER), new iNA::Parser::TokenProduction(T_FLOAT)));
 }
 
 NumberProduction *NumberProduction::instance = 0;
@@ -54,7 +54,7 @@ ExpressionProduction::ExpressionProduction()
   this->alternatives.resize(2);
 
   this->alternatives[0] =
-      new Fluc::Parser::Production(
+      new iNA::Parser::Production(
         3, ProductExpressionProduction::get(),
         new Parser::AltProduction(
           2, new Parser::TokenProduction(T_PLUS), new Parser::TokenProduction(T_MINUS)),

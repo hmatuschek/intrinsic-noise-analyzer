@@ -2,7 +2,7 @@
 #include "exception.hh"
 
 
-using namespace Fluc::Parser;
+using namespace iNA::Parser;
 
 
 

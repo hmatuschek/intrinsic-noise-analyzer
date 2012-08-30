@@ -6,19 +6,19 @@
 #include <fstream>
 
 
-using namespace Fluc;
-using namespace Fluc::Parser::Sbmlsh;
+using namespace iNA;
+using namespace iNA::Parser::Sbmlsh;
 
 
 void
-Fluc::Parser::Sbmlsh::importModel(Ast::Model &model, std::istream &input)
+iNA::Parser::Sbmlsh::importModel(Ast::Model &model, std::istream &input)
 {
   Parser parser(input);
   parser.parse(model);
 }
 
 void
-Fluc::Parser::Sbmlsh::importModel(Ast::Model &model, const std::string &filename)
+iNA::Parser::Sbmlsh::importModel(Ast::Model &model, const std::string &filename)
 {
   std::fstream stream(filename.c_str(), std::ios_base::in);
 
@@ -32,14 +32,14 @@ Fluc::Parser::Sbmlsh::importModel(Ast::Model &model, const std::string &filename
 }
 
 Ast::Model *
-Fluc::Parser::Sbmlsh::importModel(std::istream &input) {
+iNA::Parser::Sbmlsh::importModel(std::istream &input) {
   Ast::Model *model = new Ast::Model();
   importModel(*model, input);
   return model;
 }
 
 Ast::Model *
-Fluc::Parser::Sbmlsh::importModel(const std::string &filename) {
+iNA::Parser::Sbmlsh::importModel(const std::string &filename) {
   Ast::Model *model = new Ast::Model();
   importModel(*model, filename);
   return model;
@@ -48,13 +48,13 @@ Fluc::Parser::Sbmlsh::importModel(const std::string &filename) {
 
 
 void
-Fluc::Parser::Sbmlsh::exportModel(Ast::Model &model, std::ostream &stream) {
+iNA::Parser::Sbmlsh::exportModel(Ast::Model &model, std::ostream &stream) {
   Writer::processModel(model, stream);
 }
 
 
 void
-Fluc::Parser::Sbmlsh::exportModel(Ast::Model &model, const std::string &filename) {
+iNA::Parser::Sbmlsh::exportModel(Ast::Model &model, const std::string &filename) {
   std::fstream stream(filename.c_str(), std::ios_base::out);
 
   if (! stream.is_open()) {

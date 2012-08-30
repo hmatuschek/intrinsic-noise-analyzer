@@ -4,7 +4,7 @@
 #include "eval/eval.hh"
 #include "trafo/constantfolder.hh"
 
-namespace Fluc {
+namespace iNA {
 namespace NLEsolve {
 
     enum LineSearchMethod {

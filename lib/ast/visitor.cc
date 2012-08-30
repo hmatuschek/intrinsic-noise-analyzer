@@ -1,6 +1,6 @@
 #include "visitor.hh"
 
-using namespace Fluc::Ast;
+using namespace iNA::Ast;
 
 
 Visitor::~Visitor() {

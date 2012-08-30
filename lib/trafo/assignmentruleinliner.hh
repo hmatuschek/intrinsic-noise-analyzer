@@ -6,7 +6,7 @@
 #include "substitution.hh"
 
 
-namespace Fluc {
+namespace iNA {
 namespace Trafo {
 
 

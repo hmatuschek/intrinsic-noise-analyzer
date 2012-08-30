@@ -9,28 +9,28 @@
 /** This class terverses the @c Ast::Model and collects all references to a defined species.
  * This class is used within the model editor to determine if a variable can savely be deleted. */
 class ReferenceCounter
-    : public QObject, public Fluc::Ast::Visitor, public Fluc::Ast::Compartment::Visitor,
-    public Fluc::Ast::Species::Visitor, public Fluc::Ast::Parameter::Visitor,
-    public Fluc::Ast::AlgebraicConstraint::Visitor, public Fluc::Ast::Reaction::Visitor,
-    public Fluc::Ast::KineticLaw::Visitor
+    : public QObject, public iNA::Ast::Visitor, public iNA::Ast::Compartment::Visitor,
+    public iNA::Ast::Species::Visitor, public iNA::Ast::Parameter::Visitor,
+    public iNA::Ast::AlgebraicConstraint::Visitor, public iNA::Ast::Reaction::Visitor,
+    public iNA::Ast::KineticLaw::Visitor
 {
   Q_OBJECT
 
 public:
-  explicit ReferenceCounter(Fluc::Ast::VariableDefinition *var, QObject *parent=0);
+  explicit ReferenceCounter(iNA::Ast::VariableDefinition *var, QObject *parent=0);
 
-  void visit(const Fluc::Ast::Compartment *var);
-  void visit(const Fluc::Ast::Species *var);
-  void visit(const Fluc::Ast::Parameter *var);
-  void visit(const Fluc::Ast::AlgebraicConstraint *var);
-  void visit(const Fluc::Ast::Reaction *reac);
-  void visit(const Fluc::Ast::KineticLaw *law);
+  void visit(const iNA::Ast::Compartment *var);
+  void visit(const iNA::Ast::Species *var);
+  void visit(const iNA::Ast::Parameter *var);
+  void visit(const iNA::Ast::AlgebraicConstraint *var);
+  void visit(const iNA::Ast::Reaction *reac);
+  void visit(const iNA::Ast::KineticLaw *law);
 
   const QList<QString> &references() const;
 
 private:
   /** Counts the references of this variable. */
-  Fluc::Ast::VariableDefinition *_var;
+  iNA::Ast::VariableDefinition *_var;
   /** Collects the references found. */
   QList<QString> _references;
 };

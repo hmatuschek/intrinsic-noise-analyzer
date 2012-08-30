@@ -4,7 +4,7 @@
 #include <math.h>
 #include <iostream>
 
-namespace Fluc {
+namespace iNA {
 namespace ODE {
 
 /**

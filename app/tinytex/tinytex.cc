@@ -8,7 +8,7 @@
 #include <QPainter>
 #include <QDebug>
 
-using namespace Fluc;
+using namespace iNA;
 
 
 /* ******************************************************************************************** *
@@ -22,7 +22,7 @@ TinyTex::Error::Error(const Error &other) : ParserError(other) {
   // pass...
 }
 
-TinyTex::Error::Error(const Fluc::Parser::ParserError &other) : ParserError(other) {
+TinyTex::Error::Error(const iNA::Parser::ParserError &other) : ParserError(other) {
   // pass...
 }
 
@@ -255,7 +255,7 @@ TinyTex::parse(const std::string &source)
     grammar->notify(lexer, cst);
     TinyTex parser(lexer);
     item = parser.parseFormula(cst[0]);
-  } catch (Fluc::Parser::ParserError &err) {
+  } catch (iNA::Parser::ParserError &err) {
     throw TinyTex::Error(err);
   }
 
@@ -264,7 +264,7 @@ TinyTex::parse(const std::string &source)
 
 
 MathFormula *
-TinyTex::parseFormula(Fluc::Parser::ConcreteSyntaxTree &node)
+TinyTex::parseFormula(iNA::Parser::ConcreteSyntaxTree &node)
 {
   /* Formula = SupSubScript [Formula] */
   MathFormula *formula = 0;
@@ -305,7 +305,7 @@ TinyTex::parseSupSub(Parser::ConcreteSyntaxTree &node)
 
 
 MathFormulaItem *
-TinyTex::parseElement(Fluc::Parser::ConcreteSyntaxTree &node)
+TinyTex::parseElement(iNA::Parser::ConcreteSyntaxTree &node)
 {
   switch (node.getAltIdx()) {
   case 0: // Text
@@ -396,7 +396,7 @@ TinyTex::parseQuoted(const std::string &source) {
 }
 
 MathFormulaItem *
-TinyTex::parseVariable(const Fluc::Ast::VariableDefinition *var)
+TinyTex::parseVariable(const iNA::Ast::VariableDefinition *var)
 {
   if (var->hasName()) { return TinyTex::parseQuoted(var->getName()); }
   return new MathText(var->getIdentifier().c_str());

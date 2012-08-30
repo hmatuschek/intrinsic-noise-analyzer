@@ -1,8 +1,8 @@
 #include "writer.hh"
 #include "exception.hh"
 
-using namespace Fluc;
-using namespace Fluc::Parser::Expr;
+using namespace iNA;
+using namespace iNA::Parser::Expr;
 
 
 Writer::Writer(const Ast::Scope &scope, std::ostream &output)

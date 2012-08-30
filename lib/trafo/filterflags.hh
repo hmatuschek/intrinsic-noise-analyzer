@@ -1,7 +1,7 @@
 #ifndef __INA_TRAFO_FILTERFLAGS_HH__
 #define __INA_TRAFO_FILTERFLAGS_HH__
 
-namespace Fluc {
+namespace iNA {
 namespace Trafo {
 
 

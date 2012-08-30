@@ -23,7 +23,7 @@ public:
   /** Constructs a model for the given SBML document. */
   explicit ModelItem(const QString &file_path, QObject *parent = 0);
   /** Constructs a model for the given SBML document. */
-  explicit ModelItem(Fluc::Ast::Model *model, QObject *parent = 0);
+  explicit ModelItem(iNA::Ast::Model *model, QObject *parent = 0);
   /** Destructor. Also frees the held SBML document. */
   ~ModelItem();
 
@@ -31,9 +31,9 @@ public:
   virtual const QString &getLabel() const;
 
   /** Returns a reference to the SBML model. */
-  Fluc::Ast::Model &getModel();
+  iNA::Ast::Model &getModel();
   /** Returns a const reference to the SBML model. */
-  const Fluc::Ast::Model &getModel() const;
+  const iNA::Ast::Model &getModel() const;
 
   /** Retruns true. */
   virtual bool providesView() const;
@@ -42,7 +42,7 @@ public:
 
 private:
   /** Holds the SBML document associated with the model. */
-  Fluc::Models::BaseModel *base_model;
+  iNA::Models::BaseModel *base_model;
   /** Holds the display label for the item in the @c DocumentTree. */
   QString itemLabel;
 };

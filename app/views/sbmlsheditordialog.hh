@@ -18,11 +18,11 @@ public:
   explicit SbmlshEditorDialog(QWidget *parent = 0);
 
   /** Serializes the @c Ast::Model as SBML-SH and sets the code to the editor. */
-  void setModel(Fluc::Ast::Model &model);
+  void setModel(iNA::Ast::Model &model);
 
   /** Takes the parsed Ast::Model instance from the dialog. The ownership is tranferred to the
    * caller.*/
-  Fluc::Ast::Model *takeModel();
+  iNA::Ast::Model *takeModel();
 
 private slots:
   /** "reimport" handler, parses the SBML-SH model and constructs a Ast::Model from it. */
@@ -36,7 +36,7 @@ private:
   /** Holds an instance of the highlighter. */
   QSyntaxHighlighter *_sbmlshHighlighter;
   /** Holds the parsed Ast::Model (once "load" is clicked). */
-  Fluc::Ast::Model *_model;
+  iNA::Ast::Model *_model;
 };
 
 #endif // __INA_APP_SBMLSHEDITORDIALOG_HH__

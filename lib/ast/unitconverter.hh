@@ -5,7 +5,7 @@
 #include "../exception.hh"
 
 
-namespace Fluc {
+namespace iNA {
 namespace Ast {
 
 /** A trivial class to tranlate a value given in unit A, into the same value in unit B. */
@@ -13,7 +13,7 @@ class UnitConverter
 {
 public:
   /** Defines the unit conversion error class, to be thrown if a unit can not be converted. */
-  class Error : public Fluc::Exception {
+  class Error : public iNA::Exception {
   public:
     /** Empty constructor. */
     Error();

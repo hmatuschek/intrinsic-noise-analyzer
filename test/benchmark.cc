@@ -17,7 +17,7 @@
 
 
 
-using namespace Fluc;
+using namespace iNA;
 
 typedef Models::GenericSSEinterpreter< Models::IOSmodel, Eval::bci::Engine<Eigen::VectorXd>, Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd> > BCIInterpreter;
 typedef Models::GenericSSEinterpreter< Models::IOSmodel, Eval::bcimp::Engine<Eigen::VectorXd>, Eval::bcimp::Engine<Eigen::VectorXd, Eigen::MatrixXd> > BCIMPInterpreter;

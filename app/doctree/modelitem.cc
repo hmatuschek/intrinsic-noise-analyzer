@@ -8,7 +8,7 @@
 
 #include <parser/parser.hh>
 
-using namespace Fluc;
+using namespace iNA;
 
 
 
@@ -42,7 +42,7 @@ ModelItem::ModelItem(const QString &file_path, QObject *parent) :
 }
 
 
-ModelItem::ModelItem(Fluc::Ast::Model *model, QObject *parent) :
+ModelItem::ModelItem(iNA::Ast::Model *model, QObject *parent) :
   QObject(parent), base_model(0), itemLabel("Model")
 {
   // Now, assemble a base model from SBML:
@@ -82,14 +82,14 @@ ModelItem::getLabel() const
 }
 
 
-Fluc::Ast::Model &
+iNA::Ast::Model &
 ModelItem::getModel()
 {
   return *(this->base_model);
 }
 
 
-const Fluc::Ast::Model &
+const iNA::Ast::Model &
 ModelItem::getModel() const
 {
   return *(this->base_model);

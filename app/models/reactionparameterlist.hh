@@ -16,11 +16,11 @@ class ReactionParameterList : public QAbstractTableModel
 
 protected:
   /** Holds a weak reference to the @c Fluc::Ast::KineticLaw instance. */
-  Fluc::Ast::KineticLaw *_kinetic_law;
+  iNA::Ast::KineticLaw *_kinetic_law;
 
 public:
   /** Constructs a list of local paramters defined in the given @c Fluc::Ast::KineticLaw. */
-  explicit ReactionParameterList(Fluc::Ast::KineticLaw *law, QObject *parent=0);
+  explicit ReactionParameterList(iNA::Ast::KineticLaw *law, QObject *parent=0);
 
   /** Signals if the given item is editable. */
   Qt::ItemFlags flags(const QModelIndex &index) const;
@@ -41,7 +41,7 @@ public:
   int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
   /** Returns a weak reference to the kinetic law instance. */
-  Fluc::Ast::KineticLaw &kineticLaw();
+  iNA::Ast::KineticLaw &kineticLaw();
 
   /** Add a new "empty" parameter to the kinetic law. */
   void addParameter();
@@ -51,21 +51,21 @@ public:
 
 private:
   /** Retruns the identifier of the local paramter. */
-  QVariant _getIdentifier(Fluc::Ast::Parameter *param, int role) const;
+  QVariant _getIdentifier(iNA::Ast::Parameter *param, int role) const;
   /** Returns the name of the paramter. */
-  QVariant _getName(Fluc::Ast::Parameter *param, int role) const;
+  QVariant _getName(iNA::Ast::Parameter *param, int role) const;
   /** Updates the name of the parameter. */
-  bool _updateName(Fluc::Ast::Parameter *param, const QVariant &value);
+  bool _updateName(iNA::Ast::Parameter *param, const QVariant &value);
   /** Returns the initial value of the parameter. */
-  QVariant _getInitialValue(Fluc::Ast::Parameter *param, int role) const;
+  QVariant _getInitialValue(iNA::Ast::Parameter *param, int role) const;
   /** Updates the initial value of the paramter. */
-  bool _updateInitialValue(Fluc::Ast::Parameter *param, const QVariant &value);
+  bool _updateInitialValue(iNA::Ast::Parameter *param, const QVariant &value);
   /** Retunrs the unit (rendered). */
-  QVariant _getUnit(Fluc::Ast::Parameter *param, int role) const;
+  QVariant _getUnit(iNA::Ast::Parameter *param, int role) const;
   /** Returns the const flag of the parameter. Should always be constant. */
-  QVariant _getConstFlag(Fluc::Ast::Parameter *param, int role) const;
+  QVariant _getConstFlag(iNA::Ast::Parameter *param, int role) const;
   /** Returns the const flag of the parameter. Should always be constant. */
-  bool _updateConstFlag(Fluc::Ast::Parameter *param, const QVariant &value);
+  bool _updateConstFlag(iNA::Ast::Parameter *param, const QVariant &value);
 };
 
 

@@ -6,10 +6,10 @@
 #include "utils/logger.hh"
 
 
-using namespace Fluc;
+using namespace iNA;
 
 
-Ginac2Formula::Ginac2Formula(Fluc::Ast::Scope &scope, bool tex_names)
+Ginac2Formula::Ginac2Formula(iNA::Ast::Scope &scope, bool tex_names)
   : _stack(), _scope(scope), _tex_names(tex_names), _current_precedence(0)
 {
   // pass...
@@ -20,9 +20,9 @@ void
 Ginac2Formula::visit(const GiNaC::symbol &node)
 {
   if (! _scope.hasDefinition(node.get_name())) {
-    Fluc::Utils::Message msg = LOG_MESSAGE(Fluc::Utils::Message::INFO);
+    iNA::Utils::Message msg = LOG_MESSAGE(iNA::Utils::Message::INFO);
     msg << "Can not resolve symbol: " << node;
-    Fluc::Utils::Logger::get().log(msg);
+    iNA::Utils::Logger::get().log(msg);
 
     _stack.push_back(new MathText(node.get_name().c_str()));
     return;
@@ -32,9 +32,9 @@ Ginac2Formula::visit(const GiNaC::symbol &node)
 
   Ast::VariableDefinition *var = 0;
   if (0 == (var = dynamic_cast<Ast::VariableDefinition *>(def))) {
-    Fluc::Utils::Message msg = LOG_MESSAGE(Fluc::Utils::Message::INFO);
+    iNA::Utils::Message msg = LOG_MESSAGE(iNA::Utils::Message::INFO);
     msg << "Symbol : " << node << " does not refer to a variable.";
-    Fluc::Utils::Logger::get().log(msg);
+    iNA::Utils::Logger::get().log(msg);
 
     _stack.push_back(new MathText(node.get_name().c_str()));
     return;
@@ -52,7 +52,7 @@ Ginac2Formula::visit(const GiNaC::symbol &node)
 
   // Now, the name has been rendered -> if variable was a species with concentration untis ->
   // put name in brackets:
-  if (Fluc::Ast::Node::isSpecies(var) && var->getUnit().isConcentrationUnit()) {
+  if (iNA::Ast::Node::isSpecies(var) && var->getUnit().isConcentrationUnit()) {
     MathFormula *tmp = new MathFormula();
     tmp->appendItem(new MathText("["));
     tmp->appendItem(_stack.back()); _stack.pop_back();
@@ -216,9 +216,9 @@ Ginac2Formula::toFormula(GiNaC::ex expression, Ast::Scope &scope, bool tex_names
     std::stringstream buffer; buffer << expression;
     formula = new MathText(buffer.str().c_str());
 
-    Fluc::Utils::Message msg = LOG_MESSAGE(Fluc::Utils::Message::WARN);
+    iNA::Utils::Message msg = LOG_MESSAGE(iNA::Utils::Message::WARN);
     msg << "Can not layout expression: " << expression << ": " << err.what();
-    Fluc::Utils::Logger::get().log(msg);
+    iNA::Utils::Logger::get().log(msg);
   }
 
   return formula;

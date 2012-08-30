@@ -9,7 +9,7 @@
 #include "parameter.hh"
 
 
-namespace Fluc {
+namespace iNA {
 namespace Ast {
 
 

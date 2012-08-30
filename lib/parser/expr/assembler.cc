@@ -2,16 +2,16 @@
 #include <exception.hh>
 
 
-using namespace Fluc;
-using namespace Fluc::Parser::Expr;
+using namespace iNA;
+using namespace iNA::Parser::Expr;
 
 
 #define ASSERT_UNARY_FUNCTION(name, nargs) if (1 != nargs) { \
-  Fluc::SBMLParserError err; err << name << "() takes exactly one argument, " << nargs << " given."; \
+  iNA::SBMLParserError err; err << name << "() takes exactly one argument, " << nargs << " given."; \
   throw err; }
 
 #define ASSERT_BINARY_FUNCTION(name, nargs) if (2 != nargs) { \
-  Fluc::SBMLParserError err; err << name << "() takes exactly two arguments, " << nargs << " given."; \
+  iNA::SBMLParserError err; err << name << "() takes exactly two arguments, " << nargs << " given."; \
   throw err; }
 
 

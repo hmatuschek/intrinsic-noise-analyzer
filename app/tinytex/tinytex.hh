@@ -21,11 +21,11 @@ class TinyTex
 {
 public:
   /** Exception class for all tinyTeX errors. */
-  class Error : public Fluc::Parser::ParserError {
+  class Error : public iNA::Parser::ParserError {
   public:
     Error();
     Error(const Error &other);
-    Error(const Fluc::Parser::ParserError &other);
+    Error(const iNA::Parser::ParserError &other);
     ~Error() throw ();
   };
 
@@ -48,50 +48,50 @@ public:
 
   /** Parses the name of a @c Ast::VariableDefinition if set otherwise the
    * identifier. */
-  static MathFormulaItem *parseVariable(const Fluc::Ast::VariableDefinition *var);
+  static MathFormulaItem *parseVariable(const iNA::Ast::VariableDefinition *var);
 
 
 protected:
   /** A weak reference to the lexer. */
-  Fluc::Parser::Lexer &_lexer;
+  iNA::Parser::Lexer &_lexer;
   /** A table to map symbols to its unicode string. */
   std::map<std::string, QString> _symbol_table;
 
 protected:
   /** Hidden constructor, use @parse. */
-  TinyTex(Fluc::Parser::Lexer &lexer);
+  TinyTex(iNA::Parser::Lexer &lexer);
 
   /** Assembles a MathFormula from the CST. */
-  MathFormula *parseFormula(Fluc::Parser::ConcreteSyntaxTree &node);
+  MathFormula *parseFormula(iNA::Parser::ConcreteSyntaxTree &node);
   /** Assembles a super/sub script */
-  MathFormulaItem *parseSupSub(Fluc::Parser::ConcreteSyntaxTree &node);
+  MathFormulaItem *parseSupSub(iNA::Parser::ConcreteSyntaxTree &node);
   /** Assembles a MathFormula element from the CST. */
-  MathFormulaItem *parseElement(Fluc::Parser::ConcreteSyntaxTree &node);
+  MathFormulaItem *parseElement(iNA::Parser::ConcreteSyntaxTree &node);
   /** Unicode symbols. */
   MathFormulaItem *processSymbol(const std::string &symbol);
 
 
 protected:
   /** Represents a simple word consisting of at least one char regexp: "[a-zA-Z]+". */
-  class TextTokenRule : public Fluc::Parser::TokenRule {
+  class TextTokenRule : public iNA::Parser::TokenRule {
   public:
     /** Constructor. */
     TextTokenRule(unsigned id);
   };
 
   /** Represents a single symbol token regexp: "'\'[a-zA-Z]+" */
-  class SymbolTokenRule : public Fluc::Parser::TokenRule {
+  class SymbolTokenRule : public iNA::Parser::TokenRule {
   public:
     /** Constructor. */
     SymbolTokenRule(unsigned id);
   };
 
   /** Implements the Lexer for TinyTex */
-  class Lexer : public Fluc::Parser::Lexer {
+  class Lexer : public iNA::Parser::Lexer {
   public:
     /** Enumerates all token identifiers. */
     typedef enum {
-      TEXT_TOKEN = Fluc::Parser::Token::FIRST_USER_DEFINED, ///< A word.
+      TEXT_TOKEN = iNA::Parser::Token::FIRST_USER_DEFINED, ///< A word.
       SYMBOL_TOKEN,       ///< A symbol "\SYMBOLNAME"
       SUP_TOKEN,          ///< '^'
       SUB_TOKEN,          ///< '_'
@@ -107,14 +107,14 @@ protected:
 
 
   /** Grammar := Formula END_OF_FILE; */
-  class GrammarProduction : public Fluc::Parser::Production {
+  class GrammarProduction : public iNA::Parser::Production {
   protected:
     /** Hidden constructor. */
     GrammarProduction();
 
   public:
     /** Factory method of the singleton. */
-    static Fluc::Parser::Production *factory();
+    static iNA::Parser::Production *factory();
 
   private:
     /** Singleton instance. */
@@ -123,14 +123,14 @@ protected:
 
 
   /** Formula := SupSubScript [Formula] */
-  class FormulaProduction : public Fluc::Parser::Production {
+  class FormulaProduction : public iNA::Parser::Production {
   protected:
     /** Hidden constructor. */
     FormulaProduction();
 
   public:
     /** Factory method of the singleton. */
-    static Fluc::Parser::Production *factory();
+    static iNA::Parser::Production *factory();
 
   private:
     /** Singleton instance. */
@@ -138,11 +138,11 @@ protected:
   };
 
   /** SupSubScript := Element [('^'|'_') Element] */
-  class SupSubScriptProduction : public Fluc::Parser::Production
+  class SupSubScriptProduction : public iNA::Parser::Production
   {
   public:
     /** Factory method for the singleton. */
-    static Fluc::Parser::Production *factory();
+    static iNA::Parser::Production *factory();
 
   protected:
     /** hidden constructor. */
@@ -151,14 +151,14 @@ protected:
   };
 
   /** Element := (TEXT | SYMBOL | '{' Formula '}') */
-  class ElementProduction : public Fluc::Parser::AltProduction {
+  class ElementProduction : public iNA::Parser::AltProduction {
   protected:
     /** Hidden constructor. */
     ElementProduction();
 
   public:
     /** Factory method of the singleton. */
-    static Fluc::Parser::Production *factory();
+    static iNA::Parser::Production *factory();
 
   private:
     /** Singleton instance. */

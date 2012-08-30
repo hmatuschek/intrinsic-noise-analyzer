@@ -9,7 +9,7 @@
 #include <QMessageBox>
 
 
-ParameterList::ParameterList(Fluc::Ast::Model *model, QObject *parent)
+ParameterList::ParameterList(iNA::Ast::Model *model, QObject *parent)
   : QAbstractTableModel(parent), _model(model)
 {
   // Install some delegates for some columns:
@@ -23,7 +23,7 @@ ParameterList::data(const QModelIndex &index, int role) const
   if (! index.isValid() || 5 <= index.column()) { return QVariant(); }
   if (rowCount() <= index.row()) { return QVariant(); }
 
-  Fluc::Ast::Parameter *param = this->_model->getParameter(index.row());
+  iNA::Ast::Parameter *param = this->_model->getParameter(index.row());
 
   switch(index.column()) {
   case 0: return _getIdentifier(param, role);
@@ -45,7 +45,7 @@ ParameterList::setData(const QModelIndex &index, const QVariant &value, int role
   if (columnCount() <= index.column()) return false;
 
   // Get paramter for index (row):
-  Fluc::Ast::Parameter *param = _model->getParameter(index.row());
+  iNA::Ast::Parameter *param = _model->getParameter(index.row());
 
   // Dispatch
   bool success = false;
@@ -116,7 +116,7 @@ ParameterList::columnCount(const QModelIndex &parent) const {
   return 5;
 }
 
-Fluc::Ast::Model &
+iNA::Ast::Model &
 ParameterList::model() {
   return *_model;
 }
@@ -131,7 +131,7 @@ ParameterList::addParameter() {
   // Add paramter to model and update table
   beginInsertRows(QModelIndex(), new_idx, new_idx);
   _model->addDefinition(
-        new Fluc::Ast::Parameter(identifier, 0, Fluc::Ast::Unit::dimensionless(), true));
+        new iNA::Ast::Parameter(identifier, 0, iNA::Ast::Unit::dimensionless(), true));
   endInsertRows();
 }
 
@@ -143,7 +143,7 @@ ParameterList::remParameter(int row)
   if ((0 > row) || (row >= int(_model->numParameters()))) { return; }
 
   // Get param and count its references:
-  Fluc::Ast::Parameter *parameter = _model->getParameter(row);
+  iNA::Ast::Parameter *parameter = _model->getParameter(row);
   ReferenceCounter refs(parameter); _model->accept(refs);
 
   // Show message id
@@ -163,7 +163,7 @@ ParameterList::remParameter(int row)
 
 
 QVariant
-ParameterList::_getIdentifier(Fluc::Ast::Parameter *param, int role) const
+ParameterList::_getIdentifier(iNA::Ast::Parameter *param, int role) const
 {
   if (Qt::DisplayRole != role) { return QVariant(); }
 
@@ -171,7 +171,7 @@ ParameterList::_getIdentifier(Fluc::Ast::Parameter *param, int role) const
 }
 
 QVariant
-ParameterList::_getName(Fluc::Ast::Parameter *param, int role) const
+ParameterList::_getName(iNA::Ast::Parameter *param, int role) const
 {
   if ((Qt::DisplayRole != role) && (Qt::EditRole != role)) { return QVariant(); }
 
@@ -189,14 +189,14 @@ ParameterList::_getName(Fluc::Ast::Parameter *param, int role) const
 }
 
 bool
-ParameterList::_updateName(Fluc::Ast::Parameter *param, const QVariant &value)
+ParameterList::_updateName(iNA::Ast::Parameter *param, const QVariant &value)
 {
   param->setName(value.toString().toStdString());
   return true;
 }
 
 QVariant
-ParameterList::_getInitialValue(Fluc::Ast::Parameter *param, int role) const
+ParameterList::_getInitialValue(iNA::Ast::Parameter *param, int role) const
 {
   if ((Qt::DisplayRole != role) && (Qt::EditRole != role)) { return QVariant(); }
 
@@ -211,17 +211,17 @@ ParameterList::_getInitialValue(Fluc::Ast::Parameter *param, int role) const
 }
 
 bool
-ParameterList::_updateInitialValue(Fluc::Ast::Parameter *param, const QVariant &value)
+ParameterList::_updateInitialValue(iNA::Ast::Parameter *param, const QVariant &value)
 {
   // If the initial value was changed: get expression
   std::string expression = value.toString().toStdString();
   // parse expression
   GiNaC::ex new_value;
-  try { new_value = Fluc::Parser::Expr::parseExpression(expression, _model); }
-  catch (Fluc::Exception &err) {
-    Fluc::Utils::Message msg = LOG_MESSAGE(Fluc::Utils::Message::INFO);
+  try { new_value = iNA::Parser::Expr::parseExpression(expression, _model); }
+  catch (iNA::Exception &err) {
+    iNA::Utils::Message msg = LOG_MESSAGE(iNA::Utils::Message::INFO);
     msg << "Can not parse expression: " << expression << ": " << err.what();
-    Fluc::Utils::Logger::get().log(msg);
+    iNA::Utils::Logger::get().log(msg);
     return false;
   }
   // Set new "value"
@@ -230,7 +230,7 @@ ParameterList::_updateInitialValue(Fluc::Ast::Parameter *param, const QVariant &
 }
 
 QVariant
-ParameterList::_getUnit(Fluc::Ast::Parameter *param, int role) const
+ParameterList::_getUnit(iNA::Ast::Parameter *param, int role) const
 {
   if ((Qt::DecorationRole != role)) { return QVariant(); }
 
@@ -239,7 +239,7 @@ ParameterList::_getUnit(Fluc::Ast::Parameter *param, int role) const
 }
 
 QVariant
-ParameterList::_getConstFlag(Fluc::Ast::Parameter *param, int role) const {
+ParameterList::_getConstFlag(iNA::Ast::Parameter *param, int role) const {
   if ((Qt::CheckStateRole != role) && (Qt::EditRole != role)) { return QVariant(); }
 
   if (Qt::CheckStateRole == role) {
@@ -254,7 +254,7 @@ ParameterList::_getConstFlag(Fluc::Ast::Parameter *param, int role) const {
 
 
 bool
-ParameterList::_updateConstFlag(Fluc::Ast::Parameter *param, const QVariant &value)
+ParameterList::_updateConstFlag(iNA::Ast::Parameter *param, const QVariant &value)
 {
   param->setConst(value.toBool());
   return true;

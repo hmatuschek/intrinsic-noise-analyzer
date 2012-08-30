@@ -58,7 +58,7 @@ public:
    * @param path Specifies the path of the file.
    * @param parent Specifies the "logical" parent of the instance.
    */
-  explicit DocumentItem(Fluc::Ast::Model *model, const QString &path=QString(), QObject *parent=0);
+  explicit DocumentItem(iNA::Ast::Model *model, const QString &path=QString(), QObject *parent=0);
 
   /**
    * Destructor.
@@ -70,12 +70,12 @@ public:
   /**
    * Returns the @c Ast::Model instance associated with this document.
    */
-  Fluc::Ast::Model &getModel();
+  iNA::Ast::Model &getModel();
 
   /**
    * Returns the @c Ast::Model instance associated with this document.
    */
-  const Fluc::Ast::Model &getModel() const;
+  const iNA::Ast::Model &getModel() const;
 
   /**
    * Adds a task to the document.

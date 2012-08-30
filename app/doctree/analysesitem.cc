@@ -2,7 +2,7 @@
 #include "exception.hh"
 #include "../application.hh"
 
-using namespace Fluc;
+using namespace iNA;
 
 AnalysesItem::AnalysesItem(QObject *parent) :
   QObject(parent), DocumentTreeItem(), itemLabel("Analyses")

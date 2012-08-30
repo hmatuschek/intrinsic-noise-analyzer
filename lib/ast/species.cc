@@ -1,8 +1,8 @@
 #include "species.hh"
 #include "exception.hh"
 
-using namespace Fluc;
-using namespace Fluc::Ast;
+using namespace iNA;
+using namespace iNA::Ast;
 
 
 Species::Species(const std::string &id, const Unit &unit, Compartment *compartment, bool is_const)

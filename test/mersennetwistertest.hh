@@ -4,7 +4,7 @@
 #include "unittest.hh"
 
 
-namespace Fluc {
+namespace iNA {
 
 /**
  * Simple test case, where I test two identical RNG against each other.

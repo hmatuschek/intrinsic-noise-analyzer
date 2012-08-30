@@ -1,7 +1,7 @@
 #include "basemodel.hh"
 
-using namespace Fluc;
-using namespace Fluc::Models;
+using namespace iNA;
+using namespace iNA::Models;
 
 
 BaseModel::BaseModel(const Ast::Model &model)

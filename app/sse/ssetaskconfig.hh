@@ -45,7 +45,7 @@ public:
   virtual void setModelDocument(DocumentItem *document);
 
   /** Implements the @c SpeciesSelectionTaskConfig interface, and returns the model instance. */
-  virtual Fluc::Ast::Model *getModel() const;
+  virtual iNA::Ast::Model *getModel() const;
 
   /** Get model as specific type. */
   template <class T> T* getModelAs() const {
@@ -60,11 +60,11 @@ public:
 
 public:
   /** The model to be analyzed. */
-  Fluc::Models::REmodel *re_model;
+  iNA::Models::REmodel *re_model;
   /** The model to be analyzed. */
-  Fluc::Models::LNAmodel *lna_model;
+  iNA::Models::LNAmodel *lna_model;
   /** The model to be analyzed. */
-  Fluc::Models::IOSmodel *ios_model;
+  iNA::Models::IOSmodel *ios_model;
 };
 
 

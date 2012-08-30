@@ -4,7 +4,7 @@
 #include "ast/ast.hh"
 #include "ssebasemodel.hh"
 
-namespace Fluc {
+namespace iNA {
 namespace Models {
 
 class ConservationConstantCollector

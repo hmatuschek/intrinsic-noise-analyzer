@@ -1,7 +1,7 @@
 #include "parameter.hh"
 
-using namespace Fluc;
-using namespace Fluc::Ast;
+using namespace iNA;
+using namespace iNA::Ast;
 
 
 Parameter::Parameter(const std::string &id, const Unit &unit, bool is_const)

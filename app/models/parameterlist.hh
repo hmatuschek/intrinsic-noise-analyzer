@@ -15,7 +15,7 @@ class ParameterList : public QAbstractTableModel
 
 public:
   /** Constructs a parameter list from the given SBML model. */
-  explicit ParameterList(Fluc::Ast::Model *_model, QObject *parent = 0);
+  explicit ParameterList(iNA::Ast::Model *_model, QObject *parent = 0);
 
   /** Implementation for the QAbstractTableModel. Returns the requested data. */
   QVariant data(const QModelIndex &index, int role) const;
@@ -36,7 +36,7 @@ public:
   int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
   /** Returns a weak reference to the model instance. */
-  Fluc::Ast::Model &model();
+  iNA::Ast::Model &model();
 
   /** Adds a new paramter to the list of paramters. */
   void addParameter();
@@ -45,26 +45,26 @@ public:
 
 private:
   /** Retunrs the identifier of the parameter. */
-  QVariant _getIdentifier(Fluc::Ast::Parameter *param, int role) const;
+  QVariant _getIdentifier(iNA::Ast::Parameter *param, int role) const;
   /** Retuns the name of the paramter. */
-  QVariant _getName(Fluc::Ast::Parameter *param, int role) const;
+  QVariant _getName(iNA::Ast::Parameter *param, int role) const;
   /** Retuns the name of the paramter. */
-  bool _updateName(Fluc::Ast::Parameter *param, const QVariant &value);
+  bool _updateName(iNA::Ast::Parameter *param, const QVariant &value);
   /** Returns the intial value of the paramter. */
-  QVariant _getInitialValue(Fluc::Ast::Parameter *param, int role) const;
+  QVariant _getInitialValue(iNA::Ast::Parameter *param, int role) const;
   /** Updates the initial value of the paramter. */
-  bool _updateInitialValue(Fluc::Ast::Parameter *param, const QVariant &value);
+  bool _updateInitialValue(iNA::Ast::Parameter *param, const QVariant &value);
   /** Return the unit of the parameter. */
-  QVariant _getUnit(Fluc::Ast::Parameter *param, int role) const;
+  QVariant _getUnit(iNA::Ast::Parameter *param, int role) const;
   /** Returns the const flag. */
-  QVariant _getConstFlag(Fluc::Ast::Parameter *param, int role) const;
+  QVariant _getConstFlag(iNA::Ast::Parameter *param, int role) const;
   /** Updates the const flag. */
-  bool _updateConstFlag(Fluc::Ast::Parameter *param, const QVariant &value);
+  bool _updateConstFlag(iNA::Ast::Parameter *param, const QVariant &value);
 
 
 private:
   /** Holds a weak reference to the SBML model. */
-  Fluc::Ast::Model *_model;
+  iNA::Ast::Model *_model;
 };
 
 #endif // PARAMETERLIST_HH

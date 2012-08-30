@@ -4,7 +4,7 @@
 #include <ast/model.hh>
 
 
-namespace Fluc {
+namespace iNA {
 namespace Parser {
 namespace Sbml {
 

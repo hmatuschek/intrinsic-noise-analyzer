@@ -2,7 +2,7 @@
 #include <parser/sbml/sbml.hh>
 #include <fstream>
 
-using namespace Fluc;
+using namespace iNA;
 
 int main(int argc, char *argv[])
 {

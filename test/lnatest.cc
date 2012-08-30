@@ -7,7 +7,7 @@
 #include "parser/parser.hh"
 
 
-using namespace Fluc;
+using namespace iNA;
 
 LNATest::~LNATest()
 {

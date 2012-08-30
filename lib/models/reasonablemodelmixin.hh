@@ -11,7 +11,7 @@
 #include "assertirreversiblereactions.hh"
 
 
-namespace Fluc {
+namespace iNA {
 namespace Models {
 
 

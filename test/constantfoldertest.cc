@@ -5,7 +5,7 @@
 #include "trafo/trafo.hh"
 
 
-using namespace Fluc;
+using namespace iNA;
 
 ConstantFolderTest::~ConstantFolderTest()
 {

@@ -1,7 +1,7 @@
 #ifndef __INA_AST_VISITOR_HH__
 #define __INA_AST_VISITOR_HH__
 
-namespace Fluc {
+namespace iNA {
 namespace Ast {
 
 /** Base class of all visitors.

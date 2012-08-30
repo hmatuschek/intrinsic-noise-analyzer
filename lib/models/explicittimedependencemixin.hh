@@ -4,7 +4,7 @@
 #include "basemodel.hh"
 #include "exception.hh"
 
-namespace Fluc {
+namespace iNA {
 namespace Models {
 
 

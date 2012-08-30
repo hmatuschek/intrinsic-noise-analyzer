@@ -5,7 +5,7 @@
 #include "ast/ast.hh"
 
 
-namespace Fluc {
+namespace iNA {
 
 class ConservationAnalysisTest : public UnitTest::TestCase
 {

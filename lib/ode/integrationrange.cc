@@ -1,6 +1,6 @@
 #include "integrationrange.hh"
 
-using namespace Fluc::ODE;
+using namespace iNA::ODE;
 
 
 IntegrationRange::IntegrationRange(double t0, double t, size_t n)

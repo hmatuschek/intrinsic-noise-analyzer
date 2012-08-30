@@ -1,5 +1,5 @@
-#ifndef __FLUC_PARSER_LEXER_HH__
-#define __FLUC_PARSER_LEXER_HH__
+#ifndef __INA_PARSER_LEXER_HH__
+#define __INA_PARSER_LEXER_HH__
 
 #include "automata.hh"
 #include <vector>
@@ -7,7 +7,7 @@
 #include <sstream>
 
 
-namespace Fluc {
+namespace iNA {
 namespace Parser {
 
 /**

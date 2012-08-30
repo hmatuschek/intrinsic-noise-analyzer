@@ -31,7 +31,7 @@ public:
   /**
    * Constructs a new DocumentTree item holding the list of species of the given model.
    */
-  SpeciesItem(Fluc::Ast::Model *model, QObject *parent=0);
+  SpeciesItem(iNA::Ast::Model *model, QObject *parent=0);
 
   /**
    * Returns the list of species.

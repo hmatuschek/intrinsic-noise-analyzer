@@ -5,7 +5,7 @@
 #include "eval/bci/interpreter.hh"
 
 
-namespace Fluc {
+namespace iNA {
 namespace Eval {
 namespace bcimp {
 

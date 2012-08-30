@@ -5,7 +5,7 @@
 #include "ginacsupportforeigen.hh"
 
 
-namespace Fluc {
+namespace iNA {
 namespace Trafo {
 
 /** This visitor traverses a given model and throws a @c SBMLFeatureNotSupported exception if

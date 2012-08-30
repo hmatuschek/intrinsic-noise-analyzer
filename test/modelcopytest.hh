@@ -4,7 +4,7 @@
 #include "unittest.hh"
 #include "ast/ast.hh"
 
-namespace Fluc {
+namespace iNA {
 
 /**
  * Simple test to check if copying of models work.

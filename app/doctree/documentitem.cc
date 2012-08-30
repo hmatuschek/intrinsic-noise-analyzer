@@ -7,7 +7,7 @@
 #include <QMessageBox>
 
 
-using namespace Fluc;
+using namespace iNA;
 
 
 
@@ -37,7 +37,7 @@ DocumentItem::DocumentItem(const QString &path, QObject *parent)
 
 
 
-DocumentItem::DocumentItem(Fluc::Ast::Model *model, const QString &path, QObject *parent)
+DocumentItem::DocumentItem(iNA::Ast::Model *model, const QString &path, QObject *parent)
   : QObject(parent), DocumentTreeItem(), file_path(path)
 {
   this->model = new ModelItem(model, this);
@@ -69,14 +69,14 @@ DocumentItem::~DocumentItem()
 }
 
 
-Fluc::Ast::Model &
+iNA::Ast::Model &
 DocumentItem::getModel()
 {
   return this->model->getModel();
 }
 
 
-const Fluc::Ast::Model &
+const iNA::Ast::Model &
 DocumentItem::getModel() const
 {
   return this->model->getModel();

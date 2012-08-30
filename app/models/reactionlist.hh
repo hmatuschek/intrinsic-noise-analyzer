@@ -14,10 +14,10 @@ class ReactionList : public QAbstractTableModel
 
 public:
   /** Constructor. */
-  explicit ReactionList(Fluc::Ast::Model *model, QObject *parent = 0);
+  explicit ReactionList(iNA::Ast::Model *model, QObject *parent = 0);
 
   /** Returns a weak reference to the model. */
-  Fluc::Ast::Model &getModel();
+  iNA::Ast::Model &getModel();
 
   /** Implementation for the QAbstractTableModel. Returns the requested data. */
   QVariant data(const QModelIndex &index, int role) const;
@@ -32,12 +32,12 @@ public:
   int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
 private:
-  QVariant getName(Fluc::Ast::Reaction *reaction, int role) const;
-  QVariant getReaction(Fluc::Ast::Reaction *reaction, int role) const;
-  QVariant getKineticLaw(Fluc::Ast::Reaction *reaction, int role) const;
+  QVariant getName(iNA::Ast::Reaction *reaction, int role) const;
+  QVariant getReaction(iNA::Ast::Reaction *reaction, int role) const;
+  QVariant getKineticLaw(iNA::Ast::Reaction *reaction, int role) const;
 
 private:
-  Fluc::Ast::Model *_model;
+  iNA::Ast::Model *_model;
 
 };
 

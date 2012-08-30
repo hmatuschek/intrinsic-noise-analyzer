@@ -1,10 +1,10 @@
 #include "scopeitemmodel.hh"
 #include <QStringList>
 
-using namespace Fluc;
+using namespace iNA;
 
 
-ScopeItemModel::ScopeItemModel(const Fluc::Ast::Scope &scope, QObject *parent)
+ScopeItemModel::ScopeItemModel(const iNA::Ast::Scope &scope, QObject *parent)
   : QAbstractListModel(parent), _items()
 {
   const Ast::Scope *current_scope = &scope;
@@ -51,7 +51,7 @@ ScopeItemModel::headerData(int section, Qt::Orientation orientation, int role) c
 
 
 QStringList
-ScopeItemModel::collectIdentifiers(const Fluc::Ast::Scope &scope, unsigned selection)
+ScopeItemModel::collectIdentifiers(const iNA::Ast::Scope &scope, unsigned selection)
 {
   QStringList ids;
   const Ast::Scope *current_scope = &scope;

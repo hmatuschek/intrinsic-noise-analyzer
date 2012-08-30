@@ -6,7 +6,7 @@
 #include "smartptr.hh"
 
 
-namespace Fluc {
+namespace iNA {
 namespace Eval {
 namespace bci {
 

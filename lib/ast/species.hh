@@ -5,7 +5,7 @@
 #include "compartment.hh"
 
 
-namespace Fluc {
+namespace iNA {
 namespace Ast {
 
 /**

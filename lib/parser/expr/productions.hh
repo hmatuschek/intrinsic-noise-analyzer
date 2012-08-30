@@ -5,7 +5,7 @@
 #include <parser/production.hh>
 
 
-namespace Fluc {
+namespace iNA {
 namespace Parser {
 namespace Expr {
 
@@ -44,7 +44,7 @@ protected:
 
 public:
   /** Factory method. */
-  static Fluc::Parser::Production *get();
+  static iNA::Parser::Production *get();
 
 protected:
   static FunctionCallArgumentsProduction *instance;
@@ -63,7 +63,7 @@ protected:
 
 public:
   /** Factory method. */
-  static Fluc::Parser::Production *get();
+  static iNA::Parser::Production *get();
 
 protected:
   /** Singleton instance. */
@@ -83,7 +83,7 @@ protected:
 
 public:
   /** Factory method. */
-  static Fluc::Parser::Production *get();
+  static iNA::Parser::Production *get();
 
 private:
   /** Singleton instance. */
@@ -103,7 +103,7 @@ protected:
 
 public:
   /** Factory method. */
-  static Fluc::Parser::Production *get();
+  static iNA::Parser::Production *get();
 
 protected:
   static PowerExpressionProduction *instance;
@@ -122,7 +122,7 @@ protected:
 
 public:
   /** Factory method. */
-  static Fluc::Parser::Production *get();
+  static iNA::Parser::Production *get();
 
 private:
   /** Singleton instance. */
@@ -142,7 +142,7 @@ protected:
 
 public:
   /** factory method. */
-  static Fluc::Parser::Production *get();
+  static iNA::Parser::Production *get();
 
 private:
   /** Singleton instance. */
@@ -162,7 +162,7 @@ protected:
 
 public:
   /** factory method. */
-  static Fluc::Parser::Production *get();
+  static iNA::Parser::Production *get();
 
 private:
   /** Singleton instance. */

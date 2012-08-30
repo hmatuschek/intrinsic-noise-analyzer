@@ -4,7 +4,7 @@
 #include <exception.hh>
 
 
-namespace Fluc {
+namespace iNA {
 namespace Parser {
 
 

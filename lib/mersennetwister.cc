@@ -1,4 +1,4 @@
 #include "mersennetwister.hh"
 
-using namespace Fluc;
+using namespace iNA;
 

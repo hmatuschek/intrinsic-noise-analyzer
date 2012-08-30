@@ -2,8 +2,8 @@
 #include "math.hh"
 
 
-using namespace Fluc;
-using namespace Fluc::Parser::Sbml;
+using namespace iNA;
+using namespace iNA::Parser::Sbml;
 
 
 /* ********************************************************************************************* *
@@ -691,10 +691,10 @@ Parser::Sbml::__process_expression(const LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode
   switch (node->getType())
   {
   case LIBSBML_CPP_NAMESPACE_QUALIFIER AST_CONSTANT_E:
-    return GiNaC::numeric(Fluc::constants::e);
+    return GiNaC::numeric(iNA::constants::e);
 
   case LIBSBML_CPP_NAMESPACE_QUALIFIER AST_CONSTANT_PI:
-    return GiNaC::numeric(Fluc::constants::pi);
+    return GiNaC::numeric(iNA::constants::pi);
 
   case LIBSBML_CPP_NAMESPACE_QUALIFIER AST_CONSTANT_TRUE:
   case LIBSBML_CPP_NAMESPACE_QUALIFIER AST_CONSTANT_FALSE:

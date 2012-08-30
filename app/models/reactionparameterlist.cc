@@ -14,7 +14,7 @@
 /* ********************************************************************************************* *
  * Implementation of ReactionParameterModel for the local parameters of a reaction
  * ********************************************************************************************* */
-ReactionParameterList::ReactionParameterList(Fluc::Ast::KineticLaw *law, QObject *parent)
+ReactionParameterList::ReactionParameterList(iNA::Ast::KineticLaw *law, QObject *parent)
   : QAbstractTableModel(parent), _kinetic_law(law)
 {
   // Pass...
@@ -47,7 +47,7 @@ ReactionParameterList::data(const QModelIndex &index, int role) const
   if (rowCount() <= index.row()) { return QVariant(); }
 
   // Get selected paramter:
-  Fluc::Ast::Parameter *param = this->_kinetic_law->getParameter(index.row());
+  iNA::Ast::Parameter *param = this->_kinetic_law->getParameter(index.row());
 
   // Dispatch by column:
   switch (index.column()) {
@@ -70,7 +70,7 @@ ReactionParameterList::setData(const QModelIndex &index, const QVariant &value, 
   if (index.column() >= columnCount()) return false;
 
   // Get paramter for index (row):
-  Fluc::Ast::Parameter *param = _kinetic_law->getParameter(index.row());
+  iNA::Ast::Parameter *param = _kinetic_law->getParameter(index.row());
 
   // Dispatch...
   bool success = false;
@@ -117,7 +117,7 @@ ReactionParameterList::columnCount(const QModelIndex &parent) const {
 }
 
 
-Fluc::Ast::KineticLaw &
+iNA::Ast::KineticLaw &
 ReactionParameterList::kineticLaw() {
   return *_kinetic_law;
 }
@@ -133,7 +133,7 @@ ReactionParameterList::addParameter()
   int new_idx = _kinetic_law->numParameters();
   beginInsertRows(QModelIndex(), new_idx, new_idx);
   _kinetic_law->addDefinition(
-        new Fluc::Ast::Parameter(identifier, 0, Fluc::Ast::Unit::dimensionless(), true));
+        new iNA::Ast::Parameter(identifier, 0, iNA::Ast::Unit::dimensionless(), true));
   endInsertRows();
 }
 
@@ -145,7 +145,7 @@ ReactionParameterList::remParameter(int row)
   if ((0 > row) || (row >= int(_kinetic_law->numParameters()))) { return; }
 
   // Get param and count its references:
-  Fluc::Ast::Parameter *parameter = _kinetic_law->getParameter(row);
+  iNA::Ast::Parameter *parameter = _kinetic_law->getParameter(row);
   ReferenceCounter refs(parameter); _kinetic_law->accept(refs);
 
   // Show message id
@@ -165,7 +165,7 @@ ReactionParameterList::remParameter(int row)
 
 
 QVariant
-ReactionParameterList::_getIdentifier(Fluc::Ast::Parameter *param, int role) const
+ReactionParameterList::_getIdentifier(iNA::Ast::Parameter *param, int role) const
 {
   if (Qt::DisplayRole != role) { return QVariant(); }
   return QString(param->getIdentifier().c_str());
@@ -173,7 +173,7 @@ ReactionParameterList::_getIdentifier(Fluc::Ast::Parameter *param, int role) con
 
 
 QVariant
-ReactionParameterList::_getName(Fluc::Ast::Parameter *param, int role) const
+ReactionParameterList::_getName(iNA::Ast::Parameter *param, int role) const
 {
   if (Qt::DisplayRole == role) {
     if (param->hasName()) {
@@ -194,7 +194,7 @@ ReactionParameterList::_getName(Fluc::Ast::Parameter *param, int role) const
 
 
 bool
-ReactionParameterList::_updateName(Fluc::Ast::Parameter *param, const QVariant &value)
+ReactionParameterList::_updateName(iNA::Ast::Parameter *param, const QVariant &value)
 {
   param->setName(value.toString().toStdString());
   return true;
@@ -202,7 +202,7 @@ ReactionParameterList::_updateName(Fluc::Ast::Parameter *param, const QVariant &
 
 
 QVariant
-ReactionParameterList::_getInitialValue(Fluc::Ast::Parameter *param, int role) const
+ReactionParameterList::_getInitialValue(iNA::Ast::Parameter *param, int role) const
 {
   // Try to render formula as pixmap
   if (Qt::DisplayRole == role) {
@@ -222,17 +222,17 @@ ReactionParameterList::_getInitialValue(Fluc::Ast::Parameter *param, int role) c
 
 
 bool
-ReactionParameterList::_updateInitialValue(Fluc::Ast::Parameter *param, const QVariant &value)
+ReactionParameterList::_updateInitialValue(iNA::Ast::Parameter *param, const QVariant &value)
 {
   // If the initial value was changed: get expression
   std::string expression = value.toString().toStdString();
   // parse expression
   GiNaC::ex new_value;
-  try { new_value = Fluc::Parser::Expr::parseExpression(expression, _kinetic_law); }
-  catch (Fluc::Exception &err) {
-    Fluc::Utils::Message msg = LOG_MESSAGE(Fluc::Utils::Message::INFO);
+  try { new_value = iNA::Parser::Expr::parseExpression(expression, _kinetic_law); }
+  catch (iNA::Exception &err) {
+    iNA::Utils::Message msg = LOG_MESSAGE(iNA::Utils::Message::INFO);
     msg << "Can not parse expression: " << expression << ": " << err.what();
-    Fluc::Utils::Logger::get().log(msg);
+    iNA::Utils::Logger::get().log(msg);
     return false;
   }
   // Set new "value"
@@ -242,7 +242,7 @@ ReactionParameterList::_updateInitialValue(Fluc::Ast::Parameter *param, const QV
 
 
 QVariant
-ReactionParameterList::_getUnit(Fluc::Ast::Parameter *param, int role) const
+ReactionParameterList::_getUnit(iNA::Ast::Parameter *param, int role) const
 {
   if ((Qt::DecorationRole != role)) { return QVariant(); }
 
@@ -252,7 +252,7 @@ ReactionParameterList::_getUnit(Fluc::Ast::Parameter *param, int role) const
 
 
 QVariant
-ReactionParameterList::_getConstFlag(Fluc::Ast::Parameter *param, int role) const
+ReactionParameterList::_getConstFlag(iNA::Ast::Parameter *param, int role) const
 {
   if (Qt::CheckStateRole != role) { return QVariant(); }
   if (param->isConst()) { return Qt::Checked; }
@@ -261,7 +261,7 @@ ReactionParameterList::_getConstFlag(Fluc::Ast::Parameter *param, int role) cons
 
 
 bool
-ReactionParameterList::_updateConstFlag(Fluc::Ast::Parameter *param, const QVariant &value)
+ReactionParameterList::_updateConstFlag(iNA::Ast::Parameter *param, const QVariant &value)
 {
   if (value == Qt::Checked) {
     param->setConst(true);

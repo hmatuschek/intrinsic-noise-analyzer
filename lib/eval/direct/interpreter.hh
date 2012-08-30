@@ -6,7 +6,7 @@
 #include <complex>
 
 
-namespace Fluc {
+namespace iNA {
 namespace Eval {
 namespace direct {
 
@@ -174,7 +174,7 @@ public:
 
       // Check if value is a numerical value:
       if (! GiNaC::is_a<GiNaC::numeric>(value)) {
-        Fluc::RuntimeError err;
+        iNA::RuntimeError err;
         err << "Can not evaluate GiNaC expression " << item->first
             << " some symbols can not be resolved! Minimal expression: " << value;
         throw err;

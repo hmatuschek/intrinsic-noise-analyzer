@@ -14,7 +14,7 @@ class SpeciesRuleDelegate : public QItemDelegate
 
 public:
   /** Constructor. */
-  explicit SpeciesRuleDelegate(Fluc::Ast::Model &model, QObject *parent = 0);
+  explicit SpeciesRuleDelegate(iNA::Ast::Model &model, QObject *parent = 0);
 
   /** Creates the editor widget. */
   QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const;
@@ -27,7 +27,7 @@ public:
 
 private:
   /** Holds the model. */
-  Fluc::Ast::Model &_model;
+  iNA::Ast::Model &_model;
 };
 
 

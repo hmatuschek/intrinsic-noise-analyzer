@@ -3,10 +3,10 @@
 #include <QApplication>
 
 
-using namespace Fluc;
+using namespace iNA;
 
 
-SpeciesRuleDelegate::SpeciesRuleDelegate(Fluc::Ast::Model &model, QObject *parent)
+SpeciesRuleDelegate::SpeciesRuleDelegate(iNA::Ast::Model &model, QObject *parent)
   : QItemDelegate(parent), _model(model)
 {
   // Pass...

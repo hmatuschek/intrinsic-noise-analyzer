@@ -4,7 +4,7 @@
 #include "ast/ast.hh"
 
 
-namespace Fluc {
+namespace iNA {
 namespace Trafo {
 
 

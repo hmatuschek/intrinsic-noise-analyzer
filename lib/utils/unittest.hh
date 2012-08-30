@@ -6,7 +6,7 @@
 #include <ginac/ginac.h>
 
 
-namespace Fluc {
+namespace iNA {
 namespace Utils {
 namespace UnitTest {
 

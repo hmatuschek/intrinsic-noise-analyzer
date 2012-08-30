@@ -10,7 +10,7 @@
 #include <QMessageBox>
 
 
-CompartmentList::CompartmentList(Fluc::Ast::Model *model, QObject *parent)
+CompartmentList::CompartmentList(iNA::Ast::Model *model, QObject *parent)
   : QAbstractTableModel(parent), _model(model)
 {
   // Pass...
@@ -44,7 +44,7 @@ CompartmentList::data(const QModelIndex &index, int role) const
   if (rowCount() <= index.row()) { return QVariant(); }
 
   // Get selected compartment:
-  Fluc::Ast::Compartment *comp = this->_model->getCompartment(index.row());
+  iNA::Ast::Compartment *comp = this->_model->getCompartment(index.row());
 
   // Dispatch:
   switch (index.column()) {
@@ -68,7 +68,7 @@ CompartmentList::setData(const QModelIndex &index, const QVariant &value, int ro
   if (index.column() >= columnCount()) return false;
 
   // Get compartment:
-  Fluc::Ast::Compartment *comp = _model->getCompartment(index.row());
+  iNA::Ast::Compartment *comp = _model->getCompartment(index.row());
 
   // Dispatch
   bool success = false;
@@ -115,14 +115,14 @@ int CompartmentList::columnCount(const QModelIndex &parent) const {
   return 5;
 }
 
-Fluc::Ast::Model &
+iNA::Ast::Model &
 CompartmentList::model() {
   return *_model;
 }
 
 
 QVariant
-CompartmentList::_getIdentifier(Fluc::Ast::Compartment *compartment, int role) const
+CompartmentList::_getIdentifier(iNA::Ast::Compartment *compartment, int role) const
 {
   if (Qt::DisplayRole != role) { return QVariant(); }
   return QString(compartment->getIdentifier().c_str());
@@ -130,7 +130,7 @@ CompartmentList::_getIdentifier(Fluc::Ast::Compartment *compartment, int role) c
 
 
 QVariant
-CompartmentList::_getName(Fluc::Ast::Compartment *compartment, int role) const
+CompartmentList::_getName(iNA::Ast::Compartment *compartment, int role) const
 {
   if ( (Qt::DisplayRole != role) && (Qt::EditRole != role)) { return QVariant(); }
 
@@ -149,7 +149,7 @@ CompartmentList::_getName(Fluc::Ast::Compartment *compartment, int role) const
 }
 
 bool
-CompartmentList::_updateName(Fluc::Ast::Compartment *compartment, const QVariant &value)
+CompartmentList::_updateName(iNA::Ast::Compartment *compartment, const QVariant &value)
 {
   compartment->setName(value.toString().toStdString());
   return true;
@@ -157,7 +157,7 @@ CompartmentList::_updateName(Fluc::Ast::Compartment *compartment, const QVariant
 
 
 QVariant
-CompartmentList::_getInitValue(Fluc::Ast::Compartment *comp, int role) const
+CompartmentList::_getInitValue(iNA::Ast::Compartment *comp, int role) const
 {
   if (Qt::DisplayRole == role) {
     // Render initial value:
@@ -172,17 +172,17 @@ CompartmentList::_getInitValue(Fluc::Ast::Compartment *comp, int role) const
 }
 
 bool
-CompartmentList::_updateInitValue(Fluc::Ast::Compartment *compartment, const QVariant &value)
+CompartmentList::_updateInitValue(iNA::Ast::Compartment *compartment, const QVariant &value)
 {
   // If the initial value was changed: get expression
   std::string expression = value.toString().toStdString();
   // parse expression
   GiNaC::ex new_value;
-  try { new_value = Fluc::Parser::Expr::parseExpression(expression, _model); }
-  catch (Fluc::Exception &err) {
-    Fluc::Utils::Message msg = LOG_MESSAGE(Fluc::Utils::Message::INFO);
+  try { new_value = iNA::Parser::Expr::parseExpression(expression, _model); }
+  catch (iNA::Exception &err) {
+    iNA::Utils::Message msg = LOG_MESSAGE(iNA::Utils::Message::INFO);
     msg << "Can not parse expression: " << expression << ": " << err.what();
-    Fluc::Utils::Logger::get().log(msg);
+    iNA::Utils::Logger::get().log(msg);
     return false;
   }
   // Set new "value"
@@ -192,7 +192,7 @@ CompartmentList::_updateInitValue(Fluc::Ast::Compartment *compartment, const QVa
 
 
 QVariant
-CompartmentList::_getUnit(Fluc::Ast::Compartment *compartment, int role) const
+CompartmentList::_getUnit(iNA::Ast::Compartment *compartment, int role) const
 {
   if ((Qt::DecorationRole != role) || (Qt::EditRole == role)) { return QVariant(); }
 
@@ -203,25 +203,25 @@ CompartmentList::_getUnit(Fluc::Ast::Compartment *compartment, int role) const
   }
 
   // Return serialized unit for edit role:
-  return Fluc::Parser::Unit::UnitParser::write(compartment->getUnit()).c_str();
+  return iNA::Parser::Unit::UnitParser::write(compartment->getUnit()).c_str();
 }
 
 
 bool
-CompartmentList::_updateUnit(Fluc::Ast::Compartment *compartment, const QVariant &value)
+CompartmentList::_updateUnit(iNA::Ast::Compartment *compartment, const QVariant &value)
 {
   // Try to parse the unit from string:
   try {
-    Fluc::Ast::Unit unit = Fluc::Parser::Unit::UnitParser::parse(value.toString().toStdString());
+    iNA::Ast::Unit unit = iNA::Parser::Unit::UnitParser::parse(value.toString().toStdString());
     compartment->setUnit(unit);
-  } catch (const Fluc::Parser::ParserError &err) {
+  } catch (const iNA::Parser::ParserError &err) {
     return false;
   }
   return true;
 }
 
 QVariant
-CompartmentList::_getConstFlag(Fluc::Ast::Compartment *compartment, int role) const
+CompartmentList::_getConstFlag(iNA::Ast::Compartment *compartment, int role) const
 {
   if (Qt::CheckStateRole != role) { return QVariant(); }
   if (compartment->isConst()) { return Qt::Checked; }
@@ -229,7 +229,7 @@ CompartmentList::_getConstFlag(Fluc::Ast::Compartment *compartment, int role) co
 }
 
 bool
-CompartmentList::_updateConstFlag(Fluc::Ast::Compartment *compartment, const QVariant &value)
+CompartmentList::_updateConstFlag(iNA::Ast::Compartment *compartment, const QVariant &value)
 {
   if (Qt::Checked == value) { compartment->setConst(true); }
   else { compartment->setConst(false); }
@@ -246,8 +246,8 @@ CompartmentList::addCompartment()
   // Signal views and add compartment:
   beginInsertRows(QModelIndex(), new_idx, new_idx);
   _model->addDefinition(
-        new Fluc::Ast::Compartment(
-          identifier, _model->getDefaultVolumeUnit(), Fluc::Ast::Compartment::VOLUME, true));
+        new iNA::Ast::Compartment(
+          identifier, _model->getDefaultVolumeUnit(), iNA::Ast::Compartment::VOLUME, true));
   endInsertRows();
 }
 
@@ -257,7 +257,7 @@ CompartmentList::remCompartment(int row)
 {
   if (row >= rowCount()) { return; }
   // Get compartment and count its references:
-  Fluc::Ast::Compartment *compartment = _model->getCompartment(row);
+  iNA::Ast::Compartment *compartment = _model->getCompartment(row);
   ReferenceCounter refs(compartment); _model->accept(refs);
 
   // Show message id

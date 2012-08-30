@@ -6,7 +6,7 @@
 /* ********************************************************************************************* *
  * Implementation of ReactionWrapper a single reaction
  * ********************************************************************************************* */
-ReactionItem::ReactionItem(Fluc::Ast::Reaction *reaction, QObject *parent)
+ReactionItem::ReactionItem(iNA::Ast::Reaction *reaction, QObject *parent)
   : QObject(parent), _reaction(reaction), _local_parameters(0), _itemLabel()
 {
   // Assemble display name
@@ -35,7 +35,7 @@ ReactionItem::getDisplayName() const
 }
 
 
-Fluc::Ast::Reaction *
+iNA::Ast::Reaction *
 ReactionItem::getReaction()
 {
   return this->_reaction;

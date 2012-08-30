@@ -12,7 +12,7 @@
 #include <QMessageBox>
 
 
-using namespace Fluc;
+using namespace iNA;
 
 
 SSEModule::SSEModule(QObject *parent) :
@@ -70,7 +70,7 @@ SSEModule::configSSE()
             "No method was selected.");
       return;
     }
-  } catch (Fluc::Exception err) {
+  } catch (iNA::Exception err) {
     QMessageBox::warning(
           0, tr("Can not construct time course analysis (SEE) from model: "), err.what());
     return;

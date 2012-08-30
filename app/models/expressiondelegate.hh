@@ -20,7 +20,7 @@ class ExpressionDelegate : public PixmapDelegate
 
 public:
   /** Constructs the delegate. */
-  explicit ExpressionDelegate(Fluc::Ast::Scope &scope, QObject *parent = 0);
+  explicit ExpressionDelegate(iNA::Ast::Scope &scope, QObject *parent = 0);
 
   /** Creates the editor widget. */
   QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const;
@@ -33,7 +33,7 @@ public:
 
 private:
    /** Holds a weak reference to the model. */
-   Fluc::Ast::Scope &_scope;
+   iNA::Ast::Scope &_scope;
 };
 
 #endif // EXPRESSIONDELEGATE_HH

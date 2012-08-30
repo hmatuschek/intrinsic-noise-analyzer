@@ -4,7 +4,7 @@
 #include <parser/expr/lexer.hh>
 
 
-namespace Fluc {
+namespace iNA {
 namespace Parser {
 namespace Sbmlsh {
 
@@ -74,7 +74,7 @@ typedef enum {
  *
  * @ingroup sbmlsh
  */
-class VersionNumberTokenRule : public Fluc::Parser::TokenRule
+class VersionNumberTokenRule : public iNA::Parser::TokenRule
 {
 public:
   /** Constructor. */
@@ -88,7 +88,7 @@ public:
  * @todo Turn this into a Production to get the actual version numbers.
  * @ingroup sbmlsh
  */
-class Lexer: public Fluc::Parser::Lexer
+class Lexer: public iNA::Parser::Lexer
 {
 public:
   /** Constructor.

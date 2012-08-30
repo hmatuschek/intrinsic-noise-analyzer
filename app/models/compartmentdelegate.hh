@@ -13,7 +13,7 @@ class CompartmentDelegate : public QItemDelegate
 public:
   /** Constructor.
    * The available compartments are taken from the given model. */
-  explicit CompartmentDelegate(Fluc::Ast::Model &model, QObject *parent = 0);
+  explicit CompartmentDelegate(iNA::Ast::Model &model, QObject *parent = 0);
 
   /** Creates the editor widget. */
   QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const;
@@ -26,7 +26,7 @@ public:
 
 private:
    /** Holds a weak reference to the model. */
-   Fluc::Ast::Model &_model;
+   iNA::Ast::Model &_model;
 };
 
 #endif // COMPARTMENTDELEGATE_HH

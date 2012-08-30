@@ -6,8 +6,8 @@
 #include <fstream>
 
 
-using namespace Fluc;
-using namespace Fluc::Parser::Sbmlsh;
+using namespace iNA;
+using namespace iNA::Parser::Sbmlsh;
 
 
 /* ******************************************************************************************** *

@@ -2,7 +2,7 @@
 #include "parser/sbml/sbml.hh"
 
 
-using namespace Fluc;
+using namespace iNA;
 
 
 

@@ -7,7 +7,7 @@
 #include <map>
 
 
-namespace Fluc{
+namespace iNA{
 namespace Utils {
 namespace Opt {
 

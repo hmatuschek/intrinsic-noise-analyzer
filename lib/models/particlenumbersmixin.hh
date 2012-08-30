@@ -4,7 +4,7 @@
 #include "constcompartmentmixin.hh"
 #include "extensivespeciesmixin.hh"
 
-namespace Fluc {
+namespace iNA {
 namespace Models {
 
 /**

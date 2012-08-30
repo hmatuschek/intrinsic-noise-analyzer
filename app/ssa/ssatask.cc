@@ -1,6 +1,6 @@
 #include "ssatask.hh"
 
-using namespace Fluc;
+using namespace iNA;
 
 
 /* ******************************************************************************************** *
@@ -36,7 +36,7 @@ SSATaskConfig::setModelDocument(DocumentItem *document)
 {
   ModelSelectionTaskConfig::setModelDocument(document);
   // create copy of model:
-  model = new Fluc::Ast::Model(getModelDocument()->getModel());
+  model = new iNA::Ast::Model(getModelDocument()->getModel());
 }
 
 
@@ -48,7 +48,7 @@ SSATaskConfig::getModel() const
 
 
 void
-SSATaskConfig::setSimulator(Fluc::Models::StochasticSimulator *sim)
+SSATaskConfig::setSimulator(iNA::Models::StochasticSimulator *sim)
 {
   simulator=sim;
 }
@@ -239,7 +239,7 @@ SSATask::getLabel()
 }
 
 
-Fluc::Models::StochasticSimulator *
+iNA::Models::StochasticSimulator *
 SSATask::getModel()
 {
   return this->simulator;

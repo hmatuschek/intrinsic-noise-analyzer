@@ -18,7 +18,7 @@ class ReactionItem : public QObject, public DocumentTreeItem
 
 protected:
   /** Holds a weak reference to the reaction. */
-  Fluc::Ast::Reaction *_reaction;
+  iNA::Ast::Reaction *_reaction;
   /** Hold an instance of the local paramter list of the kinetic law. */
   ReactionParameterList *_local_parameters;
   /** Holds the display name of the reaction. */
@@ -26,7 +26,7 @@ protected:
 
 public:
   /** Constructor. */
-  explicit ReactionItem(Fluc::Ast::Reaction *_reaction, QObject *parent=0);
+  explicit ReactionItem(iNA::Ast::Reaction *_reaction, QObject *parent=0);
 
   /** Retunrs the display name of the reaction. */
   virtual const QString &getLabel() const;
@@ -35,7 +35,7 @@ public:
   QString getDisplayName() const;
 
   /** Retunrs the reaction instance. */
-  Fluc::Ast::Reaction *getReaction();
+  iNA::Ast::Reaction *getReaction();
 
   /** Returns the list of local paramters. */
   ReactionParameterList *localParameters();

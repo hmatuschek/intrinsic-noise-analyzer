@@ -4,8 +4,8 @@
 #include "variabledefinition.hh"
 #include "exception.hh"
 
-using namespace Fluc;
-using namespace Fluc::Ast;
+using namespace iNA;
+using namespace iNA::Ast;
 
 
 Reaction::Reaction(const std::string &id, KineticLaw *law, bool reversible)

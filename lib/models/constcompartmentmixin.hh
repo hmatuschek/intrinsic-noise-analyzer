@@ -5,7 +5,7 @@
 #include "baseunitmixin.hh"
 #include "ginacsupportforeigen.hh"
 
-namespace Fluc {
+namespace iNA {
 namespace Models {
 
 

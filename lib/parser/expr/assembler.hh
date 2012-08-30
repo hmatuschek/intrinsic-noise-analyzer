@@ -7,7 +7,7 @@
 #include "parser.hh"
 
 
-namespace Fluc {
+namespace iNA {
 namespace Parser {
 namespace Expr {
 

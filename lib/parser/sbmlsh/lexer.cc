@@ -2,12 +2,12 @@
 #include <parser/lexer.hh>
 
 
-using namespace Fluc;
-using namespace Fluc::Parser::Sbmlsh;
+using namespace iNA;
+using namespace iNA::Parser::Sbmlsh;
 
 
 Parser::Sbmlsh::Lexer::Lexer(std::istream &input)
-  : Fluc::Parser::Lexer(input)
+  : iNA::Parser::Lexer(input)
 {
   // Token rules for white spaces
   this->addRule(new Parser::WhiteSpaceTokenRule(T_WHITESPACE));

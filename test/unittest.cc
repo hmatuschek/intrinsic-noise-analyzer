@@ -7,7 +7,7 @@
 #include <execinfo.h>
 #include <sys/time.h>
 
-using namespace Fluc::UnitTest;
+using namespace iNA::UnitTest;
 
 
 

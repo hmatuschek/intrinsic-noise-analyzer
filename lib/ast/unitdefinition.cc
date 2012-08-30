@@ -3,8 +3,8 @@
 #include "exception.hh"
 
 
-using namespace Fluc;
-using namespace Fluc::Ast;
+using namespace iNA;
+using namespace iNA::Ast;
 
 /** Tiny helper class to create static maps. Just ignore. */
 template <typename T, typename U> class create_map

@@ -4,8 +4,8 @@
 #include "functiondefinition.hh"
 
 
-using namespace Fluc;
-using namespace Fluc::Ast;
+using namespace iNA;
+using namespace iNA::Ast;
 
 
 

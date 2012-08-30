@@ -1,6 +1,6 @@
 #include "rule.hh"
 
-using namespace Fluc::Ast;
+using namespace iNA::Ast;
 
 
 Rule::Rule(Node::NodeType type, GiNaC::ex rule)

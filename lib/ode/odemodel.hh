@@ -3,7 +3,7 @@
 
 #include "eval/eval.hh"
 
-namespace Fluc {
+namespace iNA {
 namespace ODE {
 
 

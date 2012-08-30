@@ -2,7 +2,7 @@
 #include "ina.hh"
 
 
-using namespace Fluc;
+using namespace iNA;
 
 RegressionTest::~RegressionTest()
 {
@@ -33,7 +33,7 @@ RegressionTest::testSpeciesByAssignmentRule()
   UT_ASSERT(S3->hasRule());
 
   UT_ASSERT_THROW(Models::REmodel re_model(*sbml_model),
-                  Fluc::SBMLFeatureNotSupported);
+                  iNA::SBMLFeatureNotSupported);
 
   delete sbml_model;
 }
@@ -45,7 +45,7 @@ RegressionTest::testNonConstantParameter()
   Ast::Model *sbml_model = Parser::Sbml::importModel("test/regression-tests/non_const_parameter.xml");
 
   UT_ASSERT_THROW(Models::REmodel re_model(*sbml_model),
-                  Fluc::SBMLFeatureNotSupported);
+                  iNA::SBMLFeatureNotSupported);
 
   delete sbml_model;
 }
@@ -57,7 +57,7 @@ RegressionTest::testNonConstantCompartment()
   Ast::Model *sbml_model = Parser::Sbml::importModel("test/regression-tests/non_const_compartment.xml");
 
   UT_ASSERT_THROW(Models::REmodel re_model(*sbml_model),
-                  Fluc::SBMLFeatureNotSupported);
+                  iNA::SBMLFeatureNotSupported);
 
   delete sbml_model;
 }
@@ -69,7 +69,7 @@ RegressionTest::testAlgebraicConstraint()
   Ast::Model *model = Parser::Sbml::importModel("test/regression-tests/algebraicrules.xml");
 
   UT_ASSERT_THROW(Models::REmodel re_model(*model),
-                  Fluc::SBMLFeatureNotSupported);
+                  iNA::SBMLFeatureNotSupported);
 
   delete model;
 }
@@ -81,7 +81,7 @@ RegressionTest::testSpeciesByRateRule()
   Ast::Model *model = Parser::Sbml::importModel("test/regression-tests/rate_rules.xml");
 
   UT_ASSERT_THROW(Models::REmodel re_model(*model),
-                  Fluc::SBMLFeatureNotSupported);
+                  iNA::SBMLFeatureNotSupported);
 
   delete model;
 }

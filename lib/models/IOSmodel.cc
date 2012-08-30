@@ -1,8 +1,8 @@
 #include "IOSmodel.hh"
 #include "trafo/constantfolder.hh"
 
-using namespace Fluc;
-using namespace Fluc::Models;
+using namespace iNA;
+using namespace iNA::Models;
 
 IOSmodel::IOSmodel(const Ast::Model &model)
   : LNAmodel(model)

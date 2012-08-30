@@ -7,7 +7,7 @@
 #include "node.hh"
 
 
-namespace Fluc {
+namespace iNA {
 namespace Ast {
 
 

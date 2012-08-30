@@ -5,7 +5,7 @@
 #include "propensityexpansion.hh"
 #include "conservationanalysismixin.hh"
 
-namespace Fluc {
+namespace iNA {
 namespace Models {
 
 class ConservationAnalysis:

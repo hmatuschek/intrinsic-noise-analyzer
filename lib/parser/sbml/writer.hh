@@ -5,7 +5,7 @@
 #include <sbml/SBMLTypes.h>
 
 
-namespace Fluc {
+namespace iNA {
 namespace Parser {
 namespace Sbml {
 

@@ -1,8 +1,8 @@
 #include "ssebasemodel.hh"
 #include "trafo/constantfolder.hh"
 
-using namespace Fluc;
-using namespace Fluc::Models;
+using namespace iNA;
+using namespace iNA::Models;
 
 ConservationAnalysis::ConservationAnalysis(const Ast::Model &model)
     : BaseModel(model),

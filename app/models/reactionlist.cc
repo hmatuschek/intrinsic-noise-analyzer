@@ -4,14 +4,14 @@
 
 
 
-ReactionList::ReactionList(Fluc::Ast::Model *model, QObject *parent)
+ReactionList::ReactionList(iNA::Ast::Model *model, QObject *parent)
   : QAbstractTableModel(parent), _model(model)
 {
   /* Pass... */
 }
 
 
-Fluc::Ast::Model & ReactionList::getModel() { return *_model; }
+iNA::Ast::Model & ReactionList::getModel() { return *_model; }
 
 int ReactionList::rowCount(const QModelIndex &parent) const { return _model->numReactions(); }
 int ReactionList::columnCount(const QModelIndex &parent) const { return 3; }
@@ -42,7 +42,7 @@ ReactionList::data(const QModelIndex &index, int role) const
     return QVariant();
   }
 
-  Fluc::Ast::Reaction *reac = _model->getReaction(index.row());
+  iNA::Ast::Reaction *reac = _model->getReaction(index.row());
 
   switch (index.column()) {
   case 0: return getName(reac, role);
@@ -56,7 +56,7 @@ ReactionList::data(const QModelIndex &index, int role) const
 
 
 QVariant
-ReactionList::getName(Fluc::Ast::Reaction *reaction, int role) const
+ReactionList::getName(iNA::Ast::Reaction *reaction, int role) const
 {
   if (Qt::DecorationRole != role) { return QVariant(); }
 
@@ -69,7 +69,7 @@ ReactionList::getName(Fluc::Ast::Reaction *reaction, int role) const
 
 
 QVariant
-ReactionList::getReaction(Fluc::Ast::Reaction *reaction, int role) const
+ReactionList::getReaction(iNA::Ast::Reaction *reaction, int role) const
 {
   if (Qt::DecorationRole != role) { return QVariant(); }
 
@@ -78,7 +78,7 @@ ReactionList::getReaction(Fluc::Ast::Reaction *reaction, int role) const
 
 
 QVariant
-ReactionList::getKineticLaw(Fluc::Ast::Reaction *reaction, int role) const
+ReactionList::getKineticLaw(iNA::Ast::Reaction *reaction, int role) const
 {
   if (Qt::DecorationRole != role) { return QVariant(); }
 

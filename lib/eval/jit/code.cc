@@ -11,7 +11,7 @@
 #include <llvm/ExecutionEngine/Interpreter.h>
 
 
-using namespace Fluc::Eval::jit;
+using namespace iNA::Eval::jit;
 
 
 Code::Code(size_t num_threads)

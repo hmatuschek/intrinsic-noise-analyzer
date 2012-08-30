@@ -5,7 +5,7 @@
 #include "unittest.hh"
 
 
-namespace Fluc {
+namespace iNA {
 
 class OptionParserTest : public UnitTest::TestCase
 {

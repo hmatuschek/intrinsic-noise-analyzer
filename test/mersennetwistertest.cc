@@ -1,7 +1,7 @@
 #include "mersennetwistertest.hh"
 #include <cmath>
 
-using namespace Fluc;
+using namespace iNA;
 
 
 #include "mersennetwister.hh"

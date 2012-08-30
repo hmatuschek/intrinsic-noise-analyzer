@@ -5,7 +5,7 @@
 #include "ast/reaction.hh"
 
 
-namespace Fluc {
+namespace iNA {
 namespace Ast {
 namespace Trafo {
 

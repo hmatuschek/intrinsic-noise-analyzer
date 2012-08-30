@@ -11,7 +11,7 @@
 #include <QGroupBox>
 
 
-using namespace Fluc;
+using namespace iNA;
 
 
 

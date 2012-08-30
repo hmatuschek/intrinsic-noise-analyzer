@@ -86,7 +86,7 @@ SpeciesSelectionWizardPage::initializePage()
   // Get selected model from wizard:
   GeneralTaskWizard *wizard = static_cast<GeneralTaskWizard *>(this->wizard());
   SpeciesSelectionTaskConfig &config = wizard->getConfigCast<SpeciesSelectionTaskConfig>();
-  Fluc::Ast::Model *model = config.getModel();
+  iNA::Ast::Model *model = config.getModel();
 
   // Construct list of species
   for (size_t i=0; i<model->numSpecies(); i++)
@@ -339,7 +339,7 @@ IntegratorWizardPage::validatePage()
   GeneralTaskWizard *wizard = static_cast<GeneralTaskWizard *>(this->wizard());
   ODEIntTaskConfig &config = wizard->getConfigCast<ODEIntTaskConfig>();
 
-  config.setIntegrationRange(Fluc::ODE::IntegrationRange(t0, t, n*(1+n_imm)));
+  config.setIntegrationRange(iNA::ODE::IntegrationRange(t0, t, n*(1+n_imm)));
   config.setEpsilon(epsilon_abs, epsilon_rel);
   config.setIntermediateSteps(n_imm);
 

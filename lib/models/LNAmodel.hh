@@ -3,7 +3,7 @@
 
 #include "REmodel.hh"
 
-namespace Fluc {
+namespace iNA {
 namespace Models {
 
 /**

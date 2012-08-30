@@ -4,8 +4,8 @@
 #include "utils/logger.hh"
 
 
-using namespace Fluc;
-using namespace Fluc::Trafo;
+using namespace iNA;
+using namespace iNA::Trafo;
 
 
 ConservationAnalysis::ConservationAnalysis(Ast::Model &model)

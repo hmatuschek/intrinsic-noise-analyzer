@@ -5,7 +5,7 @@
 
 #include <cmath>
 
-using namespace Fluc::Ast;
+using namespace iNA::Ast;
 
 
 

@@ -12,7 +12,7 @@
 #include "openmp.hh"
 
 
-namespace Fluc {
+namespace iNA {
 namespace Models {
 
 template<class T>

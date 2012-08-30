@@ -5,7 +5,7 @@
 #include "ode/odemodel.hh"
 
 
-namespace Fluc {
+namespace iNA {
 
 /**
  * Performs some simple tests for the integrator drivers.

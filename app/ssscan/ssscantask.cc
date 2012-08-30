@@ -6,7 +6,7 @@
 SSScanTask::Config::Config()
   : GeneralTaskConfig(), ModelSelectionTaskConfig(), SpeciesSelectionTaskConfig(),
     model(0), max_iterations(0), max_time_step(0), epsilon(0), auto_frequencies(false),
-    min_frequency(0), max_frequency(0), num_frequency(0), parameter(), start_value(0), end_value(1),
+    parameter(), start_value(0), end_value(1),
     steps(1)
 {
   // Pass...
@@ -16,8 +16,7 @@ SSScanTask::Config::Config(const Config &other)
   : GeneralTaskConfig(), ModelSelectionTaskConfig(other), SpeciesSelectionTaskConfig(other),
     model(other.model), max_iterations(other.max_iterations), max_time_step(other.max_time_step),
     epsilon(other.epsilon), auto_frequencies(other.auto_frequencies),
-    min_frequency(other.min_frequency), max_frequency(other.max_frequency),
-    num_frequency(other.num_frequency), parameter(other.parameter), start_value(other.start_value),
+    parameter(other.parameter), start_value(other.start_value),
     end_value(other.end_value), steps(other.steps)
 {
   // Pass...
@@ -28,10 +27,10 @@ SSScanTask::Config::setModelDocument(DocumentItem *document)
 {
   ModelSelectionTaskConfig::setModelDocument(document);
   // Construct LNA model from SBML model associated with the selected document
-  this->model = new Fluc::Models::IOSmodel(document->getModel());
+  this->model = new iNA::Models::IOSmodel(document->getModel());
 }
 
-Fluc::Ast::Model *
+iNA::Ast::Model *
 SSScanTask::Config::getModel() const
 {
   return this->model;
@@ -81,7 +80,7 @@ SSScanTask::Config::setEpsilon(double eps)
  * ******************************************************************************************* */
 SSScanTask::SSScanTask(const Config &config, QObject *parent)
   : Task(parent), config(config),
-    steady_state(dynamic_cast<Fluc::Models::IOSmodel &>(*config.getModel()),
+    steady_state(dynamic_cast<iNA::Models::IOSmodel &>(*config.getModel()),
       config.getMaxIterations(), config.getEpsilon(), config.getMaxTimeStep()),
     concentrations(config.getNumSpecies()), emre_corrections(config.getNumSpecies()),
     ios_corrections(config.getNumSpecies()),
@@ -124,8 +123,8 @@ SSScanTask::process()
   this->setState(Task::INITIALIZED);
   this->setProgress(0);
 
-  Fluc::Models::IOSmodel *lna_model
-      = dynamic_cast<Fluc::Models::IOSmodel *>(config.getModel());
+  iNA::Models::IOSmodel *lna_model
+      = dynamic_cast<iNA::Models::IOSmodel *>(config.getModel());
 
   // Allocate reduced state vector (independent species)
   Eigen::VectorXd reduced_state(lna_model->getDimension());
@@ -188,9 +187,9 @@ SSScanTask::process()
   this->setState(Task::DONE);
 
   {
-   Fluc::Utils::Message message = LOG_MESSAGE(Fluc::Utils::Message::INFO);
+   iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::INFO);
    message << "Finished steady state analysis.";
-   Fluc::Utils::Logger::get().log(message);
+   iNA::Utils::Logger::get().log(message);
   }
 
 }
@@ -203,7 +202,7 @@ SSScanTask::getLabel()
 }
 
 
-const Fluc::Ast::Unit &
+const iNA::Ast::Unit &
 SSScanTask::getSpeciesUnit() const
 {
   return config.getModel()->getSpecies(0)->getUnit();

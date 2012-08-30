@@ -47,10 +47,10 @@ VarianceLineGraph::addPoint(double x, double y, double s)
 {
   // Check for NaNs:
   if (x != x || y != y || s != s) {
-    Fluc::Utils::Message message = LOG_MESSAGE(Fluc::Utils::Message::WARN);
+    iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::WARN);
     message << __FILE__ << ":" << __LINE__
             << ": NaN occured in plot." << std::endl;
-    Fluc::Utils::Logger::get().log(message);
+    iNA::Utils::Logger::get().log(message);
     return;
   }
 

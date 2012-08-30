@@ -1,7 +1,7 @@
 #include "sbml_lna.hh"
 #include <parser/sbml/sbml.hh>
 
-using namespace Fluc;
+using namespace iNA;
 
 
 int main(int argc, char *argv[])

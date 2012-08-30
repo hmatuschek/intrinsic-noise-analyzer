@@ -11,7 +11,7 @@
 #include "parser/parser.hh"
 #include "exception.hh"
 
-using namespace Fluc;
+using namespace iNA;
 
 
 /*
@@ -196,7 +196,7 @@ void Application::onImportModel()
     } else if (ImportModelDialog::SBMLSH_MODEL == format) {
       new_doc = new DocumentItem(Parser::Sbmlsh::importModel(fileName.toStdString()), fileName);
     }
-  } catch (Fluc::Exception &err) {
+  } catch (iNA::Exception &err) {
     QMessageBox::warning(0, tr("Can not open model"), err.what());
     return;
   }
@@ -258,7 +258,7 @@ void Application::onEditModel()
   if (QDialog::Accepted != dialog->exec()) { delete dialog; return; }
 
   // Obtain model from dialog
-  Fluc::Ast::Model *new_model = dialog->takeModel(); delete dialog;
+  iNA::Ast::Model *new_model = dialog->takeModel(); delete dialog;
   // Assemble new document item and add it to the tree...
   DocumentItem *new_doc = new DocumentItem(new_model);
   docTree()->addDocument(new_doc);

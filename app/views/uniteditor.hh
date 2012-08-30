@@ -17,12 +17,12 @@ public:
   /** Constructor. */
   explicit UnitEditor(QWidget *parent = 0);
   /** Constructor with unit. */
-  UnitEditor(const Fluc::Ast::Unit &unit, QWidget *parent = 0);
+  UnitEditor(const iNA::Ast::Unit &unit, QWidget *parent = 0);
 
   /** Retunrs the unit. */
-  const Fluc::Ast::Unit &unit() const;
+  const iNA::Ast::Unit &unit() const;
   /** Resets the unit, updates views. */
-  void setUnit(const Fluc::Ast::Unit &unit);
+  void setUnit(const iNA::Ast::Unit &unit);
 
 signals:
   /** Will be emitted if the unit was changed. */
@@ -39,7 +39,7 @@ private slots:
 
 private:
   /** Holds the current unit. */
-  Fluc::Ast::Unit _unit;
+  iNA::Ast::Unit _unit;
   /** The unit display widget. */
   QLabel *_unitDisplay;
   /** The unit editor widget. */

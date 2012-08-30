@@ -3,11 +3,11 @@
 #include "../views/parameterview.hh"
 
 
-using namespace Fluc;
+using namespace iNA;
 
 
 
-ParametersItem::ParametersItem(Fluc::Ast::Model *model, QObject *parent)
+ParametersItem::ParametersItem(iNA::Ast::Model *model, QObject *parent)
   : QObject(parent), _parameters(0), itemLabel(tr("Global Parameters"))
 {
   // Construct list of parameters and task ownership:

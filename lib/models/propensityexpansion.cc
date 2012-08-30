@@ -1,7 +1,7 @@
 #include "propensityexpansion.hh"
 
-using namespace Fluc;
-using namespace Fluc::Models;
+using namespace iNA;
+using namespace iNA::Models;
 
 propensityExpansion::propensityExpansion(BaseModel &base):
   IntensiveSpeciesMixin(base), ConstCompartmentMixin(base), ReasonableModelMixin(base),

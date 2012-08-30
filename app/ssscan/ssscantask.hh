@@ -22,7 +22,7 @@ public:
       public SpeciesSelectionTaskConfig
   {
   protected:
-    Fluc::Models::IOSmodel *model;
+    iNA::Models::IOSmodel *model;
 
     int max_iterations;
     double max_time_step;
@@ -33,7 +33,7 @@ public:
     double max_frequency;
     size_t num_frequency;
 
-    std::string parameter;
+    iNA::Ast::Parameter * parameter;
     double start_value;
     double end_value;
     size_t steps;
@@ -51,7 +51,7 @@ public:
     virtual void setModelDocument(DocumentItem *document);
 
     /** Implements the @c SpeciesSelectionTaskConfig interface, and returns the LNA model instance. */
-    virtual Fluc::Ast::Model *getModel() const;
+    virtual iNA::Ast::Model *getModel() const;
 
     /** Returns the max number of iterations.*/
     size_t getMaxIterations() const;
@@ -67,8 +67,8 @@ public:
     double getEpsilon() const;
     void setEpsilon(double eps);
 
-    inline const std::string &getParameter() const { return paramter; }
-    inline void setParameter(const std::string &id) { paramter = id; }
+    inline const iNA::Ast::Parameter &getParameter() const { return *parameter; }
+    inline void setParameter(iNA::Ast::Parameter *id) { parameter = id; }
     inline double getStartValue() const { return start_value; }
     inline void setStartValue(double value) { start_value = value; }
     inline double getEndValue() const { return end_value; }
@@ -83,7 +83,7 @@ protected:
   /** Holds the task configuration. */
   Config config;
   /** Holds an instance of the analysis. */
-  Fluc::Models::SteadyStateAnalysis<Fluc::Models::IOSmodel> steady_state;
+  iNA::Models::SteadyStateAnalysis<iNA::Models::IOSmodel> steady_state;
   Eigen::VectorXd concentrations;
   Eigen::VectorXd emre_corrections;
   Eigen::VectorXd ios_corrections;
@@ -99,7 +99,7 @@ protected:
 
 
 public:
-  explicit LNASteadyStateTask(const Config &config, QObject *parent=0);
+  explicit SSScanTask(const Config &config, QObject *parent=0);
 
   Eigen::VectorXd &getConcentrations();
 
@@ -117,7 +117,7 @@ public:
 
   const QString &getSpeciesName(int i);
 
-  const Fluc::Ast::Unit &getSpeciesUnit() const;
+  const iNA::Ast::Unit &getSpeciesUnit() const;
 
   virtual QString getLabel();
 

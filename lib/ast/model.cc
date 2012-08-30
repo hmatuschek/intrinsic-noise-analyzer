@@ -4,8 +4,8 @@
 #include "converter.hh"
 #include "trafo/modelcopyist.hh"
 
-using namespace Fluc;
-using namespace Fluc::Ast;
+using namespace iNA;
+using namespace iNA::Ast;
 
 
 Model::Model()

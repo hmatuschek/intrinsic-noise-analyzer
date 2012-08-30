@@ -2,8 +2,8 @@
 #include "exception.hh"
 
 
-using namespace Fluc;
-using namespace Fluc::Trafo;
+using namespace iNA;
+using namespace iNA::Trafo;
 
 
 Substitution::Substitution()

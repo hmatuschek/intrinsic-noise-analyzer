@@ -2,7 +2,7 @@
 #include "ode/ode.hh"
 #include "utils/logger.hh"
 
-using namespace Fluc;
+using namespace iNA;
 
 
 /* ******************************************************************************************** *
@@ -33,7 +33,7 @@ IOSTask::IOSTask(const SSETaskConfig &config, QObject *parent) :
   for (int i=0; i<(int)config.getNumSpecies(); i++, column++)
   {
     QString species_id = config.getSelectedSpecies().value(i);
-    Fluc::Ast::Species *species = config.getModel()->getSpecies(species_id.toStdString());
+    iNA::Ast::Species *species = config.getModel()->getSpecies(species_id.toStdString());
 
     if (species->hasName())
       species_names[i] = QString("%1").arg(species->getName().c_str());
@@ -120,7 +120,7 @@ IOSTask::process()
   }
 
   // Holds the current system state (reduced state)
-  Eigen::VectorXd x(config.getModelAs<Fluc::Models::IOSmodel>()->getDimension());
+  Eigen::VectorXd x(config.getModelAs<iNA::Models::IOSmodel>()->getDimension());
 
   // Holds the concentrations for each species (full state)
   Eigen::VectorXd concentrations(config.getModel()->numSpecies());
@@ -153,9 +153,9 @@ IOSTask::process()
   }
 
   // initialize (reduced) state
-  config.getModelAs<Fluc::Models::IOSmodel>()->getInitialState(x);
+  config.getModelAs<iNA::Models::IOSmodel>()->getInitialState(x);
   // get full initial concentrations and covariance
-  config.getModelAs<Fluc::Models::IOSmodel>()->fullState(
+  config.getModelAs<iNA::Models::IOSmodel>()->fullState(
         x, concentrations, lna, emre, ios, thirdMoment, iosemre);
 
   this->setState(Task::RUNNING);
@@ -207,7 +207,7 @@ IOSTask::process()
       continue;
 
     // Get full state:
-    config.getModelAs<Fluc::Models::IOSmodel>()->fullState(
+    config.getModelAs<iNA::Models::IOSmodel>()->fullState(
           x, concentrations, lna, emre, ios, thirdMoment, iosemre);
 
     // store state and time:
@@ -282,17 +282,17 @@ IOSTask::getSelectedSpecies() const
 }
 
 
-const Fluc::Ast::Unit &
+const iNA::Ast::Unit &
 IOSTask::getSpeciesUnit() const
 {
-  return this->config.getModelAs<Fluc::Models::IOSmodel>()->getConcentrationUnit();
+  return this->config.getModelAs<iNA::Models::IOSmodel>()->getConcentrationUnit();
 }
 
 
-const Fluc::Ast::Unit &
+const iNA::Ast::Unit &
 IOSTask::getTimeUnit() const
 {
-  return this->config.getModelAs<Fluc::Models::IOSmodel>()->getTimeUnit();
+  return this->config.getModelAs<iNA::Models::IOSmodel>()->getTimeUnit();
 }
 
 bool
@@ -315,7 +315,7 @@ IOSTask::instantiateInterpreter() {
     interpreter = new Models::GenericSSEinterpreter<
         Models::IOSmodel, Eval::direct::Engine<Eigen::VectorXd, Eigen::VectorXd>,
         Eval::direct::Engine<Eigen::VectorXd, Eigen::MatrixXd> >(
-          *config.getModelAs<Fluc::Models::IOSmodel>(),
+          *config.getModelAs<iNA::Models::IOSmodel>(),
           config.getOptLevel(), config.getNumEvalThreads(), false);
 
     // Instantiate integrator for that engine:
@@ -388,7 +388,7 @@ IOSTask::instantiateInterpreter() {
     interpreter = new Models::GenericSSEinterpreter<
         Models::IOSmodel, Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>,
         Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd> >(
-          *config.getModelAs<Fluc::Models::IOSmodel>(),
+          *config.getModelAs<iNA::Models::IOSmodel>(),
           config.getOptLevel(), config.getNumEvalThreads(), false);
 
     // Instantiate integrator for that engine:
@@ -461,7 +461,7 @@ IOSTask::instantiateInterpreter() {
     interpreter = new Models::GenericSSEinterpreter<
         Models::IOSmodel, Eval::bcimp::Engine<Eigen::VectorXd, Eigen::VectorXd>,
         Eval::bcimp::Engine<Eigen::VectorXd, Eigen::MatrixXd> >(
-          *config.getModelAs<Fluc::Models::IOSmodel>(),
+          *config.getModelAs<iNA::Models::IOSmodel>(),
           config.getOptLevel(), config.getNumEvalThreads(), false);
 
     // Instantiate integrator for that engine:
@@ -535,7 +535,7 @@ IOSTask::instantiateInterpreter() {
     interpreter = new Models::GenericSSEinterpreter<
         Models::IOSmodel, Eval::jit::Engine<Eigen::VectorXd, Eigen::VectorXd>,
         Eval::jit::Engine<Eigen::VectorXd, Eigen::MatrixXd> >(
-          *config.getModelAs<Fluc::Models::IOSmodel>(),
+          *config.getModelAs<iNA::Models::IOSmodel>(),
           config.getOptLevel(), config.getNumEvalThreads(), false);
 
     // Instantiate integrator for that engine:

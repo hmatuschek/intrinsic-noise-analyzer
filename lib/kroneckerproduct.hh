@@ -3,7 +3,7 @@
 
 #include <eigen3/Eigen/Eigen>
 
-namespace Fluc{
+namespace iNA{
 
 /**
 * @deprecated

@@ -16,7 +16,7 @@
 
 
 
-SpeciesList::SpeciesList(Fluc::Ast::Model *model, QObject *parent)
+SpeciesList::SpeciesList(iNA::Ast::Model *model, QObject *parent)
   : QAbstractTableModel(parent), _model(model)
 {
   // Pass...
@@ -52,7 +52,7 @@ SpeciesList::data(const QModelIndex &index, int role) const
   if (int(this->_model->numSpecies()) <= index.row()) { return QVariant(); }
 
   // Get selected species by row
-  Fluc::Ast::Species *spec = this->_model->getSpecies(index.row());
+  iNA::Ast::Species *spec = this->_model->getSpecies(index.row());
 
   switch (index.column()) {
   case 0: return _getIdentifier(spec, role);
@@ -76,7 +76,7 @@ SpeciesList::setData(const QModelIndex &index, const QVariant &value, int role)
   if (columnCount() <= index.column()) return false;
 
   // Get paramter for index (row):
-  Fluc::Ast::Species *species = _model->getSpecies(index.row());
+  iNA::Ast::Species *species = _model->getSpecies(index.row());
 
   // Dispatch by column:
   switch (index.column()) {
@@ -132,18 +132,18 @@ SpeciesList::headerData(int section, Qt::Orientation orientation, int role) cons
 int SpeciesList::rowCount(const QModelIndex &parent) const { return _model->numSpecies(); }
 int SpeciesList::columnCount(const QModelIndex &parent) const { return 6; }
 
-Fluc::Ast::Model & SpeciesList::model() { return *_model; }
+iNA::Ast::Model & SpeciesList::model() { return *_model; }
 
 
 QVariant
-SpeciesList::_getIdentifier(Fluc::Ast::Species *species, int role) const {
+SpeciesList::_getIdentifier(iNA::Ast::Species *species, int role) const {
   if (Qt::DisplayRole != role) { return QVariant(); }
   return QVariant(species->getIdentifier().c_str());
 }
 
 
 QVariant
-SpeciesList::_getName(Fluc::Ast::Species *species, int role) const
+SpeciesList::_getName(iNA::Ast::Species *species, int role) const
 {
   if ( (Qt::DisplayRole != role) && (Qt::EditRole != role) ) { return QVariant(); }
 
@@ -162,13 +162,13 @@ SpeciesList::_getName(Fluc::Ast::Species *species, int role) const
 
 
 bool
-SpeciesList::_updateName(Fluc::Ast::Species *species, const QVariant &value)
+SpeciesList::_updateName(iNA::Ast::Species *species, const QVariant &value)
 {
   // Debug message:
-  Fluc::Utils::Message msg = LOG_MESSAGE(Fluc::Utils::Message::DEBUG);
+  iNA::Utils::Message msg = LOG_MESSAGE(iNA::Utils::Message::DEBUG);
   msg << "Update species name from " << species->getName()
       << " to " << value.toString().toStdString();
-  Fluc::Utils::Logger::get().log(msg);
+  iNA::Utils::Logger::get().log(msg);
 
   // If name is changed, get new name
   QString new_name = value.toString();
@@ -179,7 +179,7 @@ SpeciesList::_updateName(Fluc::Ast::Species *species, const QVariant &value)
 }
 
 QVariant
-SpeciesList::_getInitialValue(Fluc::Ast::Species *species, int role) const
+SpeciesList::_getInitialValue(iNA::Ast::Species *species, int role) const
 {
   // filter by display role
   if ( (Qt::EditRole != role) && (Qt::DisplayRole != role))
@@ -194,23 +194,23 @@ SpeciesList::_getInitialValue(Fluc::Ast::Species *species, int role) const
   // Export formula as string
   std::stringstream buffer;
   if (species->hasValue()) {
-    Fluc::Parser::Expr::Writer::write(species->getValue(), *_model, buffer);
+    iNA::Parser::Expr::Writer::write(species->getValue(), *_model, buffer);
   }
   return QString(buffer.str().c_str());
 }
 
 bool
-SpeciesList::_updateInitialValue(Fluc::Ast::Species *species, const QVariant &value)
+SpeciesList::_updateInitialValue(iNA::Ast::Species *species, const QVariant &value)
 {
   // If the initial value was changed: get expression
   std::string expression = value.toString().toStdString();
   // parse expression
   GiNaC::ex new_value;
-  try { new_value = Fluc::Parser::Expr::parseExpression(expression, _model); }
-  catch (Fluc::Exception &err) {
-    Fluc::Utils::Message msg = LOG_MESSAGE(Fluc::Utils::Message::INFO);
+  try { new_value = iNA::Parser::Expr::parseExpression(expression, _model); }
+  catch (iNA::Exception &err) {
+    iNA::Utils::Message msg = LOG_MESSAGE(iNA::Utils::Message::INFO);
     msg << "Can not parse expression: " << expression << ": " << err.what();
-    Fluc::Utils::Logger::get().log(msg);
+    iNA::Utils::Logger::get().log(msg);
     return false;
   }
   // Set new "value"
@@ -220,7 +220,7 @@ SpeciesList::_updateInitialValue(Fluc::Ast::Species *species, const QVariant &va
 
 
 QVariant
-SpeciesList::_getUnit(Fluc::Ast::Species *species, int role) const
+SpeciesList::_getUnit(iNA::Ast::Species *species, int role) const
 {
   if ((Qt::DecorationRole != role)) { return QVariant(); }
 
@@ -230,14 +230,14 @@ SpeciesList::_getUnit(Fluc::Ast::Species *species, int role) const
 
 
 bool
-SpeciesList::_updateUnit(Fluc::Ast::Species *species, const QVariant &value)
+SpeciesList::_updateUnit(iNA::Ast::Species *species, const QVariant &value)
 {
   return false;
 }
 
 
 QVariant
-SpeciesList::_getConstFlag(Fluc::Ast::Species *species, int role) const
+SpeciesList::_getConstFlag(iNA::Ast::Species *species, int role) const
 {
   if (Qt::CheckStateRole != role) { return QVariant(); }
   if (species->isConst()) { return Qt::Checked; }
@@ -245,7 +245,7 @@ SpeciesList::_getConstFlag(Fluc::Ast::Species *species, int role) const
 }
 
 bool
-SpeciesList::_updateConstFlag(Fluc::Ast::Species *species, const QVariant &value)
+SpeciesList::_updateConstFlag(iNA::Ast::Species *species, const QVariant &value)
 {
   if (value == Qt::Checked) {
     species->setConst(true);
@@ -257,7 +257,7 @@ SpeciesList::_updateConstFlag(Fluc::Ast::Species *species, const QVariant &value
 
 
 QVariant
-SpeciesList::_getCompartment(Fluc::Ast::Species *species, int role) const
+SpeciesList::_getCompartment(iNA::Ast::Species *species, int role) const
 {
   if ( (Qt::DecorationRole != role) && (Qt::EditRole != role)) { return QVariant(); }
 
@@ -273,11 +273,11 @@ SpeciesList::_getCompartment(Fluc::Ast::Species *species, int role) const
 }
 
 bool
-SpeciesList::_updateCompartment(Fluc::Ast::Species *species, const QVariant &value)
+SpeciesList::_updateCompartment(iNA::Ast::Species *species, const QVariant &value)
 {
   // Get compartment by identifier:
   if (! _model->hasCompartment(value.toString().toStdString())) { return false; }
-  Fluc::Ast::Compartment *compartment =
+  iNA::Ast::Compartment *compartment =
       _model->getCompartment(value.toString().toStdString());
   species->setCompartment(compartment);
   return true;
@@ -285,14 +285,14 @@ SpeciesList::_updateCompartment(Fluc::Ast::Species *species, const QVariant &val
 
 
 QVariant
-SpeciesList::_getRule(Fluc::Ast::Species *species, int role) const
+SpeciesList::_getRule(iNA::Ast::Species *species, int role) const
 {
   if (Qt::DecorationRole != role) {  return QVariant(); }
 
   if (species->hasRule()) {
     // Translate ginac expression into formula:
     MathFormula *formula = new MathFormula();
-    if (Fluc::Ast::Node::isAssignmentRule(species->getRule())) {
+    if (iNA::Ast::Node::isAssignmentRule(species->getRule())) {
       formula->appendItem(
             Ginac2Formula::toFormula(species->getSymbol(), *_model));
       formula->appendItem(new MathText("="));
@@ -324,7 +324,7 @@ SpeciesList::_getRule(Fluc::Ast::Species *species, int role) const
 }
 
 bool
-SpeciesList::_updateRule(Fluc::Ast::Species *species, const QVariant &value)
+SpeciesList::_updateRule(iNA::Ast::Species *species, const QVariant &value)
 {
   // Get variable rule data:
   VariableRuleData *data = (VariableRuleData *)(value.value<void *>());
@@ -342,20 +342,20 @@ SpeciesList::_updateRule(Fluc::Ast::Species *species, const QVariant &value)
   // Parse expression in module:
   std::string expression = data->ruleExpression().toStdString();
   GiNaC::ex new_rule_expression;
-  try { new_rule_expression = Fluc::Parser::Expr::parseExpression(expression, _model); }
-  catch (Fluc::Exception &err) {
-    Fluc::Utils::Message msg = LOG_MESSAGE(Fluc::Utils::Message::INFO);
+  try { new_rule_expression = iNA::Parser::Expr::parseExpression(expression, _model); }
+  catch (iNA::Exception &err) {
+    iNA::Utils::Message msg = LOG_MESSAGE(iNA::Utils::Message::INFO);
     msg << "Can not parse expression: " << expression << ": " << err.what();
-    Fluc::Utils::Logger::get().log(msg);
+    iNA::Utils::Logger::get().log(msg);
     delete data; return false;
   }
 
   // Assemble rule object:
-  Fluc::Ast::Rule *rule = 0;
+  iNA::Ast::Rule *rule = 0;
   if (VariableRuleData::ASSIGNMENT_RULE == data->ruleKind()) {
-    rule = new Fluc::Ast::AssignmentRule(new_rule_expression);
+    rule = new iNA::Ast::AssignmentRule(new_rule_expression);
   } else {
-    rule = new Fluc::Ast::RateRule(new_rule_expression);
+    rule = new iNA::Ast::RateRule(new_rule_expression);
   }
 
   // Replace rule in species:
@@ -378,14 +378,14 @@ SpeciesList::addSpecies()
   }
 
   // Get compartment and new unique identifier:
-  Fluc::Ast::Compartment *compartment = _model->getCompartment(0);
+  iNA::Ast::Compartment *compartment = _model->getCompartment(0);
   std::string identifier = _model->getNewIdentifier("species");
 
   // Signal views and add sepecies:
   int new_idx = _model->numSpecies();
   beginInsertRows(QModelIndex(), new_idx, new_idx);
   _model->addDefinition(
-        new Fluc::Ast::Species(
+        new iNA::Ast::Species(
           identifier, _model->getDefaultSubstanceUnit(), compartment, false));
   endInsertRows();
 }
@@ -397,7 +397,7 @@ SpeciesList::remSpecies(int row)
   if (row >= int(_model->numSpecies())) { return; }
 
   // Get Species and count its references:
-  Fluc::Ast::Species *species = _model->getSpecies(row);
+  iNA::Ast::Species *species = _model->getSpecies(row);
   ReferenceCounter refs(species); _model->accept(refs);
 
   // Show message id

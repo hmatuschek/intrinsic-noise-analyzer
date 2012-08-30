@@ -1,7 +1,7 @@
 #ifndef __FLUC_SMART_PTR_HH__
 #define __FLUC_SMART_PTR_HH__
 
-namespace Fluc {
+namespace iNA {
 
 
 /**

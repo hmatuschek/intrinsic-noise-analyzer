@@ -4,8 +4,8 @@
 #include "parser/expr/assembler.hh"
 
 
-using namespace Fluc;
-using namespace Fluc::Parser::Sbmlsh;
+using namespace iNA;
+using namespace iNA::Parser::Sbmlsh;
 
 
 Assembler::Assembler(Ast::Model &model, Parser::Lexer &lexer)

@@ -13,7 +13,7 @@
 
 #include "../application.hh"
 
-using namespace Fluc;
+using namespace iNA;
 
 
 
@@ -310,7 +310,7 @@ SSASummaryPage::validatePage()
       } break;
     }
   }
-  catch (Fluc::Exception &err)
+  catch (iNA::Exception &err)
   {
     QMessageBox::warning(0, tr("Can not construct SSA analysis: "), err.what());
     return false;

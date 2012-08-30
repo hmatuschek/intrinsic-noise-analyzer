@@ -5,7 +5,7 @@
 #include <ginac/ginac.h>
 
 
-namespace Fluc {
+namespace iNA {
 namespace Eval {
 namespace jit {
 

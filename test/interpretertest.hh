@@ -6,7 +6,7 @@
 #include "config.hh"
 
 
-namespace Fluc {
+namespace iNA {
 
 
 /**

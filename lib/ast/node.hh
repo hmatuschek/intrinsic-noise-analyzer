@@ -6,7 +6,7 @@
 #include "visitor.hh"
 
 
-namespace Fluc {
+namespace iNA {
 namespace Ast {
 
 

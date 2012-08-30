@@ -4,7 +4,7 @@
 #include "unittest.hh"
 #include "models/IOSmodel.hh"
 
-namespace Fluc {
+namespace iNA {
 
 class Benchmark : public UnitTest::TestCase
 {

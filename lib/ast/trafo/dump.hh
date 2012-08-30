@@ -6,7 +6,7 @@
 #include "ast/trafo/walker.hh"
 
 
-namespace Fluc {
+namespace iNA {
 namespace Ast {
 namespace Trafo {
 

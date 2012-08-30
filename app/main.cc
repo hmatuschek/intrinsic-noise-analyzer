@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
   Application::shutdown();
 
   // Deactivate logger.
-  Fluc::Utils::Logger::shutdown();
+  iNA::Utils::Logger::shutdown();
 
   return 0;
 }

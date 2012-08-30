@@ -2,10 +2,10 @@
 #include <QApplication>
 #include <QString>
 
-using namespace Fluc;
+using namespace iNA;
 
 
-ReferenceCounter::ReferenceCounter(Fluc::Ast::VariableDefinition *var, QObject *parent)
+ReferenceCounter::ReferenceCounter(iNA::Ast::VariableDefinition *var, QObject *parent)
   : QObject(parent), _var(var)
 {
   // Pass...
@@ -13,7 +13,7 @@ ReferenceCounter::ReferenceCounter(Fluc::Ast::VariableDefinition *var, QObject *
 
 
 void
-ReferenceCounter::visit(const Fluc::Ast::Compartment *var)
+ReferenceCounter::visit(const iNA::Ast::Compartment *var)
 {
   QString name = var->getIdentifier().c_str();
   if (var->hasName()) { name = QString("%1 (id: %2)").arg(var->getName().c_str(), name); }
@@ -28,7 +28,7 @@ ReferenceCounter::visit(const Fluc::Ast::Compartment *var)
 }
 
 void
-ReferenceCounter::visit(const Fluc::Ast::Species *var)
+ReferenceCounter::visit(const iNA::Ast::Species *var)
 {
   QString name = var->getIdentifier().c_str();
   if (var->hasName()) { name = QString("%1 (id: %2)").arg(var->getName().c_str(), name); }
@@ -48,7 +48,7 @@ ReferenceCounter::visit(const Fluc::Ast::Species *var)
 
 
 void
-ReferenceCounter::visit(const Fluc::Ast::Parameter *var)
+ReferenceCounter::visit(const iNA::Ast::Parameter *var)
 {
   QString name = var->getIdentifier().c_str();
   if (var->hasName()) { name = QString("%1 (id: %2)").arg(var->getName().c_str(), name); }
@@ -64,7 +64,7 @@ ReferenceCounter::visit(const Fluc::Ast::Parameter *var)
 
 
 void
-ReferenceCounter::visit(const Fluc::Ast::AlgebraicConstraint *var)
+ReferenceCounter::visit(const iNA::Ast::AlgebraicConstraint *var)
 {
   if (var->getConstraint().has(_var->getSymbol())) {
     _references.push_back(tr("in an algebraic constraint"));
@@ -73,7 +73,7 @@ ReferenceCounter::visit(const Fluc::Ast::AlgebraicConstraint *var)
 
 
 void
-ReferenceCounter::visit(const Fluc::Ast::Reaction *reac)
+ReferenceCounter::visit(const iNA::Ast::Reaction *reac)
 {
   // First traverse into kinetic law etc...
   reac->traverse(*this);
@@ -105,7 +105,7 @@ ReferenceCounter::visit(const Fluc::Ast::Reaction *reac)
 
 
 void
-ReferenceCounter::visit(const Fluc::Ast::KineticLaw *law)
+ReferenceCounter::visit(const iNA::Ast::KineticLaw *law)
 {
   // Handle local paramters etc...
   law->traverse(*this);

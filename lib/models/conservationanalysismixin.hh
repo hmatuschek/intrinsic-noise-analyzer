@@ -3,7 +3,7 @@
 
 #include "constantstoichiometrymixin.hh"
 
-namespace Fluc {
+namespace iNA {
 namespace Models {
 
 /**

@@ -9,7 +9,7 @@
 #include <QCheckBox>
 
 
-using namespace Fluc;
+using namespace iNA;
 
 
 

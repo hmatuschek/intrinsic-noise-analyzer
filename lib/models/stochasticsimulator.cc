@@ -3,8 +3,8 @@
 #include "utils/logger.hh"
 
 
-using namespace Fluc;
-using namespace Fluc::Models;
+using namespace iNA;
+using namespace iNA::Models;
 
 StochasticSimulator::StochasticSimulator(const Ast::Model &model, int size, int seed, size_t threads)
     : BaseModel(model),

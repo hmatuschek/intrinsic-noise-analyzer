@@ -5,7 +5,7 @@
 #include "models/LNAmodel.hh"
 
 
-namespace Fluc {
+namespace iNA {
 
 /**
  * This class integrates some systems for some time and compares the result

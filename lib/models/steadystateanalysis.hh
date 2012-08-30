@@ -5,7 +5,7 @@
 #include "REmodel.hh"
 #include "math.hh"
 
-namespace Fluc {
+namespace iNA {
 namespace Models {
 
 /**
@@ -315,7 +315,7 @@ public:
                 resultSet[j] = x;
 
             }
-            catch (Fluc::NumericError &err)
+            catch (iNA::NumericError &err)
             {
                 // generate a vector of nans the easy way
                 resultSet[j] = Eigen::VectorXd::Zero(sseModel.getDimension())/0.;

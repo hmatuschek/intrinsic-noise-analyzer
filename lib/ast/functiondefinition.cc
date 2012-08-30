@@ -2,7 +2,7 @@
 #include "exception.hh"
 
 
-using namespace Fluc::Ast;
+using namespace iNA::Ast;
 
 
 FunctionDefinition::FunctionDefinition(const std::string &id, std::vector<VariableDefinition *> &argdef,

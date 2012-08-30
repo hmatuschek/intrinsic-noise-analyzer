@@ -1,6 +1,6 @@
 #include "ginacforeigentest.hh"
 
-using namespace Fluc;
+using namespace iNA;
 
 void
 GinacForEigenTest::testMatrixVectorMultiplication()

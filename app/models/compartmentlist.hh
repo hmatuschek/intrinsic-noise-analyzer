@@ -14,7 +14,7 @@ class CompartmentList : public QAbstractTableModel
 public:
   /** Constructs a @c QAbstractTableModel holding the compartments of the given SBML model and
    * their attributes. */
-  explicit CompartmentList(Fluc::Ast::Model *_model, QObject *parent = 0);
+  explicit CompartmentList(iNA::Ast::Model *_model, QObject *parent = 0);
 
   /** Enables the columns of the compartment names and initial value to be editable. */
   Qt::ItemFlags flags(const QModelIndex &index) const;
@@ -35,7 +35,7 @@ public:
   int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
   /** Returns a weak reference to the Ast::Model. */
-  Fluc::Ast::Model &model();
+  iNA::Ast::Model &model();
 
 
 public slots:
@@ -48,32 +48,32 @@ public slots:
 
 private:
   /** Returns the identifier. */
-  QVariant _getIdentifier(Fluc::Ast::Compartment *compartment, int role) const;
+  QVariant _getIdentifier(iNA::Ast::Compartment *compartment, int role) const;
 
   /** Returns the name of the compartment. */
-  QVariant _getName(Fluc::Ast::Compartment *compartment, int role) const;
+  QVariant _getName(iNA::Ast::Compartment *compartment, int role) const;
   /** Updates the name of the compartment. */
-  bool _updateName(Fluc::Ast::Compartment *compartment, const QVariant &value);
+  bool _updateName(iNA::Ast::Compartment *compartment, const QVariant &value);
 
   /** Returns the initial value of the compartment. */
-  QVariant _getInitValue(Fluc::Ast::Compartment *compartment, int role) const;
+  QVariant _getInitValue(iNA::Ast::Compartment *compartment, int role) const;
   /** Updates the initial value of the compartment. */
-  bool _updateInitValue(Fluc::Ast::Compartment *compartment, const QVariant &value);
+  bool _updateInitValue(iNA::Ast::Compartment *compartment, const QVariant &value);
 
   /** Returns the unit of the compartment. */
-  QVariant _getUnit(Fluc::Ast::Compartment *compartment, int role) const;
+  QVariant _getUnit(iNA::Ast::Compartment *compartment, int role) const;
   /** Updates the unit of the compartment. */
-  bool _updateUnit(Fluc::Ast::Compartment *compartment, const QVariant &value);
+  bool _updateUnit(iNA::Ast::Compartment *compartment, const QVariant &value);
 
   /** Returns the const flag of the compartment. */
-  QVariant _getConstFlag(Fluc::Ast::Compartment *compartment, int role) const;
+  QVariant _getConstFlag(iNA::Ast::Compartment *compartment, int role) const;
   /** Updates the const flag of the compartment. */
-  bool _updateConstFlag(Fluc::Ast::Compartment *compartment, const QVariant &value);
+  bool _updateConstFlag(iNA::Ast::Compartment *compartment, const QVariant &value);
 
 
 private:
   /** Holds a weak reference to the SBML model. */
-  Fluc::Ast::Model *_model;
+  iNA::Ast::Model *_model;
 };
 
 

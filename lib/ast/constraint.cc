@@ -1,6 +1,6 @@
 #include "constraint.hh"
 
-using namespace Fluc::Ast;
+using namespace iNA::Ast;
 
 
 Constraint::Constraint(Node::NodeType type)

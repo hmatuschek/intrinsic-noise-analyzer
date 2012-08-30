@@ -12,7 +12,7 @@ class SpeciesList : public QAbstractTableModel
 
 public:
   /** Constructor. */
-  explicit SpeciesList(Fluc::Ast::Model *_model, QObject *parent = 0);
+  explicit SpeciesList(iNA::Ast::Model *_model, QObject *parent = 0);
 
   /** Signals, if a cell is editable. */
   Qt::ItemFlags flags(const QModelIndex &index) const;
@@ -33,7 +33,7 @@ public:
   int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
   /** Returns the underlying @c Ast::Model */
-  Fluc::Ast::Model &model();
+  iNA::Ast::Model &model();
 
 public slots:
   /** Adds a dummy species to the model. */
@@ -43,41 +43,41 @@ public slots:
 
 private:
   /** Returns the identifier. */
-  QVariant _getIdentifier(Fluc::Ast::Species *species, int role) const;
+  QVariant _getIdentifier(iNA::Ast::Species *species, int role) const;
 
   /** Iternal function to get the species name. */
-  QVariant _getName(Fluc::Ast::Species *species, int role) const;
+  QVariant _getName(iNA::Ast::Species *species, int role) const;
   /** Internal function to update the species name. */
-  bool _updateName(Fluc::Ast::Species *species, const QVariant &value);
+  bool _updateName(iNA::Ast::Species *species, const QVariant &value);
 
   /** Internal function to get the initial value of the species. */
-  QVariant _getInitialValue(Fluc::Ast::Species *species, int role) const;
+  QVariant _getInitialValue(iNA::Ast::Species *species, int role) const;
   /** Internal function to update the initial value of the species. */
-  bool _updateInitialValue(Fluc::Ast::Species *species, const QVariant &value);
+  bool _updateInitialValue(iNA::Ast::Species *species, const QVariant &value);
 
   /** Internal function to get the unit. */
-  QVariant _getUnit(Fluc::Ast::Species *species, int role) const;
+  QVariant _getUnit(iNA::Ast::Species *species, int role) const;
   /** Updates the unit of the species. */
-  bool _updateUnit(Fluc::Ast::Species *species, const QVariant &value);
+  bool _updateUnit(iNA::Ast::Species *species, const QVariant &value);
 
   /** Internal function to get const flag. */
-  QVariant _getConstFlag(Fluc::Ast::Species *species, int role) const;
+  QVariant _getConstFlag(iNA::Ast::Species *species, int role) const;
   /** Internal function to update the constant flag of the species. */
-  bool _updateConstFlag(Fluc::Ast::Species *species, const QVariant &value);
+  bool _updateConstFlag(iNA::Ast::Species *species, const QVariant &value);
 
   /** Internal function to get species compartment. */
-  QVariant _getCompartment(Fluc::Ast::Species *species, int role) const;
+  QVariant _getCompartment(iNA::Ast::Species *species, int role) const;
   /** Internal function to update the compartment of the species. */
-  bool _updateCompartment(Fluc::Ast::Species *species, const QVariant &value);
+  bool _updateCompartment(iNA::Ast::Species *species, const QVariant &value);
 
   /** Internal function to get species rule. */
-  QVariant _getRule(Fluc::Ast::Species *species, int role) const;
+  QVariant _getRule(iNA::Ast::Species *species, int role) const;
   /** Internal function to update the rule of the species. */
-  bool _updateRule(Fluc::Ast::Species *species, const QVariant &value);
+  bool _updateRule(iNA::Ast::Species *species, const QVariant &value);
 
 private:
   /** Holds a weak reference to the SBML model. */
-  Fluc::Ast::Model *_model;
+  iNA::Ast::Model *_model;
 };
 
 

@@ -8,7 +8,7 @@
 #include "eval/bcimp/engine.hh"
 #include "trafo/constantfolder.hh"
 
-namespace Fluc {
+namespace iNA {
 namespace Models {
 
 

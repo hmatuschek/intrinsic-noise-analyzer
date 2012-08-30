@@ -13,7 +13,7 @@
 #include "views/importmodeldialog.hh"
 
 
-using namespace Fluc;
+using namespace iNA;
 
 
 MainWindow::MainWindow(QWidget *parent) :

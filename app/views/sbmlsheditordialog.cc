@@ -42,10 +42,10 @@ SbmlshEditorDialog::SbmlshEditorDialog(QWidget *parent) :
 
 
 void
-SbmlshEditorDialog::setModel(Fluc::Ast::Model &model)
+SbmlshEditorDialog::setModel(iNA::Ast::Model &model)
 {
   std::stringstream buffer;
-  Fluc::Parser::Sbmlsh::exportModel(model, buffer);
+  iNA::Parser::Sbmlsh::exportModel(model, buffer);
   _document->setPlainText(buffer.str().c_str());
 }
 
@@ -60,8 +60,8 @@ SbmlshEditorDialog::onReimport()
 
   // parse model...
   try {
-    _model = Fluc::Parser::Sbmlsh::importModel(buffer);
-  } catch (Fluc::Parser::ParserError &err) {
+    _model = iNA::Parser::Sbmlsh::importModel(buffer);
+  } catch (iNA::Parser::ParserError &err) {
     QList<QTextEdit::ExtraSelection> selections;
     QTextEdit::ExtraSelection selection;
     selection.format.setBackground(QColor(Qt::red).lighter(160));
@@ -73,7 +73,7 @@ SbmlshEditorDialog::onReimport()
     selections.append(selection); _editor->setExtraSelections(selections);
     has_error = true;
     QMessageBox::critical(0, tr("Error while parsing SBML-SH."), err.what());
-  } catch (Fluc::Exception &err) {
+  } catch (iNA::Exception &err) {
     QMessageBox::critical(0, tr("Error while parsing SBML-SH."), err.what());
     has_error = true;
   }
@@ -82,8 +82,8 @@ SbmlshEditorDialog::onReimport()
 }
 
 
-Fluc::Ast::Model *
+iNA::Ast::Model *
 SbmlshEditorDialog::takeModel() {
-  Fluc::Ast::Model *model = _model; _model = 0;
+  iNA::Ast::Model *model = _model; _model = 0;
   return model;
 }

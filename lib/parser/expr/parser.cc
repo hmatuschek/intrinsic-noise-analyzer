@@ -8,8 +8,8 @@
 #include "assembler.hh"
 
 
-using namespace Fluc;
-using namespace Fluc::Parser::Expr;
+using namespace iNA;
+using namespace iNA::Parser::Expr;
 
 
 Context::Context(Ast::Scope *model)
@@ -73,7 +73,7 @@ Parser::Expr::parseExpression(const std::string &text, Ast::Scope *scope)
 {
   std::stringstream stream(text);
 
-  Fluc::Parser::Lexer lexer(stream);
+  iNA::Parser::Lexer lexer(stream);
   lexer.addRule(new Parser::WhiteSpaceTokenRule(T_WHITESPACE));
   lexer.addRule(new Parser::IdentifierTokenRule(T_IDENTIFIER));
   lexer.addRule(new Parser::IntegerTokenRule(T_INTEGER));

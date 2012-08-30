@@ -26,10 +26,10 @@ LNASteadyStateTask::Config::setModelDocument(DocumentItem *document)
 {
   ModelSelectionTaskConfig::setModelDocument(document);
   // Construct LNA model from SBML model associated with the selected document
-  this->model = new Fluc::Models::IOSmodel(document->getModel());
+  this->model = new iNA::Models::IOSmodel(document->getModel());
 }
 
-Fluc::Ast::Model *
+iNA::Ast::Model *
 LNASteadyStateTask::Config::getModel() const
 {
   return this->model;
@@ -79,7 +79,7 @@ LNASteadyStateTask::Config::setEpsilon(double eps)
  * ******************************************************************************************* */
 LNASteadyStateTask::LNASteadyStateTask(const Config &config, QObject *parent)
   : Task(parent), config(config),
-    steady_state(dynamic_cast<Fluc::Models::IOSmodel &>(*config.getModel()),
+    steady_state(dynamic_cast<iNA::Models::IOSmodel &>(*config.getModel()),
       config.getMaxIterations(), config.getEpsilon(), config.getMaxTimeStep()),
     concentrations(config.getNumSpecies()), emre_corrections(config.getNumSpecies()),
     ios_corrections(config.getNumSpecies()),
@@ -122,8 +122,8 @@ LNASteadyStateTask::process()
   this->setState(Task::INITIALIZED);
   this->setProgress(0);
 
-  Fluc::Models::IOSmodel *lna_model
-      = dynamic_cast<Fluc::Models::IOSmodel *>(config.getModel());
+  iNA::Models::IOSmodel *lna_model
+      = dynamic_cast<iNA::Models::IOSmodel *>(config.getModel());
 
   // Allocate reduced state vector (independent species)
   Eigen::VectorXd reduced_state(lna_model->getDimension());
@@ -186,9 +186,9 @@ LNASteadyStateTask::process()
   this->setState(Task::DONE);
 
   {
-   Fluc::Utils::Message message = LOG_MESSAGE(Fluc::Utils::Message::INFO);
+   iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::INFO);
    message << "Finished steady state analysis.";
-   Fluc::Utils::Logger::get().log(message);
+   iNA::Utils::Logger::get().log(message);
   }
 
 }
@@ -201,7 +201,7 @@ LNASteadyStateTask::getLabel()
 }
 
 
-const Fluc::Ast::Unit &
+const iNA::Ast::Unit &
 LNASteadyStateTask::getSpeciesUnit() const
 {
   return config.getModel()->getSpecies(0)->getUnit();

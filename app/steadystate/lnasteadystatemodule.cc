@@ -38,7 +38,7 @@ LNASteadyStateModule::configSteadyState()
 
   try {
     task = new LNASteadyStateTask(this->wizard->getConfigCast<LNASteadyStateTask::Config>());
-  } catch (Fluc::Exception &err) {
+  } catch (iNA::Exception &err) {
     QMessageBox::warning(
           0, tr("Can not construct stochastic simulation analysis from model: "), err.what());
     return;

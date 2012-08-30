@@ -4,7 +4,7 @@
 #include "nlesolve/newtonraphson.hh"
 #include "ode/lsoda.hh"
 
-namespace Fluc{
+namespace iNA{
 namespace NLEsolve{
 /**
  * A hybrid of the ODE integrator LSODA and the Newton-Raphson method for nonlinear algebraic equations.

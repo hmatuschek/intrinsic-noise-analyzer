@@ -1,6 +1,6 @@
 #include "definition.hh"
 
-using namespace Fluc::Ast;
+using namespace iNA::Ast;
 
 
 Definition::Definition(const std::string &id, Node::NodeType node_type)
