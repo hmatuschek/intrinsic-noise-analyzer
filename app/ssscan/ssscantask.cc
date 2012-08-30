@@ -83,7 +83,7 @@ SSScanTask::SSScanTask(const Config &config, QObject *parent)
     steady_state(dynamic_cast<iNA::Models::IOSmodel &>(*config.getModel()),
       config.getMaxIterations(), config.getEpsilon(), config.getMaxTimeStep()),
     species(config.getNumSpecies()), species_name(config.getNumSpecies()),
-    parameterScan(1+config.getNumSpecies()+config.getNumSpecies()*(config.getNumSpecies()-1)/2, config.getSteps()),
+    parameterScan(1+2*config.getNumSpecies()+config.getNumSpecies()*(config.getNumSpecies()-1), config.getSteps()),
     index_table(config.getNumSpecies())
 {
 
@@ -112,17 +112,17 @@ SSScanTask::SSScanTask(const Config &config, QObject *parent)
               column,QString("var(%1)").arg(species_name[i]));
     }
 
-    /*for (int i=0; i<(int)config.getNumSpecies(); i++, column++)
+    for (int i=0; i<(int)config.getNumSpecies(); i++, column++)
     {
       this->parameterScan.setColumnName(
             column, QString("EMRE(%1)").arg(species_name[i]));
-    }*/
+    }
 
-    /*for (int i=0; i<(int)config.getNumSpecies(); i++)
+    for (int i=0; i<(int)config.getNumSpecies(); i++)
     {
         this->parameterScan.setColumnName(
               column,QString("var(%1)").arg(species_name[i]));
-    }*/
+    }
 
 }
 
