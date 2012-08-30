@@ -104,7 +104,9 @@ public:
 
   Eigen::MatrixXd &getIOSCovariances();
 
-  Table &getSpectrum();
+  Table &getParameterScan();
+
+  inline const QVector<QString> &getSelectedSpecies() const { return species; }
 
   const QString &getSpeciesId(int i);
 

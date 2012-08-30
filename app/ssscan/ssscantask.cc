@@ -232,3 +232,5 @@ SSScanTask::getSpeciesName(int i)
 {
   return this->species_name[i];
 }
+
+Table & SSScanTask::getParameterScan() { return parameterScan; }
