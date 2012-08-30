@@ -1,5 +1,5 @@
 #include "reactionsitem.hh"
-#include "../views/reactionview.hh"
+#include "../views/reactionlistview.hh"
 
 
 
@@ -8,7 +8,7 @@
  * Implementation of ReactionsWrapper (list of reactions)
  * ********************************************************************************************* */
 ReactionsItem::ReactionsItem(Fluc::Ast::Model *model, QObject *parent) :
-  QObject(parent), itemLabel("Reactions")
+  QObject(parent), _itemLabel("Reactions"), _reactionList(model)
 {
   // Populate reactions:
   for (size_t i=0; i<model->numReactions(); i++)
@@ -21,12 +21,13 @@ ReactionsItem::ReactionsItem(Fluc::Ast::Model *model, QObject *parent) :
 }
 
 
-const QString &
-ReactionsItem::getLabel() const
-{
-  return this->itemLabel;
-}
+bool ReactionsItem::providesView() const { return true; }
 
+QWidget *ReactionsItem::createView() { return new ReactionListView(this); }
+
+const QString & ReactionsItem::getLabel() const { return _itemLabel; }
+
+ReactionList *ReactionsItem::reactionList() { return &_reactionList; }
 
 
 

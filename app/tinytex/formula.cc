@@ -5,7 +5,8 @@
 #include <QGraphicsEllipseItem>
 #include <QPen>
 #include <QDebug>
-
+#include <QGraphicsScene>
+#include <QPainter>
 #include <iostream>
 
 
@@ -64,6 +65,18 @@ MathFormulaItem::~MathFormulaItem() {
 const MathMetrics &
 MathFormulaItem::metrics() const {
   return _metrics;
+}
+
+QPixmap
+MathFormulaItem::renderItem(const MathContext &ctx)
+{
+  QGraphicsScene *scene = new QGraphicsScene(); scene->addItem(layout(ctx));
+  QSize size = scene->sceneRect().size().toSize();
+  QPixmap pixmap(size.width(), size.height());
+  QPainter painter(&pixmap);
+  painter.fillRect(0,0, size.width(), size.height(), QColor(255,255,255));
+  scene->render(&painter); delete scene;
+  return pixmap;
 }
 
 

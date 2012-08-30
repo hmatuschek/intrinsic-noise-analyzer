@@ -71,13 +71,13 @@ SET(ina_app_models_SOURCES
     models/reactionparameterlist.cc models/taskerror.cc models/tablewrapper.cc
     models/generaltaskconfig.cc models/compartmentdelegate.cc models/variableruledelegate.cc
     models/variableruledata.cc models/referencecounter.cc models/scopeitemmodel.cc
-    models/expressiondelegate.cc models/sbmlshhighlighter.cc)
+    models/expressiondelegate.cc models/sbmlshhighlighter.cc models/reactionlist.cc)
 SET(ina_app_models_HEADERS
     models/parameterlist.hh models/specieslist.hh models/compartmentlist.hh
     models/reactionparameterlist.hh models/taskerror.hh models/tablewrapper.hh
     models/generaltaskconfig.hh models/compartmentdelegate.hh models/variableruledelegate.hh
     models/variableruledata.hh models/referencecounter.hh models/scopeitemmodel.hh
-    models/expressiondelegate.hh models/sbmlshhighlighter.hh)
+    models/expressiondelegate.hh models/sbmlshhighlighter.hh models/reactionlist.hh)
 
 SET(ina_app_views_SOURCES
     views/documentsview.cc views/parameterview.cc views/reactionview.cc
@@ -86,7 +86,8 @@ SET(ina_app_views_SOURCES
     views/taskview.cc views/generaltaskwizard.cc views/varianceplot.cc views/logwindow.cc
     views/fileselector.cc views/importmodeldialog.cc views/exportmodeldialog.cc
     views/variableruleeditor.cc views/expressioneditor.cc views/unitrenderer.cc
-    views/sbmlsheditordialog.cc views/modelview.cc views/uniteditor.cc)
+    views/sbmlsheditordialog.cc views/modelview.cc views/uniteditor.cc views/reactionlistview.cc
+    views/reactioneditor.cc)
 SET(ina_app_views_HEADERS
     views/documentsview.hh views/parameterview.hh views/reactionview.hh
     views/reactionequationrenderer.hh views/compartmentview.hh views/speciesview.hh
@@ -94,7 +95,8 @@ SET(ina_app_views_HEADERS
     views/taskview.hh views/generaltaskwizard.hh views/varianceplot.hh views/logwindow.hh
     views/fileselector.hh views/importmodeldialog.hh views/exportmodeldialog.hh
     views/variableruleeditor.hh views/expressioneditor.hh views/unitrenderer.hh
-    views/sbmlsheditordialog.hh views/modelview.hh views/uniteditor.hh)
+    views/sbmlsheditordialog.hh views/modelview.hh views/uniteditor.hh views/reactionlistview.hh
+    views/reactioneditor.hh)
 
 SET(ina_app_tinytex_SOURCES
     tinytex/tinytex.cc tinytex/formula.cc tinytex/ginac2formula.cc)

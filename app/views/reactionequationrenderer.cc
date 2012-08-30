@@ -1,6 +1,7 @@
 #include "reactionequationrenderer.hh"
 #include <QGraphicsItem>
 #include <QGraphicsTextItem>
+#include <QPainter>
 #include "../tinytex/ginac2formula.hh"
 #include "ast/reaction.hh"
 
@@ -10,10 +11,25 @@ using namespace Fluc;
 ReactionEquationRenderer::ReactionEquationRenderer(Fluc::Ast::Reaction *reac, QObject *parent) :
   QGraphicsScene(parent)
 {
+  // Assemble forumla
+  MathFormulaItem *reaction = ReactionEquationRenderer::assembleReaction(reac);
+
+  // layout equation and add to this graphics scene...
+  MathContext ctx; ctx.setFontSize(ctx.fontSize()+4);
+  this->addItem(reaction->layout(ctx));
+  // Free formula
+  delete reaction;
+}
+
+
+MathFormulaItem *
+ReactionEquationRenderer::assembleReactionEquation(Fluc::Ast::Reaction *reac)
+{
+  // Allocate formula
   Ast::Scope &scope = *(reac->getKineticLaw());
-  MathFormula reaction;
+  MathFormula *reaction  = new MathFormula();
   MathFormula *reactants = new MathFormula();
-  MathFormula *products = new MathFormula();
+  MathFormula *products  = new MathFormula();
 
   // Handle reactants:
   if (0 == reac->numReactants()) { reactants->appendItem(new MathText(QChar(0x2205))); }
@@ -29,16 +45,16 @@ ReactionEquationRenderer::ReactionEquationRenderer(Fluc::Ast::Reaction *reac, QO
     }
     reactants->appendItem(Ginac2Formula::toFormula(item->first->getSymbol(), scope));
   }
-  reaction.appendItem(reactants);
+  reaction->appendItem(reactants);
 
   // " -> "
-  reaction.appendItem(new MathSpace(MathSpace::THICK_SPACE));
+  reaction->appendItem(new MathSpace(MathSpace::THICK_SPACE));
   if (reac->isReversible()) {
-    reaction.appendItem(new MathText(QChar(0x21CC)));
+    reaction->appendItem(new MathText(QChar(0x21CC)));
   } else {
-    reaction.appendItem(new MathText(QChar(0x2192)));
+    reaction->appendItem(new MathText(QChar(0x2192)));
   }
-  reaction.appendItem(new MathSpace(MathSpace::THICK_SPACE));
+  reaction->appendItem(new MathSpace(MathSpace::THICK_SPACE));
 
   // handle products
   if (0 == reac->numProducts()) { products->appendItem(new MathText(QChar(0x2205))); }
@@ -57,16 +73,57 @@ ReactionEquationRenderer::ReactionEquationRenderer(Fluc::Ast::Reaction *reac, QO
     // render species symbol.
     products->appendItem(Ginac2Formula::toFormula(item->first->getSymbol(), scope));
   }
-  reaction.appendItem(products);
+  reaction->appendItem(products);
 
-  reaction.appendItem(new MathSpace(MathSpace::QUAD_SPACE));
-  reaction.appendItem(new MathText(":"));
-  reaction.appendItem(new MathSpace(MathSpace::MEDIUM_SPACE));
+  return reaction;
+}
 
+
+MathFormulaItem *
+ReactionEquationRenderer::assembleKineticLaw(Fluc::Ast::Reaction *reaction)
+{
   // Handle rate law
-  reaction.appendItem(Ginac2Formula::toFormula(reac->getKineticLaw()->getRateLaw(), scope));
+  Ast::Scope &scope = *(reaction->getKineticLaw());
+  return Ginac2Formula::toFormula(reaction->getKineticLaw()->getRateLaw(), scope);
+}
 
-  // layout equation and add to this graphics scene...
-  MathContext ctx; ctx.setFontSize(ctx.fontSize()+4);
-  this->addItem(reaction.layout(ctx));
+
+MathFormulaItem *
+ReactionEquationRenderer::assembleReaction(Fluc::Ast::Reaction *reac)
+{
+  MathFormula *reaction = new MathFormula();
+
+  reaction->appendItem(ReactionEquationRenderer::assembleReactionEquation(reac));
+  reaction->appendItem(new MathSpace(MathSpace::QUAD_SPACE));
+  reaction->appendItem(new MathText(":"));
+  reaction->appendItem(new MathSpace(MathSpace::MEDIUM_SPACE));
+  reaction->appendItem(ReactionEquationRenderer::assembleKineticLaw(reac));
+
+  return reaction;
+}
+
+
+
+QPixmap
+ReactionEquationRenderer::renderReaction(Fluc::Ast::Reaction *reaction, MathContext ctx)
+{
+  MathFormulaItem *formula = ReactionEquationRenderer::assembleReaction(reaction);
+  QPixmap pixmap = formula->renderItem(ctx); delete formula;
+  return pixmap;
+}
+
+QPixmap
+ReactionEquationRenderer::renderReactionEquation(Fluc::Ast::Reaction *reaction, MathContext ctx)
+{
+  MathFormulaItem *formula = ReactionEquationRenderer::assembleReactionEquation(reaction);
+  QPixmap pixmap = formula->renderItem(ctx); delete formula;
+  return pixmap;
+}
+
+QPixmap
+ReactionEquationRenderer::renderKineticLaw(Fluc::Ast::Reaction *reaction, MathContext ctx)
+{
+  MathFormulaItem *formula = ReactionEquationRenderer::assembleKineticLaw(reaction);
+  QPixmap pixmap = formula->renderItem(ctx); delete formula;
+  return pixmap;
 }

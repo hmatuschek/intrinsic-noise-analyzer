@@ -14,7 +14,7 @@ double floorRange(double num, int n) {
     double d = std::ceil(std::log10(num < 0 ? -num: num));
     int power = n - (int) d;
 
-    double magnitude = std::pow(10, power);
+    double magnitude = std::pow(10., power);
     long shifted = std::floor(num*magnitude);
     return shifted/magnitude;
 }
@@ -30,7 +30,7 @@ double ceilRange(double num, int n) {
     double d = std::ceil(std::log10(num < 0 ? -num: num));
     int power = n - (int) d;
 
-    double magnitude = std::pow(10, power);
+    double magnitude = std::pow(10., power);
     long shifted = std::ceil(num*magnitude);
     return shifted/magnitude;
 }

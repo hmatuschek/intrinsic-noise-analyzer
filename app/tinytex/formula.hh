@@ -96,6 +96,9 @@ public:
   /** Returns the metrics of the item. */
   const MathMetrics &metrics() const;
 
+  /** Direct rendering into a @c QPixmap. */
+  QPixmap renderItem(const MathContext &ctx=MathContext());
+
 protected:
   /** Holds the metrics of the item. */
   MathMetrics _metrics;
