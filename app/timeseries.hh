@@ -218,11 +218,13 @@ protected:
 public:
   /**
    * Constructs an empty (uninitialized) data-table with given row- and column-count.
+   * @bug Clean up that shit here!
    */
   explicit Table(size_t columns, size_t rows, QObject *parent=0);
 
   /**
    * Constructs an empty (uninitilized) data-table with given column-labels and row-count.
+   * @bug Clean up that shit here!
    */
   explicit Table(const QVector<QString> &columns, size_t rows, QObject *parent=0);
 
