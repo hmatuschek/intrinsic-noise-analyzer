@@ -3,6 +3,7 @@
 #include "ssa/ssamodule.hh"
 #include "steadystate/lnasteadystatemodule.hh"
 #include "sse/ssemodule.hh"
+#include "ssscan/ssscanmodule.hh"
 #include "doctree/documentitem.hh"
 #include "utils/logger.hh"
 
@@ -32,6 +33,8 @@ int main(int argc, char *argv[])
   app->addModule(new SSEModule(app));
   // Load SSA module:
   app->addModule(new SSAModule(app));
+  // Load parameter scan module
+  app->addModule(new SSScanModule(app));
 
   window->show();
 

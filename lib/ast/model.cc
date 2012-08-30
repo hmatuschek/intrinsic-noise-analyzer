@@ -49,13 +49,29 @@ Model::hasParameter(const GiNaC::symbol &symbol) const
 Parameter *
 Model::getParameter(const std::string &name)
 {
-  return this->getParameter(name);
+  Ast::VariableDefinition *def = this->getVariable(name);
+  if (! Node::isParameter(def))
+  {
+    SymbolError err;
+    err << "Identifier " << name << " is not associated with a parameter.";
+    throw err;
+  }
+
+  return static_cast<Parameter *>(def);
 }
 
-Parameter * const
+const Parameter *
 Model::getParameter(const std::string &name) const
 {
-  return this->getParameter(name);
+  const Ast::VariableDefinition *def = this->getVariable(name);
+  if (! Node::isParameter(def))
+  {
+    SymbolError err;
+    err << "Identifier " << name << " is not associated with a parameter.";
+    throw err;
+  }
+
+  return static_cast<const Parameter *>(def);
 }
 
 
@@ -116,7 +132,7 @@ Model::getParameterIdx(const GiNaC::symbol &symbol) const
 
 
 size_t
-Model::getParameterIdx(Parameter *parameter) const
+Model::getParameterIdx(const Parameter *parameter) const
 {
   // Search vector for parameter:
   for (size_t i=0; i<this->parameter_vector.size(); i++)

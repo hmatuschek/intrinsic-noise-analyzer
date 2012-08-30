@@ -248,7 +248,7 @@ public:
    * Returns the parameter by its identifier, throws an exception if the parameter can not
    * be found.
    */
-  Parameter * const getParameter(const std::string &id) const;
+  const Parameter * getParameter(const std::string &id) const;
 
   /**
    * Returns the parameter by its symbol.
@@ -289,7 +289,7 @@ public:
    * Returns the index of the given parameter, throws an exception if the parameter can not be
    * found.
    */
-  size_t getParameterIdx(Parameter *parameter) const;
+  size_t getParameterIdx(const Parameter *parameter) const;
 
   /**
    * Returns the number of reactions defined in the model.
