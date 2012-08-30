@@ -44,8 +44,7 @@ ReactionView::ReactionView(ReactionItem *reaction, QWidget *parent) :
   // Assemble and configure parameter table view:
   _paramTable = new QTableView();
   _paramTable->setModel(_reaction->localParameters());
-  _paramTable->setItemDelegateForColumn(
-        1, new ExpressionDelegate(_reaction->localParameters()->kineticLaw(), _paramTable));
+  _paramTable->setItemDelegateForColumn(1, new PixmapDelegate(_paramTable));
   _paramTable->setItemDelegateForColumn(
         2, new ExpressionDelegate(_reaction->localParameters()->kineticLaw(), _paramTable));
 

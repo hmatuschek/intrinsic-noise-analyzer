@@ -1,7 +1,7 @@
 #ifndef __INA_APP_MODELS_EXPRESSIONDELEGATE_HH__
 #define __INA_APP_MODELS_EXPRESSIONDELEGATE_HH__
 
-#include <QStyledItemDelegate>
+#include "pixmapdelegate.hh"
 #include "ast/scope.hh"
 
 
@@ -14,7 +14,7 @@ public:
 
 
 /** This class implements a delegate for expressions to provide a specialized editor. */
-class ExpressionDelegate : public QStyledItemDelegate
+class ExpressionDelegate : public PixmapDelegate
 {
   Q_OBJECT
 
@@ -30,8 +30,6 @@ public:
   void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const;
   /** Resize. */
   void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const;
-  /** Draw. */
-  void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
 
 private:
    /** Holds a weak reference to the model. */

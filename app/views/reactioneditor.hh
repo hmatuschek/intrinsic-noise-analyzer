@@ -41,7 +41,9 @@ private:
 
   /** Helper function to render a factor. */
   MathFormulaItem *assembleFactor(QString &id, int exponent);
+  /** Assembles the name of the compartment. */
   MathFormulaItem *assembleCompartment();
+  /** Assembles the name of an identifier. */
   MathFormulaItem *assembleName(const QString &id);
 
 private:

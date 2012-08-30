@@ -41,8 +41,7 @@ ParameterView::ParameterView(ParametersItem *parameters, QWidget *parent) :
   this->_paramTable->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
 
   // Register delegates for columns:
-  _paramTable->setItemDelegateForColumn(
-        1, new ExpressionDelegate(parameters->parmeters()->model(), _paramTable));
+  _paramTable->setItemDelegateForColumn(1, new PixmapDelegate(_paramTable));
   _paramTable->setItemDelegateForColumn(
         2, new ExpressionDelegate(parameters->parmeters()->model(), _paramTable));
 

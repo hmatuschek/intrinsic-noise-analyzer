@@ -42,9 +42,9 @@ CompartmentView::CompartmentView(CompartmentsItem *compartments, QWidget *parent
   _compTable->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
   _compTable->verticalHeader()->hide();
 
-  // Create delegate for expressions:
-  _compTable->setItemDelegateForColumn(
-        1, new ExpressionDelegate(_compartments->compartments()->model(), this));
+  // Delegate for compartment name
+  _compTable->setItemDelegateForColumn(1, new PixmapDelegate(this));
+  // Delegate for initial value of compartment
   _compTable->setItemDelegateForColumn(
         2, new ExpressionDelegate(_compartments->compartments()->model(), this));
 
