@@ -6,24 +6,24 @@
 ImportModelDialog::ImportModelDialog(QWidget *parent) :
   QDialog(parent)
 {
-  setWindowTitle("Import Model...");
+  setWindowTitle("Import model");
 
   _file_selector = new FileSelector(
         FileSelector::OpenFile,
-        tr("SBML models (*.xml *.sbml);;SBML-SH models (*.mod *.sbmlsh)"));
+        tr("SBML/shorthand (*.xml *.sbml *.mod *.sbmlsh);;SBML format (*.xml *.sbml);;SBML shorthand format (*.mod *.sbmlsh)"));
   _file_selector->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
 
   _format_selector = new QComboBox();
   _format_selector->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
-  _format_selector->addItem(tr("SBML Model"), unsigned(SBML_MODEL));
-  _format_selector->addItem(tr("SBML-SH Model"), unsigned(SBMLSH_MODEL));
+  _format_selector->addItem(tr("SBML"), unsigned(SBML_MODEL));
+  _format_selector->addItem(tr("SBML shorthand"), unsigned(SBMLSH_MODEL));
   _format_selector->setCurrentIndex(0);
 
   _buttons = new QDialogButtonBox(QDialogButtonBox::Open|QDialogButtonBox::Cancel);
 
   QFormLayout *form_layout = new QFormLayout();
-  form_layout->addRow(tr("Select a file:"), _file_selector);
-  form_layout->addRow(tr("Select the format:"), _format_selector);
+  form_layout->addRow(tr("Model file"), _file_selector);
+  form_layout->addRow(tr("Format"), _format_selector);
   form_layout->setFieldGrowthPolicy(QFormLayout::ExpandingFieldsGrow);
 
   QVBoxLayout *layout = new QVBoxLayout();

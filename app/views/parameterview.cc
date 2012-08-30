@@ -23,16 +23,16 @@ ParameterView::ParameterView(ParametersItem *parameters, QWidget *parent) :
   this->setBackgroundRole(QPalette::Window);
 
   // Label
-  QLabel *label = new QLabel(tr("Model Parameters"));
+  QLabel *label = new QLabel(tr("Parameters"));
   label->setFont(Application::getApp()->getH1Font());
   label->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
 
   // Create buttons:
   _addParamButton = new QPushButton("+");
-  _addParamButton->setToolTip(tr("Adds a new parameter."));
+  _addParamButton->setToolTip(tr("Add new parameter."));
   _addParamButton->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
   _remParamButton = new QPushButton("-");
-  _remParamButton->setToolTip(tr("Deletes the selected parameter"));
+  _remParamButton->setToolTip(tr("Delete parameter"));
   _remParamButton->setEnabled(false);
   _remParamButton->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 

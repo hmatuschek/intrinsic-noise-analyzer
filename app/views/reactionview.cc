@@ -30,13 +30,13 @@ ReactionView::ReactionView(ReactionItem *reaction, QWidget *parent) :
 
   // Add buttons and label for parameter list
   _addParamButton = new QPushButton(tr("+"));
-  _addParamButton->setToolTip(tr("Adds a new parameter."));
+  _addParamButton->setToolTip(tr("Add new parameter."));
   _addParamButton->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
   _remParamButton = new QPushButton("-");
-  _remParamButton->setToolTip(tr("Deletes the selected parameter."));
+  _remParamButton->setToolTip(tr("Delete parameter."));
   _remParamButton->setEnabled(false);
   _remParamButton->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
-  QLabel *param_label = new QLabel(tr("Reaction local parameters"));
+  QLabel *param_label = new QLabel(tr("Local parameters"));
   param_label->setFont(Application::getApp()->getH3Font());
   param_label->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
   param_label->setAlignment(Qt::AlignRight);

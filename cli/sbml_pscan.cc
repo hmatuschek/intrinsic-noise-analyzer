@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
 
 
     // perform the parameter scan
-    Eigen::MatrixXd result;
+    std::vector<Eigen::VectorXd> result;
     steadyState.parameterScan(parameters,result);
 
     Eigen::VectorXd concentrations(model.numSpecies());
@@ -53,11 +53,11 @@ int main(int argc, char *argv[])
 
     std::cout<<std::endl;
 
-    for(int j=0; j<result.rows();j++)
+    for(size_t j=0; j<result.size();j++)
     {
 
         std::cout << (*parameters[j].find(param->getSymbol())).second << "\t";
-        model.fullState(result.row(j),concentrations,cov,emre);
+        model.fullState(result[j],concentrations,cov,emre);
         for(size_t i=0; i<model.numSpecies(); i++)
         {
             std::cout << concentrations(i) <<"\t";

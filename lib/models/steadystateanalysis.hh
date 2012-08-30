@@ -250,19 +250,18 @@ public:
 
 
     /**
-     * Solves for steady state of the reduced state vector and returns number of function evaluations
-     * used.
+     * Does a parameter scan of the steady state analysis and returns a .
      *
      * @param parameterSets: Vector of parameter sets to perform analysis for.
      * @param resultSet: Outputs the steady state concentrations, covariance and EMRE vector in reduced
      *        coordinates. Contents will be overwritten.
      */
-    int parameterScan(std::vector<GiNaC::exmap> &parameterSets, Eigen::MatrixXd &resultSet)
+    int parameterScan(std::vector<GiNaC::exmap> &parameterSets, std::vector<Eigen::VectorXd> &resultSet)
 
     {
 
         // first make space
-        resultSet.resize(parameterSets.size(),sseModel.getDimension());
+        resultSet.resize(parameterSets.size());
 
         // initialize with initial concentrations
         Eigen::VectorXd x(sseModel.getDimension());
@@ -294,23 +293,34 @@ public:
             Eigen::MatrixXex Jacobian = constants.apply( parameters.apply(sseModel.getJacobian()) );
 
             // setup solver and solve for RE concentrations
-            solver.set(sseModel.stateIndex,REs,Jacobian);
-            iter = this->calcConcentrations(conc);
-            x.head(offset) = conc;
+            try
+            {
 
-            // ... and substitute RE concentrations
-            GiNaC::exmap subs_table;
-            for (size_t s=0; s<sseModel.numIndSpecies(); s++)
-                subs_table.insert( std::pair<GiNaC::ex,GiNaC::ex>( sseModel.getREvar(s), conc(s) ) );
-            for (size_t i=0; i<sseLength; i++)
-                sseUpdate(i) = sseUpdate(i).subs(subs_table);
+                solver.set(sseModel.stateIndex,REs,Jacobian);
+                iter = this->calcConcentrations(conc);
+                x.head(offset) = conc;
 
-            // calc LNA & IOS
-            calcLNA(x,sseUpdate);
-            calcIOS(x,sseUpdate);
+                // ... and substitute RE concentrations
+                GiNaC::exmap subs_table;
+                for (size_t s=0; s<sseModel.numIndSpecies(); s++)
+                    subs_table.insert( std::pair<GiNaC::ex,GiNaC::ex>( sseModel.getREvar(s), conc(s) ) );
+                for (size_t i=0; i<sseLength; i++)
+                    sseUpdate(i) = sseUpdate(i).subs(subs_table);
 
-            // save result in matrix
-            resultSet.row(j) = x;
+                // calc LNA & IOS
+                calcLNA(x,sseUpdate);
+                calcIOS(x,sseUpdate);
+
+                // save result in matrix
+                resultSet[j] = x;
+
+            }
+            catch (Fluc::NumericError &err)
+            {
+                // generate a vector of nans the easy way
+                resultSet[j] = Eigen::VectorXd::Zero(sseModel.getDimension())/0.;
+            }
+
 
         }
 

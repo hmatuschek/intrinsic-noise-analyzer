@@ -9,7 +9,7 @@ FileSelector::FileSelector(Mode mode, const QString &filter, QWidget *parent) :
   QWidget(parent), _mode(mode), _filter(filter)
 {
   _filename = new QLineEdit();
-  _choose = new QPushButton("choose");
+  _choose = new QPushButton("Select");
 
   // Orgastic cmd-line experience:
   QCompleter *completer = new QCompleter(this);
@@ -38,11 +38,11 @@ void FileSelector::setFilter(const QString &filter) { _filter = filter; }
 void FileSelector::__on_choose_file() {
   QString filename;
   if (OpenFile == _mode) {
-    filename = QFileDialog::getOpenFileName(0, "Choose file...", "", _filter);
+    filename = QFileDialog::getOpenFileName(0, "Select file", "", _filter);
   } else if (SaveFile == _mode) {
-    filename = QFileDialog::getSaveFileName(0, "Choose file...", "", _filter);
+    filename = QFileDialog::getSaveFileName(0, "Select file", "", _filter);
   } else if (Directory == _mode) {
-    filename = QFileDialog::getExistingDirectory(0, "Choose directory...", "");
+    filename = QFileDialog::getExistingDirectory(0, "Select directory", "");
   }
 
   _filename->setText(filename);
