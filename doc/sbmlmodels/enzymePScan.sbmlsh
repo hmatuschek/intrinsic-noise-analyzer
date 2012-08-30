@@ -32,12 +32,12 @@
 
  @r= unbind "unbind"
   species_ES -> species_E + species_S
-  compartment*km1*species_ES: km1=5
+  compartment*km1*species_ES: km1=5.0
 
  @r= vcat "vcat"
   species_ES -> species_E + species_P
-  k2*compartment*species_ES: k2=5
+  k2*compartment*species_ES: k2=5.0
 
  @r= out "out"
   species_P -> 
-  species_P*kout*compartment: kout=7
+  species_P*kout*compartment: kout=7.0

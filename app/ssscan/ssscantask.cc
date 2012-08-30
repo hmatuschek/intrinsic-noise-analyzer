@@ -112,17 +112,17 @@ SSScanTask::SSScanTask(const Config &config, QObject *parent)
               column,QString("var(%1)").arg(species_name[i]));
     }
 
-    for (int i=0; i<(int)config.getNumSpecies(); i++, column++)
+    /*for (int i=0; i<(int)config.getNumSpecies(); i++, column++)
     {
       this->parameterScan.setColumnName(
             column, QString("EMRE(%1)").arg(species_name[i]));
-    }
+    }*/
 
-    for (int i=0; i<(int)config.getNumSpecies(); i++)
+    /*for (int i=0; i<(int)config.getNumSpecies(); i++)
     {
         this->parameterScan.setColumnName(
               column,QString("var(%1)").arg(species_name[i]));
-    }
+    }*/
 
 }
 
