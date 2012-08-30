@@ -14,7 +14,7 @@ class SSScanTask : public Task
 
 public:
   /**
-   * This class assembles all parameters needed to configure a SteadyStateTask.
+   * This class assembles all parameters needed to configure a parameter scan task.
    */
   class Config :
       public GeneralTaskConfig,
@@ -22,6 +22,7 @@ public:
       public SpeciesSelectionTaskConfig
   {
   protected:
+
     iNA::Models::IOSmodel *model;
 
     int max_iterations;
@@ -93,16 +94,6 @@ protected:
 
 public:
   explicit SSScanTask(const Config &config, QObject *parent=0);
-
-  Eigen::VectorXd &getConcentrations();
-
-  Eigen::VectorXd &getEMRECorrections();
-
-  Eigen::VectorXd &getIOSCorrections();
-
-  Eigen::MatrixXd &getLNACovariances();
-
-  Eigen::MatrixXd &getIOSCovariances();
 
   Table &getParameterScan();
 
