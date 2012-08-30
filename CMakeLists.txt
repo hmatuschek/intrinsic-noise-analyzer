@@ -137,7 +137,7 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}/lib)
 #
 add_subdirectory(lib)
 add_subdirectory(app)
-#add_subdirectory(cli)
+add_subdirectory(cli)
 
 #
 # Exclude unit tests requiring glibc which is not available under Windows!

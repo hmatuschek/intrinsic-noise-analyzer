@@ -80,10 +80,6 @@ protected:
   Config config;
   /** Holds an instance of the analysis. */
   iNA::Models::SteadyStateAnalysis<iNA::Models::IOSmodel> steady_state;
-  std::vector<Eigen::VectorXd> concentrations;
-  std::vector<Eigen::VectorXd> emre_corrections;
-  std::vector<Eigen::VectorXd> lna_variances;
-  std::vector<Eigen::VectorXd> ios_variances;
   QVector<QString> species;
   QVector<QString> species_name;
 
@@ -112,4 +108,4 @@ protected:
   virtual void process();
 };
 
-#endif // LNASTEADYSTATETASK_HH
+#endif
