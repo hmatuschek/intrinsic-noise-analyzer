@@ -5,7 +5,7 @@
  * ******************************************************************************************* */
 SSScanTask::Config::Config()
   : GeneralTaskConfig(), ModelSelectionTaskConfig(), SpeciesSelectionTaskConfig(),
-    model(0), max_iterations(0), max_time_step(0), epsilon(0), auto_frequencies(false),
+    model(0), max_iterations(0), max_time_step(0), epsilon(0),
     parameter(), start_value(0), end_value(1),
     steps(1)
 {
@@ -15,7 +15,7 @@ SSScanTask::Config::Config()
 SSScanTask::Config::Config(const Config &other)
   : GeneralTaskConfig(), ModelSelectionTaskConfig(other), SpeciesSelectionTaskConfig(other),
     model(other.model), max_iterations(other.max_iterations), max_time_step(other.max_time_step),
-    epsilon(other.epsilon), auto_frequencies(other.auto_frequencies),
+    epsilon(other.epsilon),
     parameter(other.parameter), start_value(other.start_value),
     end_value(other.end_value), steps(other.steps)
 {
@@ -82,37 +82,55 @@ SSScanTask::SSScanTask(const Config &config, QObject *parent)
   : Task(parent), config(config),
     steady_state(dynamic_cast<iNA::Models::IOSmodel &>(*config.getModel()),
       config.getMaxIterations(), config.getEpsilon(), config.getMaxTimeStep()),
-    concentrations(config.getNumSpecies()), emre_corrections(config.getNumSpecies()),
-    ios_corrections(config.getNumSpecies()),
-    lna_covariances(config.getNumSpecies(), config.getNumSpecies()),
-    ios_covariances(config.getNumSpecies(), config.getNumSpecies()),
     species(config.getNumSpecies()), species_name(config.getNumSpecies()),
-    spectrum(1, config.getNumSpecies()+1),
+    parameterScan(1+config.getNumSpecies()+config.getNumSpecies()*(config.getNumSpecies()-1)/2, config.getSteps()),
     index_table(config.getNumSpecies())
 {
-  //this->spectrum.setColumnName(0, "freq");
 
-  // Assign species identifier:
-  for (int i=0; i<this->species.size(); i++)
-  {
-    this->species[i] = config.getSelectedSpecies().at(i);
-    this->index_table[i] = config.getModel()->getSpeciesIdx(this->species[i].toStdString());
+    size_t column = 0;
 
-    if (config.getModel()->getSpecies(this->species[i].toStdString())->hasName()) {
-      this->species_name[i] = config.getModel()->getSpecies(this->species[i].toStdString())->getName().c_str();
-    } else {
-      this->species_name[i] = this->species[i];
+    this->parameterScan.setColumnName(column++, config.getParameter().getName().c_str());
+    for (int i=0; i<(int)config.getNumSpecies(); i++, column++)
+    {
+      // fill index table
+      this->index_table[i] = config.getModel()->getSpeciesIdx(this->species[i].toStdString());
+
+      QString species_id = config.getSelectedSpecies().value(i);
+      iNA::Ast::Species *species = config.getModel()->getSpecies(species_id.toStdString());
+
+      if (species->hasName())
+        species_name[i] = QString("%1").arg(species->getName().c_str());
+      else
+        species_name[i] = species_id;
+
+      this->parameterScan.setColumnName(column, QString("%1").arg(species_name[i]));
     }
 
-    //this->spectrum.setColumnName(i+1, this->species_name[i]);
-  }
+    for (int i=0; i<(int)config.getNumSpecies(); i++)
+    {
+      for (int j=i; j<(int)config.getNumSpecies(); j++, column++)
+      {
+        this->parameterScan.setColumnName(
+              column,QString("cov(%1,%2)").arg(species_name[i]).arg(species_name[j]));
+      }
+    }
 
-  // Create frequency vector:
-  /*double df = (max_freq-min_freq)/num_freq;
-  for (size_t i=0; i<num_freq; i++)
-  {
-    this->frequencies(i) = min_freq+i*df;
-  }*/
+    for (int i=0; i<(int)config.getNumSpecies(); i++, column++)
+    {
+      this->parameterScan.setColumnName(
+            column, QString("EMRE(%1)").arg(species_name[i]));
+    }
+
+    for (int i=0; i<(int)config.getNumSpecies(); i++)
+    {
+      for (int j=i; j<(int)config.getNumSpecies(); j++, column++)
+      {
+        this->parameterScan.setColumnName(
+              column,QString("cov(%1,%2)").arg(species_name[i]).arg(species_name[j]));
+      }
+    }
+
+
 }
 
 
@@ -123,14 +141,23 @@ SSScanTask::process()
   this->setState(Task::INITIALIZED);
   this->setProgress(0);
 
+  // construct parameter sets
+
+  std::vector<GiNaC::exmap> parameterSets;
+  size_t j=0;
+  for(double val=config.getStartValue(); val<=config.getEndValue(); val+=config.getStepSize())
+  {
+     parameterSets[j++].insert(std::pair<GiNaC::ex,GiNaC::ex>(config.getParameter().getSymbol(),val));
+  }
+
   iNA::Models::IOSmodel *lna_model
       = dynamic_cast<iNA::Models::IOSmodel *>(config.getModel());
 
-  // Allocate reduced state vector (independent species)
-  Eigen::VectorXd reduced_state(lna_model->getDimension());
+  // Allocate result matrix (of unified state vectors)
+  std::vector<Eigen::VectorXd> scanResult(lna_model->getDimension());
 
   // Calc steadystate:
-  this->steady_state.calcSteadyState(reduced_state);
+  this->steady_state.parameterScan(parameterSets,scanResult);
 
   // Check if task shall terminate:
   if (Task::TERMINATING == this->getState())
@@ -139,6 +166,7 @@ SSScanTask::process()
     return;
   }
 
+
   // Get full state and covariance and EMRE corrections for steady state;
   Eigen::VectorXd concentrations(config.getModel()->numSpecies());
   Eigen::VectorXd emre_corrections(config.getModel()->numSpecies());
@@ -146,49 +174,34 @@ SSScanTask::process()
   Eigen::MatrixXd lna_covariances(config.getModel()->numSpecies(), config.getModel()->numSpecies());
   Eigen::MatrixXd ios_covariances(config.getModel()->numSpecies(), config.getModel()->numSpecies());
   Eigen::VectorXd thirdOrder(config.getModel()->numSpecies());
-  lna_model->fullState(reduced_state, concentrations, lna_covariances, emre_corrections,
+
+  for(size_t j=0; j<scanResult.size(); j++)
+  {
+      lna_model->fullState(scanResult[j], concentrations, lna_covariances, emre_corrections,
                        ios_covariances, thirdOrder, iosemre_corrections);
 
-//  // Get steadystate spectrum:
-//  Eigen::MatrixXd spectrum(this->frequencies.size(), this->model->numSpecies());
-//  this->setProgress(0.5);
+      parameterScan(0,j) = GiNaC::ex_to<GiNaC::numeric>(parameterSets[j][config.getParameter().getSymbol()]).to_double();
 
-//  std::cerr << "Calc spectrum ... " << std::endl;
-//  this->steady_state.calcSpectrum(this->frequencies, spectrum, auto_frequencies);
-//  std::cerr << "   ... done." << std::endl;
+      int col=1;
+      // fill table
+      for (int i=0; i<this->species.size(); i++)
+        parameterScan(col++,j) = concentrations(index_table[i]);
+      for (int i=0; i<this->species.size(); i++)
+        parameterScan(col++,j) = lna_covariances(index_table[i], index_table[i]);
+      for (int i=0; i<this->species.size(); i++)
+        parameterScan(col++,j) = concentrations(index_table[i])+emre_corrections(index_table[i]);
+      for (int i=0; i<this->species.size(); i++)
+        parameterScan(col++,j) = lna_covariances(index_table[i], index_table[i])+ios_covariances(index_table[i], index_table[i]);
 
-  // Copy concentration, EMRE, COVARIANCE
-  for (int i=0; i<this->species.size(); i++)
-  {
-    this->concentrations(i) = concentrations(index_table[i]);
-    this->emre_corrections(i) = emre_corrections(index_table[i]);
-    this->ios_corrections(i) = iosemre_corrections(index_table[i]);
-
-    for (int j=0; j<this->species.size(); j++)
-    {
-      this->lna_covariances(i, j) = lna_covariances(index_table[i], index_table[j]);
-      this->ios_covariances(i, j) = ios_covariances(index_table[i], index_table[j]);
-    }
   }
 
-  // Copy spectrum into table
-  /*for (int i=0; i<this->frequencies.size(); i++)
-  {
-    this->spectrum.matrix()(i,0) = this->frequencies(i);
-
-    for (int j=0; j<this->species.size(); j++)
-    {
-      size_t idx = this->index_table[j];
-      this->spectrum.matrix()(i,j+1) = spectrum(i, idx);
-    }
-  }*/
 
   // Done...
   this->setState(Task::DONE);
 
   {
    iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::INFO);
-   message << "Finished steady state analysis.";
+   message << "Finished parameter scan.";
    iNA::Utils::Logger::get().log(message);
   }
 
@@ -206,43 +219,6 @@ const iNA::Ast::Unit &
 SSScanTask::getSpeciesUnit() const
 {
   return config.getModel()->getSpecies(0)->getUnit();
-}
-
-Eigen::VectorXd &
-SSScanTask::getConcentrations()
-{
-  return this->concentrations;
-}
-
-
-Eigen::VectorXd &
-SSScanTask::getEMRECorrections()
-{
-  return this->emre_corrections;
-}
-
-Eigen::VectorXd &
-SSScanTask::getIOSCorrections()
-{
-  return this->ios_corrections;
-}
-
-Eigen::MatrixXd &
-SSScanTask::getLNACovariances()
-{
-  return this->lna_covariances;
-}
-
-Eigen::MatrixXd &
-SSScanTask::getIOSCovariances()
-{
-  return this->ios_covariances;
-}
-
-Table &
-SSScanTask::getSpectrum()
-{
-  return this->spectrum;
 }
 
 const QString &
