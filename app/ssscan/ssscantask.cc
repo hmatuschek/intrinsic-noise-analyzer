@@ -137,10 +137,12 @@ SSScanTask::process()
 
   // Construct parameter sets
   std::vector<GiNaC::exmap> parameterSets(config.getSteps());
-  size_t j=0;
-  for(double val=config.getStartValue(); val<=config.getEndValue(); val+=config.getStepSize())
   {
-     parameterSets[j++].insert(std::pair<GiNaC::ex,GiNaC::ex>(config.getParameter().getSymbol(),val));
+    size_t j=0;
+    for(double val=config.getStartValue(); val<=config.getEndValue(); val+=config.getStepSize())
+    {
+      parameterSets[j++].insert(std::pair<GiNaC::ex,GiNaC::ex>(config.getParameter().getSymbol(),val));
+    }
   }
 
   // Take model
@@ -175,17 +177,17 @@ SSScanTask::process()
       lna_model->fullState(scanResult[j], concentrations, lna_covariances, emre_corrections,
                        ios_covariances, thirdOrder, iosemre_corrections);
 
-      parameterScan(0,j) = GiNaC::ex_to<GiNaC::numeric>(parameterSets[j][config.getParameter().getSymbol()]).to_double();
+      parameterScan(j,0) = GiNaC::ex_to<GiNaC::numeric>(parameterSets[j][config.getParameter().getSymbol()]).to_double();
 
       int col=1;
       for (int i=0; i<this->species.size(); i++)
-        parameterScan(col++,j) = concentrations(index_table[i]);
+        parameterScan(j,col++) = concentrations(index_table[i]);
       for (int i=0; i<this->species.size(); i++)
-        parameterScan(col++,j) = lna_covariances(index_table[i], index_table[i]);
+        parameterScan(j,col++) = lna_covariances(index_table[i], index_table[i]);
       for (int i=0; i<this->species.size(); i++)
-        parameterScan(col++,j) = concentrations(index_table[i])+emre_corrections(index_table[i]);
+        parameterScan(j,col++) = concentrations(index_table[i])+emre_corrections(index_table[i]);
       for (int i=0; i<this->species.size(); i++)
-        parameterScan(col++,j) = lna_covariances(index_table[i], index_table[i])+ios_covariances(index_table[i], index_table[i]);
+        parameterScan(j,col++) = lna_covariances(index_table[i], index_table[i])+ios_covariances(index_table[i], index_table[i]);
 
   }
 
