@@ -142,9 +142,9 @@ add_subdirectory(cli)
 #
 # Exclude unit tests requiring glibc which is not available under Windows!
 #
-#IF(NOT WIN32)
-#    add_subdirectory(test)
-#ENDIF(NOT WIN32)
+IF(NOT WIN32)
+  add_subdirectory(test)
+ENDIF(NOT WIN32)
 
 #
 # Source distribution packages:

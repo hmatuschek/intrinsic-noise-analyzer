@@ -83,7 +83,6 @@ Parser::Sbmlsh::Lexer::Lexer(std::istream &input)
   this->addRule(new Parser::KeyWordTokenRule(T_TIMES, "*"));
   this->addTokenName(T_TIMES, "OP_TIMES");
   this->addRule(new Parser::KeyWordTokenRule(T_POWER, "**"));
-  this->addTokenName(T_POWER, "OP_POWER");
   this->addRule(new Parser::KeyWordTokenRule(T_POWER, "^"));
   this->addTokenName(T_POWER, "OP_POWER");
   this->addRule(new Parser::KeyWordTokenRule(T_DIVIVE, "/"));

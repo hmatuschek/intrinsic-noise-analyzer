@@ -32,7 +32,7 @@ ExpressionEditor::keyPressEvent(QKeyEvent *event)
     if (cursorPosition() == text().size()) {
       if (cursorPosition()==0 || text().at(cursorPosition()-1).isSpace()) {
         completer->setCompletionPrefix("");
-      } else {
+      } else if (cursorPosition()>0) {
         QString prefix; int idx = cursorPosition()-1;
         while ((idx > 0) || !(text().at(idx).isSpace())) {
           prefix.prepend(text().at(idx)); idx--;

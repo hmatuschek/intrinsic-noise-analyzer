@@ -17,6 +17,7 @@ namespace Sbmlsh {
  * @ingroup sbmlsh
  */
 typedef enum {
+  /* Reproduce lexer items of expression parser. */
   T_WHITESPACE = Expr::T_WHITESPACE,  ///< A white space char (SPACE, TAB)
   T_IDENTIFIER = Expr::T_IDENTIFIER,  ///< C-style identifier.
   T_INTEGER = Expr::T_INTEGER,        ///< Integers (w/o) sign.
@@ -30,7 +31,8 @@ typedef enum {
   T_LPAR = Expr::T_LPAR,              ///< '('
   T_RPAR = Expr::T_RPAR,              ///< ')'
 
-  T_END_OF_LINE,  ///< Any combination of NEWLINE, LINEFEET
+  /* New token ids for the SBML-SH parser. */
+  T_END_OF_LINE = Expr::T_FIRST_NON_EXPRESSION_TOKEN,  ///< Any combination of NEWLINE, LINEFEET
 
   T_MODEL_KW,         ///< '@model'
   T_UNITS_KW,         ///< '@units'
