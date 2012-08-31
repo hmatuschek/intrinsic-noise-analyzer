@@ -8,6 +8,7 @@
 #include <QDoubleValidator>
 #include <QIntValidator>
 #include <QCheckBox>
+#include <QGroupBox>
 
 
 using namespace iNA;
@@ -138,23 +139,31 @@ SSScanSpectrumConfigPage::SSScanSpectrumConfigPage(GeneralTaskWizard *parent)
     thread_count->setEnabled(false);
 
 
-  QFormLayout *layout = new QFormLayout();
-  layout->addRow(tr("Parameter"), p_select);
-  layout->addRow(tr("Start value"), p_min);
-  layout->addRow(tr("End value"), p_max);
-  layout->addRow(tr("Steps"), p_num);
+  QGroupBox *param_box = new QGroupBox(tr("Parameter scan"));
+  QFormLayout *param_layout = new QFormLayout();
+  param_layout->addRow(tr("Parameter"), p_select);
+  param_layout->addRow(tr("Start value"), p_min);
+  param_layout->addRow(tr("End value"), p_max);
+  param_layout->addRow(tr("Steps"), p_num);
+  param_box->setLayout(param_layout);
 
-  layout->addItem(layout->spacerItem());
+  QGroupBox *mp_box = new QGroupBox(tr("Parallel process"));
+  QFormLayout *mp_layout = new QFormLayout();
+  mp_layout->addRow(tr("Thread count"), thread_count);
+  mp_box->setLayout(mp_layout);
 
-  layout->addRow(tr("Thread count"), thread_count);
+  QGroupBox *ss_box = new QGroupBox(tr("Steady state solver"));
+  QFormLayout *ss_layout = new QFormLayout();
+  ss_layout->addRow(tr("Precision"), epsilon);
+  ss_layout->addRow(tr("Max. iterations"), n_iter);
+  ss_layout->addRow(tr("Max. integration time"), t_max);
+  ss_box->setLayout(ss_layout);
 
-  layout->addItem(layout->spacerItem());
-
-  layout->addRow(tr("Precision"), epsilon);
-  layout->addRow(tr("Max. iterations"), n_iter);
-  layout->addRow(tr("Max. integration time"), t_max);
-
-  this->setLayout(layout);
+  QVBoxLayout *layout = new QVBoxLayout();
+  layout->addWidget(param_box);
+  layout->addWidget(mp_box);
+  layout->addWidget(ss_box);
+  setLayout(layout);
 }
 
 
