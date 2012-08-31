@@ -41,8 +41,9 @@ LSODA::terminate(int *istate)
 {
         if (illin == 5)
         {
-                InternalError err;
-                err<<"LSODA: repeated occurrence of illegal input. Aborted due to apparent infinite loop.";
+                NumericError err;
+                err<<"LSODA: no progress in calculation.";
+                //err<<"LSODA: repeated occurrence of illegal input. Aborted due to apparent infinite loop.";
                 throw err;
         }
         else
@@ -252,8 +253,9 @@ LSODA::lsoda (int neq, double *y, double *t, double tout,
                 if (tout == *t) {
                         ntrep++;
                         if (ntrep < 5) return;
-                        InternalError err;
-                        err<<"LSODA: Repeated calls with istate = 1 and tout = t. Run aborted due to apparent infinite loop";
+                        NumericError err;
+                        err<<"LSODA: No progress in calculation.";
+                        //err<<"LSODA: Repeated calls with istate = 1 and tout = t. Run aborted due to apparent infinite loop";
                         throw err;
                         return;
                 }

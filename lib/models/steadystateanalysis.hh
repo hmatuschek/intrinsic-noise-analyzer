@@ -287,10 +287,10 @@ public:
             ParameterFolder parameters(parameterSets[j]);
 
             // fold variable parameters first and then all the rest as constant parameters
-            updateVector = constants.apply( parameters.apply( sseModel.getUpdateVector() ) );
+            updateVector = parameters.apply(constants.apply( sseModel.getUpdateVector() ) );
             Eigen::VectorXex REs = updateVector.head(offset);
             Eigen::VectorXex sseUpdate = updateVector.segment(offset,sseLength);
-            Eigen::MatrixXex Jacobian = constants.apply( parameters.apply(sseModel.getJacobian()) );
+            Eigen::MatrixXex Jacobian = parameters.apply(constants.apply( sseModel.getJacobian()) );
 
             // setup solver and solve for RE concentrations
             try

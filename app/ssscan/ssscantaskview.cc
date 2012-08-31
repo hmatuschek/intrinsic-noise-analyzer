@@ -73,14 +73,21 @@ SSScanResultWidget::plotButtonPressed()
   QString concentration_unit(unit_str.str().c_str());
   QString time_unit("a.u.");
 
-
-  // Add timeseries plot:
+  // Add LNA parameter plot:
   Application::getApp()->docTree()->addPlot(
         this->ssscan_task_wrapper,
         new PlotItem(
           new ParameterScanPlot(this->ssscan_task_wrapper->getSSScanTask()->numSpecies(),
                                 &(this->ssscan_task_wrapper->getSSScanTask()->getParameterScan()),
                                 concentration_unit, time_unit)));
+  // Add IOS parameter plot
+  Application::getApp()->docTree()->addPlot(
+        this->ssscan_task_wrapper,
+        new PlotItem(
+          new ParameterScanIOSPlot(this->ssscan_task_wrapper->getSSScanTask()->numSpecies(),
+                                &(this->ssscan_task_wrapper->getSSScanTask()->getParameterScan()),
+                                concentration_unit, time_unit)));
+
 }
 
 
