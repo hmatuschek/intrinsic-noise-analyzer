@@ -61,6 +61,10 @@ public:
   QAction *editModelAction();
   /** Retunrs a weak reference to the "close model" menu action. */
   QAction *closeModelAction();
+  /** Returns a weak ref to the "expand rev reaction" menu action. */
+  QAction *expandRevReacAction();
+  /** Returns a weak ref to the "combine irrev reaction" menu action. */
+  QAction *combineIrrevReacAction();
 
 
 public slots:
@@ -94,6 +98,12 @@ private slots:
   /** Handler for the "edit model" action. */
   void onEditModel();
 
+  /** Handler for the "expand reversible reactions" action. */
+  void onExpandRevReactions();
+
+  /** Handler for the "combine irreversible reactions" action. */
+  void onCombineIrrevReactions();
+
 
 private:
   /** Holds the only reference to the application running. */
@@ -117,6 +127,10 @@ private:
   QAction *_closeModel;
   /** The "edit model" menu action. */
   QAction *_editModel;
+  /** The "expand reversible ractions" menu action. */
+  QAction *_expandRevReaction;
+  /** The "combine irreversible ractions" menu action. */
+  QAction *_combineIrvReaction;
 };
 
 

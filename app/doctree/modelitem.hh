@@ -23,7 +23,7 @@ public:
   /** Constructs a model for the given SBML document. */
   explicit ModelItem(const QString &file_path, QObject *parent = 0);
   /** Constructs a model for the given SBML document. */
-  explicit ModelItem(iNA::Ast::Model *model, QObject *parent = 0);
+  explicit ModelItem(iNA::Ast::Model *_model, QObject *parent = 0);
   /** Destructor. Also frees the held SBML document. */
   ~ModelItem();
 
@@ -42,7 +42,7 @@ public:
 
 private:
   /** Holds the SBML document associated with the model. */
-  iNA::Models::BaseModel *base_model;
+  iNA::Ast::Model *_model;
   /** Holds the display label for the item in the @c DocumentTree. */
   QString itemLabel;
 };
