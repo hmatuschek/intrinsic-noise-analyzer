@@ -11,7 +11,7 @@
 #include "../views/generaltaskwizard.hh"
 
 
-class SSScanWizard : public GeneralTaskWizard
+class ParamScanWizard : public GeneralTaskWizard
 {
   Q_OBJECT
 
@@ -26,44 +26,44 @@ public:
 
 protected:
   /** The task configuration. This instance will be populated by the wizard. */
-  SSScanTask::Config config;
+  ParamScanTask::Config config;
 
 public:
   /** Default constructor. */
-  explicit SSScanWizard(QWidget *parent = 0);
+  explicit ParamScanWizard(QWidget *parent = 0);
   /** Implements GeneralTaskWizard interface. */
   virtual GeneralTaskConfig &getConfig();
 };
 
 
 
-class SSScanModelSelectionPage : public ModelSelectionWizardPage
+class ParamScanModelSelectionPage : public ModelSelectionWizardPage
 {
   Q_OBJECT
 
 public:
-  explicit SSScanModelSelectionPage(GeneralTaskWizard *parent);
+  explicit ParamScanModelSelectionPage(GeneralTaskWizard *parent);
   virtual bool validatePage();
 };
 
 
 
-class SSScanSpeciesSelectionPage : public SpeciesSelectionWizardPage
+class ParamScanSpeciesSelectionPage : public SpeciesSelectionWizardPage
 {
   Q_OBJECT
 
 public:
-  explicit SSScanSpeciesSelectionPage(GeneralTaskWizard *parent);
+  explicit ParamScanSpeciesSelectionPage(GeneralTaskWizard *parent);
 };
 
 
 
-class SSScanSpectrumConfigPage : public QWizardPage
+class ParameterScanConfigPage : public QWizardPage
 {
   Q_OBJECT
 
 public:
-  explicit SSScanSpectrumConfigPage(GeneralTaskWizard *parent);
+  explicit ParameterScanConfigPage(GeneralTaskWizard *parent);
 
   virtual void initializePage();
   virtual bool validatePage();
@@ -77,16 +77,20 @@ private:
   QLineEdit *p_min;
   QLineEdit *p_max;
   QLineEdit *p_num;
+
+private slots:
+  void setParamRange(int);
+
 };
 
 
 
-class SSScanSummaryPage : public QWizardPage
+class ParamScanSummaryPage : public QWizardPage
 {
   Q_OBJECT
 
 public:
-  explicit SSScanSummaryPage(QWidget *parent=0);
+  explicit ParamScanSummaryPage(QWidget *parent=0);
 
   virtual void initializePage();
 

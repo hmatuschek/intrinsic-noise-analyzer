@@ -256,7 +256,7 @@ public:
      * @param resultSet: Outputs the steady state concentrations, covariance and EMRE vector in reduced
      *        coordinates. Contents will be overwritten.
      */
-    int parameterScan(std::vector<GiNaC::exmap> &parameterSets, std::vector<Eigen::VectorXd> &resultSet)
+    int parameterScan(std::vector<GiNaC::exmap> &parameterSets, std::vector<Eigen::VectorXd> &resultSet, const size_t &numThreads=OpenMP::getMaxThreads())
 
     {
 
@@ -275,8 +275,14 @@ public:
 
         Eigen::VectorXex updateVector;
 
-        int iter;
+        int iter=0;
 
+        std::vector< NLEsolve::HybridSolver<M> > solvers(numThreads,solver);
+        //for(size_t i=0; i<solvers.size(); i++)
+          //  solvers[i].set
+
+
+//#pragma omp parallel for if(numThreads>1) num_threads(numThreads) schedule(dynamic) private(updateVector,iter,x)
         // iterate over all parameter sets
         for(size_t j = 0; j < parameterSets.size(); j++)
         {
@@ -296,8 +302,8 @@ public:
             try
             {
 
-                solver.set(sseModel.stateIndex,REs,Jacobian);
-                iter = this->calcConcentrations(conc);
+                solvers[OpenMP::getThreadNum()].set(sseModel.stateIndex,REs,Jacobian);
+                iter = solvers[OpenMP::getThreadNum()].solve(conc, max_time, min_time_step);
                 x.head(offset) = conc;
 
                 // ... and substitute RE concentrations

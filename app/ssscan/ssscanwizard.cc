@@ -16,20 +16,20 @@ using namespace iNA;
 
 
 
-SSScanWizard::SSScanWizard(QWidget *parent) :
+ParamScanWizard::ParamScanWizard(QWidget *parent) :
   GeneralTaskWizard(parent), config()
 {
   this->setWindowTitle("System Size Expansion");
 
-  this->setPage(SSScanWizard::MODEL_SELECTION_PAGE, new SSScanModelSelectionPage(this));
-  this->setPage(SSScanWizard::SPECIES_SELECTION_PAGE, new SSScanSpeciesSelectionPage(this));
-  this->setPage(SSScanWizard::SCAN_CONFIG_PAGE, new SSScanSpectrumConfigPage(this));
-  this->setPage(SSScanWizard::SUMMARY_PAGE, new SSScanSummaryPage(this));
-  this->page(SSScanWizard::SUMMARY_PAGE)->setFinalPage(true);
+  this->setPage(ParamScanWizard::MODEL_SELECTION_PAGE, new ParamScanModelSelectionPage(this));
+  this->setPage(ParamScanWizard::SPECIES_SELECTION_PAGE, new ParamScanSpeciesSelectionPage(this));
+  this->setPage(ParamScanWizard::SCAN_CONFIG_PAGE, new ParameterScanConfigPage(this));
+  this->setPage(ParamScanWizard::SUMMARY_PAGE, new ParamScanSummaryPage(this));
+  this->page(ParamScanWizard::SUMMARY_PAGE)->setFinalPage(true);
 }
 
 GeneralTaskConfig &
-SSScanWizard::getConfig()
+ParamScanWizard::getConfig()
 {
   return this->config;
 }
@@ -39,16 +39,16 @@ SSScanWizard::getConfig()
 /* ********************************************************************************************* *
  * Implementation of model selection page:
  * ********************************************************************************************* */
-SSScanModelSelectionPage::SSScanModelSelectionPage(GeneralTaskWizard *parent)
+ParamScanModelSelectionPage::ParamScanModelSelectionPage(GeneralTaskWizard *parent)
   : ModelSelectionWizardPage(parent)
 {
-  this->setTitle(tr("Steady State Analysis"));
-  this->setSubTitle(tr("Select a model to analyze."));
+  this->setTitle(tr("Parameter scan"));
+  this->setSubTitle(tr("Select a model for parameter scan"));
 }
 
 
 bool
-SSScanModelSelectionPage::validatePage()
+ParamScanModelSelectionPage::validatePage()
 {
   // Try to create LNA model from SBML document
   try {
@@ -57,7 +57,7 @@ SSScanModelSelectionPage::validatePage()
       return false;
   } catch (Exception err) {
     // Simply show a warning and done.
-    QMessageBox::warning(0, tr("Cannot construct LNA anlysis from model: "), err.what());
+    QMessageBox::warning(0, tr("Cannot construct analysis from model: "), err.what());
     return false;
   }
 
@@ -69,23 +69,23 @@ SSScanModelSelectionPage::validatePage()
 /* ********************************************************************************************* *
  * Implementation of species selection page:
  * ********************************************************************************************* */
-SSScanSpeciesSelectionPage::SSScanSpeciesSelectionPage(GeneralTaskWizard *parent)
+ParamScanSpeciesSelectionPage::ParamScanSpeciesSelectionPage(GeneralTaskWizard *parent)
   : SpeciesSelectionWizardPage(parent)
 {
-  this->setTitle(tr("Steady State Analysis"));
-  this->setSubTitle(tr("Select some species for analysis."));
+  this->setTitle(tr("Parameter scan"));
+  this->setSubTitle(tr("Select some species for parameter scan."));
 }
 
 
 
 /* ********************************************************************************************* *
- * Implementation of frequency range page:
+ * Config page
  * ********************************************************************************************* */
-SSScanSpectrumConfigPage::SSScanSpectrumConfigPage(GeneralTaskWizard *parent)
+ParameterScanConfigPage::ParameterScanConfigPage(GeneralTaskWizard *parent)
   : QWizardPage(parent)
 {
-  this->setTitle(tr("Steady State Analysis"));
-  this->setSubTitle(tr("Configure steady state solver."));
+  this->setTitle(tr("Parameter scan"));
+  this->setSubTitle(tr("Configure parameter scan"));
 
   this->n_iter = new QLineEdit(); this->n_iter->setText("100");
   this->n_iter->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
@@ -111,6 +111,8 @@ SSScanSpectrumConfigPage::SSScanSpectrumConfigPage(GeneralTaskWizard *parent)
 
   p_select = new QComboBox();
   p_select->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
+
+  QObject::connect(p_select, SIGNAL(currentIndexChanged(int)), this, SLOT(setParamRange(int)));
 
   p_min = new QLineEdit("0.0");
   p_min->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
@@ -142,8 +144,8 @@ SSScanSpectrumConfigPage::SSScanSpectrumConfigPage(GeneralTaskWizard *parent)
   QGroupBox *param_box = new QGroupBox(tr("Parameter scan"));
   QFormLayout *param_layout = new QFormLayout();
   param_layout->addRow(tr("Parameter"), p_select);
-  param_layout->addRow(tr("Start value"), p_min);
-  param_layout->addRow(tr("End value"), p_max);
+  param_layout->addRow(tr("Min. value"), p_min);
+  param_layout->addRow(tr("Max. value"), p_max);
   param_layout->addRow(tr("Steps"), p_num);
   param_box->setLayout(param_layout);
 
@@ -166,28 +168,50 @@ SSScanSpectrumConfigPage::SSScanSpectrumConfigPage(GeneralTaskWizard *parent)
   setLayout(layout);
 }
 
+void
+ParameterScanConfigPage::setParamRange(int)
+{
+
+    // Get the config:
+    ParamScanWizard *wizard = static_cast<ParamScanWizard *>(this->wizard());
+    ParamScanTask::Config &config = wizard->getConfigCast<ParamScanTask::Config>();
+
+    QString idp = p_select->currentText();
+
+    iNA::Ast::Parameter * parameter = config.getModel()->getParameter(idp.toStdString());
+
+    // Set range
+    if(parameter->hasValue() && GiNaC::is_a<GiNaC::numeric>(parameter->getValue()))
+    {
+        double val = GiNaC::ex_to<GiNaC::numeric>(parameter->getValue()).to_double();
+        p_min->setText(QString("%1").arg(val));
+        p_max->setText(QString("%1").arg(1.1*val));
+    }
+
+}
 
 void
-SSScanSpectrumConfigPage::initializePage()
+ParameterScanConfigPage::initializePage()
 {
   // Get the config:
-  SSScanWizard *wizard = static_cast<SSScanWizard *>(this->wizard());
-  SSScanTask::Config &config = wizard->getConfigCast<SSScanTask::Config>();
+  ParamScanWizard *wizard = static_cast<ParamScanWizard *>(this->wizard());
+  ParamScanTask::Config &config = wizard->getConfigCast<ParamScanTask::Config>();
 
   // Init parameter list:
   p_select->clear();
   p_select->addItems(ScopeItemModel::collectIdentifiers(
                        *(config.getModel()), ScopeItemModel::SELECT_PARAMETERS));
   if (p_select->model()->rowCount() > 0) { p_select->setCurrentIndex(0); }
+
 }
 
 
 bool
-SSScanSpectrumConfigPage::validatePage()
+ParameterScanConfigPage::validatePage()
 {
   // Get the wizard:
-  SSScanWizard *wizard = static_cast<SSScanWizard *>(this->wizard());
-  SSScanTask::Config &config = wizard->getConfigCast<SSScanTask::Config>();
+  ParamScanWizard *wizard = static_cast<ParamScanWizard *>(this->wizard());
+  ParamScanTask::Config &config = wizard->getConfigCast<ParamScanTask::Config>();
 
   bool ok;
   config.setEpsilon(epsilon->text().toDouble(&ok));
@@ -213,10 +237,10 @@ SSScanSpectrumConfigPage::validatePage()
 /* ********************************************************************************************* *
  * Implementation of summary page:
  * ********************************************************************************************* */
-SSScanSummaryPage::SSScanSummaryPage(QWidget *parent)
+ParamScanSummaryPage::ParamScanSummaryPage(QWidget *parent)
   : QWizardPage(parent)
 {
-  this->setTitle("Steady State Analysis");
+  this->setTitle("Parameter scan");
   this->setSubTitle("Summary");
 
   this->model_name = new QLabel();
@@ -226,26 +250,22 @@ SSScanSummaryPage::SSScanSummaryPage(QWidget *parent)
   this->species->setTextFormat(Qt::LogText);
   this->species->setWordWrap(true);
 
-  //this->spectrum = new QLabel();
-  //this->spectrum->setTextFormat(Qt::LogText);
-
   this->memory = new QLabel();
   this->memory->setTextFormat(Qt::LogText);
 
   QFormLayout *layout = new QFormLayout();
   layout->addRow("Model:", this->model_name);
   layout->addRow("Selected species:", this->species);
-  //layout->addRow("Calculate spectrum:", this->spectrum);
   layout->addRow("Approx. memory used:", this->memory);
   this->setLayout(layout);
 }
 
 
 void
-SSScanSummaryPage::initializePage()
+ParamScanSummaryPage::initializePage()
 {
-  SSScanWizard *wizard = static_cast<SSScanWizard *>(this->wizard());
-  SSScanTask::Config &config = wizard->getConfigCast<SSScanTask::Config>();
+  ParamScanWizard *wizard = static_cast<ParamScanWizard *>(this->wizard());
+  ParamScanTask::Config &config = wizard->getConfigCast<ParamScanTask::Config>();
 
   this->model_name->setText(config.getModelDocument()->getModel().getName().c_str());
   QStringList species(config.getSelectedSpecies());

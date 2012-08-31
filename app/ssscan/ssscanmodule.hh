@@ -8,11 +8,11 @@
 
 
 
-class SSScanModule : public Module
+class ParamScanModule : public Module
 {
   Q_OBJECT
 public:
-  explicit SSScanModule(QObject *parent = 0);
+  explicit ParamScanModule(QObject *parent = 0);
 
 
 private slots:
@@ -20,7 +20,7 @@ private slots:
 
 
 private:
-  SSScanWizard *wizard;
+  ParamScanWizard *wizard;
   QAction *scanAction;
 };
 

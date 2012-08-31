@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
   // Load SSA module:
   app->addModule(new SSAModule(app));
   // Load parameter scan module
-  app->addModule(new SSScanModule(app));
+  app->addModule(new ParamScanModule(app));
 
   window->show();
 

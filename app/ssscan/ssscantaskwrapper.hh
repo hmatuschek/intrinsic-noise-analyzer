@@ -12,9 +12,9 @@ class SSScanTaskWrapper : public TaskItem
   Q_OBJECT
 
 public:
-  SSScanTaskWrapper(SSScanTask *task, QObject *parent=0);
+  SSScanTaskWrapper(ParamScanTask *task, QObject *parent=0);
 
-  SSScanTask *getSSScanTask();
+  ParamScanTask *getSSScanTask();
 
   virtual bool providesView() const;
   virtual QWidget *createView();

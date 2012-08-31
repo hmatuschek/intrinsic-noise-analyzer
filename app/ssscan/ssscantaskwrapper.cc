@@ -3,16 +3,16 @@
 #include "ssscantaskview.hh"
 
 
-SSScanTaskWrapper::SSScanTaskWrapper(SSScanTask *task, QObject *parent)
+SSScanTaskWrapper::SSScanTaskWrapper(ParamScanTask *task, QObject *parent)
   : TaskItem(task, parent)
 {
 }
 
 
-SSScanTask *
+ParamScanTask *
 SSScanTaskWrapper::getSSScanTask()
 {
-  return static_cast<SSScanTask *>(this->task);
+  return static_cast<ParamScanTask *>(this->task);
 }
 
 
