@@ -264,16 +264,16 @@ MathFraction::layout(const MathContext &context, QGraphicsItem *parent)
   QPointF nom_pos((tot_width - _nominator->metrics().bbWidth())/2, 0);
 
   QPointF denom_pos((tot_width-_denominator->metrics().bbWidth())/2,
-                    _nominator->metrics().bbHeight());
+                    _nominator->metrics().bbHeight()+sub_ctx.lineWidth());
 
   QRectF nom_bb = _nominator->metrics().bb(); nom_bb.translate(nom_pos);
-  QRectF denom_bb = _nominator->metrics().bb(); denom_bb.translate(nom_pos);
+  QRectF denom_bb = _denominator->metrics().bb(); denom_bb.translate(denom_pos);
 
   // Update own metrics:
   _metrics.setBB(nom_bb.unite(denom_bb));
   _metrics.setWidth(tot_width);
   _metrics.setHeight(tot_height);
-  _metrics.setAscent(_nominator->metrics().bbHeight() + _denominator->metrics().bbAscent());
+  _metrics.setAscent(_nominator->metrics().bbHeight() + _denominator->metrics().bbHeight() + sub_ctx.lineWidth());
   _metrics.setCenter(_nominator->metrics().bbHeight() + sub_ctx.lineWidth()/2);
   _metrics.setLeftBearing(0); _metrics.setRightBearing(0);
 
