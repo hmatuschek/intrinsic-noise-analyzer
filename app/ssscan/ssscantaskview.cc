@@ -78,7 +78,7 @@ SSScanResultWidget::plotButtonPressed()
   Application::getApp()->docTree()->addPlot(
         this->ssscan_task_wrapper,
         new PlotItem(
-          new ParameterScanPlot(this->ssscan_task_wrapper->getSSScanTask()->getSelectedSpecies().size(),
+          new ParameterScanPlot(this->ssscan_task_wrapper->getSSScanTask()->numSpecies(),
                                 &(this->ssscan_task_wrapper->getSSScanTask()->getParameterScan()),
                                 concentration_unit, time_unit)));
 }

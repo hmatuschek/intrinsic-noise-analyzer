@@ -80,7 +80,6 @@ protected:
   Config config;
   /** Holds an instance of the analysis. */
   iNA::Models::SteadyStateAnalysis<iNA::Models::IOSmodel> steady_state;
-  QVector<QString> species;
   QVector<QString> species_name;
 
   Table parameterScan;
@@ -93,9 +92,7 @@ public:
 
   Table &getParameterScan();
 
-  inline const QVector<QString> &getSelectedSpecies() const { return species; }
-
-  const QString &getSpeciesId(int i);
+  inline size_t numSpecies() const { return config.getNumSpecies(); }
 
   const QString &getSpeciesName(int i);
 
