@@ -1,20 +1,20 @@
 #include "ssscantask.hh"
 
 /* ******************************************************************************************* *
- * Implementation of SSScanTask::Config, the task configuration.
+ * Implementation of ParamScanTask::Config, the task configuration.
  * ******************************************************************************************* */
-SSScanTask::Config::Config()
+ParamScanTask::Config::Config()
   : GeneralTaskConfig(), ModelSelectionTaskConfig(), SpeciesSelectionTaskConfig(),
-    _model(0), max_iterations(0), max_time_step(0), epsilon(0),
+    _model(0), num_threads(0), max_iterations(0), max_time_step(0), epsilon(0),
     parameter(), start_value(0), end_value(1),
     steps(1)
 {
   // Pass...
 }
 
-SSScanTask::Config::Config(const Config &other)
+ParamScanTask::Config::Config(const Config &other)
   : GeneralTaskConfig(), ModelSelectionTaskConfig(other), SpeciesSelectionTaskConfig(other),
-    _model(other._model), max_iterations(other.max_iterations), max_time_step(other.max_time_step),
+    _model(other._model), num_threads(other.num_threads), max_iterations(other.max_iterations), max_time_step(other.max_time_step),
     epsilon(other.epsilon),
     parameter(other.parameter), start_value(other.start_value),
     end_value(other.end_value), steps(other.steps)
@@ -23,7 +23,7 @@ SSScanTask::Config::Config(const Config &other)
 }
 
 void
-SSScanTask::Config::setModelDocument(DocumentItem *document)
+ParamScanTask::Config::setModelDocument(DocumentItem *document)
 {
   ModelSelectionTaskConfig::setModelDocument(document);
   // Construct IOS model from SBML model associated with the selected document
@@ -31,44 +31,49 @@ SSScanTask::Config::setModelDocument(DocumentItem *document)
 }
 
 iNA::Ast::Model *
-SSScanTask::Config::getModel() const
+ParamScanTask::Config::getModel() const
 {
   return _model;
 }
 
+void
+ParamScanTask::Config::setNumThreads(size_t num)
+{
+  num_threads = num;
+}
 
 size_t
-SSScanTask::Config::getMaxIterations() const
+ParamScanTask::Config::getMaxIterations() const
 {
   return this->max_iterations;
 }
 
 void
-SSScanTask::Config::setMaxIterations(size_t num)
+ParamScanTask::Config::setMaxIterations(size_t num)
 {
   this->max_iterations = num;
 }
 
 double
-SSScanTask::Config::getMaxTimeStep() const
+ParamScanTask::Config::getMaxTimeStep() const
 {
   return max_time_step;
 }
 
 void
-SSScanTask::Config::setMaxTimeStep(double t_max)
+ParamScanTask::Config::setMaxTimeStep(double t_max)
 {
   max_time_step = t_max;
 }
 
 double
-SSScanTask::Config::getEpsilon() const
+ParamScanTask::Config::getEpsilon() const
 {
   return this->epsilon;
 }
 
 void
-SSScanTask::Config::setEpsilon(double eps)
+ParamScanTask::Config::setEpsilon(double eps)
 {
   this->epsilon = eps;
 }
@@ -76,14 +81,14 @@ SSScanTask::Config::setEpsilon(double eps)
 
 
 /* ******************************************************************************************* *
- * Implementation of SSScanTask::Config, the task configuration.
+ * Implementation of ParamScanTask::Config, the task configuration.
  * ******************************************************************************************* */
-SSScanTask::SSScanTask(const Config &config, QObject *parent)
+ParamScanTask::ParamScanTask(const Config &config, QObject *parent)
   : Task(parent), config(config),
     steady_state(dynamic_cast<iNA::Models::IOSmodel &>(*config.getModel()),
       config.getMaxIterations(), config.getEpsilon(), config.getMaxTimeStep()),
     species_name(config.getNumSpecies()),
-    parameterScan(1+2*config.getNumSpecies()+config.getNumSpecies()*(config.getNumSpecies()+1), config.getSteps()),
+    parameterScan(1+2*config.getNumSpecies()+config.getNumSpecies()*(config.getNumSpecies()+1), config.getSteps()+1),
     index_table(config.getNumSpecies())
 {
 
@@ -126,17 +131,17 @@ SSScanTask::SSScanTask(const Config &config, QObject *parent)
 
 
 void
-SSScanTask::process()
+ParamScanTask::process()
 {
 
   this->setState(Task::INITIALIZED);
   this->setProgress(0);
 
   // Construct parameter sets
-  std::vector<GiNaC::exmap> parameterSets(config.getSteps());
-  for(size_t j = 0; j<config.getSteps(); j++)
+  std::vector<GiNaC::exmap> parameterSets(config.getSteps()+1);
+  for(size_t j = 0; j<=config.getSteps(); j++)
   {
-      double val = config.getStartValue()+config.getStepSize()*j;
+      double val = config.getStartValue()+config.getInterval()*j;
       parameterSets[j].insert(std::pair<GiNaC::ex,GiNaC::ex>(config.getParameter().getSymbol(),val));
   }
 
@@ -205,23 +210,23 @@ SSScanTask::process()
 
 
 QString
-SSScanTask::getLabel()
+ParamScanTask::getLabel()
 {
   return "Steady State Analysis (SSE)";
 }
 
 
 const iNA::Ast::Unit &
-SSScanTask::getSpeciesUnit() const
+ParamScanTask::getSpeciesUnit() const
 {
   return config.getModel()->getSpecies(0)->getUnit();
 }
 
 
 const QString &
-SSScanTask::getSpeciesName(int i)
+ParamScanTask::getSpeciesName(int i)
 {
   return this->species_name[i];
 }
 
-Table & SSScanTask::getParameterScan() { return parameterScan; }
+Table & ParamScanTask::getParameterScan() { return parameterScan; }

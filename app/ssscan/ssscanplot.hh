@@ -36,5 +36,33 @@ public:
                              QObject *parent=0);
 };
 
+/**
+ * Collects data from a @c Table and updates the
+ * @c VarianceLinesGraph instance.
+ */
+class ParameterScanCovPlot : public Plot::Figure
+{
+  Q_OBJECT
+
+public:
+  explicit ParameterScanCovPlot(size_t num_species, Table *data,
+                             const QString &species_unit, const QString &time_unit,
+                             QObject *parent=0);
+};
+
+/**
+ * Collects data from a @c Table and updates the
+ * @c VarianceLinesGraph instance.
+ */
+class ParameterScanCovIOSPlot : public Plot::Figure
+{
+  Q_OBJECT
+
+public:
+  explicit ParameterScanCovIOSPlot(size_t num_species, Table *data,
+                             const QString &species_unit, const QString &time_unit,
+                             QObject *parent=0);
+};
+
 
 #endif

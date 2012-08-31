@@ -5,23 +5,23 @@
 #include <QMessageBox>
 
 
-SSScanModule::SSScanModule(QObject *parent) :
+ParamScanModule::ParamScanModule(QObject *parent) :
   Module(parent)
 {
   // Create wizard:
-  this->wizard = new SSScanWizard();
+  this->wizard = new ParamScanWizard();
   this->wizard->setModal(true);
 
   // Create Menu:
   // Register menus
-  this->scanAction = new QAction(tr("&ParameterScan (SSE)"), this);
+  this->scanAction = new QAction(tr("&Parameter Scan (SSE)"), this);
   Application::getApp()->addToAnalysesMenu(this->scanAction);
   QObject::connect(this->scanAction, SIGNAL(triggered()), this, SLOT(configTask()));
 }
 
 
 void
-SSScanModule::configTask()
+ParamScanModule::configTask()
 {
   this->wizard->restart();
 
@@ -29,10 +29,10 @@ SSScanModule::configTask()
   if (! this->wizard->exec()) { return; }
 
   // Construct a task from configuration:
-  SSScanTask *task = 0;
+  ParamScanTask *task = 0;
 
   try {
-    task = new SSScanTask(this->wizard->getConfigCast<SSScanTask::Config>());
+    task = new ParamScanTask(this->wizard->getConfigCast<ParamScanTask::Config>());
   } catch (iNA::Exception &err) {
     QMessageBox::warning(
           0, tr("Can not construct parameter scan from model: "), err.what());
@@ -41,7 +41,7 @@ SSScanModule::configTask()
 
   // Add task to application and run it:
   Application::getApp()->docTree()->addTask(
-        this->wizard->getConfigCast<SSScanTask::Config>().getModelDocument(),
+        this->wizard->getConfigCast<ParamScanTask::Config>().getModelDocument(),
         new SSScanTaskWrapper(task));
 
   task->start();

@@ -88,6 +88,22 @@ SSScanResultWidget::plotButtonPressed()
                                 &(this->ssscan_task_wrapper->getSSScanTask()->getParameterScan()),
                                 concentration_unit, time_unit)));
 
+  // Add IOS COV plot
+  Application::getApp()->docTree()->addPlot(
+        this->ssscan_task_wrapper,
+        new PlotItem(
+          new ParameterScanCovPlot(this->ssscan_task_wrapper->getSSScanTask()->numSpecies(),
+                                &(this->ssscan_task_wrapper->getSSScanTask()->getParameterScan()),
+                                concentration_unit, time_unit)));
+
+  // Add IOS COV plot
+  Application::getApp()->docTree()->addPlot(
+        this->ssscan_task_wrapper,
+        new PlotItem(
+          new ParameterScanCovIOSPlot(this->ssscan_task_wrapper->getSSScanTask()->numSpecies(),
+                                &(this->ssscan_task_wrapper->getSSScanTask()->getParameterScan()),
+                                concentration_unit, time_unit)));
+
 }
 
 

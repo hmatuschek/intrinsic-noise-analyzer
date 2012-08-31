@@ -8,7 +8,7 @@
 #include "../models/generaltaskconfig.hh"
 
 
-class SSScanTask : public Task
+class ParamScanTask : public Task
 {
   Q_OBJECT
 
@@ -23,6 +23,8 @@ public:
   {
   protected:
     iNA::Models::IOSmodel *_model;
+
+    size_t num_threads;
 
     int max_iterations;
     double max_time_step;
@@ -48,6 +50,9 @@ public:
     /** Implements the @c SpeciesSelectionTaskConfig interface, and returns the LNA model instance. */
     virtual iNA::Ast::Model *getModel() const;
 
+    /** Sets the number of threads for OpenMP. */
+    void setNumThreads(size_t num);
+
     /** Returns the max number of iterations.*/
     size_t getMaxIterations() const;
     /** Resets the max number of iterations. */
@@ -70,7 +75,7 @@ public:
     inline void setEndValue(double value) { end_value = value; }
     size_t getSteps() const { return steps; }
     void setSteps(size_t value) { steps = value; }
-    double getStepSize() const { return (end_value-start_value)/steps; }
+    double getInterval() const { return (end_value-start_value)/steps; }
   };
 
 
@@ -87,7 +92,7 @@ protected:
 
 
 public:
-  explicit SSScanTask(const Config &config, QObject *parent=0);
+  explicit ParamScanTask(const Config &config, QObject *parent=0);
 
   Table &getParameterScan();
 
