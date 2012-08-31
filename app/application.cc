@@ -150,10 +150,12 @@ Application::itemSelected(const QModelIndex &index)
     _exportModel->setEnabled(true);
     _editModel->setEnabled(true);
     _closeModel->setEnabled(true);
+    _expandRevReaction->setEnabled(true);
   } else {
     _exportModel->setEnabled(false);
     _editModel->setEnabled(false);
     _closeModel->setEnabled(false);
+    _expandRevReaction->setEnabled(false);
   }
 
 }

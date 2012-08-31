@@ -19,7 +19,8 @@
  * arrows are allowed. */
 class Ginac2Formula :
     public GiNaC::visitor, public GiNaC::symbol::visitor, public GiNaC::numeric::visitor,
-    public GiNaC::add::visitor, public GiNaC::mul::visitor, public GiNaC::power::visitor
+    public GiNaC::add::visitor, public GiNaC::mul::visitor, public GiNaC::power::visitor,
+    public GiNaC::basic::visitor
 {
   QList<MathItem *> _stack;
   iNA::Ast::Scope &_scope;
@@ -34,6 +35,8 @@ public:
   virtual void visit(const GiNaC::add &node);
   virtual void visit(const GiNaC::mul &node);
   virtual void visit(const GiNaC::power &node);
+
+  virtual void visit(const GiNaC::basic &node);
 
   MathItem *getFormula();
 

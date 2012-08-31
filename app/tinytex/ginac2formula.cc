@@ -66,9 +66,15 @@ void
 Ginac2Formula::visit(const GiNaC::numeric &node)
 {
   if (node.is_integer()) {
-    _stack.push_back(new MathText(QString("%1").arg(node.to_int())));
+    if (0 > node.to_int())
+      _stack.push_back(new MathText(QString("(%1)").arg(node.to_int())));
+    else
+      _stack.push_back(new MathText(QString("%1").arg(node.to_int())));
   } else {
-    _stack.push_back(new MathText(QString("%1").arg(node.to_double())));
+    if (0 > node.to_double())
+      _stack.push_back(new MathText(QString("(%1)").arg(node.to_double())));
+    else
+      _stack.push_back(new MathText(QString("%1").arg(node.to_double())));
   }
 }
 
@@ -81,23 +87,20 @@ Ginac2Formula::visit(const GiNaC::add &node)
 
   MathFormula *formula = new MathFormula();
 
-  /*if (old_precedence > _current_precedence) {
-    formula->appendItem(new MathText("("));
-  }*/
-
   // Handle summands:
   for (size_t i=0; i<node.nops(); i++) {
     node.op(i).accept(*this);
   }
 
-  formula->appendItem(_stack.back()); _stack.pop_back();
-  for (size_t i=1; i<node.nops(); i++) {
-    formula->appendItem(new MathText("+"));
+  if (node.nops() > 0) {
     formula->appendItem(_stack.back()); _stack.pop_back();
+    for (size_t i=1; i<node.nops(); i++) {
+      formula->appendItem(new MathText("+"));
+      formula->appendItem(_stack.back()); _stack.pop_back();
+    }
   }
 
   if (old_precedence > _current_precedence) {
-    //formula->appendItem(new MathText(")"));
     _stack.push_back(new MathBlock(formula, new MathText("("), new MathText(")")));
   } else {
     _stack.push_back(formula);
@@ -119,31 +122,22 @@ Ginac2Formula::visit(const GiNaC::mul &node)
   for (size_t i=0; i<node.nops(); i++) {
     // Process factor
     node.op(i).accept(*this);
-    // Add factor to the formula:
-    if (GiNaC::is_a<GiNaC::power>(node.op(i))) {
-      // Get exponent
-      GiNaC::ex exponent = GiNaC::ex_to<GiNaC::power>(node.op(i)).op(1);
-      if (GiNaC::is_a<GiNaC::numeric>(exponent)) {
-        // get numeric value
-        GiNaC::numeric value = GiNaC::ex_to<GiNaC::numeric>(exponent);
-        // If expoent is negative integer:
-        if (value.info(GiNaC::info_flags::integer) && value.is_negative()) {
-          (1/node.op(i)).accept(*this);
-          if (0 < denumerator.size()) { denumerator.append(new MathText(QChar(0x00B7))); }
-          denumerator.append(_stack.back()); _stack.pop_back();
-          continue;
-        }
-      }
-    }
+    MathItem *item = _stack.back(); _stack.pop_back();
 
-    node.op(i).accept(*this);
-    if (0 < numerator.size()) { numerator.append(new MathText(QChar(0x00B7))); }
-    numerator.append(_stack.back()); _stack.pop_back();
+    // Add factor to the formula:
+    if (GiNaC::is_a<GiNaC::power>(node.op(i)) &&
+        node.op(i).op(1).info(GiNaC::info_flags::integer) &&
+        GiNaC::ex_to<GiNaC::numeric>(node.op(i).op(1)).is_negative())
+    {
+      GiNaC::ex tmp = GiNaC::power(node.op(i).op(0), -node.op(i).op(1)); tmp.accept(*this);
+      delete item; item = _stack.back(); _stack.pop_back();
+      denumerator.append(item);
+    }  else  {
+      numerator.append(item);
+    }
   }
 
-  /*
-   * Now, assemble formula (product/quotient)
-   */
+  // Now, assemble formula (product/quotient)
   // If there are no numerator elements:
   if (0 == numerator.size()) {
     numerator.append(new MathText("1"));
@@ -152,15 +146,18 @@ Ginac2Formula::visit(const GiNaC::mul &node)
   // if there are no denumerator elements:
   if (0 == denumerator.size()) {
     for (QList<MathItem *>::iterator item=numerator.begin(); item!=numerator.end(); item++) {
+      if(formula->size() > 0) formula->appendItem(new MathText(QChar(0x00b7)));
       formula->appendItem(*item);
     }
   } else {
     MathFormula *num = new MathFormula();
     MathFormula *denum = new MathFormula();
     for (QList<MathItem *>::iterator item=numerator.begin(); item!=numerator.end(); item++) {
+      if (num->size() > 0) num->appendItem(new MathText(QChar(0x00b7)));
       num->appendItem(*item);
     }
     for (QList<MathItem *>::iterator item=denumerator.begin(); item!=denumerator.end(); item++) {
+      if (denum->size() > 0) denum->appendItem(new MathText(QChar(0x00b7)));
       denum->appendItem(*item);
     }
     formula->appendItem(new MathFraction(num, denum));
@@ -192,6 +189,17 @@ Ginac2Formula::visit(const GiNaC::power &node)
   _current_precedence = old_precedence;
 }
 
+
+void
+Ginac2Formula::visit(const GiNaC::basic &node)
+{
+  iNA::Utils::Message msg = LOG_MESSAGE(iNA::Utils::Message::INFO);
+  msg << "Can not render formula, unknown expression type. ";
+  iNA::Utils::Logger::get().log(msg);
+
+  TinyTex::Error err; err << "Can not render formula: Unknown element: " << node;
+  throw err;
+}
 
 MathItem *
 Ginac2Formula::getFormula()

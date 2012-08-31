@@ -21,8 +21,8 @@ Model::Model(const Model &other)
   Trafo::ModelCopyist::copy(&other, this);
 
   // Convert irreversible reactions to reversible ones:
-  Convert2Irreversible converter(*this);
-  converter.process();
+  //Convert2Irreversible converter(*this);
+  //converter.process();
 }
 
 

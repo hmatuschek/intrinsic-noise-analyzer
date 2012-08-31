@@ -1,4 +1,5 @@
 #include "basemodel.hh"
+#include <ast/converter.hh>
 
 using namespace iNA;
 using namespace iNA::Models;
@@ -9,6 +10,10 @@ BaseModel::BaseModel(const Ast::Model &model)
     species(numSpecies()), reactions(numReactions()),
     propensities(numReactions())
 {
+  // Convert irreversible reactions to reversible ones:
+  Ast::Convert2Irreversible converter(*this);
+  converter.process();
+
   // Collect all constants and assignment rules, that are needed to be substituted
   // before evaluation:
   Ast::Trafo::SubstitutionCollector collector(this->constant_substitution_table);
