@@ -10,9 +10,6 @@ LIBSBML_CPP_NAMESPACE_QUALIFIER Model *
 Writer::processModel(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIER SBMLDocument *sbml_doc)
 {
   LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model = sbml_doc->createModel();
-  /// @bug Ast::Model has no identifier!
-  if (model.hasName()) { sbml_model->setName(model.getName()); }
-
   // First, serialize unit definitions:
   processUnitDefinitions(model, sbml_model);
   // then, serialize parameter definitions:
@@ -24,6 +21,9 @@ Writer::processModel(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIER SBMLDocu
   // then serialise reactions
   processReactions(model, sbml_model);
 
+  sbml_model->setId("model");
+  if (model.hasName()) { sbml_model->setName(model.getName()); }
+
   // Done...
   return sbml_model;
 }
@@ -32,6 +32,24 @@ Writer::processModel(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIER SBMLDocu
 void
 Writer::processUnitDefinitions(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model)
 {
+  // Redefine default units:
+  LIBSBML_CPP_NAMESPACE_QUALIFIER UnitDefinition *sbml_unit;
+  sbml_unit = sbml_model->createUnitDefinition(); sbml_unit->setId("substance");
+  processUnit(model.getDefaultSubstanceUnit().asScaledBaseUnit(), sbml_unit);
+
+  sbml_unit = sbml_model->createUnitDefinition(); sbml_unit->setId("volume");
+  processUnit(model.getDefaultVolumeUnit().asScaledBaseUnit(), sbml_unit);
+
+  sbml_unit = sbml_model->createUnitDefinition(); sbml_unit->setId("area");
+  processUnit(model.getDefaultAreaUnit().asScaledBaseUnit(), sbml_unit);
+
+  sbml_unit = sbml_model->createUnitDefinition(); sbml_unit->setId("length");
+  processUnit(model.getDefaultLengthUnit().asScaledBaseUnit(), sbml_unit);
+
+  sbml_unit = sbml_model->createUnitDefinition(); sbml_unit->setId("time");
+  processUnit(model.getDefaultTimeUnit().asScaledBaseUnit(), sbml_unit);
+
+
   for (Ast::Model::iterator item=model.begin(); item!=model.end(); item++) {
     // Skip non unit definitions:
     if (! Ast::Node::isUnitDefinition(*item)) { continue; }
@@ -276,7 +294,6 @@ Writer::processSpeciesList(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIER Mo
     sbml_species->setCompartment(species->getCompartment()->getIdentifier());
     if (species->hasValue()) { processInitialValue(species, sbml_model, model); }
     if (species->hasRule())  { processRule(species, sbml_model, model); }
-    if (! hasDefaultUnit(species, model)) { sbml_species->setUnits(getUnitIdentifier(species, model)); }
   }
 }
 
@@ -304,6 +321,10 @@ Writer::processReactions(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIER Mode
 void
 Writer::processReaction(Ast::Reaction *reac, LIBSBML_CPP_NAMESPACE_QUALIFIER Reaction *sbml_reac, Ast::Model &model)
 {
+  // Handle name and id of reactions:
+  sbml_reac->setId(reac->getIdentifier());
+  if (reac->hasName()) { sbml_reac->setName(reac->getName()); }
+
   // Process reactants:
   for (Ast::Reaction::iterator item = reac->reacBegin(); item != reac->reacEnd(); item++) {
     LIBSBML_CPP_NAMESPACE_QUALIFIER SpeciesReference *sbml_r = sbml_reac->createReactant();
@@ -341,7 +362,7 @@ Writer::processKineticLaw(Ast::KineticLaw *law, LIBSBML_CPP_NAMESPACE_QUALIFIER 
     }
 
     Ast::Parameter *param = static_cast<Ast::Parameter *>(*item);
-    LIBSBML_CPP_NAMESPACE_QUALIFIER LocalParameter *sbml_param = sbml_law->createLocalParameter();
+    LIBSBML_CPP_NAMESPACE_QUALIFIER Parameter *sbml_param = sbml_law->createParameter();
     sbml_param->setId(param->getIdentifier());
     if (param->hasName()) {sbml_param->setName(param->getName()); }
     if (! hasDefaultUnit(param, model)) {
