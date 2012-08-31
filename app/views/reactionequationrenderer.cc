@@ -13,7 +13,7 @@ ReactionEquationRenderer::ReactionEquationRenderer(iNA::Ast::Reaction *reac, QOb
   QGraphicsScene(parent)
 {
   // Assemble forumla
-  MathFormulaItem *reaction = ReactionEquationRenderer::assembleReaction(reac);
+  MathItem *reaction = ReactionEquationRenderer::assembleReaction(reac);
 
   // layout equation and add to this graphics scene...
   MathContext ctx; ctx.setFontSize(ctx.fontSize()+4);
@@ -23,7 +23,7 @@ ReactionEquationRenderer::ReactionEquationRenderer(iNA::Ast::Reaction *reac, QOb
 }
 
 
-MathFormulaItem *
+MathItem *
 ReactionEquationRenderer::assembleReactionEquation(iNA::Ast::Reaction *reac)
 {
   // Allocate formula
@@ -81,7 +81,7 @@ ReactionEquationRenderer::assembleReactionEquation(iNA::Ast::Reaction *reac)
 }
 
 
-MathFormulaItem *
+MathItem *
 ReactionEquationRenderer::assembleKineticLaw(iNA::Ast::Reaction *reaction)
 {
   // Handle rate law
@@ -90,7 +90,7 @@ ReactionEquationRenderer::assembleKineticLaw(iNA::Ast::Reaction *reaction)
 }
 
 
-MathFormulaItem *
+MathItem *
 ReactionEquationRenderer::assembleReaction(iNA::Ast::Reaction *reac)
 {
   MathFormula *reaction = new MathFormula();
@@ -109,7 +109,7 @@ ReactionEquationRenderer::assembleReaction(iNA::Ast::Reaction *reac)
 QPixmap
 ReactionEquationRenderer::renderReaction(iNA::Ast::Reaction *reaction, MathContext ctx)
 {
-  MathFormulaItem *formula = ReactionEquationRenderer::assembleReaction(reaction);
+  MathItem *formula = ReactionEquationRenderer::assembleReaction(reaction);
   QPixmap pixmap = formula->renderItem(ctx); delete formula;
   return pixmap;
 }
@@ -117,7 +117,7 @@ ReactionEquationRenderer::renderReaction(iNA::Ast::Reaction *reaction, MathConte
 QPixmap
 ReactionEquationRenderer::renderReactionEquation(iNA::Ast::Reaction *reaction, MathContext ctx)
 {
-  MathFormulaItem *formula = ReactionEquationRenderer::assembleReactionEquation(reaction);
+  MathItem *formula = ReactionEquationRenderer::assembleReactionEquation(reaction);
   QPixmap pixmap = formula->renderItem(ctx); delete formula;
   return pixmap;
 }
@@ -125,7 +125,7 @@ ReactionEquationRenderer::renderReactionEquation(iNA::Ast::Reaction *reaction, M
 QPixmap
 ReactionEquationRenderer::renderKineticLaw(iNA::Ast::Reaction *reaction, MathContext ctx)
 {
-  MathFormulaItem *formula = ReactionEquationRenderer::assembleKineticLaw(reaction);
+  MathItem *formula = ReactionEquationRenderer::assembleKineticLaw(reaction);
   QPixmap pixmap = formula->renderItem(ctx); delete formula;
   return pixmap;
 }

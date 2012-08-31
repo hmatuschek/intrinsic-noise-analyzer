@@ -31,7 +31,7 @@ public:
 
 public:
   /** Parses a simple formula and returns the equivalent MathFormulaItem. */
-  static MathFormulaItem *parse(const std::string &source);
+  static MathItem *parse(const std::string &source);
 
   /** Parses the given formula and returns the rendered pixmap, if rendering fails,
    * it returns the given source. */
@@ -44,11 +44,11 @@ public:
   static std::string texUnquote(const std::string &source);
 
   /** Handles quoted strings. */
-  static MathFormulaItem *parseQuoted(const std::string &source);
+  static MathItem *parseQuoted(const std::string &source);
 
   /** Parses the name of a @c Ast::VariableDefinition if set otherwise the
    * identifier. */
-  static MathFormulaItem *parseVariable(const iNA::Ast::VariableDefinition *var);
+  static MathItem *parseVariable(const iNA::Ast::VariableDefinition *var);
 
 
 protected:
@@ -64,11 +64,11 @@ protected:
   /** Assembles a MathFormula from the CST. */
   MathFormula *parseFormula(iNA::Parser::ConcreteSyntaxTree &node);
   /** Assembles a super/sub script */
-  MathFormulaItem *parseSupSub(iNA::Parser::ConcreteSyntaxTree &node);
+  MathItem *parseSupSub(iNA::Parser::ConcreteSyntaxTree &node);
   /** Assembles a MathFormula element from the CST. */
-  MathFormulaItem *parseElement(iNA::Parser::ConcreteSyntaxTree &node);
+  MathItem *parseElement(iNA::Parser::ConcreteSyntaxTree &node);
   /** Unicode symbols. */
-  MathFormulaItem *processSymbol(const std::string &symbol);
+  MathItem *processSymbol(const std::string &symbol);
 
 
 protected:

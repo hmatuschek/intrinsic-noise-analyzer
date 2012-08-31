@@ -40,11 +40,11 @@ private:
   bool parseIdentifier(QString &text);
 
   /** Helper function to render a factor. */
-  MathFormulaItem *assembleFactor(QString &id, int exponent);
+  MathItem *assembleFactor(QString &id, int exponent);
   /** Assembles the name of the compartment. */
-  MathFormulaItem *assembleCompartment();
+  MathItem *assembleCompartment();
   /** Assembles the name of an identifier. */
-  MathFormulaItem *assembleName(const QString &id);
+  MathItem *assembleName(const QString &id);
 
 private:
   /** Holds a weak reference to the model. */

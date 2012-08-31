@@ -81,22 +81,22 @@ protected:
 
 
 /** Just the base class of all math items. */
-class MathFormulaItem {
+class MathItem {
 public:
   /** Default constructor. */
-  MathFormulaItem();
+  MathItem();
   /** Copy constructor. */
-  MathFormulaItem(const MathFormulaItem &other);
+  MathItem(const MathItem &other);
 
   /** To ensure this class is virtual. */
-  virtual ~MathFormulaItem();
+  virtual ~MathItem();
 
   /** Layouts the element and renders it into a graphics item and also updates the
    * metrics of the item. */
   virtual QGraphicsItem *layout(const MathContext &context, QGraphicsItem *parent=0) = 0;
 
   /** Copy method. */
-  virtual MathFormulaItem *copy() const = 0;
+  virtual MathItem *copy() const = 0;
 
   /** Returns the metrics of the item. */
   const MathMetrics &metrics() const;
@@ -111,7 +111,7 @@ protected:
 
 
 /** A container, renders as a series of formula items. */
-class MathFormula : public MathFormulaItem
+class MathFormula : public MathItem
 {
 public:
   MathFormula();
@@ -120,19 +120,36 @@ public:
   virtual ~MathFormula();
 
   size_t size() const;
-  void appendItem(MathFormulaItem *item);
-  void prependItem(MathFormulaItem *item);
+  void appendItem(MathItem *item);
+  void prependItem(MathItem *item);
 
   QGraphicsItem *layout(const MathContext &context, QGraphicsItem *parent=0);
-  MathFormulaItem *copy() const;
+  MathItem *copy() const;
 
 private:
-  QList<MathFormulaItem *> _items;
+  QList<MathItem *> _items;
+};
+
+
+/** Simple block with left and right delimiters. */
+class MathBlock : public MathItem {
+public:
+  MathBlock(MathItem *center, MathItem *left=0, MathItem *right=0);
+  MathBlock(const MathBlock &other);
+  virtual ~MathBlock();
+
+  QGraphicsItem *layout(const MathContext &context, QGraphicsItem *parent);
+  MathItem *copy() const;
+
+private:
+  MathItem *_center;
+  MathItem *_left;
+  MathItem *_right;
 };
 
 
 /** Simple class to implement certain spaces. */
-class MathSpace : public MathFormulaItem {
+class MathSpace : public MathItem {
 public:
   /** Some common spaces in TeX mathmode. */
   typedef enum {
@@ -149,7 +166,7 @@ public:
   virtual ~MathSpace();
 
   QGraphicsItem *layout(const MathContext &context, QGraphicsItem *parent);
-  MathFormulaItem *copy() const;
+  MathItem *copy() const;
 
 private:
   /** The actual space factor. */
@@ -158,24 +175,24 @@ private:
 
 
 /** Simple formula item to draw a fraction. */
-class MathFraction : public MathFormulaItem
+class MathFraction : public MathItem
 {
 public:
-  MathFraction(MathFormulaItem *nom, MathFormulaItem *denom);
+  MathFraction(MathItem *nom, MathItem *denom);
   MathFraction(const MathFraction &other);
   virtual ~MathFraction();
 
   virtual QGraphicsItem* layout(const MathContext &context, QGraphicsItem *parent=0);
-  virtual MathFormulaItem *copy() const;
+  virtual MathItem *copy() const;
 
 private:
-  MathFormulaItem *_nominator;
-  MathFormulaItem *_denominator;
+  MathItem *_nominator;
+  MathItem *_denominator;
 };
 
 
 /** Simple pain text element. */
-class MathText : public MathFormulaItem
+class MathText : public MathItem
 {
 public:
   MathText(const QString &text);
@@ -183,7 +200,7 @@ public:
   virtual ~MathText();
 
   QGraphicsItem* layout(const MathContext &context, QGraphicsItem *parent=0);
-  MathFormulaItem *copy() const;
+  MathItem *copy() const;
 
 private:
   QString _text;
@@ -191,7 +208,7 @@ private:
 
 
 /** Simple symbol element, similar to MathText but with an different alignment. */
-class MathSymbol : public MathFormulaItem
+class MathSymbol : public MathItem
 {
 public:
   MathSymbol(QChar symbol);
@@ -199,7 +216,7 @@ public:
   virtual ~MathSymbol();
 
   QGraphicsItem* layout(const MathContext &context, QGraphicsItem *parent);
-  MathFormulaItem *copy() const;
+  MathItem *copy() const;
 
 private:
   QChar _symbol;
@@ -207,35 +224,35 @@ private:
 
 
 /** Simple X^Y formula element. */
-class MathSup : public MathFormulaItem
+class MathSup : public MathItem
 {
 public:
-  MathSup(MathFormulaItem *base, MathFormulaItem *upper);
+  MathSup(MathItem *base, MathItem *upper);
   MathSup(const MathSup &other);
   virtual ~MathSup();
 
   QGraphicsItem* layout(const MathContext &context, QGraphicsItem *parent=0);
-  MathFormulaItem *copy() const;
+  MathItem *copy() const;
 
 private:
-  MathFormulaItem *_base;
-  MathFormulaItem *_upper;
+  MathItem *_base;
+  MathItem *_upper;
 };
 
 
-class MathSub : public MathFormulaItem, public QGraphicsItemGroup
+class MathSub : public MathItem, public QGraphicsItemGroup
 {
 public:
-  MathSub(MathFormulaItem *base, MathFormulaItem *lower);
+  MathSub(MathItem *base, MathItem *lower);
   MathSub(const MathSub &other);
   virtual ~MathSub();
 
   QGraphicsItem *layout(const MathContext &context, QGraphicsItem *parent);
-  MathFormulaItem *copy() const;
+  MathItem *copy() const;
 
 private:
-  MathFormulaItem *_base;
-  MathFormulaItem *_lower;
+  MathItem *_base;
+  MathItem *_lower;
 };
 
 #endif // __INA_APP_TINYTEX_FORMULA_HH__

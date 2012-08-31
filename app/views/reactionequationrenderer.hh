@@ -28,11 +28,11 @@ public:
 
 protected:
   /** Assembles only the reaction equation. */
-  static MathFormulaItem *assembleReactionEquation(iNA::Ast::Reaction *reaction);
+  static MathItem *assembleReactionEquation(iNA::Ast::Reaction *reaction);
   /** Assembles only the kinetic law expression. */
-  static MathFormulaItem *assembleKineticLaw(iNA::Ast::Reaction *reaction);
+  static MathItem *assembleKineticLaw(iNA::Ast::Reaction *reaction);
   /** Assembles the complete reaction (equation + kinetic law). */
-  static MathFormulaItem *assembleReaction(iNA::Ast::Reaction *reaction);
+  static MathItem *assembleReaction(iNA::Ast::Reaction *reaction);
 };
 
 #endif // REACTIONEQUATIONRENDERER_HH

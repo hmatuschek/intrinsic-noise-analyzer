@@ -21,7 +21,7 @@ class Ginac2Formula :
     public GiNaC::visitor, public GiNaC::symbol::visitor, public GiNaC::numeric::visitor,
     public GiNaC::add::visitor, public GiNaC::mul::visitor, public GiNaC::power::visitor
 {
-  QList<MathFormulaItem *> _stack;
+  QList<MathItem *> _stack;
   iNA::Ast::Scope &_scope;
   bool _tex_names;
   int _current_precedence;
@@ -35,11 +35,11 @@ public:
   virtual void visit(const GiNaC::mul &node);
   virtual void visit(const GiNaC::power &node);
 
-  MathFormulaItem *getFormula();
+  MathItem *getFormula();
 
 public:
   /** Renders an expression as a Formula. */
-  static MathFormulaItem *toFormula(GiNaC::ex expression, iNA::Ast::Scope &scope, bool tex_names=true);
+  static MathItem *toFormula(GiNaC::ex expression, iNA::Ast::Scope &scope, bool tex_names=true);
 
   /** Very helpful function to render a given expression into a formula. The formula is returned
    * inside a QVariant as a pixmap or an invald QVariant if there was an error during rendering. */

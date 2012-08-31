@@ -201,12 +201,12 @@ ReactionCreator::parseIdentifier(QString &text)
 }
 
 
-MathFormulaItem *
+MathItem *
 ReactionCreator::assembleFactor(QString &id, int exponent)
 {
-  MathFormulaItem *name = assembleName(id);
+  MathItem *name = assembleName(id);
   MathFormula     *factor = new MathFormula();
-  MathFormulaItem *compartment = assembleCompartment();
+  MathItem *compartment = assembleCompartment();
 
   // Handle exponent 1 -> easy:
   factor->appendItem(name);
@@ -228,7 +228,7 @@ ReactionCreator::assembleFactor(QString &id, int exponent)
 }
 
 
-MathFormulaItem *
+MathItem *
 ReactionCreator::assembleCompartment()
 {
   // if there is no compartment defined use \Omega
@@ -245,7 +245,7 @@ ReactionCreator::assembleCompartment()
 }
 
 
-MathFormulaItem *
+MathItem *
 ReactionCreator::assembleName(const QString &id)
 {
   // Assemble name of the factor

@@ -240,7 +240,7 @@ TinyTex::TinyTex(Parser::Lexer &lexer)
   _symbol_table["\\partial"] = QChar(0x2202);
 }
 
-MathFormulaItem *
+MathItem *
 TinyTex::parse(const std::string &source)
 {
   std::stringstream buffer; buffer << source;
@@ -249,7 +249,7 @@ TinyTex::parse(const std::string &source)
   Parser::Production *grammar = GrammarProduction::factory();
   Parser::ConcreteSyntaxTree cst;
 
-  MathFormulaItem *item = 0;
+  MathItem *item = 0;
   try {
     grammar->parse(lexer, cst);
     grammar->notify(lexer, cst);
@@ -273,7 +273,7 @@ TinyTex::parseFormula(iNA::Parser::ConcreteSyntaxTree &node)
     formula = parseFormula(node[1][0]);
     formula->prependItem(parseSupSub(node[0]));
   } else {
-    MathFormulaItem *item = parseSupSub(node[0]);
+    MathItem *item = parseSupSub(node[0]);
     if (0 == dynamic_cast<MathFormula *>(item)) {
       formula = new MathFormula(); formula->appendItem(item);
     } else {
@@ -285,14 +285,14 @@ TinyTex::parseFormula(iNA::Parser::ConcreteSyntaxTree &node)
 }
 
 
-MathFormulaItem *
+MathItem *
 TinyTex::parseSupSub(Parser::ConcreteSyntaxTree &node)
 {
   /** := Element [('^'|'_') Element] */
-  MathFormulaItem *item = parseElement(node[0]);
+  MathItem *item = parseElement(node[0]);
 
   if (node[1].matched()) {
-    MathFormulaItem *rhs = parseElement(node[1][0][1]);
+    MathItem *rhs = parseElement(node[1][0][1]);
     if (0 == node[1][0][0].getAltIdx()) {
       item = new MathSup(item, rhs);
     } else {
@@ -304,7 +304,7 @@ TinyTex::parseSupSub(Parser::ConcreteSyntaxTree &node)
 }
 
 
-MathFormulaItem *
+MathItem *
 TinyTex::parseElement(iNA::Parser::ConcreteSyntaxTree &node)
 {
   switch (node.getAltIdx()) {
@@ -327,7 +327,7 @@ TinyTex::parseElement(iNA::Parser::ConcreteSyntaxTree &node)
 }
 
 
-MathFormulaItem *
+MathItem *
 TinyTex::processSymbol(const std::string &symbol)
 {
   std::map<std::string, QString>::iterator item=_symbol_table.find(symbol);
@@ -345,7 +345,7 @@ TinyTex::processSymbol(const std::string &symbol)
 QVariant
 TinyTex::toPixmap(const std::string &source)
 {
-  MathFormulaItem *item = 0;
+  MathItem *item = 0;
   try {
     if (TinyTex::isTexQuoted(source)) {
       item = TinyTex::parse(TinyTex::texUnquote(source));
@@ -387,7 +387,7 @@ TinyTex::texUnquote(const std::string &source)
   return source.substr(1, source.size()-2);
 }
 
-MathFormulaItem *
+MathItem *
 TinyTex::parseQuoted(const std::string &source) {
   if (isTexQuoted(source)) {
     return parse(texUnquote(source));
@@ -395,7 +395,7 @@ TinyTex::parseQuoted(const std::string &source) {
   return new MathText(source.c_str());
 }
 
-MathFormulaItem *
+MathItem *
 TinyTex::parseVariable(const iNA::Ast::VariableDefinition *var)
 {
   if (var->hasName()) { return TinyTex::parseQuoted(var->getName()); }

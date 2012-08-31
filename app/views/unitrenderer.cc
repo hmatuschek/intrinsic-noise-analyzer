@@ -10,12 +10,12 @@ UnitRenderer::UnitRenderer(const iNA::Ast::Unit &unit, QObject *parent)
     _formula->appendItem(new MathText(QString("%2").arg(unit.getMultiplier())));
   }
   if (0 != unit.getScale()) {
-    MathFormulaItem *item = new MathText(QString("%2").arg(unit.getScale()));
+    MathItem *item = new MathText(QString("%2").arg(unit.getScale()));
     _formula->appendItem(new MathSup(new MathText("10"), item));
   }
 
-  QList<MathFormulaItem *> nominator;
-  QList<MathFormulaItem *> denominator;
+  QList<MathItem *> nominator;
+  QList<MathItem *> denominator;
   for (iNA::Ast::Unit::iterator item=unit.begin(); item != unit.end(); item++) {
     if (0 < item->second) {
       if (item->second==1) {
@@ -46,19 +46,19 @@ UnitRenderer::UnitRenderer(const iNA::Ast::Unit &unit, QObject *parent)
   if (0 == nominator.size()) { nominator.push_back(new MathText("1")); }
 
   if (0 == denominator.size()) {
-    for (QList<MathFormulaItem *>::iterator item=nominator.begin(); item!=nominator.end(); item++) {
+    for (QList<MathItem *>::iterator item=nominator.begin(); item!=nominator.end(); item++) {
       _formula->appendItem(*item);
     }
     return;
   }
 
   MathFormula *nom = new MathFormula();
-  for (QList<MathFormulaItem *>::iterator item=nominator.begin(); item!=nominator.end(); item++) {
+  for (QList<MathItem *>::iterator item=nominator.begin(); item!=nominator.end(); item++) {
     nom->appendItem(*item);
   }
 
   MathFormula *denom = new MathFormula();
-  for (QList<MathFormulaItem *>::iterator item=denominator.begin(); item!=denominator.end(); item++) {
+  for (QList<MathItem *>::iterator item=denominator.begin(); item!=denominator.end(); item++) {
     denom->appendItem(*item);
   }
 

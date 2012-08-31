@@ -81,9 +81,9 @@ Ginac2Formula::visit(const GiNaC::add &node)
 
   MathFormula *formula = new MathFormula();
 
-  if (old_precedence > _current_precedence) {
+  /*if (old_precedence > _current_precedence) {
     formula->appendItem(new MathText("("));
-  }
+  }*/
 
   // Handle summands:
   for (size_t i=0; i<node.nops(); i++) {
@@ -97,11 +97,12 @@ Ginac2Formula::visit(const GiNaC::add &node)
   }
 
   if (old_precedence > _current_precedence) {
-    formula->appendItem(new MathText(")"));
+    //formula->appendItem(new MathText(")"));
+    _stack.push_back(new MathBlock(formula, new MathText("("), new MathText(")")));
+  } else {
+    _stack.push_back(formula);
   }
   _current_precedence = old_precedence;
-
-  _stack.push_back(formula);
 }
 
 
@@ -112,7 +113,7 @@ Ginac2Formula::visit(const GiNaC::mul &node)
   _current_precedence = 2;
 
   MathFormula *formula = new MathFormula();
-  QList<MathFormulaItem *> numerator, denumerator;
+  QList<MathItem *> numerator, denumerator;
 
   // Handle factors:
   for (size_t i=0; i<node.nops(); i++) {
@@ -143,10 +144,6 @@ Ginac2Formula::visit(const GiNaC::mul &node)
   /*
    * Now, assemble formula (product/quotient)
    */
-  if ((old_precedence > _current_precedence) && (node.nops()>1)) {
-    formula->appendItem(new MathText("("));
-  }
-
   // If there are no numerator elements:
   if (0 == numerator.size()) {
     numerator.append(new MathText("1"));
@@ -154,27 +151,27 @@ Ginac2Formula::visit(const GiNaC::mul &node)
 
   // if there are no denumerator elements:
   if (0 == denumerator.size()) {
-    for (QList<MathFormulaItem *>::iterator item=numerator.begin(); item!=numerator.end(); item++) {
+    for (QList<MathItem *>::iterator item=numerator.begin(); item!=numerator.end(); item++) {
       formula->appendItem(*item);
     }
   } else {
     MathFormula *num = new MathFormula();
     MathFormula *denum = new MathFormula();
-    for (QList<MathFormulaItem *>::iterator item=numerator.begin(); item!=numerator.end(); item++) {
+    for (QList<MathItem *>::iterator item=numerator.begin(); item!=numerator.end(); item++) {
       num->appendItem(*item);
     }
-    for (QList<MathFormulaItem *>::iterator item=denumerator.begin(); item!=denumerator.end(); item++) {
+    for (QList<MathItem *>::iterator item=denumerator.begin(); item!=denumerator.end(); item++) {
       denum->appendItem(*item);
     }
     formula->appendItem(new MathFraction(num, denum));
   }
 
   if ((old_precedence > _current_precedence) && (node.nops()>1)) {
-    formula->appendItem(new MathText(")"));
+    _stack.push_back(new MathBlock(formula, new MathText("("), new MathText(")")));
+  } else {
+    _stack.push_back(formula);
   }
   _current_precedence = old_precedence;
-
-  _stack.push_back(formula);
 }
 
 
@@ -188,26 +185,26 @@ Ginac2Formula::visit(const GiNaC::power &node)
   node.op(0).accept(*this);
   node.op(1).accept(*this);
 
-  MathFormulaItem *exponent = _stack.back(); _stack.pop_back();
-  MathFormulaItem *base = _stack.back(); _stack.pop_back();
+  MathItem *exponent = _stack.back(); _stack.pop_back();
+  MathItem *base = _stack.back(); _stack.pop_back();
   _stack.push_back(new MathSup(base, exponent));
 
   _current_precedence = old_precedence;
 }
 
 
-MathFormulaItem *
+MathItem *
 Ginac2Formula::getFormula()
 {
-  MathFormulaItem *item = _stack.back(); _stack.pop_back();
+  MathItem *item = _stack.back(); _stack.pop_back();
   return item;
 }
 
 
-MathFormulaItem *
+MathItem *
 Ginac2Formula::toFormula(GiNaC::ex expression, Ast::Scope &scope, bool tex_names)
 {
-  MathFormulaItem *formula = 0;
+  MathItem *formula = 0;
   try {
     // Assemble formula from GiNaC expression
     Ginac2Formula converter(scope, tex_names); expression.accept(converter);
@@ -229,7 +226,7 @@ QVariant
 Ginac2Formula::toPixmap(GiNaC::ex expression, Ast::Scope &scope, bool tex_names)
 {
   // Assemble formula from GiNaC expression
-  MathFormulaItem *formula = toFormula(expression, scope, tex_names);
+  MathItem *formula = toFormula(expression, scope, tex_names);
   // Render formula
   QGraphicsItem *rendered_formula = formula->layout(MathContext());
   // Draw formula into pixmap:

@@ -54,25 +54,25 @@ MathMetrics::MathMetrics(const MathMetrics &other)
 /* ******************************************************************************************** *
  * Implementation of MathFormulaItem
  * ******************************************************************************************** */
-MathFormulaItem::MathFormulaItem() : _metrics() {
+MathItem::MathItem() : _metrics() {
   // pass..
 }
 
-MathFormulaItem::MathFormulaItem(const MathFormulaItem &other) : _metrics(other._metrics) {
+MathItem::MathItem(const MathItem &other) : _metrics(other._metrics) {
   /* pass... */
 }
 
-MathFormulaItem::~MathFormulaItem() {
+MathItem::~MathItem() {
   // pass...
 }
 
 const MathMetrics &
-MathFormulaItem::metrics() const {
+MathItem::metrics() const {
   return _metrics;
 }
 
 QPixmap
-MathFormulaItem::renderItem(const MathContext &ctx)
+MathItem::renderItem(const MathContext &ctx)
 {
   QGraphicsScene *scene = new QGraphicsScene(); scene->addItem(layout(ctx));
   QSize size = scene->sceneRect().size().toSize();
@@ -87,14 +87,14 @@ MathFormulaItem::renderItem(const MathContext &ctx)
 /* ******************************************************************************************** *
  * Implementation of MathFormula
  * ******************************************************************************************** */
-MathFormula::MathFormula() : MathFormulaItem() {
+MathFormula::MathFormula() : MathItem() {
   // pass...
 }
 
 MathFormula::MathFormula(const MathFormula &other)
-  : MathFormulaItem(other)
+  : MathItem(other)
 {
-  for (QList<MathFormulaItem *>::const_iterator item=other._items.begin();
+  for (QList<MathItem *>::const_iterator item=other._items.begin();
        item!=other._items.end(); item++)
   {
     _items.append((*item)->copy());
@@ -102,7 +102,7 @@ MathFormula::MathFormula(const MathFormula &other)
 }
 
 MathFormula::~MathFormula() {
-  for (QList<MathFormulaItem *>::iterator item=_items.begin(); item!=_items.end(); item++) {
+  for (QList<MathItem *>::iterator item=_items.begin(); item!=_items.end(); item++) {
     delete *item;
   }
 }
@@ -113,12 +113,12 @@ MathFormula::size() const {
 }
 
 void
-MathFormula::appendItem(MathFormulaItem *item) {
+MathFormula::appendItem(MathItem *item) {
   _items.append(item);
 }
 
 void
-MathFormula::prependItem(MathFormulaItem *item) {
+MathFormula::prependItem(MathItem *item) {
   _items.prepend(item);
 }
 
@@ -135,7 +135,7 @@ MathFormula::layout(const MathContext &context, QGraphicsItem *parent)
 
   QList<QGraphicsItem *> item_list;
   // First traverse into all sub-elements with the same context and get max height of all elements:
-  for (QList<MathFormulaItem *>::iterator item=_items.begin(); item!=_items.end(); item++) {
+  for (QList<MathItem *>::iterator item=_items.begin(); item!=_items.end(); item++) {
     // Layout formula item:
     QGraphicsItem *gitem = (*item)->layout(context, item_group);
     // add to list of graphics items:
@@ -157,7 +157,7 @@ MathFormula::layout(const MathContext &context, QGraphicsItem *parent)
 
   // Now arrange item on base-line
   QRectF my_bb = _metrics.bb();
-  QList<MathFormulaItem*>::iterator fitem = _items.begin();
+  QList<MathItem*>::iterator fitem = _items.begin();
   QList<QGraphicsItem *>::iterator gitem = item_list.begin();
   for (; fitem!=_items.end(); fitem++, gitem++) {
     qreal iw = (*fitem)->metrics().width();
@@ -182,7 +182,117 @@ MathFormula::layout(const MathContext &context, QGraphicsItem *parent)
 }
 
 
-MathFormulaItem * MathFormula::copy() const { return new MathFormula(*this); }
+MathItem * MathFormula::copy() const { return new MathFormula(*this); }
+
+
+/* ******************************************************************************************** *
+ * Implementation of MathBlock
+ * ******************************************************************************************** */
+MathBlock::MathBlock(MathItem *center, MathItem *left, MathItem *right)
+  : MathItem(), _center(center), _left(left), _right(right)
+{
+  // pass...
+}
+
+MathBlock::MathBlock(const MathBlock &other)
+  : MathItem(other), _center(other._center->copy()), _left(0), _right(0)
+{
+  if (0 != other._left) { _left = other._left->copy(); }
+  if (0 != other._right) { _right = other._right->copy(); }
+}
+
+MathBlock::~MathBlock()
+{
+  delete _center;
+  if (0 != _left) { delete _left; }
+  if (0 != _right) { delete _right; }
+}
+
+QGraphicsItem *
+MathBlock::layout(const MathContext &context, QGraphicsItem *parent)
+{
+  QGraphicsItemGroup *grp = new QGraphicsItemGroup(parent);
+  QGraphicsItem *center = _center->layout(context, grp);
+  QGraphicsItem *left  = (0 != _left) ? _left->layout(context, grp): 0;
+  QGraphicsItem *right = (0 != _right) ? _right->layout(context, grp): 0;
+
+  qreal max_height = _center->metrics().bbHeight();
+  qreal max_center = _center->metrics().center();
+  qreal tot_width = _center->metrics().width();
+  if (0 != _left) {
+    max_height = std::max(max_height, _left->metrics().bbHeight());
+    max_center = std::max(max_center, _left->metrics().center());
+    tot_width  += _left->metrics().width();
+  }
+  if (0 != _right) {
+    max_height = std::max(max_height, _right->metrics().bbHeight());
+    max_center = std::max(max_center, _right->metrics().center());
+    tot_width  += _right->metrics().width();
+  }
+
+  // Setup metrics:
+  QRectF my_bb = metrics().bb();
+  qreal shift = 0;
+  if (0 != _left) {
+    qreal iw = _left->metrics().width();
+    qreal ic = _left->metrics().center();
+
+    if (_left->metrics().bbHeight() < max_height) {
+      qreal scale = max_height/_left->metrics().bbHeight()+0.1;
+      ic = max_height/2;
+      left->setTransform(QTransform().scale(1, scale));
+    }
+
+    QPointF item_pos;
+    item_pos = QPointF(shift, max_center-ic);
+
+    left->setPos(item_pos);
+    QRectF item_bb = _left->metrics().bb(); item_bb.translate(item_pos);
+    my_bb = my_bb.unite(item_bb); shift += iw;
+  }
+
+  {
+    qreal iw = _center->metrics().width();
+    qreal ic = _center->metrics().center();
+    QPointF item_pos;
+    item_pos = QPointF(shift, max_center-ic);
+
+    center->setPos(item_pos);
+    QRectF item_bb = _center->metrics().bb(); item_bb.translate(item_pos);
+    my_bb = my_bb.unite(item_bb); shift += iw;
+  }
+
+  if (0 != _right) {
+    qreal iw = _right->metrics().width();
+    qreal ic = _right->metrics().center();
+
+    if (_right->metrics().bbHeight() < max_height) {
+      qreal scale = max_height/_right->metrics().bbHeight()+0.1;
+      ic = max_height/2;
+      right->setTransform(QTransform().scale(1, scale));
+    }
+
+    QPointF item_pos;
+    item_pos = QPointF(shift, max_center-ic);
+
+    right->setPos(item_pos);
+    QRectF item_bb = _right->metrics().bb(); item_bb.translate(item_pos);
+    my_bb = my_bb.unite(item_bb); shift += iw;
+  }
+
+  _metrics.setWidth(tot_width);
+  _metrics.setHeight(max_height);
+  _metrics.setAscent(max_center);
+  _metrics.setLeftBearing(0); _metrics.setRightBearing(0);
+  _metrics.setBB(my_bb);
+  _metrics.setCenter(max_center);
+
+  // Done:
+  return grp;
+}
+
+
+MathItem *MathBlock::copy() const { return new MathBlock(*this); }
 
 
 /* ******************************************************************************************** *
@@ -202,7 +312,7 @@ MathSpace::MathSpace(qreal factor) : _factor(factor) {
 }
 
 MathSpace::MathSpace(const MathSpace &other) :
-  MathFormulaItem(other), _factor(other._factor)
+  MathItem(other), _factor(other._factor)
 {
   // pass...
 }
@@ -221,19 +331,19 @@ MathSpace::layout(const MathContext &context, QGraphicsItem *parent)
   return new QGraphicsTextItem(parent);
 }
 
-MathFormulaItem *MathSpace::copy() const { return new MathSpace(*this); }
+MathItem *MathSpace::copy() const { return new MathSpace(*this); }
 
 
 /* ******************************************************************************************** *
  * Implementation of MathFraction
  * ******************************************************************************************** */
-MathFraction::MathFraction(MathFormulaItem *nom, MathFormulaItem *denom)
-  : MathFormulaItem(), _nominator(nom), _denominator(denom)
+MathFraction::MathFraction(MathItem *nom, MathItem *denom)
+  : MathItem(), _nominator(nom), _denominator(denom)
 {
 }
 
 MathFraction::MathFraction(const MathFraction &other)
-  : MathFormulaItem(other), _nominator(other._nominator->copy()),
+  : MathItem(other), _nominator(other._nominator->copy()),
     _denominator(other._denominator->copy()) {
   // Pass...
 }
@@ -288,7 +398,7 @@ MathFraction::layout(const MathContext &context, QGraphicsItem *parent)
 }
 
 
-MathFormulaItem *
+MathItem *
 MathFraction::copy() const {
   return new MathFraction(*this);
 }
@@ -298,13 +408,13 @@ MathFraction::copy() const {
  * Implementation of MathText
  * ******************************************************************************************** */
 MathText::MathText(const QString &text)
-  : MathFormulaItem(), _text(text)
+  : MathItem(), _text(text)
 {
   // Pass...
 }
 
 MathText::MathText(const MathText &other)
-  : MathFormulaItem(other), _text(other._text)
+  : MathItem(other), _text(other._text)
 {
   // Pass...
 }
@@ -341,7 +451,7 @@ MathText::layout(const MathContext &context, QGraphicsItem *parent)
   return item;
 }
 
-MathFormulaItem * MathText::copy() const { return new MathText(*this); }
+MathItem * MathText::copy() const { return new MathText(*this); }
 
 
 
@@ -349,12 +459,12 @@ MathFormulaItem * MathText::copy() const { return new MathText(*this); }
  * Implementation of MathText
  * ******************************************************************************************** */
 MathSymbol::MathSymbol(QChar symbol)
-  : MathFormulaItem(), _symbol(symbol) {
+  : MathItem(), _symbol(symbol) {
   // pass...
 }
 
 MathSymbol::MathSymbol(const MathSymbol &other)
-  : MathFormulaItem(other), _symbol(other._symbol) {
+  : MathItem(other), _symbol(other._symbol) {
   // pass...
 }
 
@@ -395,21 +505,21 @@ MathSymbol::layout(const MathContext &context, QGraphicsItem *parent)
   return item;
 }
 
-MathFormulaItem * MathSymbol::copy() const { return new MathSymbol(*this); }
+MathItem * MathSymbol::copy() const { return new MathSymbol(*this); }
 
 
 
 /* ******************************************************************************************** *
  * Implementation of MathSup
  * ******************************************************************************************** */
-MathSup::MathSup(MathFormulaItem *base, MathFormulaItem *upper)
-  : MathFormulaItem(), _base(base), _upper(upper)
+MathSup::MathSup(MathItem *base, MathItem *upper)
+  : MathItem(), _base(base), _upper(upper)
 {
   // pass...
 }
 
 MathSup::MathSup(const MathSup &other)
-  : MathFormulaItem(other), _base(other._base->copy()), _upper(other._upper->copy())
+  : MathItem(other), _base(other._base->copy()), _upper(other._upper->copy())
 {
   // Pass...
 }
@@ -460,21 +570,21 @@ MathSup::layout(const MathContext &context, QGraphicsItem *parent)
 }
 
 
-MathFormulaItem *MathSup::copy() const { return new MathSup(*this); }
+MathItem *MathSup::copy() const { return new MathSup(*this); }
 
 
 
 /* ******************************************************************************************** *
  * Implementation of MathSub: X_Y
  * ******************************************************************************************** */
-MathSub::MathSub(MathFormulaItem *base, MathFormulaItem *lower)
-  : MathFormulaItem(), _base(base), _lower(lower)
+MathSub::MathSub(MathItem *base, MathItem *lower)
+  : MathItem(), _base(base), _lower(lower)
 {
   // pass...
 }
 
 MathSub::MathSub(const MathSub &other)
-  : MathFormulaItem(other), _base(other._base->copy()), _lower(other._lower->copy())
+  : MathItem(other), _base(other._base->copy()), _lower(other._lower->copy())
 {
   // Pass...
 }
@@ -524,4 +634,4 @@ MathSub::layout(const MathContext &context, QGraphicsItem *parent)
 }
 
 
-MathFormulaItem * MathSub::copy() const { return new MathSub(*this); }
+MathItem * MathSub::copy() const { return new MathSub(*this); }
