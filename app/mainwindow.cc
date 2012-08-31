@@ -96,6 +96,9 @@ MainWindow::createMenus()
   fileMenu->addAction(quitAct);
 
   this->analysisMenu = this->menuBar()->addMenu(tr("&Analyses"));
+  this->analysisMenu->addAction(Application::getApp()->expandRevReacAction());
+  this->analysisMenu->addAction(Application::getApp()->combineIrrevReacAction());
+  this->analysisMenu->addSeparator();
 
   this->helpMenu = this->menuBar()->addMenu(tr("&Help"));
   this->helpMenu->addAction(this->onlineHelp);
