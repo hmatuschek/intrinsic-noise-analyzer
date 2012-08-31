@@ -34,8 +34,8 @@ ExpressionEditor::keyPressEvent(QKeyEvent *event)
         completer->setCompletionPrefix("");
       } else if (cursorPosition()>0) {
         QString prefix; int idx = cursorPosition()-1;
-        while ((idx > 0) || !(text().at(idx).isSpace())) {
-          prefix.prepend(text().at(idx)); idx--;
+        while ((idx >= 0) && !(text().at(idx).isSpace())) {
+          prefix.prepend(text().at(idx--));
         }
         completer->setCompletionPrefix(prefix);
       }

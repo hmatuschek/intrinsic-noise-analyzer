@@ -19,6 +19,12 @@ Writer::processModel(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIER SBMLDocu
   processParameters(model, sbml_model);
   // them serialize compartments
   processCompartments(model, sbml_model);
+  // then serialise species:
+  processSpeciesList(model, sbml_model);
+  // then serialise reactions
+  processReactions(model, sbml_model);
+
+  // Done...
   return sbml_model;
 }
 
