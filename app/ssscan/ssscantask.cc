@@ -90,13 +90,12 @@ SSScanTask::SSScanTask(const Config &config, QObject *parent)
     size_t column = 0;
 
     this->parameterScan.setColumnName(column++, config.getParameter().getName().c_str());
-    for (int i=0; i<(int)config.getNumSpecies(); i++, column++)
+    for (size_t i=0; i<config.getNumSpecies(); i++, column++)
     {
       // fill index table
       QString species_id = config.getSelectedSpecies().value(i);
-      iNA::Ast::Species *species = config.getModel()->getSpecies(species_id.toStdString());
+      iNA::Ast::Species *species = config.getModel()->getSpecies(species_id.toStdString());      
       this->index_table[i] = config.getModel()->getSpeciesIdx(species_id.toStdString());
-
 
       if (species->hasName())
         species_name[i] = QString("%1").arg(species->getName().c_str());
@@ -106,23 +105,19 @@ SSScanTask::SSScanTask(const Config &config, QObject *parent)
       this->parameterScan.setColumnName(column, QString("%1").arg(species_name[i]));
     }
 
-    for (int i=0; i<(int)config.getNumSpecies(); i++, column++)
-    {
+    for (int i=0; i<(int)config.getNumSpecies(); i++)
+      for (int j=i; j<(int)config.getNumSpecies(); j++, column++)
         this->parameterScan.setColumnName(
-              column,QString("var(%1)").arg(species_name[i]));
-    }
+              column,QString("cov(%1,%2)").arg(species_name[i]).arg(species_name[j]));
 
-    for (int i=0; i<(int)config.getNumSpecies(); i++, column++)
-    {
+    for (size_t i=0; i<config.getNumSpecies(); i++, column++)
       this->parameterScan.setColumnName(
             column, QString("EMRE(%1)").arg(species_name[i]));
-    }
 
-    for (int i=0; i<(int)config.getNumSpecies(); i++,column++)
-    {
+    for (size_t i=0; i<config.getNumSpecies(); i++)
+      for (size_t j=i; j<config.getNumSpecies(); j++, column++)
         this->parameterScan.setColumnName(
-              column,QString("var(%1)").arg(species_name[i]));
-    }
+              column,QString("cov(%1,%2)").arg(species_name[i]).arg(species_name[j]));
 
 }
 
@@ -144,11 +139,11 @@ SSScanTask::process()
   }
 
   // Take model
-  iNA::Models::IOSmodel *lna_model
+  iNA::Models::IOSmodel *model
       = dynamic_cast<iNA::Models::IOSmodel *>(config.getModel());
 
   // Allocate result matrix (of unified state vectors)
-  std::vector<Eigen::VectorXd> scanResult(lna_model->getDimension());
+  std::vector<Eigen::VectorXd> scanResult(model->getDimension());
 
   // Do parameter scan
   this->steady_state.parameterScan(parameterSets,scanResult);
@@ -162,9 +157,8 @@ SSScanTask::process()
 
 
   // Fill table
-  for(size_t j=0; j<scanResult.size(); j++)
+  for(size_t pid=0; pid<scanResult.size(); pid++)
   {
-
       // Some temporary vectors for the result of the analysis
       Eigen::VectorXd concentrations(config.getModel()->numSpecies());
       Eigen::VectorXd emre_corrections(config.getModel()->numSpecies());
@@ -173,21 +167,26 @@ SSScanTask::process()
       Eigen::MatrixXd ios_covariances(config.getModel()->numSpecies(), config.getModel()->numSpecies());
       Eigen::VectorXd thirdOrder(config.getModel()->numSpecies());
 
-      lna_model->fullState(scanResult[j], concentrations, lna_covariances, emre_corrections,
+      model->fullState(scanResult[pid], concentrations, lna_covariances, emre_corrections,
                        ios_covariances, thirdOrder, iosemre_corrections);
 
-
-      parameterScan(j,0) = GiNaC::ex_to<GiNaC::numeric>(parameterSets[j][config.getParameter().getSymbol()]).to_double();
+      parameterScan(pid,0) = GiNaC::ex_to<GiNaC::numeric>(parameterSets[pid][config.getParameter().getSymbol()]).to_double();
 
       int col=1;
-      for (int i=0; i<config.getNumSpecies(); i++)
-        parameterScan(j,col++) = concentrations(index_table[i]);
-      for (int i=0; i<config.getNumSpecies(); i++)
-        parameterScan(j,col++) = lna_covariances(index_table[i], index_table[i]);
-      for (int i=0; i<config.getNumSpecies(); i++)
-        parameterScan(j,col++) = concentrations(index_table[i])+emre_corrections(index_table[i]);
-      for (int i=0; i<config.getNumSpecies(); i++)
-        parameterScan(j,col++) = lna_covariances(index_table[i], index_table[i])+ios_covariances(index_table[i], index_table[i]);
+
+      // output LNA
+      for (size_t i=0; i<config.getNumSpecies(); i++)
+        parameterScan(pid,col++) = concentrations(index_table[i]);
+      for (size_t i=0; i<config.getNumSpecies(); i++)
+        for (size_t j=i; j<config.getNumSpecies(); j++)
+            parameterScan(pid,col++) = lna_covariances(index_table[i], index_table[j]);
+
+      // output IOS
+      for (size_t i=0; i<config.getNumSpecies(); i++)
+        parameterScan(pid,col++) = concentrations(index_table[i])+emre_corrections(index_table[i]);
+      for (size_t i=0; i<config.getNumSpecies(); i++)
+        for (size_t j=i; j<config.getNumSpecies(); j++)
+            parameterScan(pid,col++) = lna_covariances(index_table[i], index_table[j])+ios_covariances(index_table[i], index_table[j]);
 
   }
 
