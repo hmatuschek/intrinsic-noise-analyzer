@@ -129,14 +129,30 @@ SSScanSpectrumConfigPage::SSScanSpectrumConfigPage(GeneralTaskWizard *parent)
   p_num->setValidator(p_num_val);
   registerField("p_num", p_num);
 
+  QSpinBox *thread_count = new QSpinBox();
+  thread_count->setMinimum(1);
+  thread_count->setMaximum(OpenMP::getMaxThreads());
+  thread_count->setValue(OpenMP::getMaxThreads());
+  this->registerField("thread_count", thread_count);
+  if (1 == OpenMP::getMaxThreads())
+    thread_count->setEnabled(false);
+
+
   QFormLayout *layout = new QFormLayout();
-  layout->addRow(tr("Precision"), epsilon);
-  layout->addRow(tr("Max. iterations"), n_iter);
-  layout->addRow(tr("Max. integration time"), t_max);
   layout->addRow(tr("Parameter"), p_select);
   layout->addRow(tr("Start value"), p_min);
   layout->addRow(tr("End value"), p_max);
   layout->addRow(tr("Steps"), p_num);
+
+  layout->addItem(layout->spacerItem());
+
+  layout->addRow(tr("Thread count"), thread_count);
+
+  layout->addItem(layout->spacerItem());
+
+  layout->addRow(tr("Precision"), epsilon);
+  layout->addRow(tr("Max. iterations"), n_iter);
+  layout->addRow(tr("Max. integration time"), t_max);
 
   this->setLayout(layout);
 }

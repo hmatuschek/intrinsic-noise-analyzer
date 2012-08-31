@@ -89,7 +89,9 @@ SSScanTask::SSScanTask(const Config &config, QObject *parent)
 
     size_t column = 0;
 
-    this->parameterScan.setColumnName(column++, config.getParameter().getName().c_str());
+    // first column parameter name
+    this->parameterScan.setColumnName(column++, config.getParameter().hasName() ? config.getParameter().getName().c_str() : config.getParameter().getIdentifier().c_str() );
+
     for (size_t i=0; i<config.getNumSpecies(); i++, column++)
     {
       // fill index table
