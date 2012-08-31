@@ -10,7 +10,7 @@ ParameterScanPlot::ParameterScanPlot(size_t num_species, Table *series,
     : Plot::Figure("Mean concentrations (RE & LNA)", parent)
 {
   // Create a plot:
-  this->setXLabel(tr("time [%1]").arg(time_unit));
+  this->setXLabel(tr("%1").arg(series->getColumnName(0)));
   this->setYLabel(tr("concentrations [%1]").arg(species_unit));
 
   QVector<Plot::VarianceLineGraph *> graphs(num_species);
