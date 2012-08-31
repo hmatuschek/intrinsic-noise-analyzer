@@ -10,11 +10,7 @@
 #include <QCheckBox>
 #include <QGroupBox>
 
-
 using namespace iNA;
-
-
-
 
 ParamScanWizard::ParamScanWizard(QWidget *parent) :
   GeneralTaskWizard(parent), config()
@@ -112,7 +108,7 @@ ParameterScanConfigPage::ParameterScanConfigPage(GeneralTaskWizard *parent)
   p_select = new QComboBox();
   p_select->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
 
-  QObject::connect(p_select, SIGNAL(currentIndexChanged(int)), this, SLOT(setParamRange(int)));
+  QObject::connect(p_select, SIGNAL(currentIndexChanged(int)), this, SLOT(refreshParamRange(int)));
 
   p_min = new QLineEdit("0.0");
   p_min->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
@@ -149,10 +145,10 @@ ParameterScanConfigPage::ParameterScanConfigPage(GeneralTaskWizard *parent)
   param_layout->addRow(tr("Steps"), p_num);
   param_box->setLayout(param_layout);
 
-  QGroupBox *mp_box = new QGroupBox(tr("Parallel process"));
-  QFormLayout *mp_layout = new QFormLayout();
-  mp_layout->addRow(tr("Thread count"), thread_count);
-  mp_box->setLayout(mp_layout);
+//  QGroupBox *mp_box = new QGroupBox(tr("Parallel process"));
+//  QFormLayout *mp_layout = new QFormLayout();
+//  mp_layout->addRow(tr("Thread count"), thread_count);
+//  mp_box->setLayout(mp_layout);
 
   QGroupBox *ss_box = new QGroupBox(tr("Steady state solver"));
   QFormLayout *ss_layout = new QFormLayout();
@@ -163,13 +159,13 @@ ParameterScanConfigPage::ParameterScanConfigPage(GeneralTaskWizard *parent)
 
   QVBoxLayout *layout = new QVBoxLayout();
   layout->addWidget(param_box);
-  layout->addWidget(mp_box);
+  //layout->addWidget(mp_box);
   layout->addWidget(ss_box);
   setLayout(layout);
 }
 
 void
-ParameterScanConfigPage::setParamRange(int)
+ParameterScanConfigPage::refreshParamRange(int)
 {
 
     // Get the config:
@@ -250,12 +246,17 @@ ParamScanSummaryPage::ParamScanSummaryPage(QWidget *parent)
   this->species->setTextFormat(Qt::LogText);
   this->species->setWordWrap(true);
 
+  this->param = new QLabel();
+  this->param->setTextFormat(Qt::LogText);
+  this->param->setWordWrap(true);
+
   this->memory = new QLabel();
   this->memory->setTextFormat(Qt::LogText);
 
   QFormLayout *layout = new QFormLayout();
   layout->addRow("Model:", this->model_name);
   layout->addRow("Selected species:", this->species);
+  layout->addRow("Selected parameter:", this->param);
   layout->addRow("Approx. memory used:", this->memory);
   this->setLayout(layout);
 }
@@ -271,8 +272,10 @@ ParamScanSummaryPage::initializePage()
   QStringList species(config.getSelectedSpecies());
   this->species->setText(species.join(", "));
 
+  this->param->setText(QString((config.getParameter().hasName() ? config.getParameter().getName() : config.getParameter().getIdentifier()).c_str()));
+
   QString mem_str("%1 MB");
   int N = config.getNumSpecies();
-  this->memory->setText(mem_str.arg(double(8*(2*N+N*N))/126976.));
+  this->memory->setText(mem_str.arg(double(8*(2*N+N*(N-1)))/126976.));
 }
 

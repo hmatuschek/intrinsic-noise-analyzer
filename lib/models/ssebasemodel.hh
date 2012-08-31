@@ -45,24 +45,35 @@ protected:
 
     GiNaC::exmap dependentSpecies;
 
-    /**
-    * A method that generates a substituation table for all conservation laws arising from the model
-    */
-    GiNaC::exmap getConservationConstants(const Eigen::VectorXex &conserved_cycles);
-
 private:
 
     GiNaC::exmap substitutions;
 
 public:
 
+
+    /**
+    * A method that generates a substituation table for all conservation laws arising from the model
+    */
+    GiNaC::exmap getConservationConstants(const Eigen::VectorXex &conserved_cycles);
+
+    /**
+    * A method that generates a substituation table for all conservation laws arising from the model
+    */
+    GiNaC::exmap getConservationConstants(const Eigen::VectorXd &conserved_cycles);
+
     ConservationAnalysis(const Ast::Model &model);
 
+    /* Links concentration to full state */
     const Eigen::MatrixXex & getLink0CMatrix();
 
+    /* Links concentrations to full state */
     const Eigen::MatrixXex & getLinkCMatrix();
 
     Eigen::MatrixXex getConservedCycles(const Eigen::VectorXd &ICs);
+
+    /* Yields the conservation matrix in concentration space */
+    Eigen::MatrixXex getConservationMatrix();
 
     Eigen::VectorXex conserved_cycles;
 
@@ -84,7 +95,7 @@ public:
         // ... and fold all constants due to conservation laws
         for (int i=0; i<vec.rows(); i++)
         for (int j=0; j<vec.cols(); j++)
-                vec(i,j)=vec(i,j).subs(this->substitutions);
+                vec(i,j) = vec(i,j).subs(this->substitutions);
     }
 
 };

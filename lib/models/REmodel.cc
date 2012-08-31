@@ -12,38 +12,22 @@ ConservationConstantCollector::ConservationConstantCollector(SSEBaseModel &model
     // Evaluate initial concentrations and evaluate volumes:
     Ast::EvaluateInitialValue evICs(model);
     Eigen::VectorXd ICs(model.numSpecies());
-    for(size_t i=0; i<model.numSpecies();i++){
-       ICs(i)=evICs.evaluate(model.getSpecies(i)->getSymbol());
-       this->Omega(i)=evICs.evaluate(model.getSpecies(i)->getCompartment()->getSymbol());
-    }
+    for(size_t i=0; i<model.numSpecies();i++)
+           ICs(i)=evICs.evaluate(model.getSpecies(i)->getSymbol());
 
     //store in permutated base
-    //this->Omega = model.PermutationM*this->Omega;
-    //this->ICsPermuted = model.PermutationM*ICs;
+    //this->ICsPermuted = this->PermutationM*ICs;
 
-    for(size_t i=0;i<model.numSpecies();i++)
-        for(size_t j=0;j<model.numIndSpecies();j++)
-            this->LinkCMatrixNumeric(i,j) = GiNaC::ex_to<GiNaC::numeric>( model.getLinkCMatrix()(i,j) ).to_double();
+    Trafo::ConstantFolder constants(model);
 
-    for(size_t i=0;i<model.numDepSpecies();i++)
-        for(size_t j=0;j<model.numIndSpecies();j++)
-            this->Link0CMatrixNumeric(i,j) = GiNaC::ex_to<GiNaC::numeric>( model.getLink0CMatrix()(i,j) ).to_double();
+    //evaluate the link matrices
+    Link0CMatrixNumeric = Eigen::ex2double(model.getLink0CMatrix());
+    LinkCMatrixNumeric = Eigen::ex2double(model.getLinkCMatrix());
 
-//    /**
-//    * @todo the omega business is ugly and workaround at the moment
-//    */
-
-//    if(model.numDepSpecies()>0){
-//        Eigen::VectorXd om_dep=this->Omega.tail(model.numDepSpecies());
-//        // compute conserved cycles in permutated base and store in conserved_cycles
-//        this->conserved_cycles = om_dep.asDiagonal().inverse()*model.conservation_matrix*(this->Omega.asDiagonal())*this->ICsPermuted;
-//    }
+    if(model.numDepSpecies()>0) this->conserved_cycles = Eigen::ex2double(constants.apply(model.getConservationMatrix()))*ICs;
 
     // generate substitution table
-    //substitutions = model.getConservationConstants(conserved_cycles);
-
-    //this->foldConservationConstants(conserved_cycles,this->updateVector);
-    //this->foldConservationConstants(this->conserved_cycles,this->JacobianM);
+    substitutions = model.getConservationConstants(conserved_cycles);
 
 }
 
@@ -56,10 +40,37 @@ ConservationConstantCollector::getInitialState(Eigen::VectorXd &x)
 
 }
 
-void
-ConservationConstantCollector::getConservedCycles(Eigen::VectorXd &cycles)
+/**
+* A method that folds conservation constants in an expression.
+*/
+GiNaC::ex
+ConservationConstantCollector::apply(const GiNaC::ex &exIn)
 {
-  //cycles = this->conserved_cycles;
+    return exIn.subs(substitutions);
+}
+
+
+/**
+* A method that folds all constants in a vector or matrix.
+*/
+Eigen::MatrixXex
+ConservationConstantCollector::apply(const Eigen::MatrixXex &vecIn)
+{
+
+    Eigen::MatrixXex vecOut(vecIn.rows(),vecIn.cols());
+    // ... and fold all constants due to conservation laws
+    for (int i=0; i<vecIn.rows(); i++)
+    for (int j=0; j<vecIn.cols(); j++)
+            vecOut(i,j)=vecIn(i,j).subs(substitutions);
+
+    return vecOut;
+
+}
+
+const Eigen::VectorXd &
+ConservationConstantCollector::getConservedCycles()
+{
+    return this->conserved_cycles;
 }
 
 void
@@ -98,6 +109,26 @@ REmodel::fullState(const Eigen::VectorXd &state, Eigen::VectorXd &full_state)
       full_state.tail(this->numDepSpecies()) =
               Eigen::ex2double(this->conserved_cycles)
               + this->Link0CMatrixNumeric*state.head(this->numIndSpecies());
+  }
+
+  // restore original order and return
+  full_state = (this->PermutationM.transpose())*full_state;
+
+}
+
+
+void
+REmodel::fullState(ConservationConstantCollector &context,const Eigen::VectorXd &state, Eigen::VectorXd &full_state)
+{
+
+  // make space
+  full_state.resize(this->numSpecies());
+  full_state.head(this->numIndSpecies()) = state.head(this->numIndSpecies());
+
+  if(this->numDepSpecies()>0){
+      full_state.tail(this->numDepSpecies()) =
+              context.getConservedCycles()
+              + context.getLink0CMatrix()*state.head(this->numIndSpecies());
   }
 
   // restore original order and return

@@ -76,25 +76,14 @@ public:
   void apply(Ast::Model &model);
 
   /** Tiny helper function to fold all constants in the given expression. */
-  GiNaC::ex apply(GiNaC::ex expr);
+  GiNaC::ex apply(const GiNaC::ex &expr);
 
   /** Tiny helper function to fold all constants in the given vector expression. */
-  void apply(Eigen::VectorXex &expr);
+  //void apply(Eigen::VectorXex &expr);
 
+  /** Tiny helper function to fold all constants in the given vector expression. */
+  Eigen::MatrixXex apply(const Eigen::MatrixXex &vecIn);
 
-  Eigen::MatrixXex apply(const Eigen::MatrixXex &vecIn)
-  {
-
-      Eigen::MatrixXex vecOut;
-      vecOut.resize(vecIn.rows(),vecIn.cols());
-
-      for (int i=0; i<vecIn.rows(); i++)
-      for (int j=0; j<vecIn.cols(); j++)
-              vecOut(i,j)=vecIn(i,j).subs(this->getTable());
-
-      return vecOut;
-
-  }
 
 };
 

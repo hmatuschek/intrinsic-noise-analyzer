@@ -79,7 +79,7 @@ private:
   QLineEdit *p_num;
 
 private slots:
-  void setParamRange(int);
+  void refreshParamRange(int);
 
 };
 
@@ -95,8 +95,10 @@ public:
   virtual void initializePage();
 
 private:
+
   QLabel *model_name;
   QLabel *species;
+  QLabel *param;
   QLabel *spectrum;
   QLabel *memory;
 };

@@ -146,6 +146,44 @@ LNAmodel::fullState(const Eigen::VectorXd &state, Eigen::VectorXd &concentration
 
 }
 
+
+void
+LNAmodel::fullState(ConservationConstantCollector &context, const Eigen::VectorXd &state, Eigen::VectorXd &concentrations, Eigen::MatrixXd &cov)
+
+{
+
+    // reconstruct full concentration vector in original permutation order
+    REmodel::fullState(context,state,concentrations);
+
+    // ... then begin reconstruction of covariance matrix
+
+    // get reduced covariance vector
+    Eigen::VectorXd covvec = state.segment(this->numIndSpecies(),dimCOV);
+
+    // full cov permutated
+    Eigen::MatrixXd cov_all(this->numSpecies(),this->numSpecies());
+    // red cov permutated
+    Eigen::MatrixXd cov_ind(this->numIndSpecies(),this->numIndSpecies());
+
+   // fill upper triangular
+   size_t idx=0;
+   for(size_t i=0;i<this->numIndSpecies();i++)
+   {
+       for(size_t j=0;j<=i;j++)
+       {
+           cov_ind(i,j) = covvec(idx);
+           // fill rest by symmetry
+           cov_ind(j,i) = cov_ind(i,j);
+           idx++;
+       }
+   }
+
+   // restore native permutation of covariance
+   cov = context.getLinkCMatrix().transpose()*cov_all*context.getLinkCMatrix();
+
+}
+
+
 void
 LNAmodel::fullState(const Eigen::VectorXd &state, Eigen::VectorXd &concentrations,
                                      Eigen::MatrixXd &cov, Eigen::VectorXd &emre)
@@ -161,6 +199,23 @@ LNAmodel::fullState(const Eigen::VectorXd &state, Eigen::VectorXd &concentration
 
     // construct full emre vector, restore original order and return
     emre = this->PermutationM.transpose()*this->LinkCMatrixNumeric*tail;
+
+}
+
+void
+LNAmodel::fullState(ConservationConstantCollector &context, const Eigen::VectorXd &state, Eigen::VectorXd &concentrations,
+                                     Eigen::MatrixXd &cov, Eigen::VectorXd &emre)
+
+{
+
+    // Reconstruct full concentration vector and covariances in original permutation order
+    this->fullState(context,state,concentrations,cov);
+
+    // Get reduced emre vector (should better be a view rather then a copy)
+    Eigen::VectorXd tail = state.segment(this->numIndSpecies()+dimCOV,this->numIndSpecies());
+
+    // Construct full emre vector, restore original order and return
+    emre = context.getLinkCMatrix()*tail;
 
 }
 

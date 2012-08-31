@@ -66,9 +66,20 @@ public:
    * output:
    * @param concentrations vector, @param covariance matrix and @param emre correction vector.
    */
-  void fullState(const Eigen::VectorXd &state, Eigen::VectorXd &concentrations, Eigen::MatrixXd &covariance, Eigen::VectorXd &emre);
+  void fullState(const Eigen::VectorXd &state,
+                 Eigen::VectorXd &concentrations, Eigen::MatrixXd &covariance, Eigen::VectorXd &emre);
 
-  void fluxAnalysis(const Eigen::VectorXd &state,  Eigen::VectorXd &flux, Eigen::MatrixXd &fluxCovariance);
+  void fullState(ConservationConstantCollector &context,
+                 const Eigen::VectorXd &state, Eigen::VectorXd &concentrations, Eigen::MatrixXd &cov, Eigen::VectorXd &emre);
+
+
+  void fullState(ConservationConstantCollector &context,
+                 const Eigen::VectorXd &state, Eigen::VectorXd &concentrations, Eigen::MatrixXd &cov);
+
+
+
+  void fluxAnalysis(const Eigen::VectorXd &state,
+                    Eigen::VectorXd &flux, Eigen::MatrixXd &fluxCovariance);
 
 
 };

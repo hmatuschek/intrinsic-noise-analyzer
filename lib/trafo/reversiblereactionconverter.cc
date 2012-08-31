@@ -48,8 +48,7 @@ void ReversibleReactionConverter::apply(Ast::Model &model)
         continue;
     }
 
-
-    // skip reaction if unsuccesful
+    // Skip reaction if unsuccesful
     if (!numerator.is_equal(forwardLaw+backwardLaw)) {
       continue;
     }
@@ -57,11 +56,11 @@ void ReversibleReactionConverter::apply(Ast::Model &model)
     forwardLaw=forwardLaw/denominator;
     backwardLaw=-backwardLaw/denominator;
 
-    // set forward rate law
+    // Set forward rate law
     reaction->setReversible(false);
     reaction->getKineticLaw()->setRateLaw(forwardLaw);
 
-    // create a new irreversible backward reaction
+    // Create a new irreversible backward reaction
     std::string id = reaction->getIdentifier();
     id=id.append("Reverse");
 

@@ -94,8 +94,7 @@ public:
 
     // Fold constants and get update vector
     Trafo::ConstantFolder constants(sseModel);
-    updateVector = sseModel.getUpdateVector();
-    constants.apply(updateVector);
+    updateVector = constants.apply(sseModel.getUpdateVector());
 
     // Compile expressions
     typename SysEngine::Compiler compiler(sseModel.stateIndex);

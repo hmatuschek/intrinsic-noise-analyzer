@@ -57,17 +57,32 @@ ConstantFolder::apply(Ast::Model &model)
 }
 
 GiNaC::ex
-ConstantFolder::apply(GiNaC::ex expr)
+ConstantFolder::apply(const GiNaC::ex & expr)
 {
   // apply substitutions on expression:
   return expr.subs(this->getTable());
 }
 
-void
-ConstantFolder::apply(Eigen::VectorXex &expr)
+//void
+//ConstantFolder::apply(Eigen::VectorXex &expr)
+//{
+//  // apply substitutions to vector:
+//    for(int i=0;i<expr.size();i++)
+//        expr(i)=expr(i).subs(this->getTable());
+//}
+
+Eigen::MatrixXex
+ConstantFolder::apply(const Eigen::MatrixXex &vecIn)
 {
-  // apply substitutions to vector:
-    for(int i=0;i<expr.size();i++)
-        expr(i)=expr(i).subs(this->getTable());
+
+    Eigen::MatrixXex vecOut;
+    vecOut.resize(vecIn.rows(),vecIn.cols());
+
+    for (int i=0; i<vecIn.rows(); i++)
+    for (int j=0; j<vecIn.cols(); j++)
+            vecOut(i,j)=vecIn(i,j).subs(this->getTable());
+
+    return vecOut;
+
 }
 

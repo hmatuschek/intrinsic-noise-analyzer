@@ -16,17 +16,19 @@ class ConservationConstantCollector
      */
     ConservationConstantCollector(SSEBaseModel &model);
 
+private:
 
     GiNaC::exmap substitutions;
 
     Eigen::MatrixXd Link0CMatrixNumeric;
     Eigen::MatrixXd LinkCMatrixNumeric;
 
-    Eigen::VectorXd  Omega;
+    Eigen::VectorXd Omega;
 
-    Eigen::VectorXd  conserved_cycles;
-    Eigen::VectorXd  ICsPermuted;
+    Eigen::VectorXd conserved_cycles;
+    Eigen::VectorXd ICsPermuted;
 
+public:
 
     /**
      * Interface for the integrator: get initial state vector.
@@ -36,7 +38,18 @@ class ConservationConstantCollector
     /**
      * Get the values of the conservation constants.
      */
-    void getConservedCycles(Eigen::VectorXd &consc);
+    const Eigen::VectorXd & getConservedCycles();
+
+    /**
+    * A method that folds conservation constants in an expression.
+    */
+    GiNaC::ex apply(const GiNaC::ex &exIn);
+
+    /**
+    * A method that folds all constants in a vector or matrix.
+    */
+    Eigen::MatrixXex apply(const Eigen::MatrixXex &vecIn);
+
 
     /**
     * A method that folds all constants arising from conservation laws in a given expression
@@ -52,6 +65,22 @@ class ConservationConstantCollector
                 vec(i,j)=vec(i,j).subs(this->substitutions);
 
     }
+
+    const Eigen::MatrixXd &
+    getLink0CMatrix()
+    {
+        return this->Link0CMatrixNumeric;
+    }
+
+
+    const Eigen::MatrixXd &
+    getLinkCMatrix()
+    {
+        return this->LinkCMatrixNumeric;
+    }
+
+
+
 
 };
 
@@ -71,9 +100,6 @@ protected:
   size_t dim;
 
   std::vector<GiNaC::symbol> stateVariables;
-
- // Eigen::MatrixXd Link0CMatrixNumeric;
- // Eigen::MatrixXd LinkCMatrixNumeric;
 
   Eigen::VectorXex updateVector;
 
@@ -117,12 +143,9 @@ public:
    */
   void fullState(const Eigen::VectorXd &state, Eigen::VectorXd &fullState);
 
-  GiNaC::exmap getFlux(const Eigen::VectorXd &state,  Eigen::VectorXd &flux);
+  void fullState(ConservationConstantCollector &context,const Eigen::VectorXd &state, Eigen::VectorXd &full_state);
 
-  /**
-   * Evaluate the full Omega (volumes) vector.
-   */
-//  void getOmega(Eigen::VectorXd &om);
+  GiNaC::exmap getFlux(const Eigen::VectorXd &state,  Eigen::VectorXd &flux);
 
   double foldVertex(std::list<int> lower, std::list<int> upper);
 

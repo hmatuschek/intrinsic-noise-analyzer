@@ -362,6 +362,88 @@ IOSmodel::fullState(const Eigen::VectorXd &state, Eigen::VectorXd &concentration
 }
 
 void
+IOSmodel::fullState(ConservationConstantCollector &context, const Eigen::VectorXd &state, Eigen::VectorXd &concentrations,
+                                     Eigen::MatrixXd &cov, Eigen::VectorXd &emre, Eigen::MatrixXd &iosCov, Eigen::VectorXd &skewness, Eigen::VectorXd &iosemre)
+
+{
+
+    // reconstruct full concentration vector and covariances in original permutation order
+    LNAmodel::fullState(context,state,concentrations,cov,emre);
+
+    // reconstruct thirdmoments
+    // get reduced skewness vector (should better be a view rather then a copy)
+    Eigen::VectorXd tail = state.segment(2*this->numIndSpecies()+dimCOV,dim3M);
+
+    Eigen::VectorXd emreVal = state.segment(this->numIndSpecies()+dimCOV,this->numIndSpecies());
+
+    std::vector< Eigen::MatrixXd > thirdMomVariables(this->numIndSpecies());
+
+    double val = 0;
+
+    size_t idx = 0;
+    for(size_t i=0;i<this->numIndSpecies();i++)
+    {
+        thirdMomVariables[i].resize(this->numIndSpecies(),this->numIndSpecies());
+        for(size_t j=0;j<=i;j++)
+            for(size_t k=0;k<=j;k++)
+            {
+                val = tail[idx]-emreVal(i)*emreVal(j)*emreVal(k);
+
+                thirdMomVariables[i](j,k)=val;
+                thirdMomVariables[i](k,j)=val;
+
+                thirdMomVariables[j](i,k)=val;
+                thirdMomVariables[j](k,i)=val;
+
+                thirdMomVariables[k](i,j)=val;
+                thirdMomVariables[k](j,i)=val;
+
+                idx++; // counts i,j,k loop
+            }
+    }
+
+    // construct full third moment vector, restore original order and return
+    for(size_t i=0; i<(unsigned)context.getLinkCMatrix().rows(); i++)
+    {
+        skewness(i)=0.;
+        for(size_t j=0; j<(unsigned)context.getLinkCMatrix().cols(); j++)
+            for(size_t k=0; k<(unsigned)context.getLinkCMatrix().cols(); k++)
+                for(size_t l=0; l<(unsigned)context.getLinkCMatrix().cols(); l++)
+                    skewness(i) += context.getLinkCMatrix()(i,j) * context.getLinkCMatrix()(i,k) * context.getLinkCMatrix()(i,l) *thirdMomVariables[j](k,l);
+
+        skewness(i)/=cov(i,i)*sqrt(cov(i,i));
+    }
+
+   // get reduced covariance vector
+   Eigen::VectorXd covvec = state.segment(2*this->numIndSpecies()+dimCOV+dim3M,dimCOV);
+   // reduced covariance
+   Eigen::MatrixXd cov_ind(this->numIndSpecies(),this->numIndSpecies());
+
+   // fill upper triangular
+   idx=0;
+   for(size_t i=0;i<this->numIndSpecies();i++)
+   {
+       for(size_t j=0;j<=i;j++)
+       {
+           cov_ind(i,j) = covvec(idx)-emreVal(i)*emreVal(j);
+           // fill rest by symmetry
+           cov_ind(j,i) = cov_ind(i,j);
+           idx++;
+       }
+   }
+
+   // restore full covariance in native permutation
+   iosCov = context.getLinkCMatrix()*cov_ind*context.getLinkCMatrix().transpose();
+
+   tail = state.segment(2*this->numIndSpecies()+2*dimCOV+dim3M,this->numIndSpecies());
+
+   // construct full iosemre vector, restore original order and return
+   iosemre = context.getLinkCMatrix()*tail;
+
+}
+
+
+void
 IOSmodel::getInitialState(Eigen::VectorXd &x)
 {
 
