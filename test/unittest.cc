@@ -4,7 +4,7 @@
 #include <limits>
 #include <cmath>
 #include "utils/cputime.hh"
-#include <execinfo.h>
+//#include <execinfo.h>
 #include <sys/time.h>
 
 using namespace iNA::UnitTest;
@@ -427,7 +427,7 @@ TestRunner::operator ()()
       {
         this->stream << " exception" << std::endl;
         this->stream << "   what(): " << err.what() << std::endl;
-        this->printTraceBack();
+        //this->printTraceBack();
         tests_error++;
       }
     }
@@ -444,7 +444,7 @@ TestRunner::operator ()()
 
 
 
-void
+/*void
 TestRunner::printTraceBack()
 {
   const size_t max_depth = 100;
@@ -461,4 +461,4 @@ TestRunner::printTraceBack()
   }
 
   free(stack_strings); // malloc()ed by backtrace_symbols
-}
+}*/

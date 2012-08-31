@@ -139,8 +139,8 @@ public:
 
   void operator() ();
 
-protected:
-  void printTraceBack();
+/*protected:
+  void printTraceBack();*/
 };
 
 

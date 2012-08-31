@@ -22,8 +22,7 @@ public:
       public SpeciesSelectionTaskConfig
   {
   protected:
-
-    iNA::Models::IOSmodel *model;
+    iNA::Models::IOSmodel *_model;
 
     int max_iterations;
     double max_time_step;

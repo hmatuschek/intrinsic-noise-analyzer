@@ -7,9 +7,8 @@
 
 #include "views/sbmlsheditordialog.hh"
 
-
 #include "parser/parser.hh"
-#include "exception.hh"
+#include "parser/exception.hh"
 
 using namespace iNA;
 
@@ -196,6 +195,10 @@ void Application::onImportModel()
     } else if (ImportModelDialog::SBMLSH_MODEL == format) {
       new_doc = new DocumentItem(Parser::Sbmlsh::importModel(fileName.toStdString()), fileName);
     }
+  } catch (iNA::Parser::ParserError &err) {
+    QMessageBox::warning(
+          0, tr("Can not open model"), err.what());
+    return;
   } catch (iNA::Exception &err) {
     QMessageBox::warning(0, tr("Can not open model"), err.what());
     return;

@@ -23,7 +23,8 @@ typedef enum {
   T_POWER,            ///< '**' or '^'
   T_DIVIVE,           ///< '/'
   T_LPAR,             ///< '('
-  T_RPAR              ///< ')'
+  T_RPAR,              ///< ')'
+  T_FIRST_NON_EXPRESSION_TOKEN
 } TokenId;
 
 

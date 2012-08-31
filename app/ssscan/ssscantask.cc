@@ -5,7 +5,7 @@
  * ******************************************************************************************* */
 SSScanTask::Config::Config()
   : GeneralTaskConfig(), ModelSelectionTaskConfig(), SpeciesSelectionTaskConfig(),
-    model(0), max_iterations(0), max_time_step(0), epsilon(0),
+    _model(0), max_iterations(0), max_time_step(0), epsilon(0),
     parameter(), start_value(0), end_value(1),
     steps(1)
 {
@@ -14,7 +14,7 @@ SSScanTask::Config::Config()
 
 SSScanTask::Config::Config(const Config &other)
   : GeneralTaskConfig(), ModelSelectionTaskConfig(other), SpeciesSelectionTaskConfig(other),
-    model(other.model), max_iterations(other.max_iterations), max_time_step(other.max_time_step),
+    _model(other._model), max_iterations(other.max_iterations), max_time_step(other.max_time_step),
     epsilon(other.epsilon),
     parameter(other.parameter), start_value(other.start_value),
     end_value(other.end_value), steps(other.steps)
@@ -27,13 +27,13 @@ SSScanTask::Config::setModelDocument(DocumentItem *document)
 {
   ModelSelectionTaskConfig::setModelDocument(document);
   // Construct IOS model from SBML model associated with the selected document
-  this->model = new iNA::Models::IOSmodel(document->getModel());
+  this->_model = new iNA::Models::IOSmodel(document->getModel());
 }
 
 iNA::Ast::Model *
 SSScanTask::Config::getModel() const
 {
-  return this->model;
+  return _model;
 }
 
 
