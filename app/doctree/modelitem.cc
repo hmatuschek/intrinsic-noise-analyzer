@@ -16,23 +16,23 @@ using namespace iNA;
  * Implementation of SBML Model...
  * ********************************************************************************************* */
 ModelItem::ModelItem(const QString &file_path, QObject *parent) :
-  QObject(parent), base_model(0), itemLabel("Model")
+  QObject(parent), _model(0), itemLabel("Model")
 {
   // Now, assemble a base model from SBML:
-  Ast::Model model; Parser::Sbml::importModel(model, file_path.toStdString());
-  base_model = new Models::BaseModel(model);
+  _model = new Ast::Model();
+  Parser::Sbml::importModel(*_model, file_path.toStdString());
 
   // Assemble child-items:
-  CompartmentsItem *compartments = new CompartmentsItem(this->base_model, this);
+  CompartmentsItem *compartments = new CompartmentsItem(this->_model, this);
   compartments->setTreeParent(this);
 
-  SpeciesItem *species = new SpeciesItem(this->base_model, this);
+  SpeciesItem *species = new SpeciesItem(this->_model, this);
   species->setTreeParent(this);
 
-  ParametersItem *parameters = new ParametersItem(this->base_model, this);
+  ParametersItem *parameters = new ParametersItem(this->_model, this);
   parameters->setTreeParent(this);
 
-  ReactionsItem *reactions = new ReactionsItem(this->base_model, this);
+  ReactionsItem *reactions = new ReactionsItem(this->_model, this);
   reactions->setTreeParent(this);
 
   this->_children.append(compartments);
@@ -43,22 +43,22 @@ ModelItem::ModelItem(const QString &file_path, QObject *parent) :
 
 
 ModelItem::ModelItem(iNA::Ast::Model *model, QObject *parent) :
-  QObject(parent), base_model(0), itemLabel("Model")
+  QObject(parent), _model(0), itemLabel("Model")
 {
   // Now, assemble a base model from SBML:
-  base_model = new Models::BaseModel(*model);
+  model = new Models::BaseModel(*model);
 
   // Assemble child-items:
-  CompartmentsItem *compartments = new CompartmentsItem(this->base_model, this);
+  CompartmentsItem *compartments = new CompartmentsItem(this->_model, this);
   compartments->setTreeParent(this);
 
-  SpeciesItem *species = new SpeciesItem(this->base_model, this);
+  SpeciesItem *species = new SpeciesItem(this->_model, this);
   species->setTreeParent(this);
 
-  ParametersItem *parameters = new ParametersItem(this->base_model, this);
+  ParametersItem *parameters = new ParametersItem(this->_model, this);
   parameters->setTreeParent(this);
 
-  ReactionsItem *reactions = new ReactionsItem(this->base_model, this);
+  ReactionsItem *reactions = new ReactionsItem(this->_model, this);
   reactions->setTreeParent(this);
 
   this->_children.append(compartments);
@@ -71,7 +71,7 @@ ModelItem::ModelItem(iNA::Ast::Model *model, QObject *parent) :
 ModelItem::~ModelItem()
 {
   // Free model instance:
-  delete this->base_model;
+  delete this->_model;
 }
 
 
@@ -85,14 +85,14 @@ ModelItem::getLabel() const
 iNA::Ast::Model &
 ModelItem::getModel()
 {
-  return *(this->base_model);
+  return *(this->_model);
 }
 
 
 const iNA::Ast::Model &
 ModelItem::getModel() const
 {
-  return *(this->base_model);
+  return *(this->_model);
 }
 
 

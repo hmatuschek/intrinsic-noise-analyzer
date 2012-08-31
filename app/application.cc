@@ -10,6 +10,9 @@
 #include "parser/parser.hh"
 #include "parser/exception.hh"
 
+#include <trafo/reversiblereactionconverter.hh>
+
+
 using namespace iNA;
 
 
@@ -69,11 +72,19 @@ Application::Application() :
   _editModel = new QAction(tr("Edit model"), this);
   _editModel->setEnabled(false);
 
+  _expandRevReaction = new QAction(tr("Expand rev. reactions"), this);
+  _expandRevReaction->setEnabled(false);
+
+  _combineIrvReaction = new QAction(tr("Combine irrev. reactions"), this);
+  _combineIrvReaction->setEnabled(false);
+
   // Connect signals
   QObject::connect(_importModel, SIGNAL(triggered()), this, SLOT(onImportModel()));
   QObject::connect(_exportModel, SIGNAL(triggered()), this, SLOT(onExportModel()));
   QObject::connect(_closeModel, SIGNAL(triggered()), this, SLOT(onCloseModel()));
   QObject::connect(_editModel, SIGNAL(triggered()), this, SLOT(onEditModel()));
+  QObject::connect(_expandRevReaction, SIGNAL(triggered()), this, SLOT(onExpandRevReactions()));
+  QObject::connect(_combineIrvReaction, SIGNAL(triggered()), this, SLOT(onCombineIrrevReactions()));
 }
 
 
@@ -171,6 +182,8 @@ QAction *Application::importModelAction() { return _importModel; }
 QAction *Application::exportModelAction() { return _exportModel; }
 QAction *Application::closeModelAction()  { return _closeModel; }
 QAction *Application::editModelAction()   { return _editModel; }
+QAction *Application::expandRevReacAction() { return _expandRevReaction; }
+QAction *Application::combineIrrevReacAction() { return _combineIrvReaction; }
 
 
 /* ******************************************************************************************** *
@@ -265,4 +278,28 @@ void Application::onEditModel()
   // Assemble new document item and add it to the tree...
   DocumentItem *new_doc = new DocumentItem(new_model);
   docTree()->addDocument(new_doc);
+}
+
+
+void Application::onExpandRevReactions()
+{
+  DocumentItem *document = 0;
+
+  if (0 == _selected_item) { return; }
+  if (0 == (document = dynamic_cast<DocumentItem *>(_selected_item))) { return; }
+  iNA::Ast::Model &model = document->getModel();
+
+  iNA::Trafo::ReversibleReactionConverter converter; converter.apply(model);
+  docTree()->resetCompleteTree();
+}
+
+void Application::onCombineIrrevReactions()
+{
+  DocumentItem *document = 0;
+
+  if (0 == _selected_item) { return; }
+  if (0 == (document = dynamic_cast<DocumentItem *>(_selected_item))) { return; }
+  iNA::Ast::Model &model = document->getModel();
+
+  QMessageBox::information(0, "Not implemented yet.", "This feature is not implemented yet.");
 }
