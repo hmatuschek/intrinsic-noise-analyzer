@@ -497,7 +497,7 @@ Assembler::processParameterDefinition(Parser::ConcreteSyntaxTree &params)
    *   [EOL ParameterDefinitionList];     : params[5], ParameterDefinitionList = params[5][0][1] */
 
   std::string identifier = _lexer[params[0].getTokenIdx()].getValue();
-  GiNaC::ex value = processExpression(params[1]);
+  GiNaC::ex value = processExpression(params[2]);
   bool is_constant = true;
 
   // There is just one modifier, making paramerer non-constant

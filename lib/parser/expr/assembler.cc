@@ -31,7 +31,7 @@ Assembler::processExpression(Parser::ConcreteSyntaxTree &expr)
    *     ProductExpression          : expr[0][0]
    *     ("+"|"-")                  : expr[0][1]
    *     Expression) |              : expr[0][2]
-   *    ProductExpression;        : expr[0] */
+   *   ProductExpression);        : expr[0] */
 
   if (0 == expr.getAltIdx()) {
     GiNaC::ex lhs = processProduct(expr[0][0]);
