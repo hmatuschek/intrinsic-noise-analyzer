@@ -83,7 +83,7 @@ SSScanTask::SSScanTask(const Config &config, QObject *parent)
     steady_state(dynamic_cast<iNA::Models::IOSmodel &>(*config.getModel()),
       config.getMaxIterations(), config.getEpsilon(), config.getMaxTimeStep()),
     species(config.getNumSpecies()), species_name(config.getNumSpecies()),
-    parameterScan(1+config.getNumSpecies()+config.getNumSpecies()*(config.getNumSpecies()-1)/2, config.getSteps()),
+    parameterScan(1+2*config.getNumSpecies()+(config.getNumSpecies()*(config.getNumSpecies()+1))/2, config.getSteps()),
     index_table(config.getNumSpecies())
 {
 
