@@ -1,6 +1,6 @@
 #include "rosenbrock4.hh"
 
-using namespace Fluc::ODE;
+using namespace iNA::ODE;
 
 const double Rosenbrock4Constants::c2=0.386;
 const double Rosenbrock4Constants::c3=0.21;

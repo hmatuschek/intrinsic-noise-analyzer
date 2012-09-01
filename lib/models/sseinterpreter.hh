@@ -6,8 +6,9 @@
 #include "IOSmodel.hh"
 #include "eval/eval.hh"
 #include "eval/bcimp/engine.hh"
+#include "trafo/constantfolder.hh"
 
-namespace Fluc {
+namespace iNA {
 namespace Models {
 
 
@@ -68,6 +69,12 @@ protected:
    size_t opt_level;
 
 
+   /**
+    * Holds the update vector with constants folded.
+    */
+   Eigen::VectorXex updateVector;
+
+
 public:
   /**
    * Constructor.
@@ -84,10 +91,15 @@ public:
     : sseModel(model), bytecode(num_threads), jacobianCode(num_threads),
       hasJacobian(false), opt_level(opt_level)
   {
+
+    // Fold constants and get update vector
+    Trafo::ConstantFolder constants(sseModel);
+    updateVector = constants.apply(sseModel.getUpdateVector());
+
     // Compile expressions
     typename SysEngine::Compiler compiler(sseModel.stateIndex);
     compiler.setCode(&this->bytecode);
-    compiler.compileVector(sseModel.getUpdateVector());
+    compiler.compileVector(updateVector);
     compiler.finalize(opt_level);
 
     // Set bytecode for interpreter
@@ -101,7 +113,7 @@ public:
 
   /**
    * Derives and compiles the Jacobian from the ODEs.
-   * If the Jacobian was allready compiled, this method does nothing.
+   * If the Jacobian was already compiled, this method does nothing.
    */
   void compileJacobian()
   {
@@ -114,7 +126,7 @@ public:
       for(it = sseModel.stateIndex.begin(); it != sseModel.stateIndex.end(); ++it)
       {
         for (size_t i=0; i<sseModel.getDimension(); i++)
-          jacobian(i,(*it).second) = sseModel.getUpdateVector()(i).diff((*it).first);
+          jacobian(i,(*it).second) = updateVector(i).diff((*it).first);
       }
     }
 
@@ -178,7 +190,7 @@ public:
   /**
    * Constructs the "full" state from the internal, reduced state.
    */
-  void full_state( const Eigen::VectorXd &state, Eigen::VectorXd &concentrations,
+  void getFullState( const Eigen::VectorXd &state, Eigen::VectorXd &concentrations,
                    Eigen::MatrixXd &covariance, Eigen::VectorXd &emre) {
     this->sseModel.fullState(state,concentrations,covariance,emre);
   }

@@ -5,7 +5,7 @@
 
 #include <cmath>
 
-using namespace Fluc::Ast;
+using namespace iNA::Ast;
 
 
 
@@ -45,7 +45,7 @@ Evaluate::evaluate(const GiNaC::ex &expr)
   } catch (std::runtime_error err) {
     NumericError new_err;
     new_err << "Cannot evaluate expression " << expr
-            << ": A run-time exception was thrown: " << err.what();
+            << ": A runtime exception was thrown: " << err.what();
     throw new_err;
   } catch (std::exception err) {
     InternalError new_err;

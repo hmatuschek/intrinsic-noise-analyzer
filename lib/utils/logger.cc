@@ -1,6 +1,6 @@
 #include "logger.hh"
 
-using namespace Fluc::Utils;
+using namespace iNA::Utils;
 
 
 Message::Message(Level level)

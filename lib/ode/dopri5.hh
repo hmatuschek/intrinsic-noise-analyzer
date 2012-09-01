@@ -8,7 +8,7 @@
 #include "math.hh"
 
 
-namespace Fluc {
+namespace iNA {
 namespace ODE {
 
 

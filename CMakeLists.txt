@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.6)
 PROJECT(intrinsic-noise-analyzer)
 
+
 #
 # Register own CMake extensions:
 #
@@ -16,6 +17,11 @@ ELSE()
 SET(CMAKE_INSTALL_LIBDIR "lib")
 ENDIF(UNIX AND NOT APPLE)
 
+# Ok we need this to avoid clang compiler on MacOSX 10.8+
+IF(APPLE)
+SET(CMAKE_C_COMPILER "gcc")
+SET(CMAKE_CXX_COMPILER "g++")
+ENDIF(APPLE)
 
 #
 # Search for libraries
@@ -27,7 +33,7 @@ INCLUDE_DIRECTORIES(${QT_QTCORE_INCLUDE_DIR} ${QT_QTGUI_INCLUDE_DIR})
 
 FIND_PACKAGE(Ginac REQUIRED)
 FIND_PACKAGE(LibSBML REQUIRED)
-FIND_PACKAGE(OpenMP REQUIRED)
+FIND_PACKAGE(OpenMP)
 FIND_PACKAGE(LLVM REQUIRED)
 
 
@@ -50,7 +56,7 @@ INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/lib)
 #
 # Used libaries:
 #
-set(LIBS ${LIBS} ${GINAC_LIBRARIES} ${LIBSBML_LIBRARIES} m pthread)
+set(LIBS ${LIBS} ${GINAC_LIBRARIES} ${LIBSBML_LIBRARIES} m pthread gomp)
 
 #
 # Used headers:
@@ -68,6 +74,26 @@ set(CMAKE_EXE_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS_INIT} ${OpenMP_CXX_FLAGS}
 set(CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS_INIT} ${OpenMP_CXX_FLAGS})
 set(CMAKE_MODULE_LINKER_FLAGS ${CMAKE_MODULE_LINKER_FLAGS_INIT} ${OpenMP_CXX_FLAGS})
 
+
+# Let application start in its own window
+IF(WIN32)
+    SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -mwindows")
+ENDIF(WIN32)
+
+#
+# eigen + mingw weirdness, see
+# http://eigen.tuxfamily.org/dox/TopicWrongStackAlignment.html
+#
+
+IF(WIN32 AND WINGW)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mincoming-stack-boundary=2")
+    SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -mincoming-stack-boundary=2")
+    SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -mincoming-stack-boundary=2 -mwindows")
+
+    SET(CMAKE_EXE_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS} -mincoming-stack-boundary=2)
+    SET(CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS} -mincoming-stack-boundary=2)
+    SET(CMAKE_MODULE_LINKER_FLAGS ${CMAKE_MODULE_LINKER_FLAGS} -mincoming-stack-boundary=2)
+ENDIF(WIN32 AND WINGW)
 
 #
 # Define flags, libs etc if LLVM is present:
@@ -107,11 +133,18 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}/lib)
 
 
 #
-# traverse into source tree:
+# Traverse into source tree:
 #
 add_subdirectory(lib)
 add_subdirectory(app)
-add_subdirectory(test)
+add_subdirectory(cli)
+
+#
+# Exclude unit tests requiring glibc which is not available under Windows!
+#
+IF(NOT WIN32)
+  add_subdirectory(test)
+ENDIF(NOT WIN32)
 
 #
 # Source distribution packages:

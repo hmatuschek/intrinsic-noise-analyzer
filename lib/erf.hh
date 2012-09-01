@@ -3,12 +3,8 @@
 
 #include <cmath>
 
-/**
- * @defgroup math Mathematical Utilities
- */
 
-
-namespace Fluc
+namespace iNA
 {
 /**
  * Implements the error function defined as:

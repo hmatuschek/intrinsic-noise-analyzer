@@ -8,11 +8,12 @@
 
 
 
-namespace Fluc {
+namespace iNA {
 namespace Ast {
 
 
 /**
+ * @deprecated
  * Evaluates an @c GiNaC::ex (expression) instance using the internal value table. This
  * class does not implement the association between symbols and values, this has to be done in a
  * class derived from this one. For example as in @c EvaluateInitialValue or @c EvaluateByIndex.

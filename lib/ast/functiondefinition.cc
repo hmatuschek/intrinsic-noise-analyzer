@@ -2,12 +2,12 @@
 #include "exception.hh"
 
 
-using namespace Fluc::Ast;
+using namespace iNA::Ast;
 
 
 FunctionDefinition::FunctionDefinition(const std::string &id, std::vector<VariableDefinition *> &argdef,
                                        GiNaC::ex body)
-  : Definition(id, Node::FUNCTION_DEFINITION), Scope(true),
+  : Definition(id, Node::FUNCTION_DEFINITION), Scope(0, true),
     arguments(argdef.size()), function_body(body)
 {
   // get symbol for args and add argument definition to function scope:
@@ -97,6 +97,40 @@ FunctionDefinition::dump(std::ostream &str)
 }
 
 
+void
+FunctionDefinition::accept(Ast::Visitor &visitor) const
+{
+  if (FunctionDefinition::Visitor *fun_vis = dynamic_cast<FunctionDefinition::Visitor *>(&visitor)) {
+    fun_vis->visit(this);
+  } else {
+    FunctionDefinition::traverse(visitor);
+    Definition::accept(visitor);
+  }
+}
+
+void
+FunctionDefinition::apply(Ast::Operator &op)
+{
+  if (FunctionDefinition::Operator *fun_op = dynamic_cast<FunctionDefinition::Operator *>(&op)) {
+    fun_op->act(this);
+  } else {
+    FunctionDefinition::traverse(op);
+    Definition::apply(op);
+  }
+}
+
+void
+FunctionDefinition::traverse(Ast::Visitor &visitor) const
+{
+  Scope::traverse(visitor);
+}
+
+void
+FunctionDefinition::traverse(Ast::Operator &op)
+{
+  Scope::traverse(op);
+}
+
 
 
 /* ******************************************************************************************** *
@@ -106,4 +140,26 @@ FunctionArgument::FunctionArgument(const std::string &id)
   : VariableDefinition(Node::FUNCTION_ARGUMENT, id, Unit::dimensionless(), false)
 {
   // Pass...
+}
+
+
+void
+FunctionArgument::accept(Ast::Visitor &visitor) const
+{
+  if (FunctionArgument::Visitor *arg_vis = dynamic_cast<FunctionArgument::Visitor *>(&visitor)) {
+    arg_vis->visit(this);
+  } else {
+    VariableDefinition::accept(visitor);
+  }
+}
+
+
+void
+FunctionArgument::apply(Ast::Operator &op)
+{
+  if (FunctionArgument::Operator *arg_op = dynamic_cast<FunctionArgument::Operator *>(&op)) {
+    arg_op->act(this);
+  } else {
+    VariableDefinition::apply(op);
+  }
 }

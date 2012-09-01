@@ -4,10 +4,10 @@
 #include <limits>
 #include <cmath>
 #include "utils/cputime.hh"
-#include <execinfo.h>
+//#include <execinfo.h>
 #include <sys/time.h>
 
-using namespace Fluc::UnitTest;
+using namespace iNA::UnitTest;
 
 
 
@@ -238,7 +238,7 @@ TestCase::assertEqual(const GiNaC::ex &t, const GiNaC::ex &e, const std::string 
   if (!e.is_equal(t))
   {
       std::stringstream str;
-      str << "Ginac expressions not equal"
+      str << "Ginac expressions " << e << " and " << t << " are not equal"
           << " in file "<< file << " in line " << line;
       throw TestFailure(str.str());
   }
@@ -326,8 +326,7 @@ TestSuite::TestSuite(const std::string &desc)
 TestSuite::~TestSuite()
 {
   for(std::list<TestCallerInterface *>::iterator item = this->tests.begin();
-      item != this->tests.end(); item++)
-  {
+      item != this->tests.end(); item++) {
     delete *item;
   }
 }
@@ -424,13 +423,13 @@ TestRunner::operator ()()
         this->stream << "   reason: " << fail.what() << std::endl;
         tests_failed++;
       }
-      /*catch (std::exception &err)
+      catch (std::exception &err)
       {
         this->stream << " exception" << std::endl;
         this->stream << "   what(): " << err.what() << std::endl;
         //this->printTraceBack();
         tests_error++;
-      }*/
+      }
     }
 
     this->stream << std::endl;
@@ -445,7 +444,7 @@ TestRunner::operator ()()
 
 
 
-void
+/*void
 TestRunner::printTraceBack()
 {
   const size_t max_depth = 100;
@@ -462,4 +461,4 @@ TestRunner::printTraceBack()
   }
 
   free(stack_strings); // malloc()ed by backtrace_symbols
-}
+}*/

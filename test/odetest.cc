@@ -3,7 +3,7 @@
 #include "ode/ode.hh"
 
 
-using namespace Fluc;
+using namespace iNA;
 
 
 ODETest::ODETest()

@@ -6,7 +6,7 @@
 #include "smartptr.hh"
 
 
-namespace Fluc {
+namespace iNA {
 namespace Eval {
 namespace bci {
 
@@ -102,6 +102,11 @@ public:
    * Retunrs the opcode of the associated instruction.
    */
   Instruction::OpCode opCode() const;
+
+  /**
+  * Destructor
+  */
+  virtual ~Value();
 
   /**
    * Returns true, if the instruction has a immediate value.

@@ -5,7 +5,7 @@
 #include <list>
 
 
-namespace Fluc {
+namespace iNA {
 namespace Ast {
 
 
@@ -60,259 +60,182 @@ public:
 
 
 protected:
-  /**
-   * Holds a weak reference to the unit.
-   */
+  /** Holds a weak reference to the unit. */
   BaseUnit unit;
-
-  /**
-   * Holds the multiplier of unit.
-   */
+  /** Holds the multiplier of unit. */
   double multiplier;
-
-  /**
-   * Holds the scale of the unit.
-   */
+  /** Holds the scale of the unit. */
   int scale;
-
-  /**
-   * Holds the exponent of the unit.
-   */
-  double exponent;
+  /** Holds the exponent of the unit. */
+  int exponent;
 
 
 public:
-  /**
-   * Constructs a unit from a base-unit and scaling as:
-   *
-   * \f[ u = \left(multiplier\cdot 10^{scale}\cdot u_b\right)^{exponent} \f]
-   */
-  ScaledBaseUnit(BaseUnit unit, double multiplier, int scale, double exponent);
+  /** Default constructor, equivalent to call: ScaledBaseUnit(DIMENSIONLESS, 1, 0, 1). */
+  ScaledBaseUnit();
 
-  /**
-   * Copy constructor.
-   */
+  /** Constructs a unit from a base-unit and scaling as
+   *
+   * \f[ u = \left(multiplier\cdot 10^{scale}\cdot u_b\right)^{exponent} \f] */
+  ScaledBaseUnit(BaseUnit unit, double multiplier, int scale, int exponent);
+
+  /** Trivial constructor from base unit, equivalent to ScaledBaseUnit(unit, 1, 0, 1). */
+  explicit ScaledBaseUnit(BaseUnit unit);
+
+  /** Copy constructor. */
   ScaledBaseUnit(const ScaledBaseUnit &other);
 
-  /**
-   * Implements the assignment operator for scaled units.
-   */
+  /** Implements the assignment operator for scaled units. */
   const ScaledBaseUnit &operator =(const ScaledBaseUnit &other);
 
-  /**
-   * Returns the multiplier of unit.
-   */
+  /** Returns the multiplier of unit. */
   double getMultiplier() const;
 
-  /**
-   * Returns the scale of unit.
-   */
+  /** Returns the scale of unit. */
   int getScale() const;
 
-  /**
-   * Retunrs the exponent.
-   */
-  double getExponent() const;
+  /** Retunrs the exponent. */
+  int getExponent() const;
 
-  /**
-   * Returns the base-unit.
-   */
+  /** Returns the base-unit. */
   ScaledBaseUnit::BaseUnit getBaseUnit() const;
 
-  /**
-   * Aka. is exponent == 1? Means if the unit is a linear scaling of a base unit.
-   */
+  /** Aka. is exponent == 1? Means if the unit is a linear scaling of a base unit. */
   bool isLinScaling() const;
 
-  /**
-   * Returns true, if the ScaledUnit is a proper unit for substances,
-   *
-   * i.e., if the unit is a linear scaling of either: @c ScaledUnit::MOLE, @c ScaledUnit::ITEM,
-   * @c ScaledUnit::GRAM, @c ScaledUnit::KILOGRAM or @c ScaledUnit::DIMENSIONLESS.
-   */
+  /** Returns true, if the ScaledUnit is a proper unit for substances.
+   * I.e., if the unit is a linear scaling of either: @c ScaledUnit::MOLE, @c ScaledUnit::ITEM,
+   * @c ScaledUnit::GRAM, @c ScaledUnit::KILOGRAM or @c ScaledUnit::DIMENSIONLESS. */
   bool isSubstanceUnit() const;
 
-  /**
-   * Returns true, if the ScaledUnit is a proper unit for volumes,
-   *
-   * i.e. if the unit is a linear scaling of @c ScaledUnit::LITRE or @c ScaledUnit::DIMENSIONLESS
-   * or if it is a qubic scaling of @c ScaledUnit::METRE.
-   */
+  /** Returns true, if the ScaledUnit is a proper unit for volumes.
+   * I.e. if the unit is a linear scaling of @c ScaledUnit::LITRE or @c ScaledUnit::DIMENSIONLESS
+   * or if it is a qubic scaling of @c ScaledUnit::METRE. */
   bool isVolumeUnit() const;
 
-  /**
-   * Returns true, if the ScaledUnit is a proper unit for areas,
-   *
-   * i.e., if the unit is a linear scaling of @c ScaledUnit::DIMENSIONLESS or a quadratic scaling
-   * of @c ScaledUnit::METRE.
-   */
+  /** Returns true, if the ScaledUnit is a proper unit for areas.
+   * I.e., if the unit is a linear scaling of @c ScaledUnit::DIMENSIONLESS or a quadratic scaling
+   * of @c ScaledUnit::METRE. */
   bool isAreaUnit() const;
 
-  /**
-   * Returns true, if the ScaledUnit is a proper unit for length,
-   *
-   * i.e. if the unit is a linear scaling of @c ScaledUnit::METRE or @c ScaledUnit::DIMENSIONLESS.
-   */
+  /** Returns true, if the ScaledUnit is a proper unit for length.
+   * i.e. if the unit is a linear scaling of @c ScaledUnit::METRE or
+   * @c ScaledUnit::DIMENSIONLESS. */
   bool isLengthUnit() const;
 
-  /**
-   * Returns true, if the ScaledUnit is a proper unit of for time.
-   *
-   * Ie. if the unit is a linear scaling of @c ScaledUnit::TIME or @c ScaledUnit::DIMENSIONLESS.
-   */
+  /** Returns true, if the ScaledUnit is a proper unit of for time.
+   * I.e. if the unit is a linear scaling of @c ScaledUnit::TIME or @c ScaledUnit::DIMENSIONLESS. */
   bool isTimeUnit() const;
 
-  /**
-   * Dums a string representation of the unit into the given stream.
-   */
+  /** Dums a string representation of the unit into the given stream. */
   void dump(std::ostream &str) const;
 
 
 public:
-  /**
-   * Helper function to get a string representation of a base-unit.
-   */
+  /** Helper function to get a short string representation of a base-unit. */
   static std::string baseUnitRepr(ScaledBaseUnit::BaseUnit base);
+  /** Helper function to get the name of the base-unit as defined by SBML. */
+  static std::string baseUnitName(ScaledBaseUnit::BaseUnit base);
+  /** Helper function to get a base-unit by its name as defined by SBML. */
+  static ScaledBaseUnit::BaseUnit baseUnitByName(const std::string &name);
+  /** Returns true if the given name names a base unit. */
+  static bool isBaseUnitName(const std::string &name);
+
+private:
+  /** Static unit->name table. */
+  static std::map<ScaledBaseUnit::BaseUnit, std::string> _unit_to_name;
+  /** Static name->unit table. */
+  static std::map<std::string, ScaledBaseUnit::BaseUnit> _name_to_unit;
 };
 
 
 
 
-/**
- * Represents an unit, composed as a product of scaled base-units (@c ScaledBaseUnit).
+/** Represents an unit, composed as a product of scaled base-units (@c ScaledBaseUnit).
  *
  * @ingroup ast
  */
 class Unit
 {
+public:
+  /** Iterator over scaled base units of the unit. */
+  typedef std::map<ScaledBaseUnit::BaseUnit, int>::const_iterator iterator;
+
 protected:
-  /**
-   * The common multiplier of all scaled base-units.
-   */
+  /** The common multiplier of all scaled base-units. */
   double common_multiplier;
-
-  /**
-   * The common scale of all scaled base-units.
-   */
+  /** The common scale of all scaled base-units. */
   double common_scale;
-
-  /**
-   * this list represents the product of scaled base-units, that build the actual unit.
-   */
-  std::map<ScaledBaseUnit::BaseUnit, double> units;
+  /** This list represents the product of scaled base-units, that build the actual unit. */
+  std::map<ScaledBaseUnit::BaseUnit, int> units;
 
 
 protected:
-  /**
-   * Hidden constructor. Avoids direct instantiation.
-   */
-  Unit(const std::map<ScaledBaseUnit::BaseUnit, double> &units,
-       double common_multiplier, double common_scale);
+  /** Hidden constructor. Avoids direct instantiation. */
+  Unit(const std::map<ScaledBaseUnit::BaseUnit, int> &units,
+       double common_multiplier, int common_scale);
 
 
 public:
-  /**
-   * Default constructor (dimensionless).
-   */
+  /** Default constructor (dimensionless). */
   Unit();
-
-  /**
-   * Constructs a unit.
-   */
+  /** Constructs a unit. */
   Unit(const std::list<ScaledBaseUnit> &units);
-
-  /**
-   * Constructs a simple unit as a scaled variant of a base-unit.
-   */
+  /** Constructs a simple unit as a scaled variant of a base-unit. */
   Unit(const ScaledBaseUnit &base);
-
-  /**
-   * Copy constructor.
-   */
+  /** Copy constructor. */
   Unit(const Unit &other);
 
-  /**
-   * Assignment.
-   */
+  /** Assignment. */
   const Unit &operator =(const Unit &other);
-
-
-  /**
-   * Returns true if units are equal.
-   */
+  /** Returns true if units are equal. */
   bool operator ==(const Unit &other) const;
+  /** Implements simple unit manipulations. */
+  Unit operator *(const Unit &other) const;
+  /** Implements simple unit manipulations. */
+  Unit operator /(const Unit &other) const;
 
-  /**
-   * Returns the common multiplier of the unit.
-   */
+  /** Returns the common multiplier of the unit. */
   double getMultiplier() const;
-
-  /**
-   * Returns the common scale of the unit.
-   */
+  /** Returns the common scale of the unit. */
   double getScale() const;
 
-  /**
-   * Returns true, if the unit is a scaled variant of the given base-unit with given exponent
-   */
-  bool isVariantOf(ScaledBaseUnit::BaseUnit baseUnit, double expo = 1.0) const;
-
-  /**
-   * Retunrs ture, if the unit contains a variant of the given base-unit with given exponent.
-   */
-  bool hasVariantOf(ScaledBaseUnit::BaseUnit baseUnit, double expo = 1.0) const;
-
-  /**
-   * Retruns true, if the unit is a linear scaled substance unit.
-   */
+  /** Returns true, if the unit is a scaled variant of the given base-unit with given exponent. */
+  bool isVariantOf(ScaledBaseUnit::BaseUnit baseUnit, int expo = 1.0) const;
+  /** Retunrs true, if the unit contains a variant of the given base-unit with given exponent. */
+  bool hasVariantOf(ScaledBaseUnit::BaseUnit baseUnit, int expo = 1.0) const;
+  /** Retruns true, if the unit is a linear scaled substance unit. */
   bool isSubstanceUnit() const;
-
-  /**
-   * Returns true, if one of the unit-factors is a linear scaling of a substance unit.
-   */
+  /** Returns true, if one of the unit-factors is a linear scaling of a substance unit. */
   bool hasSubstanceUnit() const;
-
-  /**
-   * Returns true, if the unit is a linear scaled substance unit divied by a linear scaled
-   * volume unit.
-   */
+  /** Returns true, if the unit is a linear scaled substance unit divied by a linear scaled
+   * volume unit. */
   bool isConcentrationUnit() const;
+  /** Retunrs true, if the unit is dimensionless. */
+  bool isDimensionless() const;
+  /** Retunrs true if the unit is dimensionless, has multiplier 1 and scale 0. */
+  bool isExactlyDimensionless() const;
 
-  /**
-   * Dumps the unit into the given stream.
-   */
+  /** Dumps the unit into the given stream. */
   void dump(std::ostream &str, bool html=false) const;
 
-  /**
-   * Retunrs true, if the unit is dimensionless.
-   */
-  bool isDimensionless() const;
-
-  /**
-   * Returns the unit as a scaled base unit.
-   *
+  /** Returns the unit as a scaled base unit.
    * @note This method only returns a proper @c ScaledUnit instance if the unit consists of a
-   * single scaled base unit. Otherwise it throws a @c InternalError exception.
-   */
+   * single scaled base unit. Otherwise it throws a @c InternalError exception. */
   ScaledBaseUnit asScaledBaseUnit() const;
 
-  /**
-   * Implements simple unit manipulations.
-   */
-  Unit operator *(const Unit &other) const;
-
-  /**
-   * Implements simple unit manipulations.
-   */
-  Unit operator /(const Unit &other) const;
+  /** Iterator pointing to the first scaled base unit of the unit. */
+  iterator begin() const;
+  /** Iterator pointing right after the last scaled base unit of this unit. */
+  iterator end() const;
 
 
 public:
-  /**
-   * Constructs a dimensionless unit.
-   */
-  static Unit dimensionless();
+  /** Constructs a dimensionless unit. */
+  static Unit dimensionless(double multiplier=1.0, int scale=0);
 };
+
+
 
 /**
  * This class defines a unit as a product of scaled base units.
@@ -321,37 +244,37 @@ public:
  */
 class UnitDefinition : public Definition
 {
+public:
+  /** Visitor class for unit definitions. */
+  class Visitor { public: virtual void visit(const UnitDefinition *unit) = 0; };
+  /** Operator class for unit definitions. */
+  class Operator { public: virtual void act(UnitDefinition *unit) = 0; };
+
 protected:
-  /**
-   * Holds the unit being defined.
-   */
+  /** Holds the unit being defined. */
   Unit unit;
 
 public:
-  /**
-   * Constructs a unit definition from scaled base units.
-   */
+  /** Constructs a unit definition from scaled base units. */
   UnitDefinition(const std::string &identifier, std::list<ScaledBaseUnit> units);
 
-  /**
-   * Constructs a unit definition from a unit.
-   */
+  /** Constructs a unit definition from a unit. */
   UnitDefinition(const std::string &identifier, const Unit &unit);
 
-  /**
-   * Returns true, if the unit is a linear scaled variant of the given base-unit.
-   */
+  /** Returns true, if the unit is a linear scaled variant of the given base-unit. */
   bool isVariantOf(ScaledBaseUnit::BaseUnit baseUnit);
 
-  /**
-   * Returns the unit being defined.
-   */
+  /** Returns the unit being defined. */
   const Unit &getUnit() const;
 
-  /**
-   * Simply dumps the unit-definition.
-   */
+  /** Simply dumps the unit-definition. */
   virtual void dump(std::ostream &str);
+
+  /** Handles a visitor for the unit definition. */
+  virtual void accept(Ast::Visitor &visitor) const;
+
+  /** Applies an operator on the unit definition. */
+  virtual void apply(Ast::Operator &op);
 };
 
 

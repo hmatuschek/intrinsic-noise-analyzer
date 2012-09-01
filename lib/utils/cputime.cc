@@ -1,6 +1,6 @@
 #include "cputime.hh"
 
-using namespace Fluc::Utils;
+using namespace iNA::Utils;
 
 
 CpuTime::CpuTime()

@@ -1,6 +1,6 @@
 #include "dopri853.hh"
 
-using namespace Fluc::ODE;
+using namespace iNA::ODE;
 
 /// @cond 0
 /// exclude from docs

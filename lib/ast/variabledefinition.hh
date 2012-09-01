@@ -6,7 +6,7 @@
 #include "unitdefinition.hh"
 
 
-namespace Fluc {
+namespace iNA {
 namespace Ast {
 
 
@@ -17,36 +17,29 @@ namespace Ast {
  */
 class VariableDefinition : public Definition
 {
+public:
+  /** Visitor class for variable definitions. */
+  class Visitor { public: virtual void visit(const VariableDefinition *var) = 0; };
+  /** Operator class of variable definitions. */
+  class Operator { public: virtual void act(VariableDefinition *var) = 0; };
+
 protected:
-  /**
-   * If true, this->value holds the initial value of the variable.
-   */
+  /** If true, this->value holds the initial value of the variable. */
   bool has_value;
 
-  /**
-   * If true, the variable is constant.
-   */
+  /** If true, the variable is constant. */
   bool is_const;
 
-  /**
-   * Holds the GiNaC symbol representing this expression in GiNaC expressions.
-   */
+  /** Holds the GiNaC symbol representing this expression in GiNaC expressions. */
   GiNaC::symbol symbol;
 
-  /**
-   * Holds the (optional) initial-value of the variable/parameter.
-   */
+  /** Holds the (optional) initial-value of the variable/parameter. */
   GiNaC::ex value;
 
-  /**
-   * Holds the rule applied to the variable or 0 if there is no rule.
-   */
+  /** Holds the rule applied to the variable or 0 if there is no rule. */
   Rule *rule;
 
-  /**
-   * Holds a reference to the @c UnitDefinition instance describing the unit of the
-   * variable. If null, there was no unit assigned.
-   */
+  /** Holds a unit of the variable. */
   Unit unit;
 
 
@@ -99,17 +92,20 @@ public:
   /**
    * Returns true, if the variable is constant.
    */
-  bool isConst();
+  bool isConst() const;
+
+  /** Resets if a variable is constant. */
+  void setConst(bool is_const);
 
   /**
    * Retunrs true, if the variable definition has an initial value expression.
    */
-  bool hasValue();
+  bool hasValue() const;
 
   /**
    * Retruns the initial value expression, if present. Otherwise null is returned.
    */
-  GiNaC::ex getValue();
+  GiNaC::ex getValue() const;
 
   /**
    * (re-) Sets the initial value expression.
@@ -124,12 +120,13 @@ public:
   /**
    * Retunrs true, if there is a rule attached to the variable.
    */
-  bool hasRule();
+  bool hasRule() const;
 
-  /**
-   * Retunrs the rule attached to the variable.
-   */
+  /** Retunrs the rule attached to the variable. */
   Rule *getRule();
+
+  /** Returns a const reference to the rule attached to the variable. */
+  const Rule *getRule() const;
 
   /**
    * (Re-) Sets the attached rule for the variable.
@@ -155,6 +152,19 @@ public:
    * Just dumps a simple string representation of the variable definition into the given stream.
    */
   virtual void dump(std::ostream &str);
+
+  /** Handles a visitor for the variable definition. */
+  virtual void accept(Ast::Visitor &visitor) const;
+
+  /** Applies an operator on the variable definition. */
+  virtual void apply(Ast::Operator &op);
+
+  /** Forwards the visitor to the rule if present. */
+  virtual void traverse(Ast::Visitor &visitor) const;
+
+  /** Applies the operator on the rule if present. */
+  virtual void traverse(Ast::Operator &op);
+
 };
 
 

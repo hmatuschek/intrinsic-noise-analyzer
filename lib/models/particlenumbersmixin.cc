@@ -1,9 +1,11 @@
 #include "particlenumbersmixin.hh"
 #include "ast/unitdefinition.hh"
 #include "math.hh"
+#include "exception.hh"
 
-using namespace Fluc;
-using namespace Fluc::Models;
+
+using namespace iNA;
+using namespace iNA::Models;
 
 ParticleNumbersMixin::ParticleNumbersMixin(BaseModel &base)
     : ConstCompartmentMixin(base),ExtensiveSpeciesMixin(base)

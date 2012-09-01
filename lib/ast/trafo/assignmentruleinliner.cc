@@ -1,6 +1,6 @@
 #include "assignmentruleinliner.hh"
 
-using namespace Fluc::Ast::Trafo;
+using namespace iNA::Ast::Trafo;
 
 
 AssignmentRuleInliner::AssignmentRuleInliner()

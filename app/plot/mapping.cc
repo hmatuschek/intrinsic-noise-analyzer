@@ -1,9 +1,39 @@
 #include "mapping.hh"
+#include <iostream>
 
 using namespace Plot;
 
+/**
+* Helper that rounds down to n leading digits
+*/
+double floorRange(double num, int n) {
+    if(num == 0) {
+        return 0;
+    }
 
+    double d = std::ceil(std::log10(num < 0 ? -num: num));
+    int power = n - (int) d;
 
+    double magnitude = std::pow(10., power);
+    long shifted = std::floor(num*magnitude);
+    return shifted/magnitude;
+}
+
+/**
+* Helper that rounds up to n leading digits
+*/
+double ceilRange(double num, int n) {
+    if(num == 0) {
+        return 0;
+    }
+
+    double d = std::ceil(std::log10(num < 0 ? -num: num));
+    int power = n - (int) d;
+
+    double magnitude = std::pow(10., power);
+    long shifted = std::ceil(num*magnitude);
+    return shifted/magnitude;
+}
 
 /* ********************************************************************************************* *
  * Implementation of base Range:
@@ -115,16 +145,16 @@ LinearMapFunction::LinearMapFunction(const Range &range, const RangePolicy &poli
   // Pass...
 }
 
-
 void
 LinearMapFunction::updateRange(const Range &range)
 {
-  // Determine precision (-1 relative to order of magnitude of values)
-  double prec = std::ceil(std::log(range.delta())/std::log(10))-1;
 
-  // Round to that pecision
-  double rmin = std::floor(range.min()*pow(10, -prec))/pow(10, -prec);
-  double rmax = std::ceil(range.max()*pow(10, -prec))/pow(10, -prec);
+  // Round to pecision
+  double rmin = floorRange(range.min(),2);
+  double rmax = ceilRange(range.max(),2);
+
+  //std::cerr << range.max() << std::endl;
+  //std::cerr << rmax<< std::endl;
 
   if (RangePolicy::FIXED == this->_policy.getMinPolicy())
   {

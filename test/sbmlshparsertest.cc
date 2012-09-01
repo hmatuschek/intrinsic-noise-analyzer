@@ -1,11 +1,12 @@
 #include "sbmlshparsertest.hh"
 
 #include <sstream>
-#include "sbmlsh/lexer.hh"
-#include "sbmlsh/parser.hh"
+#include "parser/sbmlsh/lexer.hh"
+#include "parser/sbmlsh/parser.hh"
 
 
-using namespace Fluc;
+using namespace iNA;
+using namespace iNA::Parser;
 
 
 void
@@ -23,7 +24,7 @@ SBMLSHParserTest::testLexerIdentifier()
 
   UT_ASSERT_EQUAL(lexer.current().getId(), unsigned(Sbmlsh::T_END_OF_LINE)); lexer.next();
 
-  UT_ASSERT_EQUAL(lexer.current().getId(), unsigned(Utils::Token::END_OF_INPUT));
+  UT_ASSERT_EQUAL(lexer.current().getId(), unsigned(Parser::Token::END_OF_INPUT));
 }
 
 
@@ -37,7 +38,7 @@ SBMLSHParserTest::testLexerString()
   UT_ASSERT_EQUAL(lexer.current().getId(), unsigned(Sbmlsh::T_QUOTED_STRING));
   UT_ASSERT_EQUAL(lexer.current().getValue(), "\"abc\""); lexer.next();
 
-  UT_ASSERT_EQUAL(lexer.current().getId(), unsigned(Utils::Token::END_OF_INPUT));
+  UT_ASSERT_EQUAL(lexer.current().getId(), unsigned(iNA::Parser::Token::END_OF_INPUT));
 }
 
 
@@ -50,7 +51,7 @@ SBMLSHParserTest::testLexerInteger()
   Sbmlsh::Lexer lexer(text);
   UT_ASSERT_EQUAL(lexer.current().getId(), unsigned(Sbmlsh::T_INTEGER));
   UT_ASSERT_EQUAL(lexer.current().getValue(), "1234"); lexer.next();
-  UT_ASSERT_EQUAL(lexer.current().getId(), unsigned(Utils::Token::END_OF_INPUT));
+  UT_ASSERT_EQUAL(lexer.current().getId(), unsigned(iNA::Parser::Token::END_OF_INPUT));
 }
 
 
@@ -63,7 +64,7 @@ SBMLSHParserTest::testLexerFloat()
   Sbmlsh::Lexer lexer(text);
   UT_ASSERT_EQUAL(lexer.current().getId(), unsigned(Sbmlsh::T_FLOAT));
   UT_ASSERT_EQUAL(lexer.current().getValue(), "12.34"); lexer.next();
-  UT_ASSERT_EQUAL(lexer.current().getId(), unsigned(Utils::Token::END_OF_INPUT));
+  UT_ASSERT_EQUAL(lexer.current().getId(), unsigned(iNA::Parser::Token::END_OF_INPUT));
 }
 
 
@@ -89,7 +90,7 @@ SBMLSHParserTest::testLexerExpFloat()
   UT_ASSERT_EQUAL(lexer.current().getId(), unsigned(Sbmlsh::T_FLOAT));
   UT_ASSERT_EQUAL(lexer.current().getValue(), "1.2e-34"); lexer.next();
 
-  UT_ASSERT_EQUAL(lexer.current().getId(), unsigned(Utils::Token::END_OF_INPUT));
+  UT_ASSERT_EQUAL(lexer.current().getId(), unsigned(iNA::Parser::Token::END_OF_INPUT));
 }
 
 
@@ -121,7 +122,7 @@ SBMLSHParserTest::testLexerKeywords()
   UT_ASSERT_EQUAL(lexer.current().getId(), unsigned(Sbmlsh::T_R_KW)); lexer.next(); lexer.next();
   UT_ASSERT_EQUAL(lexer.current().getId(), unsigned(Sbmlsh::T_RR_KW)); lexer.next(); lexer.next();
   UT_ASSERT_EQUAL(lexer.current().getId(), unsigned(Sbmlsh::T_EVENTS_KW)); lexer.next();
-  UT_ASSERT_EQUAL(lexer.current().getId(), unsigned(Utils::Token::END_OF_INPUT));
+  UT_ASSERT_EQUAL(lexer.current().getId(), unsigned(iNA::Parser::Token::END_OF_INPUT));
 }
 
 
@@ -133,9 +134,9 @@ SBMLSHParserTest::testParserModelDefinition()
     text << "@model:3.3.1 = ModelId \"Model Name\"";
 
     Sbmlsh::Lexer lexer(text);
-    Utils::Production *prod = Sbmlsh::ModelDefinitionProduction::get();
+    iNA::Parser::Production *prod = Sbmlsh::ModelDefinitionProduction::get();
 
-    Utils::ConcreteSyntaxTree element;
+    iNA::Parser::ConcreteSyntaxTree element;
     prod->parse(lexer, element);
   }
 
@@ -145,8 +146,8 @@ SBMLSHParserTest::testParserModelDefinition()
          << "  s=\"mole\" t=\"seconds\" v=\"litre\"";
 
     Sbmlsh::Lexer lexer(text);
-    Utils::Production *prod = Sbmlsh::ModelDefinitionProduction::get();
-    Utils::ConcreteSyntaxTree element;
+    iNA::Parser::Production *prod = Sbmlsh::ModelDefinitionProduction::get();
+    iNA::Parser::ConcreteSyntaxTree element;
     prod->parse(lexer, element);
   }
 }
@@ -164,8 +165,8 @@ SBMLSHParserTest::testParserUnitDefinition()
          << "  " << "mm = metre:s=-3;";
 
     Sbmlsh::Lexer lexer(text);
-    Utils::Production *prod = Sbmlsh::UnitDefinitionsProduction::get();
-    Utils::ConcreteSyntaxTree element;
+    iNA::Parser::Production *prod = Sbmlsh::UnitDefinitionsProduction::get();
+    iNA::Parser::ConcreteSyntaxTree element;
     prod->parse(lexer, element);
   }
 
@@ -175,9 +176,9 @@ SBMLSHParserTest::testParserUnitDefinition()
          << "  " << "mm = mat:s=-3;";
 
     Sbmlsh::Lexer lexer(text);
-    Utils::Production *prod = Sbmlsh::UnitDefinitionsProduction::get();
-    Utils::ConcreteSyntaxTree element;
-    UT_ASSERT_THROW(prod->parse(lexer, element), Utils::ParserError);
+    iNA::Parser::Production *prod = Sbmlsh::UnitDefinitionsProduction::get();
+    iNA::Parser::ConcreteSyntaxTree element;
+    UT_ASSERT_THROW(prod->parse(lexer, element), Parser::ParserError);
   }
 }
 
@@ -193,8 +194,8 @@ SBMLSHParserTest::testParserCompartmentDefinition()
          << "  " << "cell = 1" << std::endl;
 
     Sbmlsh::Lexer lexer(text);
-    Utils::Production *prod = Sbmlsh::CompartmentDefinitionsProduction::get();
-    Utils::ConcreteSyntaxTree element;
+    iNA::Parser::Production *prod = Sbmlsh::CompartmentDefinitionsProduction::get();
+    iNA::Parser::ConcreteSyntaxTree element;
     prod->parse(lexer, element);
   }
 }
@@ -214,8 +215,8 @@ SBMLSHParserTest::testParserSpeciesDefinition()
          << "  cell: [s] = 1 s b c";
 
     Sbmlsh::Lexer lexer(text);
-    Utils::Production *prod = Sbmlsh::SpeciesDefinitionsProduction::get();
-    Utils::ConcreteSyntaxTree element;
+    iNA::Parser::Production *prod = Sbmlsh::SpeciesDefinitionsProduction::get();
+    iNA::Parser::ConcreteSyntaxTree element;
     prod->parse(lexer, element);
   }
 }
@@ -233,16 +234,16 @@ SBMLSHParserTest::testParserModel()
          << "  cytosol = 1e5 \"Cytosol\"" << std::endl
          << std::endl
          << "@species" << std::endl
-         << "  cytosol: [ES] = 0 \"ES\"" << std::endl
-         << "  cytosol: [P]  = 0 \"P\"" << std::endl
+         << "  cytosol: [ES] = 0  \"ES\"" << std::endl
+         << "  cytosol: [P]  = 0  \"P\"" << std::endl
          << "  cytosol: [S]  = 10 \"S\"" << std::endl
          << "  cytosol: [E]  = 10 \"E\"" << std::endl
          << std::endl
          << "@reactions" << std::endl
-         << "  @r veq \"veq\"" << std::endl
+         << "  @r = veq \"veq\"" << std::endl
          << "    E + S -> ES" << std::endl
          << "    cytosol*(k1*E*S - k2*ES): k1=1e6, k2=0.2" << std::endl
-         << "  @r vcat \"vcat\"" << std::endl
+         << "  @r = vcat \"vcat\"" << std::endl
          << "    ES -> E + P" << std::endl
          << "    cytosol*k1*ES: k1=1" << std::endl;   //
 
@@ -259,13 +260,13 @@ SBMLSHParserTest::suite()
   UnitTest::TestSuite *s = new UnitTest::TestSuite("Tests for SBML-SH parser.");
 
   s->addTest(new UnitTest::TestCaller<SBMLSHParserTest>(
+               "Lexer: Integer", &SBMLSHParserTest::testLexerInteger));
+
+  s->addTest(new UnitTest::TestCaller<SBMLSHParserTest>(
                "Lexer: Identifier", &SBMLSHParserTest::testLexerIdentifier));
 
   s->addTest(new UnitTest::TestCaller<SBMLSHParserTest>(
                "Lexer: String", &SBMLSHParserTest::testLexerString));
-
-  s->addTest(new UnitTest::TestCaller<SBMLSHParserTest>(
-               "Lexer: Integer", &SBMLSHParserTest::testLexerInteger));
 
   s->addTest(new UnitTest::TestCaller<SBMLSHParserTest>(
                "Lexer: Float", &SBMLSHParserTest::testLexerFloat));

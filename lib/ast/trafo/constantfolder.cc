@@ -1,6 +1,6 @@
 #include "constantfolder.hh"
 
-using namespace Fluc::Ast::Trafo;
+using namespace iNA::Ast::Trafo;
 
 
 ConstantSubstitution::ConstantSubstitution()

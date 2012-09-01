@@ -1,7 +1,8 @@
 #include "conservationanalysismixin.hh"
 
-using namespace Fluc;
-using namespace Fluc::Models;
+using namespace iNA;
+using namespace iNA::Models;
+
 
 ConservationAnalysisMixin::ConservationAnalysisMixin(BaseModel &base)
   : ConstantStoichiometryMixin(base)

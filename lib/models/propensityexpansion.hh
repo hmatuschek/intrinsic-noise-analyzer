@@ -6,7 +6,7 @@
 #include "intensivespeciesmixin.hh"
 #include "reasonablemodelmixin.hh"
 
-namespace Fluc {
+namespace iNA {
 namespace Models {
 
 /**

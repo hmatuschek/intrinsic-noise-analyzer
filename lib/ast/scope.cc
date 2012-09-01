@@ -4,7 +4,8 @@
 #include "functiondefinition.hh"
 
 
-using namespace Fluc::Ast;
+using namespace iNA;
+using namespace iNA::Ast;
 
 
 
@@ -93,8 +94,8 @@ Scope::const_iterator::operator !=(const Scope::const_iterator &other)
 /*
  * Implementation of Scope.
  */
-Scope::Scope(bool is_closed)
-  : definitions(), is_closed(is_closed)
+Scope::Scope(Scope *parent, bool is_closed)
+  : definitions(), symbol_table(), is_closed(is_closed), _parent_scope(parent)
 {
   // Done.
 }
@@ -111,6 +112,27 @@ Scope::~Scope()
 }
 
 
+bool
+Scope::hasParentScope() const {
+  return 0 != _parent_scope;
+}
+
+Scope *
+Scope::getParentScope() {
+  return _parent_scope;
+}
+
+const Scope *
+Scope::getParentScope() const {
+  return _parent_scope;
+}
+
+void
+Scope::setParent(Scope *parent) {
+  _parent_scope = parent;
+}
+
+
 void
 Scope::addDefinition(Definition *def)
 {
@@ -122,6 +144,24 @@ Scope::addDefinition(Definition *def)
   } else {
     // Store definition in table
     this->definitions[def->getIdentifier()] = def;
+  }
+
+  Scope *scope = 0;
+  if (0 != (scope = dynamic_cast<Scope *>(def))) {
+    // If the definition is a scope, set scopes parent:
+    scope->setParent(this);
+  }
+
+  Reaction *reaction = 0;
+  if (0 != (reaction = dynamic_cast<Reaction *>(def))) {
+    // If the definition is a reaction, set parent of kinetic law:
+    reaction->getKineticLaw()->setParent(this);
+  }
+
+  VariableDefinition *var = 0;
+  if (0 != (var = dynamic_cast<VariableDefinition *>(def))) {
+    // If the definition is a variable definition -> store symbol of variable in symbol_table.
+    symbol_table[var->getSymbol()] = var;
   }
 }
 
@@ -140,50 +180,161 @@ Scope::remDefinition(Definition *def)
   }
 
   this->definitions.erase(def->getIdentifier());
+
+  if (Node::isVariableDefinition(def)) {
+    symbol_table.erase(static_cast<VariableDefinition *>(def)->getSymbol());
+  }
 }
 
 
 bool
 Scope::hasDefinition(const std::string &name) const throw()
 {
-  return this->definitions.end() != this->definitions.find(name);
+  if (this->definitions.end() != this->definitions.find(name))
+    return true;
+
+  if (0 != _parent_scope && !is_closed)
+    return _parent_scope->hasDefinition(name);
+
+  return false;
 }
 
 
 Definition *
 Scope::getDefinition(const std::string &name)
 {
+  // Search in this scope:
   std::map<std::string, Definition *>::iterator item = this->definitions.find(name);
+  if (definitions.end() != item) { return item->second; }
 
-  if (this->definitions.end() == item) {
-    SymbolError err;
-    err << "Symbol " << name << " not found in scope.";
-    throw err;
-  }
+  // If not closed and has parent -> search in parent scope:
+  if (0 != _parent_scope && !is_closed)
+    return _parent_scope->getDefinition(name);
 
-  return item->second;
+  // Not found...
+  SymbolError err;
+  err << "Symbol " << name << " not found in scope.";
+  throw err;
 }
 
 
 Definition * const
 Scope::getDefinition(const std::string &name) const
 {
+  // Search in this scope:
   std::map<std::string, Definition *>::const_iterator item = this->definitions.find(name);
+  if (definitions.end() != item) { return item->second; }
 
-  if (this->definitions.end() == item) {
+  // If not closed and has parent -> search in parent scope:
+  if (0 != _parent_scope && !is_closed)
+    return _parent_scope->getDefinition(name);
+
+  // Not found...
+  SymbolError err;
+  err << "Symbol " << name << " not found in scope.";
+  throw err;
+}
+
+
+bool
+Scope::hasVariable(const GiNaC::symbol &symbol) const
+{
+  if (this->symbol_table.end() != this->symbol_table.find(symbol)) { return true; }
+  if (! hasParentScope() || isClosed()) { return false; }
+  return _parent_scope->hasVariable(symbol);
+}
+
+
+bool
+Scope::hasVariable(const std::string &identifier) const
+{
+  return this->hasDefinition(identifier) && Node::isVariableDefinition(this->getDefinition(identifier));
+}
+
+
+VariableDefinition *
+Scope::getVariable(const std::string &identifier)
+{
+  Ast::Definition *def = this->getDefinition(identifier);
+
+  if (! Node::isVariableDefinition(def))
+  {
     SymbolError err;
-    err << "Symbol " << name << " not found in scope.";
+    err << "Symbol " << identifier << " does not name a variable.";
     throw err;
+  }
+
+  return static_cast<Ast::VariableDefinition *>(def);
+}
+
+
+VariableDefinition * const
+Scope::getVariable(const std::string &identifier) const
+{
+  Ast::Definition *def = this->getDefinition(identifier);
+
+  if (! Node::isVariableDefinition(def)) {
+    SymbolError err;
+    err << "Symbol " << identifier << " does not name a variable.";
+    throw err;
+  }
+
+  return static_cast<Ast::VariableDefinition *>(def);
+}
+
+
+VariableDefinition *
+Scope::getVariable(const GiNaC::symbol &symbol)
+{
+  std::map<GiNaC::symbol, VariableDefinition *, GiNaC::ex_is_less>::iterator item
+      = this->symbol_table.find(symbol);
+
+  if (this->symbol_table.end() == item) {
+    if (isClosed() || ! hasParentScope()) {
+      SymbolError err;
+      err << "Symbol " << symbol << " does not name a variable.";
+      throw err;
+    }
+
+    return _parent_scope->getVariable(symbol);
   }
 
   return item->second;
 }
 
 
-bool
-Scope::isClosed()
+VariableDefinition * const
+Scope::getVariable(const GiNaC::symbol &symbol) const
 {
-  return is_closed;
+  std::map<GiNaC::symbol, VariableDefinition *, GiNaC::ex_is_less>::const_iterator item
+      = this->symbol_table.find(symbol);
+
+  if (this->symbol_table.end() == item) {
+    if (isClosed() || ! hasParentScope()) {
+      SymbolError err;
+      err << "Symbol " << symbol << " does not name a variable.";
+      throw err;
+    }
+
+    return _parent_scope->getVariable(symbol);
+  }
+
+  return item->second;
+}
+
+
+bool Scope::isClosed() const { return is_closed; }
+
+
+std::string
+Scope::getNewIdentifier(const std::string &base_name)
+{
+  std::stringstream buffer(base_name);
+  size_t count = 1;
+  while (hasDefinition(buffer.str())) {
+    buffer.str(""); buffer << base_name << "_" << count; count++;
+  }
+  return buffer.str();
 }
 
 
@@ -224,4 +375,36 @@ Scope::dump(std::ostream &str)
     (*iter)->dump(str); str << std::endl;
   }
   str << "}" << std::endl;
+}
+
+
+void
+Scope::accept(Ast::Visitor &visitor) const
+{
+  // Default behavior, traverse scope:
+  this->traverse(visitor);
+}
+
+
+void
+Scope::apply(Ast::Operator &op)
+{
+  // Default behavior, traverse scope:
+  this->traverse(op);
+}
+
+void
+Scope::traverse(Ast::Visitor &visitor) const
+{
+  for (Scope::const_iterator iter = this->begin(); iter != this->end(); iter++) {
+    (*iter)->accept(visitor);
+  }
+}
+
+void
+Scope::traverse(Ast::Operator &op)
+{
+  for (Scope::iterator iter = this->begin(); iter != this->end(); iter++) {
+    (*iter)->apply(op);
+  }
 }

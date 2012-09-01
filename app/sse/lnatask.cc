@@ -2,7 +2,7 @@
 #include "ode/ode.hh"
 
 
-using namespace Fluc;
+using namespace iNA;
 
 
 /* ******************************************************************************************** *
@@ -21,7 +21,7 @@ LNATask::LNATask(const SSETaskConfig &config, QObject *parent) :
   for (int i=0; i<(int)config.getNumSpecies(); i++, column++)
   {
     QString species_id = config.getSelectedSpecies().value(i);
-    Fluc::Ast::Species *species = config.getModel()->getSpecies(species_id.toStdString());
+    iNA::Ast::Species *species = config.getModel()->getSpecies(species_id.toStdString());
 
     if (species->hasName())
       species_names[i] = QString("%1").arg(species->getName().c_str());
@@ -69,9 +69,9 @@ LNATask::process()
   instantiateInterpreter();
 
   // Holds the current system state (reduced state)
-  Eigen::VectorXd x(config.getModelAs<Fluc::Models::LNAmodel>()->getDimension());
+  Eigen::VectorXd x(config.getModelAs<iNA::Models::LNAmodel>()->getDimension());
   // Holds the update to the next state (reduced state)
-  Eigen::VectorXd dx(config.getModelAs<Fluc::Models::LNAmodel>()->getDimension());
+  Eigen::VectorXd dx(config.getModelAs<iNA::Models::LNAmodel>()->getDimension());
 
   // Holds the concentrations for each species (full state)
   Eigen::VectorXd concentrations(config.getModel()->numSpecies());
@@ -95,9 +95,9 @@ LNATask::process()
   }
 
   // initialize (reduced) state
-  config.getModelAs<Fluc::Models::LNAmodel>()->getInitialState(x);
+  config.getModelAs<iNA::Models::LNAmodel>()->getInitialState(x);
   // get full initial concentrations and covariance
-  config.getModelAs<Fluc::Models::LNAmodel>()->fullState(x, concentrations, cov, emre);
+  config.getModelAs<iNA::Models::LNAmodel>()->fullState(x, concentrations, cov, emre);
 
 
   setState(Task::RUNNING, "Run analysis...");
@@ -157,7 +157,7 @@ LNATask::process()
       continue;
 
     // Get full state:
-    config.getModelAs<Fluc::Models::LNAmodel>()->fullState(x, concentrations, cov, emre);
+    config.getModelAs<iNA::Models::LNAmodel>()->fullState(x, concentrations, cov, emre);
 
     // Store new time:
     output_vector(0) = t;
@@ -230,17 +230,17 @@ LNATask::getSpeciesNames() const
 }
 
 
-const Fluc::Ast::Unit &
+const iNA::Ast::Unit &
 LNATask::getSpeciesUnit() const
 {
-  return this->config.getModelAs<Fluc::Models::LNAmodel>()->getConcentrationUnit();
+  return this->config.getModelAs<iNA::Models::LNAmodel>()->getConcentrationUnit();
 }
 
 
-const Fluc::Ast::Unit &
+const iNA::Ast::Unit &
 LNATask::getTimeUnit() const
 {
-  return this->config.getModelAs<Fluc::Models::LNAmodel>()->getTimeUnit();
+  return this->config.getModelAs<iNA::Models::LNAmodel>()->getTimeUnit();
 }
 
 
@@ -255,7 +255,7 @@ LNATask::instantiateInterpreter()
     interpreter = new Models::GenericSSEinterpreter<
         Models::LNAmodel, Eval::direct::Engine<Eigen::VectorXd, Eigen::VectorXd>,
         Eval::direct::Engine<Eigen::VectorXd, Eigen::MatrixXd> >(
-          *config.getModelAs<Fluc::Models::LNAmodel>(),
+          *config.getModelAs<iNA::Models::LNAmodel>(),
           config.getOptLevel(), config.getNumEvalThreads(), false);
 
     // Instantiate integrator for that engine:
@@ -328,7 +328,7 @@ LNATask::instantiateInterpreter()
     interpreter = new Models::GenericSSEinterpreter<
         Models::LNAmodel, Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>,
         Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd> >(
-          *config.getModelAs<Fluc::Models::LNAmodel>(),
+          *config.getModelAs<iNA::Models::LNAmodel>(),
           config.getOptLevel(), config.getNumEvalThreads(), false);
 
     // Instantiate integrator for that engine:
@@ -401,7 +401,7 @@ LNATask::instantiateInterpreter()
     interpreter = new Models::GenericSSEinterpreter<
         Models::LNAmodel, Eval::bcimp::Engine<Eigen::VectorXd, Eigen::VectorXd>,
         Eval::bcimp::Engine<Eigen::VectorXd, Eigen::MatrixXd> >(
-          *config.getModelAs<Fluc::Models::LNAmodel>(),
+          *config.getModelAs<iNA::Models::LNAmodel>(),
           config.getOptLevel(), config.getNumEvalThreads(), false);
 
     // Instantiate integrator for that engine:
@@ -475,7 +475,7 @@ LNATask::instantiateInterpreter()
     interpreter = new Models::GenericSSEinterpreter<
         Models::LNAmodel, Eval::jit::Engine<Eigen::VectorXd, Eigen::VectorXd>,
         Eval::jit::Engine<Eigen::VectorXd, Eigen::MatrixXd> >(
-          *config.getModelAs<Fluc::Models::LNAmodel>(),
+          *config.getModelAs<iNA::Models::LNAmodel>(),
           config.getOptLevel(), config.getNumEvalThreads(), false);
 
     // Instantiate integrator for that engine:

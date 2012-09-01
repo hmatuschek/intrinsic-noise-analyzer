@@ -1,11 +1,11 @@
 #include "steadystatespectrumplot.hh"
 
 
-SteadyStateSpectrumPlot::SteadyStateSpectrumPlot(Table &spectrum, const Fluc::Ast::Unit &species_unit, const Fluc::Ast::Unit &time_unit, QObject *parent)
+SteadyStateSpectrumPlot::SteadyStateSpectrumPlot(Table &spectrum, const iNA::Ast::Unit &species_unit, const iNA::Ast::Unit &time_unit, QObject *parent)
   : Plot::Figure("Power spectrum", parent)
 {
   // Calc spectrum unit:
-  Fluc::Ast::Unit unit = species_unit * species_unit / time_unit;
+  iNA::Ast::Unit unit = species_unit * species_unit / time_unit;
   std::stringstream power_str;
   std::stringstream freq_str;
 

@@ -11,7 +11,7 @@
 #include <QGroupBox>
 
 
-using namespace Fluc;
+using namespace iNA;
 
 
 
@@ -177,7 +177,7 @@ SSESummaryPage::initializePage()
   GeneralTaskWizard *wizard = static_cast<GeneralTaskWizard *>(this->wizard());
   SSETaskConfig &config = wizard->getConfigCast<SSETaskConfig>();
 
-  this->model_name->setText(config.getModelDocument()->getSBMLModel()->getName().c_str());
+  this->model_name->setText(config.getModelDocument()->getModel().getName().c_str());
   this->selected_species->setText(config.getSelectedSpecies().join(", "));
 
   ODE::IntegrationRange range = config.getIntegrationRange();

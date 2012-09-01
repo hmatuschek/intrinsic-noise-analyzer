@@ -31,89 +31,106 @@ class Application : public QObject, public Configuration
   Q_OBJECT
 
 protected:
-  /**
-   * Default constructor for an Application.
-   */
+  /** Default constructor for an Application. */
   explicit Application();
 
 
 public:
-  /**
-   * Destructor, also frees the SBML models held. (on application exit)
-   */
+  /** Destructor, also frees the SBML models held. (on application exit) */
   ~Application();
 
-  /**
-   * Sets the main-window of the application.
-   */
+  /** Sets the main-window of the application. */
   void setMainWindow(MainWindow *mainwindow);
 
-  /**
-   * Adds a module to the application.
-   */
+  /** Adds a module to the application. */
   void addModule(Module *module);
 
-  /**
-   * Adds some entry to the 'Analyses' menu.
-   */
+  /** Adds some entry to the 'Analyses' menu. */
   void addToAnalysesMenu(QAction *action);
 
-  /**
-   * Opens an item in the document tree.
-   *
-   * This method checks if the item has an associated view, if so, the item is displayed on
-   * the main-panel using that view.
-   */
-  void openModelIndex(const QModelIndex &index);
-
-  /**
-   * Checks if the item has a context-menu and displays it.
-   */
+  /** Checks if the item has a context-menu and displays it. */
   void showContextMenuAt(const QModelIndex &index, const QPoint &global_pos);
 
-  /**
-   * Returns the document tree of the application.
-   */
+  /** Returns the document tree of the application. */
   DocumentTree *docTree();
+  /** Returns a weak reference to the "import model" menu action. */
+  QAction *importModelAction();
+  /** Returns a weak reference to the "export model" menu action. */
+  QAction *exportModelAction();
+  /** Returns a weak reference to the "edit model" menu action. */
+  QAction *editModelAction();
+  /** Retunrs a weak reference to the "close model" menu action. */
+  QAction *closeModelAction();
+  /** Returns a weak ref to the "expand rev reaction" menu action. */
+  QAction *expandRevReacAction();
+  /** Returns a weak ref to the "combine irrev reaction" menu action. */
+  QAction *combineIrrevReacAction();
+
+
+public slots:
+  /** Resets the currently selected document tree item. */
+  void resetSelectedItem();
+
+  /** Opens an item in the document tree.
+   * This method checks if the item has an associated view, if so, the item is displayed on
+   * the main-panel using that view. It also sets the currently selected item. */
+  void itemSelected(const QModelIndex &index);
 
 
 public:
-  /**
-   * Factory method for application singleton.
-   */
-  static Application *factory();
-
-  /**
-   * Shuts the only running application instance down.
-   */
+  /** Shuts the only running application instance down. */
   static void shutdown();
 
-  /**
-   * Retunrs the running application or 0 if there is none.
-   */
+  /** Retunrs the running application or 0 if there is none. */
   static Application *getApp();
 
 
+private slots:
+  /** Handler for the "import model" menu action. */
+  void onImportModel();
+
+  /** Handler for "export model" action. */
+  void onExportModel();
+
+  /** Handler for "remove model" action. */
+  void onCloseModel();
+
+  /** Handler for the "edit model" action. */
+  void onEditModel();
+
+  /** Handler for the "expand reversible reactions" action. */
+  void onExpandRevReactions();
+
+  /** Handler for the "combine irreversible reactions" action. */
+  void onCombineIrrevReactions();
+
+
 private:
-  /**
-   * Holds the only reference to the application running.
-   */
+  /** Holds the only reference to the application running. */
   static Application *singleton_instance;
 
-  /**
-   * Holds the main-window.
-   */
+  /** Holds the main-window. */
   MainWindow *mainWindow;
-
-  /**
-   * Holds the complete document tree.
-   */
+  /** Holds the complete document tree. */
   DocumentTree *document_tree;
-
-  /**
-   * Hold the list of loaded modules.
-   */
+  /** Hold the list of loaded modules. */
   QList<Module *> modules;
+
+  /** Holds a weak reference to the currently selected item. */
+  DocumentTreeItem *_selected_item;
+
+  /** The "import model" menu action. */
+  QAction *_importModel;
+  /** The "export model" menu action. */
+  QAction *_exportModel;
+  /** The "close model" menu action. */
+  QAction *_closeModel;
+  /** The "edit model" menu action. */
+  QAction *_editModel;
+  /** The "expand reversible ractions" menu action. */
+  QAction *_expandRevReaction;
+  /** The "combine irreversible ractions" menu action. */
+  QAction *_combineIrvReaction;
 };
 
 

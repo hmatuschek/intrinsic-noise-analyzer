@@ -3,8 +3,8 @@
 #include "utils/logger.hh"
 
 
-using namespace Fluc;
-using namespace Fluc::Ast;
+using namespace iNA;
+using namespace iNA::Ast;
 
 Convert2Irreversible::Convert2Irreversible(Ast::Model &model)
     : model(model)

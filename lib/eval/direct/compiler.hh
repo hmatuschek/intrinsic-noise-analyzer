@@ -8,7 +8,7 @@
 #include "eval/compilercommon.hh"
 
 
-namespace Fluc {
+namespace iNA {
 namespace Eval {
 namespace direct {
 

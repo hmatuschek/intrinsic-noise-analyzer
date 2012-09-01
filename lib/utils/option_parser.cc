@@ -5,7 +5,7 @@
 
 
 using namespace std;
-using namespace Fluc::Utils::Opt;
+using namespace iNA::Utils::Opt;
 
 
 RuleInterface::~RuleInterface()

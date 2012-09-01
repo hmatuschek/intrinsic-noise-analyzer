@@ -1,87 +1,89 @@
 #include "regression_test.hh"
 #include "ina.hh"
-#include <sbml/SBMLTypes.h>
 
 
+using namespace iNA;
 
-using namespace Fluc;
+RegressionTest::~RegressionTest()
+{
 
+}
 
 void
 RegressionTest::testConstSpecies()
 {
-  libsbml::SBMLDocument *doc = libsbml::readSBMLFromFile("test/regression-tests/const_species.xml");
-  UT_ASSERT(0 == doc->getNumErrors());
+  // load model from SBML file
+  Ast::Model *sbml_model = Parser::Sbml::importModel("test/regression-tests/const_species.xml");
 
-  UT_ASSERT_THROW(Models::REmodel(doc->getModel()),
-                  Fluc::SBMLFeatureNotSupported);
+  Ast::Species *S1 = sbml_model->getSpecies("S1");
+  UT_ASSERT(S1->isConst());
 
-  delete doc;
+  Models::REmodel re_model(*sbml_model);
+
+  delete sbml_model;
 }
 
 
 void
 RegressionTest::testSpeciesByAssignmentRule()
 {
-  libsbml::SBMLDocument *doc = libsbml::readSBMLFromFile("test/regression-tests/species_by_assignment_rule.xml");
-  UT_ASSERT(0 == doc->getNumErrors());
+  Ast::Model *sbml_model = Parser::Sbml::importModel("test/regression-tests/species_by_assignment_rule.xml");
 
-  UT_ASSERT_THROW(Models::REmodel(doc->getModel()),
-                  Fluc::SBMLFeatureNotSupported);
+  Ast::Species *S3 = sbml_model->getSpecies("S3");
+  UT_ASSERT(S3->hasRule());
 
-  delete doc;
+  UT_ASSERT_THROW(Models::REmodel re_model(*sbml_model),
+                  iNA::SBMLFeatureNotSupported);
+
+  delete sbml_model;
 }
 
 
 void
 RegressionTest::testNonConstantParameter()
 {
-  libsbml::SBMLDocument *doc = libsbml::readSBMLFromFile("test/regression-tests/non_const_parameter.xml");
-  UT_ASSERT(0 == doc->getNumErrors());
+  Ast::Model *sbml_model = Parser::Sbml::importModel("test/regression-tests/non_const_parameter.xml");
 
-  UT_ASSERT_THROW(Models::REmodel(doc->getModel()),
-                  Fluc::SBMLFeatureNotSupported);
+  UT_ASSERT_THROW(Models::REmodel re_model(*sbml_model),
+                  iNA::SBMLFeatureNotSupported);
 
-  delete doc;
+  delete sbml_model;
 }
 
 
 void
 RegressionTest::testNonConstantCompartment()
 {
-  libsbml::SBMLDocument *doc = libsbml::readSBMLFromFile("test/regression-tests/non_const_compartment.xml");
-  UT_ASSERT(0 == doc->getNumErrors());
+  Ast::Model *sbml_model = Parser::Sbml::importModel("test/regression-tests/non_const_compartment.xml");
 
-  UT_ASSERT_THROW(Models::REmodel(doc->getModel()),
-                  Fluc::SBMLFeatureNotSupported);
+  UT_ASSERT_THROW(Models::REmodel re_model(*sbml_model),
+                  iNA::SBMLFeatureNotSupported);
 
-  delete doc;
+  delete sbml_model;
 }
 
 
 void
 RegressionTest::testAlgebraicConstraint()
 {
-  libsbml::SBMLDocument *doc = libsbml::readSBMLFromFile("test/regression-tests/algebraicrules.xml");
-  UT_ASSERT(0 == doc->getNumErrors());
+  Ast::Model *model = Parser::Sbml::importModel("test/regression-tests/algebraicrules.xml");
 
-  UT_ASSERT_THROW(Models::REmodel(doc->getModel()),
-                  Fluc::SBMLFeatureNotSupported);
+  UT_ASSERT_THROW(Models::REmodel re_model(*model),
+                  iNA::SBMLFeatureNotSupported);
 
-  delete doc;
+  delete model;
 }
 
 
 void
 RegressionTest::testSpeciesByRateRule()
 {
-  libsbml::SBMLDocument *doc = libsbml::readSBMLFromFile("test/regression-tests/rate_rules.xml");
-  UT_ASSERT(0 == doc->getNumErrors());
+  Ast::Model *model = Parser::Sbml::importModel("test/regression-tests/rate_rules.xml");
 
-  UT_ASSERT_THROW(Models::REmodel(doc->getModel()),
-                  Fluc::SBMLFeatureNotSupported);
+  UT_ASSERT_THROW(Models::REmodel re_model(*model),
+                  iNA::SBMLFeatureNotSupported);
 
-  delete doc;
+  delete model;
 }
 
 

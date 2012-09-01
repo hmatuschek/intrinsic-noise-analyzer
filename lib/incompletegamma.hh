@@ -3,7 +3,7 @@
 
 #include <cmath>
 
-namespace Fluc {
+namespace iNA {
 
 
 /**

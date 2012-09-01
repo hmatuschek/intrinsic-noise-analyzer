@@ -1,6 +1,6 @@
 #include "code.hh"
 
-using namespace Fluc::Eval::direct;
+using namespace iNA::Eval::direct;
 
 
 Code::Code(size_t num_threads)

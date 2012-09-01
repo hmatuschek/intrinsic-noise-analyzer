@@ -43,24 +43,13 @@ public slots:
 
 
 private slots:
-  /**
-   * When triggered, shows a "open model" dialog.
-   */
-  void openModel();
-
-  /**
-   * When triggered, quits the application.
-   */
+  /** When triggered, quits the application. */
   void quit();
 
-  /**
-   * Shows the about dialog.
-   */
+  /** Shows the about dialog. */
   void about();
 
-  /**
-   * Opens a browser and shows the online-help.
-   */
+  /** Opens a browser and shows the online-help. */
   void openTutorial();
 
   void showLogs();
@@ -93,11 +82,6 @@ private:
    * Holds teh 'Help' menu.
    */
   QMenu *helpMenu;
-
-  /**
-   * Holds the "open a model" action.
-   */
-  QAction *openModelAct;
 
   /**
    * Holds the "quit the application" action.

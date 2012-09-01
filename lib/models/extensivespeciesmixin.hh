@@ -3,7 +3,7 @@
 
 #include "baseunitmixin.hh"
 
-namespace Fluc {
+namespace iNA {
 namespace Models {
 
 

@@ -3,13 +3,14 @@
 
 #include "LNAmodel.hh"
 
-namespace Fluc {
+namespace iNA {
 namespace Models {
 
 /**
  * The IOS model.
  *
- * The model uses the System Size Expansion to derive corrections to mean and variances beyond the Linear Noise Approximation \cite grima2011.
+ * The model uses the System Size Expansion to derive corrections to mean and variances beyond the
+ * Linear Noise Approximation \cite grima2011.
  *
  * @ingroup sse
  */
@@ -29,11 +30,6 @@ private:
 
 public:
   /**
-   * Constructor...
-   */
-  IOSmodel(libsbml::Model *model);
-
-  /**
    * Constructor.
    */
   explicit IOSmodel(const Ast::Model &model);
@@ -42,6 +38,10 @@ public:
    * Interface for the integrator: get initial state vector.
    */
   virtual void getInitialState(Eigen::VectorXd &x);
+
+
+  void fluxAnalysis(const Eigen::VectorXd &state, Eigen::VectorXd &flux, Eigen::VectorXd &fluxEMRE,
+                    Eigen::MatrixXd &fluxCovariance, Eigen::MatrixXd &fluxIOS);
 
   /**
    * Reconstruct concentration vector, covariance matrix and EMRE & IOS correction vector from state vector.
@@ -54,6 +54,11 @@ public:
    */
   void fullState(const Eigen::VectorXd &state, Eigen::VectorXd &concentrations,
                  Eigen::MatrixXd &cov, Eigen::VectorXd &emre,  Eigen::MatrixXd &iosCov, Eigen::VectorXd &skewness, Eigen::VectorXd &iosemre);
+
+
+  void fullState(ConservationConstantCollector &context, const Eigen::VectorXd &state, Eigen::VectorXd &concentrations,
+                 Eigen::MatrixXd &cov, Eigen::VectorXd &emre,
+                 Eigen::MatrixXd &iosCov, Eigen::VectorXd &skewness, Eigen::VectorXd &iosemre);
 
 
 };

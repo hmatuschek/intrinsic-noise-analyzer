@@ -1,14 +1,8 @@
 #include "IOSmodel.hh"
+#include "trafo/constantfolder.hh"
 
-using namespace Fluc;
-using namespace Fluc::Models;
-
-IOSmodel::IOSmodel(libsbml::Model *model)
-  : LNAmodel(model)
-{
-  postConstructor();
-}
-
+using namespace iNA;
+using namespace iNA::Models;
 
 IOSmodel::IOSmodel(const Ast::Model &model)
   : LNAmodel(model)
@@ -271,9 +265,9 @@ IOSmodel::postConstructor()
     Eigen::VectorXex EMREiosUpdate = ((this->JacobianM*iosemreVariables)+Delta);
 
     // fold conservation constants
-    this->foldConservationConstants(conserved_cycles,ThirdMomentUpdate);
-    this->foldConservationConstants(conserved_cycles,iosUpdate);
-    this->foldConservationConstants(conserved_cycles,EMREiosUpdate);
+    this->foldConservationConstants(ThirdMomentUpdate);
+    this->foldConservationConstants(iosUpdate);
+    this->foldConservationConstants(EMREiosUpdate);
 
     // and attach to update vector
     this->updateVector.head(dimold) = LNAupdate;
@@ -368,6 +362,88 @@ IOSmodel::fullState(const Eigen::VectorXd &state, Eigen::VectorXd &concentration
 }
 
 void
+IOSmodel::fullState(ConservationConstantCollector &context, const Eigen::VectorXd &state, Eigen::VectorXd &concentrations,
+                                     Eigen::MatrixXd &cov, Eigen::VectorXd &emre, Eigen::MatrixXd &iosCov, Eigen::VectorXd &skewness, Eigen::VectorXd &iosemre)
+
+{
+
+    // reconstruct full concentration vector and covariances in original permutation order
+    LNAmodel::fullState(context,state,concentrations,cov,emre);
+
+    // reconstruct thirdmoments
+    // get reduced skewness vector (should better be a view rather then a copy)
+    Eigen::VectorXd tail = state.segment(2*this->numIndSpecies()+dimCOV,dim3M);
+
+    Eigen::VectorXd emreVal = state.segment(this->numIndSpecies()+dimCOV,this->numIndSpecies());
+
+    std::vector< Eigen::MatrixXd > thirdMomVariables(this->numIndSpecies());
+
+    double val = 0;
+
+    size_t idx = 0;
+    for(size_t i=0;i<this->numIndSpecies();i++)
+    {
+        thirdMomVariables[i].resize(this->numIndSpecies(),this->numIndSpecies());
+        for(size_t j=0;j<=i;j++)
+            for(size_t k=0;k<=j;k++)
+            {
+                val = tail[idx]-emreVal(i)*emreVal(j)*emreVal(k);
+
+                thirdMomVariables[i](j,k)=val;
+                thirdMomVariables[i](k,j)=val;
+
+                thirdMomVariables[j](i,k)=val;
+                thirdMomVariables[j](k,i)=val;
+
+                thirdMomVariables[k](i,j)=val;
+                thirdMomVariables[k](j,i)=val;
+
+                idx++; // counts i,j,k loop
+            }
+    }
+
+    // construct full third moment vector, restore original order and return
+    for(size_t i=0; i<(unsigned)context.getLinkCMatrix().rows(); i++)
+    {
+        skewness(i)=0.;
+        for(size_t j=0; j<(unsigned)context.getLinkCMatrix().cols(); j++)
+            for(size_t k=0; k<(unsigned)context.getLinkCMatrix().cols(); k++)
+                for(size_t l=0; l<(unsigned)context.getLinkCMatrix().cols(); l++)
+                    skewness(i) += context.getLinkCMatrix()(i,j) * context.getLinkCMatrix()(i,k) * context.getLinkCMatrix()(i,l) *thirdMomVariables[j](k,l);
+
+        skewness(i)/=cov(i,i)*sqrt(cov(i,i));
+    }
+
+   // get reduced covariance vector
+   Eigen::VectorXd covvec = state.segment(2*this->numIndSpecies()+dimCOV+dim3M,dimCOV);
+   // reduced covariance
+   Eigen::MatrixXd cov_ind(this->numIndSpecies(),this->numIndSpecies());
+
+   // fill upper triangular
+   idx=0;
+   for(size_t i=0;i<this->numIndSpecies();i++)
+   {
+       for(size_t j=0;j<=i;j++)
+       {
+           cov_ind(i,j) = covvec(idx)-emreVal(i)*emreVal(j);
+           // fill rest by symmetry
+           cov_ind(j,i) = cov_ind(i,j);
+           idx++;
+       }
+   }
+
+   // restore full covariance in native permutation
+   iosCov = context.getLinkCMatrix()*cov_ind*context.getLinkCMatrix().transpose();
+
+   tail = state.segment(2*this->numIndSpecies()+2*dimCOV+dim3M,this->numIndSpecies());
+
+   // construct full iosemre vector, restore original order and return
+   iosemre = context.getLinkCMatrix()*tail;
+
+}
+
+
+void
 IOSmodel::getInitialState(Eigen::VectorXd &x)
 {
 
@@ -385,3 +461,209 @@ IOSmodel::getInitialState(Eigen::VectorXd &x)
      Eigen::VectorXd::Zero(this->numIndSpecies());
 
 }
+
+void
+IOSmodel::fluxAnalysis(const Eigen::VectorXd &state, Eigen::VectorXd &flux, Eigen::VectorXd &fluxEMRE,
+                       Eigen::MatrixXd &fluxCovariance, Eigen::MatrixXd &fluxIOS)
+
+{
+
+
+    // collect all the values of constant parameters except variable parameters
+    Trafo::ConstantFolder constants(*this);
+
+    fluxEMRE.resize(this->numReactions());
+    fluxIOS.resize(this->numReactions(),this->numReactions());
+
+    // reconstruct full concentration vector and covariances in original permutation order
+    GiNaC::exmap subtab = getFlux(state,flux);
+
+    LNAmodel::fluxAnalysis(state,flux,fluxCovariance);
+
+    // get reduced covariance vector
+    Eigen::VectorXd covvec = state.segment(this->numIndSpecies(),dimCOV);
+    Eigen::VectorXd emre = state.segment(this->numIndSpecies()+dimCOV,this->numIndSpecies());
+
+    // red cov permutated
+    Eigen::MatrixXd covLNA(this->numIndSpecies(),this->numIndSpecies());
+
+       // fill upper triangular
+       size_t idx=0;
+       for(size_t i=0;i<this->numIndSpecies();i++)
+       {
+           for(size_t j=0;j<=i;j++)
+           {
+               covLNA(i,j) = covvec(idx);
+               // fill rest by symmetry
+               covLNA(j,i) = covLNA(i,j);
+               idx++;
+           }
+       }
+
+
+    // get reduced covariance vector
+    covvec = state.segment(2*this->numIndSpecies()+dimCOV+dim3M,dimCOV);
+    // red cov permutated
+    Eigen::MatrixXd cov_ind(this->numIndSpecies(),this->numIndSpecies());
+
+       // fill upper triangular
+       idx=0;
+       for(size_t i=0;i<this->numIndSpecies();i++)
+       {
+           for(size_t j=0;j<=i;j++)
+           {
+               cov_ind(i,j) = covvec(idx);
+               // fill rest by symmetry
+               cov_ind(j,i) = cov_ind(i,j);
+               idx++;
+           }
+       }
+
+    Eigen::MatrixXd rateJac(this->rates_gradient.rows(),this->rates_gradient.cols());
+    Eigen::MatrixXd rateHessian(this->numReactions(),this->dimCOV);
+    Eigen::MatrixXd rate1Jac(this->rates_gradient.rows(),this->rates_gradient.cols());
+
+    this->foldConservationConstants(rates_gradient);
+    this->foldConservationConstants(rate_corrections);
+
+    for(int i=0;i<this->rates_gradient.rows();i++)
+    {
+      for(int j=0;j<this->rates_gradient.cols();j++)
+      {
+          rate1Jac(i,j)=GiNaC::ex_to<GiNaC::numeric>(constants.apply(rates_gradientO1(i,j)).subs(subtab)).to_double();
+          rateJac(i,j)=GiNaC::ex_to<GiNaC::numeric>(constants.apply(rates_gradient(i,j)).subs(subtab)).to_double();
+      }
+      for(int j=0;j<this->rates_hessian.cols();j++)
+      {
+          rateHessian(i,j)=GiNaC::ex_to<GiNaC::numeric>(constants.apply(rates_hessian(i,j)).subs(subtab)).to_double();
+      }
+    }
+
+
+    fluxEMRE = rateJac*emre;
+
+    for(size_t i=0;i<this->numReactions();i++)
+      fluxEMRE(i) += GiNaC::ex_to<GiNaC::numeric>(constants.apply(rate_corrections(i)).subs(subtab)).to_double();
+
+    for(size_t j=0; j<this->numReactions(); j++)
+    {
+        idx=0;
+        for(size_t s=0; s<this->numIndSpecies(); s++)
+        {
+            for(size_t t=0; t<s; t++)
+            {
+                fluxEMRE(j)+=rateHessian(j,idx)*covLNA(s,t);
+                idx++;
+            }
+            // t=s
+            fluxEMRE(j)+=rateHessian(j,idx)*covLNA(s,s)/2.;
+            idx++;
+        }
+    }
+
+    fluxIOS = rateJac*cov_ind*rateJac.transpose();
+
+    // reconstruct thirdmoments
+    // get reduced skewness vector (should better be a view rather then a copy)
+    Eigen::VectorXd tail = state.segment(2*this->numIndSpecies()+dimCOV,dim3M);
+    std::vector< Eigen::MatrixXd > thirdmoment(this->numIndSpecies());
+
+    double val = 0;
+
+    idx = 0;
+    for(size_t i=0;i<this->numIndSpecies();i++)
+    {
+        thirdmoment[i].resize(this->numIndSpecies(),this->numIndSpecies());
+        for(size_t j=0;j<=i;j++)
+            for(size_t k=0;k<=j;k++)
+            {
+                val = tail[idx];
+
+                thirdmoment[i](j,k)=val;
+                thirdmoment[i](k,j)=val;
+
+                thirdmoment[j](i,k)=val;
+                thirdmoment[j](k,i)=val;
+
+                thirdmoment[k](i,j)=val;
+                thirdmoment[k](j,i)=val;
+
+                idx++; // counts i,j,k loop
+            }
+    }
+
+
+    for(size_t i=0;i<this->numReactions();i++)
+        for(size_t j=0;j<this->numReactions();j++)
+        {
+
+            for(size_t s=0;s<this->numIndSpecies();s++)
+                for(size_t t=0;t<this->numIndSpecies();t++)
+                    fluxIOS(i,j)+= rateJac(i,s)*covLNA(s,t)*rate1Jac(j,t)+rateJac(j,s)*covLNA(s,t)*rate1Jac(i,t);
+
+            for(size_t s=0;s<this->numIndSpecies();s++)
+            {
+                idx=0;
+                for(size_t t=0;t<this->numIndSpecies();t++)
+                {
+                    for(size_t u=0;u<t;u++)
+                    {
+                        fluxIOS(i,j)+=thirdmoment[s](t,u)*(rateHessian(i,idx)*rateJac(j,s));//+rateHessian(j,idx)*rateJac(i,s));
+                        idx++;
+                    }
+                    // t=u
+                    fluxIOS(i,j)+=rateHessian(i,idx)*thirdmoment[s](t,t)*rateJac(j,s)/2.+rateHessian(j,idx)*thirdmoment[s](t,t)*rateJac(i,s)/2.;
+                    idx++;
+                }
+            }
+
+
+
+
+            idx=0;
+            for(size_t s=0;s<this->numIndSpecies();s++)
+            {
+                for(size_t t=0;t<s;t++)
+                {
+                    int idy=0;
+                    for(size_t u=0;u<this->numIndSpecies();u++)
+                    {
+                        for(size_t v=0;v<u;v++)
+                        {
+                            double wick = covLNA(s,u)*covLNA(t,v)+covLNA(s,v)*covLNA(t,u);
+                            fluxIOS(i,j)+=rateHessian(i,idx)*rateHessian(j,idy)*wick;
+                            idy++;
+                        }
+                        // u=v
+                        double wick = 2.*covLNA(s,u)*covLNA(t,u);
+                        fluxIOS(i,j)+=rateHessian(i,idx)*rateHessian(j,idy)*wick/2;
+                    }
+
+                    idx++;
+                }
+
+                // s=t
+                int idy=0;
+                for(size_t u=0;u<this->numIndSpecies();u++)
+                {
+                    for(size_t v=0;v<u;v++)
+                    {
+                        double wick = covLNA(s,s)*covLNA(u,v)+2.*covLNA(s,u)*covLNA(s,v);
+                        fluxIOS(i,j)+=rateHessian(i,idx)*rateHessian(j,idy)*wick/2;
+                        idy++;
+                    }
+                    // u=v
+                    double wick = covLNA(s,s)*covLNA(u,u)+2.*covLNA(s,u)*covLNA(s,u);
+                    fluxIOS(i,j)+=rateHessian(i,idx)*rateHessian(j,idy)*wick/4;
+                }
+
+                idx++;
+
+            }
+
+
+        }
+
+    // done.
+}
+

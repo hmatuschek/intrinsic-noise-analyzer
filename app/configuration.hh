@@ -2,13 +2,10 @@
 #define __FLUC_GUI_CONFIGURATION_HH__
 
 #include <QFont>
+#include <QSettings>
 
 
-/**
- * Provides some configurations.
- *
- * @ingroup gui
- */
+/** Provides some configurations. */
 class Configuration
 {
 protected:

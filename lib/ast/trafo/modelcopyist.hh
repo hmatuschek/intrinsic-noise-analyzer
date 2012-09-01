@@ -5,14 +5,16 @@
 #include "ast/reaction.hh"
 
 
-namespace Fluc {
+namespace iNA {
 namespace Ast {
 namespace Trafo {
 
 
 /**
  * This class is just a collection of static methods to ease the copying of @c Ast::Model
- * instances.
+ * instances. The copying is performed in two stages, in the first stage, a invalid copy of the
+ * original model is created, that still refers to the symbols of the original one. In a second
+ * stage, these symbols are resolved to these of the copied model.
  *
  * @ingroup ast
  */
@@ -53,62 +55,67 @@ public:
 
 
 protected:
-  /**
-   * Helper function to copy function definitions.
-   */
+  /** Helper function to copy function definitions. */
   static Ast::FunctionDefinition *copyFunctionDefinition(Ast::FunctionDefinition *node,
                                                          GiNaC::exmap &translation_table);
 
-  /**
-   * Helper function to copy unit-definitions.
-   */
+  /** Helper function to copy unit-definitions. */
   static Ast::UnitDefinition *copyUnitDefinition(Ast::UnitDefinition *node);
 
-  /**
-   * Helper function to copy parameter definitions.
-   */
-  static Ast::Parameter *copyParameterDefinition(Ast::Parameter *node,
-                                                 GiNaC::exmap &translation_table);
+  /** Helper function to copy parameter definitions. */
+  static Ast::Parameter *copyParameterDefinition(
+    Ast::Parameter *node, GiNaC::exmap &translation_table);
 
-  /**
-   * Helper function to copy compartment definitions.
-   */
+  /** This function updates the symbols of the initial value of the paramter definition using
+   * the given translation table. */
+  static void updateParamter(Ast::Parameter *node, GiNaC::exmap &translation_table);
+
+  /** Helper function to copy compartment definitions. */
   static Ast::Compartment *copyCompartmentDefinition(Ast::Compartment *node,
                                                      GiNaC::exmap &translation_table);
+  /** This function updates the value of the compartment definition. */
+  static void updateCompartment(Ast::Compartment *node, GiNaC::exmap &translation_table);
 
-  /**
-   * Helper function to copy species definitions.
-   */
-  static Ast::Species *copySpeciesDefinition(Ast::Species *node, GiNaC::exmap &translation_table,
-                                             std::map<Species *, Species *> &species_table,
-                                             Model *destination);
+  /** Helper function to copy species definitions. */
+  static Ast::Species *copySpeciesDefinition(
+    Ast::Species *node, GiNaC::exmap &translation_table,
+    std::map<Species *, Species *> &species_table, Model *destination);
 
-  /**
-   * Helper function to copy constraints.
-   */
+  /** This function updates the initial value of the species. */
+  static void updateSpecies(Ast::Species *node, GiNaC::exmap &translation_table);
+
+  /** Helper function to copy constraints. */
   static Ast::Constraint *copyConstraint(Ast::Constraint *node, GiNaC::exmap &translation_table);
 
-  /**
-   * Helper function to copy algebraic constraints.
-   */
-  static Ast::AlgebraicConstraint *copyAlgebraicConstraint(Ast::AlgebraicConstraint *node,
-                                                           GiNaC::exmap &translation_table);
+  /** This function updates a constraint (dispatcher). */
+  static void updateConstraint(Ast::Constraint *node, GiNaC::exmap &translation_table);
 
-  /**
-   * Helper function to copy reactions.
-   */
+  /** Helper function to copy algebraic constraints. */
+  static Ast::AlgebraicConstraint *copyAlgebraicConstraint(
+    Ast::AlgebraicConstraint *node, GiNaC::exmap &translation_table);
+
+  /** This function updates an algebraic constraint. */
+  static void updateAlgebraicConstraint(
+    Ast::AlgebraicConstraint *node, GiNaC::exmap &translation_table);
+
+  /** Helper function to copy reactions. */
   static Ast::Reaction *copyReaction(Ast::Reaction *node, GiNaC::exmap &translation_table,
                                      std::map<Species *, Species *> &species_table);
 
-  /**
-   * Helper function to copy kinetic laws.
-   */
+  /** This function updates a reaction (stoichiometry and kinetic law) */
+  static void updateReaction(Ast::Reaction *node, GiNaC::exmap &translation_table);
+
+  /** Helper function to copy kinetic laws. */
   static Ast::KineticLaw *copyKineticLaw(Ast::KineticLaw *node, GiNaC::exmap &translation_table);
 
-  /**
-   * Helper function to copy rules.
-   */
+  /** This function updates a kinetic law. */
+  static void updateKineticLaw(Ast::KineticLaw *node, GiNaC::exmap &translation_table);
+
+  /** Helper function to copy rules. */
   static Ast::Rule *copyRule(Ast::Rule *node, GiNaC::exmap &translation_table);
+
+  /** This function updates a rule definition. */
+  static void updateRule(Ast::Rule *node, GiNaC::exmap &translation_table);
 
   /**
    * Helper function to copy assignment rules.

@@ -1,29 +1,16 @@
 #include "model.hh"
 #include "exception.hh"
 #include "reaction.hh"
-#include "assembler.hh"
 #include "converter.hh"
 #include "trafo/modelcopyist.hh"
 
-using namespace Fluc;
-using namespace Fluc::Ast;
+using namespace iNA;
+using namespace iNA::Ast;
 
 
 Model::Model()
   : Module()
 {
-  // Pass...
-}
-
-
-Model::Model(libsbml::Model *model)
-  : Module()
-{
-  Assembler assembler(*this);
-  assembler.processModel(model);
-
-  Convert2Irreversible converter(*this);
-  converter.process();
 }
 
 
@@ -32,6 +19,10 @@ Model::Model(const Model &other)
 {
   // Copy "other" module into this module
   Trafo::ModelCopyist::copy(&other, this);
+
+  // Convert irreversible reactions to reversible ones:
+  //Convert2Irreversible converter(*this);
+  //converter.process();
 }
 
 
@@ -58,13 +49,29 @@ Model::hasParameter(const GiNaC::symbol &symbol) const
 Parameter *
 Model::getParameter(const std::string &name)
 {
-  return this->getParameter(name);
+  Ast::VariableDefinition *def = this->getVariable(name);
+  if (! Node::isParameter(def))
+  {
+    SymbolError err;
+    err << "Identifier " << name << " is not associated with a parameter.";
+    throw err;
+  }
+
+  return static_cast<Parameter *>(def);
 }
 
-Parameter * const
+const Parameter *
 Model::getParameter(const std::string &name) const
 {
-  return this->getParameter(name);
+  const Ast::VariableDefinition *def = this->getVariable(name);
+  if (! Node::isParameter(def))
+  {
+    SymbolError err;
+    err << "Identifier " << name << " is not associated with a parameter.";
+    throw err;
+  }
+
+  return static_cast<const Parameter *>(def);
 }
 
 
@@ -125,7 +132,7 @@ Model::getParameterIdx(const GiNaC::symbol &symbol) const
 
 
 size_t
-Model::getParameterIdx(Parameter *parameter) const
+Model::getParameterIdx(const Parameter *parameter) const
 {
   // Search vector for parameter:
   for (size_t i=0; i<this->parameter_vector.size(); i++)
@@ -430,6 +437,15 @@ Model::getReaction(size_t idx) const
   return this->reaction_vector[idx];
 }
 
+Reaction *
+Model::getReaction(const std::string &id) {
+  return Module::getReaction(id);
+}
+
+Reaction * const
+Model::getReaction(const std::string &id) const {
+  return Module::getReaction(id);
+}
 
 size_t
 Model::getReactionIdx(const std::string &id) const
@@ -518,5 +534,27 @@ Model::remDefinition(Definition *def)
 
   default:
     break;
+  }
+}
+
+
+void
+Model::accept(Ast::Visitor &visitor) const
+{
+  if (Model::Visitor *mod_vis = dynamic_cast<Model::Visitor *>(&visitor)) {
+    mod_vis->visit(this);
+  } else {
+    Scope::accept(visitor);
+  }
+}
+
+
+void
+Model::apply(Ast::Operator &op)
+{
+  if (Model::Operator *mod_op = dynamic_cast<Model::Operator *>(&op)) {
+    mod_op->act(this);
+  } else {
+    Scope::apply(op);
   }
 }

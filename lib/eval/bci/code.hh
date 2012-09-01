@@ -6,7 +6,7 @@
 #include <complex>
 
 
-namespace Fluc {
+namespace iNA {
 namespace Eval {
 namespace bci {
 
@@ -195,6 +195,8 @@ public:
   size_t getMinStackSize() const;
 
   size_t getCodeSize() const;
+
+  void clear();
 
   /**
    * Returns an iterator to the first instruction of the bytecode.

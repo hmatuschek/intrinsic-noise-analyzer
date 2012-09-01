@@ -3,68 +3,58 @@
 
 #include <QWidget>
 #include <QTableView>
+#include <QPushButton>
 
 #include "../doctree/parametersitem.hh"
 
 
 
-/**
- * Simply extends QTableView to show parameters.
- *
- * Default view for @c ParameterList model.
- *
- * @ingroup gui
- */
+/** Simply extends QTableView to show parameters.
+ * Default view for @c ParameterList model. */
 class ParameterTable : public QTableView
 {
   Q_OBJECT
 
 protected:
-  /**
-   * A weak reference to the parameter list.
-   */
-  ParameterList *parameters;
-
+  /** A weak reference to the parameter list. */
+  ParameterList *_parameters;
 
 public:
-  /**
-   * Constructs a view for the parameters.
-   */
-  ParameterTable(ParameterList *parameters, QWidget *parent=0);
+  /** Constructs a view for the parameters. */
+  ParameterTable(ParameterList *_parameters, QWidget *parent=0);
+
+  /** Returns a weak reference to the list of paramters. */
+  ParameterList &parameters();
 };
 
 
 
-/**
- * A simple view widget to show some parameters.
- *
- * Default view for the @c ParametersItem model.
- *
- * @ingroup gui
- */
+/** A simple view widget to show some parameters.
+ * Default view for the @c ParametersItem model. */
 class ParameterView : public QWidget
 {
   Q_OBJECT
 
 public:
-  /**
-   * Constructs a view to the given paramters.
-   */
+  /** Constructs a view to the given paramters. */
   explicit ParameterView(ParametersItem *parameters, QWidget *parent = 0);
 
-
 private slots:
-  /**
-   * Will be called if the model gets deleted.
-   */
-  void paramtersDestroyed();
-
+  /** Will be called if "add param" is clicked. */
+  void onAddParameter();
+  /** Will be called if "rem param" is clicked. */
+  void onRemParameter();
+  /** Will be called if the selection of the parameter list is changed.
+   * Is used to enable/disable the "rem param" button. */
+  void onSelectionChanged(const QItemSelection &selected,const QItemSelection &unselected);
 
 private:
-  /**
-   * A weak reference to the parameters.
-   */
-  ParameterTable *paramTable;
+  /** Holds the paramter table view. */
+  ParameterTable *_paramTable;
+  /** The "add param" button. */
+  QPushButton *_addParamButton;
+  /** The "rem param" button. */
+  QPushButton *_remParamButton;
 };
 
 

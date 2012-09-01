@@ -3,10 +3,10 @@
 
 #include <exception>
 #include <sstream>
-#include <ginac/ginac.h>
+#include <ginac.h>
 
 
-namespace Fluc
+namespace iNA
 {
 
 /**
@@ -235,6 +235,33 @@ public:
   virtual ~SBMLParserError() throw();
 };
 
+
+/**
+ * Will be thrown if the export of an model failed.
+ */
+class ExportError: public Exception
+{
+public:
+  /**
+   * Constructs an empty exception message.
+   */
+  ExportError();
+
+  /**
+   * Constructs an exception with given message.
+   */
+  ExportError(const std::string &message);
+
+  /**
+   * Copyconstructor.
+   */
+  ExportError(const ExportError &other);
+
+  /**
+   * Destructor.
+   */
+  virtual ~ExportError() throw();
+};
 
 
 /**

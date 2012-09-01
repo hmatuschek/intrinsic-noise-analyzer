@@ -7,7 +7,7 @@
 #include <complex>
 
 
-namespace Fluc {
+namespace iNA {
 namespace UnitTest {
 
 class TestFailure : public std::exception
@@ -139,8 +139,8 @@ public:
 
   void operator() ();
 
-protected:
-  void printTraceBack();
+/*protected:
+  void printTraceBack();*/
 };
 
 

@@ -1,7 +1,7 @@
 #include "kroneckerproduct.hh"
 
 Eigen::MatrixXd
-Fluc::KroneckerSum(const Eigen::MatrixXd &m1, const Eigen::MatrixXd &m2)
+iNA::KroneckerSum(const Eigen::MatrixXd &m1, const Eigen::MatrixXd &m2)
 {
 
     if(m1.rows()!=m1.cols() || m2.rows()!=m2.cols()) throw("Kronecker sum is only defined for quadratic matrices");
@@ -24,7 +24,7 @@ Fluc::KroneckerSum(const Eigen::MatrixXd &m1, const Eigen::MatrixXd &m2)
 }
 
 Eigen::MatrixXcd
-Fluc::ComplexKroneckerSum(const Eigen::MatrixXcd &m1, const Eigen::MatrixXcd &m2)
+iNA::ComplexKroneckerSum(const Eigen::MatrixXcd &m1, const Eigen::MatrixXcd &m2)
 {
 
     if(m1.rows()!=m1.cols() || m2.rows()!=m2.cols()) throw("Kronecker sum is only defined for quadratic matrices");
@@ -47,7 +47,7 @@ Fluc::ComplexKroneckerSum(const Eigen::MatrixXcd &m1, const Eigen::MatrixXcd &m2
 }
 
 void
-Fluc::ComplexSylvesterSolve(const Eigen::MatrixXcd &m1, const Eigen::MatrixXcd &m2,
+iNA::ComplexSylvesterSolve(const Eigen::MatrixXcd &m1, const Eigen::MatrixXcd &m2,
                const Eigen::MatrixXcd &Dm , Eigen::MatrixXcd &solutionM)
 {
 

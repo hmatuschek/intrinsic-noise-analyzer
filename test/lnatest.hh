@@ -5,7 +5,7 @@
 #include "models/LNAmodel.hh"
 
 
-namespace Fluc {
+namespace iNA {
 
 /**
  * This class integrates some systems for some time and compares the result
@@ -14,9 +14,13 @@ namespace Fluc {
 class LNATest : public UnitTest::TestCase
 {
 public:
+
+  virtual ~LNATest();
   void testEnzymeKineticsOpen();
   void testDimerization();
   void testDimerization2();
+
+
 
 
 public:

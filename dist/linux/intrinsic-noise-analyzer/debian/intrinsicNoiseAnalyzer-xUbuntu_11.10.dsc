@@ -2,7 +2,7 @@ Format: 3.0 (quilt)
 Source: intrinsic-noise-analyzer
 Binary: intrinsic-noise-analyzer
 Architecture: any
-Version: 0.3.0-1
+Version: 0.3.1-1
 Maintainer: Hannes Matuschek <hmatuschek@gmail.com>
 Homepage: http://www.googlecode.com/p/intrinsic-noise-analyzer
 Standards-Version: 3.9.2

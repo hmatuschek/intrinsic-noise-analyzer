@@ -188,14 +188,14 @@ ODEIntTaskConfig::setIntegrator(Integrator integrator)
   this->integrator = integrator;
 }
 
-const Fluc::ODE::IntegrationRange &
+const iNA::ODE::IntegrationRange &
 ODEIntTaskConfig::getIntegrationRange() const
 {
   return this->integration_range;
 }
 
 void
-ODEIntTaskConfig::setIntegrationRange(const Fluc::ODE::IntegrationRange &range)
+ODEIntTaskConfig::setIntegrationRange(const iNA::ODE::IntegrationRange &range)
 {
   this->integration_range = range;
 }
@@ -203,7 +203,7 @@ ODEIntTaskConfig::setIntegrationRange(const Fluc::ODE::IntegrationRange &range)
 void
 ODEIntTaskConfig::setIntegrationRange(double t_end, size_t steps)
 {
-  this->integration_range = Fluc::ODE::IntegrationRange(0, t_end, steps);
+  this->integration_range = iNA::ODE::IntegrationRange(0, t_end, steps);
 }
 
 size_t

@@ -1,7 +1,7 @@
 #include "code.hh"
 
-using namespace Fluc;
-using namespace Fluc::Eval::bci;
+using namespace iNA;
+using namespace iNA::Eval::bci;
 
 
 
@@ -22,6 +22,11 @@ Code::Code(const Code &other)
   // Pass...
 }
 
+void
+Code::clear()
+{
+    code.clear();
+}
 
 
 const Code &

@@ -1,141 +1,131 @@
 #include "reactionequationrenderer.hh"
 #include <QGraphicsItem>
 #include <QGraphicsTextItem>
+#include <QPainter>
+#include "../tinytex/tinytex.hh"
+#include "../tinytex/ginac2formula.hh"
+#include "ast/reaction.hh"
 
 
+using namespace iNA;
 
-ReactionEquationRenderer::ReactionEquationRenderer(QObject *parent) :
-  QGraphicsScene(parent), rate(0)
+ReactionEquationRenderer::ReactionEquationRenderer(iNA::Ast::Reaction *reac, QObject *parent) :
+  QGraphicsScene(parent)
 {
-  this->arrow_length = 20.0;
-  this->arrow_head_width = 6.;
-  this->arrow_head_height = 6.;
-  this->reaction_margin = 20.;
+  // Assemble forumla
+  MathItem *reaction = ReactionEquationRenderer::assembleReaction(reac);
 
-  // Construct arrow
-  QList<QGraphicsItem *> arrow_elm;
-  arrow_elm.append(this->addLine(0, this->arrow_head_height/2,
-                                 this->arrow_length, this->arrow_head_height/2));
-  arrow_elm.append(this->addLine(this->arrow_length-this->arrow_head_width, 0.,
-                                 this->arrow_length, this->arrow_head_height/2));
-  arrow_elm.append(this->addLine(this->arrow_length-this->arrow_head_width, this->arrow_head_height,
-                                 this->arrow_length, this->arrow_head_height/2));
-  this->arrow = this->createItemGroup(arrow_elm);
-
-  this->colon = this->addText(":");
-
-  this->updateLayout();
+  // layout equation and add to this graphics scene...
+  MathContext ctx; ctx.setFontSize(ctx.fontSize()+4);
+  this->addItem(reaction->layout(ctx));
+  // Free formula
+  delete reaction;
 }
 
 
-void
-ReactionEquationRenderer::addReactant(const std::string &stoi, const std::string &spec)
+MathItem *
+ReactionEquationRenderer::assembleReactionEquation(iNA::Ast::Reaction *reac)
 {
-  if (0 != this->reactants.size())
-  {
-    this->reactants.append(this->addText("+"));
+  // Allocate formula
+  Ast::Scope &scope = *(reac->getKineticLaw());
+  MathFormula *reaction  = new MathFormula();
+  MathFormula *reactants = new MathFormula();
+  MathFormula *products  = new MathFormula();
+
+  // Handle reactants:
+  if (0 == reac->numReactants()) { reactants->appendItem(new MathText(QChar(0x2205))); }
+  for (Ast::Reaction::iterator item=reac->reacBegin(); item!=reac->reacEnd(); item++) {
+    if (0 != reactants->size()) {
+      reactants->appendItem(new MathSpace(MathSpace::MEDIUM_SPACE));
+      reactants->appendItem(new MathText("+"));
+      reactants->appendItem(new MathSpace(MathSpace::MEDIUM_SPACE));
+    }
+    if (1 != item->second) {
+      reactants->appendItem(Ginac2Formula::toFormula(item->second, scope));
+      reactants->appendItem(new MathSpace(MathSpace::THIN_SPACE));
+    }
+    // Render species symbol
+    reactants->appendItem(TinyTex::parseVariable(item->first));
   }
+  reaction->appendItem(reactants);
 
-  this->reactants.append(this->addText((stoi+" "+spec).c_str()));
+  // " -> "
+  reaction->appendItem(new MathSpace(MathSpace::THICK_SPACE));
+  if (reac->isReversible()) {
+    reaction->appendItem(new MathText(QChar(0x21CC)));
+  } else {
+    reaction->appendItem(new MathText(QChar(0x2192)));
+  }
+  reaction->appendItem(new MathSpace(MathSpace::THICK_SPACE));
 
-  this->updateLayout();
+  // handle products
+  if (0 == reac->numProducts()) { products->appendItem(new MathText(QChar(0x2205))); }
+  for (Ast::Reaction::iterator item=reac->prodBegin(); item!=reac->prodEnd(); item++) {
+    // Prepent "+" sign
+    if (0 != products->size()) {
+      products->appendItem(new MathSpace(MathSpace::MEDIUM_SPACE));
+      products->appendItem(new MathText("+"));
+      products->appendItem(new MathSpace(MathSpace::MEDIUM_SPACE));
+    }
+    // Prepren stoichiometry if != 1:
+    if (1 != item->second) {
+      products->appendItem(Ginac2Formula::toFormula(item->second, scope));
+      products->appendItem(new MathSpace(MathSpace::THIN_SPACE));
+    }
+    // render species symbol.
+    products->appendItem(TinyTex::parseVariable(item->first));
+  }
+  reaction->appendItem(products);
+
+  return reaction;
 }
 
 
-void
-ReactionEquationRenderer::addProduct(const std::string &stoi, const std::string &spec)
+MathItem *
+ReactionEquationRenderer::assembleKineticLaw(iNA::Ast::Reaction *reaction)
 {
-  if (0 != this->products.size())
-  {
-    this->products.append(this->addText("+"));
-  }
-
-  this->products.append(this->addText((stoi+" "+spec).c_str()));
-
-  this->updateLayout();
+  // Handle rate law
+  Ast::Scope &scope = *(reaction->getKineticLaw());
+  return Ginac2Formula::toFormula(reaction->getKineticLaw()->getRateLaw(), scope);
 }
 
 
-void
-ReactionEquationRenderer::setRate(const std::string &rate)
+MathItem *
+ReactionEquationRenderer::assembleReaction(iNA::Ast::Reaction *reac)
 {
-  if (0 != this->rate)
-  {
-    this->removeItem(this->rate);
-    delete this->rate;
-  }
+  MathFormula *reaction = new MathFormula();
 
-  this->rate = this->addText(rate.c_str());
+  reaction->appendItem(ReactionEquationRenderer::assembleReactionEquation(reac));
+  reaction->appendItem(new MathSpace(MathSpace::QUAD_SPACE));
+  reaction->appendItem(new MathText(":"));
+  reaction->appendItem(new MathSpace(MathSpace::MEDIUM_SPACE));
+  reaction->appendItem(ReactionEquationRenderer::assembleKineticLaw(reac));
 
-  this->updateLayout();
+  return reaction;
 }
 
 
-void
-ReactionEquationRenderer::updateLayout()
+
+QPixmap
+ReactionEquationRenderer::renderReaction(iNA::Ast::Reaction *reaction, MathContext ctx)
 {
-  double overall_width = 0.0;
-  double overall_height = 0.0;
+  MathItem *formula = ReactionEquationRenderer::assembleReaction(reaction);
+  QPixmap pixmap = formula->renderItem(ctx); delete formula;
+  return pixmap;
+}
 
+QPixmap
+ReactionEquationRenderer::renderReactionEquation(iNA::Ast::Reaction *reaction, MathContext ctx)
+{
+  MathItem *formula = ReactionEquationRenderer::assembleReactionEquation(reaction);
+  QPixmap pixmap = formula->renderItem(ctx); delete formula;
+  return pixmap;
+}
 
-  for (QList<QGraphicsItem *>::iterator iter = this->reactants.begin();
-       iter != this->reactants.end(); iter++)
-  {
-    overall_width += (*iter)->boundingRect().width();
-    overall_height = std::max(overall_height, (*iter)->boundingRect().height());
-  }
-
-  overall_width += this->arrow->boundingRect().width();
-
-  for (QList<QGraphicsItem *>::iterator iter = this->products.begin();
-       iter != this->products.end(); iter++)
-  {
-    overall_width += (*iter)->boundingRect().width();
-    overall_height = std::max(overall_height, (*iter)->boundingRect().height());
-  }
-
-  overall_width += this->reaction_margin;
-  overall_width += this->colon->boundingRect().width();
-  overall_width += this->reaction_margin;
-
-  if (0 != this->rate)
-  {
-    overall_width += this->rate->boundingRect().width();
-    overall_height = std::max(overall_height, overall_height/2+this->rate->boundingRect().height());
-  }
-
-  /*
-   * Update positions of elements.
-   */
-  double x = 0.0;
-  for (QList<QGraphicsItem *>::iterator iter = this->reactants.begin();
-       iter != this->reactants.end(); iter++)
-  {
-    double h = (*iter)->boundingRect().height();
-    (*iter)->setPos(x, overall_height/2 - h/2);
-    x += (*iter)->boundingRect().width();
-  }
-
-  // Set start-position of arrow
-  this->arrow->setPos(x, overall_height/2 - this->arrow->boundingRect().height()/2);
-  x += this->arrow->boundingRect().width();
-
-  for (QList<QGraphicsItem *>::iterator iter = this->products.begin();
-       iter != this->products.end(); iter++)
-  {
-    double h = (*iter)->boundingRect().height();
-    (*iter)->setPos(x, overall_height/2 - h/2);
-    x += (*iter)->boundingRect().width();
-  }
-
-  x += this->reaction_margin;
-  this->colon->setPos(x, overall_height/2-this->colon->boundingRect().height()/2);
-  x += this->colon->boundingRect().width();
-
-  x += this->reaction_margin;
-  if (0 != this->rate)
-  {
-    this->rate->setPos(x, overall_height/2-this->rate->boundingRect().height()/2);
-    x += this->rate->boundingRect().width();
-  }
+QPixmap
+ReactionEquationRenderer::renderKineticLaw(iNA::Ast::Reaction *reaction, MathContext ctx)
+{
+  MathItem *formula = ReactionEquationRenderer::assembleKineticLaw(reaction);
+  QPixmap pixmap = formula->renderItem(ctx); delete formula;
+  return pixmap;
 }

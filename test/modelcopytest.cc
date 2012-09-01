@@ -1,6 +1,8 @@
 #include "modelcopytest.hh"
+#include "parser/sbml/sbml.hh"
 
-using namespace Fluc;
+
+using namespace iNA;
 
 
 
@@ -295,18 +297,12 @@ ModelCopyTest::testModelEqual(Ast::Model &A, Ast::Model &B)
 void
 ModelCopyTest::testCopy(const std::string &file)
 {
-  // Load SBML...
-  libsbml::SBMLDocument *document = libsbml::readSBMLFromFile(file.c_str());
-  UT_ASSERT(0 == document->getNumErrors());
-
   // Construct model from SBML
-  Ast::Model modelA(document->getModel());
+  Ast::Model modelA; Parser::Sbml::importModel(modelA, file);
   Ast::Model modelB(modelA);  // Copy model
 
   testModelEqual(modelA, modelB);
   testModelEqual(modelB, modelA);
-
-  delete document;
 }
 
 

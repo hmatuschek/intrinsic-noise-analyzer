@@ -1,8 +1,12 @@
 #include "node.hh"
+#include "visitor.hh"
 
-using namespace Fluc::Ast;
+using namespace iNA::Ast;
 
 
+/* ********************************************************************************************* *
+ * Implementation of Ast::Node:
+ * ********************************************************************************************* */
 Node::Node(Node::NodeType node_type)
   :  node_type(node_type)
 {
@@ -15,15 +19,41 @@ Node::~Node()
 }
 
 
+void
+Node::accept(Ast::Visitor &visitor) const {
+  // If visitor implements a visitor for Ast::Node instances:
+  if (Ast::Node::Visitor *node_vis = dynamic_cast<Ast::Node::Visitor *>(&visitor)) {
+    node_vis->visit(this);
+  }
+}
+
+void
+Node::apply(Ast::Operator &op) {
+  // If operator implements an operator for Ast::Node instances:
+  if (Ast::Node::Operator *node_op = dynamic_cast<Ast::Node::Operator *>(&op)) {
+    node_op->act(this);
+  }
+}
+
+void
+Node::traverse(Ast::Visitor &visitor) const {
+  // pass...
+}
+
+void
+Node::traverse(Ast::Operator &op) {
+  // pass...
+}
+
 Node::NodeType
-Node::getNodeType()
+Node::getNodeType() const
 {
   return this->node_type;
 }
 
 
 bool
-Node::isConstraint(Node *node)
+Node::isConstraint(const Node *node)
 {
   switch (node->getNodeType())
   {
@@ -37,14 +67,14 @@ Node::isConstraint(Node *node)
 
 
 bool
-Node::isAlgebraicConstraint(Node *node)
+Node::isAlgebraicConstraint(const Node *node)
 {
   return Node::ALGEBRAIC_CONSTRAINT == node->getNodeType();
 }
 
 
 bool
-Node::isDefinition(Node *node)
+Node::isDefinition(const Node *node)
 {
   switch(node->getNodeType())
   {
@@ -63,14 +93,14 @@ Node::isDefinition(Node *node)
 
 
 bool
-Node::isFunctionDefinition(Node *node)
+Node::isFunctionDefinition(const Node *node)
 {
   return Node::FUNCTION_DEFINITION == node->getNodeType();
 }
 
 
 bool
-Node::isVariableDefinition(Node *node)
+Node::isVariableDefinition(const Node *node)
 {
   switch (node->getNodeType())
   {
@@ -89,35 +119,35 @@ Node::isVariableDefinition(Node *node)
 
 
 bool
-Node::isSpecies(Node *node)
+Node::isSpecies(const Node *node)
 {
   return Node::SPECIES_DEFINITION == node->getNodeType();
 }
 
 
 bool
-Node::isParameter(Node *node)
+Node::isParameter(const Node *node)
 {
   return Node::PARAMETER_DEFINITION == node->getNodeType();
 }
 
 
 bool
-Node::isCompartment(Node *node)
+Node::isCompartment(const Node *node)
 {
   return Node::COMPARTMENT_DEFINITION == node->getNodeType();
 }
 
 
 bool
-Node::isUnitDefinition(Node *node)
+Node::isUnitDefinition(const Node *node)
 {
   return Node::UNIT_DEFINITION == node->getNodeType();
 }
 
 
 bool
-Node::isRule(Node *node)
+Node::isRule(const Node *node)
 {
   switch (node->getNodeType())
   {
@@ -132,14 +162,14 @@ Node::isRule(Node *node)
 
 
 bool
-Node::isAssignmentRule(Node *node)
+Node::isAssignmentRule(const Node *node)
 {
   return Node::ASSIGNMENT_RULE == node->getNodeType();
 }
 
 
 bool
-Node::isRateRule(Node *node)
+Node::isRateRule(const Node *node)
 {
   return Node::RATE_RULE == node->getNodeType();
 }
@@ -147,14 +177,14 @@ Node::isRateRule(Node *node)
 
 
 bool
-Node::isReactionDefinition(Node *node)
+Node::isReactionDefinition(const Node *node)
 {
   return Node::REACTION_DEFINITION == node->getNodeType();
 }
 
 
 bool
-Node::isKineticLaw(Node *node)
+Node::isKineticLaw(const Node *node)
 {
   return Node::KINETIC_LAW == node->getNodeType();
 }

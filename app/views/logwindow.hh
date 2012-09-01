@@ -15,16 +15,16 @@ class MessageWrapper : public QObject
   Q_OBJECT
 
 private:
-  Fluc::Utils::Message _message;
+  iNA::Utils::Message _message;
 
 public:
-  MessageWrapper(const Fluc::Utils::Message &message, QObject *parent=0);
+  MessageWrapper(const iNA::Utils::Message &message, QObject *parent=0);
 
   QString getText() const;
   QString getFile() const;
   size_t getLine() const;
   QDateTime getTime() const;
-  Fluc::Utils::Message::Level getLevel() const;
+  iNA::Utils::Message::Level getLevel() const;
   QString getLevelName() const;
 };
 
@@ -32,14 +32,14 @@ public:
 /**
  * The handler that receives the messages from @c Fluc::Utils::Logger.
  */
-class LogWindowMessageHandler : public QObject, public Fluc::Utils::MessageHandler
+class LogWindowMessageHandler : public QObject, public iNA::Utils::MessageHandler
 {
   Q_OBJECT
 
 public:
   explicit LogWindowMessageHandler();
 
-  virtual void handleMessage(const Fluc::Utils::Message &message);
+  virtual void handleMessage(const iNA::Utils::Message &message);
 
 signals:
   void newMessage(MessageWrapper *message);

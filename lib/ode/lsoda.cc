@@ -4,8 +4,8 @@
 
 #include <cstdio>
 
-using namespace Fluc;
-using namespace Fluc::ODE;
+using namespace iNA;
+using namespace iNA::ODE;
 
 const int    LsodaConstants::mord[3] = {0, 12, 5};
 const double LsodaConstants::sm1[13] = {0., 0.5, 0.575, 0.55, 0.45, 0.35, 0.25, 0.2, 0.15, 0.1, 0.075, 0.05, 0.025};
@@ -41,8 +41,9 @@ LSODA::terminate(int *istate)
 {
         if (illin == 5)
         {
-                InternalError err;
-                err<<"LSODA: repeated occurrence of illegal input. Aborted due to apparent infinite loop.";
+                NumericError err;
+                err<<"LSODA: no progress in calculation.";
+                //err<<"LSODA: repeated occurrence of illegal input. Aborted due to apparent infinite loop.";
                 throw err;
         }
         else
@@ -252,8 +253,9 @@ LSODA::lsoda (int neq, double *y, double *t, double tout,
                 if (tout == *t) {
                         ntrep++;
                         if (ntrep < 5) return;
-                        InternalError err;
-                        err<<"LSODA: Repeated calls with istate = 1 and tout = t. Run aborted due to apparent infinite loop";
+                        NumericError err;
+                        err<<"LSODA: No progress in calculation.";
+                        //err<<"LSODA: Repeated calls with istate = 1 and tout = t. Run aborted due to apparent infinite loop";
                         throw err;
                         return;
                 }

@@ -3,7 +3,7 @@
 
 #include "variabledefinition.hh"
 
-namespace Fluc {
+namespace iNA {
 namespace Ast {
 
 
@@ -15,6 +15,14 @@ namespace Ast {
  */
 class Parameter : public VariableDefinition
 {
+public:
+  /** Visitor class for paramters. */
+  class Visitor { public: virtual void visit(const Parameter *param) = 0; };
+
+  /** Operator class for paramters. */
+  class Operator { public: virtual void act(Parameter *param) = 0; };
+
+
 public:
   /**
    * Minimal constructor.
@@ -34,6 +42,12 @@ public:
    * @param is_const Specifies if the parameter is constant.
    */
   Parameter(const std::string &id, const GiNaC::ex &init_val, const Unit &unit, bool is_const=false);
+
+  /** Handles a visitor for the paramter. */
+  virtual void accept(Ast::Visitor &visitor) const;
+
+  /** Applies an operator on the parameter. */
+  virtual void apply(Ast::Operator &op);
 };
 
 

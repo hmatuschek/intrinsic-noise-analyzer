@@ -37,5 +37,6 @@
 #include "stochasticsimulator.hh"
 #include "gillespieSSA.hh"
 #include "optimizedSSA.hh"
+#include "gibsonbruckSSA.hh"
 
 #endif

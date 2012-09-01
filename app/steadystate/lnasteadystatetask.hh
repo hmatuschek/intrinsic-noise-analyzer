@@ -22,7 +22,7 @@ public:
       public SpeciesSelectionTaskConfig
   {
   protected:
-    Fluc::Models::IOSmodel *model;
+    iNA::Models::IOSmodel *model;
 
     int max_iterations;
     double max_time_step;
@@ -46,7 +46,7 @@ public:
     virtual void setModelDocument(DocumentItem *document);
 
     /** Implements the @c SpeciesSelectionTaskConfig interface, and returns the LNA model instance. */
-    virtual Fluc::Ast::Model *getModel() const;
+    virtual iNA::Ast::Model *getModel() const;
 
     /** Returns the max number of iterations.*/
     size_t getMaxIterations() const;
@@ -68,7 +68,7 @@ protected:
   /** Holds the task configuration. */
   Config config;
   /** Holds an instance of the analysis. */
-  Fluc::Models::SteadyStateAnalysis<Fluc::Models::IOSmodel> steady_state;
+  iNA::Models::SteadyStateAnalysis<iNA::Models::IOSmodel> steady_state;
   Eigen::VectorXd concentrations;
   Eigen::VectorXd emre_corrections;
   Eigen::VectorXd ios_corrections;
@@ -102,7 +102,7 @@ public:
 
   const QString &getSpeciesName(int i);
 
-  const Fluc::Ast::Unit &getSpeciesUnit() const;
+  const iNA::Ast::Unit &getSpeciesUnit() const;
 
   virtual QString getLabel();
 

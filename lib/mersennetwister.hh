@@ -52,7 +52,7 @@
 #include <climits>
 
 
-namespace Fluc {
+namespace iNA {
 
 /**
  * This is a 64-bit version of Mersenne Twister pseudo random number
@@ -171,7 +171,7 @@ public:
   {
     size_t i;
     uint64_t x;
-    static const int64_t mag01[2] = {0ULL, MATRIX_A};
+    static const int64_t mag01[2] = {0ULL, static_cast<int64_t>(MATRIX_A)};
 
     if (mti >= NN) { /* generate NN words at one time */
       /* if init_genrand64() has not been called, */

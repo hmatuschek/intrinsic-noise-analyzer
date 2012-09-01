@@ -1,11 +1,12 @@
 #include "stochasticsimulator.hh"
+#include "trafo/constantfolder.hh"
 #include "utils/logger.hh"
 
-using namespace Fluc;
 
-using namespace Fluc::Models;
+using namespace iNA;
+using namespace iNA::Models;
 
-StochasticSimulator::StochasticSimulator(libsbml::Model *model, int size, int seed, size_t threads)
+StochasticSimulator::StochasticSimulator(const Ast::Model &model, int size, int seed, size_t threads)
     : BaseModel(model),
       ParticleNumbersMixin((BaseModel &)(*this)),
       ReasonableModelMixin((BaseModel &)(*this)),
@@ -32,10 +33,9 @@ StochasticSimulator::StochasticSimulator(libsbml::Model *model, int size, int se
      this->stateIndex.insert(std::make_pair(this->getSpecies(i)->getSymbol(),i));
 
   // fold all constants
+  Trafo::ConstantFolder constants(*this);
   for(size_t i=0;i<this->propensities.size();i++)
-  {
-      this->propensities[i]=this->foldConstants(this->propensities[i]);
-  }
+        this->propensities[i] = constants.apply(this->propensities[i]);
 
   // evaluate initial concentrations & get volumes
   Ast::EvaluateInitialValue evICs(*this);
@@ -50,8 +50,9 @@ StochasticSimulator::StochasticSimulator(libsbml::Model *model, int size, int se
         if(ics(i)==0.)
         {
             InternalError err;
-            err << "Could not initiate Stochastic Simulation since initial particle number of species " << this->getSpecies(i)->getName();
-            err << "evaluated to zero.";
+            err << "Could not initiate Stochastic Simulation since initial particle number of species <i>"
+                << (this->getSpecies(i)->hasName() ? this->getSpecies(i)->getName() : this->getSpecies(i)->getIdentifier())
+                << "</i> evaluated to zero.";
             throw err;
             throw InternalError();
         }
@@ -59,8 +60,9 @@ StochasticSimulator::StochasticSimulator(libsbml::Model *model, int size, int se
      else if(ics(i)<0.)
      {
          InternalError err;
-         err << "Could not initiate Stochastic Simulation since initial particle number of species " << this->getSpecies(i)->getName();
-         err << "evaluated to a value < 0.";
+         err << "Could not initiate Stochastic Simulation since initial particle number of species <i>"
+             << (this->getSpecies(i)->hasName() ? this->getSpecies(i)->getName() : this->getSpecies(i)->getIdentifier())
+             << "</i> evaluated to a value < 0.";
          throw err;
          throw InternalError();
      }
@@ -72,7 +74,12 @@ StochasticSimulator::StochasticSimulator(libsbml::Model *model, int size, int se
   msg << "SSA initial copy numbers: ";
   for(size_t i=0; i<numSpecies(); i++)
   {
-      msg<<this->getSpecies(i)->getName()<<"="<<ics(i)<<" ";
+      if(this->getSpecies(i)->hasName())
+        msg<<this->getSpecies(i)->getName();
+      else
+        msg<<this->getSpecies(i)->getIdentifier();
+
+      msg<<"="<<ics(i)<<" ";
   }
   Utils::Logger::get().log(msg);
 
@@ -83,6 +90,7 @@ StochasticSimulator::StochasticSimulator(libsbml::Model *model, int size, int se
   }
 
 }
+
 
 StochasticSimulator::~StochasticSimulator()
 
@@ -99,9 +107,8 @@ StochasticSimulator::evaluate(const Eigen::VectorXd &populationVec, Eigen::Vecto
 
   // then evaluate propensities
   for (size_t i=0; i<this->numReactions(); i++)
-  {
     propensities(i) = this->interpreter.evaluate(this->propensities[i]);
-  }
+
 }
 
 
@@ -119,7 +126,7 @@ void
 StochasticSimulator::getHistogram(size_t speciesId,std::map<double,double> &hist)
 {
 
-    hist.clear();
+    //hist.clear();
     for(int sid=0; sid<observationMatrix.rows(); sid++)
     {
         double val = observationMatrix(sid,speciesId);
@@ -131,6 +138,12 @@ StochasticSimulator::getHistogram(size_t speciesId,std::map<double,double> &hist
     }
 }
 
+void
+StochasticSimulator::getHistogram(size_t speciesId,Histogram<double> &hist)
+{
+  hist.insert(observationMatrix.col(speciesId) *
+              Eigen::DiagonalMatrix<double, Eigen::Dynamic>(this->Omega).inverse());
+}
 
 void
 StochasticSimulator::stats(Eigen::VectorXd &mean, Eigen::MatrixXd &covariance, Eigen::VectorXd &skewness)
@@ -204,6 +217,33 @@ StochasticSimulator::stats(Eigen::VectorXd &mean, Eigen::MatrixXd &covariance, E
   }
 
 }
+
+void
+StochasticSimulator::fluxStatistics(Eigen::VectorXd &mean, Eigen::MatrixXd &covariance)
+
+{
+
+    Eigen::VectorXd prop(this->numReactions());
+
+    mean = Eigen::VectorXd::Zero(this->numReactions());
+    covariance = Eigen::MatrixXd::Zero(this->numReactions(),this->numReactions());
+
+    // calculate mean fluxes
+    for(int ids=0;ids<this->ensembleSize;ids++){
+     this->evaluate(this->observationMatrix.row(ids), prop);
+     mean += prop;
+     covariance += prop*prop.transpose();
+    }
+    mean /= this->ensembleSize;
+    covariance /= (this->ensembleSize-1);
+
+    covariance-=mean*mean.transpose()*(this->ensembleSize)/(this->ensembleSize-1);
+
+    //
+
+}
+
+
 
 
 size_t

@@ -12,7 +12,7 @@
 #include "kroneckerproduct.hh"
 
 
-namespace Fluc {
+namespace iNA {
 
 /**
  * Important constants.
@@ -38,9 +38,11 @@ const double AVOGADRO  = 6.0221412927e23;
 
 }
 
+
 namespace Math {
 
-/** Tests if the given value is true value or some special value like NaN, inf, etc. */
+/** Tests if the given value is true value or some special value like NaN, inf, etc.
+ * @ingroup math */
 template <typename T>
 inline bool isValue(const T &value)
 {
@@ -51,7 +53,8 @@ inline bool isValue(const T &value)
 }
 
 
-/** Tests if the given value is true value or some special value like NaN, inf, etc. */
+/** Tests if the given value is true value or some special value like NaN, inf, etc.
+ * @ingroup math */
 template <>
 inline bool isValue< std::complex<double> >(const std::complex<double> &value)
 {
@@ -59,7 +62,8 @@ inline bool isValue< std::complex<double> >(const std::complex<double> &value)
 }
 
 
-/** Tests if the given value is true value or some special value like NaN, inf, etc. */
+/** Tests if the given value is true value or some special value like NaN, inf, etc.
+ * @ingroup math */
 template <typename T>
 inline bool isNotValue(const T &value)
 {

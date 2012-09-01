@@ -18,7 +18,8 @@ public:
   /** Enumerates the available methods. */
   typedef enum {
     DIRECT_SSA,
-    OPTIMIZED_SSA
+    OPTIMIZED_SSA,
+    GIBSONBRUCK_SSA
   } SSAMethod;
 
 
@@ -28,8 +29,8 @@ protected:
   double      final_time;
   size_t      steps;
   size_t      num_threads;
-  Fluc::Ast::Model *model;
-  Fluc::Models::StochasticSimulator *simulator;
+  iNA::Ast::Model *model;
+  iNA::Models::StochasticSimulator *simulator;
 
 
 public:
@@ -39,11 +40,11 @@ public:
   /** Copy constructor. */
   SSATaskConfig(const SSATaskConfig &other);
 
-  Fluc::Models::StochasticSimulator *getSimulator() const;
-  void setSimulator(Fluc::Models::StochasticSimulator *sim);
+  iNA::Models::StochasticSimulator *getSimulator() const;
+  void setSimulator(iNA::Models::StochasticSimulator *sim);
 
   virtual void setModelDocument(DocumentItem *document);
-  virtual Fluc::Ast::Model *getModel() const;
+  virtual iNA::Ast::Model *getModel() const;
 
   SSAMethod getMethod() const;
   void setMethod(SSAMethod meth);
@@ -68,7 +69,7 @@ class SSATask : public Task
   Q_OBJECT
 
 protected:
-  Fluc::Models::StochasticSimulator *simulator;
+  iNA::Models::StochasticSimulator *simulator;
 
   QVector<QString> species_id;
   QVector<QString> species_name;
@@ -89,7 +90,7 @@ public:
 
   size_t numSpecies() const;
 
-  Fluc::Models::StochasticSimulator *getModel();
+  iNA::Models::StochasticSimulator *getModel();
 
   virtual QString getLabel();
 

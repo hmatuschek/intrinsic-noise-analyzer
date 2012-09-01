@@ -69,7 +69,7 @@ public:
   virtual ~SpeciesSelectionTaskConfig();
 
   /** Needs to be implemented by the actual task config to return the previously selected model. */
-  virtual Fluc::Ast::Model *getModel() const = 0 ;
+  virtual iNA::Ast::Model *getModel() const = 0 ;
   /** Returns the list of selected species. */
   virtual const QStringList &getSelectedSpecies() const;
   /** Just returns the number of selected species. */
@@ -151,7 +151,7 @@ protected:
   /** Holds the selected integrator type. */
   Integrator integrator;
   /** Holds the selected integration range. */
-  Fluc::ODE::IntegrationRange integration_range;
+  iNA::ODE::IntegrationRange integration_range;
   /** Optional, holds the itermediate steps (for RK4). */
   size_t intermediate_steps;
   /** Holds the absolut error for adaptive integrators. */
@@ -172,9 +172,9 @@ public:
   /** (Re-) Sets the default integrator. */
   virtual void setIntegrator(Integrator integrator);
   /** Returns the selected integration range. */
-  virtual const Fluc::ODE::IntegrationRange &getIntegrationRange() const;
+  virtual const iNA::ODE::IntegrationRange &getIntegrationRange() const;
   /** (Re-) Sets the integration range. */
-  virtual void setIntegrationRange(const Fluc::ODE::IntegrationRange &range);
+  virtual void setIntegrationRange(const iNA::ODE::IntegrationRange &range);
   /** (Re-) Sets the integration range. */
   virtual void setIntegrationRange(double t_end, size_t steps);
   /** Returns the number of intermediate steps. */

@@ -31,12 +31,12 @@ protected:
    * Holds an instance of the interpreter for the LNA model, this object also implements
    * the @c System interface for the integrators.
    */
-  Fluc::Models::SSEInterpreterInterface *interpreter;
+  iNA::Models::SSEInterpreterInterface *interpreter;
 
   /**
    * Holds the stepper being used.
    */
-  Fluc::ODE::Stepper *stepper;
+  iNA::ODE::Stepper *stepper;
 
   /**
    * This table will hold the results of the integration as a time-series.
@@ -82,12 +82,12 @@ public:
   /**
    * Returns the (common) unit of the species.
    */
-  const Fluc::Ast::Unit &getSpeciesUnit() const;
+  const iNA::Ast::Unit &getSpeciesUnit() const;
 
   /**
    * Returns the (common) unit of time.
    */
-  const Fluc::Ast::Unit &getTimeUnit() const;
+  const iNA::Ast::Unit &getTimeUnit() const;
 
   /**
    * Returns the task label.

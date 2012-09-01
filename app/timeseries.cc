@@ -185,12 +185,17 @@ Table::append(Eigen::VectorXd &values)
 }
 
 
-double
+const double &
 Table::operator ()(size_t i, size_t j) const
 {
   return this->data(i,j);
 }
 
+double &
+Table::operator ()(size_t i, size_t j)
+{
+  return this->data(i,j);
+}
 
 Eigen::MatrixXd &
 Table::matrix()

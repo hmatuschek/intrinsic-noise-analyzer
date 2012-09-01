@@ -6,7 +6,7 @@
 
 
 
-namespace Fluc {
+namespace iNA {
 namespace Models {
 
 

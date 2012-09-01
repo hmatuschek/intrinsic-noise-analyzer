@@ -4,8 +4,8 @@
 #include "variabledefinition.hh"
 #include "exception.hh"
 
-using namespace Fluc;
-using namespace Fluc::Ast;
+using namespace iNA;
+using namespace iNA::Ast;
 
 
 Reaction::Reaction(const std::string &id, KineticLaw *law, bool reversible)
@@ -75,6 +75,10 @@ Reaction::hasReactant(GiNaC::symbol id)
 }
 
 
+size_t
+Reaction::numReactants() const {
+  return reactants.size();
+}
 
 GiNaC::ex
 Reaction::getReactantStoichiometry(Species *species)
@@ -154,6 +158,12 @@ Reaction::hasProduct(GiNaC::symbol id)
 }
 
 
+size_t
+Reaction::numProducts() const {
+  return products.size();
+}
+
+
 GiNaC::ex
 Reaction::getProductStoichiometry(Species *species)
 {
@@ -217,10 +227,23 @@ Reaction::addModifier(Species *species)
 }
 
 
+void
+Reaction::remModifier(Species *species)
+{
+  modifiers.erase(species);
+}
+
+
 bool
 Reaction::hasModifier() const
 {
   return 0 == this->modifiers.size();
+}
+
+
+size_t
+Reaction::numModifier() const {
+  return modifiers.size();
 }
 
 
@@ -285,6 +308,18 @@ Reaction::reacEnd()
   return this->reactants.end();
 }
 
+Reaction::const_iterator
+Reaction::reacBegin() const
+{
+  return this->reactants.begin();
+}
+
+Reaction::const_iterator
+Reaction::reacEnd() const
+{
+  return this->reactants.end();
+}
+
 
 Reaction::iterator
 Reaction::prodBegin()
@@ -294,6 +329,18 @@ Reaction::prodBegin()
 
 Reaction::iterator
 Reaction::prodEnd()
+{
+  return this->products.end();
+}
+
+Reaction::const_iterator
+Reaction::prodBegin() const
+{
+  return this->products.begin();
+}
+
+Reaction::const_iterator
+Reaction::prodEnd() const
 {
   return this->products.end();
 }
@@ -312,6 +359,19 @@ Reaction::modEnd()
   return this->modifiers.end();
 }
 
+Reaction::const_mod_iterator
+Reaction::modBegin() const
+{
+  return this->modifiers.begin();
+}
+
+
+Reaction::const_mod_iterator
+Reaction::modEnd() const
+{
+  return this->modifiers.end();
+}
+
 
 void
 Reaction::dump(std::ostream &str)
@@ -320,14 +380,22 @@ Reaction::dump(std::ostream &str)
   // First, dump ractants of reaction:
   for (Reaction::iterator iter = this->reacBegin(); iter != this->reacEnd(); iter++)
   {
-    str << iter->first << "(" << iter->second << ") + ";
+    if (1 == iter->second) {
+      str << iter->first->getSymbol();
+    } else {
+      str << iter->second << " " << iter->first->getSymbol() << " + ";
+    }
   }
   str << " => ";
 
   // Then dump products:
   for (Reaction::iterator iter = this->prodBegin(); iter != this->prodEnd(); iter++)
   {
-    str << iter->first << "(" << iter->second << ") + ";
+    if (1 == iter->second) {
+      str << iter->first->getSymbol() << " + ";
+    } else {
+      str << iter->second << " " << iter->first->getSymbol() << " + ";
+    }
   }
   str << std::endl << " with rate ";
   this->kinetic_law->dump(str);
@@ -336,12 +404,49 @@ Reaction::dump(std::ostream &str)
 }
 
 
+void
+Reaction::accept(Ast::Visitor &visitor) const
+{
+  if (Reaction::Visitor *reac_vis = dynamic_cast<Reaction::Visitor *>(&visitor)) {
+    reac_vis->visit(this);
+  } else {
+    this->traverse(visitor);
+    Definition::accept(visitor);
+  }
+}
+
+
+void
+Reaction::apply(Ast::Operator &op)
+{
+  if (Reaction::Operator *reac_op = dynamic_cast<Reaction::Operator *>(&op)) {
+    reac_op->act(this);
+  } else {
+    this->traverse(op);
+    Definition::apply(op);
+  }
+}
+
+
+void
+Reaction::traverse(Ast::Visitor &visitor) const
+{
+  kinetic_law->accept(visitor);
+}
+
+void
+Reaction::traverse(Ast::Operator &op)
+{
+  kinetic_law->apply(op);
+}
+
+
 
 /* ********************************************************************************************* *
  * Implementation of kinetic law:
  * ********************************************************************************************* */
 KineticLaw::KineticLaw(GiNaC::ex expr)
-  : Node(Node::KINETIC_LAW), Scope(false), expression(expr)
+  : Node(Node::KINETIC_LAW), Scope(0, false), expression(expr)
 {
   // Done.
 }
@@ -354,7 +459,7 @@ KineticLaw::~KineticLaw()
 
 
 GiNaC::ex
-KineticLaw::getRateLaw()
+KineticLaw::getRateLaw() const
 {
   return this->expression;
 }
@@ -408,3 +513,39 @@ KineticLaw::dump(std::ostream &str)
   Scope::dump(str);
 }
 
+
+void
+KineticLaw::accept(Ast::Visitor &visitor) const
+{
+  if (KineticLaw::Visitor *law_vis = dynamic_cast<KineticLaw::Visitor *>(&visitor)) {
+    law_vis->visit(this);
+  } else {
+    this->traverse(visitor);
+    Node::accept(visitor);
+  }
+}
+
+
+void
+KineticLaw::apply(Ast::Operator &op)
+{
+  if (KineticLaw::Operator *law_op = dynamic_cast<KineticLaw::Operator *>(&op)) {
+    law_op->act(this);
+  } else {
+    this->traverse(op);
+    Node::apply(op);
+  }
+}
+
+
+void
+KineticLaw::traverse(Ast::Visitor &visitor) const
+{
+  Scope::traverse(visitor);
+}
+
+void
+KineticLaw::traverse(Ast::Operator &op)
+{
+  Scope::traverse(op);
+}

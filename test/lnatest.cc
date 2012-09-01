@@ -4,11 +4,15 @@
 #include "models/LNAmodel.hh"
 #include "models/sseinterpreter.hh"
 #include "ode/ode.hh"
+#include "parser/parser.hh"
 
 
-using namespace Fluc;
+using namespace iNA;
 
-
+LNATest::~LNATest()
+{
+ //pass
+}
 
 void
 LNATest::testEnzymeKineticsOpen()
@@ -36,17 +40,10 @@ LNATest::compareIntegrators(const std::string &file, double final_time)
   double err_rel = 1e-6;
 
   // Read doc and check for errors:
-  libsbml::SBMLDocument *doc = libsbml::readSBMLFromFile(file.c_str());
-
-  if (0 < doc->getNumErrors())
-  {
-    std::cerr << "Error: ";
-    doc->printErrors(std::cerr); std::cerr << std::endl;
-  }
-  UT_ASSERT_EQUAL(doc->getNumErrors(), 0u);
+  Ast::Model sbml_model; Parser::Sbml::importModel(sbml_model, file);
 
   // Construct LNA model to integrate
-  Models::LNAmodel model(doc->getModel());
+  Models::LNAmodel model(sbml_model);
 
   Eigen::VectorXd initial_state(model.getDimension());
   Eigen::VectorXd final_state_intpr(model.getDimension());
@@ -54,8 +51,6 @@ LNATest::compareIntegrators(const std::string &file, double final_time)
   model.getInitialState(initial_state);
 
   this->integrateViaByteCode(model, initial_state, final_state_intpr, final_time, err_abs, err_rel);
-
-  delete doc;
 }
 
 
@@ -95,9 +90,6 @@ LNATest::suite()
 
   s->addTest(new UnitTest::TestCaller<LNATest>(
                "EnzymeKineticsOpen.", &LNATest::testEnzymeKineticsOpen));
-
-  /*s->addTest(new UnitTest::TestCaller<LNATest>(
-               "Dimerization.", &LNATest::testDimerization));*/
 
   s->addTest(new UnitTest::TestCaller<LNATest>(
                "Dimerization 2.", &LNATest::testDimerization2));

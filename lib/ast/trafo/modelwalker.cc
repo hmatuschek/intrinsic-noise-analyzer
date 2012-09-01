@@ -1,8 +1,8 @@
 #include "modelwalker.hh"
 #include "exception.hh"
 
-using namespace Fluc;
-using namespace Fluc::Ast::Trafo;
+using namespace iNA;
+using namespace iNA::Ast::Trafo;
 
 
 ModelWalker::ModelWalker()

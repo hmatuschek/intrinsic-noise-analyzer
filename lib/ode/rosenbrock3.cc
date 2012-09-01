@@ -1,6 +1,6 @@
 #include "rosenbrock3.hh"
 
-using namespace Fluc::ODE;
+using namespace iNA::ODE;
 
 
 const double Rosenbrock3Constants::gamma = 0.5;

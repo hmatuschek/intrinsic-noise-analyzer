@@ -13,8 +13,11 @@
 
 #include "utils/cputime.hh"
 
+#include "parser/parser.hh"
 
-using namespace Fluc;
+
+
+using namespace iNA;
 
 typedef Models::GenericSSEinterpreter< Models::IOSmodel, Eval::bci::Engine<Eigen::VectorXd>, Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd> > BCIInterpreter;
 typedef Models::GenericSSEinterpreter< Models::IOSmodel, Eval::bcimp::Engine<Eigen::VectorXd>, Eval::bcimp::Engine<Eigen::VectorXd, Eigen::MatrixXd> > BCIMPInterpreter;
@@ -36,22 +39,24 @@ double Benchmark::eps_rel = 1e-6;
 double Benchmark::t_end   = 5.0;
 size_t Benchmark::ensemble_size = 300; // 3000
 
+Benchmark::~Benchmark()
+{
+ // pass
+}
+
 void
 Benchmark::setUp()
 {
-  libsbml::SBMLDocument *doc = libsbml::readSBMLFromFile("test/regression-tests/coremodel2.xml");
-  UT_ASSERT(0 == doc->getNumErrors());
-
-  this->lna = new Models::IOSmodel(doc->getModel());
-  this->document = doc;
+  sbml_model = Parser::Sbml::importModel("test/regression-tests/coremodel2.xml");
+  lna = new Models::IOSmodel(*sbml_model);
 }
 
 
 void
 Benchmark::tearDown()
 {
-  delete this->lna;
-  delete this->document;
+  delete lna;
+  delete sbml_model;
 }
 
 
@@ -255,9 +260,9 @@ Benchmark::integrate_JIT_Rosen4(Models::IOSmodel *model, double t_end, size_t op
 
 
 void
-Benchmark::simulate_BCI_gillespie(libsbml::Model *model, double t, size_t opt_level)
+Benchmark::simulate_BCI_gillespie(Ast::Model *model, double t, size_t opt_level)
 {
-  GillespieBCI simulator(model, ensemble_size, 1234, opt_level, OpenMP::getMaxThreads());
+  GillespieBCI simulator(*model, ensemble_size, 1234, opt_level, OpenMP::getMaxThreads());
   double dt=t/N_steps;
 
   Utils::CpuTime  cpu_clock; cpu_clock.start();
@@ -273,9 +278,9 @@ Benchmark::simulate_BCI_gillespie(libsbml::Model *model, double t, size_t opt_le
 }
 
 void
-Benchmark::simulate_JIT_gillespie(libsbml::Model *model, double t, size_t opt_level)
+Benchmark::simulate_JIT_gillespie(Ast::Model *model, double t, size_t opt_level)
 {
-  GillespieJIT simulator(model, ensemble_size, 1234, opt_level, OpenMP::getMaxThreads());
+  GillespieJIT simulator(*model, ensemble_size, 1234, opt_level, OpenMP::getMaxThreads());
   double dt=t/N_steps;
 
   Utils::CpuTime  cpu_clock; cpu_clock.start();
@@ -292,9 +297,9 @@ Benchmark::simulate_JIT_gillespie(libsbml::Model *model, double t, size_t opt_le
 
 
 void
-Benchmark::simulate_GiNaC_gillespie(libsbml::Model *model, double t, size_t opt_level)
+Benchmark::simulate_GiNaC_gillespie(Ast::Model *model, double t, size_t opt_level)
 {
-  GillespieGiNaC simulator(model, ensemble_size, 1234, opt_level, 1);
+  GillespieGiNaC simulator(*model, ensemble_size, 1234, opt_level, 1);
   double dt=t/N_steps;
 
   Utils::CpuTime  cpu_clock; cpu_clock.start();
@@ -311,9 +316,9 @@ Benchmark::simulate_GiNaC_gillespie(libsbml::Model *model, double t, size_t opt_
 
 
 void
-Benchmark::simulate_BCI_optSSA(libsbml::Model *model, double t, size_t opt_level)
+Benchmark::simulate_BCI_optSSA(Ast::Model *model, double t, size_t opt_level)
 {
-  OptSSABCI simulator(model, ensemble_size, 1234, opt_level, OpenMP::getMaxThreads());
+  OptSSABCI simulator(*model, ensemble_size, 1234, opt_level, OpenMP::getMaxThreads());
   double dt=t/N_steps;
 
   Utils::CpuTime  cpu_clock; cpu_clock.start();
@@ -330,9 +335,9 @@ Benchmark::simulate_BCI_optSSA(libsbml::Model *model, double t, size_t opt_level
 
 
 void
-Benchmark::simulate_JIT_optSSA(libsbml::Model *model, double t, size_t opt_level)
+Benchmark::simulate_JIT_optSSA(Ast::Model *model, double t, size_t opt_level)
 {
-  OptSSAJIT simulator(model, ensemble_size, 1234, opt_level, OpenMP::getMaxThreads());
+  OptSSAJIT simulator(*model, ensemble_size, 1234, opt_level, OpenMP::getMaxThreads());
   double dt=t/N_steps;
 
   Utils::CpuTime  cpu_clock; cpu_clock.start();
@@ -349,9 +354,9 @@ Benchmark::simulate_JIT_optSSA(libsbml::Model *model, double t, size_t opt_level
 
 
 void
-Benchmark::simulate_GiNaC_optSSA(libsbml::Model *model, double t, size_t opt_level)
+Benchmark::simulate_GiNaC_optSSA(Ast::Model *model, double t, size_t opt_level)
 {
-  OptSSAGiNaC simulator(model, ensemble_size, 1234, opt_level, 1);
+  OptSSAGiNaC simulator(*model, ensemble_size, 1234, opt_level, 1);
   double dt=t/N_steps;
 
   Utils::CpuTime  cpu_clock; cpu_clock.start();
@@ -461,61 +466,61 @@ Benchmark::testCoremodelJITRosen4NoOpt()
 void
 Benchmark::testCoremodelBCIGillespieOpt()
 {
-  simulate_BCI_gillespie(this->document->getModel(), t_end, 1);
+  simulate_BCI_gillespie(sbml_model, t_end, 1);
 }
 
 void
 Benchmark::testCoremodelBCIGillespieNoOpt()
 {
-  simulate_BCI_gillespie(this->document->getModel(), t_end, 0);
+  simulate_BCI_gillespie(sbml_model, t_end, 0);
 }
 
 void
 Benchmark::testCoremodelJITGillespieOpt()
 {
-  simulate_JIT_gillespie(this->document->getModel(), t_end, 1);
+  simulate_JIT_gillespie(sbml_model, t_end, 1);
 }
 
 void
 Benchmark::testCoremodelJITGillespieNoOpt()
 {
-  simulate_JIT_gillespie(this->document->getModel(), t_end, 0);
+  simulate_JIT_gillespie(sbml_model, t_end, 0);
 }
 
 void
 Benchmark::testCoremodelGiNaCGillespie()
 {
-  simulate_GiNaC_gillespie(this->document->getModel(), t_end, 0);
+  simulate_GiNaC_gillespie(sbml_model, t_end, 0);
 }
 
 void
 Benchmark::testCoremodelBCIOptSSAOpt()
 {
-  simulate_BCI_optSSA(this->document->getModel(), t_end, 1);
+  simulate_BCI_optSSA(sbml_model, t_end, 1);
 }
 
 void
 Benchmark::testCoremodelBCIOptSSANoOpt()
 {
-  simulate_BCI_optSSA(this->document->getModel(), t_end, 0);
+  simulate_BCI_optSSA(sbml_model, t_end, 0);
 }
 
 void
 Benchmark::testCoremodelJITOptSSAOpt()
 {
-  simulate_JIT_optSSA(this->document->getModel(), t_end, 1);
+  simulate_JIT_optSSA(sbml_model, t_end, 1);
 }
 
 void
 Benchmark::testCoremodelJITOptSSANoOpt()
 {
-  simulate_JIT_optSSA(this->document->getModel(), t_end, 0);
+  simulate_JIT_optSSA(sbml_model, t_end, 0);
 }
 
 void
 Benchmark::testCoremodelGiNaCOptSSA()
 {
-  simulate_GiNaC_optSSA(this->document->getModel(), t_end, 0);
+  simulate_GiNaC_optSSA(sbml_model, t_end, 0);
 }
 
 

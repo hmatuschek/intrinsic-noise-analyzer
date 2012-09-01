@@ -11,7 +11,7 @@
 #define EIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET
 #include <eigen3/Eigen/Sparse>
 
-namespace Fluc {
+namespace iNA {
 namespace Models {
 
 /**
@@ -39,6 +39,7 @@ protected:
   Eigen::SparseMatrix<double> sparseStoichiometry;
 
 public:
+
   /**
    * Is constructed from a SBML model.
    *
@@ -48,7 +49,7 @@ public:
    * @param opt_level Specifies the byte-code optimization level.
    * @param num_threads Specifies the number of threads to use.
    */
-  GenericOptimizedSSA(libsbml::Model *model, int ensembleSize, int seed,
+  GenericOptimizedSSA(const Ast::Model &model, int ensembleSize, int seed,
                size_t opt_level=0, size_t num_threads=OpenMP::getMaxThreads())
     : StochasticSimulator(model, ensembleSize, seed, num_threads),
       ConstantStoichiometryMixin((BaseModel &)(*this)),
@@ -116,6 +117,18 @@ public:
     }
   }
 
+  /** Reimplement evaluate using the generic interpreter. */
+  void
+  evaluate(const Eigen::VectorXd &state, Eigen::VectorXd &propensities)
+
+  {
+
+    interpreter[0].setCode(&all_byte_code);
+    interpreter[0].run(state, propensities);
+
+  }
+
+
   /**
    * The stepper for the SSA
    */
@@ -169,7 +182,6 @@ public:
       } //end time step loop
     } // end ensemble loop
   }
-
 
 private:
     /** Reserves space for propensities of each threads. */

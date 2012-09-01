@@ -1,0 +1,43 @@
+@model:3.1.1 = model "Michaelis-Menten (open reaction)"
+
+@units
+ substance = mole
+ volume = litre
+ area = metre: e=2
+ length = metre
+ time = second
+ litre_per_mole_per_second = mole: e=-3
+ per_second = second: e=-1
+
+@compartments
+ compartment = 5e-16 "compartment"
+
+@species
+ compartment: [species_S]  = 0  "S"
+ compartment: [species_P]  = 0  "P"
+ compartment: [species_E]  = 4e-06  "E"
+ compartment: [species_ES]  = 0  "ES"
+
+@parameters
+ parameter=1e-05
+
+@reactions
+ @r= input "input"
+   -> species_S
+  kin*compartment: kin=parameter
+
+ @r= bind "bind"
+  species_E + species_S -> species_ES
+  species_S*k1*species_E*compartment: k1=5e+07
+
+ @r= unbind "unbind"
+  species_ES -> species_E + species_S
+  compartment*km1*species_ES: km1=5.0
+
+ @r= vcat "vcat"
+  species_ES -> species_E + species_P
+  k2*compartment*species_ES: k2=5.0
+
+ @r= out "out"
+  species_P -> 
+  species_P*kout*compartment: kout=7.0

@@ -6,47 +6,46 @@
 /* ********************************************************************************************* *
  * Implementation of ReactionWrapper a single reaction
  * ********************************************************************************************* */
-ReactionItem::ReactionItem(Fluc::Ast::Reaction *reaction, QObject *parent)
-  : QObject(parent), reaction(reaction), local_parameters(0), itemLabel()
+ReactionItem::ReactionItem(iNA::Ast::Reaction *reaction, QObject *parent)
+  : QObject(parent), _reaction(reaction), _local_parameters(0), _itemLabel()
 {
-  if (reaction->hasName())
-  {
-    itemLabel = reaction->getName().c_str();
-  }
-  else
-  {
-    itemLabel = reaction->getIdentifier().c_str();
+  // Assemble display name
+  if (reaction->hasName()){
+    _itemLabel = reaction->getName().c_str();
+  } else {
+    _itemLabel = reaction->getIdentifier().c_str();
   }
 
-  this->local_parameters = new ReactionParameterList(reaction->getKineticLaw(), this);
+  // Create list model of local parameters:
+  _local_parameters = new ReactionParameterList(reaction->getKineticLaw(), this);
 }
 
 
 const QString &
 ReactionItem::getLabel() const
 {
-  return this->itemLabel;
+  return this->_itemLabel;
 }
 
 
 QString
 ReactionItem::getDisplayName() const
 {
-  return this->itemLabel;
+  return this->_itemLabel;
 }
 
 
-Fluc::Ast::Reaction *
+iNA::Ast::Reaction *
 ReactionItem::getReaction()
 {
-  return this->reaction;
+  return this->_reaction;
 }
 
 
 ReactionParameterList *
 ReactionItem::localParameters()
 {
-  return this->local_parameters;
+  return _local_parameters;
 }
 
 

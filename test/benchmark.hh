@@ -4,12 +4,12 @@
 #include "unittest.hh"
 #include "models/IOSmodel.hh"
 
-namespace Fluc {
+namespace iNA {
 
 class Benchmark : public UnitTest::TestCase
 {
 protected:
-  libsbml::SBMLDocument *document;
+  Ast::Model *sbml_model;
   Models::IOSmodel *lna;
 
   void integrate_BCI_LSODA(Models::IOSmodel *model,
@@ -33,12 +33,12 @@ protected:
   void integrate_JIT_Rosen4(Models::IOSmodel *model,
                            double t, size_t opt_level);
 
-  void simulate_BCI_gillespie(libsbml::Model *model, double t, size_t opt_level);
-  void simulate_JIT_gillespie(libsbml::Model *model, double t, size_t opt_level);
-  void simulate_GiNaC_gillespie(libsbml::Model *model, double t, size_t opt_level);
-  void simulate_BCI_optSSA(libsbml::Model *model, double t, size_t opt_level);
-  void simulate_JIT_optSSA(libsbml::Model *model, double t, size_t opt_level);
-  void simulate_GiNaC_optSSA(libsbml::Model *model, double t, size_t opt_level);
+  void simulate_BCI_gillespie(Ast::Model *model, double t, size_t opt_level);
+  void simulate_JIT_gillespie(Ast::Model *model, double t, size_t opt_level);
+  void simulate_GiNaC_gillespie(Ast::Model *model, double t, size_t opt_level);
+  void simulate_BCI_optSSA(Ast::Model *model, double t, size_t opt_level);
+  void simulate_JIT_optSSA(Ast::Model *model, double t, size_t opt_level);
+  void simulate_GiNaC_optSSA(Ast::Model *model, double t, size_t opt_level);
 
 protected:
   static size_t N_steps;
@@ -81,6 +81,8 @@ public:
 
 public:
   static UnitTest::TestSuite *suite();
+
+  virtual ~Benchmark();
 };
 
 }

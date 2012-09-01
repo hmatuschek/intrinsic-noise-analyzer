@@ -16,6 +16,8 @@ class DocumentTree :  public QAbstractItemModel, public TreeItem
 public:
   DocumentTree(QObject *parent=0);
 
+  void resetCompleteTree() { this->reset(); }
+
   virtual void addDocument(DocumentItem *document);
 
   virtual void addTask(DocumentItem *document, TaskItem *task);

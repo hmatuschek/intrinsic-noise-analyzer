@@ -13,7 +13,7 @@
 #include "utils/cputime.hh"
 
 
-using namespace Fluc::Eval::jit;
+using namespace iNA::Eval::jit;
 
 
 

@@ -1,7 +1,7 @@
 #include "propensityexpansion.hh"
 
-using namespace Fluc;
-using namespace Fluc::Models;
+using namespace iNA;
+using namespace iNA::Models;
 
 propensityExpansion::propensityExpansion(BaseModel &base):
   IntensiveSpeciesMixin(base), ConstCompartmentMixin(base), ReasonableModelMixin(base),
@@ -26,7 +26,7 @@ propensityExpansion::propensityExpansion(BaseModel &base):
         */
 
         // define variable for inverse volume
-        GiNaC::symbol alpha;
+        GiNaC::symbol inverseVolume;
         GiNaC::ex volume = base.getCompartment(j)->getSymbol();
 
         // and use it to obtain taylor series
@@ -38,11 +38,11 @@ propensityExpansion::propensityExpansion(BaseModel &base):
         try {
 
             // substitute inverse volume
-            GiNaC::ex temp = (this->rates[i]).subs(volume==1/alpha);
+            GiNaC::ex temp = (this->rates[i]).subs(volume==1/inverseVolume);
 
             // ...and do the expansion
-            taylor = temp.series(alpha==0,1);
-            principalPart = series_to_poly(temp.series(alpha==0,-1));
+            taylor = temp.series(inverseVolume==0,1);
+            principalPart = series_to_poly(temp.series(inverseVolume==0,-1));
 
         } catch (std::runtime_error err) {
 
@@ -51,23 +51,18 @@ propensityExpansion::propensityExpansion(BaseModel &base):
             principalPart = 0;
         }
 
-        if(!principalPart.is_zero() || taylor.coeff(alpha,-1).is_zero())
+        if(!principalPart.is_zero() || taylor.coeff(inverseVolume,-1).is_zero())
         {
             // simply skip if principal part is non-zero
         }
         else
         {
             // use expansion of rates
-            this->rates[i]  = volume*taylor.coeff(alpha,-1);
-            this->rates1[i] = taylor.coeff(alpha,0);
+            this->rates[i]  = volume*taylor.coeff(inverseVolume,-1);
+            this->rates1[i] = taylor.coeff(inverseVolume,0);
         }
      }
     }
-
-    /* @todo fold constants later */
-    // and fold all constants
-    this->rates[i]  = base.foldConstants(this->rates[i]);
-    this->rates1[i] = base.foldConstants(this->rates1[i]);
 
     // ...done
 

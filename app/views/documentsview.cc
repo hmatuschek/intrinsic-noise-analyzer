@@ -28,20 +28,16 @@ DocumentsView::selectionChanged(const QItemSelection &selected, const QItemSelec
   // First call default handler:
   QTreeView::selectionChanged(selected, deselected);
 
-  // try to find out, which item was selected:
-  if (0 == selected.indexes().size())
-  {
-    return;
-  }
+  // Anyway reset the selected item in application:
+  Application::getApp()->resetSelectedItem();
 
+  // try to find out, which item was selected:
+  if (0 == selected.indexes().size()) { return; }
   QModelIndex idx = selected.indexes().front();
-  if (! idx.isValid())
-  {
-    return;
-  }
+  if (! idx.isValid()) { return; }
 
   // Signal Application to open the index
-  Application::getApp()->openModelIndex(idx);
+  Application::getApp()->itemSelected(idx);
 }
 
 

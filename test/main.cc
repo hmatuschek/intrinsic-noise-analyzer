@@ -12,14 +12,17 @@
 #include "optionparsertest.hh"
 #include "odetest.hh"
 #include "modelcopytest.hh"
+#include "constantfoldertest.hh"
+#include "conservationanalysistest.hh"
+#include "unitparsertest.hh"
 #include "benchmark.hh"
 
 #include "utils/option_parser.hh"
 #include "utils/logger.hh"
 
 
-using namespace Fluc;
-using namespace Fluc::UnitTest;
+using namespace iNA;
+using namespace iNA::UnitTest;
 
 
 int main(int argc, char *argv[])
@@ -51,8 +54,8 @@ int main(int argc, char *argv[])
   }
 
   // Assemble logger:
-  Utils::Logger::get().addHandler(
-        new Utils::TextMessageHandler(std::cerr, Utils::Message::INFO));
+  /*Utils::Logger::get().addHandler(
+        new Utils::TextMessageHandler(std::cerr, Utils::Message::INFO));*/
 
   // Construct test-runner
   TestRunner runner(std::cout);
@@ -68,9 +71,7 @@ int main(int argc, char *argv[])
     runner.addSuite(ODETest::suite());
   if (0 == skipped_tests.count("ModelCopy"))
     runner.addSuite(ModelCopyTest::suite());
-  if (0 == skipped_tests.count("LNA"))
-    runner.addSuite(LNATest::suite());
-  if (0 == skipped_tests.count("MersenneTwister"))
+  if (0 == skipped_tests.count("RNG"))
     runner.addSuite(MersenneTwisterTest::suite());
   if (0 == skipped_tests.count("Regression"))
     runner.addSuite(RegressionTest::suite());
@@ -78,6 +79,12 @@ int main(int argc, char *argv[])
     runner.addSuite(SBMLSHParserTest::suite());
   if (0 == skipped_tests.count("OptionParser"))
     runner.addSuite(OptionParserTest::suite());
+  if (0 == skipped_tests.count("ConstantFolder"))
+    runner.addSuite(ConstantFolderTest::suite());
+  if (0 == skipped_tests.count("ConservationAnalysis"))
+    runner.addSuite(ConservationAnalysisTest::suite());
+  if (0 == skipped_tests.count("UnitParser"))
+    runner.addSuite(UnitParserTest::suite());
   if (0 == skipped_tests.count("Benchmark"))
     runner.addSuite(Benchmark::suite());
 

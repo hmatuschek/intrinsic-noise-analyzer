@@ -4,12 +4,12 @@
 #include "functiondefinition.hh"
 
 
-using namespace Fluc;
-using namespace Fluc::Ast;
+using namespace iNA;
+using namespace iNA::Ast;
 
 
 Module::Module(const std::string &name)
-  : Scope(false), name(name), time_symbol("t"),
+  : Scope(0, false), name(name), time_symbol("t"),
     substance_unit(ScaledBaseUnit(ScaledBaseUnit::MOLE, 1, 0, 1)),
     volume_unit(ScaledBaseUnit(ScaledBaseUnit::LITRE, 1, 0, 1)),
     area_unit(ScaledBaseUnit(ScaledBaseUnit::METRE, 1, 0, 2)),
@@ -54,7 +54,7 @@ Module::Module(const std::string &name)
 
 Module::~Module()
 {
-  // Free constaints:
+  // Free constraints:
   for (constraintIterator iter = this->constraints.begin();
        iter != this->constraints.end(); iter++)
   {
@@ -115,7 +115,7 @@ Module::remDefinition(Definition *def)
 
 
 size_t
-Module::getNumConstraints() const
+Module::numConstraints() const
 {
   return this->constraints.size();
 }
@@ -125,6 +125,11 @@ void
 Module::addConstraint(Constraint *constraint)
 {
   this->constraints.push_back(constraint);
+}
+
+void
+Module::remConstraint(Constraint *constraint) {
+  this->constraints.remove(constraint);
 }
 
 
@@ -157,7 +162,7 @@ Module::constraintEnd() const
 
 
 GiNaC::symbol
-Module::getTime()
+Module::getTime() const
 {
   return this->time_symbol;
 }
@@ -323,83 +328,18 @@ Module::getUnitDefinition(const std::string &identifier) const
 }
 
 
-bool
-Module::hasVariable(const GiNaC::symbol &symbol) const
+UnitDefinition * const
+Module::getUnitDefinition(const Unit &unit) const
 {
-  return this->symbol_table.end() != this->symbol_table.find(symbol);
-}
-
-
-bool
-Module::hasVariable(const std::string &identifier) const
-{
-  return this->hasDefinition(identifier) && Node::isVariableDefinition(this->getDefinition(identifier));
-}
-
-
-VariableDefinition *
-Module::getVariable(const std::string &identifier)
-{
-  Ast::Definition *def = this->getDefinition(identifier);
-
-  if (! Node::isVariableDefinition(def))
-  {
-    SymbolError err;
-    err << "Symbol " << identifier << " does not name a variable.";
-    throw err;
+  for (Module::const_iterator item=this->begin(); item!=this->end(); item++) {
+    if (! Ast::Node::isUnitDefinition(*item)) { continue; }
+    Ast::UnitDefinition * const unit_def = (Ast::UnitDefinition * const)(*item);
+    if (unit_def->getUnit() == unit) { return unit_def; }
   }
 
-  return static_cast<Ast::VariableDefinition *>(def);
-}
-
-
-VariableDefinition * const
-Module::getVariable(const std::string &identifier) const
-{
-  Ast::Definition *def = this->getDefinition(identifier);
-
-  if (! Node::isVariableDefinition(def))
-  {
-    SymbolError err;
-    err << "Symbol " << identifier << " does not name a variable.";
-    throw err;
-  }
-
-  return static_cast<Ast::VariableDefinition *>(def);
-}
-
-
-VariableDefinition *
-Module::getVariable(const GiNaC::symbol &symbol)
-{
-  std::map<GiNaC::symbol, VariableDefinition *, GiNaC::ex_is_less>::iterator item
-      = this->symbol_table.find(symbol);
-
-  if (this->symbol_table.end() == item)
-  {
-    SymbolError err;
-    err << "Symbol " << symbol << " does not name a variable.";
-    throw err;
-  }
-
-  return item->second;
-}
-
-
-VariableDefinition * const
-Module::getVariable(const GiNaC::symbol &symbol) const
-{
-  std::map<GiNaC::symbol, VariableDefinition *, GiNaC::ex_is_less>::const_iterator item
-      = this->symbol_table.find(symbol);
-
-  if (this->symbol_table.end() == item)
-  {
-    SymbolError err;
-    err << "Symbol " << symbol << " does not name a variable.";
-    throw err;
-  }
-
-  return item->second;
+  SymbolError err;
+  err << "Can not find matching unit!";
+  throw err;
 }
 
 

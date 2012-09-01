@@ -11,7 +11,7 @@ class SteadyStateSpectrumPlot : public Plot::Figure
   Q_OBJECT
 
 public:
-  SteadyStateSpectrumPlot(Table &spectrum, const Fluc::Ast::Unit &species_unit, const Fluc::Ast::Unit &time_unit, QObject *parent=0);
+  SteadyStateSpectrumPlot(Table &spectrum, const iNA::Ast::Unit &species_unit, const iNA::Ast::Unit &time_unit, QObject *parent=0);
 };
 
 

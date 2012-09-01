@@ -36,7 +36,7 @@ public:
   /**
    * Constructs a new "Compartments" item for the DocumentTree.
    */
-  CompartmentsItem(Fluc::Ast::Model *model, QObject *parent=0);
+  CompartmentsItem(iNA::Ast::Model *model, QObject *parent=0);
 
   /**
    * Implemente @c Wrapper interface.

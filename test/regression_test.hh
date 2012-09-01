@@ -4,7 +4,7 @@
 #include "unittest.hh"
 
 
-namespace Fluc {
+namespace iNA {
 
 
 class RegressionTest : public UnitTest::TestCase
@@ -19,6 +19,9 @@ public:
 
 public:
   static UnitTest::TestSuite *suite();
+
+  virtual ~RegressionTest();
+
 };
 
 

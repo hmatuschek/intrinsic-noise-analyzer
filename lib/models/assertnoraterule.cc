@@ -1,7 +1,8 @@
 #include "assertnoraterule.hh"
+#include "exception.hh"
 
-using namespace Fluc;
-using namespace Fluc::Models;
+using namespace iNA;
+using namespace iNA::Models;
 
 
 AssertNoRateRule::AssertNoRateRule(BaseModel &model)

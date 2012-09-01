@@ -19,16 +19,16 @@ SET(libina_HEADERS ina.hh smartptr.hh linkedlist.hh
 
 # Then, the AST classes:
 SET(libina_ast_SOURCES
-    ast/definition.cc ast/assembler.cc ast/functiondefinition.cc ast/node.cc ast/rule.cc
+    ast/definition.cc ast/functiondefinition.cc ast/node.cc ast/rule.cc
     ast/reaction.cc ast/scope.cc ast/variabledefinition.cc ast/constraint.cc ast/module.cc
     ast/evaluate.cc ast/unitdefinition.cc ast/species.cc ast/compartment.cc ast/parameter.cc
-    ast/model.cc ast/converter.cc)
+    ast/model.cc ast/converter.cc ast/visitor.cc ast/unitconverter.cc)
 SET(libina_ast_HEADERS
     ast/ast.hh
-    ast/definition.hh ast/assembler.hh ast/functiondefinition.hh ast/node.hh ast/rule.hh
+    ast/definition.hh ast/functiondefinition.hh ast/node.hh ast/rule.hh
     ast/reaction.hh ast/scope.hh ast/variabledefinition.hh ast/constraint.hh ast/module.hh
     ast/evaluate.hh ast/unitdefinition.hh ast/species.hh ast/compartment.hh ast/parameter.hh
-    ast/model.hh ast/converter.hh)
+    ast/model.hh ast/converter.hh ast/visitor.hh ast/unitconverter.hh)
 
 SET(libina_ast_trafo_SOURCES
     ast/trafo/walker.cc ast/trafo/pass.cc ast/trafo/constantfolder.cc ast/trafo/dump.cc
@@ -39,17 +39,56 @@ SET(libina_ast_trafo_HEADERS ast/trafo/trafo.hh
     ast/trafo/assignmentruleinliner.hh ast/trafo/substitutioncollector.hh ast/trafo/modelwalker.hh
     ast/trafo/modelcopyist.hh)
 
-SET(libina_sbmlsh_SOURCES
-    sbmlsh/lexer.cc sbmlsh/parser.cc sbmlsh/productions.cc)
-SET(libina_sbmlsh_HEADERS
-    sbmlsh/lexer.hh sbmlsh/parser.hh sbmlsh/productions.hh)
+SET(libina_trafo_SOURCES
+    trafo/assertions.cc trafo/substitution.cc trafo/constantfolder.cc
+    trafo/algebraicconstraintsolver.cc trafo/partialmodel.cc trafo/assignmentruleinliner.cc
+    trafo/conservationanalysis.cc trafo/reversiblereactionconverter.cc)
+SET(libina_trafo_HEADERS trafo/trafo.hh
+    trafo/assertions.hh trafo/substitution.hh trafo/constantfolder.hh
+    trafo/algebraicconstraintsolver.hh trafo/partialmodel.hh trafo/assignmentruleinliner.hh
+    trafo/conservationanalysis.hh trafo/reversiblereactionconverter.hh)
+
+SET(libina_sbmlsh_parser_SOURCES
+    parser/sbmlsh/lexer.cc parser/sbmlsh/parser.cc parser/sbmlsh/productions.cc
+    parser/sbmlsh/assembler.cc parser/sbmlsh/writer.cc parser/sbmlsh/sbmlsh.cc)
+SET(libina_sbmlsh_parser_HEADERS
+    parser/sbmlsh/lexer.hh parser/sbmlsh/parser.hh parser/sbmlsh/productions.hh
+    parser/sbmlsh/assembler.hh parser/sbmlsh/writer.hh parser/sbmlsh/sbmlsh.hh)
+
+SET(libina_sbml_parser_SOURCES
+    parser/sbml/sbml.cc parser/sbml/assembler.cc parser/sbml/writer.cc)
+SET(libina_sbml_parser_HEADERS
+    parser/sbml/sbml.hh parser/sbml/assembler.hh parser/sbml/writer.hh)
+
+SET(libina_expr_parser_SOURCES
+    parser/expr/lexer.cc parser/expr/parser.cc parser/expr/productions.cc parser/expr/assembler.cc
+    parser/expr/writer.cc)
+SET(libina_expr_parser_HEADERS parser/expr/expr.hh
+    parser/expr/lexer.hh parser/expr/parser.hh parser/expr/productions.hh parser/expr/assembler.hh
+    parser/expr/writer.hh)
+
+SET(libina_unit_parser_SOURCES
+    parser/unit/unitparser.cc)
+SET(libina_unit_parser_HEADERS
+    parser/unit/unitparser.hh)
+
+SET(libina_parser_SOURCES
+    parser/automata.cc parser/lexer.cc parser/production.cc parser/exception.cc
+    ${libina_sbmlsh_parser_SOURCES}
+    ${libina_sbml_parser_SOURCES}
+    ${libina_expr_parser_SOURCES}
+    ${libina_unit_parser_SOURCES})
+SET(libina_parser_HEADERS
+    parser/automata.hh parser/lexer.hh parser/production.hh parser/exception.hh
+    ${libina_sbmlsh_parser_HEADERS}
+    ${libina_sbml_parser_HEADERS}
+    ${libina_expr_parser_HEADERS}
+    ${libina_unit_parser_HEADERS})
 
 SET(libina_utils_SOURCES
-    utils/exception.cc utils/automata.cc utils/lexer.cc utils/tokenrules.cc utils/parser.cc
-    utils/unittest.cc utils/option_parser.cc utils/cputime.cc utils/logger.cc)
+    utils/exception.cc utils/unittest.cc utils/option_parser.cc utils/cputime.cc utils/logger.cc)
 SET(libina_utils_HEADERS
-    utils/exception.hh utils/automata.hh utils/lexer.hh utils/tokenrules.hh utils/parser.hh
-    utils/unittest.hh utils/option_parser.hh utils/cputime.hh utils/logger.hh)
+    utils/exception.hh utils/unittest.hh utils/option_parser.hh utils/cputime.hh utils/logger.hh)
 
 # Add sources for BaseModel and derived classes.
 SET(libina_models_SOURCES
@@ -65,6 +104,7 @@ SET(libina_models_SOURCES
     models/stochasticsimulator.cc
     models/gillespieSSA.cc
     models/optimizedSSA.cc
+    models/gibsonbruckSSA.cc
     models/explicittimedependencemixin.cc
     models/assertnoalgebraicconstraintmixin.cc
     models/assertnoconstantspeciesmixin.cc
@@ -91,6 +131,7 @@ SET(libina_models_HEADERS models/models.hh
     models/stochasticsimulator.hh
     models/gillespieSSA.hh
     models/optimizedSSA.hh
+    models/gibsonbruckSSA.hh
     models/partialsumSSA.hh
     models/optimizedSSAginac.hh
     models/gillespieSSAginac.hh
@@ -178,9 +219,10 @@ ENDIF(WITH_EXECUTION_ENGINE_LLVM)
 SET(libina_SOURCES
     ${libina_SOURCES}
     ${libina_utils_SOURCES}
-    ${libina_sbmlsh_SOURCES}
+    ${libina_parser_SOURCES}
     ${libina_ast_SOURCES}
     ${libina_ast_trafo_SOURCES}
+    ${libina_trafo_SOURCES}
     ${libina_models_SOURCES}
     ${libina_nlesolve_SOURCES}
     ${libina_ode_SOURCES}
@@ -190,9 +232,10 @@ SET(libina_SOURCES
 SET(libina_HEADERS
     ${libina_HEADERS}
     ${libina_utils_HEADERS}
-    ${libina_sbmlsh_HEADERS}
+    ${libina_parser_HEADERS}
     ${libina_ast_HEADERS}
     ${libina_ast_trafo_HEADERS}
+    ${libina_trafo_HEADERS}
     ${libina_models_HEADERS}
     ${libina_nlesolve_HEADERS}
     ${libina_ode_HEADERS}

@@ -1,6 +1,6 @@
 #include "sseinterpreter.hh"
 
-using namespace Fluc::Models;
+using namespace iNA::Models;
 
 
 SSEInterpreterInterface::~SSEInterpreterInterface() {

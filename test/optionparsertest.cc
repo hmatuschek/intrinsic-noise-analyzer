@@ -2,8 +2,8 @@
 #include "utils/option_parser.hh"
 
 
-using namespace Fluc;
-using namespace Fluc::Utils::Opt;
+using namespace iNA;
+using namespace iNA::Utils::Opt;
 
 
 void

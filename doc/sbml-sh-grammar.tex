@@ -1,0 +1,295 @@
+\documentclass[a4paper]{article}
+
+
+\usepackage{listings}
+\usepackage{syntax}
+\usepackage{a4wide}
+
+	
+\title{\texttt{SBML-SH} a Precise Grammar Specification}
+%\author{Matuschek, H. \and Thomas, P.}
+%\date{\today}
+
+\setlength{\parskip}{\medskipamount}
+\setlength{\parindent}{0pt}
+
+\begin{document}
+\lstset{basicstyle=\small\ttfamily}
+
+\maketitle
+
+\section{Introduction}
+Some introducing words about SBML-SH.
+\begin{itemize}
+\item SBML -- markup language for the description of biological systems. 
+\item SBML-SH \emph{short handed} SBML, a condensed description language forms a subset of SBML. 
+\item for readability and allows to assemble SBML models with a text editor, no need for a complex modelling software.
+\item Software 
+\begin{itemize}
+\item sbmlsh.py; translation SBML-SH -> SBML
+\item iNA (since version 0.4.0), native support for SBML-SH
+\end{itemize}
+\item This document tries to define a precise grammar specification for SBML-SH in (extended) Bacus-Nauer-Form ((E)BNF).
+\end{itemize}
+
+\subsection{(E)BNF Notation}
+The grammar specification in the next section is given using syntax diagrams and the Bacus-Nauer form (EBF) with two extensions to make the definitions more compact.
+
+\begin{itemize}
+  \item Productions in rectangular brackets are optional.
+  \item Parenthesis may be used to group productions and alternatives.
+\end{itemize}
+
+Both extensions are borrowed from the extended BNF.
+
+
+\section{\texttt{SBML-SH} Grammar}
+The general structure of a SBML-SH file consists of a mandatory model header and followed by optional sections for unit, compartment, species, parameter, reaction and event definitions. Figure \ref{fig:root} shows the syntax diagram of the general file structure.
+
+\begin{figure}[h!]
+\centering
+\begin{syntdiag*}[\left{>>-}\right{...}]
+<ModelHeader>
+\begin{stack} \\ <EOL> <UnitSec> \end{stack}	
+\begin{stack} \\ <EOL> <CompartmentSec> \end{stack}	
+\end{syntdiag*}
+
+\begin{syntdiag*}[\left{...}\right{...}]
+\begin{stack} \\ <EOL> <SpeciesSec> \end{stack}	
+\begin{stack} \\ <EOL> <ParameterSec> \end{stack}	
+\begin{stack} \\ <EOL> <RuleSec> \end{stack}	
+\end{syntdiag*}
+
+\begin{syntdiag*}[\left{...}\right{-><}]
+\begin{stack} \\ <EOL> <ReactionSec> \end{stack}	
+\begin{stack} \\ <EOL> <EventSec> \end{stack}	
+\end{syntdiag*}
+\caption{General file structure of SBML-SH.} \label{fig:root}
+\end{figure}
+
+As only the \emph{ModelHeader} production is mandatory, an empty model (without species etc.) is a valid SBML-SH model.
+
+
+\subsubsection*{model header}
+The model header is mandatory and defines some basic information about the model, see table \ref{tab:head}. It specifies the SBML-SH version, model identifier, an optional model name and optionally the default units for the model (tab. \ref{tab:defaultunit}).
+
+\begin{table}[h!]
+\begin{grammar}
+<ModelHeader> ::= '@model' ':' <VersionString> '=' <Identifier> [<QuotedString>] [<EOL> <DefaultUnitDefinitions>]
+
+<VersionString> ::= <Integer> '.' <Integer> '.' <Integer>
+\end{grammar}
+\caption{Model header and default unit definition grammar.} \label{tab:head}
+\end{table}
+
+The version number consists of 3 integers separated by dots, i.e. $x.y.z$, where $x$ denotes the addressed SBML level, $y$ the SBML version of that level and $z$ the version of SBML-SH for the SBML level and version. The mandatory \emph{Identifier} production specifies the model ID, an unique identifier for model. The model identifier may be followed by a descriptive (non-unique) name of the SBML model. 
+
+\begin{table}[h!]
+\begin{grammar}
+<DefaultUnitDefinitions> ::= <DefaultUnitDefinition> <DefaultUnitDefinitions>
+  \alt <DefaultUnitDefinition>
+
+<DefaultUnitDefinition> ::= ('s' | 't' | 'v' | 'a' | 'l' | 'e' | 'c') '=' <GenericUnit>
+
+<GenericUnit> ::= 'ampere' | 'becquerel' | 'candela' | 'coulomb' | 'dimensionless' | 'farad' | 'gram' | 'katal' | 'gray' | 'kelvin' | 'henry' | 'kilogram' | 'hertz' | 'litre' | 'item' | 'lumen' | 'joule' | 'lux' | 'metre' | 'mole' | 'newton' | 'ohm' | 'pascal' | 'radian' | 'second' | 'watt' | 'siemens' | 'weber' | 'sievert' | 'steradian' | 'tesla' | 'volt'
+\end{grammar}
+\caption{Default unit definition grammar} \label{tab:defaultunit}
+\end{table}
+
+After the mandatory part of the model header, it is possible to define the model global default units using the optional \emph{DefaultUnitDefinition} production shown in table \ref{tab:defaultunit}. This production is a series of assignments defining the default unit for substance (\emph{s}), time (\emph{t}), volume (\emph{v}), area (\emph{a}), length (\emph{l}), ??? (\emph{e}) and ??? (\emph{c}). The identifier of the right side of the assignment must be one of the pre-defined basis units of SBML.
+
+The following SBML-SH code shows an example model header and its SBML equivalent.
+
+\begin{lstlisting}
+@model:3.3.1=mymodel "My model"
+ s=substance, t=second, v=litre
+\end{lstlisting}
+
+\lstset{language=XML}
+\begin{lstlisting}
+<model id="mymodel" name="My Model" substanceUnits="substance"
+                     timeUnits="second" volumeUnits="litre">
+\end{lstlisting}
+
+\subsubsection*{unit definition}
+Within the unit section it is possible to define new units\footnote{Altough I do not see the advantage here for the definition of new units if they can not be addressed within species or compartment definitions.}. A unit definition starts with the \emph{@units} keyword followed by a list of at least one unit-definition, see figure \ref{fig:unit}. 
+
+\begin{table}[h!]
+\begin{grammar}
+<UnitSec> ::= '@units' <UnitDefinitionList>
+
+<UnitDefinitionList> ::= <EOL> <UnitDefinition> <UnitDefinitionList>
+  \alt <EOL> <UnitDefinition>
+  
+<UnitDefinition> ::= <Identifier> '=' <ScaledUnitList> [<QuotedString>]
+
+<ScaledUnitList> ::= <ScaledUnit>
+  \alt <ScaledUnit> ';' <ScaledUnitList>
+
+<ScaledUnit> ::= <GenericUnit> [':' <ScaledUnitModifiers>]
+
+<ScaledUnitModifiers> ::= ('m' | 's' | 'e' | 'o') '=' <Number> [',' <ScaledUnitModifiers>]
+\end{grammar}
+\caption{Unit definition grammar.} \label{fig:unit}
+\end{table}
+Each unit definition consists of an \emph{Identifier} specifying the unique identifier of the unit and a list of scaled generic units (\emph{ScaledUnit} production). A \emph{ScaledUnit} production consists of a generic SBML unit followed by an optional modifier specifying the exponent (\emph{e}), multiplier (\emph{m}) scale (\emph{s}) or offset (\emph{o}). For the definition of the \emph{GenericUnit} production, see table \ref{tab:defaultunit}.
+
+
+\subsubsection*{compartment definition}
+Within the compartment section (table \ref{tab:compartment}), compartments for the species are defined. This section starts with the \emph{@compartments} keyword, followed by a list of at least one compartment definition separated by line-breaks.
+
+\begin{table}[h!]
+\begin{grammar}
+<CompartmentSec> ::= '@compartments' <CompartmentList>
+
+<CompartmentList> ::= <EOL> <Compartment> <CompartmentList>
+  \alt <EOL> <Compartment> 
+  
+<Compartment> ::= <Identifier> ['"<"'<Identifier>] ['=' <Expression>] [<QuotedString>]
+\end{grammar}
+\caption{Compartment definition grammar.} \label{tab:compartment}
+\end{table}
+A compartment definition consists of an identifier specifying its unique id followed by an optional initial value.
+
+Note: Modifiers to specify whether the compartment is variable or constant in size are not defined. Therefore all compartments are assumed to be constant. If this is assumed, the initial value for the compartment must be mandatory.
+
+
+\subsubsection*{species definition}
+The species section (table \ref{tab:species}) consists of the \emph{@species} keyword followed by a list of at least one species definition. The species definitions (\emph{Species} production) are separated by line breaks and consists of the identifier of the compartment associated with the species, the species identifier, initial value, an optional list of species modifiers and an optional (descriptive) name of the species.
+
+\begin{table}[h!]
+\begin{grammar}
+<SpeciesSec> ::= '@species' <SpeciesList>
+
+<SpeciesList> ::= <EOL> <Species> <SepeciesList> 
+ \alt <EOL> <Species> 
+ 
+<Species> ::= <Identifier> ':' (('[' <Identifier>']') | <Identifier>) '=' <Expression> [<SpeciesModifierList>] [<QuotedString>]
+
+<SpeciesModifierList> ::= <SpeciesModifier> <SpeciesModifierList>
+  \alt <SpecieModifier>
+  
+<SpeciesModifier> ::= 's' | 'b' | 'c'
+\end{grammar}
+\caption{Species definition grammar.} \label{tab:species}
+\end{table}
+
+The optional species modifier list allows to specify whether the species has substance units (\emph{s}), has a boundary condition (\emph{b}) or is constant (\emph{c}). Any combination of these modifiers are allowed. If the identifier of the species is given in rectangular brackets, The initial value is assumed to be given in concentration units rather then substance units.
+
+
+\subsubsection*{parameter definition}
+The parameter section consists of the \emph{@parameters} keyword followed by a list of at least one parameter definition separated by line breaks. The parameter definition consists of the unique identifier of the parameter and the initial value of the parameter followed by an optional \emph{v} modifier specifying that the parameter is variable, means not constant and an optional name.
+
+\begin{table} [h!]
+\begin{grammar}
+<ParameterSec> ::= '@parameters' <ParameterList>
+
+<ParameterList> ::= <EOL> <Parameter> <ParameterList>
+  \alt <EOL> <Parameter>
+  
+<Parameter> ::= <Identifier> '=' <Expression> ['v'] [QuotedString]
+\end{grammar}
+\end{table}
+
+
+\subsubsection*{rule definition}
+SBML-SH allows to define rate and assignment rules for the model. This can be done within the rule section (table \ref{tab:rules}). The rule section consists of the \emph{@rules} keyword and a list of at least one rule separated by line-breaks. 
+
+\begin{table}[h!]
+\begin{grammar}
+<RuleSec> ::= '@rules' <RuleList>
+
+<RuleList> ::= <EOL> <Rule> <RuleList>
+  \alt <EOL> <Rule>
+  
+<Rule> ::= '@assign' ':' <Identifier> '=' <Expression>
+\alt '@rate' ':' <Identifier> '=' <Expression>
+\end{grammar}
+\caption{Grammar of the rules section.} \label{tab:rules}
+\end{table}
+
+A rule is consists of an identifier of the species (or paramter) the rule is defined for and followed by an expression. This defines a assignment rule for the species. Alternatively, if the rule is prefixed with the \emph{@rate} keyword, a rate rule is defined.
+
+
+\subsubsection*{reaction definition}
+Reactions can be defined within the reactions section (\ref{tab:reactions}). This section consists of the \emph{@reactions} keyword followed by a list of at least on reaction definition separated by line breaks. 
+
+\begin{table}[h!]
+\begin{grammar}
+<ReactionSec> ::= '@reactions' <ReactionList>
+
+<ReactionList> ::= <EOL> <Reaction> <ReactionList>
+  \alt <EOL> <Reaction>
+  
+<Reaction> ::= ('@r' | '@rr') '=' <Identifier> [<QuotedString>] <EOL> <ReactionEquation> [':' <ReactionModifierList>] <EOL> <KineticLaw>
+
+<ReactionModifierList> ::= <Identifier> [',' <ReactionModifierList>]
+\end{grammar}
+\caption{Grammar of the reactions section} \label{tab:reactions}
+\end{table}
+
+A reaction definition consists of at least 3 lines. The first line starts with either the \emph{@r} or with the \emph{@rr} keyword. The first defines an irreversible reaction while the latter defines a reversible one. The keyword is followed by the unique identifier of the reaction and an optional descriptive name. The second line defines the reaction equation (table \ref{tab:reaceq}) followed by an optional identifier specifying a modifier species. And the third line specifies the kinetic law expression (table \ref:{tab:reackin}).
+
+\begin{table}[h!]
+\begin{grammar}
+<ReactionEquation> ::= <Stoichiometry> '$->$' [<Stoichiometry>]
+  \alt '$->$' <Stoichiometry>
+  
+<Stoichiometry> ::= [<Integer>] <Identifier> '+' <Stoichiometry>
+  \alt [<Integer>] <Identifier>
+\end{grammar}
+\caption{Grammar of the reaction equation.} \label{tab:reaceq}
+\end{table}
+  
+A reaction equation consists of either a stoichiometry expression for the reactants and an optional stoichiometry expression for the products, or by defining only the stoichiometry for the products. The stoichiometry expression consists of a sum of identifiers of the reactants or products prefixed with an optional integer, specifying the multiplicity for the species. If the multiplicity is left, 1 is assumed.
+
+\begin{table}[h!]
+\begin{grammar}
+<KineticLaw> ::= <Expression> [':' <LocalParameterList>]
+
+<LocalParameterList> ::= <LocalParameter> ',' <LocalParameterList>
+  \alt <LocalParameter>
+  
+<LocalParameter> ::= <Identifier> '=' <Expression>
+\end{grammar}
+\caption{Grammar of the kinetic law definition} \label{tab:reackin}
+\end{table}
+
+The kinetic law definition consist of an expression for the kinetic law followed by an optional list of local parameters. The list of local parameters is just a semicolon separated list of assignments, where the identifier specifies the unique identifier of the local parameter and the expression specifies its value.
+
+\subsubsection*{event definition}
+Events can be described within the events section. This section consist of the \emph{@events} keyword followed by a list of at least one event definition. 
+\begin{table} [h!]
+\begin{grammar}
+<EventSec> ::= '@events' <EventList>
+
+<EventList> ::= <EOL> <Event> <EOL> <EventList>
+  \alt <EOL> <Event>
+  
+<Event> ::= <Identifier> '=' <Condition> [';' <Expression>] ':' <AssignmentList> [<QuotedString>]
+
+<Condition> ::= <Identifier> ('"=="' | '"!="' | '">"' | '">="' | '"<"' | '"<="') <Expression>;
+
+<AssignmentList> ::= <Assignment> ';' <AssignmentList>
+  \alt <Assignment>
+  
+<Assignment> ::= <Identifier> '=' <Expression>
+\end{grammar}
+\end{table}
+
+
+\subsubsection*{expressions}
+\begin{table}[h!]
+\begin{grammar}
+<Expression> ::= <Product> ('+' | '-') <Expression>
+ \alt <Product>
+ 
+<Product> ::= <AtomicExpression> ('*'|'/') <Product>
+  \alt <AtomicExpression>
+  
+<AtomicExpression> ::= <Identifier> | <Number> | '(' <Expression> ')'
+\end{grammar}
+\end{table}
+
+
+\end{document}

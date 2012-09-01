@@ -37,7 +37,7 @@ public:
   /**
    * Constructs a new parameter list item for the given model.
    */
-  ParametersItem(Fluc::Ast::Model *model, QObject *parent=0);
+  ParametersItem(iNA::Ast::Model *model, QObject *parent=0);
 
   /**
    * Retunrs the list of paramters.

@@ -4,7 +4,7 @@
 #include "pass.hh"
 
 
-namespace Fluc {
+namespace iNA {
 namespace Ast {
 namespace Trafo {
 

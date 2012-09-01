@@ -2,10 +2,10 @@
 #include <cmath>
 #include "math.hh"
 
-using namespace Fluc;
+using namespace iNA;
 
 double
-Fluc::incompletegamma(double a, double x)
+iNA::incompletegamma(double a, double x)
 {
   double igammaepsilon;
   double ans;
@@ -56,7 +56,7 @@ Fluc::incompletegamma(double a, double x)
 
 
 double
-Fluc::incompletegammac(double a, double x)
+iNA::incompletegammac(double a, double x)
 {
   double igammaepsilon;
   double igammabignumber;
@@ -151,7 +151,7 @@ Fluc::incompletegammac(double a, double x)
 
 
 double
-Fluc::lngamma(double x, double* sgngam)
+iNA::lngamma(double x, double* sgngam)
 {
   double a;
   double b;
@@ -195,7 +195,7 @@ Fluc::lngamma(double x, double* sgngam)
       z = p-q;
     }
 
-    z = q*std::sin(Fluc::constants::pi*z);
+    z = q*std::sin(iNA::constants::pi*z);
     result = logpi-std::log(z)-w;
     return result;
   }

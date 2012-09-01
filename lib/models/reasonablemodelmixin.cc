@@ -1,7 +1,7 @@
 #include "reasonablemodelmixin.hh"
 
-using namespace Fluc;
-using namespace Fluc::Models;
+using namespace iNA;
+using namespace iNA::Models;
 
 
 ReasonableModelMixin::ReasonableModelMixin(BaseModel &model) :

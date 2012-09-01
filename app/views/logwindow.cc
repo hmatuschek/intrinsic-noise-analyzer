@@ -3,7 +3,7 @@
 #include <QHeaderView>
 
 
-MessageWrapper::MessageWrapper(const Fluc::Utils::Message &message, QObject *parent)
+MessageWrapper::MessageWrapper(const iNA::Utils::Message &message, QObject *parent)
   : QObject(parent), _message(message)
 {
   // Pass...
@@ -27,7 +27,7 @@ MessageWrapper::getLine() const
   return _message.getLevel();
 }
 
-Fluc::Utils::Message::Level
+iNA::Utils::Message::Level
 MessageWrapper::getLevel() const
 {
   return _message.getLevel();
@@ -43,13 +43,13 @@ QString
 MessageWrapper::getLevelName() const
 {
   switch (_message.getLevel()) {
-  case Fluc::Utils::Message::DEBUG:
+  case iNA::Utils::Message::DEBUG:
     return "debug";
-  case Fluc::Utils::Message::INFO:
+  case iNA::Utils::Message::INFO:
     return "info";
-  case Fluc::Utils::Message::WARN:
+  case iNA::Utils::Message::WARN:
     return "warn";
-  case Fluc::Utils::Message::ERROR:
+  case iNA::Utils::Message::ERROR:
     return "error";
   }
   return "";
@@ -63,7 +63,7 @@ LogWindowMessageHandler::LogWindowMessageHandler()
 }
 
 void
-LogWindowMessageHandler::handleMessage(const Fluc::Utils::Message &message)
+LogWindowMessageHandler::handleMessage(const iNA::Utils::Message &message)
 {
   emit newMessage(new MessageWrapper(message));
 }
@@ -85,7 +85,7 @@ LogWindow::LogWindow(QWidget *parent) :
   // Install message handler:
   LogWindowMessageHandler *handler = new LogWindowMessageHandler();
   QObject::connect(handler, SIGNAL(newMessage(MessageWrapper*)), SLOT(onMessage(MessageWrapper*)));
-  Fluc::Utils::Logger::get().addHandler(handler);
+  iNA::Utils::Logger::get().addHandler(handler);
 }
 
 
@@ -99,22 +99,22 @@ LogWindow::onMessage(MessageWrapper *message)
   time_item->setFlags(Qt::NoItemFlags); text_item->setFlags(Qt::NoItemFlags);
 
   switch(message->getLevel()) {
-  case Fluc::Utils::Message::DEBUG:
+  case iNA::Utils::Message::DEBUG:
     time_item->setTextColor(QColor::fromRgb(0xa0, 0xa0, 0xa0));
     text_item->setTextColor(QColor::fromRgb(0xa0, 0xa0, 0xa0));
     break;
 
-  case Fluc::Utils::Message::INFO:
+  case iNA::Utils::Message::INFO:
     time_item->setBackgroundColor(QColor::fromRgb(0xff, 0xff, 0xff));
     text_item->setBackgroundColor(QColor::fromRgb(0xff, 0xff, 0xff));
     break;
 
-  case Fluc::Utils::Message::WARN:
+  case iNA::Utils::Message::WARN:
     time_item->setBackgroundColor(QColor::fromRgb(0xff, 0xf0, 0xc0));
     text_item->setBackgroundColor(QColor::fromRgb(0xff, 0xf0, 0xc0));
     break;
 
-  case Fluc::Utils::Message::ERROR:
+  case iNA::Utils::Message::ERROR:
     time_item->setBackgroundColor(QColor::fromRgb(0xff, 0xc0, 0xc0));
     text_item->setBackgroundColor(QColor::fromRgb(0xff, 0xc0, 0xc0));
     break;

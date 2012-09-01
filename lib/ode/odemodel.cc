@@ -1,6 +1,6 @@
 #include "odemodel.hh"
 
-using namespace Fluc::ODE;
+using namespace iNA::ODE;
 
 
 TimeIndepODEModel::TimeIndepODEModel(const std::vector<GiNaC::symbol> &symbols,

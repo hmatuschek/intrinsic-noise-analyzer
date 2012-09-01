@@ -1,15 +1,9 @@
 #include "LNAmodel.hh"
 #include "ode/ode.hh"
+#include "trafo/constantfolder.hh"
 
-using namespace Fluc;
-using namespace Fluc::Models;
-
-LNAmodel::LNAmodel(libsbml::Model *model)
-  : REmodel(model)
-{
-  postConstructor();
-}
-
+using namespace iNA;
+using namespace iNA::Models;
 
 LNAmodel::LNAmodel(const Ast::Model &model)
   : REmodel(model)
@@ -103,8 +97,8 @@ LNAmodel::postConstructor()
     EMREUpdate = ((this->JacobianM*emreVariables)+Delta);
 
     // fold constants
-    this->foldConservationConstants(conserved_cycles,CovUpdate);
-    this->foldConservationConstants(conserved_cycles,EMREUpdate);
+    this->foldConservationConstants(CovUpdate);
+    this->foldConservationConstants(EMREUpdate);
 
     // and combine to update vector
     this->updateVector.head(this->numIndSpecies())=REupdate;
@@ -152,6 +146,44 @@ LNAmodel::fullState(const Eigen::VectorXd &state, Eigen::VectorXd &concentration
 
 }
 
+
+void
+LNAmodel::fullState(ConservationConstantCollector &context, const Eigen::VectorXd &state, Eigen::VectorXd &concentrations, Eigen::MatrixXd &cov)
+
+{
+
+    // reconstruct full concentration vector in original permutation order
+    REmodel::fullState(context,state,concentrations);
+
+    // ... then begin reconstruction of covariance matrix
+
+    // get reduced covariance vector
+    Eigen::VectorXd covvec = state.segment(this->numIndSpecies(),dimCOV);
+
+    // full cov permutated
+    Eigen::MatrixXd cov_all(this->numSpecies(),this->numSpecies());
+    // red cov permutated
+    Eigen::MatrixXd cov_ind(this->numIndSpecies(),this->numIndSpecies());
+
+   // fill upper triangular
+   size_t idx=0;
+   for(size_t i=0;i<this->numIndSpecies();i++)
+   {
+       for(size_t j=0;j<=i;j++)
+       {
+           cov_ind(i,j) = covvec(idx);
+           // fill rest by symmetry
+           cov_ind(j,i) = cov_ind(i,j);
+           idx++;
+       }
+   }
+
+   // restore native permutation of covariance
+   cov = context.getLinkCMatrix().transpose()*cov_all*context.getLinkCMatrix();
+
+}
+
+
 void
 LNAmodel::fullState(const Eigen::VectorXd &state, Eigen::VectorXd &concentrations,
                                      Eigen::MatrixXd &cov, Eigen::VectorXd &emre)
@@ -168,6 +200,77 @@ LNAmodel::fullState(const Eigen::VectorXd &state, Eigen::VectorXd &concentration
     // construct full emre vector, restore original order and return
     emre = this->PermutationM.transpose()*this->LinkCMatrixNumeric*tail;
 
+}
+
+void
+LNAmodel::fullState(ConservationConstantCollector &context, const Eigen::VectorXd &state, Eigen::VectorXd &concentrations,
+                                     Eigen::MatrixXd &cov, Eigen::VectorXd &emre)
+
+{
+
+    // Reconstruct full concentration vector and covariances in original permutation order
+    this->fullState(context,state,concentrations,cov);
+
+    // Get reduced emre vector (should better be a view rather then a copy)
+    Eigen::VectorXd tail = state.segment(this->numIndSpecies()+dimCOV,this->numIndSpecies());
+
+    // Construct full emre vector, restore original order and return
+    emre = context.getLinkCMatrix()*tail;
+
+}
+
+void
+LNAmodel::fluxAnalysis(const Eigen::VectorXd &state, Eigen::VectorXd &flux,
+                                     Eigen::MatrixXd &fluxLNA)
+
+{
+
+
+    // collect all the values of constant parameters except variable parameters
+    Trafo::ConstantFolder constants(*this);
+
+    fluxLNA.resize(this->numReactions(),this->numReactions());
+
+    // reconstruct full concentration vector and covariances in original permutation order
+    GiNaC::exmap subtab = getFlux(state,flux);
+
+    for(size_t s=0; s<this->numIndSpecies(); s++)
+        subtab.insert( std::pair<GiNaC::ex,GiNaC::ex>( getREvar(s), state(s) ) );
+
+    // get reduced covariance vector
+    Eigen::VectorXd covvec = state.segment(this->numIndSpecies(),dimCOV);
+
+    // red cov permutated
+    Eigen::MatrixXd covLNA(this->numIndSpecies(),this->numIndSpecies());
+
+       // fill upper triangular
+       size_t idx=0;
+       for(size_t i=0;i<this->numIndSpecies();i++)
+       {
+           for(size_t j=0;j<=i;j++)
+           {
+               covLNA(i,j) = covvec(idx);
+               // fill rest by symmetry
+               covLNA(j,i) = covLNA(i,j);
+               idx++;
+           }
+       }
+
+    Eigen::MatrixXd rateJac(this->rates_gradient.rows(),this->rates_gradient.cols());
+    Eigen::MatrixXd rateHessian(this->numReactions(),this->dimCOV);
+
+    this->foldConservationConstants(rates_gradient);
+    for(int i=0;i<this->rates_gradient.rows();i++)
+    {
+      for(int j=0;j<this->rates_gradient.cols();j++)
+          rateJac(i,j)=GiNaC::ex_to<GiNaC::numeric>(constants.apply(rates_gradient(i,j)).subs(subtab)).to_double();
+      for(int j=0;j<this->rates_hessian.cols();j++)
+          rateHessian(i,j)=GiNaC::ex_to<GiNaC::numeric>(constants.apply(rates_hessian(i,j)).subs(subtab)).to_double();
+    }
+
+    fluxLNA = rateJac*covLNA*rateJac.transpose();
+
+    // done.
 }
 
 void

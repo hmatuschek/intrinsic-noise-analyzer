@@ -9,7 +9,7 @@
 #include "parameter.hh"
 
 
-namespace Fluc {
+namespace iNA {
 namespace Ast {
 
 
@@ -23,6 +23,12 @@ namespace Ast {
  */
 class Model : public Module
 {
+public:
+  /** Visitor class for models. */
+  class Visitor { public: virtual void visit(const Model *model) = 0; };
+  /** Operator class for models. */
+  class Operator { public: virtual void act(Model *model) = 0; };
+
 protected:
   /**
    * Holds a vector of weak-references to all compartments defined in the model, in order of
@@ -54,11 +60,6 @@ public:
    * (species, reactions, ...)
    */
   Model();
-
-  /**
-   * Constructs a Ast::Model instance from the SBML Model instance.
-   */
-  Model(libsbml::Model *model);
 
   /**
    * Recursive copy-constructor.
@@ -247,7 +248,7 @@ public:
    * Returns the parameter by its identifier, throws an exception if the parameter can not
    * be found.
    */
-  Parameter * const getParameter(const std::string &id) const;
+  const Parameter * getParameter(const std::string &id) const;
 
   /**
    * Returns the parameter by its symbol.
@@ -288,7 +289,7 @@ public:
    * Returns the index of the given parameter, throws an exception if the parameter can not be
    * found.
    */
-  size_t getParameterIdx(Parameter *parameter) const;
+  size_t getParameterIdx(const Parameter *parameter) const;
 
   /**
    * Returns the number of reactions defined in the model.
@@ -304,6 +305,12 @@ public:
    * Returns the reaction by index.
    */
   Reaction *getReaction(size_t idx);
+
+  /** Returns the reaction by identifier. */
+  Reaction *getReaction(const std::string &id);
+
+  /** Returns the reaction by identifier. */
+  Reaction * const getReaction(const std::string &id) const;
 
   /**
    * Returns the reaction by index.
@@ -333,6 +340,12 @@ public:
    * (also its symbols).
    */
   virtual void remDefinition(Definition *def);
+
+  /** Handles a visitor for the model. */
+  virtual void accept(Ast::Visitor &visitor) const;
+
+  /** Applies an operator on the model. */
+  virtual void apply(Ast::Operator &op);
 };
 
 

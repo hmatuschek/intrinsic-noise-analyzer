@@ -3,9 +3,10 @@
 
 #include "basemodel.hh"
 #include "eigen3/Eigen/Eigen"
+#include "ginacsupportforeigen.hh"
 
 
-namespace Fluc {
+namespace iNA {
 namespace Models {
 
 

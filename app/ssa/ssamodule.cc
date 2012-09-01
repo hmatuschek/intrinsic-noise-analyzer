@@ -38,7 +38,7 @@ SSAModule::configSSA()
   SSATask *task = 0;
   try {
     task = new SSATask(wizard->getConfigCast<SSATaskConfig>());
-  } catch (Fluc::Exception err) {
+  } catch (iNA::Exception err) {
     QMessageBox::warning(
           0, tr("Can not construct steady state anlysis from model: "), err.what());
     return;

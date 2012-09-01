@@ -3,14 +3,14 @@
 #include "../views/compartmentview.hh"
 
 
-using namespace Fluc;
+using namespace iNA;
 
 
 
 /* ********************************************************************************************* *
  * Implementation of SBML Model Parameters
  * ********************************************************************************************* */
-CompartmentsItem::CompartmentsItem(Fluc::Ast::Model *model, QObject *parent)
+CompartmentsItem::CompartmentsItem(iNA::Ast::Model *model, QObject *parent)
   : QObject(parent), _compartments(0), itemLabel(tr("Compartments"))
 {
   // Construct list of compartments and takes its ownership:

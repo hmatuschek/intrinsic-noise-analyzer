@@ -2,8 +2,8 @@
 #include <list>
 
 
-using namespace Fluc;
-using namespace Fluc::Eval::bci;
+using namespace iNA;
+using namespace iNA::Eval::bci;
 
 
 
@@ -71,6 +71,10 @@ Value::Value(const Instruction &instruction, const std::vector< SmartPtr<Value> 
   // Pass...
 }
 
+Value::~Value()
+{
+  // Pass...
+}
 
 Instruction::OpCode
 Value::opCode() const

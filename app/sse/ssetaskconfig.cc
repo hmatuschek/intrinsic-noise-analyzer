@@ -26,21 +26,21 @@ SSETaskConfig::setModelDocument(DocumentItem *document)
   // Construct analysis model depending on the selected method:
   switch (selected_method) {
   case RE_ANALYSIS:
-    this->re_model = new Fluc::Models::REmodel(document->getSBMLModel());
+    this->re_model = new iNA::Models::REmodel(document->getModel());
     this->lna_model = 0;
     this->ios_model = 0;
     break;
 
   case LNA_ANALYSIS:
     this->re_model = 0;
-    this->lna_model = new Fluc::Models::LNAmodel(document->getSBMLModel());
+    this->lna_model = new iNA::Models::LNAmodel(document->getModel());
     this->ios_model = 0;
     break;
 
   case IOS_ANALYSIS:
     this->re_model = 0;
     this->lna_model = 0;
-    this->ios_model = new Fluc::Models::IOSmodel(document->getSBMLModel());
+    this->ios_model = new iNA::Models::IOSmodel(document->getModel());
     break;
 
   case UNDEFINED_ANALYSIS:
@@ -52,7 +52,7 @@ SSETaskConfig::setModelDocument(DocumentItem *document)
 }
 
 
-Fluc::Ast::Model *
+iNA::Ast::Model *
 SSETaskConfig::getModel() const
 {
   switch (selected_method) {

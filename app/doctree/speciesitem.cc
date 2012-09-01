@@ -3,15 +3,15 @@
 #include "../views/speciesview.hh"
 
 
-using namespace Fluc;
+using namespace iNA;
 
 
 
 /* ********************************************************************************************* *
  * Implementation of SBML Model Species List
  * ********************************************************************************************* */
-SpeciesItem::SpeciesItem(Fluc::Ast::Model *model, QObject *parent)
-  : QObject(parent), DocumentTreeItem(), _species(0), itemLabel(tr("Species"))
+SpeciesItem::SpeciesItem(iNA::Ast::Model *model, QObject *parent)
+  : QObject(parent), DocumentTreeItem(), _species(0), _itemLabel(tr("Species"))
 {
   // Constructs the list of species and taske its ownership:
   this->_species = new SpeciesList(model, this);
@@ -28,7 +28,7 @@ SpeciesItem::species()
 const QString &
 SpeciesItem::getLabel() const
 {
-  return this->itemLabel;
+  return this->_itemLabel;
 }
 
 

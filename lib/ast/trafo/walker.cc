@@ -2,8 +2,8 @@
 #include "exception.hh"
 
 
-using namespace Fluc::Ast;
-using namespace Fluc::Ast::Trafo;
+using namespace iNA::Ast;
+using namespace iNA::Ast::Trafo;
 
 
 Walker::Walker()

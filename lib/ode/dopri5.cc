@@ -1,6 +1,6 @@
 #include "dopri5.hh"
 
-using namespace Fluc::ODE;
+using namespace iNA::ODE;
 
 /// @cond 0
 const double Dopri5Constants::c2 = 0.2;

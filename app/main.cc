@@ -3,6 +3,7 @@
 #include "ssa/ssamodule.hh"
 #include "steadystate/lnasteadystatemodule.hh"
 #include "sse/ssemodule.hh"
+#include "ssscan/ssscanmodule.hh"
 #include "doctree/documentitem.hh"
 #include "utils/logger.hh"
 
@@ -20,7 +21,7 @@ int main(int argc, char *argv[])
   QApplication qapp(argc, argv);
 
   // Instantiate our own application model, holds all the data of the running application
-  Application *app = Application::factory();
+  Application *app = Application::getApp();
 
   // Create new main-window, this initializes all the view-part
   MainWindow *window = new MainWindow();
@@ -32,6 +33,8 @@ int main(int argc, char *argv[])
   app->addModule(new SSEModule(app));
   // Load SSA module:
   app->addModule(new SSAModule(app));
+  // Load parameter scan module
+  app->addModule(new ParamScanModule(app));
 
   window->show();
 
@@ -48,7 +51,7 @@ int main(int argc, char *argv[])
   Application::shutdown();
 
   // Deactivate logger.
-  Fluc::Utils::Logger::shutdown();
+  iNA::Utils::Logger::shutdown();
 
   return 0;
 }
