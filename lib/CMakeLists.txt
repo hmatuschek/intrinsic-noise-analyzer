@@ -94,6 +94,7 @@ SET(libina_utils_HEADERS
 SET(libina_models_SOURCES
     models/basemodel.cc models/constantstoichiometrymixin.cc models/constcompartmentmixin.cc
     models/conservationanalysismixin.cc
+    models/conservationanalysis.cc
     models/propensityexpansion.cc
     models/ssebasemodel.cc
     models/REmodel.cc
@@ -116,11 +117,13 @@ SET(libina_models_SOURCES
     models/particlenumbersmixin.cc
     models/sseinterpreter.cc
     models/steadystateanalysis.cc
+    models/initialconditions.cc
 )
 
 SET(libina_models_HEADERS models/models.hh
     models/basemodel.hh models/constantstoichiometrymixin.hh models/constcompartmentmixin.hh
     models/conservationanalysismixin.hh
+    models/conservationanalysis.hh
     models/propensityexpansion.hh
     models/ssebasemodel.hh
     models/REmodel.hh
@@ -147,6 +150,7 @@ SET(libina_models_HEADERS models/models.hh
     models/particlenumbersmixin.hh
     models/sseinterpreter.hh
     models/steadystateanalysis.hh
+    models/initialconditions.hh
 )
 
 # Add source for nonlinear solvers

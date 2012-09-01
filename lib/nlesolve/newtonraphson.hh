@@ -7,6 +7,15 @@
 namespace iNA {
 namespace NLEsolve {
 
+
+inline double
+maxNorm(const Eigen::VectorXd &vector)
+
+{
+    return vector.lpNorm<Eigen::Infinity>();
+}
+
+
     enum LineSearchMethod {
         NoLineSearch = 0,
         Damped = 1,
@@ -183,7 +192,7 @@ public:
               Jac(i,j) = constants.apply(model.getJacobian()(i,j));
       }
 
-      set(model.stateIndex, updateVector, Jac);
+      this->set(model.stateIndex, updateVector, Jac);
 
   }
 
@@ -196,7 +205,7 @@ public:
         parameters(model.numIndSpecies())
 
   {
-      set(model.stateIndex, updateVector, Jacobian);
+      this->set(model.stateIndex, updateVector, Jacobian);
   }
 
   const Eigen::MatrixXd&
@@ -493,12 +502,6 @@ public:
 
 };
 
-inline double
-maxNorm(const Eigen::VectorXd &vector)
-
-{
-    return vector.lpNorm<Eigen::Infinity>();
-}
 
 
 }

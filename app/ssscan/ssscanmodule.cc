@@ -35,7 +35,7 @@ ParamScanModule::configTask()
     task = new ParamScanTask(this->wizard->getConfigCast<ParamScanTask::Config>());
   } catch (iNA::Exception &err) {
     QMessageBox::warning(
-          0, tr("Can not construct parameter scan from model: "), err.what());
+          0, tr("Cannot construct parameter scan from model: "), err.what());
     return;
   }
 

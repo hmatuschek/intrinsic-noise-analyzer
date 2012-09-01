@@ -16,8 +16,8 @@ ParamScanTask::Config::Config(const Config &other)
   : GeneralTaskConfig(), ModelSelectionTaskConfig(other), SpeciesSelectionTaskConfig(other),
     _model(other._model), num_threads(other.num_threads), max_iterations(other.max_iterations), max_time_step(other.max_time_step),
     epsilon(other.epsilon),
-    parameter(other.parameter), start_value(other.start_value),
-    end_value(other.end_value), steps(other.steps)
+    parameter(other.parameter), start_value(other.start_value), end_value(other.end_value),
+    steps(other.steps)
 {
   // Pass...
 }

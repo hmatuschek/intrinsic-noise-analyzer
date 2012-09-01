@@ -362,7 +362,7 @@ IOSmodel::fullState(const Eigen::VectorXd &state, Eigen::VectorXd &concentration
 }
 
 void
-IOSmodel::fullState(ConservationConstantCollector &context, const Eigen::VectorXd &state, Eigen::VectorXd &concentrations,
+IOSmodel::fullState(InitialConditions &context, const Eigen::VectorXd &state, Eigen::VectorXd &concentrations,
                                      Eigen::MatrixXd &cov, Eigen::VectorXd &emre, Eigen::MatrixXd &iosCov, Eigen::VectorXd &skewness, Eigen::VectorXd &iosemre)
 
 {

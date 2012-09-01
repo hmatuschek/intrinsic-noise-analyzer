@@ -148,7 +148,7 @@ LNAmodel::fullState(const Eigen::VectorXd &state, Eigen::VectorXd &concentration
 
 
 void
-LNAmodel::fullState(ConservationConstantCollector &context, const Eigen::VectorXd &state, Eigen::VectorXd &concentrations, Eigen::MatrixXd &cov)
+LNAmodel::fullState(InitialConditions &context, const Eigen::VectorXd &state, Eigen::VectorXd &concentrations, Eigen::MatrixXd &cov)
 
 {
 
@@ -203,7 +203,7 @@ LNAmodel::fullState(const Eigen::VectorXd &state, Eigen::VectorXd &concentration
 }
 
 void
-LNAmodel::fullState(ConservationConstantCollector &context, const Eigen::VectorXd &state, Eigen::VectorXd &concentrations,
+LNAmodel::fullState(InitialConditions &context, const Eigen::VectorXd &state, Eigen::VectorXd &concentrations,
                                      Eigen::MatrixXd &cov, Eigen::VectorXd &emre)
 
 {

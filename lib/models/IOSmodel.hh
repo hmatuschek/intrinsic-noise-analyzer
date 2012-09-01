@@ -56,7 +56,7 @@ public:
                  Eigen::MatrixXd &cov, Eigen::VectorXd &emre,  Eigen::MatrixXd &iosCov, Eigen::VectorXd &skewness, Eigen::VectorXd &iosemre);
 
 
-  void fullState(ConservationConstantCollector &context, const Eigen::VectorXd &state, Eigen::VectorXd &concentrations,
+  void fullState(InitialConditions &context, const Eigen::VectorXd &state, Eigen::VectorXd &concentrations,
                  Eigen::MatrixXd &cov, Eigen::VectorXd &emre,
                  Eigen::MatrixXd &iosCov, Eigen::VectorXd &skewness, Eigen::VectorXd &iosemre);
 

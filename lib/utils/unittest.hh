@@ -166,6 +166,13 @@ public:
   {
     // Pass...
   }
+  /**
+   * Virtual destructor.
+   */
+  virtual ~TestCallerInterface()
+  {
+    // Pass...
+  }
 
   /**
    * Returns the description of the test.

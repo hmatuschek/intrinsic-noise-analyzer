@@ -32,6 +32,8 @@ protected:
 public:
   ODETest();
 
+  virtual ~ODETest();
+
   void testHarmonicRKF45();
   void testHarmonicDopri5();
   void testHarmonicDopri853();
