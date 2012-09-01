@@ -174,6 +174,7 @@ ParameterScanConfigPage::refreshParamRange(int)
 
     QString idp = p_select->currentText();
 
+    if (! config.getModel()->hasParameter(idp.toStdString())) { return; }
     iNA::Ast::Parameter * parameter = config.getModel()->getParameter(idp.toStdString());
 
     // Set range
