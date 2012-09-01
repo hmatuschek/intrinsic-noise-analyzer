@@ -5,7 +5,7 @@ using namespace iNA;
 using namespace iNA::Models;
 
 InitialConditions::InitialConditions(SSEBaseModel &model)
-
+    : model(model)
 {
 
     // Evaluate initial concentrations and evaluate volumes:
@@ -14,14 +14,14 @@ InitialConditions::InitialConditions(SSEBaseModel &model)
     for(size_t i=0; i<model.numSpecies();i++)
            ICs(i)=evICs.evaluate(model.getSpecies(i)->getSymbol());
 
-    //store in permutated base
-    //this->ICsPermuted = this->PermutationM*ICs;
+    // Store in permutated base
+    this->ICsPermuted = (model.getPermutationMatrix()*ICs).head(model.numIndSpecies());
 
     Trafo::ConstantFolder constants(model);
 
-    //evaluate the link matrices
-    Link0CMatrixNumeric = Eigen::ex2double(model.getLink0CMatrix());
-    LinkCMatrixNumeric = Eigen::ex2double(model.getLinkCMatrix());
+    // Evaluate the link matrices
+    Link0CMatrixNumeric = Eigen::ex2double(constants.apply(model.getLink0CMatrix()));
+    LinkCMatrixNumeric = Eigen::ex2double(constants.apply(model.getLinkCMatrix()));
 
     if(model.numDepSpecies()>0) this->conserved_cycles = Eigen::ex2double(constants.apply(model.getConservationMatrix()))*ICs;
 
@@ -35,8 +35,7 @@ void
 InitialConditions::getInitialState(Eigen::VectorXd &x)
 {
   // deterministic initial conditions for state
-  //x<<(this->ICsPermuted).head(this->numIndSpecies());
-
+    x.head(ICsPermuted.size())=this->ICsPermuted;
 }
 
 /**

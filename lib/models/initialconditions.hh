@@ -28,6 +28,11 @@ private:
     Eigen::VectorXd conserved_cycles;
     Eigen::VectorXd ICsPermuted;
 
+    Eigen::VectorXd ICs;
+
+    SSEBaseModel &model;
+
+
 public:
 
     /**
