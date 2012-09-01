@@ -1,6 +1,7 @@
 #include "ssscanwizard.hh"
 #include "../application.hh"
 #include "../models/scopeitemmodel.hh"
+#include "trafo/constantfolder.hh"
 #include <QMessageBox>
 #include <QVBoxLayout>
 #include <QFormLayout>
@@ -167,24 +168,28 @@ ParameterScanConfigPage::ParameterScanConfigPage(GeneralTaskWizard *parent)
 void
 ParameterScanConfigPage::refreshParamRange(int)
 {
+  // Get the config:
+  ParamScanWizard *wizard = static_cast<ParamScanWizard *>(this->wizard());
+  ParamScanTask::Config &config = wizard->getConfigCast<ParamScanTask::Config>();
 
-    // Get the config:
-    ParamScanWizard *wizard = static_cast<ParamScanWizard *>(this->wizard());
-    ParamScanTask::Config &config = wizard->getConfigCast<ParamScanTask::Config>();
+  // Get parameter
+  QString idp = p_select->currentText();
+  if (! config.getModel()->hasParameter(idp.toStdString())) { return; }
+  iNA::Ast::Parameter * parameter = config.getModel()->getParameter(idp.toStdString());
 
-    QString idp = p_select->currentText();
-
-    if (! config.getModel()->hasParameter(idp.toStdString())) { return; }
-    iNA::Ast::Parameter * parameter = config.getModel()->getParameter(idp.toStdString());
-
-    // Set range
-    if(parameter->hasValue() && GiNaC::is_a<GiNaC::numeric>(parameter->getValue()))
-    {
-        double val = GiNaC::ex_to<GiNaC::numeric>(parameter->getValue()).to_double();
-        p_min->setText(QString("%1").arg(val));
-        p_max->setText(QString("%1").arg(1.1*val));
+  // Set range (if parameter has an initial value assigned)
+  if(parameter->hasValue())
+  {
+    GiNaC::ex value = parameter->getValue();
+    // Fold constants in parameter initial value:
+    iNA::Trafo::ConstantFolder folder(*(config.getModel()));
+    value = folder.apply(value);
+    if (GiNaC::is_a<GiNaC::numeric>(value)) {
+      double val = GiNaC::ex_to<GiNaC::numeric>(parameter->getValue()).to_double();
+      p_min->setText(QString("%1").arg(val));
+      p_max->setText(QString("%1").arg(1.1*val));
     }
-
+  }
 }
 
 void
