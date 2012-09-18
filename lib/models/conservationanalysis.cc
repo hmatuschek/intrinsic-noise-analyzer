@@ -52,7 +52,7 @@ ConservationAnalysis::ConservationAnalysis(const Ast::Model &model)
     //plugin some constants
 
     // Evaluate initial concentrations and evaluate volumes:
-    Ast::EvaluateInitialValue evICs(*this);
+    Trafo::InitialValueFolder evICs(*this);
     Eigen::VectorXd ICs(species.size());
     for(size_t i=0; i<species.size();i++){
        ICs(i)=evICs.evaluate(this->species[i]);

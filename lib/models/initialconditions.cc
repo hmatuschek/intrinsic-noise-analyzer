@@ -9,7 +9,7 @@ InitialConditions::InitialConditions(SSEBaseModel &model)
 {
 
     // Evaluate initial concentrations and evaluate volumes:
-    Ast::EvaluateInitialValue evICs(model);
+    Trafo::InitialValueFolder evICs(model);
     Eigen::VectorXd ICs(model.numSpecies());
     for(size_t i=0; i<model.numSpecies();i++)
            ICs(i)=evICs.evaluate(model.getSpecies(i)->getSymbol());

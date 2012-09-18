@@ -3,10 +3,7 @@
 
 #include "walker.hh"
 #include "pass.hh"
-#include "modelwalker.hh"
 
-#include "constantfolder.hh"
-#include "assignmentruleinliner.hh"
 #include "substitutioncollector.hh"
 
 #endif

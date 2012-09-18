@@ -288,7 +288,7 @@ public:
         {
 
             // collect all the values of constant parameters except variable parameters
-            Trafo::ConstantFolder constants(sseModel, Trafo::Filter::ALL, parameterSets[j]);
+            Trafo::ConstantFolder constants(sseModel, Trafo::Filter::ALL_CONST, parameterSets[j]);
             // collect the variable parameters
             ParameterFolder parameters(parameterSets[j]);
 

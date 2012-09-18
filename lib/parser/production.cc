@@ -192,7 +192,7 @@ Production::notify(Lexer &lexer, ConcreteSyntaxTree &element)
  * Implementation of TokenProduction:
  * ******************************************************************************************** */
 TokenProduction::TokenProduction(unsigned id)
-  : Production(), id(id)
+  : Production(), _id(id)
 {
   // Pass...
 }
@@ -201,19 +201,17 @@ TokenProduction::TokenProduction(unsigned id)
 void
 TokenProduction::parse(Lexer &lexer, ConcreteSyntaxTree &element)
 {
-  if (this->id != lexer.current().getId()) {
+  // Check if the current token of the lexer matches token _id.
+  if (_id != lexer.current().getId()) {
     SyntaxError err(lexer.current().getLine());
     err << "@line "<< lexer.current().getLine() << ": "
         << "Unexpected token: " << lexer.getTokenName(lexer.current().getId())
-        << " expected: " << lexer.getTokenName(this->id);
+        << " expected: " << lexer.getTokenName(_id);
     throw err;
   }
 
+  // If matches -> initialize element as token node.
   ConcreteSyntaxTree::asTokenNode(element, lexer.currentIndex());
-
-  /*std::cerr << "Parsed token " << lexer.current().getId()
-            << " @line " << lexer.current().getLine()
-            << ": \"" << lexer.current().getValue() << "\"" << std::endl;*/
 
   // Consume token...
   lexer.next();

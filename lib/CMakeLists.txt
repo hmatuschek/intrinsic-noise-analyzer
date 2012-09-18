@@ -31,12 +31,12 @@ SET(libina_ast_HEADERS
     ast/model.hh ast/converter.hh ast/visitor.hh ast/unitconverter.hh)
 
 SET(libina_ast_trafo_SOURCES
-    ast/trafo/walker.cc ast/trafo/pass.cc ast/trafo/constantfolder.cc ast/trafo/dump.cc
-    ast/trafo/assignmentruleinliner.cc ast/trafo/substitutioncollector.cc ast/trafo/modelwalker.cc
+    ast/trafo/walker.cc ast/trafo/pass.cc
+    ast/trafo/substitutioncollector.cc
     ast/trafo/modelcopyist.cc)
 SET(libina_ast_trafo_HEADERS ast/trafo/trafo.hh
-    ast/trafo/walker.hh ast/trafo/pass.hh ast/trafo/constantfolder.hh ast/trafo/dump.hh
-    ast/trafo/assignmentruleinliner.hh ast/trafo/substitutioncollector.hh ast/trafo/modelwalker.hh
+    ast/trafo/walker.hh ast/trafo/pass.hh
+    ast/trafo/substitutioncollector.hh
     ast/trafo/modelcopyist.hh)
 
 SET(libina_trafo_SOURCES

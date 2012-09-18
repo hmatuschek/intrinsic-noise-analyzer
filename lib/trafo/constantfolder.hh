@@ -13,11 +13,14 @@ namespace Trafo {
 
 typedef GiNaC::exmap excludeType;
 
-/** Simple visitor to collect all substitutions for constant variables.
+/**
+ * Simple visitor to collect all substitutions for variables.
+ *
  * It is possible to specify which classes of variables are processed. This allows for example to
  * skip constant folding of compartments altough they are defined as constant (SSE).
- * @ingroup trafo */
-class ConstSubstitutionCollector
+ * @ingroup trafo
+ */
+class SubstitutionCollector
     : public Ast::Visitor, public Ast::VariableDefinition::Visitor
 {
 protected:
@@ -31,12 +34,45 @@ protected:
   excludeType _excludes;
 
 public:
-
-  /** Constructor. */
-  ConstSubstitutionCollector(Substitution &substitutions, unsigned flags=Filter::ALL, const excludeType &excludes=excludeType());
+  /** Constructor.
+   * @param substitutions Specifies the set of substitutions to be populated by the collector.
+   * @param flags Specifies which types of varaibles are collected. By default all constant
+   *        variables are collected. By specifying @c Filter::ALL, it is possible to collect all
+   *        initial values of even non-constant variables.
+   * @param excludes Specifies a set of variable symbols, that are to be skipped during substitution
+   *        collection. */
+  SubstitutionCollector(Substitution &substitutions, unsigned flags=Filter::ALL_CONST,
+                        const excludeType &excludes=excludeType());
 
   /** Check if the variable is constant. */
   virtual void visit(const Ast::VariableDefinition *var);
+};
+
+
+/**
+ * This class allows to collect and substitute all initial values defined within a @c Ast::Model.
+ * This class is particulary useful for constant folding (see @c ConstantFolder) of for the
+ * evaluation of initial values.
+ * @ingroup trafo
+ */
+class InitialValueFolder
+    : public Substitution
+{
+public:
+  InitialValueFolder(const Ast::Model &model, unsigned flags=Filter::ALL, const excludeType &excludes=excludeType());
+
+  /** Tiny helper function to fold all constants in the given model. */
+  void apply(Ast::Model &model);
+
+  /** Tiny helper function to fold all substitutions in the given expression. */
+  GiNaC::ex apply(const GiNaC::ex &expr);
+
+  /** Tiny helper function to fold all substitutions in the given expression assuming it is then
+   * folded into a double value. */
+  double evaluate(const GiNaC::ex &expr);
+
+  /** Tiny helper function to fold all constants in the given vector expression. */
+  Eigen::MatrixXex apply(const Eigen::MatrixXex &vecIn);
 };
 
 
@@ -66,25 +102,11 @@ public:
  * @ingroup trafo
  */
 class ConstantFolder
-    : public Substitution
+    : public InitialValueFolder
 {
 public:
   /** Constructor, collects all substitutions of constant variables and assignment rules. */
-  ConstantFolder(const Ast::Model &model, unsigned flags = Filter::ALL, const excludeType &excludes=excludeType());
-
-  /** Tiny helper function to fold all constants in the given model. */
-  void apply(Ast::Model &model);
-
-  /** Tiny helper function to fold all constants in the given expression. */
-  GiNaC::ex apply(const GiNaC::ex &expr);
-
-  /** Tiny helper function to fold all constants in the given vector expression. */
-  //void apply(Eigen::VectorXex &expr);
-
-  /** Tiny helper function to fold all constants in the given vector expression. */
-  Eigen::MatrixXex apply(const Eigen::MatrixXex &vecIn);
-
-
+  ConstantFolder(const Ast::Model &model, unsigned flags = Filter::ALL_CONST, const excludeType &excludes=excludeType());
 };
 
 

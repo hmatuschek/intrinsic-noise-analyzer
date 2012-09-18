@@ -38,7 +38,7 @@ StochasticSimulator::StochasticSimulator(const Ast::Model &model, int size, int 
         this->propensities[i] = constants.apply(this->propensities[i]);
 
   // evaluate initial concentrations & get volumes
-  Ast::EvaluateInitialValue evICs(*this);
+  Trafo::InitialValueFolder evICs(*this);
 
   for(size_t i=0; i<species.size();i++)
   {
