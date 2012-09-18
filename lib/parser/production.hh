@@ -134,10 +134,6 @@ public:
   /** Performs parsing and assembles the CST. If the production is successful, it initializes
    * the given CST element. */
   virtual void parse(Lexer &lexer, ConcreteSyntaxTree &element);
-
-  /** Assembles the CST.
-   * @deprecated I do not know, if this is necessary any more. */
-  virtual void notify(Lexer &lexer, ConcreteSyntaxTree &element);
 };
 
 
@@ -152,17 +148,19 @@ class TokenProduction: public Production
 public:
   /** Holds the token id. */
   unsigned _id;
+  /** If true, this token production is terminal, means no further alternatives are processed. */
+  bool _is_terminal;
 
 public:
   /** Constructor, takes the token-id to match. */
-  TokenProduction(unsigned _id);
+  TokenProduction(unsigned _id, bool is_terminal=false);
 
   /** Checks if the current token of the lexer matches. If the token matches, the given CST
    * element is initialized as a @c TOKEN_NODE. */
   virtual void parse(Lexer &lexer, ConcreteSyntaxTree &element);
 
-  /** @deprecated */
-  virtual void notify(Lexer &lexer, ConcreteSyntaxTree &element);
+  /** Retunrs true, if the token production is terminal. */
+  bool isTerminal() const;
 };
 
 
@@ -194,8 +192,6 @@ public:
   AltProduction(const std::vector<Production *> &alternatives);
 
   virtual void parse(Lexer &lexer, ConcreteSyntaxTree &element);
-
-  virtual void notify(Lexer &lexer, ConcreteSyntaxTree &element);
 };
 
 
@@ -212,8 +208,6 @@ public:
   EmptyProduction();
 
   virtual void parse(Lexer &lexer, ConcreteSyntaxTree &element);
-
-  virtual void notify(Lexer &lexer, ConcreteSyntaxTree &element);
 };
 
 
@@ -236,8 +230,6 @@ public:
   OptionalProduction(Production *prod);
 
   virtual void parse(Lexer &lexer, ConcreteSyntaxTree &element);
-
-  virtual void notify(Lexer &lexer, ConcreteSyntaxTree &element);
 };
 
 

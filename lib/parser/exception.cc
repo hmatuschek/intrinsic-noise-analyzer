@@ -85,7 +85,7 @@ SyntaxError::SyntaxError(const std::string &message, int line)
 
 
 SyntaxError::SyntaxError(const SyntaxError &other)
-  : ParserError(other)
+  : ParserError(other), _expected_tokens(other._expected_tokens)
 {
   // pass...
 }
@@ -94,4 +94,20 @@ SyntaxError::SyntaxError(const SyntaxError &other)
 SyntaxError::~SyntaxError() throw()
 {
   // pass...
+}
+
+
+const std::set<std::string> &
+SyntaxError::getExpectedTokens() const {
+  return _expected_tokens;
+}
+
+void
+SyntaxError::addExpectedTokenId(const std::string &id) {
+  _expected_tokens.insert(id);
+}
+
+void
+SyntaxError::addExpectedTokens(const std::set<std::string> &ids) {
+  _expected_tokens.insert(ids.begin(), ids.end());
 }

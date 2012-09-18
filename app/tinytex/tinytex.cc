@@ -252,7 +252,6 @@ TinyTex::parse(const std::string &source)
   MathItem *item = 0;
   try {
     grammar->parse(lexer, cst);
-    grammar->notify(lexer, cst);
     TinyTex parser(lexer);
     item = parser.parseFormula(cst[0]);
   } catch (iNA::Parser::ParserError &err) {

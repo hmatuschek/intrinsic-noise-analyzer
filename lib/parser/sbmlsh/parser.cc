@@ -11,10 +11,10 @@ using namespace iNA::Parser::Sbmlsh;
  * Implementation of Parser:
  * ******************************************************************************************** */
 iNA::Parser::Sbmlsh::Parser::Parser(std::istream &input)
-  : lexer(input), grammar(0)
+  : _lexer(input), _grammar(0)
 {
   // Instantiate Grammar
-  grammar = ModelProduction::get();
+  _grammar = ModelProduction::get();
 }
 
 
@@ -22,17 +22,15 @@ void
 iNA::Parser::Sbmlsh::Parser::parse(Ast::Model &model)
 {
   // Reset lexer:
-  lexer.reset();
+  _lexer.reset();
 
   // Try to parse using grammar:
   iNA::Parser::ConcreteSyntaxTree root;
   // First parse the grammar
-  grammar->parse(lexer, root);
-  // now, assemble CST
-  grammar->notify(lexer, root);
+  _grammar->parse(_lexer, root);
 
   // Assemble model from CST
-  Assembler assembler(model, lexer);
+  Assembler assembler(model, _lexer);
   assembler.process(root);
 }
 
