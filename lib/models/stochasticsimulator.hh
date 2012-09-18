@@ -136,11 +136,6 @@ protected:
   std::vector<MersenneTwister> rand;
 
   /**
-   * needs interpreter to set initial conditons
-   **/
-  Ast::EvaluateModel interpreter;
-
-  /**
   * index map for bytecode interpreter
   **/
   std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> stateIndex;

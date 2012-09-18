@@ -12,7 +12,6 @@ StochasticSimulator::StochasticSimulator(const Ast::Model &model, int size, int 
       ReasonableModelMixin((BaseModel &)(*this)),
       num_threads(threads),
       rand(1),
-      interpreter(*this),
       observationMatrix(size,numSpecies()),
       ics(numSpecies()), Omega(numSpecies()), ensembleSize(size)
 
@@ -102,13 +101,23 @@ StochasticSimulator::~StochasticSimulator()
 void
 StochasticSimulator::evaluate(const Eigen::VectorXd &populationVec, Eigen::VectorXd &propensities)
 {
-  // first update values for state:
-  this->interpreter.setValues(populationVec);
+  // Assemble substitutions
+  GiNaC::exmap substitutions;
+  for (size_t i=0; i<numSpecies(); i++) {
+    substitutions[getSpecies(i)->getSymbol()] = populationVec[i];
+  }
 
   // then evaluate propensities
-  for (size_t i=0; i<this->numReactions(); i++)
-    propensities(i) = this->interpreter.evaluate(this->propensities[i]);
-
+  for (size_t i=0; i<this->numReactions(); i++) {
+    GiNaC::ex value = GiNaC::evalf(this->propensities[i].subs(substitutions));
+    if (! GiNaC::is_a<GiNaC::numeric>(value)) {
+      SymbolError err;
+      err << "Can not evaluate propensity of reaction " << i
+          << ": Propensity not reduced to value. Minimal expression: " << value;
+      throw err;
+    }
+    propensities(i) = GiNaC::ex_to<GiNaC::numeric>(value).to_double();
+  }
 }
 
 

@@ -32,10 +32,8 @@
 #include "compartment.hh"
 #include "parameter.hh"
 
-#include "evaluate.hh"
 #include "visitor.hh"
 
-//#include "trafo/trafo.hh"
 #include "unitconverter.hh"
 #include "modelcopyist.hh"
 
