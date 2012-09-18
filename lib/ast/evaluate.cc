@@ -1,8 +1,6 @@
 #include "evaluate.hh"
 #include "exception.hh"
 
-#include "trafo/substitutioncollector.hh"
-
 #include <cmath>
 
 using namespace iNA::Ast;
@@ -64,69 +62,6 @@ Evaluate::evaluate(const GiNaC::ex &expr)
   }
 
   return GiNaC::ex_to<GiNaC::numeric>(temp_value).to_double();
-}
-
-
-
-
-/* ********************************************************************************************* *
- * Implementation EvaluateInitialValue class:
- * ********************************************************************************************* */
-EvaluateInitialValue::EvaluateInitialValue(Module &module)
-  : Evaluate()
-{
-  // Collect all constants and populate the value_table
-  Trafo::SubstitutionCollector collector(this->value_table);
-  collector.handleModule(&module);
-
-  // Collect all initial values for all variables in given module.
-  this->handleModule(&module);
-}
-
-
-void
-EvaluateInitialValue::handleVariableDefinition(Ast::VariableDefinition *node)
-{
-  // If variable has no initial value -> skip
-  if (! node->hasValue())
-  {
-    // Just traverse further:
-    Walker::handleVariableDefinition(node);
-  }
-
-  // Otherwise -> associate initial value with symbol of variable.
-  this->setValue(node->getSymbol(), node->getValue());
-
-  Walker::handleVariableDefinition(node);
-}
-
-
-
-
-/* ********************************************************************************************* *
- * Implementation EvaluateByIndex class:
- * ********************************************************************************************* */
-EvaluateByIndex::EvaluateByIndex(const std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> &index_table)
-  : Evaluate(), index_table(index_table)
-{
-  // Pass...
-}
-
-
-void
-EvaluateByIndex::setValues(const Eigen::VectorXd &values)
-{
-  // Iterate over all symbols, that have some index assigned:
-  for (std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less>::iterator iter = this->index_table.begin();
-       iter != this->index_table.end(); iter++)
-  {
-    // and associate the symbol with the value in values at its index:
-    size_t idx = iter->second;
-    double val = values(idx);
-    this->setValue(iter->first, val);
-  }
-
-  // Done.
 }
 
 

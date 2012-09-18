@@ -2,7 +2,7 @@
 #include "exception.hh"
 #include "reaction.hh"
 #include "converter.hh"
-#include "trafo/modelcopyist.hh"
+#include "modelcopyist.hh"
 
 using namespace iNA;
 using namespace iNA::Ast;
@@ -18,11 +18,7 @@ Model::Model(const Model &other)
   : Module()
 {
   // Copy "other" module into this module
-  Trafo::ModelCopyist::copy(&other, this);
-
-  // Convert irreversible reactions to reversible ones:
-  //Convert2Irreversible converter(*this);
-  //converter.process();
+  ModelCopyist::copy(&other, this);
 }
 
 

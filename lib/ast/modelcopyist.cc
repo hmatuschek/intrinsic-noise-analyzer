@@ -1,11 +1,11 @@
 #include "modelcopyist.hh"
-#include "ast/functiondefinition.hh"
-#include "ast/reaction.hh"
-#include "exception.hh"
+#include "functiondefinition.hh"
+#include "reaction.hh"
+#include <exception.hh>
 
 
 using namespace iNA;
-using namespace iNA::Ast::Trafo;
+using namespace iNA::Ast;
 
 
 void

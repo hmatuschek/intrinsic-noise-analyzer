@@ -1,13 +1,12 @@
-#ifndef __FLUC_AST_TRAFO_MODELCOPYIST_HH__
-#define __FLUC_AST_TRAFO_MODELCOPYIST_HH__
+#ifndef __FLUC_AST_MODELCOPYIST_HH__
+#define __FLUC_AST_MODELCOPYIST_HH__
 
-#include "ast/model.hh"
-#include "ast/reaction.hh"
+#include "model.hh"
+#include "reaction.hh"
 
 
 namespace iNA {
 namespace Ast {
-namespace Trafo {
 
 
 /**
@@ -130,7 +129,6 @@ protected:
 };
 
 
-}
 }
 }
 

@@ -2,7 +2,6 @@
 #define __FLUC_COMPILER_AST_EVALUATE_HH__
 
 #include "model.hh"
-#include "trafo/walker.hh"
 #include <ginac/ginac.h>
 #include <eigen3/Eigen/Eigen>
 
@@ -55,60 +54,6 @@ public:
 };
 
 
-
-
-/**
- * Evaluates expression while evaluating the value of variables as their initial value.
- *
- * @ingroup ast
- */
-class EvaluateInitialValue : public Evaluate, protected Trafo::Walker
-{
-public:
-  /**
-   * Constructs a initial value evaluator, by collecting all initial values of all variables in
-   * the given module and associating these variables with their initial values.
-   */
-  EvaluateInitialValue(Module &module);
-
-protected:
-  /**
-   * Gets the initial value of the variable (if there is one). These values are then used to
-   * evaluate the expressions passed to @c evaluate.
-   */
-  virtual void handleVariableDefinition(Ast::VariableDefinition *node);
-};
-
-
-
-
-/**
- * Evaluates an expression by resolving the symbols of the expression using a value vector.
- * (For example the state vector of an ODE). Therefore, the constructor takes a table, that
- * associates symbols or variables with indices, during evaluation, symbols are resolved using
- * the values provides by a vector.
- *
- * @ingroup ast
- */
-class EvaluateByIndex: public Evaluate
-{
-protected:
-  /**
-   * Holds the index-mapping symbol->index.
-   */
-  std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> index_table;
-
-public:
-  /**
-   * Constructs a new evaluator using the given index-mapping.
-   */
-  EvaluateByIndex(const std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> &index_table);
-
-  /**
-   * Updated the values for the index variables.
-   */
-  void setValues(const Eigen::VectorXd &values);
-};
 
 
 /**

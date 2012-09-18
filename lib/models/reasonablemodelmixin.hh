@@ -2,13 +2,13 @@
 #define __FLUC_MODELS_REASONABLEMODELMIXIN_HH__
 
 #include "basemodel.hh"
-#include "explicittimedependencemixin.hh"
 #include "assertnoalgebraicconstraintmixin.hh"
 #include "assertnoconstantspeciesmixin.hh"
 #include "assertconstantparametermixin.hh"
 #include "assertnoassignmentrule.hh"
 #include "assertnoraterule.hh"
 #include "assertirreversiblereactions.hh"
+#include "trafo/assertions.hh"
 
 
 namespace iNA {
@@ -33,7 +33,6 @@ namespace Models {
  * @ingroup models
  */
 class ReasonableModelMixin :
-    public AssertNoExplicitTimeDependenceMixin,
     public AssertNoAlgebraicConstraintMixin,
     public AssertConstantParameterMixin,
     public AssertNoAssignmentRule,

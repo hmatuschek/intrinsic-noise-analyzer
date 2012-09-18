@@ -61,11 +61,8 @@ ExtensiveSpeciesMixin::ExtensiveSpeciesMixin(BaseModel &base)
     }
   }
 
-  Ast::Trafo::Pass forward_pass(forward_subst);
-  forward_pass.handleModule(&(base));
-
-  Ast::Trafo::Pass back_pass(back_subst);
-  back_pass.handleModule(&(base));
+  Trafo::Substitution forward_pass(forward_subst); base.apply(forward_pass);
+  Trafo::Substitution back_pass(back_subst); base.apply(back_pass);
 
   for (size_t i=0; i<base.propensities.size(); i++)
   {

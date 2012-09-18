@@ -35,7 +35,8 @@
 #include "evaluate.hh"
 #include "visitor.hh"
 
-#include "trafo/trafo.hh"
+//#include "trafo/trafo.hh"
 #include "unitconverter.hh"
+#include "modelcopyist.hh"
 
 #endif // __FLUC_COMPILER_AST_HH__

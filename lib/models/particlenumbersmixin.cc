@@ -83,20 +83,14 @@ ParticleNumbersMixin::ParticleNumbersMixin(BaseModel &base)
     }
 
 
-    Ast::Trafo::Pass forward_pass(forward_subst);
-    forward_pass.handleModule(&(base));
-
-    Ast::Trafo::Pass back_pass(back_subst);
-    back_pass.handleModule(&(base));
+    Trafo::Substitution forward_pass(forward_subst); base.apply(forward_pass);
+    Trafo::Substitution back_pass(back_subst); base.apply(back_pass);
 
     // do the substitution for the propensities
-
     for (size_t i=0; i<base.propensities.size(); i++)
     {
         base.propensities[i] = base.propensities[i].subs(forward_subst);
         base.propensities[i] = base.propensities[i].subs(back_subst);
     }
-
-
-};
+}
 
