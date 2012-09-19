@@ -222,8 +222,8 @@ Unit::hasVariantOf(ScaledBaseUnit::BaseUnit baseUnit, int expo) const
 bool
 Unit::isSubstanceUnit() const
 {
-  if (0 == this->units.size())
-  {
+  // Dimensionless is a valid substabce unit.
+  if (0 == this->units.size()) {
     return true;
   }
 
@@ -234,20 +234,21 @@ Unit::isSubstanceUnit() const
 bool
 Unit::hasSubstanceUnit() const
 {
-  return (this->hasVariantOf(Ast::ScaledBaseUnit::MOLE) || this->hasVariantOf(Ast::ScaledBaseUnit::ITEM) );
+  return (hasVariantOf(Ast::ScaledBaseUnit::MOLE) || hasVariantOf(Ast::ScaledBaseUnit::ITEM) ||
+          hasVariantOf(Ast::ScaledBaseUnit::GRAM) || hasVariantOf(Ast::ScaledBaseUnit::KILOGRAM));
 }
 
 
 bool
 Unit::isConcentrationUnit() const
 {
-  if (this->isVariantOf(Ast::ScaledBaseUnit::DIMENSIONLESS, -1) || this->isVariantOf(Ast::ScaledBaseUnit::LITRE, -1) || this->isVariantOf(Ast::ScaledBaseUnit::METRE, -3))
-  {
+  if (this->isVariantOf(Ast::ScaledBaseUnit::DIMENSIONLESS, -1) ||
+      this->isVariantOf(Ast::ScaledBaseUnit::LITRE, -1) ||
+      this->isVariantOf(Ast::ScaledBaseUnit::METRE, -3)) {
     return false;
   }
 
-  if (2 != this->units.size())
-  {
+  if (2 != this->units.size()) {
     return false;
   }
 

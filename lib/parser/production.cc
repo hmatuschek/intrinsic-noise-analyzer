@@ -331,7 +331,7 @@ OptionalProduction::parse(Lexer &lexer, ConcreteSyntaxTree &element)
     this->production->parse(lexer, element[0]);
     lexer.drop_state();
     element.setMatched(true);
-  } catch (ParserError &err) {
+  } catch (SyntaxError &err) {
     // If lexer is in terminal state -> forward error
     if (lexer.isTerminal()) {
       throw err;
