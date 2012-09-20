@@ -198,26 +198,19 @@ CompartmentList::_getUnit(iNA::Ast::Compartment *compartment, int role) const
 
   // Return rendered unit for decoration role:
   if (Qt::DecorationRole == role) {
-    UnitRenderer renderer(compartment->getUnit());
+    UnitRenderer renderer(_model->getVolumeUnit());
     return renderer.toPixmap();
   }
 
   // Return serialized unit for edit role:
-  return iNA::Parser::Unit::UnitParser::write(compartment->getUnit()).c_str();
+  return iNA::Parser::Unit::UnitParser::write(_model->getVolumeUnit()).c_str();
 }
 
 
 bool
 CompartmentList::_updateUnit(iNA::Ast::Compartment *compartment, const QVariant &value)
 {
-  // Try to parse the unit from string:
-  try {
-    iNA::Ast::Unit unit = iNA::Parser::Unit::UnitParser::parse(value.toString().toStdString());
-    compartment->setUnit(unit);
-  } catch (const iNA::Parser::ParserError &err) {
-    return false;
-  }
-  return true;
+  return false;
 }
 
 QVariant
@@ -247,7 +240,7 @@ CompartmentList::addCompartment()
   beginInsertRows(QModelIndex(), new_idx, new_idx);
   _model->addDefinition(
         new iNA::Ast::Compartment(
-          identifier, _model->getVolumeUnit(), iNA::Ast::Compartment::VOLUME, true));
+          identifier, iNA::Ast::Compartment::VOLUME, true));
   endInsertRows();
 }
 
