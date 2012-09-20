@@ -109,9 +109,6 @@ ModelCopyTest::testVariableEqual(Ast::VariableDefinition *A, Ast::VariableDefini
   // Check if variable is constant.
   UT_ASSERT(A->isConst() == B->isConst());
 
-  // Compare units:
-  UT_ASSERT(A->getUnit() == B->getUnit());
-
   // Check if variables has rules:
   UT_ASSERT(A->hasRule() == A->hasRule());
   if (A->hasRule()) {

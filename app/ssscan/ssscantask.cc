@@ -216,10 +216,10 @@ ParamScanTask::getLabel()
 }
 
 
-const iNA::Ast::Unit &
+iNA::Ast::Unit
 ParamScanTask::getSpeciesUnit() const
 {
-  return config.getModel()->getSpecies(0)->getUnit();
+  return config.getModel()->getSpeciesUnit();
 }
 
 
