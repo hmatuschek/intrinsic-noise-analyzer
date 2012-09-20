@@ -17,7 +17,6 @@
 #define __FLUC_COMPILER_AST_HH__
 
 #include "node.hh"
-#include "module.hh"
 #include "model.hh"
 #include "constraint.hh"
 

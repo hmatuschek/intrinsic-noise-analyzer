@@ -8,7 +8,7 @@ namespace Trafo {
 
 /** This simple operator scales variables within a @c Ast::Model and maintains an consistent model.
  * This operator is particulary useful when changeing units of variables without modifying the
- * model at all. The scaleing \f$x\rightarrow x' : x' = s\cdotx\f$ such that all occurrences of x
+ * model at all. The scaleing \f$x\rightarrow x' : x' = s\cdot x\f$ such that all occurrences of x
  * are replaced by x/f and the initial value of x, x(0) is replaced with f*x(0).
  * @ingroup trafo */
 class VariableScaling

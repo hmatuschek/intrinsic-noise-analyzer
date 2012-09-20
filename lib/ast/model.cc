@@ -14,7 +14,7 @@ using namespace iNA::Ast;
 
 
 Model::Model(const std::string &identifier, const std::string &name)
-  : Module(), _identifier(identifier), _name(name), _species_have_substance_units(false),
+  : Scope(), _identifier(identifier), _name(name), _species_have_substance_units(false),
     _predefined_units()
 {
   // Populate pre-defined units.
@@ -61,7 +61,7 @@ Model::Model(const std::string &identifier, const std::string &name)
 
 
 Model::Model(const Model &other)
-  : Module(), _species_have_substance_units(other._species_have_substance_units),
+  : Scope(), _species_have_substance_units(other._species_have_substance_units),
     _predefined_units(other._predefined_units)
 {
   // Copy "other" module into this module
@@ -860,48 +860,60 @@ Model::getSpeciesIdx(Species *species) const
 
 
 size_t
-Model::numReactions() const
-{
+Model::numReactions() const {
   return this->reaction_vector.size();
 }
 
-
 bool
-Model::hasReaction(const std::string &name) const
-{
+Model::hasReaction(const std::string &name) const {
   return this->hasDefinition(name) &&
       Node::isReactionDefinition(this->getDefinition(name));
 }
 
+Reaction *
+Model::getReaction(const std::string &identifier)
+{
+  Ast::Definition *def = this->getDefinition(identifier);
+
+  if (! Node::isReactionDefinition(def))
+  {
+    SymbolError err;
+    err << "There is no reaction with identifier " << identifier << " defined in this module.";
+    throw err;
+  }
+
+  return static_cast<Ast::Reaction *>(def);
+}
+
+Reaction * const
+Model::getReaction(const std::string &identifier) const
+{
+  Ast::Definition * const def = this->getDefinition(identifier);
+
+  if (! Node::isReactionDefinition(def))
+  {
+    SymbolError err;
+    err << "There is no reaction with identifier " << identifier << " defined in this module.";
+    throw err;
+  }
+
+  return static_cast<Ast::Reaction * const>(def);
+}
 
 Reaction *
-Model::getReaction(size_t idx)
-{
+Model::getReaction(size_t idx) {
   return this->reaction_vector[idx];
 }
 
 Reaction * const
-Model::getReaction(size_t idx) const
-{
+Model::getReaction(size_t idx) const {
   return this->reaction_vector[idx];
-}
-
-Reaction *
-Model::getReaction(const std::string &id) {
-  return Module::getReaction(id);
-}
-
-Reaction * const
-Model::getReaction(const std::string &id) const {
-  return Module::getReaction(id);
 }
 
 size_t
-Model::getReactionIdx(const std::string &id) const
-{
-  return this->getReactionIdx(Module::getReaction(id));
+Model::getReactionIdx(const std::string &id) const {
+  return this->getReactionIdx(getReaction(id));
 }
-
 
 size_t
 Model::getReactionIdx(Reaction *reac) const
@@ -920,11 +932,26 @@ Model::getReactionIdx(Reaction *reac) const
 }
 
 
+FunctionDefinition *
+Model::getFunction(const std::string &identifier)
+{
+  Ast::Definition *def = this->getDefinition(identifier);
+
+  if (! Node::isFunctionDefinition(def)) {
+    SymbolError err;
+    err << "Symbol " << identifier << " does not name a function definition in this module.";
+    throw err;
+  }
+
+  return static_cast<Ast::FunctionDefinition *>(def);
+}
+
+
 void
 Model::addDefinition(Definition *def)
 {
   // First, add definition to scope (takes ownership)
-  Module::addDefinition(def);
+  Scope::addDefinition(def);
 
   // Add definition to vectors of definitions:
   switch (def->getNodeType())
@@ -955,7 +982,7 @@ void
 Model::remDefinition(Definition *def)
 {
   // First, call parent method:
-  Module::remDefinition(def);
+  Scope::remDefinition(def);
 
   // Remove definition from index vectors.
   switch(def->getNodeType()) {

@@ -3,7 +3,7 @@
 
 #include <sbml/SBMLTypes.h>
 
-#include "module.hh"
+#include "scope.hh"
 #include "species.hh"
 #include "compartment.hh"
 #include "parameter.hh"
@@ -14,14 +14,14 @@ namespace Ast {
 
 
 /**
- * Extends the @c Ast::Module class to handle species, compartments and parameters. Within a
- * model, all the definitions have the same order as they are added to the model. While on module
+ * Extends the @c Ast::Scope class to handle species, compartments and parameters. Within a
+ * model, all the definitions have the same order as they are added to the model. While on scope
  * level, there is no ordering of the definitions. This allows access of definitions by index and
  * eases the iteration over specific definitions like species.
  *
  * @ingroup ast;
  */
-class Model : public Module
+class Model : public Scope
 {
 public:
   /** Visitor class for models. */
@@ -107,13 +107,13 @@ public:
   /** Returns the model-global unique time symbol. */
   GiNaC::symbol getTime() const;
 
+  /** Returns true, if the given GiNaC expression is explicitly time dependent. */
+  bool isExplTimeDep(const GiNaC::ex &expression) const;
+
   /** Returns the model global unique Avogadro constant symbol. The constant is defined as a global
    * constant parameter (id = "_avogadro_const"), the first time the symbol is requested, the
    * parameter is defined. */
   GiNaC::symbol getAvogadro();
-
-  /** Returns true, if the given GiNaC expression is explicitly time dependent. */
-  bool isExplTimeDep(const GiNaC::ex &expression) const;
 
   /** Returns true if all species in the model are defined in substance units. In this case,
    * @c getSpeciesUnit will return the substance unit as returned by @c getSubstanceUnit. If false
@@ -286,137 +286,88 @@ public:
    */
   Compartment *getCompartment(const std::string &id);
 
-  /**
-   * Returns the specified compartment.
-   *
-   * @throws SymbolError If the compartment can not be found.
-   */
+  /** Returns the specified compartment.
+   * @throws SymbolError If the compartment can not be found. */
   Compartment * const getCompartment(const std::string &id) const;
 
-  /**
-   * Returns the compartment associated with the given symbol.
-   *
-   * @throws SymbolError If there is no compartment with the given symbol.
-   */
+  /** Returns the compartment associated with the given symbol.
+   * @throws SymbolError If there is no compartment with the given symbol. */
   Compartment *getCompartment(const GiNaC::symbol &symbol);
 
-  /**
-   * Returns the compartment associated with the given symbol.
-   *
-   * @throws SymbolError If there is no compartment with the given symbol.
-   */
+  /** Returns the compartment associated with the given symbol.
+   * @throws SymbolError If there is no compartment with the given symbol. */
   Compartment * const getCompartment(const GiNaC::symbol &symbol) const;
 
-  /**
-   * Returns the specifies compartment (by index).
-   */
+  /** Returns the specifies compartment (by index). */
   Compartment *getCompartment(size_t idx);
 
-  /**
-   * Returns the specifies compartment (by index).
-   */
+  /** Returns the specifies compartment (by index). */
   Compartment * const getCompartment(size_t idx) const;
 
-  /**
-   * Retunrs the index of the specifies compartment, throws an exception if the compartment can
-   * not be found.
-   */
+  /** Retunrs the index of the specifies compartment, throws an exception if the compartment can
+   * not be found. */
   size_t getCompartmentIdx(const std::string &id) const;
 
-  /**
-   * Returns the index for the given compartment.
-   *
-   * @throws SymbolError If the symbol does not name a compartment.
-   */
+  /** Returns the index for the given compartment.
+   * @throws SymbolError If the symbol does not name a compartment. */
   size_t getCompartmentIdx(const GiNaC::symbol &symbol) const;
 
-  /**
-   * Returns the index of the given compartment.
-   */
+  /** Returns the index of the given compartment. */
   size_t getCompartmentIdx(Compartment *compartment) const;
 
-  /**
-   * Returns the number of parameters defined in the model.
-   */
+  /** Returns the number of parameters defined in the model. */
   size_t numParameters() const;
 
-  /**
-   * Returns true, if the given id specifies a parameter.
-   */
+  /** Returns true, if the given id specifies a parameter. */
   bool hasParameter(const std::string &id) const;
 
-  /**
-   * Returns true, if the given symbol specifies a parameter.
-   */
+  /** Returns true, if the given symbol specifies a parameter. */
   bool hasParameter(const GiNaC::symbol &symbol) const;
 
-  /**
-   * Returns the parameter by its identifier, throws an exception if the parameter can not
-   * be found.
-   */
+  /** Returns the parameter by its identifier, throws an exception if the parameter can not
+   * be found. */
   Parameter *getParameter(const std::string &id);
 
-  /**
-   * Returns the parameter by its identifier, throws an exception if the parameter can not
-   * be found.
-   */
+  /** Returns the parameter by its identifier, throws an exception if the parameter can not
+   * be found. */
   const Parameter * getParameter(const std::string &id) const;
 
-  /**
-   * Returns the parameter by its symbol.
-   *
-   * @throws SymbolError If the symbol is not associated with a parameter.
-   */
+  /** Returns the parameter by its symbol.
+   * @throws SymbolError If the symbol is not associated with a parameter. */
   Parameter *getParameter(const GiNaC::symbol &symbol);
 
-  /**
-   * Returns the parameter by its symbol.
-   *
-   * @throws SymbolError If the symbol is not associated with a parameter.
-   */
+  /** Returns the parameter by its symbol.
+   * @throws SymbolError If the symbol is not associated with a parameter. */
   Parameter * const getParameter(const GiNaC::symbol &symbol) const;
 
-  /**
-   * Returns the i-th parameter definition.
-   */
+  /** Returns the i-th parameter definition. */
   Parameter *getParameter(size_t idx);
 
-  /**
-   * Returns the i-th parameter definition.
-   */
+  /** Returns the i-th parameter definition. */
   Parameter * const getParameter(size_t idx) const;
 
-  /**
-   * Returns the index of the given parameter, throws an exception if the parameter can not be
-   * found.
-   */
+  /** Returns the index of the given parameter, throws an exception if the parameter can not be
+   * found. */
   size_t getParameterIdx(const std::string &id) const;
 
-  /**
-   * Returns the index of the parameter specified by symbol.
-   */
+  /** Returns the index of the parameter specified by symbol. */
   size_t getParameterIdx(const GiNaC::symbol &symbol) const;
 
-  /**
-   * Returns the index of the given parameter, throws an exception if the parameter can not be
-   * found.
-   */
+  /** Returns the index of the given parameter, throws an exception if the parameter can not be
+   * found. */
   size_t getParameterIdx(const Parameter *parameter) const;
 
-  /**
-   * Returns the number of reactions defined in the model.
-   */
+  /** Returns the number of reactions defined in the model. */
   size_t numReactions() const;
 
-  /**
-   * Returns true if the given identifier specifies a reaction.
-   */
+  /** Returns true if the given identifier specifies a reaction. */
   bool hasReaction(const std::string &id) const;
 
-  /**
-   * Returns the reaction by index.
-   */
+  /** Returns the reaction by index. */
   Reaction *getReaction(size_t idx);
+
+  /** Returns the reaction by index. */
+  Reaction * const getReaction(size_t idx) const;
 
   /** Returns the reaction by identifier. */
   Reaction *getReaction(const std::string &id);
@@ -424,33 +375,28 @@ public:
   /** Returns the reaction by identifier. */
   Reaction * const getReaction(const std::string &id) const;
 
-  /**
-   * Returns the reaction by index.
-   */
-  Reaction * const getReaction(size_t idx) const;
-
-  /**
-   * Returns the index of the given reaction, throws an exception if the reaction can not be
+  /** Returns the index of the given reaction, throws an exception if the reaction can not be
    * found.
-   */
+   * @throws SymbolError If the given id does not specify a reaction. */
   size_t getReactionIdx(const std::string &id) const;
 
-  /**
-   * Returns the index for the given reaction.
-   */
+  /** Returns the index for the given reaction. */
   size_t getReactionIdx(Reaction *reac) const;
 
-  /**
-   * Overrides the @c Scope::addDefinition method defined in @c Scope and ensures, that
-   * the definition is stored in the corresponding vector.
-   */
+
+  /** Returns the function definition by identifier.
+   * Is equivalent to call @c getFunction(getSymbol(const std::string &identifier));
+   * @throws SymbolError If the identifier is not associated with a function. */
+  FunctionDefinition *getFunction(const std::string &identifier);
+
+
+  /** Overrides the @c Scope::addDefinition method defined in @c Scope and ensures, that
+   * the definition is stored in the corresponding vector. */
   virtual void addDefinition(Definition *def);
 
-  /**
-   * Removes a definition (Species, Compartment, Reaction, ...) from the model. The user is
+  /** Removes a definition (Species, Compartment, Reaction, ...) from the model. The user is
    * responsible to ensure, that no other element refers to this definition on removal
-   * (also its symbols).
-   */
+   * (also its symbols). */
   virtual void remDefinition(Definition *def);
 
   /** Handles a visitor for the model. */
