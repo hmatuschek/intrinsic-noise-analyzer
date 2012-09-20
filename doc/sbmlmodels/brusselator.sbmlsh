@@ -1,0 +1,36 @@
+@model:3.1.1 = model "New Model"
+
+@units
+ substance = item
+ volume = litre
+ area = metre: e=2
+ length = metre
+ time = second
+
+@compartments
+ compartment_1 = 100 "compartment"
+
+@species
+ compartment_1: [species_1]  = 0  "X"
+ compartment_1: [species_2]  = 0  "Y"
+
+@parameters
+ parameter_1=4.5 "a"
+ parameter_2=2 "b"
+
+@reactions
+ @r= reaction_1 "reaction_1"
+   -> species_1
+  v*compartment_1: v=1
+
+ @r= reaction_2 "reaction_2"
+  2 species_1 + species_2 -> 3 species_1
+  species_2*compartment_1*species_1^2.0*parameter_1
+
+ @r= reaction_3 "reaction_3"
+  species_1 -> species_2
+  parameter_2*compartment_1*species_1
+
+ @r= reaction_4 "reaction_4"
+  species_1 -> 
+  compartment_1*k1*species_1: k1=1
