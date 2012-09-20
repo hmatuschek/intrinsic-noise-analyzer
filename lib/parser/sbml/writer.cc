@@ -35,19 +35,19 @@ Writer::processUnitDefinitions(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIE
   // Redefine default units:
   LIBSBML_CPP_NAMESPACE_QUALIFIER UnitDefinition *sbml_unit;
   sbml_unit = sbml_model->createUnitDefinition(); sbml_unit->setId("substance");
-  processUnit(model.getDefaultSubstanceUnit().asScaledBaseUnit(), sbml_unit);
+  processUnit(model.getSubstanceUnit().asScaledBaseUnit(), sbml_unit);
 
   sbml_unit = sbml_model->createUnitDefinition(); sbml_unit->setId("volume");
-  processUnit(model.getDefaultVolumeUnit().asScaledBaseUnit(), sbml_unit);
+  processUnit(model.getVolumeUnit().asScaledBaseUnit(), sbml_unit);
 
   sbml_unit = sbml_model->createUnitDefinition(); sbml_unit->setId("area");
-  processUnit(model.getDefaultAreaUnit().asScaledBaseUnit(), sbml_unit);
+  processUnit(model.getAreaUnit().asScaledBaseUnit(), sbml_unit);
 
   sbml_unit = sbml_model->createUnitDefinition(); sbml_unit->setId("length");
-  processUnit(model.getDefaultLengthUnit().asScaledBaseUnit(), sbml_unit);
+  processUnit(model.getLengthUnit().asScaledBaseUnit(), sbml_unit);
 
   sbml_unit = sbml_model->createUnitDefinition(); sbml_unit->setId("time");
-  processUnit(model.getDefaultTimeUnit().asScaledBaseUnit(), sbml_unit);
+  processUnit(model.getTimeUnit().asScaledBaseUnit(), sbml_unit);
 
 
   for (Ast::Model::iterator item=model.begin(); item!=model.end(); item++) {
@@ -429,15 +429,15 @@ Writer::hasDefaultUnit(Ast::VariableDefinition *var, Ast::Model &model)
     Ast::Compartment *comp = static_cast<Ast::Compartment *>(var);
     switch (comp->getDimension()) {
     case Ast::Compartment::POINT: return comp->getUnit().isExactlyDimensionless();
-    case Ast::Compartment::LINE: return comp->getUnit() == model.getDefaultLengthUnit();
-    case Ast::Compartment::AREA: return comp->getUnit() == model.getDefaultAreaUnit();
-    case Ast::Compartment::VOLUME: return comp->getUnit() == model.getDefaultVolumeUnit();
+    case Ast::Compartment::LINE: return comp->getUnit() == model.getLengthUnit();
+    case Ast::Compartment::AREA: return comp->getUnit() == model.getAreaUnit();
+    case Ast::Compartment::VOLUME: return comp->getUnit() == model.getVolumeUnit();
     }
   }
 
   if (Ast::Node::isSpecies(var)) {
     Ast::Species *species = static_cast<Ast::Species *>(var);
-    return species->getUnit() == model.getDefaultSubstanceUnit();
+    return species->getUnit() == model.getSubstanceUnit();
   }
 
   if (Ast::Node::isParameter(var)) {

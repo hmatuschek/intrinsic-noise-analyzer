@@ -3,51 +3,438 @@
 #include "reaction.hh"
 #include "converter.hh"
 #include "modelcopyist.hh"
+#include <trafo/substitution.hh>
+#include <cmath>
 
 using namespace iNA;
 using namespace iNA::Ast;
 
 
-Model::Model()
-  : Module()
+Model::Model(const std::string &identifier, const std::string &name)
+  : Module(), _identifier(identifier), _name(name)
 {
+  // Populate pre-defined units.
+  _predefined_units["ampere"] = Unit(ScaledBaseUnit(ScaledBaseUnit::AMPERE, 1, 0, 1));
+  _predefined_units["becquerel"] = Unit(ScaledBaseUnit(ScaledBaseUnit::BECQUEREL, 1, 0, 1));
+  _predefined_units["candela"] = Unit(ScaledBaseUnit(ScaledBaseUnit::CANDELA, 1, 0, 1));
+  _predefined_units["coulomb"] = Unit(ScaledBaseUnit(ScaledBaseUnit::COULOMB, 1, 0, 1));
+  _predefined_units["dimensionless"] = Unit(ScaledBaseUnit(ScaledBaseUnit::DIMENSIONLESS, 1, 0, 1));
+  _predefined_units["farad"] = Unit(ScaledBaseUnit(ScaledBaseUnit::FARAD, 1, 0, 1));
+  _predefined_units["gram"] = Unit(ScaledBaseUnit(ScaledBaseUnit::GRAM, 1, 0, 1));
+  _predefined_units["katal"] = Unit(ScaledBaseUnit(ScaledBaseUnit::KATAL, 1, 0, 1));
+  _predefined_units["gray"] = Unit(ScaledBaseUnit(ScaledBaseUnit::GRAY, 1, 0, 1));
+  _predefined_units["kelvin"] = Unit(ScaledBaseUnit(ScaledBaseUnit::KELVIN, 1, 0, 1));
+  _predefined_units["henry"] = Unit(ScaledBaseUnit(ScaledBaseUnit::HENRY, 1, 0, 1));
+  _predefined_units["kilogram"] = Unit(ScaledBaseUnit(ScaledBaseUnit::KILOGRAM, 1, 0, 1));
+  _predefined_units["hertz"] = Unit(ScaledBaseUnit(ScaledBaseUnit::HERTZ, 1, 0, 1));
+  _predefined_units["litre"] = Unit(ScaledBaseUnit(ScaledBaseUnit::LITRE, 1, 0, 1));
+  _predefined_units["item"] = Unit(ScaledBaseUnit(ScaledBaseUnit::ITEM, 1, 0, 1));
+  _predefined_units["lumen"] = Unit(ScaledBaseUnit(ScaledBaseUnit::LUMEN, 1, 0, 1));
+  _predefined_units["joule"] = Unit(ScaledBaseUnit(ScaledBaseUnit::JOULE, 1, 0, 1));
+  _predefined_units["lux"] = Unit(ScaledBaseUnit(ScaledBaseUnit::LUX, 1, 0, 1));
+  _predefined_units["metre"] = Unit(ScaledBaseUnit(ScaledBaseUnit::METRE, 1, 0, 1));
+  _predefined_units["mole"] = Unit(ScaledBaseUnit(ScaledBaseUnit::MOLE, 1, 0, 1));
+  _predefined_units["newton"] = Unit(ScaledBaseUnit(ScaledBaseUnit::NEWTON, 1, 0, 1));
+  _predefined_units["ohm"] = Unit(ScaledBaseUnit(ScaledBaseUnit::OHM, 1, 0, 1));
+  _predefined_units["pascal"] = Unit(ScaledBaseUnit(ScaledBaseUnit::PASCAL, 1, 0, 1));
+  _predefined_units["radian"] = Unit(ScaledBaseUnit(ScaledBaseUnit::RADIAN, 1, 0, 1));
+  _predefined_units["second"] = Unit(ScaledBaseUnit(ScaledBaseUnit::SECOND, 1, 0, 1));
+  _predefined_units["watt"] = Unit(ScaledBaseUnit(ScaledBaseUnit::WATT, 1, 0, 1));
+  _predefined_units["siemens"] = Unit(ScaledBaseUnit(ScaledBaseUnit::SIEMENS, 1, 0, 1));
+  _predefined_units["weber"] = Unit(ScaledBaseUnit(ScaledBaseUnit::WEBER, 1, 0, 1));
+  _predefined_units["sievert"] = Unit(ScaledBaseUnit(ScaledBaseUnit::SIEVERT, 1, 0, 1));
+  _predefined_units["steradian"] = Unit(ScaledBaseUnit(ScaledBaseUnit::STERADIAN, 1, 0, 1));
+  _predefined_units["tesla"] = Unit(ScaledBaseUnit(ScaledBaseUnit::TESLA, 1, 0, 1));
+  _predefined_units["volt"] = Unit(ScaledBaseUnit(ScaledBaseUnit::VOLT, 1, 0, 1));
 }
 
 
 Model::Model(const Model &other)
-  : Module()
+  : Module(), _predefined_units(other._predefined_units)
 {
   // Copy "other" module into this module
   ModelCopyist::copy(&other, this);
 }
 
 
-size_t
-Model::numParameters() const
-{
-  return this->parameter_vector.size();
+const std::string &
+Model::getIdentifier() const {
+  return _identifier;
+}
+
+void
+Model::setIdentifier(const std::string &identifier) {
+  _identifier = identifier;
+}
+
+bool
+Model::hasName() const {
+  return 0 != _name.size();
+}
+
+const std::string &
+Model::getName() const {
+  return _name;
+}
+
+void
+Model::setName(const std::string &name) {
+  _name = name;
+}
+
+GiNaC::symbol
+Model::getTime() const {
+  return _time_symbol;
+}
+
+bool
+Model::isExplTimeDep(const GiNaC::ex &expression) const {
+  return expression.has(_time_symbol);
+}
+
+Unit
+Model::getSpeciesUnit() const {
+  if (_species_have_substance_units) {
+    return getSubstanceUnit();
+  }
+  return getSubstanceUnit() / getVolumeUnit();
+}
+
+const Unit &
+Model::getSubstanceUnit() const {
+  return _substance_unit;
+}
+
+void
+Model::setSubstanceUnit(const Unit &unit, bool scale_model) {
+  if (! unit.isSubstanceUnit()) {
+    TypeError err; std::stringstream buffer; unit.dump(buffer);
+    err << "Can not set substance unit to " << buffer.str() << ": is not a substance unit.";
+    throw err;
+  }
+
+  // Set default substance unit.
+  Unit old_unit = _substance_unit; _substance_unit = unit;
+
+  // skip the rest if no model scaleing
+  if (! scale_model) { return; }
+
+  // Can we scale the model from the old to the new unit?
+  // @todo Allow translation mole -> item
+  Unit scale = old_unit/unit;
+  if (! scale.isDimensionless()) {
+    TypeError err; std::stringstream buffer;
+    err << "Can not rescale species as unit ";
+    old_unit.dump(buffer); err << buffer.str() << " can not be traslated into unit ";
+    buffer.str(""); unit.dump(buffer); err << buffer.str();
+    throw err;
+  }
+
+  // Get scaling factor
+  double factor = scale.getMultiplier(); factor *= std::pow(10., scale.getScale());
+
+  // Assemble translation table such that all species are scaled with factor:
+  GiNaC::exmap translation_table;
+  for (size_t i=0; i<numSpecies(); i++) {
+    Species *species = getSpecies(i);
+    // Define substitution
+    translation_table[species->getSymbol()] = species->getSymbol()/factor;
+    // Scale initial value:
+    if (species->hasValue()) {
+      species->setValue(factor*species->getValue());
+    }
+  }
+
+  Trafo::Substitution substitution(translation_table);
+  this->apply(substitution);
 }
 
 
-bool
-Model::hasParameter(const std::string &name) const
+const Unit &
+Model::getVolumeUnit() const {
+  return _volume_unit;
+}
+
+void
+Model::setVolumeUnit(const Unit &unit, bool scale_model)
 {
+  // Check if unit is a volume unit
+  if (! unit.isVolumeUnit()) {
+    TypeError err; std::stringstream buffer; unit.dump(buffer);
+    err << "Can not set volume unit to " << buffer.str() << ": is not a volume unit.";
+    throw err;
+  }
+
+  // Set default volume unit.
+  Unit old_unit = _volume_unit; _volume_unit = unit;
+
+  // skip the rest if no model scaleing
+  if (! scale_model) { return; }
+
+  // Can we scale the model from the old to the new unit?
+  Unit scale = old_unit/unit;
+  if (! scale.isDimensionless()) {
+    TypeError err; std::stringstream buffer;
+    err << "Can not rescale compartments as unit ";
+    old_unit.dump(buffer); err << buffer.str() << " can not be traslated into unit ";
+    buffer.str(""); unit.dump(buffer); err << buffer.str();
+    throw err;
+  }
+
+  // Get scaling factor
+  double factor = scale.getMultiplier(); factor *= std::pow(10., scale.getScale());
+
+  // Assemble translation table such that all compartments are scaled with factor:
+  GiNaC::exmap translation_table;
+  for (size_t i=0; i<numCompartments(); i++) {
+    // Get compartment:
+    Compartment *compartment = getCompartment(i);
+    // Process compartment only if it is 3D (volume)
+    if (Compartment::VOLUME == compartment->getDimension()) {
+      // Define substitution
+      translation_table[compartment->getSymbol()] = compartment->getSymbol()/factor;
+      // Scale initial value of compartment:
+      if (compartment->hasValue()) {
+        compartment->setValue(factor * compartment->getValue());
+      }
+    }
+  }
+
+  // Apply substitutions
+  Trafo::Substitution substitution(translation_table);
+  this->apply(substitution);
+}
+
+
+const Unit &
+Model::getAreaUnit() const {
+  return _area_unit;
+}
+
+void
+Model::setAreaUnit(const Unit &unit, bool scale_model)
+{
+  if (! unit.isAreaUnit()) {
+    TypeError err; std::stringstream buffer; unit.dump(buffer);
+    err << "Can not set area unit to " << buffer.str() << ": is not an area unit.";
+    throw err;
+  }
+
+  // Set default area unit.
+  Unit old_unit = _area_unit; _area_unit = unit;
+
+  // skip the rest if no model scaleing
+  if (! scale_model) { return; }
+
+  // Can we scale the model from the old to the new unit?
+  Unit scale = old_unit/unit;
+  if (! scale.isDimensionless()) {
+    TypeError err; std::stringstream buffer;
+    err << "Can not rescale compartments as unit ";
+    old_unit.dump(buffer); err << buffer.str() << " can not be traslated into unit ";
+    buffer.str(""); unit.dump(buffer); err << buffer.str();
+    throw err;
+  }
+
+  // Get scaling factor
+  double factor = scale.getMultiplier(); factor *= std::pow(10., scale.getScale());
+
+  // Assemble translation table such that all compartments are scaled with factor:
+  GiNaC::exmap translation_table;
+  for (size_t i=0; i<numCompartments(); i++) {
+    // Get compartment:
+    Compartment *compartment = getCompartment(i);
+    // Process compartment only if it is 2D (area)
+    if (Compartment::AREA == compartment->getDimension()) {
+      // Define substitution
+      translation_table[compartment->getSymbol()] = compartment->getSymbol()/factor;
+      // Scale initial value of compartment:
+      if (compartment->hasValue()) {
+        compartment->setValue(factor * compartment->getValue());
+      }
+    }
+  }
+
+  // Apply substitutions
+  Trafo::Substitution substitution(translation_table);
+  this->apply(substitution);
+}
+
+const Unit &
+Model::getLengthUnit() const {
+  return _length_unit;
+}
+
+void
+Model::setLengthUnit(const Unit &unit, bool scale_model)
+{
+  if (! unit.isLengthUnit()) {
+    TypeError err; std::stringstream buffer; unit.dump(buffer);
+    err << "Can not set length unit to " << buffer.str() << ": is not an length unit.";
+    throw err;
+  }
+
+  // Set default length unit.
+  Unit old_unit = _length_unit; _length_unit = unit;
+
+  // skip the rest if no model scaleing
+  if (! scale_model) { return; }
+
+  // Can we scale the model from the old to the new unit?
+  Unit scale = old_unit/unit;
+  if (! scale.isDimensionless()) {
+    TypeError err; std::stringstream buffer;
+    err << "Can not rescale compartments as unit ";
+    old_unit.dump(buffer); err << buffer.str() << " can not be traslated into unit ";
+    buffer.str(""); unit.dump(buffer); err << buffer.str();
+    throw err;
+  }
+
+  // Get scaling factor
+  double factor = scale.getMultiplier(); factor *= std::pow(10., scale.getScale());
+
+  // Assemble translation table such that all compartments are scaled with factor:
+  GiNaC::exmap translation_table;
+  for (size_t i=0; i<numCompartments(); i++) {
+    // Get compartment:
+    Compartment *compartment = getCompartment(i);
+    // Process compartment only if it is 1D (line)
+    if (Compartment::LINE == compartment->getDimension()) {
+      // Define substitution
+      translation_table[compartment->getSymbol()] = compartment->getSymbol()/factor;
+      // Scale initial value of compartment:
+      if (compartment->hasValue()) {
+        compartment->setValue(factor * compartment->getValue());
+      }
+    }
+  }
+
+  // Apply substitutions
+  Trafo::Substitution substitution(translation_table);
+  this->apply(substitution);
+}
+
+
+const Unit &
+Model::getTimeUnit() const {
+  return _time_unit;
+}
+
+void
+Model::setTimeUnit(const Unit &unit, bool scale_model)
+{
+  if (! unit.isTimeUnit()) {
+    TypeError err; std::stringstream buffer; unit.dump(buffer);
+    err << "Can not set time unit to " << buffer.str() << ": is not an time unit.";
+    throw err;
+  }
+
+  // Set unit:
+  _area_unit = unit;
+
+  if (scale_model) {
+    throw InternalError("Rescaleing of model by time units is not implemented yet.");
+  }
+}
+
+
+const Unit &
+Model::getUnit(const std::string &name) const
+{
+  // Check if name is one of the defaults:
+  if ("substance" == name) {
+    return _substance_unit;
+  } else if ("volume" == name) {
+    return _volume_unit;
+  } else if ("area" == name) {
+    return _area_unit;
+  } else if ("length" == name) {
+    return _length_unit;
+  } else if ("time" == name) {
+    return _time_unit;
+  }
+
+  // Check if name is one of the pre-defined units:
+  std::map<std::string, Unit>::const_iterator item;
+  if (_predefined_units.end() != (item  = _predefined_units.find(name))) {
+    return item->second;
+  }
+
+  // Otherwise search for a definition:
+  return this->getUnitDefinition(name)->getUnit();
+}
+
+
+UnitDefinition *
+Model::getUnitDefinition(const std::string &identifier)
+{
+  Definition *def = this->getDefinition(identifier);
+
+  if (! Node::isUnitDefinition(def))
+  {
+    SymbolError err;
+    err << "Symbol " << identifier << " does not name a unit-definition in this module.";
+    throw err;
+  }
+
+  return static_cast<Ast::UnitDefinition *>(def);
+}
+
+
+UnitDefinition * const
+Model::getUnitDefinition(const std::string &identifier) const
+{
+  Definition * const def = this->getDefinition(identifier);
+
+  if (! Node::isUnitDefinition(def))
+  {
+    SymbolError err;
+    err << "Symbol " << identifier << " does not name a unit-definition in this module.";
+    throw err;
+  }
+
+  return static_cast<Ast::UnitDefinition * const>(def);
+}
+
+
+UnitDefinition * const
+Model::getUnitDefinition(const Unit &unit) const
+{
+  for (Model::const_iterator item=this->begin(); item!=this->end(); item++) {
+    if (! Ast::Node::isUnitDefinition(*item)) { continue; }
+    Ast::UnitDefinition * const unit_def = (Ast::UnitDefinition * const)(*item);
+    if (unit_def->getUnit() == unit) { return unit_def; }
+  }
+
+  SymbolError err;
+  err << "Can not find matching unit!";
+  throw err;
+}
+
+
+size_t
+Model::numParameters() const {
+  return this->parameter_vector.size();
+}
+
+bool
+Model::hasParameter(const std::string &name) const {
   return this->hasDefinition(name) && Node::isParameter(this->getDefinition(name));
 }
 
 bool
-Model::hasParameter(const GiNaC::symbol &symbol) const
-{
+Model::hasParameter(const GiNaC::symbol &symbol) const {
   return this->hasVariable(symbol) && Node::isParameter(this->getVariable(symbol));
 }
-
 
 Parameter *
 Model::getParameter(const std::string &name)
 {
+  // Get variable by identifier:
   Ast::VariableDefinition *def = this->getVariable(name);
-  if (! Node::isParameter(def))
-  {
+
+  // Check if variable is a parameter:
+  if (! Node::isParameter(def)) {
     SymbolError err;
     err << "Identifier " << name << " is not associated with a parameter.";
     throw err;
@@ -454,10 +841,8 @@ size_t
 Model::getReactionIdx(Reaction *reac) const
 {
   // Search reaction in reaction vector:
-  for (size_t i=0; i<this->reaction_vector.size(); i++)
-  {
-    if (reac == this->reaction_vector[i])
-    {
+  for (size_t i=0; i<this->reaction_vector.size(); i++) {
+    if (reac == this->reaction_vector[i]) {
       return i;
     }
   }

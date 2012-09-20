@@ -2,7 +2,6 @@
 #define __FLUC_MODELS_REASONABLEMODELMIXIN_HH__
 
 #include "basemodel.hh"
-#include "assertnoalgebraicconstraintmixin.hh"
 #include "assertnoconstantspeciesmixin.hh"
 #include "assertconstantparametermixin.hh"
 #include "assertnoassignmentrule.hh"
@@ -33,7 +32,6 @@ namespace Models {
  * @ingroup models
  */
 class ReasonableModelMixin :
-    public AssertNoAlgebraicConstraintMixin,
     public AssertConstantParameterMixin,
     public AssertNoAssignmentRule,
     public AssertNoRateRule,

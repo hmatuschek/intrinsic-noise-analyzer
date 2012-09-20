@@ -83,20 +83,6 @@ protected:
   /** This function updates the initial value of the species. */
   static void updateSpecies(Ast::Species *node, GiNaC::exmap &translation_table);
 
-  /** Helper function to copy constraints. */
-  static Ast::Constraint *copyConstraint(Ast::Constraint *node, GiNaC::exmap &translation_table);
-
-  /** This function updates a constraint (dispatcher). */
-  static void updateConstraint(Ast::Constraint *node, GiNaC::exmap &translation_table);
-
-  /** Helper function to copy algebraic constraints. */
-  static Ast::AlgebraicConstraint *copyAlgebraicConstraint(
-    Ast::AlgebraicConstraint *node, GiNaC::exmap &translation_table);
-
-  /** This function updates an algebraic constraint. */
-  static void updateAlgebraicConstraint(
-    Ast::AlgebraicConstraint *node, GiNaC::exmap &translation_table);
-
   /** Helper function to copy reactions. */
   static Ast::Reaction *copyReaction(Ast::Reaction *node, GiNaC::exmap &translation_table,
                                      std::map<Species *, Species *> &species_table);

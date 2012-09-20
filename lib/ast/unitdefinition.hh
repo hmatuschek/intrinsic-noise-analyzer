@@ -211,6 +211,14 @@ public:
   /** Returns true, if the unit is a linear scaled substance unit divied by a linear scaled
    * volume unit. */
   bool isConcentrationUnit() const;
+  /** Returns true, if the unit is a linear scaled volume unit. */
+  bool isVolumeUnit() const;
+  /** Retunrs true if the unit is a area unit. */
+  bool isAreaUnit() const;
+  /** Returns true if the unit is a length unit. */
+  bool isLengthUnit() const;
+  /** Returns true if the unit is a time unit. */
+  bool isTimeUnit() const;
   /** Retunrs true, if the unit is dimensionless. */
   bool isDimensionless() const;
   /** Retunrs true if the unit is dimensionless, has multiplier 1 and scale 0. */

@@ -32,11 +32,6 @@ private:
    */
   Ast::Unit compartmentUnit;
 
-  /**
-   * Holds the time unit of the model.
-   */
-  Ast::Unit timeUnit;
-
 public:
   /**
    * Constructor
@@ -57,11 +52,6 @@ public:
    * Returns the compartment unit of the model.
    */
   const Ast::Unit &getCompartmentUnit() const;
-
-  /**
-   * Returns the time unit of the model.
-   */
-  const Ast::Unit &getTimeUnit() const;
 
   /**
    * Returns multiplier of substance unit.

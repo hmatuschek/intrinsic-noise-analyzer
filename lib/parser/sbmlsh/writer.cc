@@ -99,27 +99,27 @@ Writer::processUnitDefinitions(Ast::Model &model, std::ostream &output)
 
   // Process default substance unit first:
   temp.str(""); temp << std::endl << " substance = ";
-  processScaledUnit(model.getDefaultSubstanceUnit().asScaledBaseUnit(), temp);
+  processScaledUnit(model.getSubstanceUnit().asScaledBaseUnit(), temp);
   units.push_back(temp.str());
 
   // Process default volume unit:
   temp.str(""); temp << std::endl << " volume = ";
-  processScaledUnit(model.getDefaultVolumeUnit().asScaledBaseUnit(), temp);
+  processScaledUnit(model.getVolumeUnit().asScaledBaseUnit(), temp);
   units.push_back(temp.str());
 
   // Process default area unit:
   temp.str(""); temp << std::endl << " area = ";
-  processScaledUnit(model.getDefaultAreaUnit().asScaledBaseUnit(), temp);
+  processScaledUnit(model.getAreaUnit().asScaledBaseUnit(), temp);
   units.push_back(temp.str());
 
-  // Process default volume unit:
+  // Process default length unit:
   temp.str(""); temp << std::endl << " length = ";
-  processScaledUnit(model.getDefaultLengthUnit().asScaledBaseUnit(), temp);
+  processScaledUnit(model.getLengthUnit().asScaledBaseUnit(), temp);
   units.push_back(temp.str());
 
-  // Process default volume unit:
+  // Process default time unit:
   temp.str(""); temp << std::endl << " time = ";
-  processScaledUnit(model.getDefaultTimeUnit().asScaledBaseUnit(), temp);
+  processScaledUnit(model.getTimeUnit().asScaledBaseUnit(), temp);
   units.push_back(temp.str());
 
   for(Ast::Model::iterator item = model.begin(); item != model.end(); item++) {

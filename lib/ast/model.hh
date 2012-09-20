@@ -30,67 +30,160 @@ public:
   class Operator { public: virtual void act(Model *model) = 0; };
 
 protected:
-  /**
-   * Holds a vector of weak-references to all compartments defined in the model, in order of
-   * definition.
-   */
+  /** Holds the model identifier, should be a unique identifier. */
+  std::string _identifier;
+
+  /** Holds the model name. This name is used as a display name for the model. */
+  std::string _name;
+
+  /** Holds the global unique symbol to represent the time in a explicit time-dependent
+   * system. */
+  GiNaC::symbol _time_symbol;
+
+  /** If true, the species are measured in substance units
+   * (the unit returned by @c getSubstanceUnit). If not, the species are measured in concentration
+   * units, the unit given by @c getSubstanceUnit() / @c getVolumeUnit(). */
+  bool _species_have_substance_units;
+
+  /** Holds the global default unit for substance. */
+  Unit _substance_unit;
+
+  /** Holds the global default unit for a volume. */
+  Unit _volume_unit;
+
+  /** Holds the global default unit for a area. */
+  Unit _area_unit;
+
+  /** Holds the global default unit for a length. */
+  Unit _length_unit;
+
+  /** Holds teh global default unit for the time. */
+  Unit _time_unit;
+
+  /** Holds a list of pre-defined units. */
+  std::map<std::string, Unit> _predefined_units;
+
+  /** Holds a vector of weak-references to all compartments defined in the model, in order of
+   * definition. This vector does not own the compartment instance. */
   std::vector<Compartment *> compartment_vector;
 
-  /**
-   * Holds a vector of weak-references to all species defined in the model, in oder of their
-   * definition.
-   */
+  /** Holds a vector of weak-references to all species defined in the model, in oder of their
+   * definition. */
   std::vector<Species *> species_vector;
 
-  /**
-   * Holds a vector of weak-references to all (global) parameters in the model, in order of their
-   * definition.
-   */
+  /** Holds a vector of weak-references to all (global) parameters in the model, in order of their
+   * definition. */
   std::vector<Parameter *> parameter_vector;
 
-  /**
-   * Holds a vector of weak-references to all reactions in the model, in order of their definition.
-   */
+  /** Holds a vector of weak-references to all reactions in the model, in order of their definition.
+   * This vector does not own the reaction instances. */
   std::vector<Reaction *> reaction_vector;
 
 
 public:
-  /**
-   * Constructs an empty model, use @c addDefinition to populate the model with definitions
-   * (species, reactions, ...)
-   */
-  Model();
+  /** Constructs an empty model, use @c addDefinition to populate the model with definitions
+   * (species, reactions, ...) */
+  Model(const std::string &identifier="model", const std::string &name="");
 
-  /**
-   * Recursive copy-constructor.
-   */
+  /** Recursive copy-constructor. The copy constructor creates a deep copy of the given model
+   * including new @c GiNaC::symbol instances for variables. */
   explicit Model(const Model &other);
 
-  /**
-   * Returns the number of species defined in the model.
-   */
+  /** Returns the identifier of the model. */
+  const std::string &getIdentifier() const;
+
+  /** (Re-) Sets the identifier of the model. */
+  void setIdentifier(const std::string &identifier);
+
+  /** Returns true, if the model has a name. */
+  bool hasName() const;
+
+  /** Returns the name of the model or an empty string if there is no name set. */
+  const std::string &getName() const;
+
+  /** (Re-) Sets the name of the model. */
+  void setName(const std::string &name);
+
+  /** Returns the model-global unique time symbol. */
+  GiNaC::symbol getTime() const;
+
+  /** Returns true, if the given GiNaC expression is explicitly time dependent. */
+  bool isExplTimeDep(const GiNaC::ex &expression) const;
+
+  /** Returns the unit, the species are measured in. The species unit can not be changed directly
+   * as it is defined implicitly by the substance and volume unit. */
+  Unit getSpeciesUnit() const;
+
+  /** Returns the substance unit of the model. */
+  const Unit &getSubstanceUnit() const;
+
+  /** Resets the default substance unit. A @c UnitError exception is thrown if the given unit is not
+   * a valid substance unit. If @c scale_model is true (default), the complete model is scaled to
+   * maintain consistency. */
+  void setSubstanceUnit(const Unit &unit, bool scale_model=true);
+
+  /** Returns the volume unit of the model. */
+  const Unit &getVolumeUnit() const;
+
+  /** Resets the default volume unit. A @c UnitError exception is thrown if the given unit is not
+   * a valid volume unit. If @c scale_model is true (default), the complete model is scaled to
+   * maintain consistency. */
+  void setVolumeUnit(const Unit &unit, bool scale_model=true);
+
+  /** Returns the area unit of the model.
+   * @deprecated The area unit is not used anywhere.*/
+  const Unit &getAreaUnit() const;
+
+  /** Resets the area unit of the model. A @c UnitError exception is thrown if the given unit is not
+   * an area unit. */
+  void setAreaUnit(const Unit &unit, bool scale_model=true);
+
+  /** Returns the length unit of the model.
+   * @deprecated The length unit is not used anywhere. */
+  const Unit &getLengthUnit() const;
+
+  /** Resets the length unit of the model, a @c UnitError exception is thrown if the given unit is
+   * not a length unit. */
+  void setLengthUnit(const Unit &unit, bool scale_model=true);
+
+  /** Returns the time unit of the model. */
+  const Unit &getTimeUnit() const;
+
+  /** Resets the time unit of the model, a @c UnitError exception is thrown if the given unit is
+   * not a time unit. */
+  void setTimeUnit(const Unit &unit, bool scale_model=true);
+
+  /** Returns the given unit or throws an exception if unknwon. */
+  const Unit &getUnit(const std::string &name) const;
+
+  /** Returns the unit definition by identifier.
+   * Equivalent to call @c getUnitDefinition(getSymbol(const std::string &identifier)).
+   * @throws SymbolError If the identifier is not associated with a unit definition. */
+  UnitDefinition *getUnitDefinition(const std::string &identifier);
+
+  /** Returns the unit definition by identifier.
+   * Equivalent to call @c getUnitDefinition(getSymbol(const std::string &identifier)).
+   * @throws SymbolError If the identifier is not associated with a unit definition. */
+  UnitDefinition * const getUnitDefinition(const std::string &identifier) const;
+
+  /** Returns the unit definition by matching the unit.
+   * @throws SymbolError If the unit is not associated with a unit definition. */
+  UnitDefinition * const getUnitDefinition(const Unit &unit) const;
+
+  /** Returns the number of species defined in the model. */
   size_t numSpecies() const;
 
-  /**
-   * Returns true, if the given species (id) is defined in the model.
-   *
-   * Is equivalent to call hasSpecies(getSymbol(const std::string &id)).
-   */
+  /** Returns true, if the given species (id) is defined in the model.
+   * Is equivalent to call hasSpecies(getSymbol(const std::string &id)). */
   bool hasSpecies(const std::string &id) const;
 
-  /**
-   * Returns true, if the given symbol is associated with a species definition.
-   */
+  /** Returns true, if the given symbol is associated with a species definition. */
   bool hasSpecies(const GiNaC::symbol &symbol) const;
 
-  /**
-   * Retunrs the species with the given identifer.
-   *
+  /** Retunrs the species with the given identifer.
    * Is equivalent to call @c getSpecies(getSymbol(const std::string &id)).
-   *
    * @throws SymbolError If there is no species associated with the identifier. To check if there
-   *         is a species defined with the given identifier, use the @c hasSpecies method.
-   */
+   *         is a species defined with the given identifier, use the @c hasSpecies method. */
   Species *getSpecies(const std::string &id);
 
   /**

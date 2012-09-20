@@ -247,7 +247,7 @@ CompartmentList::addCompartment()
   beginInsertRows(QModelIndex(), new_idx, new_idx);
   _model->addDefinition(
         new iNA::Ast::Compartment(
-          identifier, _model->getDefaultVolumeUnit(), iNA::Ast::Compartment::VOLUME, true));
+          identifier, _model->getVolumeUnit(), iNA::Ast::Compartment::VOLUME, true));
   endInsertRows();
 }
 

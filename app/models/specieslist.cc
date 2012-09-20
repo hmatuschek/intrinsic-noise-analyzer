@@ -385,8 +385,7 @@ SpeciesList::addSpecies()
   int new_idx = _model->numSpecies();
   beginInsertRows(QModelIndex(), new_idx, new_idx);
   _model->addDefinition(
-        new iNA::Ast::Species(
-          identifier, _model->getDefaultSubstanceUnit(), compartment, false));
+        new iNA::Ast::Species(identifier, _model->getSubstanceUnit(), compartment, false));
   endInsertRows();
 }
 

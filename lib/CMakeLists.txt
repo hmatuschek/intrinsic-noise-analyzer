@@ -32,11 +32,11 @@ SET(libina_ast_HEADERS
 
 SET(libina_trafo_SOURCES
     trafo/assertions.cc trafo/substitution.cc trafo/constantfolder.cc
-    trafo/algebraicconstraintsolver.cc trafo/partialmodel.cc trafo/assignmentruleinliner.cc
+    trafo/partialmodel.cc trafo/assignmentruleinliner.cc
     trafo/conservationanalysis.cc trafo/reversiblereactionconverter.cc)
 SET(libina_trafo_HEADERS trafo/trafo.hh
     trafo/assertions.hh trafo/substitution.hh trafo/constantfolder.hh
-    trafo/algebraicconstraintsolver.hh trafo/partialmodel.hh trafo/assignmentruleinliner.hh
+    trafo/partialmodel.hh trafo/assignmentruleinliner.hh
     trafo/conservationanalysis.hh trafo/reversiblereactionconverter.hh)
 
 SET(libina_sbmlsh_parser_SOURCES
@@ -97,7 +97,6 @@ SET(libina_models_SOURCES
     models/gillespieSSA.cc
     models/optimizedSSA.cc
     models/gibsonbruckSSA.cc
-    models/assertnoalgebraicconstraintmixin.cc
     models/assertnoconstantspeciesmixin.cc
     models/assertconstantparametermixin.cc
     models/assertnoassignmentrule.cc models/assertnoraterule.cc
@@ -129,7 +128,6 @@ SET(libina_models_HEADERS models/models.hh
     models/optimizedSSAginac.hh
     models/gillespieSSAginac.hh
     models/gillespieCLE.hh
-    models/assertnoalgebraicconstraintmixin.hh
     models/assertnoconstantspeciesmixin.hh
     models/assertconstantparametermixin.hh
     models/assertnoassignmentrule.hh models/assertnoraterule.hh

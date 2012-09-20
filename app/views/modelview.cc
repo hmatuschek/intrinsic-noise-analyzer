@@ -27,11 +27,11 @@ ModelView::ModelView(ModelItem *model_item, QWidget *parent)
   QGroupBox *unit_frame = new QGroupBox(tr("Units"));
   unit_frame->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
   QFormLayout *unit_layout = new QFormLayout();
-  unit_layout->addRow(tr("Substance unit"), new UnitEditor(_model->getDefaultSubstanceUnit()));
-  unit_layout->addRow(tr("Volume unit"), new UnitEditor(_model->getDefaultVolumeUnit()));
-  unit_layout->addRow(tr("Area unit"), new UnitEditor(_model->getDefaultAreaUnit()));
-  unit_layout->addRow(tr("Length unit"), new UnitEditor(_model->getDefaultLengthUnit()));
-  unit_layout->addRow(tr("Time unit"), new UnitEditor(_model->getDefaultTimeUnit()));
+  unit_layout->addRow(tr("Substance unit"), new UnitEditor(_model->getSubstanceUnit()));
+  unit_layout->addRow(tr("Volume unit"), new UnitEditor(_model->getVolumeUnit()));
+  unit_layout->addRow(tr("Area unit"), new UnitEditor(_model->getAreaUnit()));
+  unit_layout->addRow(tr("Length unit"), new UnitEditor(_model->getLengthUnit()));
+  unit_layout->addRow(tr("Time unit"), new UnitEditor(_model->getTimeUnit()));
   unit_frame->setLayout(unit_layout);
 
   // Layout

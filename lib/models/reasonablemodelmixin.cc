@@ -5,7 +5,6 @@ using namespace iNA::Models;
 
 
 ReasonableModelMixin::ReasonableModelMixin(BaseModel &model) :
-  AssertNoAlgebraicConstraintMixin(model),
   AssertConstantParameterMixin(model),
   AssertNoAssignmentRule(model),
   AssertNoRateRule(model),

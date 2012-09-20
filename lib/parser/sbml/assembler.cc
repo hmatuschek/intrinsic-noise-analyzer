@@ -189,8 +189,7 @@ Parser::Sbml::__process_model(LIBSBML_CPP_NAMESPACE_QUALIFIER Model *model, Pars
     GiNaC::ex rule_expr = __process_expression(sbml_rule->getMath(), ctx);
 
     // Dispatch by type:
-    if (sbml_rule->isAssignment())
-    {
+    if (sbml_rule->isAssignment()) {
       // Find variable the rule is associated with:
       if (! ctx.model().hasDefinition(sbml_rule->getVariable())) {
         SymbolError err;
@@ -203,29 +202,21 @@ Parser::Sbml::__process_model(LIBSBML_CPP_NAMESPACE_QUALIFIER Model *model, Pars
       Ast::VariableDefinition *def = ctx.model().getVariable(sbml_rule->getVariable());
       // Construct rule and assign it to variable:
       def->setRule(new Ast::AssignmentRule(rule_expr));
-    }
-    else if (sbml_rule->isRate())
-    {
+    } else if (sbml_rule->isRate()) {
       // Find variable the rule is associated with:
-      if (! ctx.model().hasDefinition(sbml_rule->getVariable()))
-      {
+      if (! ctx.model().hasDefinition(sbml_rule->getVariable())) {
         SymbolError err;
         err << "Variable " << sbml_rule->getVariable()
             << " in rate rule not defined in module.";
         throw err;
       }
-
       // Check if definition is a variable definition.
       Ast::VariableDefinition *def = ctx.model().getVariable(sbml_rule->getVariable());
       // Construct rule and assign it to variable:
       def->setRule(new Ast::RateRule(rule_expr));
-    }
-    else if(sbml_rule->isAlgebraic())
-    {
-      ctx.model().addConstraint(new Ast::AlgebraicConstraint(rule_expr));
-    }
-    else
-    {
+    } else if(sbml_rule->isAlgebraic()) {
+      throw SBMLFeatureNotSupported("Can not create algebraic rules, feature not supported.");
+    } else {
       InternalError err;
       err << "Unknown variable-rule type.";
       throw err;
@@ -267,7 +258,7 @@ Parser::Sbml::__process_species_definition(LIBSBML_CPP_NAMESPACE_QUALIFIER Speci
   Ast::Compartment *compartment = ctx.model().getCompartment(node->getCompartment());
 
   /* Second, process unit and initial value of species. */
-  Ast::Unit unit(ctx.model().getDefaultSubstanceUnit());
+  Ast::Unit unit(ctx.model().getSubstanceUnit());
 
   // Get unit for species:
   if (node->isSetUnits()) {
@@ -389,7 +380,7 @@ Parser::Sbml::__process_compartment_definition(LIBSBML_CPP_NAMESPACE_QUALIFIER C
     init_value = GiNaC::numeric(node->getSize());
   }
 
-  Ast::Unit unit(ctx.model().getDefaultVolumeUnit());
+  Ast::Unit unit(ctx.model().getVolumeUnit());
 
   // Check if there is a Unit assigned to the compartment:
   if (node->isSetUnits()) {
@@ -458,7 +449,7 @@ Parser::Sbml::__process_default_unit_redefinition(LIBSBML_CPP_NAMESPACE_QUALIFIE
       err << "Redefinition of default unit " << node->getId() << " requires a substance unit.";
       throw err;
     }
-    ctx.model().setDefaultSubstanceUnit(unit);
+    ctx.model().setSubstanceUnit(unit, false);
   } else if ("volume" == node->getId()) {
     Ast::ScaledBaseUnit unit = __process_unit(node->getUnit(0), ctx);
     if (! unit.isVolumeUnit()) {
@@ -466,7 +457,7 @@ Parser::Sbml::__process_default_unit_redefinition(LIBSBML_CPP_NAMESPACE_QUALIFIE
       err << "Redefinition of default unit " << node->getId() << " requires a volume unit.";
       throw err;
     }
-    ctx.model().setDefaultVolumeUnit(unit);
+    ctx.model().setVolumeUnit(unit, false);
   } else if ("area" == node->getId()) {
     Ast::ScaledBaseUnit unit = __process_unit(node->getUnit(0), ctx);
     if (! unit.isAreaUnit()) {
@@ -474,7 +465,7 @@ Parser::Sbml::__process_default_unit_redefinition(LIBSBML_CPP_NAMESPACE_QUALIFIE
       err << "Redefinition of default unit " << node->getId() << " requires a area unit.";
       throw err;
     }
-    ctx.model().setDefaultAreaUnit(unit);
+    ctx.model().setAreaUnit(unit, false);
   } else if ("length" == node->getId()) {
     Ast::ScaledBaseUnit unit = __process_unit(node->getUnit(0), ctx);
     if (! unit.isLengthUnit()) {
@@ -482,7 +473,7 @@ Parser::Sbml::__process_default_unit_redefinition(LIBSBML_CPP_NAMESPACE_QUALIFIE
       err << "Redefinition of default unit " << node->getId() << " requires a length unit.";
       throw err;
     }
-    ctx.model().setDefaultLengthUnit(unit);
+    ctx.model().setLengthUnit(unit, false);
   } else if ("time" == node->getId()) {
     Ast::ScaledBaseUnit unit = __process_unit(node->getUnit(0), ctx);
     if (! unit.isTimeUnit()) {
@@ -490,7 +481,7 @@ Parser::Sbml::__process_default_unit_redefinition(LIBSBML_CPP_NAMESPACE_QUALIFIE
       err << "Redefinition of default unit " << node->getId() << " required time unit.";
       throw err;
     }
-    ctx.model().setDefaultTimeUnit(unit);
+    ctx.model().setTimeUnit(unit, false);
   }
 }
 

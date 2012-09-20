@@ -191,15 +191,15 @@ Assembler::processDefaultUnitDefinitions(Parser::ConcreteSyntaxTree &def_units)
 
   // Dispatch by flag...
   if (def_unit_id == "s") {
-    _model.setDefaultSubstanceUnit(base_unit);
+    _model.setSubstanceUnit(base_unit, false);
   } else if (def_unit_id == "t") {
-    _model.setDefaultTimeUnit(base_unit);
+    _model.setTimeUnit(base_unit, false);
   } else if (def_unit_id == "v") {
-    _model.setDefaultVolumeUnit(base_unit);
+    _model.setVolumeUnit(base_unit, false);
   } else if (def_unit_id == "a") {
-    _model.setDefaultAreaUnit(base_unit);
+    _model.setAreaUnit(base_unit, false);
   } else if (def_unit_id == "l") {
-    _model.setDefaultLengthUnit(base_unit);
+    _model.setLengthUnit(base_unit, false);
   } else if (def_unit_id == "e") {
     throw SBMLFeatureNotSupported("Setting the extent unit is not supported yet.");
   } else if (def_unit_id == "c") {
@@ -236,15 +236,15 @@ Assembler::processUnitDefinition(Parser::ConcreteSyntaxTree &unit)
   }
 
   if ("substance" == identifier) {
-    _model.setDefaultSubstanceUnit(def->getUnit().asScaledBaseUnit()); delete def;
+    _model.setSubstanceUnit(def->getUnit().asScaledBaseUnit(), false); delete def;
   } else if ("volume" == identifier) {
-    _model.setDefaultVolumeUnit(def->getUnit().asScaledBaseUnit()); delete def;
+    _model.setVolumeUnit(def->getUnit().asScaledBaseUnit(), false); delete def;
   } else if ("area" == identifier) {
-    _model.setDefaultAreaUnit(def->getUnit().asScaledBaseUnit()); delete def;
+    _model.setAreaUnit(def->getUnit().asScaledBaseUnit(), false); delete def;
   } else if ("length" == identifier) {
-    _model.setDefaultLengthUnit(def->getUnit().asScaledBaseUnit()); delete def;
+    _model.setLengthUnit(def->getUnit().asScaledBaseUnit(), false); delete def;
   } else if ("time" == identifier) {
-    _model.setDefaultTimeUnit(def->getUnit().asScaledBaseUnit()); delete def;
+    _model.setTimeUnit(def->getUnit().asScaledBaseUnit(), false); delete def;
   } else {
     // Add unit definition to model:
     _model.addDefinition(def);
@@ -342,7 +342,7 @@ Assembler::processCompartmentDefinitions(Parser::ConcreteSyntaxTree &comp)
    *  [EOL CompartmentDefinitionList];    : comp[4] */
 
   std::string id = _lexer[comp[0].getTokenIdx()].getValue();
-  Ast::Compartment *compartment = new Ast::Compartment(id, _model.getDefaultVolumeUnit(),
+  Ast::Compartment *compartment = new Ast::Compartment(id, _model.getVolumeUnit(),
                                                        Ast::Compartment::VOLUME, true);
 
   // Handle inner/outer relation if needed:
@@ -416,7 +416,7 @@ Assembler::processSpeciesDefinition(Parser::ConcreteSyntaxTree &spec)
   }
 
   // Unit voodoo...
-  Ast::Unit spec_unit = _model.getDefaultSubstanceUnit();
+  Ast::Unit spec_unit = _model.getSubstanceUnit();
   if (has_substance_units) {
     if (! has_initial_amount) {
       initial_value = initial_value * compartment->getValue();

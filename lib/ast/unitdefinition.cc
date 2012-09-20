@@ -259,6 +259,31 @@ Unit::isConcentrationUnit() const
 
 
 bool
+Unit::isVolumeUnit() const {
+  return isVariantOf(Ast::ScaledBaseUnit::LITRE, 1) ||
+      isVariantOf(Ast::ScaledBaseUnit::METRE, 3) ||
+      isVariantOf(Ast::ScaledBaseUnit::DIMENSIONLESS);
+}
+
+bool
+Unit::isAreaUnit() const {
+  return isVariantOf(Ast::ScaledBaseUnit::METRE, 2) ||
+      isVariantOf(Ast::ScaledBaseUnit::DIMENSIONLESS);
+}
+
+bool
+Unit::isLengthUnit() const {
+  return isVariantOf(Ast::ScaledBaseUnit::METRE, 1) ||
+      isVariantOf(Ast::ScaledBaseUnit::DIMENSIONLESS);
+}
+
+bool
+Unit::isTimeUnit() const {
+  return isVariantOf(Ast::ScaledBaseUnit::SECOND, 1) ||
+      isVariantOf(Ast::ScaledBaseUnit::DIMENSIONLESS);
+}
+
+bool
 Unit::isDimensionless() const
 {
   return 0 == this->units.size();

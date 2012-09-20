@@ -20,8 +20,6 @@ BaseUnitMixin::BaseUnitMixin(BaseModel &base)
 
   //Ast::Unit compUnit = base.getCompartment(0)->getUnit();
 
-  this->timeUnit = base.getDefaultTimeUnit();
-
   // loop over all compartments and check if their units are consistent
 
   for (size_t i=0; i<base.numCompartments();i++)
@@ -116,12 +114,6 @@ const Ast::Unit &
 BaseUnitMixin::getCompartmentUnit() const
 {
   return this->compartmentUnit;
-}
-
-const Ast::Unit &
-BaseUnitMixin::getTimeUnit() const
-{
-  return this->timeUnit;
 }
 
 double
