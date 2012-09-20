@@ -300,12 +300,16 @@ Unit::isExactlyDimensionless() const
 ScaledBaseUnit
 Unit::asScaledBaseUnit() const
 {
+  // Handle dimensionless unit explicitly:
+  if (this->isDimensionless()) {
+    return ScaledBaseUnit(ScaledBaseUnit::DIMENSIONLESS, 1, 0, 1);
+  }
+
   if (1 != this->units.size())
   {
     InternalError err;
-    std::stringstream str; this->dump(str);
     err << "Cannot construct a scaled base-unit from non-atomic unit: "
-        << str.str();
+        << this->dump();
     throw err;
   }
 

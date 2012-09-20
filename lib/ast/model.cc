@@ -48,6 +48,13 @@ Model::Model(const std::string &identifier, const std::string &name)
   _predefined_units["steradian"] = Unit(ScaledBaseUnit(ScaledBaseUnit::STERADIAN, 1, 0, 1));
   _predefined_units["tesla"] = Unit(ScaledBaseUnit(ScaledBaseUnit::TESLA, 1, 0, 1));
   _predefined_units["volt"] = Unit(ScaledBaseUnit(ScaledBaseUnit::VOLT, 1, 0, 1));
+
+  // Define default units:
+  _substance_unit = ScaledBaseUnit(ScaledBaseUnit::MOLE, 1, 0, 1);
+  _volume_unit    = ScaledBaseUnit(ScaledBaseUnit::LITRE, 1, 0, 1);
+  _area_unit      = ScaledBaseUnit(ScaledBaseUnit::METRE, 1, 0, 2);
+  _length_unit    = ScaledBaseUnit(ScaledBaseUnit::METRE, 1, 0, 1);
+  _time_unit      = ScaledBaseUnit(ScaledBaseUnit::SECOND, 1, 0, 1);
 }
 
 
