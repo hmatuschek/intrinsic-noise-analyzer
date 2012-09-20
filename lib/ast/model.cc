@@ -4,6 +4,7 @@
 #include "converter.hh"
 #include "modelcopyist.hh"
 #include <trafo/substitution.hh>
+#include <trafo/variablescaling.hh>
 #include <cmath>
 
 using namespace iNA;
@@ -11,7 +12,8 @@ using namespace iNA::Ast;
 
 
 Model::Model(const std::string &identifier, const std::string &name)
-  : Module(), _identifier(identifier), _name(name)
+  : Module(), _identifier(identifier), _name(name), _species_have_substance_units(false),
+    _predefined_units()
 {
   // Populate pre-defined units.
   _predefined_units["ampere"] = Unit(ScaledBaseUnit(ScaledBaseUnit::AMPERE, 1, 0, 1));
@@ -50,7 +52,8 @@ Model::Model(const std::string &identifier, const std::string &name)
 
 
 Model::Model(const Model &other)
-  : Module(), _predefined_units(other._predefined_units)
+  : Module(), _species_have_substance_units(other._species_have_substance_units),
+    _predefined_units(other._predefined_units)
 {
   // Copy "other" module into this module
   ModelCopyist::copy(&other, this);
@@ -110,6 +113,30 @@ bool
 Model::speciesHasSubstanceUnits() const {
   return _species_have_substance_units;
 }
+
+void
+Model::setSpeciesHasSubstanceUnits(bool has_substance_units)
+{
+  // If nothing changes -> skip
+  if (_species_have_substance_units == has_substance_units) { return; }
+
+  _species_have_substance_units = has_substance_units;
+  Trafo::VariableScaling scaleing;
+  for (size_t i=0; i<numSpecies(); i++) {
+    Ast::Species *species = getSpecies(i);
+    if (_species_have_substance_units) {
+      // Translation concentration -> substance:
+      scaleing.add(species->getSymbol(), species->getCompartment()->getSymbol());
+    } else {
+      // Translation substance -> concentration
+      scaleing.add(species->getSymbol(), 1./species->getCompartment()->getSymbol());
+    }
+  }
+
+  // Apply variable scaleing on model:
+  this->apply(scaleing);
+}
+
 
 Unit
 Model::getSpeciesUnit() const {

@@ -121,6 +121,10 @@ public:
    * the quotient of the units returned by @c getSubstanceUnit and @c getVolumeUnit. */
   bool speciesHasSubstanceUnits() const;
 
+  /** Resets if the species in the model are defined in substance units, fixes complete model
+   * to maintain consistency. */
+  void setSpeciesHasSubstanceUnits(bool has_substance_units);
+
   /** Returns the unit, the species are measured in. The species unit can not be changed directly
    * as it is defined implicitly by the substance and volume unit. */
   Unit getSpeciesUnit() const;
