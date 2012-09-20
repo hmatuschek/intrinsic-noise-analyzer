@@ -6,6 +6,8 @@
 #include <trafo/substitution.hh>
 #include <trafo/variablescaling.hh>
 #include <cmath>
+#include "math.hh"
+
 
 using namespace iNA;
 using namespace iNA::Ast;
@@ -178,18 +180,24 @@ Model::setSubstanceUnit(const Unit &unit, bool scale_model) {
   if (! scale_model) { return; }
 
   // Can we scale the model from the old to the new unit?
-  // @todo Allow translation mole -> item
-  Unit scale = old_unit/unit;
-  if (! scale.isDimensionless()) {
+  Unit scale = old_unit/unit; double factor;
+  if (scale.isDimensionless()) {
+    factor = scale.getMultiplier(); factor *= std::pow(10., scale.getScale());
+  } else if (2 == scale.size() && scale.hasVariantOf(ScaledBaseUnit::MOLE, 1) &&
+             scale.hasVariantOf(ScaledBaseUnit::ITEM, -1)) {
+    factor = scale.getMultiplier(); factor *= std::pow(10., scale.getScale());
+    factor *= constants::AVOGADRO;
+  } else if (2 == scale.size() && scale.hasVariantOf(ScaledBaseUnit::MOLE, -1) &&
+             scale.hasVariantOf(ScaledBaseUnit::ITEM, 1)) {
+    factor = scale.getMultiplier(); factor *= std::pow(10., scale.getScale());
+    factor /= constants::AVOGADRO;
+  } else {
     TypeError err; std::stringstream buffer;
     err << "Can not rescale species as unit ";
     old_unit.dump(buffer); err << buffer.str() << " can not be traslated into unit ";
     buffer.str(""); unit.dump(buffer); err << buffer.str();
     throw err;
   }
-
-  // Get scaling factor
-  double factor = scale.getMultiplier(); factor *= std::pow(10., scale.getScale());
 
   // Assemble translation table such that all species are scaled with factor:
   GiNaC::exmap translation_table;

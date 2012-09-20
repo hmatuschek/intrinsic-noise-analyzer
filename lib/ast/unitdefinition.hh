@@ -200,6 +200,10 @@ public:
   /** Returns the common scale of the unit. */
   double getScale() const;
 
+  /** Returns the number of scaled base units that form this unit. Note, for a dimensionless unit
+   * this figure is 0. */
+  size_t size() const;
+
   /** Returns true, if the unit is a scaled variant of the given base-unit with given exponent. */
   bool isVariantOf(ScaledBaseUnit::BaseUnit baseUnit, int expo = 1.0) const;
   /** Retunrs true, if the unit contains a variant of the given base-unit with given exponent. */

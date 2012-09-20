@@ -168,15 +168,18 @@ Unit::operator =(const Unit &other)
 
 
 double
-Unit::getMultiplier() const
-{
+Unit::getMultiplier() const {
   return this->common_multiplier;
 }
 
 double
-Unit::getScale() const
-{
+Unit::getScale() const {
   return this->common_scale;
+}
+
+size_t
+Unit::size() const {
+  return units.size();
 }
 
 

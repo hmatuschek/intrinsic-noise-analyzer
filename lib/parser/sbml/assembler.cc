@@ -257,7 +257,6 @@ Parser::Sbml::__process_species_definition(
   /* Second, process unit and initial value of species. */
   bool species_have_substance_units = ctx.model().speciesHasSubstanceUnits();
   Ast::Unit substance_unit = ctx.model().getSubstanceUnit();
-  Ast::Unit species_unit = ctx.model().getSpeciesUnit();
 
   /* Setup initial value. */
   GiNaC::ex init_value;
@@ -307,16 +306,23 @@ Parser::Sbml::__process_species_definition(
   // substance unit. If not the species must be scaled:
   if (node->isSetUnits() && !(substance_unit == ctx.model().getUnit(node->getUnits()))) {
     Ast::Unit old_unit = ctx.model().getUnit(node->getUnits());
-    Ast::Unit scale = substance_unit/old_unit;
-    if (! scale.isDimensionless()) {
+    Ast::Unit scale = old_unit/substance_unit; double factor;
+    if (scale.isDimensionless()) {
+      factor = scale.getMultiplier(); factor *= std::pow(10., scale.getScale());
+    } else if (2 == scale.size() && scale.hasVariantOf(Ast::ScaledBaseUnit::MOLE, 1) &&
+               scale.hasVariantOf(Ast::ScaledBaseUnit::ITEM, -1)) {
+      factor = scale.getMultiplier(); factor *= std::pow(10., scale.getScale());
+      factor *= constants::AVOGADRO;
+    } else if (2 == scale.size() && scale.hasVariantOf(Ast::ScaledBaseUnit::MOLE, -1) &&
+               scale.hasVariantOf(Ast::ScaledBaseUnit::ITEM, 1)) {
+      factor = scale.getMultiplier(); factor *= std::pow(10., scale.getScale());
+      factor /= constants::AVOGADRO;
+    } else {
       TypeError err;
-      err << "Can not define species " << node->getId() << ": As substance unit of species "
-          << old_unit.dump() << " can not be converted into global substance unit "
-          << substance_unit.dump();
+      err << "Can not rescale species with unit " << old_unit.dump()
+          << ". Can not be traslated into unit " << substance_unit.dump();
       throw err;
     }
-
-    double factor = scale.getMultiplier() * std::pow(10., scale.getScale());
     subst.add(species->getSymbol(), factor);
   }
 
