@@ -747,7 +747,7 @@ Assembler::processProducts(Parser::ConcreteSyntaxTree &sum, Ast::Reaction *react
   double stoichiometry = 1;
 
   if (sum[0].matched()) {
-    stoichiometry = processNumber(sum[0][0]);
+    stoichiometry = toNumber<int>(_lexer[sum[0][0].getTokenIdx()].getValue());
   }
 
   std::string identifier = _lexer[sum[1].getTokenIdx()].getValue();
