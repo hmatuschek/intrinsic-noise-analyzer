@@ -394,6 +394,7 @@ Assembler::processSpeciesDefinition(Parser::ConcreteSyntaxTree &spec)
   GiNaC::ex initial_value;
   bool has_substance_units=false; bool has_boundary_condition=false; bool is_constant=false;
   bool has_initial_amount=true;
+  bool species_have_substance_units = _model.speciesHasSubstanceUnits();
 
   Ast::Compartment *compartment = _model.getCompartment(compartment_id);
   if (0 == spec[2].getAltIdx()) {
@@ -416,21 +417,19 @@ Assembler::processSpeciesDefinition(Parser::ConcreteSyntaxTree &spec)
   }
 
   // Unit voodoo...
-  Ast::Unit spec_unit = _model.getSubstanceUnit();
-  if (has_substance_units) {
+  if (species_have_substance_units) {
     if (! has_initial_amount) {
-      initial_value = initial_value * compartment->getValue();
+      initial_value = initial_value * compartment->getSymbol();
     }
   } else {
-    spec_unit = spec_unit/compartment->getUnit();
     if (has_initial_amount) {
-      initial_value = initial_value/compartment->getValue();
+      initial_value = initial_value / compartment->getSymbol();
     }
   }
 
   // Create species:
   Ast::Species *species =
-      new Ast::Species(identifier, spec_unit, compartment, is_constant);
+      new Ast::Species(identifier, _model.getSpeciesUnit(), compartment, is_constant);
 
   // Set initial value...
   species->setValue(initial_value);

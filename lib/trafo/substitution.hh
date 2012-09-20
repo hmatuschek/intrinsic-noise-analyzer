@@ -12,8 +12,7 @@ namespace Trafo {
  * @ingroup trafo. */
 class Substitution:
     public Ast::Operator, Ast::VariableDefinition::Operator, public Ast::Rule::Operator,
-    public Ast::AlgebraicConstraint::Operator, public Ast::Reaction::Operator,
-    public Ast::KineticLaw::Operator
+    public Ast::Reaction::Operator, public Ast::KineticLaw::Operator
 {
 protected:
   /** Holds the normalized substitution table. */
@@ -44,9 +43,6 @@ public:
 
   /** Performs substitutions on the rule expression. */
   virtual void act(Ast::Rule *rule);
-
-  /** Performs substitutions on @c Ast::AlgebraicConstraint. */
-  virtual void act(Ast::AlgebraicConstraint *constraint);
 
   /** Performs substitutions on all stoichiometry expressions. */
   virtual void act(Ast::Reaction *reac);

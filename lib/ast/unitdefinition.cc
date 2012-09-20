@@ -464,8 +464,14 @@ Unit::dump(std::ostream &str, bool html) const
     if (1 != this->common_multiplier || 0 != this->common_scale)
         str << ")";
   }
+}
 
 
+std::string
+Unit::dump(bool html) const {
+  std::stringstream buffer;
+  dump(buffer, html);
+  return buffer.str();
 }
 
 

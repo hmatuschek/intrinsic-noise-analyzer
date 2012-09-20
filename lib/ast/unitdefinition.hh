@@ -226,6 +226,8 @@ public:
 
   /** Dumps the unit into the given stream. */
   void dump(std::ostream &str, bool html=false) const;
+  /** Dumps the unit as a string. */
+  std::string dump(bool html=false) const;
 
   /** Returns the unit as a scaled base unit.
    * @note This method only returns a proper @c ScaledUnit instance if the unit consists of a

@@ -87,9 +87,28 @@ Model::getTime() const {
   return _time_symbol;
 }
 
+GiNaC::symbol
+Model::getAvogadro() {
+  // If the avogadro constant was not defined yet as a global paramter -> define it
+  if (! hasParameter("_avogadro_const")) {
+    Parameter *a = new Parameter("_avogadro_const", Unit::dimensionless(), true);
+    a->setName("$N_A$");
+    a->setValue(6.02214129e23);
+    addDefinition(a);
+  }
+
+  return getParameter("_avogadro_const")->getSymbol();
+}
+
 bool
 Model::isExplTimeDep(const GiNaC::ex &expression) const {
   return expression.has(_time_symbol);
+}
+
+
+bool
+Model::speciesHasSubstanceUnits() const {
+  return _species_have_substance_units;
 }
 
 Unit

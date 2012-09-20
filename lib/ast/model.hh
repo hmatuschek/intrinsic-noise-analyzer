@@ -107,8 +107,19 @@ public:
   /** Returns the model-global unique time symbol. */
   GiNaC::symbol getTime() const;
 
+  /** Returns the model global unique Avogadro constant symbol. The constant is defined as a global
+   * constant parameter (id = "_avogadro_const"), the first time the symbol is requested, the
+   * parameter is defined. */
+  GiNaC::symbol getAvogadro();
+
   /** Returns true, if the given GiNaC expression is explicitly time dependent. */
   bool isExplTimeDep(const GiNaC::ex &expression) const;
+
+  /** Returns true if all species in the model are defined in substance units. In this case,
+   * @c getSpeciesUnit will return the substance unit as returned by @c getSubstanceUnit. If false
+   * all species are defined in concentration units and @c getSpeciesUnit will return
+   * the quotient of the units returned by @c getSubstanceUnit and @c getVolumeUnit. */
+  bool speciesHasSubstanceUnits() const;
 
   /** Returns the unit, the species are measured in. The species unit can not be changed directly
    * as it is defined implicitly by the substance and volume unit. */
