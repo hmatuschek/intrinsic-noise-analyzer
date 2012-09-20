@@ -298,9 +298,8 @@ Parser::Sbml::__process_species_definition(
   }
 
   // Assemble species definition
-  Ast::Species *species = new Ast::Species(
-        node->getId(), init_value, species_unit, node->getHasOnlySubstanceUnits(),
-        compartment, node->getName(), node->getConstant());
+  Ast::Species *species = new Ast::Species(node->getId(), init_value, compartment, node->getName(),
+                                           node->getConstant());
 
   // Now, init_value is now given in a proper from either as substance or as concentration
   // depending on whether species_have_substance_units is set to true or not (globally)
@@ -433,7 +432,7 @@ Parser::Sbml::__process_compartment_definition(
 
   // Assemble compartment:
   Ast::Compartment *comp =
-      new Ast::Compartment(node->getId(), init_value, unit, sp_dim, node->getConstant());
+      new Ast::Compartment(node->getId(), init_value, sp_dim, node->getConstant());
 
   // Set display name if defined:
   if (node->isSetName()) {

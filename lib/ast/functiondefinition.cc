@@ -137,7 +137,7 @@ FunctionDefinition::traverse(Ast::Operator &op)
  * Implementation of "FunctionArgument" variable:
  * ******************************************************************************************** */
 FunctionArgument::FunctionArgument(const std::string &id)
-  : VariableDefinition(Node::FUNCTION_ARGUMENT, id, Unit::dimensionless(), false)
+  : VariableDefinition(Node::FUNCTION_ARGUMENT, id, false)
 {
   // Pass...
 }

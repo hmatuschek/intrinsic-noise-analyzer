@@ -217,8 +217,7 @@ ModelCopyist::copyCompartmentDefinition(Ast::Compartment *node, GiNaC::exmap &tr
   // Copy compartment:
   Ast::Compartment *compartment = new Ast::Compartment(node->getIdentifier(),
                                                        node->getValue().subs(translation_table),
-                                                       node->getUnit(), node->getDimension(),
-                                                       node->isConst());
+                                                       node->getDimension(), node->isConst());
 
   // If compartment has a name:
   if (node->hasName()) {
@@ -260,7 +259,7 @@ ModelCopyist::copySpeciesDefinition(Ast::Species *node, GiNaC::exmap &translatio
   // Copy species:
   Ast::Species *species = new Ast::Species(node->getIdentifier(),
                                            node->getValue().subs(translation_table),
-                                           node->getUnit(), node->hasOnlySubstanceUnits(), comp, node->getName(), node->isConst());
+                                           comp, node->getName(), node->isConst());
 
   // copy optional rules:
   if (node->hasRule()) {

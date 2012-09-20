@@ -342,8 +342,7 @@ Assembler::processCompartmentDefinitions(Parser::ConcreteSyntaxTree &comp)
    *  [EOL CompartmentDefinitionList];    : comp[4] */
 
   std::string id = _lexer[comp[0].getTokenIdx()].getValue();
-  Ast::Compartment *compartment = new Ast::Compartment(id, _model.getVolumeUnit(),
-                                                       Ast::Compartment::VOLUME, true);
+  Ast::Compartment *compartment = new Ast::Compartment(id, Ast::Compartment::VOLUME, true);
 
   // Handle inner/outer relation if needed:
   if (comp[1].matched()) {
@@ -428,8 +427,7 @@ Assembler::processSpeciesDefinition(Parser::ConcreteSyntaxTree &spec)
   }
 
   // Create species:
-  Ast::Species *species =
-      new Ast::Species(identifier, _model.getSpeciesUnit(), compartment, is_constant);
+  Ast::Species *species = new Ast::Species(identifier, compartment, is_constant);
 
   // Set initial value...
   species->setValue(initial_value);

@@ -4,27 +4,27 @@ using namespace iNA::Ast;
 
 
 VariableDefinition::VariableDefinition(Node::NodeType type, const std::string &id,
-                                       const Unit &unit, bool is_const)
+                                       bool is_const)
   : Definition(id, type), has_value(false), is_const(is_const), symbol(id),
-    value(), rule(0), unit(unit)
+    value(), rule(0)
 {
   // Done
 }
 
 
 VariableDefinition::VariableDefinition(Node::NodeType type, const std::string &id, GiNaC::ex value,
-                                       const Unit &unit, const std::string &name, bool is_const)
+                                       const std::string &name, bool is_const)
   : Definition(id, name, type), has_value(true), is_const(is_const), symbol(id),
-    value(value), rule(0), unit(unit)
+    value(value), rule(0)
 {
   // Done.
 }
 
 
 VariableDefinition::VariableDefinition(Node::NodeType type, const std::string &id, GiNaC::ex value, Rule *rule,
-                                       const Unit &unit, bool is_const)
+                                       bool is_const)
   : Definition(id, type), has_value(true), is_const(is_const), symbol(id),
-    value(value), rule(rule), unit(unit)
+    value(value), rule(rule)
 {
   // Done.
 }
@@ -33,9 +33,8 @@ VariableDefinition::VariableDefinition(Node::NodeType type, const std::string &i
 VariableDefinition::~VariableDefinition()
 {
   // Free attached rule if there is one:
-  if (0 != this->rule)
-  {
-      delete this->rule;
+  if (0 != this->rule) {
+    delete this->rule;
   }
 }
 
@@ -79,18 +78,6 @@ const Rule * VariableDefinition::getRule() const {
 
 void VariableDefinition::setRule(Rule *rule) {
   this->rule = rule;
-}
-
-bool VariableDefinition::isDimensionLess() const {
-  return this->unit.isDimensionless();
-}
-
-const Unit & VariableDefinition::getUnit() const {
-  return this->unit;
-}
-
-void VariableDefinition::setUnit(const Unit &unit) {
-  this->unit = unit;
 }
 
 

@@ -245,11 +245,10 @@ Writer::processSpeciesList(Ast::Model &model, std::ostream &output) {
 void
 Writer::processSpecies(Ast::Species *species, const Ast::Model &model, std::ostream &output) {
   output << std::endl << " " << species->getCompartment()->getIdentifier() << ": ";
-  if (species->getUnit().isSubstanceUnit()) { output << species->getIdentifier() << " "; }
+  if (model.speciesHasSubstanceUnits()) { output << species->getIdentifier() << " "; }
   else {output << "[" << species->getIdentifier() << "] "; }
   output << " = "; Parser::Expr::Writer::write(species->getValue(), model, output); output << " ";
-  if (species->getUnit().isSubstanceUnit()) { output << "s"; }
-  /// @bug There is no "species has boundary condition" flag.
+  if (model.speciesHasSubstanceUnits()) { output << "s"; }
   if (species->isConst()) { output << "c"; }
   if (species->hasName()) { output << " \"" << species->getName() << "\""; }
 }

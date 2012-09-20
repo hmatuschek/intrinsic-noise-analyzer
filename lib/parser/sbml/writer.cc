@@ -257,9 +257,6 @@ Writer::processCompartments(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIER M
     processCompartment(comp, sbml_comp);
     if (comp->hasValue()) { processInitialValue(comp, sbml_model, model); }
     if (comp->hasRule())  { processRule(comp, sbml_model, model); }
-    if(! hasDefaultUnit(comp, model) ) {
-      sbml_comp->setUnits(getUnitIdentifier(comp, model));
-    }
   }
 }
 
@@ -289,6 +286,7 @@ Writer::processSpeciesList(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIER Mo
   for (size_t i=0; i<model.numSpecies(); i++) {
     Ast::Species *species = model.getSpecies(i);
     LIBSBML_CPP_NAMESPACE_QUALIFIER Species *sbml_species = sbml_model->createSpecies();
+    sbml_species->setHasOnlySubstanceUnits(model.speciesHasSubstanceUnits());
     processSpecies(species, sbml_species);
 
     sbml_species->setCompartment(species->getCompartment()->getIdentifier());
@@ -304,7 +302,6 @@ Writer::processSpecies(Ast::Species *species, LIBSBML_CPP_NAMESPACE_QUALIFIER Sp
   sbml_species->setId(species->getIdentifier());
   if (species->hasName()) {sbml_species->setName(species->getName()); }
   sbml_species->setConstant(species->isConst());
-  sbml_species->setHasOnlySubstanceUnits(species->getUnit().isSubstanceUnit());
 }
 
 
@@ -423,33 +420,14 @@ Writer::processRule(Ast::VariableDefinition *var, LIBSBML_CPP_NAMESPACE_QUALIFIE
 
 
 bool
-Writer::hasDefaultUnit(Ast::VariableDefinition *var, Ast::Model &model)
+Writer::hasDefaultUnit(Ast::Parameter *var, Ast::Model &model)
 {
-  if (Ast::Node::isCompartment(var)) {
-    Ast::Compartment *comp = static_cast<Ast::Compartment *>(var);
-    switch (comp->getDimension()) {
-    case Ast::Compartment::POINT: return comp->getUnit().isExactlyDimensionless();
-    case Ast::Compartment::LINE: return comp->getUnit() == model.getLengthUnit();
-    case Ast::Compartment::AREA: return comp->getUnit() == model.getAreaUnit();
-    case Ast::Compartment::VOLUME: return comp->getUnit() == model.getVolumeUnit();
-    }
-  }
-
-  if (Ast::Node::isSpecies(var)) {
-    Ast::Species *species = static_cast<Ast::Species *>(var);
-    return species->getUnit() == model.getSubstanceUnit();
-  }
-
-  if (Ast::Node::isParameter(var)) {
-    return var->getUnit().isExactlyDimensionless();
-  }
-
-  return false;
+  return var->getUnit().isExactlyDimensionless();
 }
 
 
 std::string
-Writer::getUnitIdentifier(Ast::VariableDefinition *var, Ast::Model &model)
+Writer::getUnitIdentifier(Ast::Parameter *var, Ast::Model &model)
 {
   if (! var->getUnit().isExactlyDimensionless()) {
     return "dimensionless";

@@ -5,36 +5,18 @@ using namespace iNA;
 using namespace iNA::Ast;
 
 
-Compartment::Compartment(const std::string &id, const Unit &unit, SpatialDimension dim, bool is_const)
-  : VariableDefinition(Node::COMPARTMENT_DEFINITION, id, unit, is_const), dimension(dim)
+Compartment::Compartment(const std::string &id, SpatialDimension dim, bool is_const)
+  : VariableDefinition(Node::COMPARTMENT_DEFINITION, id, is_const), dimension(dim)
 {
-  /// \todo Check if unit fits to spacial dimension.
-  if (Compartment::POINT == dim && ! unit.isDimensionless())
-  {
-    SemanticError err;
-    std::stringstream str; unit.dump(str);
-    err << "Can not construct compartment " << id
-        << ": Spatial dimension is 0 but unit is " << str.str()
-        << ", which is not dimensionless.";
-    throw err;
-  }
+  // Pass...
 }
 
-Compartment::Compartment(const std::string &id, const GiNaC::ex &init_val, const Unit &unit,
+Compartment::Compartment(const std::string &id, const GiNaC::ex &init_val,
                          SpatialDimension dim, bool is_const)
-  : VariableDefinition(Node::COMPARTMENT_DEFINITION, id, init_val, unit, "", is_const),
+  : VariableDefinition(Node::COMPARTMENT_DEFINITION, id, init_val, "", is_const),
     dimension(dim)
 {
-  /// \todo Check if unit fits to spacial dimension.
-  if (Compartment::POINT == dim && ! unit.isDimensionless())
-  {
-    SemanticError err;
-    std::stringstream str; unit.dump(str);
-    err << "Can not construct compartment " << id
-        << ": Spatial dimension is 0 but unit is " << str.str()
-        << ", which is not dimensionless.";
-    throw err;
-  }
+  // Pass...
 }
 
 Compartment::SpatialDimension
