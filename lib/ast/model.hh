@@ -132,6 +132,10 @@ public:
   /** Returns the substance unit of the model. */
   const Unit &getSubstanceUnit() const;
 
+  /** Returns the concentration unit, just the quotient of the units of @c getSubstanceUnit and
+   * @c getVolumeUnit. */
+  Unit getConcentrationUnit() const;
+
   /** Resets the default substance unit. A @c UnitError exception is thrown if the given unit is not
    * a valid substance unit. If @c scale_model is true (default), the complete model is scaled to
    * maintain consistency. */

@@ -282,14 +282,14 @@ IOSTask::getSelectedSpecies() const
 }
 
 
-const iNA::Ast::Unit &
+iNA::Ast::Unit
 IOSTask::getSpeciesUnit() const
 {
   return this->config.getModelAs<iNA::Models::IOSmodel>()->getConcentrationUnit();
 }
 
 
-const iNA::Ast::Unit &
+iNA::Ast::Unit
 IOSTask::getTimeUnit() const
 {
   return this->config.getModelAs<iNA::Models::IOSmodel>()->getTimeUnit();

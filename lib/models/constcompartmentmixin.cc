@@ -24,8 +24,11 @@ ConstCompartmentMixin::ConstCompartmentMixin(BaseModel &base)
 
   // define the compartment volumes for all species
   GiNaC::numeric fac=1.;
-  if(this->getSubstanceUnit().hasVariantOf(Ast::ScaledBaseUnit::MOLE))
-    fac = this->getMultiplier()*constants::AVOGADRO;
+  if(base.getSubstanceUnit().hasVariantOf(Ast::ScaledBaseUnit::MOLE)) {
+    double multiplier = base.getSubstanceUnit().getMultiplier();
+    multiplier *= std::pow(10., base.getSubstanceUnit().getScale());
+    fac = multiplier*constants::AVOGADRO;
+  }
 
   // Get compartment volumes for all species in SBML model:
   for (size_t i=0; i<base.numSpecies(); i++)

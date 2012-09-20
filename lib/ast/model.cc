@@ -158,6 +158,11 @@ Model::getSubstanceUnit() const {
   return _substance_unit;
 }
 
+Unit
+Model::getConcentrationUnit() const {
+  return _substance_unit / _volume_unit;
+}
+
 void
 Model::setSubstanceUnit(const Unit &unit, bool scale_model) {
   if (! unit.isSubstanceUnit()) {
