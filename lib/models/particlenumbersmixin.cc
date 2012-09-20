@@ -10,66 +10,38 @@ using namespace iNA::Models;
 ParticleNumbersMixin::ParticleNumbersMixin(BaseModel &base)
   : ConstCompartmentMixin(base), ExtensiveSpeciesMixin(base)
 {
+  // Check if species have substance units:
+  if (! base.speciesHasSubstanceUnits()) {
+    InternalError err;
+    err << "Expected model to be in substance units! But species are defined in "
+        << base.getSpeciesUnit().dump();
+    throw err;
+  }
+
+  // If model is defined in items -> skip:
+  if (base.getSubstanceUnit().isVariantOf(Ast::ScaledBaseUnit::ITEM)) { return; }
+
+  // Otherwise force species units to be items:
+  double multiplier = constants::AVOGADRO * base.getSubstanceUnit().getMultiplier();
+  multiplier *= std::pow(10., base.getSubstanceUnit().getScale());
+  base.setSubstanceUnit(Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::ITEM, 1, 0, 1));
+
   // Holds forward and back substitutions:
   GiNaC::exmap  forward_subst;
   GiNaC::exmap  back_subst;
 
+  // Update propensities:
   for (size_t i = 0; i<base.numSpecies(); i++)
   {
     // Get the specices:
     Ast::Species *species = base.getSpecies(i);
 
-    // Obtains the unit for the i-th species:
-    const Ast::Unit &unit = species->getUnit();
-
-    // Check if variable is an extensive substance unit:
-    if (unit.isConcentrationUnit()) {
-      throw InternalError("Something went wrong here. Expected amount of substrate but got concentration.");
-    }
-
-    // If it is not an extensive substance unit -> try to convert it:
-    if (unit.isSubstanceUnit())
-    {
-      if(unit.isVariantOf(Ast::ScaledBaseUnit::MOLE,1.0))
-      {
-        GiNaC::numeric fac = GiNaC::numeric(constants::AVOGADRO);
-
-        // convert to particle numbers
-        if (species->hasValue())
-        {
-          fac *= base.getSubstanceUnit().getMultiplier();
-          fac *= std::pow(10., base.getSubstanceUnit().getScale());
-          species->setValue(fac*species->getValue());
-
-          // Mark forward substitution of x -> x' * mole
-          GiNaC::symbol x(species->getIdentifier()+"'");
-          forward_subst[species->getSymbol()] = x / fac;
-          // and x' -> x
-          back_subst[x] = species->getSymbol();
-        }
-      }
-      else if(unit.isVariantOf(Ast::ScaledBaseUnit::DIMENSIONLESS,1.0))
-      {
-        // pass
-      }
-      else if(unit.isVariantOf(Ast::ScaledBaseUnit::ITEM,1.0))
-      {
-        // pass
-      }
-      else
-      {
-        SemanticError err;
-        std::stringstream str; species->getUnit().dump(str);
-        err << "Can not convert amount of " << species->getName()
-            << " with unit " << str.str()
-            << " into particle numbers";
-        throw err;
-      }
-    }
+    // Mark forward substitution of x -> x' * mole
+    GiNaC::symbol x(species->getIdentifier()+"'");
+    forward_subst[species->getSymbol()] = x / multiplier;
+    // and x' -> x
+    back_subst[x] = species->getSymbol();
   }
-
-  Trafo::Substitution forward_pass(forward_subst); base.apply(forward_pass);
-  Trafo::Substitution back_pass(back_subst); base.apply(back_pass);
 
   // do the substitution for the propensities
   for (size_t i=0; i<base.propensities.size(); i++)
