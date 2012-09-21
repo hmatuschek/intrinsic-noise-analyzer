@@ -169,7 +169,8 @@ Model::getConcentrationUnit() const {
 }
 
 void
-Model::setSubstanceUnit(const Unit &unit, bool scale_model) {
+Model::setSubstanceUnit(const Unit &unit, bool scale_model)
+{
   if (! unit.isSubstanceUnit()) {
     TypeError err; std::stringstream buffer; unit.dump(buffer);
     err << "Can not set substance unit to " << buffer.str() << ": is not a substance unit.";
@@ -202,20 +203,13 @@ Model::setSubstanceUnit(const Unit &unit, bool scale_model) {
     throw err;
   }
 
-  // Assemble translation table such that all species are scaled with factor:
-  GiNaC::exmap translation_table;
+  // Assemble scaling such that all species are scaled with factor:
+  Trafo::VariableScaling scaling;
   for (size_t i=0; i<numSpecies(); i++) {
-    Species *species = getSpecies(i);
-    // Define substitution
-    translation_table[species->getSymbol()] = species->getSymbol()/factor;
-    // Scale initial value:
-    if (species->hasValue()) {
-      species->setValue(factor*species->getValue());
-    }
+    scaling.add(getSpecies(i)->getSymbol(), factor);
   }
 
-  Trafo::Substitution substitution(translation_table);
-  this->apply(substitution);
+  this->apply(scaling);
 }
 
 
@@ -254,24 +248,18 @@ Model::setVolumeUnit(const Unit &unit, bool scale_model)
   double factor = scale.getMultiplier(); factor *= std::pow(10., scale.getScale());
 
   // Assemble translation table such that all compartments are scaled with factor:
-  GiNaC::exmap translation_table;
+  Trafo::VariableScaling scaling;
   for (size_t i=0; i<numCompartments(); i++) {
     // Get compartment:
     Compartment *compartment = getCompartment(i);
     // Process compartment only if it is 3D (volume)
     if (Compartment::VOLUME == compartment->getDimension()) {
-      // Define substitution
-      translation_table[compartment->getSymbol()] = compartment->getSymbol()/factor;
-      // Scale initial value of compartment:
-      if (compartment->hasValue()) {
-        compartment->setValue(factor * compartment->getValue());
-      }
+      scaling.add(compartment->getSymbol(), factor);
     }
   }
 
   // Apply substitutions
-  Trafo::Substitution substitution(translation_table);
-  this->apply(substitution);
+  this->apply(scaling);
 }
 
 
@@ -309,24 +297,18 @@ Model::setAreaUnit(const Unit &unit, bool scale_model)
   double factor = scale.getMultiplier(); factor *= std::pow(10., scale.getScale());
 
   // Assemble translation table such that all compartments are scaled with factor:
-  GiNaC::exmap translation_table;
+  Trafo::VariableScaling scaling;
   for (size_t i=0; i<numCompartments(); i++) {
     // Get compartment:
     Compartment *compartment = getCompartment(i);
     // Process compartment only if it is 2D (area)
     if (Compartment::AREA == compartment->getDimension()) {
-      // Define substitution
-      translation_table[compartment->getSymbol()] = compartment->getSymbol()/factor;
-      // Scale initial value of compartment:
-      if (compartment->hasValue()) {
-        compartment->setValue(factor * compartment->getValue());
-      }
+      scaling.add(compartment->getSymbol(), factor);
     }
   }
 
   // Apply substitutions
-  Trafo::Substitution substitution(translation_table);
-  this->apply(substitution);
+  this->apply(scaling);
 }
 
 const Unit &
@@ -363,24 +345,18 @@ Model::setLengthUnit(const Unit &unit, bool scale_model)
   double factor = scale.getMultiplier(); factor *= std::pow(10., scale.getScale());
 
   // Assemble translation table such that all compartments are scaled with factor:
-  GiNaC::exmap translation_table;
+  Trafo::VariableScaling scaling;
   for (size_t i=0; i<numCompartments(); i++) {
     // Get compartment:
     Compartment *compartment = getCompartment(i);
     // Process compartment only if it is 1D (line)
     if (Compartment::LINE == compartment->getDimension()) {
-      // Define substitution
-      translation_table[compartment->getSymbol()] = compartment->getSymbol()/factor;
-      // Scale initial value of compartment:
-      if (compartment->hasValue()) {
-        compartment->setValue(factor * compartment->getValue());
-      }
+      scaling.add(compartment->getSymbol(), factor);
     }
   }
 
   // Apply substitutions
-  Trafo::Substitution substitution(translation_table);
-  this->apply(substitution);
+  this->apply(scaling);
 }
 
 
