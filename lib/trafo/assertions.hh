@@ -199,7 +199,8 @@ public:
 /** This class checks if any expression is explict time-dependent.
  * @ingroup trafo */
 class NoExplicitTimeDependenceAssertion :
-    public Ast::Visitor, Ast::VariableDefinition::Visitor, Ast::Rule::Visitor, Ast::KineticLaw::Visitor
+    public Ast::Visitor, public Ast::VariableDefinition::Visitor, public Ast::Rule::Visitor,
+    public Ast::KineticLaw::Visitor
 {
 protected:
   /** Holds a reference to the global time-symbol. */
