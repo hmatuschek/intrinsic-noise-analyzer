@@ -17,9 +17,6 @@ VariableScaling::add(const GiNaC::symbol &var, const GiNaC::ex &factor)
 {
   _factors[var] = factor;
   _substitutions[var] = var/factor;
-  Utils::Message msg = LOG_MESSAGE(Utils::Message::DEBUG);
-  msg << "Scale " << var << " with " << factor;
-  Utils::Logger::get().log(msg);
 }
 
 
@@ -28,10 +25,6 @@ VariableScaling::act(Ast::VariableDefinition *var)
 {
   // First traverse the AST further
   var->traverse(*this);
-
-  Utils::Message msg = LOG_MESSAGE(Utils::Message::DEBUG);
-  msg << "Process variable " << var->getIdentifier();
-  Utils::Logger::get().log(msg);
 
   // then, if there is an inital value defined for the variable.
   if (var->hasValue()) {

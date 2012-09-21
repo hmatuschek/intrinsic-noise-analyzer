@@ -76,12 +76,6 @@ ModelView::ModelView(ModelItem *model_item, QWidget *parent)
 void
 ModelView::onSpeciesUnitSelected(int index)
 {
-  iNA::Utils::Message msg = LOG_MESSAGE(iNA::Utils::Message::DEBUG);
-  msg << "Convert species units to ";
-  if (0 == index) { msg << "concentrations."; }
-  else { msg << "amaount."; }
-  iNA::Utils::Logger::get().log(msg);
-
   if (0 == index) {
     _model->setSpeciesHasSubstanceUnits(false);
   } else {
