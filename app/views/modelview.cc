@@ -33,7 +33,7 @@ ModelView::ModelView(ModelItem *model_item, QWidget *parent)
 
   // Editors:
   _substance_unit_editor = new UnitEditor(_model->getSubstanceUnit());
-  _volume_unit_editor    = new UnitEditor(_model->getLengthUnit());
+  _volume_unit_editor    = new UnitEditor(_model->getVolumeUnit());
   _area_unit_editor      = new UnitEditor(_model->getAreaUnit());
   _length_unit_editor    = new UnitEditor(_model->getLengthUnit());
   _time_unit_editor      = new UnitEditor(_model->getTimeUnit());

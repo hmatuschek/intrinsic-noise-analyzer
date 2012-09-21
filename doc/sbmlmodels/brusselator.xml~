@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created by COPASI version 4.7 (Build 34) on 2012-09-20 14:20 with libSBML version 4.2.0. -->
+<!-- Created by COPASI version 4.7 (Build 34) on 2012-03-13 17:53 with libSBML version 4.2.0. -->
 <sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" version="4">
-  <model metaid="COPASI1" id="Model_1" name="Brusselator">
+  <model metaid="COPASI1" id="Model_1" name="New Model">
     <annotation>
       <COPASI xmlns="http://www.copasi.org/static/sbml">
         <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
@@ -16,64 +16,13 @@
       </COPASI>
     </annotation>
     <listOfFunctionDefinitions>
-      <functionDefinition id="function_2" name="Constant flux (irreversible)">
+      <functionDefinition id="function_1" name="Constant flux (irreversible)">
         <math xmlns="http://www.w3.org/1998/Math/MathML">
           <lambda>
             <bvar>
               <ci> v </ci>
             </bvar>
             <ci> v </ci>
-          </lambda>
-        </math>
-      </functionDefinition>
-      <functionDefinition metaid="COPASI12" id="function_3" name="Rate Law for reaction_2">
-        <annotation>
-          <COPASI xmlns="http://www.copasi.org/static/sbml">
-            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-              <rdf:Description rdf:about="#COPASI12">
-                <dcterms:created>
-                  <rdf:Description>
-                    <dcterms:W3CDTF>2012-09-20T14:16:01Z</dcterms:W3CDTF>
-                  </rdf:Description>
-                </dcterms:created>
-              </rdf:Description>
-            </rdf:RDF>
-          </COPASI>
-        </annotation>
-        <math xmlns="http://www.w3.org/1998/Math/MathML">
-          <lambda>
-            <bvar>
-              <ci> comp </ci>
-            </bvar>
-            <bvar>
-              <ci> parameter </ci>
-            </bvar>
-            <bvar>
-              <ci> X </ci>
-            </bvar>
-            <bvar>
-              <ci> Y </ci>
-            </bvar>
-            <apply>
-              <times/>
-              <ci> comp </ci>
-              <apply>
-                <power/>
-                <ci> parameter </ci>
-                <cn> 2 </cn>
-              </apply>
-              <ci> X </ci>
-              <ci> Y </ci>
-              <apply>
-                <minus/>
-                <ci> Y </ci>
-                <apply>
-                  <divide/>
-                  <cn> 1 </cn>
-                  <ci> comp </ci>
-                </apply>
-              </apply>
-            </apply>
           </lambda>
         </math>
       </functionDefinition>
@@ -140,7 +89,7 @@
       </species>
     </listOfSpecies>
     <listOfParameters>
-      <parameter metaid="COPASI2" id="parameter_1" name="a" value="3">
+      <parameter metaid="COPASI2" id="parameter_1" name="a" value="4.5">
         <annotation>
           <COPASI xmlns="http://www.copasi.org/static/sbml">
             <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
@@ -155,7 +104,7 @@
           </COPASI>
         </annotation>
       </parameter>
-      <parameter metaid="COPASI3" id="parameter_2" name="b" value="1.95">
+      <parameter metaid="COPASI3" id="parameter_2" name="b" value="2">
         <annotation>
           <COPASI xmlns="http://www.copasi.org/static/sbml">
             <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
@@ -195,7 +144,7 @@
               <times/>
               <ci> compartment_1 </ci>
               <apply>
-                <ci> function_2 </ci>
+                <ci> function_1 </ci>
                 <ci> v </ci>
               </apply>
             </apply>
@@ -231,18 +180,15 @@
             <apply>
               <times/>
               <ci> compartment_1 </ci>
+              <ci> parameter_1 </ci>
               <apply>
-                <ci> function_3 </ci>
-                <ci> compartment_1 </ci>
-                <ci> parameter </ci>
-                <ci> species_2 </ci>
+                <power/>
                 <ci> species_1 </ci>
+                <cn> 2 </cn>
               </apply>
+              <ci> species_2 </ci>
             </apply>
           </math>
-          <listOfParameters>
-            <parameter id="parameter" name="parameter" value="0.1"/>
-          </listOfParameters>
         </kineticLaw>
       </reaction>
       <reaction metaid="COPASI6" id="reaction_3" name="reaction_3" reversible="false">
