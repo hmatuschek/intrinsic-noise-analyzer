@@ -118,6 +118,13 @@ Scope::hasParentScope() const {
 }
 
 Scope *
+Scope::getRootScope() {
+  if (0 == _parent_scope) { return this; }
+
+  return _parent_scope->getRootScope();
+}
+
+Scope *
 Scope::getParentScope() {
   return _parent_scope;
 }

@@ -2,6 +2,7 @@
 #define __INA_APP_VIEWS_MODELVIEW_HH__
 
 #include <QWidget>
+#include <QComboBox>
 #include "../doctree/modelitem.hh"
 #include "uniteditor.hh"
 
@@ -16,6 +17,8 @@ public:
   explicit ModelView(ModelItem *model_item, QWidget *parent = 0);
 
 private slots:
+  /** Callback to update species units. */
+  void onSpeciesUnitSelected(int index);
   /** Callback to update substance unit of model. */
   void onSubstanceUnitChanged();
   /** Callback to update volume unit of model. */
@@ -41,6 +44,9 @@ private:
   UnitEditor *_length_unit_editor;
   /** Holds the unit editor for the time unit. */
   UnitEditor *_time_unit_editor;
+
+  /** Holds the combobox to select species units in amount or concentrations. */
+  QComboBox *_species_unit_selector;
 };
 
 #endif // MODELVIEW_HH

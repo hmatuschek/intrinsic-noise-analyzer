@@ -7,6 +7,7 @@
 #include <trafo/variablescaling.hh>
 #include <cmath>
 #include "math.hh"
+#include "utils/logger.hh"
 
 
 using namespace iNA;
@@ -129,21 +130,23 @@ Model::setSpeciesHasSubstanceUnits(bool has_substance_units)
   // If nothing changes -> skip
   if (_species_have_substance_units == has_substance_units) { return; }
 
+  // Store
   _species_have_substance_units = has_substance_units;
-  Trafo::VariableScaling scaleing;
+  // Assemble model scaling
+  Trafo::VariableScaling scaling;
   for (size_t i=0; i<numSpecies(); i++) {
     Ast::Species *species = getSpecies(i);
     if (_species_have_substance_units) {
       // Translation concentration -> substance:
-      scaleing.add(species->getSymbol(), species->getCompartment()->getSymbol());
+      scaling.add(species->getSymbol(), species->getCompartment()->getSymbol());
     } else {
       // Translation substance -> concentration
-      scaleing.add(species->getSymbol(), 1./species->getCompartment()->getSymbol());
+      scaling.add(species->getSymbol(), 1./species->getCompartment()->getSymbol());
     }
   }
 
   // Apply variable scaleing on model:
-  this->apply(scaleing);
+  this->apply(scaling);
 }
 
 

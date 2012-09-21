@@ -29,6 +29,7 @@ Ginac2Formula::visit(const GiNaC::symbol &node)
     return;
   }
 
+  Ast::Model *model = static_cast<Ast::Model *>(_scope.getRootScope());
   Ast::Definition *def = _scope.getDefinition(node.get_name());
 
   Ast::VariableDefinition *var = 0;
@@ -53,7 +54,7 @@ Ginac2Formula::visit(const GiNaC::symbol &node)
 
   // Now, the name has been rendered. If variable was a species with concentration untis ->
   // put name in brackets:
-  if (iNA::Ast::Node::isSpecies(var) && !static_cast<Ast::Model &>(_scope).speciesHasSubstanceUnits()) {
+  if (iNA::Ast::Node::isSpecies(var) && !(model->speciesHasSubstanceUnits())) {
     MathFormula *tmp = new MathFormula();
     tmp->appendItem(new MathText("["));
     tmp->appendItem(_stack.back()); _stack.pop_back();

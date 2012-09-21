@@ -3,6 +3,7 @@
 #include "unitrenderer.hh"
 #include "uniteditor.hh"
 #include "../application.hh"
+#include <utils/logger.hh>
 
 #include <QLabel>
 #include <QPalette>
@@ -23,6 +24,13 @@ ModelView::ModelView(ModelItem *model_item, QWidget *parent)
   label->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
   label->setAlignment(Qt::AlignRight);
 
+  // Selector concentrations/amount
+  _species_unit_selector = new QComboBox();
+  _species_unit_selector->addItem(tr("concentrations"));
+  _species_unit_selector->addItem(tr("amount"));
+  if (_model->speciesHasSubstanceUnits()) { _species_unit_selector->setCurrentIndex(1); }
+  else { _species_unit_selector->setCurrentIndex(0); }
+
   // Editors:
   _substance_unit_editor = new UnitEditor(_model->getSubstanceUnit());
   _volume_unit_editor    = new UnitEditor(_model->getLengthUnit());
@@ -34,6 +42,7 @@ ModelView::ModelView(ModelItem *model_item, QWidget *parent)
   QGroupBox *unit_frame = new QGroupBox(tr("Units"));
   unit_frame->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
   QFormLayout *unit_layout = new QFormLayout();
+  unit_layout->addRow(tr("Species in"), _species_unit_selector);
   unit_layout->addRow(tr("Substance unit"), _substance_unit_editor);
   unit_layout->addRow(tr("Volume unit"), _volume_unit_editor);
   unit_layout->addRow(tr("Area unit"), _area_unit_editor);
@@ -50,6 +59,8 @@ ModelView::ModelView(ModelItem *model_item, QWidget *parent)
   // Connect to "desroyed" signal of model_item to close view.
   QObject::connect(model_item, SIGNAL(destroyed()), this, SLOT(deleteLater()));
   QObject::connect(
+        _species_unit_selector, SIGNAL(currentIndexChanged(int)), this, SLOT(onSpeciesUnitSelected(int)));
+  QObject::connect(
         _substance_unit_editor, SIGNAL(unitChanged()), this, SLOT(onSubstanceUnitChanged()));
   QObject::connect(
         _volume_unit_editor, SIGNAL(unitChanged()), this, SLOT(onVolumeUnitChanged()));
@@ -61,6 +72,22 @@ ModelView::ModelView(ModelItem *model_item, QWidget *parent)
         _time_unit_editor, SIGNAL(unitChanged()), this, SLOT(onTimeUnitChanged()));
 }
 
+
+void
+ModelView::onSpeciesUnitSelected(int index)
+{
+  iNA::Utils::Message msg = LOG_MESSAGE(iNA::Utils::Message::DEBUG);
+  msg << "Convert species units to ";
+  if (0 == index) { msg << "concentrations."; }
+  else { msg << "amaount."; }
+  iNA::Utils::Logger::get().log(msg);
+
+  if (0 == index) {
+    _model->setSpeciesHasSubstanceUnits(false);
+  } else {
+    _model->setSpeciesHasSubstanceUnits(true);
+  }
+}
 
 void
 ModelView::onSubstanceUnitChanged() {

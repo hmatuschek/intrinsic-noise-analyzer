@@ -13,14 +13,14 @@ namespace Trafo {
  * \f$x'(0)=s\cdot x(0)\f$.
  * @ingroup trafo */
 class VariableScaling
-    : public Ast::Operator, Ast::VariableDefinition::Operator, public Ast::Rule::Operator,
+    : public Ast::Operator, public Ast::VariableDefinition::Operator, public Ast::Rule::Operator,
     public Ast::Reaction::Operator, public Ast::KineticLaw::Operator
 {
 protected:
   /** Holds the substitutions for the variables. */
   GiNaC::exmap _substitutions;
   /** Holds the factors for each variable. */
-  std::map<GiNaC::symbol, GiNaC::ex, GiNaC::ex_is_less> _factors;
+  GiNaC::exmap _factors;
 
 public:
   /** Empty constructor. */
