@@ -150,7 +150,7 @@ Assembler::processModelDefinition(Parser::ConcreteSyntaxTree &model_header)
    *   [EOL DefaultUnitDefinitions];   : model_header[6] */
 
   // Set identifier
-  //_model.setIdentifier(_lexer[model_header[4].getTokenIdx()].getValue());
+  _model.setIdentifier(_lexer[model_header[4].getTokenIdx()].getValue());
 
   // Set name if defined
   if (model_header[5].matched()) {

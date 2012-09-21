@@ -18,60 +18,39 @@ namespace bci {
 
 
 
-/**
- * Defines a value type as a union of double and complex-double values.
- *
+/** Defines a value type as a union of double and complex-double values.
  * The type of the value is determined by the instruction that processes this
  * value on the stack.
- *
  * @ingroup bci
  */
 class InterpreterValue {
 private:
-  /**
-   * Holds the actual value, if the value is real, it is stored in the real part.
-   */
+  /** Holds the actual value, if the value is real, it is stored in the real part. */
   std::complex<double> _value;
 
 public:
-  /**
-   * Constructs an empty value.
-   */
+  /** Constructs an empty value. */
   InterpreterValue() {}
 
-  /**
-   * Constructs a real-valued value.
-   */
+  /** Constructs a real-valued value. */
   InterpreterValue(const double &value): _value(value) { }
 
-  /**
-   * Constructs a complex-valued value.
-   */
+  /** Constructs a complex-valued value. */
   InterpreterValue(const std::complex<double> &value): _value(value) { }
 
-  /**
-   * Constructs a complex-valued value.
-   */
+  /** Constructs a complex-valued value. */
   InterpreterValue(const double &real, const double &imag): _value(real, imag) { }
 
-  /**
-   * Returns the value as a real.
-   */
+  /** Returns the value as a real. */
   inline double &asValue() { return _value.real(); }
 
-  /**
-   * Returns the value as a real.
-   */
+  /** Returns the value as a real. */
   inline const double &asValue() const { return _value.real(); }
 
-  /**
-   * Returns the value as a complex.
-   */
+  /** Returns the value as a complex. */
   inline std::complex<double> &asComplex() { return _value; }
 
-  /**
-   * Returns the value as a complex.
-   */
+  /** Returns the value as a complex. */
   inline const std::complex<double> &asComplex() const { return _value; }
 };
 
@@ -86,9 +65,7 @@ template <typename InScalar, typename OutScalar>
 class InterpreterCore
 {
 public:
-  /**
-   * Prototype for the evaluation function.
-   */
+  /** Prototype for the evaluation function. */
   static inline void eval(const InScalar *input, OutScalar *output,
                           std::vector<InterpreterValue> &stack);
 };
@@ -103,6 +80,7 @@ template <typename InScalar>
 class InterpreterCore <InScalar, double>
 {
 public:
+  /** Implements the real valued evaluation of the byte-code. */
   static inline void eval(Instruction &inst, const InScalar *input, double *output,
                           std::vector<InterpreterValue> &stack)
   {
@@ -208,6 +186,7 @@ template <typename InScalar>
 class InterpreterCore < InScalar, std::complex<double> >
 {
 public:
+  /** Implements the complex valued evaluation of the byte-code. */
   static inline void eval(Instruction &inst, const InScalar *input,
                           std::complex<double> *output, std::vector<InterpreterValue> &stack)
   {

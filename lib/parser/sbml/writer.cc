@@ -21,7 +21,10 @@ Writer::processModel(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIER SBMLDocu
   // then serialise reactions
   processReactions(model, sbml_model);
 
-  sbml_model->setId("model");
+  // Set model id
+  sbml_model->setId(model.getIdentifier());
+
+  // Set model name if set
   if (model.hasName()) { sbml_model->setName(model.getName()); }
 
   // Done...

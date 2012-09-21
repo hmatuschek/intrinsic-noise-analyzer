@@ -9,7 +9,10 @@ namespace Trafo {
 
 
 /** This @c Ast::Operator implements a simple substitution operation on all expressions.
- * @ingroup trafo. */
+ * This operator also allows to normalize the set of substitutions and detects circular
+ * substitution rules. For example the substitutions \f$a\rightarrow b\f$ and \f$b\rightarrow c\f$
+ * can be normalized to the substitutions \f$a\rightarrow c\f$ and \f$b\rightarrow c\f$.
+ * @ingroup trafo */
 class Substitution:
     public Ast::Operator, Ast::VariableDefinition::Operator, public Ast::Rule::Operator,
     public Ast::Reaction::Operator, public Ast::KineticLaw::Operator
@@ -27,7 +30,7 @@ public:
   /** Adds the replacement lhs -> rhs.
    * By default, the resulting substitution table will be normalized whenever it it modified. As
    * normalization is quiet expensive, you may disable it whenever you add several substitutions
-   * at once. */
+   * at once and call @c normalize once the set of substitutions are complete. */
   void add(GiNaC::ex lhs, GiNaC::ex rhs, bool normalize=true);
 
   /** Explicitly normalizes the substitution table. */

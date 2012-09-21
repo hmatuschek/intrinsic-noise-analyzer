@@ -30,8 +30,7 @@ Writer::processModel(Ast::Model &model, std::ostream &output) {
 void
 Writer::processModelHeader(Ast::Model &model, std::ostream &output)
 {
-  /// @bug @c Ast::Model has no identifier field, used "model" as identifier here.
-  output << "@model:3.1.1 = " << "model";
+  output << "@model:3.1.1 = " << model.getIdentifier();
   if (model.hasName()) output << " \"" << model.getName() << "\"";
   std::list< std::pair<char, std::string> > default_units;
 

@@ -59,6 +59,11 @@ class InitialValueFolder
     : public Substitution
 {
 public:
+  /** Constructor, collects all initial values of the given model depending on the filter flags.
+   * @param model Specifies the model, to collect initial values from.
+   * @param flags Specifies which elements of the model to be processed, by default all
+   *        variables are taken into account.
+   * @param excludes A list of symbols that are not processed. */
   InitialValueFolder(const Ast::Model &model, unsigned flags=Filter::ALL, const excludeType &excludes=excludeType());
 
   /** Tiny helper function to fold all constants in the given model. */
