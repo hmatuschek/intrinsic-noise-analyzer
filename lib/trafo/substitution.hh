@@ -14,7 +14,7 @@ namespace Trafo {
  * can be normalized to the substitutions \f$a\rightarrow c\f$ and \f$b\rightarrow c\f$.
  * @ingroup trafo */
 class Substitution:
-    public Ast::Operator, Ast::VariableDefinition::Operator, public Ast::Rule::Operator,
+    public Ast::Operator, public Ast::VariableDefinition::Operator, public Ast::Rule::Operator,
     public Ast::Reaction::Operator, public Ast::KineticLaw::Operator
 {
 protected:
