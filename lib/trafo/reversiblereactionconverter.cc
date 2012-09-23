@@ -70,7 +70,7 @@ void ReversibleReactionConverter::apply(Ast::Model &model)
 
     // Create copy of kinetic law:
     GiNaC::exmap param_subst;
-    Ast::KineticLaw *kineticLaw = Ast::Trafo::ModelCopyist::dupKineticLaw(reaction->getKineticLaw(), param_subst);
+    Ast::KineticLaw *kineticLaw = Ast::ModelCopyist::dupKineticLaw(reaction->getKineticLaw(), param_subst);
     // Substitute local paramters (if there are some) and make it look nice:
     kineticLaw->setRateLaw(GiNaC::collect_common_factors(reverseLaw.subs(param_subst)));
     // Assemble reverse reaction:
@@ -137,7 +137,6 @@ void IrreversibleReactionCollapsor::apply(Ast::Model &model)
 
             // and remove reverse reaction
             model.remDefinition(reaction2);
-            std::cerr << "collapsed" << reaction1->getName() << " with \t" << reaction2->getName() << std::endl;
 
             // Create a log message.
             {

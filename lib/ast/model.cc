@@ -1007,7 +1007,7 @@ void
 Model::addDefinition(Definition *def, Definition *after)
 {
   // First, add definition to scope (takes ownership)
-  Module::addDefinition(def);
+  Scope::addDefinition(def);
 
   // Add definition to vectors of definitions:
   switch (def->getNodeType())

@@ -432,7 +432,6 @@ public:
    * the definition is stored in the corresponding vector. */
   virtual void addDefinition(Definition *def);
 
-<<<<<<< HEAD
   /**
    * Insert element after other definition.
    */
@@ -440,9 +439,6 @@ public:
 
   /**
    * Removes a definition (Species, Compartment, Reaction, ...) from the model. The user is
-=======
-  /** Removes a definition (Species, Compartment, Reaction, ...) from the model. The user is
->>>>>>> 6c060e8cb7b3ab7b6d77e67afbaa3770c7548bfd
    * responsible to ensure, that no other element refers to this definition on removal
    * (also its symbols). */
   virtual void remDefinition(Definition *def);
