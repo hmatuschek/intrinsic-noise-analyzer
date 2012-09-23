@@ -22,7 +22,6 @@
 #include "extensivespeciesmixin.hh"
 #include "conservationanalysismixin.hh"
 
-#include "assertnoalgebraicconstraintmixin.hh"
 #include "assertnoconstantspeciesmixin.hh"
 #include "assertconstantparametermixin.hh"
 #include "reasonablemodelmixin.hh"

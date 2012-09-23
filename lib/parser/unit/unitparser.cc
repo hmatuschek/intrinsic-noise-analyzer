@@ -90,7 +90,6 @@ UnitParser::parse(std::istream &unit)
   Parser::ConcreteSyntaxTree cst;
   Parser::Production *production = GrammarProduction::factory();
   production->parse(lexer, cst);
-  production->notify(lexer, cst);
 
   // If grammar is empty:
   if (! cst[0].matched()) {

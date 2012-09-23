@@ -5,16 +5,27 @@ using namespace iNA::Ast;
 
 
 Parameter::Parameter(const std::string &id, const Unit &unit, bool is_const)
-  : VariableDefinition(Node::PARAMETER_DEFINITION, id, unit, is_const)
+  : VariableDefinition(Node::PARAMETER_DEFINITION, id, is_const), _unit(unit)
 {
   // Pass...
 }
 
 
 Parameter::Parameter(const std::string &id, const GiNaC::ex &init_val, const Unit &unit, bool is_const)
-  : VariableDefinition(Node::PARAMETER_DEFINITION, id, init_val, unit, "", is_const)
+  : VariableDefinition(Node::PARAMETER_DEFINITION, id, init_val, "", is_const), _unit(unit)
 {
   // Pass...
+}
+
+
+const Unit &
+Parameter::getUnit() const {
+  return _unit;
+}
+
+void
+Parameter::setUnit(const Unit &unit) {
+  _unit = unit;
 }
 
 

@@ -30,8 +30,7 @@ Writer::processModel(Ast::Model &model, std::ostream &output) {
 void
 Writer::processModelHeader(Ast::Model &model, std::ostream &output)
 {
-  /// @bug @c Ast::Model has no identifier field, used "model" as identifier here.
-  output << "@model:3.1.1 = " << "model";
+  output << "@model:3.1.1 = " << model.getIdentifier();
   if (model.hasName()) output << " \"" << model.getName() << "\"";
   std::list< std::pair<char, std::string> > default_units;
 
@@ -99,27 +98,27 @@ Writer::processUnitDefinitions(Ast::Model &model, std::ostream &output)
 
   // Process default substance unit first:
   temp.str(""); temp << std::endl << " substance = ";
-  processScaledUnit(model.getDefaultSubstanceUnit().asScaledBaseUnit(), temp);
+  processScaledUnit(model.getSubstanceUnit().asScaledBaseUnit(), temp);
   units.push_back(temp.str());
 
   // Process default volume unit:
   temp.str(""); temp << std::endl << " volume = ";
-  processScaledUnit(model.getDefaultVolumeUnit().asScaledBaseUnit(), temp);
+  processScaledUnit(model.getVolumeUnit().asScaledBaseUnit(), temp);
   units.push_back(temp.str());
 
   // Process default area unit:
   temp.str(""); temp << std::endl << " area = ";
-  processScaledUnit(model.getDefaultAreaUnit().asScaledBaseUnit(), temp);
+  processScaledUnit(model.getAreaUnit().asScaledBaseUnit(), temp);
   units.push_back(temp.str());
 
-  // Process default volume unit:
+  // Process default length unit:
   temp.str(""); temp << std::endl << " length = ";
-  processScaledUnit(model.getDefaultLengthUnit().asScaledBaseUnit(), temp);
+  processScaledUnit(model.getLengthUnit().asScaledBaseUnit(), temp);
   units.push_back(temp.str());
 
-  // Process default volume unit:
+  // Process default time unit:
   temp.str(""); temp << std::endl << " time = ";
-  processScaledUnit(model.getDefaultTimeUnit().asScaledBaseUnit(), temp);
+  processScaledUnit(model.getTimeUnit().asScaledBaseUnit(), temp);
   units.push_back(temp.str());
 
   for(Ast::Model::iterator item = model.begin(); item != model.end(); item++) {
@@ -245,11 +244,10 @@ Writer::processSpeciesList(Ast::Model &model, std::ostream &output) {
 void
 Writer::processSpecies(Ast::Species *species, const Ast::Model &model, std::ostream &output) {
   output << std::endl << " " << species->getCompartment()->getIdentifier() << ": ";
-  if (species->getUnit().isSubstanceUnit()) { output << species->getIdentifier() << " "; }
+  if (model.speciesHasSubstanceUnits()) { output << species->getIdentifier() << " "; }
   else {output << "[" << species->getIdentifier() << "] "; }
   output << " = "; Parser::Expr::Writer::write(species->getValue(), model, output); output << " ";
-  if (species->getUnit().isSubstanceUnit()) { output << "s"; }
-  /// @bug There is no "species has boundary condition" flag.
+  if (model.speciesHasSubstanceUnits()) { output << "s"; }
   if (species->isConst()) { output << "c"; }
   if (species->hasName()) { output << " \"" << species->getName() << "\""; }
 }

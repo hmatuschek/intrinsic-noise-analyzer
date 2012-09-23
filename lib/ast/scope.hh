@@ -107,6 +107,9 @@ public:
   /** Returns true, if this scope has a parent scope. */
   bool hasParentScope() const;
 
+  /** Returns the root scope (model). */
+  Scope *getRootScope();
+
   /** Returns the parent scope. */
   Scope *getParentScope();
 

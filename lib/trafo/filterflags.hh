@@ -15,7 +15,9 @@ public:
     SPECIES      = 1,  ///< Handle species.
     PARAMETERS   = 2,  ///< Handle parameters.
     COMPARTMENTS = 4,  ///< Handle compartments.
-    ALL          = SPECIES | PARAMETERS | COMPARTMENTS ///< Shortcut to handle all variables.
+    NON_CONST    = 8,  ///< Handle non constant variables.
+    ALL_CONST    = SPECIES | PARAMETERS | COMPARTMENTS, ///< Shortcut to handle all constant variables.
+    ALL          = ALL_CONST | NON_CONST ///< Shortcut to handle all valiables (also non constant ones).
   } VariableFlags;
 };
 

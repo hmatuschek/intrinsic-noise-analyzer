@@ -461,7 +461,7 @@ RETask::getSelectedSpecies() const
 }
 
 
-const iNA::Ast::Unit &
+iNA::Ast::Unit
 RETask::getSpeciesUnit() const
 {
   return this->config.getModelAs<iNA::Models::REmodel>()->getConcentrationUnit();

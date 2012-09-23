@@ -20,33 +20,24 @@ SET(libina_HEADERS ina.hh smartptr.hh linkedlist.hh
 # Then, the AST classes:
 SET(libina_ast_SOURCES
     ast/definition.cc ast/functiondefinition.cc ast/node.cc ast/rule.cc
-    ast/reaction.cc ast/scope.cc ast/variabledefinition.cc ast/constraint.cc ast/module.cc
-    ast/evaluate.cc ast/unitdefinition.cc ast/species.cc ast/compartment.cc ast/parameter.cc
-    ast/model.cc ast/converter.cc ast/visitor.cc ast/unitconverter.cc)
+    ast/reaction.cc ast/scope.cc ast/variabledefinition.cc ast/constraint.cc
+    ast/unitdefinition.cc ast/species.cc ast/compartment.cc ast/parameter.cc
+    ast/model.cc ast/converter.cc ast/visitor.cc ast/unitconverter.cc ast/modelcopyist.cc)
 SET(libina_ast_HEADERS
     ast/ast.hh
     ast/definition.hh ast/functiondefinition.hh ast/node.hh ast/rule.hh
-    ast/reaction.hh ast/scope.hh ast/variabledefinition.hh ast/constraint.hh ast/module.hh
-    ast/evaluate.hh ast/unitdefinition.hh ast/species.hh ast/compartment.hh ast/parameter.hh
-    ast/model.hh ast/converter.hh ast/visitor.hh ast/unitconverter.hh)
-
-SET(libina_ast_trafo_SOURCES
-    ast/trafo/walker.cc ast/trafo/pass.cc ast/trafo/constantfolder.cc ast/trafo/dump.cc
-    ast/trafo/assignmentruleinliner.cc ast/trafo/substitutioncollector.cc ast/trafo/modelwalker.cc
-    ast/trafo/modelcopyist.cc)
-SET(libina_ast_trafo_HEADERS ast/trafo/trafo.hh
-    ast/trafo/walker.hh ast/trafo/pass.hh ast/trafo/constantfolder.hh ast/trafo/dump.hh
-    ast/trafo/assignmentruleinliner.hh ast/trafo/substitutioncollector.hh ast/trafo/modelwalker.hh
-    ast/trafo/modelcopyist.hh)
+    ast/reaction.hh ast/scope.hh ast/variabledefinition.hh ast/constraint.hh
+    ast/unitdefinition.hh ast/species.hh ast/compartment.hh ast/parameter.hh
+    ast/model.hh ast/converter.hh ast/visitor.hh ast/unitconverter.hh ast/modelcopyist.hh)
 
 SET(libina_trafo_SOURCES
     trafo/assertions.cc trafo/substitution.cc trafo/constantfolder.cc
-    trafo/algebraicconstraintsolver.cc trafo/partialmodel.cc trafo/assignmentruleinliner.cc
-    trafo/conservationanalysis.cc trafo/reversiblereactionconverter.cc)
+    trafo/partialmodel.cc trafo/assignmentruleinliner.cc
+    trafo/conservationanalysis.cc trafo/reversiblereactionconverter.cc trafo/variablescaling.cc)
 SET(libina_trafo_HEADERS trafo/trafo.hh
     trafo/assertions.hh trafo/substitution.hh trafo/constantfolder.hh
-    trafo/algebraicconstraintsolver.hh trafo/partialmodel.hh trafo/assignmentruleinliner.hh
-    trafo/conservationanalysis.hh trafo/reversiblereactionconverter.hh)
+    trafo/partialmodel.hh trafo/assignmentruleinliner.hh
+    trafo/conservationanalysis.hh trafo/reversiblereactionconverter.hh trafo/variablescaling.hh)
 
 SET(libina_sbmlsh_parser_SOURCES
     parser/sbmlsh/lexer.cc parser/sbmlsh/parser.cc parser/sbmlsh/productions.cc
@@ -106,8 +97,6 @@ SET(libina_models_SOURCES
     models/gillespieSSA.cc
     models/optimizedSSA.cc
     models/gibsonbruckSSA.cc
-    models/explicittimedependencemixin.cc
-    models/assertnoalgebraicconstraintmixin.cc
     models/assertnoconstantspeciesmixin.cc
     models/assertconstantparametermixin.cc
     models/assertnoassignmentrule.cc models/assertnoraterule.cc
@@ -139,8 +128,6 @@ SET(libina_models_HEADERS models/models.hh
     models/optimizedSSAginac.hh
     models/gillespieSSAginac.hh
     models/gillespieCLE.hh
-    models/explicittimedependencemixin.hh
-    models/assertnoalgebraicconstraintmixin.hh
     models/assertnoconstantspeciesmixin.hh
     models/assertconstantparametermixin.hh
     models/assertnoassignmentrule.hh models/assertnoraterule.hh
@@ -225,7 +212,6 @@ SET(libina_SOURCES
     ${libina_utils_SOURCES}
     ${libina_parser_SOURCES}
     ${libina_ast_SOURCES}
-    ${libina_ast_trafo_SOURCES}
     ${libina_trafo_SOURCES}
     ${libina_models_SOURCES}
     ${libina_nlesolve_SOURCES}
@@ -238,7 +224,6 @@ SET(libina_HEADERS
     ${libina_utils_HEADERS}
     ${libina_parser_HEADERS}
     ${libina_ast_HEADERS}
-    ${libina_ast_trafo_HEADERS}
     ${libina_trafo_HEADERS}
     ${libina_models_HEADERS}
     ${libina_nlesolve_HEADERS}

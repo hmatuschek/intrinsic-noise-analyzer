@@ -114,14 +114,6 @@ Substitution::act(Ast::Rule *rule)
 
 
 void
-Substitution::act(Ast::AlgebraicConstraint *constraint)
-{
-  // Perform substitutions
-  constraint->setConstraint(constraint->getConstraint().subs(_substitution_table));
-}
-
-
-void
 Substitution::act(Ast::Reaction *reac)
 {
   // Traverse into kinetic law

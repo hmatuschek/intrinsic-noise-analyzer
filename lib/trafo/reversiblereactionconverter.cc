@@ -1,5 +1,5 @@
 #include "reversiblereactionconverter.hh"
-#include "ast/trafo/modelcopyist.hh"
+#include "ast/modelcopyist.hh"
 #include "utils/logger.hh"
 
 

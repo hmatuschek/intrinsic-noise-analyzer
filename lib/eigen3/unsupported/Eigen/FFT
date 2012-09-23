@@ -13,7 +13,7 @@
 #include <complex>
 #include <vector>
 #include <map>
-#include <Eigen/Core>
+#include <eigen3/Eigen/Core>
 
 
 /** \ingroup Unsupported_modules

@@ -23,6 +23,11 @@ public:
   class Operator { public: virtual void act(Parameter *param) = 0; };
 
 
+protected:
+  /** Holds a unit of the parameter. */
+  Unit _unit;
+
+
 public:
   /**
    * Minimal constructor.
@@ -31,7 +36,7 @@ public:
    * @param unit Specifies the unit of the paramter.
    * @param is_const Specifies if the parameter is constant.
    */
-  Parameter(const std::string &id, const Unit &unit, bool is_const=false);
+  Parameter(const std::string &id, const Unit &_unit, bool is_const=false);
 
   /**
    * Constructor.
@@ -41,7 +46,13 @@ public:
    * @param unit Specifies the unit of the paramter.
    * @param is_const Specifies if the parameter is constant.
    */
-  Parameter(const std::string &id, const GiNaC::ex &init_val, const Unit &unit, bool is_const=false);
+  Parameter(const std::string &id, const GiNaC::ex &init_val, const Unit &_unit, bool is_const=false);
+
+  /** Returns the unit of the paramter. */
+  const Unit &getUnit() const;
+
+  /** Resets the unit of the parameter. */
+  void setUnit(const Unit &unit);
 
   /** Handles a visitor for the paramter. */
   virtual void accept(Ast::Visitor &visitor) const;

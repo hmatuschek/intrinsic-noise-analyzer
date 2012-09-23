@@ -109,9 +109,6 @@ ModelCopyTest::testVariableEqual(Ast::VariableDefinition *A, Ast::VariableDefini
   // Check if variable is constant.
   UT_ASSERT(A->isConst() == B->isConst());
 
-  // Compare units:
-  UT_ASSERT(A->getUnit() == B->getUnit());
-
   // Check if variables has rules:
   UT_ASSERT(A->hasRule() == A->hasRule());
   if (A->hasRule()) {
@@ -285,11 +282,11 @@ ModelCopyTest::testModelEqual(Ast::Model &A, Ast::Model &B)
   }
 
   // Compare default units:
-  UT_ASSERT(A.getDefaultAreaUnit() == B.getDefaultAreaUnit());
-  UT_ASSERT(A.getDefaultLengthUnit() == B.getDefaultLengthUnit());
-  UT_ASSERT(A.getDefaultSubstanceUnit() == B.getDefaultSubstanceUnit());
-  UT_ASSERT(A.getDefaultTimeUnit() == B.getDefaultTimeUnit());
-  UT_ASSERT(A.getDefaultVolumeUnit() == B.getDefaultVolumeUnit());
+  UT_ASSERT(A.getAreaUnit() == B.getAreaUnit());
+  UT_ASSERT(A.getLengthUnit() == B.getLengthUnit());
+  UT_ASSERT(A.getSubstanceUnit() == B.getSubstanceUnit());
+  UT_ASSERT(A.getTimeUnit() == B.getTimeUnit());
+  UT_ASSERT(A.getVolumeUnit() == B.getVolumeUnit());
 }
 
 

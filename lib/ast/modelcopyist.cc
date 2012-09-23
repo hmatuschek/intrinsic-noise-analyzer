@@ -1,11 +1,11 @@
 #include "modelcopyist.hh"
-#include "ast/functiondefinition.hh"
-#include "ast/reaction.hh"
-#include "exception.hh"
+#include "functiondefinition.hh"
+#include "reaction.hh"
+#include <exception.hh>
 
 
 using namespace iNA;
-using namespace iNA::Ast::Trafo;
+using namespace iNA::Ast;
 
 
 void
@@ -23,14 +23,19 @@ ModelCopyist::copy(const Ast::Model *src, Ast::Model *dest, GiNaC::exmap &transl
   // Table of species copies:
   std::map<Species *, Species *> species_table;
 
+  // Set identifier of model:
+  dest->setIdentifier(src->getIdentifier());
+
   // Set name:
   dest->setName(src->getName());
+
+  // add time symbol to translation table:
+  translation_table[src->getTime()] = dest->getTime();
 
   // Sorry, iteration is quiet in-efficient, however:
 
   // Copy function definitions:
-  for (Ast::Model::const_iterator iter = src->begin(); iter != src->end(); iter++)
-  {
+  for (Ast::Model::const_iterator iter = src->begin(); iter != src->end(); iter++) {
     if (Ast::Node::isFunctionDefinition(*iter)) {
       dest->addDefinition(ModelCopyist::copyFunctionDefinition(
                             static_cast<Ast::FunctionDefinition *>(*iter), translation_table));
@@ -38,17 +43,15 @@ ModelCopyist::copy(const Ast::Model *src, Ast::Model *dest, GiNaC::exmap &transl
   }
 
   // Copy default units:
-  dest->setDefaultSubstanceUnit(src->getDefaultSubstanceUnit().asScaledBaseUnit());
-  dest->setDefaultVolumeUnit(src->getDefaultVolumeUnit().asScaledBaseUnit());
-  dest->setDefaultAreaUnit(src->getDefaultAreaUnit().asScaledBaseUnit());
-  dest->setDefaultLengthUnit(src->getDefaultLengthUnit().asScaledBaseUnit());
-  dest->setDefaultTimeUnit(src->getDefaultTimeUnit().asScaledBaseUnit());
+  dest->setSubstanceUnit(src->getSubstanceUnit().asScaledBaseUnit(), false);
+  dest->setVolumeUnit(src->getVolumeUnit().asScaledBaseUnit(), false);
+  dest->setAreaUnit(src->getAreaUnit().asScaledBaseUnit(), false);
+  dest->setLengthUnit(src->getLengthUnit().asScaledBaseUnit(), false);
+  dest->setTimeUnit(src->getTimeUnit().asScaledBaseUnit(), false);
 
   // Copy user defined "specialized" units:
-  for (Ast::Model::const_iterator iter = src->begin(); iter != src->end(); iter++)
-  {
-    if (Ast::Node::isUnitDefinition(*iter))
-    {
+  for (Ast::Model::const_iterator iter = src->begin(); iter != src->end(); iter++) {
+    if (Ast::Node::isUnitDefinition(*iter)) {
       dest->addDefinition(ModelCopyist::copyUnitDefinition(
                             static_cast<Ast::UnitDefinition *>(*iter)));
     }
@@ -75,12 +78,6 @@ ModelCopyist::copy(const Ast::Model *src, Ast::Model *dest, GiNaC::exmap &transl
                           translation_table, species_table, dest));
   }
 
-  // Copy constraints:
-  for (Ast::Model::const_constraintIterator iter = src->constraintBegin();
-       iter != src->constraintEnd(); iter++) {
-    dest->addConstraint(ModelCopyist::copyConstraint(*iter, translation_table));
-  }
-
   // Copy reactions:
   for (size_t i=0; i<src->numReactions(); i++) {
     dest->addDefinition(ModelCopyist::copyReaction(
@@ -103,11 +100,6 @@ ModelCopyist::copy(const Ast::Model *src, Ast::Model *dest, GiNaC::exmap &transl
   // Update all species definition:
   for (size_t i=0; i<dest->numSpecies(); i++) {
     ModelCopyist::updateSpecies(dest->getSpecies(i), translation_table);
-  }
-  // Update all constraints:
-  for (Ast::Model::const_constraintIterator iter = dest->constraintBegin();
-       iter != dest->constraintEnd(); iter++) {
-    ModelCopyist::updateConstraint(*iter, translation_table);
   }
   // Update all reactions:
   for (size_t i=0; i<dest->numReactions(); i++) {
@@ -225,8 +217,7 @@ ModelCopyist::copyCompartmentDefinition(Ast::Compartment *node, GiNaC::exmap &tr
   // Copy compartment:
   Ast::Compartment *compartment = new Ast::Compartment(node->getIdentifier(),
                                                        node->getValue().subs(translation_table),
-                                                       node->getUnit(), node->getDimension(),
-                                                       node->isConst());
+                                                       node->getDimension(), node->isConst());
 
   // If compartment has a name:
   if (node->hasName()) {
@@ -268,7 +259,7 @@ ModelCopyist::copySpeciesDefinition(Ast::Species *node, GiNaC::exmap &translatio
   // Copy species:
   Ast::Species *species = new Ast::Species(node->getIdentifier(),
                                            node->getValue().subs(translation_table),
-                                           node->getUnit(), node->hasOnlySubstanceUnits(), comp, node->getName(), node->isConst());
+                                           comp, node->getName(), node->isConst());
 
   // copy optional rules:
   if (node->hasRule()) {
@@ -291,50 +282,6 @@ ModelCopyist::updateSpecies(Ast::Species *node, GiNaC::exmap &translation_table)
   node->setValue(node->getValue().subs(translation_table));
   // Update rule if there is one:
   if (node->hasRule()) { ModelCopyist::updateRule(node->getRule(), translation_table); }
-}
-
-
-Ast::Constraint *
-ModelCopyist::copyConstraint(Ast::Constraint *node, GiNaC::exmap &translation_table)
-{
-  // Dispatch by type:
-  switch (node->getNodeType())
-  {
-  case Ast::Node::ALGEBRAIC_CONSTRAINT:
-    return ModelCopyist::copyAlgebraicConstraint(
-          static_cast<Ast::AlgebraicConstraint *>(node), translation_table);
-
-  default:
-    break;
-  }
-
-  InternalError err;
-  err << "Can not copy constraint, unkown constraint type: " << (unsigned int) node->getNodeType();
-  throw err;
-}
-
-
-void
-ModelCopyist::updateConstraint(Ast::Constraint *node, GiNaC::exmap &translation_table)
-{
-  if (Ast::Node::isAlgebraicConstraint(node)) {
-    ModelCopyist::updateAlgebraicConstraint(
-          static_cast<Ast::AlgebraicConstraint *>(node), translation_table);
-  }
-}
-
-
-Ast::AlgebraicConstraint *
-ModelCopyist::copyAlgebraicConstraint(Ast::AlgebraicConstraint *node, GiNaC::exmap &translation_table)
-{
-  return new Ast::AlgebraicConstraint(node->getConstraint().subs(translation_table));
-}
-
-
-void
-ModelCopyist::updateAlgebraicConstraint(Ast::AlgebraicConstraint *node, GiNaC::exmap &translation_table)
-{
-  node->setConstraint(node->getConstraint().subs(translation_table));
 }
 
 

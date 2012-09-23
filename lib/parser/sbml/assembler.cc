@@ -1,7 +1,6 @@
 #include "assembler.hh"
 #include "math.hh"
 
-
 using namespace iNA;
 using namespace iNA::Parser::Sbml;
 
@@ -108,7 +107,10 @@ ParserContext::model() {
 void
 Parser::Sbml::__process_model(LIBSBML_CPP_NAMESPACE_QUALIFIER Model *model, ParserContext &ctx)
 {
-  // Set name of model:
+  // Set model identifier:
+  ctx.model().setIdentifier(model->getId());
+
+  // Set name of model if set
   if (model->isSetName()) {
     ctx.model().setName(model->getName());
   }
@@ -127,11 +129,13 @@ Parser::Sbml::__process_model(LIBSBML_CPP_NAMESPACE_QUALIFIER Model *model, Pars
   {
     LIBSBML_CPP_NAMESPACE_QUALIFIER UnitDefinition *sbml_unit = model->getUnitDefinition(i);
 
+    // Handle default units
     if (__is_default_unit_redefinition(sbml_unit, ctx)) {
       __process_default_unit_redefinition(sbml_unit, ctx);
       continue;
     }
 
+    // Otherwise handle a new unit:
     Ast::UnitDefinition *unit = __process_unit_definition(sbml_unit, ctx);
     ctx.model().addDefinition(unit);
   }
@@ -147,13 +151,17 @@ Parser::Sbml::__process_model(LIBSBML_CPP_NAMESPACE_QUALIFIER Model *model, Pars
     ctx.model().addDefinition(param);
   }
 
+  // Some substitutions may be needed to maintain a cosistent model as species and compartment
+  // units are unified to default units
+  Trafo::VariableScaling scaling;
+
   /* Process all compartments defined in the SBML model. */
   for (size_t i=0; i<model->getNumCompartments(); i++)
   {
     // Get SBML compartment
     LIBSBML_CPP_NAMESPACE_QUALIFIER Compartment *comp = model->getCompartment(i);
     // Translate into AST
-    Ast::VariableDefinition *comp_def = __process_compartment_definition(comp, ctx);
+    Ast::VariableDefinition *comp_def = __process_compartment_definition(comp, ctx, scaling);
     // Store in module:
     ctx.model().addDefinition(comp_def);
   }
@@ -164,20 +172,9 @@ Parser::Sbml::__process_model(LIBSBML_CPP_NAMESPACE_QUALIFIER Model *model, Pars
     // Get species:
     LIBSBML_CPP_NAMESPACE_QUALIFIER Species *sp = model->getSpecies(i);
     // convert
-    Ast::VariableDefinition *sp_def = __process_species_definition(sp, ctx);
+    Ast::VariableDefinition *sp_def = __process_species_definition(sp, ctx, scaling);
     // store
     ctx.model().addDefinition(sp_def);
-  }
-
-  /* Process all initial value assignments */
-  for (size_t i=0; i<model->getNumInitialAssignments(); i++)
-  {
-    LIBSBML_CPP_NAMESPACE_QUALIFIER InitialAssignment *ass = model->getInitialAssignment(i);
-    Ast::VariableDefinition *var_def = ctx.model().getVariable(ass->getId());
-    // Construct initial value expression:
-    GiNaC::ex value = __process_expression(ass->getMath(), ctx);
-    // Replace 'old' initial value expression:
-    var_def->setValue(value);
   }
 
   /* Process rules for variables: */
@@ -189,8 +186,7 @@ Parser::Sbml::__process_model(LIBSBML_CPP_NAMESPACE_QUALIFIER Model *model, Pars
     GiNaC::ex rule_expr = __process_expression(sbml_rule->getMath(), ctx);
 
     // Dispatch by type:
-    if (sbml_rule->isAssignment())
-    {
+    if (sbml_rule->isAssignment()) {
       // Find variable the rule is associated with:
       if (! ctx.model().hasDefinition(sbml_rule->getVariable())) {
         SymbolError err;
@@ -203,38 +199,25 @@ Parser::Sbml::__process_model(LIBSBML_CPP_NAMESPACE_QUALIFIER Model *model, Pars
       Ast::VariableDefinition *def = ctx.model().getVariable(sbml_rule->getVariable());
       // Construct rule and assign it to variable:
       def->setRule(new Ast::AssignmentRule(rule_expr));
-    }
-    else if (sbml_rule->isRate())
-    {
+    } else if (sbml_rule->isRate()) {
       // Find variable the rule is associated with:
-      if (! ctx.model().hasDefinition(sbml_rule->getVariable()))
-      {
+      if (! ctx.model().hasDefinition(sbml_rule->getVariable())) {
         SymbolError err;
         err << "Variable " << sbml_rule->getVariable()
             << " in rate rule not defined in module.";
         throw err;
       }
-
       // Check if definition is a variable definition.
       Ast::VariableDefinition *def = ctx.model().getVariable(sbml_rule->getVariable());
       // Construct rule and assign it to variable:
       def->setRule(new Ast::RateRule(rule_expr));
-    }
-    else if(sbml_rule->isAlgebraic())
-    {
-      ctx.model().addConstraint(new Ast::AlgebraicConstraint(rule_expr));
-    }
-    else
-    {
-      InternalError err;
-      err << "Unknown variable-rule type.";
-      throw err;
+    } else {
+      throw SBMLFeatureNotSupported("Can not create rule: rule type not supported.");
     }
   }
 
   /* Process all reactions, especially all the kinetic laws of them. The identifier of the kinetic
-   * law is taken as the identifier of the reaction.
-   */
+   * law is taken as the identifier of the reaction. */
   for (size_t i=0; i<model->getNumReactions(); i++)
   {
     // Get SBML Reaction object from model
@@ -251,11 +234,16 @@ Parser::Sbml::__process_model(LIBSBML_CPP_NAMESPACE_QUALIFIER Model *model, Pars
     err << "Can not handle event definitions. Feature not supported.";
     throw err;
   }
+
+  // Finally apply all substitutions as they are needed to maintain a consistent model (due to
+  // unit changes).
+  ctx.model().apply(scaling);
 }
 
 
 Ast::VariableDefinition *
-Parser::Sbml::__process_species_definition(LIBSBML_CPP_NAMESPACE_QUALIFIER Species *node, ParserContext &ctx)
+Parser::Sbml::__process_species_definition(
+  LIBSBML_CPP_NAMESPACE_QUALIFIER Species *node, ParserContext &ctx, Trafo::VariableScaling &subst)
 {
   // Get compartment for species:
   if (! ctx.model().hasCompartment(node->getCompartment())) {
@@ -267,45 +255,78 @@ Parser::Sbml::__process_species_definition(LIBSBML_CPP_NAMESPACE_QUALIFIER Speci
   Ast::Compartment *compartment = ctx.model().getCompartment(node->getCompartment());
 
   /* Second, process unit and initial value of species. */
-  Ast::Unit unit(ctx.model().getDefaultSubstanceUnit());
-
-  // Get unit for species:
-  if (node->isSetUnits()) {
-    unit = ctx.model().getUnit(node->getUnits());
-  }
-
-  // If the flag "hasOnlySubstanceUnits == false" (default)
-  // => Unit(Species) = SubstanceUnit/Volume
-  if (! node->getHasOnlySubstanceUnits()) {
-    unit = unit / compartment->getUnit();
-  }
+  bool species_have_substance_units = ctx.model().speciesHasSubstanceUnits();
+  Ast::Unit substance_unit = ctx.model().getSubstanceUnit();
 
   /* Setup initial value. */
   GiNaC::ex init_value;
-  // If unit of species is substance (mole, gram, ...)
-  if (node->getHasOnlySubstanceUnits())
-  {
-    if (node->isSetInitialAmount()) {
+  if (node->isSetInitialAmount()) {
+    if (species_have_substance_units) {
       init_value = GiNaC::numeric(node->getInitialAmount());
-    } else if (node->isSetInitialConcentration()) {
-      // If a concentration is given but the units of the species is amount:
-      init_value = GiNaC::numeric(node->getInitialConcentration())*compartment->getSymbol();
-    }
-  }
-  // If unit of species is concentration
-  else
-  {
-    if (node->isSetInitialAmount()) {
-      // If an amount is given but the unit if the species is concentration:
+    } else {
       init_value = GiNaC::numeric(node->getInitialAmount())/compartment->getSymbol();
-    } else if (node->isSetInitialConcentration()) {
+    }
+  } else if (node->isSetInitialConcentration()){
+    if (species_have_substance_units) {
+      init_value = GiNaC::numeric(node->getInitialConcentration())*compartment->getSymbol();
+    } else {
       init_value = GiNaC::numeric(node->getInitialConcentration());
     }
   }
 
+  // Search for initial value in initial assignments:
+  const LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model = node->getModel();
+  for (size_t i=0; i<sbml_model->getNumInitialAssignments(); i++) {
+    const LIBSBML_CPP_NAMESPACE_QUALIFIER InitialAssignment *assignment
+        = sbml_model->getInitialAssignment(i);
+    if (assignment->getId() == node->getId()) {
+      if (node->getHasOnlySubstanceUnits()) {
+        if (species_have_substance_units) {
+          init_value = __process_expression(assignment->getMath(), ctx);
+        } else {
+          init_value = __process_expression(assignment->getMath(), ctx)/compartment->getSymbol();
+        }
+      } else {
+        if (species_have_substance_units) {
+          init_value = __process_expression(assignment->getMath(), ctx) * compartment->getSymbol();
+        } else {
+          init_value = __process_expression(assignment->getMath(), ctx);
+        }
+      }
+    }
+  }
+
   // Assemble species definition
-  return new Ast::Species(node->getId(), init_value, unit, node->getHasOnlySubstanceUnits(),
-                          compartment, node->getName(), node->getConstant());
+  Ast::Species *species = new Ast::Species(node->getId(), init_value, compartment, node->getName(),
+                                           node->getConstant());
+
+  // Now, init_value is now given in a proper from either as substance or as concentration
+  // depending on whether species_have_substance_units is set to true or not (globally)
+  // Finally we must check if the substance unit defined with the species matches the default
+  // substance unit. If not the species must be scaled:
+  if (node->isSetUnits() && !(substance_unit == ctx.model().getUnit(node->getUnits()))) {
+    Ast::Unit old_unit = ctx.model().getUnit(node->getUnits());
+    Ast::Unit scale = old_unit/substance_unit; double factor;
+    if (scale.isDimensionless()) {
+      factor = scale.getMultiplier(); factor *= std::pow(10., scale.getScale());
+    } else if (2 == scale.size() && scale.hasVariantOf(Ast::ScaledBaseUnit::MOLE, 1) &&
+               scale.hasVariantOf(Ast::ScaledBaseUnit::ITEM, -1)) {
+      factor = scale.getMultiplier(); factor *= std::pow(10., scale.getScale());
+      factor *= constants::AVOGADRO;
+    } else if (2 == scale.size() && scale.hasVariantOf(Ast::ScaledBaseUnit::MOLE, -1) &&
+               scale.hasVariantOf(Ast::ScaledBaseUnit::ITEM, 1)) {
+      factor = scale.getMultiplier(); factor *= std::pow(10., scale.getScale());
+      factor /= constants::AVOGADRO;
+    } else {
+      TypeError err;
+      err << "Can not rescale species with unit " << old_unit.dump()
+          << ". Can not be traslated into unit " << substance_unit.dump();
+      throw err;
+    }
+    subst.add(species->getSymbol(), factor);
+  }
+
+  return species;
 }
 
 
@@ -345,9 +366,20 @@ Parser::Sbml::__process_function_definition(LIBSBML_CPP_NAMESPACE_QUALIFIER Func
 Ast::VariableDefinition *
 Parser::Sbml::__process_parameter_definition(LIBSBML_CPP_NAMESPACE_QUALIFIER Parameter *node, ParserContext &ctx)
 {
+  /* Handle initial value for paramter. */
   GiNaC::ex init_value;
   if (node->isSetValue()) {
     init_value = GiNaC::numeric(node->getValue());
+  }
+
+  // Search for initial value in initial assignments:
+  const LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model = node->getModel();
+  for (size_t i=0; i<sbml_model->getNumInitialAssignments(); i++) {
+    const LIBSBML_CPP_NAMESPACE_QUALIFIER InitialAssignment *assignment
+        = sbml_model->getInitialAssignment(i);
+    if (assignment->getId() == node->getId()) {
+      init_value = __process_expression(assignment->getMath(), ctx);
+    }
   }
 
   // Get units for parameter (it there is one):
@@ -369,7 +401,8 @@ Parser::Sbml::__process_parameter_definition(LIBSBML_CPP_NAMESPACE_QUALIFIER Par
 
 
 Ast::VariableDefinition *
-Parser::Sbml::__process_compartment_definition(LIBSBML_CPP_NAMESPACE_QUALIFIER Compartment *node, ParserContext &ctx)
+Parser::Sbml::__process_compartment_definition(
+  LIBSBML_CPP_NAMESPACE_QUALIFIER Compartment *node, ParserContext &ctx, Trafo::VariableScaling &subst)
 {
   if (3 != node->getSpatialDimensions()) {
     SBMLFeatureNotSupported err;
@@ -388,40 +421,43 @@ Parser::Sbml::__process_compartment_definition(LIBSBML_CPP_NAMESPACE_QUALIFIER C
   if (node->isSetSize()) {
     init_value = GiNaC::numeric(node->getSize());
   }
-
-  Ast::Unit unit(ctx.model().getDefaultVolumeUnit());
-
-  // Check if there is a Unit assigned to the compartment:
-  if (node->isSetUnits()) {
-    unit = ctx.model().getUnit(node->getUnits());
+  // Search for initial value in initial assignments:
+  const LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model = node->getModel();
+  for (size_t i=0; i<sbml_model->getNumInitialAssignments(); i++) {
+    const LIBSBML_CPP_NAMESPACE_QUALIFIER InitialAssignment *assignment
+        = sbml_model->getInitialAssignment(i);
+    if (assignment->getId() == node->getId()) {
+      init_value = __process_expression(assignment->getMath(), ctx);
+    }
   }
+
+  Ast::Unit unit(ctx.model().getVolumeUnit());
 
   // Get Spatial dimension of compartment
   Ast::Compartment::SpatialDimension sp_dim = Ast::Compartment::VOLUME;
-  if (node->isSetSpatialDimensions()) {
-    switch(node->getSpatialDimensions())
-    {
-    case 0: sp_dim = Ast::Compartment::POINT;  break;
-    case 1: sp_dim = Ast::Compartment::LINE;   break;
-    case 2: sp_dim = Ast::Compartment::AREA;   break;
-    case 3: sp_dim = Ast::Compartment::VOLUME; break;
-    default:
-    {
-      SemanticError err;
-      err << "Can not define compartment " << node->getId()
-          << " unkown spacial dimension " << node->getSpatialDimensions();
-      throw err;
-    }
-    }
-  }
 
-  // Assemble and return compartment:
+  // Assemble compartment:
   Ast::Compartment *comp =
-      new Ast::Compartment(node->getId(), init_value, unit, sp_dim, node->getConstant());
+      new Ast::Compartment(node->getId(), init_value, sp_dim, node->getConstant());
 
   // Set display name if defined:
   if (node->isSetName()) {
     comp->setName(node->getName());
+  }
+
+  // Now, handle unit of compartment
+  if (node->isSetUnits() && !(unit == ctx.model().getUnit(node->getUnits()))) {
+    Ast::Unit comp_unit = ctx.model().getUnit(node->getUnits());
+    Ast::Unit scale = unit/comp_unit;
+    if (! scale.isDimensionless()) {
+      TypeError err;
+      err << "Can not convert unit of compartment " << node->getId() << ": "
+          << comp_unit.dump() << " into model volume unit "
+          << unit.dump();
+      throw err;
+    }
+    double factor = scale.getMultiplier() * std::pow(10., scale.getScale());
+    subst.add(comp->getSymbol(), factor);
   }
 
   return comp;
@@ -458,7 +494,7 @@ Parser::Sbml::__process_default_unit_redefinition(LIBSBML_CPP_NAMESPACE_QUALIFIE
       err << "Redefinition of default unit " << node->getId() << " requires a substance unit.";
       throw err;
     }
-    ctx.model().setDefaultSubstanceUnit(unit);
+    ctx.model().setSubstanceUnit(unit, false);
   } else if ("volume" == node->getId()) {
     Ast::ScaledBaseUnit unit = __process_unit(node->getUnit(0), ctx);
     if (! unit.isVolumeUnit()) {
@@ -466,7 +502,7 @@ Parser::Sbml::__process_default_unit_redefinition(LIBSBML_CPP_NAMESPACE_QUALIFIE
       err << "Redefinition of default unit " << node->getId() << " requires a volume unit.";
       throw err;
     }
-    ctx.model().setDefaultVolumeUnit(unit);
+    ctx.model().setVolumeUnit(unit, false);
   } else if ("area" == node->getId()) {
     Ast::ScaledBaseUnit unit = __process_unit(node->getUnit(0), ctx);
     if (! unit.isAreaUnit()) {
@@ -474,7 +510,7 @@ Parser::Sbml::__process_default_unit_redefinition(LIBSBML_CPP_NAMESPACE_QUALIFIE
       err << "Redefinition of default unit " << node->getId() << " requires a area unit.";
       throw err;
     }
-    ctx.model().setDefaultAreaUnit(unit);
+    ctx.model().setAreaUnit(unit, false);
   } else if ("length" == node->getId()) {
     Ast::ScaledBaseUnit unit = __process_unit(node->getUnit(0), ctx);
     if (! unit.isLengthUnit()) {
@@ -482,7 +518,7 @@ Parser::Sbml::__process_default_unit_redefinition(LIBSBML_CPP_NAMESPACE_QUALIFIE
       err << "Redefinition of default unit " << node->getId() << " requires a length unit.";
       throw err;
     }
-    ctx.model().setDefaultLengthUnit(unit);
+    ctx.model().setLengthUnit(unit, false);
   } else if ("time" == node->getId()) {
     Ast::ScaledBaseUnit unit = __process_unit(node->getUnit(0), ctx);
     if (! unit.isTimeUnit()) {
@@ -490,7 +526,7 @@ Parser::Sbml::__process_default_unit_redefinition(LIBSBML_CPP_NAMESPACE_QUALIFIE
       err << "Redefinition of default unit " << node->getId() << " required time unit.";
       throw err;
     }
-    ctx.model().setDefaultTimeUnit(unit);
+    ctx.model().setTimeUnit(unit, false);
   }
 }
 

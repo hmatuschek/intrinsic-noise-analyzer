@@ -150,7 +150,7 @@ Assembler::processModelDefinition(Parser::ConcreteSyntaxTree &model_header)
    *   [EOL DefaultUnitDefinitions];   : model_header[6] */
 
   // Set identifier
-  //_model.setIdentifier(_lexer[model_header[4].getTokenIdx()].getValue());
+  _model.setIdentifier(_lexer[model_header[4].getTokenIdx()].getValue());
 
   // Set name if defined
   if (model_header[5].matched()) {
@@ -191,15 +191,15 @@ Assembler::processDefaultUnitDefinitions(Parser::ConcreteSyntaxTree &def_units)
 
   // Dispatch by flag...
   if (def_unit_id == "s") {
-    _model.setDefaultSubstanceUnit(base_unit);
+    _model.setSubstanceUnit(base_unit, false);
   } else if (def_unit_id == "t") {
-    _model.setDefaultTimeUnit(base_unit);
+    _model.setTimeUnit(base_unit, false);
   } else if (def_unit_id == "v") {
-    _model.setDefaultVolumeUnit(base_unit);
+    _model.setVolumeUnit(base_unit, false);
   } else if (def_unit_id == "a") {
-    _model.setDefaultAreaUnit(base_unit);
+    _model.setAreaUnit(base_unit, false);
   } else if (def_unit_id == "l") {
-    _model.setDefaultLengthUnit(base_unit);
+    _model.setLengthUnit(base_unit, false);
   } else if (def_unit_id == "e") {
     throw SBMLFeatureNotSupported("Setting the extent unit is not supported yet.");
   } else if (def_unit_id == "c") {
@@ -236,15 +236,15 @@ Assembler::processUnitDefinition(Parser::ConcreteSyntaxTree &unit)
   }
 
   if ("substance" == identifier) {
-    _model.setDefaultSubstanceUnit(def->getUnit().asScaledBaseUnit()); delete def;
+    _model.setSubstanceUnit(def->getUnit().asScaledBaseUnit(), false); delete def;
   } else if ("volume" == identifier) {
-    _model.setDefaultVolumeUnit(def->getUnit().asScaledBaseUnit()); delete def;
+    _model.setVolumeUnit(def->getUnit().asScaledBaseUnit(), false); delete def;
   } else if ("area" == identifier) {
-    _model.setDefaultAreaUnit(def->getUnit().asScaledBaseUnit()); delete def;
+    _model.setAreaUnit(def->getUnit().asScaledBaseUnit(), false); delete def;
   } else if ("length" == identifier) {
-    _model.setDefaultLengthUnit(def->getUnit().asScaledBaseUnit()); delete def;
+    _model.setLengthUnit(def->getUnit().asScaledBaseUnit(), false); delete def;
   } else if ("time" == identifier) {
-    _model.setDefaultTimeUnit(def->getUnit().asScaledBaseUnit()); delete def;
+    _model.setTimeUnit(def->getUnit().asScaledBaseUnit(), false); delete def;
   } else {
     // Add unit definition to model:
     _model.addDefinition(def);
@@ -342,8 +342,7 @@ Assembler::processCompartmentDefinitions(Parser::ConcreteSyntaxTree &comp)
    *  [EOL CompartmentDefinitionList];    : comp[4] */
 
   std::string id = _lexer[comp[0].getTokenIdx()].getValue();
-  Ast::Compartment *compartment = new Ast::Compartment(id, _model.getDefaultVolumeUnit(),
-                                                       Ast::Compartment::VOLUME, true);
+  Ast::Compartment *compartment = new Ast::Compartment(id, Ast::Compartment::VOLUME, true);
 
   // Handle inner/outer relation if needed:
   if (comp[1].matched()) {
@@ -394,6 +393,7 @@ Assembler::processSpeciesDefinition(Parser::ConcreteSyntaxTree &spec)
   GiNaC::ex initial_value;
   bool has_substance_units=false; bool has_boundary_condition=false; bool is_constant=false;
   bool has_initial_amount=true;
+  bool species_have_substance_units = _model.speciesHasSubstanceUnits();
 
   Ast::Compartment *compartment = _model.getCompartment(compartment_id);
   if (0 == spec[2].getAltIdx()) {
@@ -416,21 +416,18 @@ Assembler::processSpeciesDefinition(Parser::ConcreteSyntaxTree &spec)
   }
 
   // Unit voodoo...
-  Ast::Unit spec_unit = _model.getDefaultSubstanceUnit();
-  if (has_substance_units) {
+  if (species_have_substance_units) {
     if (! has_initial_amount) {
-      initial_value = initial_value * compartment->getValue();
+      initial_value = initial_value * compartment->getSymbol();
     }
   } else {
-    spec_unit = spec_unit/compartment->getUnit();
     if (has_initial_amount) {
-      initial_value = initial_value/compartment->getValue();
+      initial_value = initial_value / compartment->getSymbol();
     }
   }
 
   // Create species:
-  Ast::Species *species =
-      new Ast::Species(identifier, spec_unit, compartment, is_constant);
+  Ast::Species *species = new Ast::Species(identifier, compartment, is_constant);
 
   // Set initial value...
   species->setValue(initial_value);
@@ -728,7 +725,7 @@ Assembler::processReactants(Parser::ConcreteSyntaxTree &sum, Ast::Reaction *reac
   double stoichiometry = 1;
 
   if (sum[0].matched()) {
-    stoichiometry = processNumber(sum[0][0]);
+    stoichiometry = toNumber<int>(_lexer[sum[0][0].getTokenIdx()].getValue());
   }
 
   std::string identifier = _lexer[sum[1].getTokenIdx()].getValue();
@@ -748,7 +745,7 @@ Assembler::processProducts(Parser::ConcreteSyntaxTree &sum, Ast::Reaction *react
   double stoichiometry = 1;
 
   if (sum[0].matched()) {
-    stoichiometry = processNumber(sum[0][0]);
+    stoichiometry = toNumber<int>(_lexer[sum[0][0].getTokenIdx()].getValue());
   }
 
   std::string identifier = _lexer[sum[1].getTokenIdx()].getValue();

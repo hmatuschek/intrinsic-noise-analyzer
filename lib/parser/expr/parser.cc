@@ -91,7 +91,6 @@ Parser::Expr::parseExpression(const std::string &text, Ast::Scope *scope)
 
   Parser::ConcreteSyntaxTree cst;
   ExpressionGrammar::get()->parse(lexer, cst);
-  ExpressionGrammar::get()->notify(lexer, cst);
 
   return Expr::Assembler(scope, lexer).processExpression(cst[0]);
 }

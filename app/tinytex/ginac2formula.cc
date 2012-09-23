@@ -4,6 +4,7 @@
 #include <QPainter>
 #include <QPixmap>
 #include "utils/logger.hh"
+#include "ast/model.hh"
 
 
 using namespace iNA;
@@ -28,6 +29,7 @@ Ginac2Formula::visit(const GiNaC::symbol &node)
     return;
   }
 
+  Ast::Model *model = static_cast<Ast::Model *>(_scope.getRootScope());
   Ast::Definition *def = _scope.getDefinition(node.get_name());
 
   Ast::VariableDefinition *var = 0;
@@ -50,9 +52,9 @@ Ginac2Formula::visit(const GiNaC::symbol &node)
     _stack.push_back(new MathText(var->getIdentifier().c_str()));
   }
 
-  // Now, the name has been rendered -> if variable was a species with concentration untis ->
+  // Now, the name has been rendered. If variable was a species with concentration untis ->
   // put name in brackets:
-  if (iNA::Ast::Node::isSpecies(var) && var->getUnit().isConcentrationUnit()) {
+  if (iNA::Ast::Node::isSpecies(var) && !(model->speciesHasSubstanceUnits())) {
     MathFormula *tmp = new MathFormula();
     tmp->appendItem(new MathText("["));
     tmp->appendItem(_stack.back()); _stack.pop_back();

@@ -95,7 +95,7 @@ ModelDefinitionProduction::ModelDefinitionProduction()
   ModelDefinitionProduction::instance = this;
 
   // "@model" ":" "3.3.1" "=" Identifier
-  this->elements.push_back(new iNA::Parser::TokenProduction(T_MODEL_KW));
+  this->elements.push_back(new iNA::Parser::TokenProduction(T_MODEL_KW, true));
   this->elements.push_back(new iNA::Parser::TokenProduction(T_COLON));
   this->elements.push_back(new iNA::Parser::TokenProduction(T_VERSION_NUMBER));
   this->elements.push_back(new iNA::Parser::TokenProduction(T_ASSIGN));
@@ -233,7 +233,7 @@ UnitDefinitionsProduction::UnitDefinitionsProduction()
 {
   UnitDefinitionsProduction::instance = this;
 
-  this->elements.push_back(new iNA::Parser::TokenProduction(T_UNITS_KW));
+  this->elements.push_back(new iNA::Parser::TokenProduction(T_UNITS_KW, true));
   this->elements.push_back(EndOfLineProduction::get());
   this->elements.push_back(UnitDefinitionListProduction::get());
 }
@@ -263,7 +263,7 @@ UnitDefinitionListProduction::UnitDefinitionListProduction()
   UnitDefinitionListProduction::instance = this;
 
   // Identifier "=" ScaledUnitList
-  this->elements.push_back(new iNA::Parser::TokenProduction(T_IDENTIFIER));
+  this->elements.push_back(new iNA::Parser::TokenProduction(T_IDENTIFIER, true));
   this->elements.push_back(new iNA::Parser::TokenProduction(T_ASSIGN));
   this->elements.push_back(ScaledUnitListProduction::get());
 
@@ -478,7 +478,7 @@ CompartmentDefinitionsProduction::CompartmentDefinitionsProduction()
 {
   CompartmentDefinitionsProduction::instance = this;
 
-  this->elements.push_back(new iNA::Parser::TokenProduction(T_COMPARTMENTS_KW));
+  this->elements.push_back(new iNA::Parser::TokenProduction(T_COMPARTMENTS_KW, true));
   this->elements.push_back(new iNA::Parser::TokenProduction(T_END_OF_LINE));
   this->elements.push_back(CompartmentDefinitionListProduction::get());
 }
@@ -508,7 +508,7 @@ CompartmentDefinitionListProduction::CompartmentDefinitionListProduction()
   CompartmentDefinitionListProduction::instance = this;
 
   // Identifier
-  this->elements.push_back(new iNA::Parser::TokenProduction(T_IDENTIFIER));
+  this->elements.push_back(new iNA::Parser::TokenProduction(T_IDENTIFIER, true));
 
   // ["<" Identifier]
   this->elements.push_back(
@@ -556,7 +556,7 @@ SpeciesDefinitionsProduction::SpeciesDefinitionsProduction()
 {
   SpeciesDefinitionsProduction::instance = this;
 
-  this->elements.push_back(new iNA::Parser::TokenProduction(T_SPECIES_KW));
+  this->elements.push_back(new iNA::Parser::TokenProduction(T_SPECIES_KW, true));
   this->elements.push_back(EndOfLineProduction::get());
   this->elements.push_back(SpeciesDefinitionListProduction::get());
 }
@@ -586,7 +586,7 @@ SpeciesDefinitionListProduction::SpeciesDefinitionListProduction()
   SpeciesDefinitionListProduction::instance = this;
 
   // ID ":"
-  this->elements.push_back(new iNA::Parser::TokenProduction(T_IDENTIFIER));
+  this->elements.push_back(new iNA::Parser::TokenProduction(T_IDENTIFIER, true));
   this->elements.push_back(new iNA::Parser::TokenProduction(T_COLON));
 
   // ("[" ID "]" | ID)
@@ -662,7 +662,7 @@ SpeciesModifierListProduction::get()
  * SpeciesModifier = Any series of 's', 'b' and 'c'
  * ******************************************************************************************** */
 SpeciesModifierProduction::SpeciesModifierProduction()
-  : TokenProduction(T_IDENTIFIER)
+  : TokenProduction(T_IDENTIFIER, true)
 {
   SpeciesModifierProduction::instance = this;
 }
@@ -713,7 +713,7 @@ ParameterDefinitionsProduction::ParameterDefinitionsProduction()
   : Production()
 {
   ParameterDefinitionsProduction::instance = this;
-  this->elements.push_back(new iNA::Parser::TokenProduction(T_PARAMETERS_KW));
+  this->elements.push_back(new iNA::Parser::TokenProduction(T_PARAMETERS_KW, true));
   this->elements.push_back(EndOfLineProduction::get());
   this->elements.push_back(ParameterDefinitionListProduction::get());
 }
@@ -742,7 +742,7 @@ ParameterDefinitionListProduction::ParameterDefinitionListProduction()
 {
   ParameterDefinitionListProduction::instance = this;
 
-  this->elements.push_back(new iNA::Parser::TokenProduction(T_IDENTIFIER));
+  this->elements.push_back(new iNA::Parser::TokenProduction(T_IDENTIFIER, true));
   this->elements.push_back(new iNA::Parser::TokenProduction(T_ASSIGN));
   this->elements.push_back(Expr::ExpressionProduction::get());
   this->elements.push_back(new iNA::Parser::OptionalProduction(ParameterModifierProduction::get()));
@@ -772,7 +772,7 @@ ParameterDefinitionListProduction::get()
  *   "v";
  * ******************************************************************************************** */
 ParameterModifierProduction::ParameterModifierProduction()
-  : TokenProduction(T_IDENTIFIER)
+  : TokenProduction(T_IDENTIFIER, true)
 {
   ParameterModifierProduction::instance = this;
 }
@@ -817,7 +817,7 @@ RuleDefinitionsProduction::RuleDefinitionsProduction()
   : iNA::Parser::Production()
 {
   RuleDefinitionsProduction::instance = this;
-  this->elements.push_back(new iNA::Parser::TokenProduction(T_RULES_KW));
+  this->elements.push_back(new iNA::Parser::TokenProduction(T_RULES_KW, true));
   this->elements.push_back(RuleDefinitionListProduction::get());
 }
 
@@ -885,7 +885,7 @@ ReactionDefinitionsProduction::ReactionDefinitionsProduction()
 {
   ReactionDefinitionsProduction::instance = this;
 
-  this->elements.push_back(new iNA::Parser::TokenProduction(T_REACTIONS_KW));
+  this->elements.push_back(new iNA::Parser::TokenProduction(T_REACTIONS_KW, true));
   this->elements.push_back(EndOfLineProduction::get());
   this->elements.push_back(ReactionDefinitionListProduction::get());
 }
@@ -946,7 +946,7 @@ ReactionDefinitionListProduction::ReactionDefinitionListProduction()
   // ("@r"|"@rr")
   this->elements.push_back(
         new iNA::Parser::AltProduction(
-          2, new iNA::Parser::TokenProduction(T_R_KW), new iNA::Parser::TokenProduction(T_RR_KW)));
+          2, new iNA::Parser::TokenProduction(T_R_KW, true), new iNA::Parser::TokenProduction(T_RR_KW, true)));
 
   // "="
   this->elements.push_back(
@@ -1153,7 +1153,7 @@ EventDefinitionsProduction::EventDefinitionsProduction()
 {
   EventDefinitionsProduction::instance = this;
 
-  this->elements.push_back(new iNA::Parser::TokenProduction(T_EVENTS_KW));
+  this->elements.push_back(new iNA::Parser::TokenProduction(T_EVENTS_KW, true));
   this->elements.push_back(EndOfLineProduction::get());
   this->elements.push_back(EventDefinitionListProduction::get());
 }

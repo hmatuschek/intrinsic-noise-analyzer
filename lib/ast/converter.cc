@@ -1,5 +1,5 @@
 #include "converter.hh"
-#include "trafo/modelcopyist.hh"
+#include "modelcopyist.hh"
 #include "utils/logger.hh"
 
 
@@ -84,7 +84,7 @@ void Convert2Irreversible::process()
 
       // Create copy of kinetic law:
       GiNaC::exmap param_subst;
-      Ast::KineticLaw *kineticLaw = Ast::Trafo::ModelCopyist::dupKineticLaw(reaction->getKineticLaw(), param_subst);
+      Ast::KineticLaw *kineticLaw = Ast::ModelCopyist::dupKineticLaw(reaction->getKineticLaw(), param_subst);
       // Substitute local paramters (if there are some):
       kineticLaw->setRateLaw(backwardLaw.subs(param_subst));
       // Assemble reverse reaction:
