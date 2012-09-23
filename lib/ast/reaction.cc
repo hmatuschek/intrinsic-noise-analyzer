@@ -295,79 +295,84 @@ Reaction::setReversible(bool val)
   this->is_reversible=val;
 }
 
+bool
+Reaction::isReverseOf(Reaction * other)
+{
+    return (this->reactants == other->products);
+}
 
 Reaction::iterator
-Reaction::reacBegin()
+Reaction::reactantsBegin()
 {
   return this->reactants.begin();
 }
 
 Reaction::iterator
-Reaction::reacEnd()
+Reaction::reactantsEnd()
 {
   return this->reactants.end();
 }
 
 Reaction::const_iterator
-Reaction::reacBegin() const
+Reaction::reactantsBegin() const
 {
   return this->reactants.begin();
 }
 
 Reaction::const_iterator
-Reaction::reacEnd() const
+Reaction::reactantsEnd() const
 {
   return this->reactants.end();
 }
 
 
 Reaction::iterator
-Reaction::prodBegin()
+Reaction::productsBegin()
 {
   return this->products.begin();
 }
 
 Reaction::iterator
-Reaction::prodEnd()
+Reaction::productsEnd()
 {
   return this->products.end();
 }
 
 Reaction::const_iterator
-Reaction::prodBegin() const
+Reaction::productsBegin() const
 {
   return this->products.begin();
 }
 
 Reaction::const_iterator
-Reaction::prodEnd() const
+Reaction::productsEnd() const
 {
   return this->products.end();
 }
 
 
 Reaction::mod_iterator
-Reaction::modBegin()
+Reaction::modifiersBegin()
 {
   return this->modifiers.begin();
 }
 
 
 Reaction::mod_iterator
-Reaction::modEnd()
+Reaction::modifiersEnd()
 {
   return this->modifiers.end();
 }
 
 Reaction::const_mod_iterator
-Reaction::modBegin() const
+Reaction::modifiersBegin() const
 {
   return this->modifiers.begin();
 }
 
 
 Reaction::const_mod_iterator
-Reaction::modEnd() const
+Reaction::modifiersEnd() const
 {
   return this->modifiers.end();
 }
@@ -378,7 +383,7 @@ Reaction::dump(std::ostream &str)
 {
   str << "Reaction: " << this->getIdentifier() << " {" << std::endl;
   // First, dump ractants of reaction:
-  for (Reaction::iterator iter = this->reacBegin(); iter != this->reacEnd(); iter++)
+  for (Reaction::iterator iter = this->reactantsBegin(); iter != this->reactantsEnd(); iter++)
   {
     if (1 == iter->second) {
       str << iter->first->getSymbol();
@@ -389,7 +394,7 @@ Reaction::dump(std::ostream &str)
   str << " => ";
 
   // Then dump products:
-  for (Reaction::iterator iter = this->prodBegin(); iter != this->prodEnd(); iter++)
+  for (Reaction::iterator iter = this->productsBegin(); iter != this->productsEnd(); iter++)
   {
     if (1 == iter->second) {
       str << iter->first->getSymbol() << " + ";

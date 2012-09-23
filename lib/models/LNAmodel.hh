@@ -1,5 +1,5 @@
-#ifndef __FLUC_LNAMODEL_HH__
-#define __FLUC_LNAMODEL_HH__
+#ifndef __INA_LNAMODEL_HH__
+#define __INA_LNAMODEL_HH__
 
 #include "REmodel.hh"
 #include "initialconditions.hh"

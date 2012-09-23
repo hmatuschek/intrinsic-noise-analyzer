@@ -453,7 +453,6 @@ Model::getReactionIdx(const std::string &id) const
   return this->getReactionIdx(Module::getReaction(id));
 }
 
-
 size_t
 Model::getReactionIdx(Reaction *reac) const
 {
@@ -472,6 +471,53 @@ Model::getReactionIdx(Reaction *reac) const
   throw err;
 }
 
+Model::CompartmentIterator
+Model::compartmentsBegin()
+{
+    return compartment_vector.begin();
+}
+
+Model::CompartmentIterator
+Model::compartmentsEnd()
+{
+    return compartment_vector.end();
+}
+
+Model::ParameterIterator
+Model::parametersBegin()
+{
+    return parameter_vector.begin();
+}
+
+Model::ParameterIterator
+Model::parametersEnd()
+{
+    return parameter_vector.end();
+}
+
+Model::SpeciesIterator
+Model::speciesBegin()
+{
+    return species_vector.begin();
+}
+
+Model::SpeciesIterator
+Model::speciesEnd()
+{
+    return species_vector.end();
+}
+
+Model::ReactionIterator
+Model::reactionsBegin()
+{
+    return reaction_vector.begin();
+}
+
+Model::ReactionIterator
+Model::reactionsEnd()
+{
+    return reaction_vector.end();
+}
 
 void
 Model::addDefinition(Definition *def)
@@ -497,6 +543,52 @@ Model::addDefinition(Definition *def)
   case Node::REACTION_DEFINITION:
     this->reaction_vector.push_back(static_cast<Reaction *>(def));
     break;
+
+  default:
+    break;
+  }
+}
+
+void
+Model::addDefinition(Definition *def, Definition *after)
+{
+  // First, add definition to scope (takes ownership)
+  Module::addDefinition(def);
+
+  // Add definition to vectors of definitions:
+  switch (def->getNodeType())
+  {
+  case Node::COMPARTMENT_DEFINITION:
+  {
+    std::vector<Compartment *>::iterator pos=this->compartment_vector.begin();
+    while(pos!=this->compartment_vector.end())
+        if((*(pos++))==static_cast<Compartment *>(after)) break;
+    this->compartment_vector.insert(pos,static_cast<Compartment *>(def));
+  } break;
+
+  case Node::SPECIES_DEFINITION:
+  {
+    std::vector<Species *>::iterator pos=this->species_vector.begin();
+    while(pos!=this->species_vector.end())
+        if((*(pos++))==static_cast<Species *>(after)) break;
+    this->species_vector.insert(pos,static_cast<Species *>(def));
+  } break;
+
+  case Node::PARAMETER_DEFINITION:
+  {
+    std::vector<Parameter *>::iterator pos=this->parameter_vector.begin();
+    while(pos!=this->parameter_vector.end())
+        if((*(pos++))==static_cast<Parameter *>(after)) break;
+    this->parameter_vector.insert(pos,static_cast<Parameter *>(def));
+  } break;
+
+  case Node::REACTION_DEFINITION:
+  {
+    std::vector<Reaction *>::iterator pos=this->reaction_vector.begin();
+    while(pos!=this->reaction_vector.end())
+        if((*(pos++))==static_cast<Reaction *>(after)) break;
+    this->reaction_vector.insert(pos,static_cast<Reaction *>(def));
+  } break;
 
   default:
     break;

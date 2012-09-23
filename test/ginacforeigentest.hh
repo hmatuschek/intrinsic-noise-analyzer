@@ -15,6 +15,12 @@ class GinacForEigenTest :
         public UnitTest::TestCase
 {
 public:
+  virtual ~GinacForEigenTest()
+  {
+
+  }
+
+public:
   void testMatrixVectorMultiplication();
   void testMatrixMatrixMultiplication();
 

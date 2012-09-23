@@ -138,11 +138,11 @@ ParamScanTask::process()
   this->setProgress(0);
 
   // Construct parameter sets
-  std::vector<GiNaC::exmap> parameterSets(config.getSteps()+1);
+  std::vector<iNA::Models::ParameterSet> parameterSets(config.getSteps()+1);
   for(size_t j = 0; j<=config.getSteps(); j++)
   {
       double val = config.getStartValue()+config.getInterval()*j;
-      parameterSets[j].insert(std::pair<GiNaC::ex,GiNaC::ex>(config.getParameter().getSymbol(),val));
+      parameterSets[j].insert(std::pair<std::string,double>(config.getParameter().getIdentifier(),val));
   }
 
   // Take model
@@ -177,7 +177,7 @@ ParamScanTask::process()
       model->fullState(scanResult[pid], concentrations, lna_covariances, emre_corrections,
                        ios_covariances, thirdOrder, iosemre_corrections);
 
-      parameterScan(pid,0) = GiNaC::ex_to<GiNaC::numeric>(parameterSets[pid][config.getParameter().getSymbol()]).to_double();
+      parameterScan(pid,0) = GiNaC::ex_to<GiNaC::numeric>(parameterSets[pid][config.getParameter().getIdentifier()]).to_double();
 
       int col=1;
 

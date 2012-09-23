@@ -151,11 +151,13 @@ Application::itemSelected(const QModelIndex &index)
     _editModel->setEnabled(true);
     _closeModel->setEnabled(true);
     _expandRevReaction->setEnabled(true);
+    _combineIrvReaction->setEnabled(true);
   } else {
     _exportModel->setEnabled(false);
     _editModel->setEnabled(false);
     _closeModel->setEnabled(false);
     _expandRevReaction->setEnabled(false);
+    _combineIrvReaction->setEnabled(false);
   }
 
 }
@@ -302,6 +304,9 @@ void Application::onCombineIrrevReactions()
   if (0 == _selected_item) { return; }
   if (0 == (document = dynamic_cast<DocumentItem *>(_selected_item))) { return; }
   iNA::Ast::Model &model = document->getModel();
+
+
+  iNA::Trafo::IrreversibleReactionCollapsor collector; collector.apply(model);
 
   QMessageBox::information(0, "Not implemented yet.", "This feature is not implemented yet.");
 }

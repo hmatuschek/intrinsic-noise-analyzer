@@ -145,10 +145,10 @@ ParameterScanConfigPage::ParameterScanConfigPage(GeneralTaskWizard *parent)
   param_layout->addRow(tr("Steps"), p_num);
   param_box->setLayout(param_layout);
 
-//  QGroupBox *mp_box = new QGroupBox(tr("Parallel process"));
-//  QFormLayout *mp_layout = new QFormLayout();
-//  mp_layout->addRow(tr("Thread count"), thread_count);
-//  mp_box->setLayout(mp_layout);
+  QGroupBox *mp_box = new QGroupBox(tr("Parallel process"));
+  QFormLayout *mp_layout = new QFormLayout();
+  mp_layout->addRow(tr("Thread count"), thread_count);
+  mp_box->setLayout(mp_layout);
 
   QGroupBox *ss_box = new QGroupBox(tr("Steady state solver"));
   QFormLayout *ss_layout = new QFormLayout();
@@ -159,7 +159,7 @@ ParameterScanConfigPage::ParameterScanConfigPage(GeneralTaskWizard *parent)
 
   QVBoxLayout *layout = new QVBoxLayout();
   layout->addWidget(param_box);
-  //layout->addWidget(mp_box);
+  layout->addWidget(mp_box);
   layout->addWidget(ss_box);
   setLayout(layout);
 }

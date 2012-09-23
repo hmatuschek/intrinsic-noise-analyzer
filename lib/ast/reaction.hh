@@ -313,41 +313,45 @@ public:
    */
   bool isReversible() const;
 
-
   /**
    * (Re-) Sets the reversible flag of the reaction.
    */
   void setReversible(bool val);
 
-  /** Retruns an iterator pointing on the first reactant of the reaction. */
-  iterator reacBegin();
-  /** Retunrs an iterator pointing right after the last reactant of the reaction. */
-  iterator reacEnd();
+  /**
+   * Tells you wether the reaction can be considered as the reverse of another.
+   */
+  bool isReverseOf(Reaction * other);
 
-  /** Retruns an iterator pointing on the first reactant of the reaction. */
-  const_iterator reacBegin() const;
+  /** Returns an iterator pointing on the first reactant of the reaction. */
+  iterator reactantsBegin();
+  /** Returns an iterator pointing right after the last reactant of the reaction. */
+  iterator reactantsEnd();
+
+  /** Retunrs an iterator pointing on the first reactant of the reaction. */
+  const_iterator reactantsBegin() const;
   /** Retunrs an iterator pointing right after the last reactant of the reaction. */
-  const_iterator reacEnd() const;
+  const_iterator reactantsEnd() const;
 
   /** Returns an iterator pointing on the first product of the reaction. */
-  iterator prodBegin();
+  iterator productsBegin();
   /** Returns an iterator pointing right after the last product of the reaction. */
-  iterator prodEnd();
+  iterator productsEnd();
 
   /** Returns an iterator pointing on the first product of the reaction. */
-  const_iterator prodBegin() const;
+  const_iterator productsBegin() const;
   /** Returns an iterator pointing right after the last product of the reaction. */
-  const_iterator prodEnd() const;
+  const_iterator productsEnd() const;
 
   /** Retunrs an interator pointing to first modifier of the species. */
-  mod_iterator modBegin();
+  mod_iterator modifiersBegin();
   /** Returns an iterator pointing right after the last modifier of the reaction. */
-  mod_iterator modEnd();
+  mod_iterator modifiersEnd();
 
   /** Retunrs an interator pointing to first modifier of the species. */
-  const_mod_iterator modBegin() const;
+  const_mod_iterator modifiersBegin() const;
   /** Returns an iterator pointing right after the last modifier of the reaction. */
-  const_mod_iterator modEnd() const;
+  const_mod_iterator modifiersEnd() const;
 
   /** Dumps a string representation of the reaction into the given stream. */
   virtual void dump(std::ostream &str);

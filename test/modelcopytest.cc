@@ -164,7 +164,7 @@ ModelCopyTest::testReactionEqual(Ast::Reaction *A, Ast::Reaction *B, GiNaC::exma
   UT_ASSERT(A->isReversible() == B->isReversible());
 
   // Test reactant stoichiometry
-  for (Ast::Reaction::iterator reac = B->reacBegin(); reac != B->reacEnd(); reac++) {
+  for (Ast::Reaction::iterator reac = B->reactantsBegin(); reac != B->reactantsEnd(); reac++) {
     GiNaC::symbol reac_sym = GiNaC::ex_to<GiNaC::symbol>(symbol_table[reac->first->getSymbol()]);
     // Check if reactant is in A:
     UT_ASSERT(A->hasReactant(reac_sym));
@@ -173,7 +173,7 @@ ModelCopyTest::testReactionEqual(Ast::Reaction *A, Ast::Reaction *B, GiNaC::exma
   }
 
   // Test product stoichiometry
-  for (Ast::Reaction::iterator prod = B->prodBegin(); prod != B->prodEnd(); prod++) {
+  for (Ast::Reaction::iterator prod = B->productsBegin(); prod != B->productsEnd(); prod++) {
     GiNaC::symbol prod_sym = GiNaC::ex_to<GiNaC::symbol>(symbol_table[prod->first->getSymbol()]);
     // Check if product is in A:
     UT_ASSERT(A->hasProduct(prod_sym));
@@ -182,7 +182,7 @@ ModelCopyTest::testReactionEqual(Ast::Reaction *A, Ast::Reaction *B, GiNaC::exma
   }
 
   // Test modifier.
-  for (Ast::Reaction::mod_iterator mod = B->modBegin(); mod != B->modEnd(); mod++) {
+  for (Ast::Reaction::mod_iterator mod = B->modifiersBegin(); mod != B->modifiersEnd(); mod++) {
     GiNaC::symbol mod_sym = GiNaC::ex_to<GiNaC::symbol>(symbol_table[(*mod)->getSymbol()]);
     // Check if A has modifier:
     UT_ASSERT(A->isModifier(mod_sym));

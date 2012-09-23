@@ -68,7 +68,7 @@ protected:
 
   /** This function updates the symbols of the initial value of the paramter definition using
    * the given translation table. */
-  static void updateParamter(Ast::Parameter *node, GiNaC::exmap &translation_table);
+  static void updateParameter(Ast::Parameter *node, GiNaC::exmap &translation_table);
 
   /** Helper function to copy compartment definitions. */
   static Ast::Compartment *copyCompartmentDefinition(Ast::Compartment *node,

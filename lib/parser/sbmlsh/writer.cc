@@ -344,7 +344,7 @@ Writer::processReaction(Ast::Reaction *reac, std::ostream &output)
   std::list<std::string> modifiers;
 
   // assemble list of reactants
-  for (Ast::Reaction::iterator item = reac->reacBegin(); item != reac->reacEnd(); item++)
+  for (Ast::Reaction::iterator item = reac->reactantsBegin(); item != reac->reactantsEnd(); item++)
   {
     if (! GiNaC::is_a<GiNaC::numeric>(item->second))
     {
@@ -362,7 +362,7 @@ Writer::processReaction(Ast::Reaction *reac, std::ostream &output)
   }
 
   // assemble list of products
-  for (Ast::Reaction::iterator item = reac->prodBegin(); item != reac->prodEnd(); item++)
+  for (Ast::Reaction::iterator item = reac->productsBegin(); item != reac->productsEnd(); item++)
   {
     if (! GiNaC::is_a<GiNaC::numeric>(item->second))
     {
@@ -380,7 +380,7 @@ Writer::processReaction(Ast::Reaction *reac, std::ostream &output)
   }
 
   // Assemble list of modifiers
-  for (Ast::Reaction::mod_iterator item = reac->modBegin(); item != reac->modEnd(); item++)
+  for (Ast::Reaction::mod_iterator item = reac->modifiersBegin(); item != reac->modifiersEnd(); item++)
   {
     modifiers.push_back((*item)->getIdentifier());
   }

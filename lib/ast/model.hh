@@ -53,6 +53,44 @@ protected:
    */
   std::vector<Reaction *> reaction_vector;
 
+public:
+
+
+  /** The compartment iterator. */
+  typedef std::vector<Compartment *>::iterator CompartmentIterator;
+
+  /** The parameter iterator. */
+  typedef std::vector<Parameter *>::iterator ParameterIterator;
+
+  /** The species iterator. */
+  typedef std::vector<Species *>::iterator SpeciesIterator;
+
+  /** The reaction iterator. */
+  typedef std::vector<Reaction *>::iterator ReactionIterator;
+
+  /** Returns an iterator pointing on the first compartment of the model. */
+  CompartmentIterator compartmentsBegin();
+
+  /** Returns an iterator pointing on somewhere after the last compartment of the model. */
+  CompartmentIterator compartmentsEnd();
+
+  /** Returns an iterator pointing on the first parameter of the model. */
+  ParameterIterator parametersBegin();
+
+  /** Returns an iterator pointing on somewhere after the last parameter of the model. */
+  ParameterIterator parametersEnd();
+
+  /** Returns an iterator pointing on the first species of the model. */
+  SpeciesIterator speciesBegin();
+
+  /** Returns an iterator pointing on somewhere after the last species of the model. */
+  SpeciesIterator speciesEnd();
+
+  /** Returns an iterator pointing on the first reaction of the model. */
+  ReactionIterator reactionsBegin();
+
+  /** Returns an iterator pointing on somewhere after the last reaction of the model. */
+  ReactionIterator reactionsEnd();
 
 public:
   /**
@@ -333,6 +371,11 @@ public:
    * the definition is stored in the corresponding vector.
    */
   virtual void addDefinition(Definition *def);
+
+  /**
+   * Insert element after other definition.
+   */
+  virtual void addDefinition(Definition *def, Definition *after);
 
   /**
    * Removes a definition (Species, Compartment, Reaction, ...) from the model. The user is

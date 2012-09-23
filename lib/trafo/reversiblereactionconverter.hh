@@ -19,6 +19,17 @@ public:
   static void apply(Ast::Model &model);
 };
 
+/**
+ * This class collapses two irreversible reactions to a single
+ * reversible one.
+ * @ingroup trafo
+ */
+class IrreversibleReactionCollapsor
+{
+public:
+  /** Performs the conversion on the given model. */
+  static void apply(Ast::Model &model);
+};
 
 }
 }

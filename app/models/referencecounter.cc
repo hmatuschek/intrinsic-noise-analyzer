@@ -82,21 +82,21 @@ ReferenceCounter::visit(const iNA::Ast::Reaction *reac)
   if (reac->hasName()) { name = QString("%1 (id: %2)").arg(reac->getName().c_str(), name); }
 
   // Check reactants:
-  for (Ast::Reaction::const_iterator item=reac->reacBegin(); item!=reac->reacEnd(); item++) {
+  for (Ast::Reaction::const_iterator item=reac->reactantsBegin(); item!=reac->reactantsEnd(); item++) {
     if (item->first->getSymbol() == _var->getSymbol()) {
       _references.push_back(tr("as reactant in reaction %1").arg(name));
     }
   }
 
   // Check products:
-  for (Ast::Reaction::const_iterator item=reac->prodBegin(); item!=reac->prodEnd(); item++) {
+  for (Ast::Reaction::const_iterator item=reac->productsBegin(); item!=reac->productsEnd(); item++) {
     if (item->first->getSymbol() == _var->getSymbol()) {
       _references.push_back(tr("as product in reaction %1").arg(name));
     }
   }
 
   // Check modifier:
-  for (Ast::Reaction::const_mod_iterator item=reac->modBegin(); item!=reac->modEnd(); item++) {
+  for (Ast::Reaction::const_mod_iterator item=reac->modifiersBegin(); item!=reac->modifiersEnd(); item++) {
     if ((*item)->getSymbol() == _var->getSymbol()) {
       _references.push_back(tr("as modifier in reaction %1").arg(name));
     }

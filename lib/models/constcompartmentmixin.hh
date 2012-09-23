@@ -1,5 +1,5 @@
-#ifndef __FLUC_MODULE_CONSTCOMPARTMENTMIXIN_HH__
-#define __FLUC_MODULE_CONSTCOMPARTMENTMIXIN_HH__
+#ifndef __INA_MODULE_CONSTCOMPARTMENTMIXIN_HH__
+#define __INA_MODULE_CONSTCOMPARTMENTMIXIN_HH__
 
 #include "basemodel.hh"
 #include "baseunitmixin.hh"

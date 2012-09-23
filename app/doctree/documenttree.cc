@@ -243,7 +243,7 @@ DocumentTree::getTreeData(int column) const
 {
   if (0 == column)
   {
-    return QVariant("open models");
+    return QVariant("Models");
   }
 
   return QVariant();

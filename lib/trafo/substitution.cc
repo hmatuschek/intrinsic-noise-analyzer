@@ -128,12 +128,12 @@ Substitution::act(Ast::Reaction *reac)
   reac->traverse(*this);
 
   // handle reactants:
-  for (Ast::Reaction::iterator item=reac->reacBegin(); item!=reac->reacEnd(); item++) {
+  for (Ast::Reaction::iterator item=reac->reactantsBegin(); item!=reac->reactantsEnd(); item++) {
     item->second = item->second.subs(_substitution_table);
   }
 
   // handle products:
-  for (Ast::Reaction::iterator item=reac->prodBegin(); item!=reac->prodEnd(); item++) {
+  for (Ast::Reaction::iterator item=reac->productsBegin(); item!=reac->productsEnd(); item++) {
     item->second = item->second.subs(_substitution_table);
   }
 }

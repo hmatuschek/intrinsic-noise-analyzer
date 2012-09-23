@@ -108,7 +108,7 @@ Dump::handleReaction(Reaction *node)
   this->indent++;
 
   this->doIndent(); this->stream << "{ ";
-  for (Reaction::iterator iter=node->reacBegin(); iter != node->reacEnd(); iter++)
+  for (Reaction::iterator iter=node->reactantsBegin(); iter != node->reactantsEnd(); iter++)
   {
     this->stream << iter->first;
     this->stream << " @ ";
@@ -117,7 +117,7 @@ Dump::handleReaction(Reaction *node)
   }
   this->stream << "} => {";
 
-  for (Reaction::iterator iter=node->prodBegin(); iter != node->prodEnd(); iter++)
+  for (Reaction::iterator iter=node->productsBegin(); iter != node->productsEnd(); iter++)
   {
     this->stream << iter->first;
     this->stream << " @ ";
