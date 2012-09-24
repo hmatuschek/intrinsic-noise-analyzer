@@ -2,7 +2,7 @@
 #define __FLUC_MODELS_SPECTRUMRECORDER_HH
 
 #include "openmp.hh"
-#include <sbml/SBMLTypes.h>
+#include <ast/ast.hh>
 #include <eigen3/unsupported/Eigen/FFT>
 
 namespace iNA{
