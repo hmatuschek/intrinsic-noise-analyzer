@@ -9,6 +9,7 @@ namespace iNA {
 class MathTest : public UnitTest::TestCase
 {
 public:
+  virtual ~MathTest(){};
   void testErf();
 
 public:

@@ -298,7 +298,7 @@ Reaction::setReversible(bool val)
 bool
 Reaction::isReverseOf(Reaction * other)
 {
-    return (this->reactants == other->products);
+    return ( (this->reactants == other->products) && (this->products == other->reactants));
 }
 
 Reaction::iterator
@@ -493,6 +493,22 @@ KineticLaw::addDefinition(Definition *def)
 
   // Also store reference in vector:
   this->parameters.push_back(static_cast<Parameter *>(def));
+}
+
+void
+KineticLaw::cleanUpParameters()
+{
+
+  for(std::vector<Parameter *>::iterator param=parameters.begin(); param!=parameters.end(); param++)
+  {
+      if(!this->getRateLaw().has((*param)->getSymbol()))
+      {
+          parameters.erase(param);
+          cleanUpParameters();
+          return;
+      }
+  }
+
 }
 
 

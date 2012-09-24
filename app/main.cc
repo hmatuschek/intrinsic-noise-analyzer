@@ -27,14 +27,16 @@ int main(int argc, char *argv[])
   MainWindow *window = new MainWindow();
   app->setMainWindow(window);
 
+
   // Load SteadyState module:
   app->addModule(new LNASteadyStateModule(app));
+  // Load parameter scan module
+  app->addModule(new ParamScanModule(app));
+
   // Load SSE module
   app->addModule(new SSEModule(app));
   // Load SSA module:
   app->addModule(new SSAModule(app));
-  // Load parameter scan module
-  app->addModule(new ParamScanModule(app));
 
   window->show();
 

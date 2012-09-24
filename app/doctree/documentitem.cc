@@ -124,7 +124,7 @@ DocumentItem::closeDocument()
 {
   if (this->analyses->tasksRunning())
   {
-    QMessageBox::warning(0, tr("Can not close document"), tr("There are analyses in grogress."));
+    QMessageBox::warning(0, tr("Cannot close document"), tr("Analysis in progress."));
     return;
   }
 

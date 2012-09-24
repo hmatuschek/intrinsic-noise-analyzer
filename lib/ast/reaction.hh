@@ -84,6 +84,11 @@ public:
   Parameter *getParameter(size_t i);
 
   /**
+   * Removes all redundant parameters, i.e., those which are not present in the rate law.
+   */
+  void cleanUpParameters();
+
+  /**
    * Dumps a string representation of the kinetic law into the given stream.
    */
   virtual void dump(std::ostream &str);

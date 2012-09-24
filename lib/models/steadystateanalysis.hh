@@ -292,9 +292,9 @@ public:
         std::vector< M * > models(numThreads);
         models[0] = &sseModel;
         for(size_t j=1; j<numThreads; j++)
-            models[j] = &sseModel;//new M(sseModel);
+            models[j] = new M(sseModel);
 
-#pragma omp parallel for if(numThreads>1) num_threads(numThreads) schedule(dynamic) private(updateVector,iter,x,conc)
+#pragma omp parallel for if(numThreads>1) num_threads(numThreads) schedule(dynamic) private(iter,x,conc)
         // Iterate over all parameter sets
         for(size_t j = 0; j < parameterSets.size(); j++)
         {
@@ -309,7 +309,7 @@ public:
             ParameterFolder parameters(ptab);
 
             // Fold variable parameters and all the rest
-            updateVector = parameters.apply(constants.apply( models[OpenMP::getThreadNum()]->getUpdateVector() ) );
+            Eigen::VectorXex updateVector = parameters.apply(constants.apply( models[OpenMP::getThreadNum()]->getUpdateVector() ) );
             Eigen::VectorXex REs = updateVector.head(offset);
             Eigen::VectorXex sseUpdate = updateVector.segment(offset,sseLength);
             Eigen::MatrixXex Jacobian = parameters.apply(constants.apply( models[OpenMP::getThreadNum()]->getJacobian()) );
@@ -382,105 +382,6 @@ public:
     calcIOS(Eigen::VectorXd &x, const Eigen::VectorXex &sseUpdate)
     {
         calcIOS(sseModel, x, sseUpdate);
-    }
-
-    int
-    calcSteadyStateOld(Eigen::VectorXd &x)
-
-    {
-
-
-
-        // Initialize with initial concentrations
-        Eigen::VectorXd conc(sseModel.getDimension());
-        sseModel.getInitialState(x);
-        conc=x.head(sseModel.numIndSpecies());
-
-        int iter = this->calcConcentrations(conc);
-
-        // Construct Diffusion vector
-        Eigen::VectorXd DiffusionVec(sseModel.numIndSpecies()*sseModel.numIndSpecies());
-        sseModel.getDiffusionVec(DiffusionVec);
-
-        // Solve for covariances
-        Eigen::VectorXd sol(sseModel.numIndSpecies()*sseModel.numIndSpecies());
-        sol = (-KroneckerSum(solver.getJacobianM(),solver.getJacobianM())).lu().solve(DiffusionVec);
-
-        // Should be check here if this is a good solution (requires a new epsilon!!!)
-        //bool a_solution_exists = (JMsum*sol).isApprox(-DiffusionVec, 1.E-10);
-
-        Eigen::VectorXd covVec((sseModel.numIndSpecies()*(sseModel.numIndSpecies()+1))/2);
-        Eigen::MatrixXd cov(sseModel.numIndSpecies(),sseModel.numIndSpecies());
-
-        // Take only important elements into reduced state vector
-        size_t idx=0;
-        for(size_t i=0;i<sseModel.numIndSpecies();i++)
-        {
-          for(size_t j=0;j<=i;j++)
-          {
-
-            size_t idy=i+j*sseModel.numIndSpecies();
-            covVec(idx)=sol(idy);
-            cov(i,j) =sol(idy);//=covarianceMatrix(i,j);
-            idx++;
-            cov(j,i)=cov(i,j);
-
-          }
-        }
-        // covariance finished
-
-        // Calculate EMRE
-
-        Eigen::VectorXd Delta(sseModel.numIndSpecies());
-
-        // Get rate corrections
-        Eigen::VectorXd REcorr;
-        sseModel.getRateCorrections(REcorr);
-
-        // Get stacked up Hessian
-        Eigen::MatrixXd HessianM;
-        sseModel.getHessian(HessianM);
-
-        for (size_t i=0; i<sseModel.numIndSpecies(); i++)
-        {
-          Delta(i)=0.;
-          idx=0;
-          for (size_t j=0; j<sseModel.numIndSpecies(); j++)
-          {
-            for (size_t k=0; k<=j; k++)
-            {
-
-                if(k==j)
-                {
-                    Delta(i) += HessianM(i,idx)*cov(j,k);
-                }
-                else
-                {
-                    Delta(i) += 2.*HessianM(i,idx)*cov(j,k);
-                }
-                idx++;
-
-            }
-          }
-          Delta(i)/=2.;
-          // add RE corrections
-          Delta(i)+=REcorr(i);
-        }
-
-        // solve EMRE
-        Eigen::VectorXd emre(sseModel.numIndSpecies());
-        emre=solver.getJacobianM().lu().solve(-Delta);
-
-        // update reduced state vector
-        // for concentrations
-        // and covariances
-        // and emre
-
-        x.resize(sseModel.getDimension());
-        x << conc, covVec, emre;
-
-        return iter;
-
     }
 
 };

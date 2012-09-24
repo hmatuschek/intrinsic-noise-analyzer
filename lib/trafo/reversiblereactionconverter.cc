@@ -59,7 +59,7 @@ void ReversibleReactionConverter::apply(Ast::Model &model)
 
     // Set forward rate law
     reaction->setReversible(false);
-    reaction->getKineticLaw()->setRateLaw(forwardLaw);
+    reaction->getKineticLaw()->setRateLaw(GiNaC::collect_common_factors(forwardLaw));
 
     // Create a new irreversible backward reaction
     std::string id = reaction->getIdentifier();
@@ -88,6 +88,10 @@ void ReversibleReactionConverter::apply(Ast::Model &model)
       reverseReaction->setReactantStoichiometry( species->first,st );
     }
 
+    // Clean up all redundant parameters
+    reaction->getKineticLaw()->cleanUpParameters();
+    reverseReaction->getKineticLaw()->cleanUpParameters();
+
     // Add reverse reaction after original one
     model.addDefinition(reverseReaction,reaction);
 
@@ -110,38 +114,38 @@ void ReversibleReactionConverter::apply(Ast::Model &model)
 }
 
 
-void IrreversibleReactionCollapsor::apply(Ast::Model &model)
+void IrreversibleReactionCollapser::apply(Ast::Model &model)
 {
   size_t count=0;
 
   // Iterate over all reactions:
   for (Ast::Model::ReactionIterator it=model.reactionsBegin(); it!=model.reactionsEnd(); it++)
   {
-      Ast::Reaction *reaction1 = (*it);
+      Ast::Reaction *forward = (*it);
 
     // Skip if reaction is reversible:
-    if ( reaction1->isReversible()) { continue; }
+    if ( forward->isReversible()) { continue; }
 
     for (Ast::Model::ReactionIterator other=(it+1); other!=model.reactionsEnd(); other++)
     {
 
-        Ast::Reaction *reaction2 = (*other);
+        Ast::Reaction *reverse = (*other);
 
         // Do comparison
-        if(reaction1->isReverseOf(reaction2))
+        if(forward->isReverseOf(reverse))
         {
+
             // Make reversible
-            GiNaC::ex rateLaw = reaction1->getKineticLaw()->getRateLaw()-reaction2->getKineticLaw()->getRateLaw();
-            reaction1->setReversible(true);
-            reaction1->getKineticLaw()->setRateLaw(GiNaC::collect_common_factors(rateLaw));
+            forward->setReversible(true);
+            Ast::ModelCopyist::mergeReversibleKineticLaw(forward->getKineticLaw(),reverse->getKineticLaw());
 
             // and remove reverse reaction
-            model.remDefinition(reaction2);
+            model.remDefinition(reverse);
 
             // Create a log message.
             {
               Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
-              message << "Collapsed reaction "<<reaction1->getName()<< " with" << reaction2->getName() <<".";
+              message << "Collapsed reaction "<<forward->getName()<< " with " << reverse->getName() <<".";
               Utils::Logger::get().log(message);
             }
 

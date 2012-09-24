@@ -26,7 +26,7 @@ CompartmentView::CompartmentView(CompartmentsItem *compartments, QWidget *parent
   _remCompartment->setEnabled(false);
 
   // The label
-  QLabel *label = new QLabel(tr("Model Compartments"));
+  QLabel *label = new QLabel(tr("Compartments"));
   label->setFont(Application::getApp()->getH1Font());
   label->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
 

@@ -24,7 +24,7 @@ public:
  * reversible one.
  * @ingroup trafo
  */
-class IrreversibleReactionCollapsor
+class IrreversibleReactionCollapser
 {
 public:
   /** Performs the conversion on the given model. */

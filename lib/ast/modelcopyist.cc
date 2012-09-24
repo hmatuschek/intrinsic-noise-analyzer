@@ -391,6 +391,33 @@ ModelCopyist::copyKineticLaw(Ast::KineticLaw *node, GiNaC::exmap &translation_ta
 
 
 void
+ModelCopyist::mergeReversibleKineticLaw(Ast::KineticLaw *forward, const Ast::KineticLaw *reverse)
+{
+  GiNaC::exmap translation_table;
+
+  // First, copy all local parameters of reverse reaction:
+  for (Ast::KineticLaw::const_iterator iter = reverse->begin(); iter != reverse->end(); iter++)
+  {
+    if (! Ast::Node::isParameter(*iter))
+    {
+      InternalError err;
+      err << "Can not merge kinetic law: Law has local non-parameter variable defined!";
+      throw err;
+    }
+
+    forward->addDefinition(ModelCopyist::copyParameterDefinition(
+                                 static_cast<Ast::Parameter *>(*iter), translation_table));
+  }
+
+  // Copy rate law with local and global variables substituted:
+  GiNaC::ex ratelaw = forward->getRateLaw()-reverse->getRateLaw();
+  forward->setRateLaw(GiNaC::collect_common_factors(ratelaw.subs(translation_table)));
+
+  // Done.
+  return;
+}
+
+void
 ModelCopyist::updateKineticLaw(Ast::KineticLaw *node, GiNaC::exmap &translation_table)
 {
   // First, update paramter definitions:

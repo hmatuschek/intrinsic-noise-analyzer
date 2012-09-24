@@ -14,6 +14,9 @@ namespace iNA {
 class MersenneTwisterTest : public UnitTest::TestCase
 {
 public:
+
+  virtual ~MersenneTwisterTest(){};
+
   /**
    * Direct comparison.
    */

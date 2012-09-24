@@ -11,9 +11,9 @@ BaseModel::BaseModel(const Ast::Model &model)
     species(numSpecies()), reactions(numReactions()),
     propensities(numReactions())
 {
-  // Convert irreversible reactions to reversible ones:
-  Ast::Convert2Irreversible converter(*this);
-  converter.process();
+//  // Convert irreversible reactions to reversible ones:
+//  Ast::Convert2Irreversible converter(*this);
+//  converter.process();
 
   // Collect all constants and assignment rules, that are needed to be substituted
   // before evaluation:
