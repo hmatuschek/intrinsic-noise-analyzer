@@ -95,10 +95,11 @@ MainWindow::createMenus()
   fileMenu->addSeparator();
   fileMenu->addAction(quitAct);
 
-  this->analysisMenu = this->menuBar()->addMenu(tr("&Analyses"));
-  this->analysisMenu->addAction(Application::getApp()->expandRevReacAction());
-  this->analysisMenu->addAction(Application::getApp()->combineIrrevReacAction());
-  this->analysisMenu->addSeparator();
+  this->analysisMenu = this->menuBar()->addMenu(tr("&Analysis"));
+
+  this->modelMenu = this->menuBar()->addMenu(tr("&Model"));
+  this->modelMenu->addAction(Application::getApp()->expandRevReacAction());
+  this->modelMenu->addAction(Application::getApp()->combineIrrevReacAction());
 
   this->helpMenu = this->menuBar()->addMenu(tr("&Help"));
   this->helpMenu->addAction(this->onlineHelp);

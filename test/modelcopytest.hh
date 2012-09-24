@@ -37,6 +37,8 @@ protected:
 
 
 public:
+  virtual ~ModelCopyTest()
+  {};
   /** Tests copying on ./test/regression-tests/coopkinetics1.xml. */
   void testCoopKinetics1();
 

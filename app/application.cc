@@ -15,6 +15,20 @@
 
 using namespace iNA;
 
+/**
+* Yields the parent item
+*
+* @todo Maybe go as static method in DocumentItem.
+*/
+DocumentItem * getParentDocumentItem(TreeItem * item)
+{
+    if (item==0) return 0;
+
+    return (0 != dynamic_cast<DocumentItem *>(item)
+                  ? dynamic_cast<DocumentItem *>(item)
+                  : getParentDocumentItem(item->getTreeParent()));
+
+}
 
 /*
  * Holds the singleton instance (or null if there is none).
@@ -72,10 +86,10 @@ Application::Application() :
   _editModel = new QAction(tr("Edit model"), this);
   _editModel->setEnabled(false);
 
-  _expandRevReaction = new QAction(tr("Expand rev. reactions"), this);
+  _expandRevReaction = new QAction(tr("Expand reversible reactions"), this);
   _expandRevReaction->setEnabled(false);
 
-  _combineIrvReaction = new QAction(tr("Combine irrev. reactions"), this);
+  _combineIrvReaction = new QAction(tr("Collapse irreversible reactions"), this);
   _combineIrvReaction->setEnabled(false);
 
   // Connect signals
@@ -146,16 +160,18 @@ Application::itemSelected(const QModelIndex &index)
   _selected_item = wrapper;
 
   // If selected item is a document item -> enabled exportModel menu item:
-  if (0 != dynamic_cast<DocumentItem *>(wrapper)) {
+  if (0 != dynamic_cast<DocumentItem *>(getParentDocumentItem(wrapper))) {
     _exportModel->setEnabled(true);
     _editModel->setEnabled(true);
     _closeModel->setEnabled(true);
     _expandRevReaction->setEnabled(true);
+    _combineIrvReaction->setEnabled(true);
   } else {
     _exportModel->setEnabled(false);
     _editModel->setEnabled(false);
     _closeModel->setEnabled(false);
     _expandRevReaction->setEnabled(false);
+    _combineIrvReaction->setEnabled(false);
   }
 
 }
@@ -172,7 +188,6 @@ Application::showContextMenuAt(const QModelIndex &index, const QPoint &global_po
     wrapper->showContextMenu(global_pos);
   }
 }
-
 
 DocumentTree * Application::docTree() { return this->document_tree; }
 
@@ -227,8 +242,8 @@ void Application::onImportModel()
 void Application::onExportModel()
 {
   DocumentItem *document = 0;
-  if (0 == _selected_item) { return; }
-  if (0 == (document = dynamic_cast<DocumentItem *>(_selected_item))) { return; }
+// redundant:  if (0 == _selected_item) { return; }
+  if (0 == (document = dynamic_cast<DocumentItem *>(getParentDocumentItem(_selected_item)))) { return; }
 
   // Show export model dialog:
   ExportModelDialog *dialog = new ExportModelDialog();
@@ -256,8 +271,8 @@ void Application::onCloseModel()
 {
   DocumentItem *document = 0;
 
-  if (0 == _selected_item) { return; }
-  if (0 == (document = dynamic_cast<DocumentItem *>(_selected_item))) { return; }
+// redundant:  if (0 == _selected_item) { return; }
+  if (0 == (document = dynamic_cast<DocumentItem *>(getParentDocumentItem(_selected_item)))) { return; }
   // signal document to close
   document->closeDocument();
 }
@@ -267,8 +282,8 @@ void Application::onEditModel()
 {
   DocumentItem *document = 0;
 
-  if (0 == _selected_item) { return; }
-  if (0 == (document = dynamic_cast<DocumentItem *>(_selected_item))) { return; }
+// redundant:  if (0 == _selected_item) { return; }
+  if (0 == (document = dynamic_cast<DocumentItem *>(getParentDocumentItem(_selected_item)))) { return; }
 
   // Create model editor dialog:
   SbmlshEditorDialog *dialog = new SbmlshEditorDialog();
@@ -287,8 +302,8 @@ void Application::onExpandRevReactions()
 {
   DocumentItem *document = 0;
 
-  if (0 == _selected_item) { return; }
-  if (0 == (document = dynamic_cast<DocumentItem *>(_selected_item))) { return; }
+// redundant:  if (0 == _selected_item) { return; }
+  if (0 == (document = dynamic_cast<DocumentItem *>(getParentDocumentItem(_selected_item)))) { return; }
   iNA::Ast::Model &model = document->getModel();
 
   iNA::Trafo::ReversibleReactionConverter converter; converter.apply(model);
@@ -299,9 +314,14 @@ void Application::onCombineIrrevReactions()
 {
   DocumentItem *document = 0;
 
-  if (0 == _selected_item) { return; }
-  if (0 == (document = dynamic_cast<DocumentItem *>(_selected_item))) { return; }
+// redundant:  if (0 == _selected_item) { return; }
+  if (0 == (document = dynamic_cast<DocumentItem *>(getParentDocumentItem(_selected_item)))) { return; }
   iNA::Ast::Model &model = document->getModel();
 
-  QMessageBox::information(0, "Not implemented yet.", "This feature is not implemented yet.");
+  iNA::Trafo::IrreversibleReactionCollapsor collector; collector.apply(model);
+  docTree()->resetCompleteTree();
+
 }
+
+
+

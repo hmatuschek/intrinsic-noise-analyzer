@@ -424,7 +424,8 @@ public:
           {
               if (lambda == 1.0)
                   tmplambda = -slope/(2.*(f-fold-slope));
-              else {
+              else
+              {
                  rhs1 = f-fold-lambda*slope;
                  rhs2 = f2-fold-lambda2*slope;
                  a = (rhs1/(lambda*lambda)-rhs2/(lambda2*lambda2))/(lambda-lambda2);

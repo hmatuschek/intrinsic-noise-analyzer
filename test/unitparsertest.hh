@@ -8,6 +8,7 @@ namespace iNA {
 class UnitParserTest : public UnitTest::TestCase
 {
 public:
+  virtual ~UnitParserTest(){};
   void testSimple();
   void testPow();
 

@@ -1,5 +1,5 @@
-#ifndef __FLUC_MODELS_propensityExpansion_HH__
-#define __FLUC_MODELS_propensityExpansion_HH__
+#ifndef __INA_MODELS_propensityExpansion_HH__
+#define __INA_MODELS_propensityExpansion_HH__
 
 #include "basemodel.hh"
 #include "constcompartmentmixin.hh"

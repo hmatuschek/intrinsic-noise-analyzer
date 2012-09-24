@@ -326,21 +326,21 @@ Writer::processReaction(Ast::Reaction *reac, LIBSBML_CPP_NAMESPACE_QUALIFIER Rea
   if (reac->hasName()) { sbml_reac->setName(reac->getName()); }
 
   // Process reactants:
-  for (Ast::Reaction::iterator item = reac->reacBegin(); item != reac->reacEnd(); item++) {
+  for (Ast::Reaction::iterator item = reac->reactantsBegin(); item != reac->reactantsEnd(); item++) {
     LIBSBML_CPP_NAMESPACE_QUALIFIER SpeciesReference *sbml_r = sbml_reac->createReactant();
     sbml_r->setSpecies(item->first->getIdentifier());
     LIBSBML_CPP_NAMESPACE_QUALIFIER StoichiometryMath *sbml_r_m = sbml_r->createStoichiometryMath();
     sbml_r_m->setMath(processExpression(item->second, model));
   }
   // Process products:
-  for (Ast::Reaction::iterator item = reac->prodBegin(); item != reac->prodEnd(); item++) {
+  for (Ast::Reaction::iterator item = reac->productsBegin(); item != reac->productsEnd(); item++) {
     LIBSBML_CPP_NAMESPACE_QUALIFIER SpeciesReference *sbml_p = sbml_reac->createProduct();
     sbml_p->setSpecies(item->first->getIdentifier());
     LIBSBML_CPP_NAMESPACE_QUALIFIER StoichiometryMath *sbml_p_m = sbml_p->createStoichiometryMath();
     sbml_p_m->setMath(processExpression(item->second, model));
   }
   // Process modifiers:
-  for (Ast::Reaction::mod_iterator item = reac->modBegin(); item != reac->modEnd(); item++) {
+  for (Ast::Reaction::mod_iterator item = reac->modifiersBegin(); item != reac->modifiersEnd(); item++) {
     LIBSBML_CPP_NAMESPACE_QUALIFIER ModifierSpeciesReference *sbml_r = sbml_reac->createModifier();
     sbml_r->setSpecies((*item)->getIdentifier());
   }

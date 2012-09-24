@@ -1,5 +1,5 @@
-#ifndef __FLUC_MODELS_OPTIMIZEDSSA_H
-#define __FLUC_MODELS_OPTIMIZEDSSA_H
+#ifndef __INA_MODELS_OPTIMIZEDSSA_H
+#define __INA_MODELS_OPTIMIZEDSSA_H
 
 #include "stochasticsimulator.hh"
 #include "constantstoichiometrymixin.hh"

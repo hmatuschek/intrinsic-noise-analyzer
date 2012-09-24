@@ -10,6 +10,7 @@ namespace iNA {
 class OptionParserTest : public UnitTest::TestCase
 {
 public:
+  virtual ~OptionParserTest(){};
   void testOptionParser();
 
 public:

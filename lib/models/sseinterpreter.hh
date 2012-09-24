@@ -1,5 +1,5 @@
-#ifndef __FLUC_MODELS_LNAINTERPRETER_HH
-#define __FLUC_MODELS_LNAINTERPRETER_HH
+#ifndef __INA_MODELS_LNAINTERPRETER_HH
+#define __INA_MODELS_LNAINTERPRETER_HH
 
 #include "REmodel.hh"
 #include "LNAmodel.hh"

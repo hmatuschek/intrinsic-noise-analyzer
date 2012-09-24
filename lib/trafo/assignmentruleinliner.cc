@@ -54,7 +54,7 @@ AssignmentRuleInliner::act(Ast::Reaction *reac)
   std::list<Ast::Species *> _add_species;
 
   // Check if a modifier is substituted:
-  for (Ast::Reaction::mod_iterator item=reac->modBegin(); item!=reac->modEnd(); item++) {
+  for (Ast::Reaction::mod_iterator item=reac->modifiersBegin(); item!=reac->modifiersEnd(); item++) {
     if (_substitution_table.end() != _substitution_table.find((*item)->getSymbol())) {
       _remove_species.push_back(*item);
       _get_referred_species(_substitution_table[(*item)->getSymbol()], _add_species);

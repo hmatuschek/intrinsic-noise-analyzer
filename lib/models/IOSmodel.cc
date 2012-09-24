@@ -10,7 +10,6 @@ IOSmodel::IOSmodel(const Ast::Model &model)
   postConstructor();
 }
 
-
 void
 IOSmodel::postConstructor()
 {

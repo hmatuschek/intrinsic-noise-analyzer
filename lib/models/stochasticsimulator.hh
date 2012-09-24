@@ -1,5 +1,5 @@
-#ifndef __FLUC_STOCHASTICSIMULATOR_HH__
-#define __FLUC_STOCHASTICSIMULATOR_HH__
+#ifndef __INA_STOCHASTICSIMULATOR_HH__
+#define __INA_STOCHASTICSIMULATOR_HH__
 
 #include "mersennetwister.hh"
 

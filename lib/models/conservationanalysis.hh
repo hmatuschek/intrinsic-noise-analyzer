@@ -51,6 +51,10 @@ private:
 
 public:
 
+    /**
+     * Constructor.
+     */
+    ConservationAnalysis(const Ast::Model &model);
 
     /**
     * A method that generates a substituation table for all conservation laws arising from the model
@@ -61,8 +65,6 @@ public:
     * A method that generates a substituation table for all conservation laws arising from the model
     */
     GiNaC::exmap getConservationConstants(const Eigen::VectorXd &conserved_cycles);
-
-    ConservationAnalysis(const Ast::Model &model);
 
     /* Links concentration to full state */
     const Eigen::MatrixXex & getLink0CMatrix();
