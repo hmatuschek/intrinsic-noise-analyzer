@@ -34,7 +34,7 @@ ReactionEquationRenderer::assembleReactionEquation(iNA::Ast::Reaction *reac)
 
   // Handle reactants:
   if (0 == reac->numReactants()) { reactants->appendItem(new MathText(QChar(0x2205))); }
-  for (Ast::Reaction::iterator item=reac->reacBegin(); item!=reac->reacEnd(); item++) {
+  for (Ast::Reaction::iterator item=reac->reactantsBegin(); item!=reac->reactantsEnd(); item++) {
     if (0 != reactants->size()) {
       reactants->appendItem(new MathSpace(MathSpace::MEDIUM_SPACE));
       reactants->appendItem(new MathText("+"));
@@ -60,7 +60,7 @@ ReactionEquationRenderer::assembleReactionEquation(iNA::Ast::Reaction *reac)
 
   // handle products
   if (0 == reac->numProducts()) { products->appendItem(new MathText(QChar(0x2205))); }
-  for (Ast::Reaction::iterator item=reac->prodBegin(); item!=reac->prodEnd(); item++) {
+  for (Ast::Reaction::iterator item=reac->productsBegin(); item!=reac->productsEnd(); item++) {
     // Prepent "+" sign
     if (0 != products->size()) {
       products->appendItem(new MathSpace(MathSpace::MEDIUM_SPACE));

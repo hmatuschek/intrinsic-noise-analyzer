@@ -28,6 +28,13 @@ SSEBaseModel::SSEBaseModel(const Ast::Model &model)
   postConstructor();
 }
 
+GiNaC::exmap SSEBaseModel::translate(const ParameterSet & parameters)
+{
+    GiNaC::exmap result;
+    for(ParameterSet::const_iterator it=parameters.begin(); it!=parameters.end(); it++)
+        result.insert(std::pair<GiNaC::ex,GiNaC::ex>( this->getParameter((*it).first)->getSymbol(), (*it).second ));
+    return result;
+}
 
 void
 SSEBaseModel::postConstructor()

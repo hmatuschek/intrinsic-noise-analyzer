@@ -1,5 +1,5 @@
-#ifndef INITIALCONDITIONS_HH
-#define INITIALCONDITIONS_HH
+#ifndef __INA_INITIALCONDITIONS_HH
+#define __INA_INITIALCONDITIONS_HH
 
 #include "ast/ast.hh"
 #include "ssebasemodel.hh"
@@ -73,6 +73,7 @@ public:
 
     const Eigen::MatrixXd &
     getLink0CMatrix()
+
     {
         return this->Link0CMatrixNumeric;
     }
@@ -80,6 +81,7 @@ public:
 
     const Eigen::MatrixXd &
     getLinkCMatrix()
+
     {
         return this->LinkCMatrixNumeric;
     }

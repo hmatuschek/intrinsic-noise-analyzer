@@ -91,7 +91,7 @@ ModelCopyist::copy(const Ast::Model *src, Ast::Model *dest, GiNaC::exmap &transl
 
   // Update all parameter definitions:
   for (size_t i=0; i<dest->numParameters(); i++) {
-    ModelCopyist::updateParamter(dest->getParameter(i), translation_table);
+    ModelCopyist::updateParameter(dest->getParameter(i), translation_table);
   }
   // Update all compartments:
   for (size_t i=0; i<dest->numCompartments(); i++) {
@@ -203,7 +203,7 @@ ModelCopyist::copyParameterDefinition(Ast::Parameter *node, GiNaC::exmap &transl
 
 
 void
-ModelCopyist::updateParamter(Ast::Parameter *node, GiNaC::exmap &translation_table)
+ModelCopyist::updateParameter(Ast::Parameter *node, GiNaC::exmap &translation_table)
 {
   // Updates initial value of paramter:
   node->setValue(node->getValue().subs(translation_table));
@@ -303,7 +303,7 @@ ModelCopyist::copyReaction(Ast::Reaction *node, GiNaC::exmap &translation_table,
   }
 
   // Copy reactants stoichiometry:
-  for (Ast::Reaction::iterator iter = node->reacBegin(); iter != node->reacEnd(); iter++)
+  for (Ast::Reaction::iterator iter = node->reactantsBegin(); iter != node->reactantsEnd(); iter++)
   {
     // New species == old_species:
     Ast::Species *new_species = iter->first;
@@ -316,7 +316,7 @@ ModelCopyist::copyReaction(Ast::Reaction *node, GiNaC::exmap &translation_table,
   }
 
   // Copy products stoichiometry:
-  for (Ast::Reaction::iterator iter = node->prodBegin(); iter != node->prodEnd(); iter++)
+  for (Ast::Reaction::iterator iter = node->productsBegin(); iter != node->productsEnd(); iter++)
   {
     // New species == old_species:
     Ast::Species *new_species = iter->first;
@@ -329,7 +329,7 @@ ModelCopyist::copyReaction(Ast::Reaction *node, GiNaC::exmap &translation_table,
   }
 
   // Copy reaction modifiers:
-  for (Ast::Reaction::mod_iterator iter = node->modBegin(); iter != node->modEnd(); iter++) {
+  for (Ast::Reaction::mod_iterator iter = node->modifiersBegin(); iter != node->modifiersEnd(); iter++) {
     // New species == old_species:
     Ast::Species *new_species = *iter;
     // Check if there is a replacement for species in species_table:
@@ -348,12 +348,12 @@ void
 ModelCopyist::updateReaction(Ast::Reaction *node, GiNaC::exmap &translation_table)
 {
   // Update reactants stoichiometry:
-  for (Ast::Reaction::iterator iter = node->reacBegin(); iter != node->reacEnd(); iter++) {
+  for (Ast::Reaction::iterator iter = node->reactantsBegin(); iter != node->reactantsEnd(); iter++) {
     iter->second = iter->second.subs(translation_table);
   }
 
   // Update reactants stoichiometry:
-  for (Ast::Reaction::iterator iter = node->prodBegin(); iter != node->prodEnd(); iter++) {
+  for (Ast::Reaction::iterator iter = node->productsBegin(); iter != node->productsEnd(); iter++) {
     iter->second = iter->second.subs(translation_table);
   }
 
@@ -389,6 +389,33 @@ ModelCopyist::copyKineticLaw(Ast::KineticLaw *node, GiNaC::exmap &translation_ta
   return kinetic_law;
 }
 
+
+void
+ModelCopyist::mergeReversibleKineticLaw(Ast::KineticLaw *forward, const Ast::KineticLaw *reverse)
+{
+  GiNaC::exmap translation_table;
+
+  // First, copy all local parameters of reverse reaction:
+  for (Ast::KineticLaw::const_iterator iter = reverse->begin(); iter != reverse->end(); iter++)
+  {
+    if (! Ast::Node::isParameter(*iter))
+    {
+      InternalError err;
+      err << "Can not merge kinetic law: Law has local non-parameter variable defined!";
+      throw err;
+    }
+
+    forward->addDefinition(ModelCopyist::copyParameterDefinition(
+                                 static_cast<Ast::Parameter *>(*iter), translation_table));
+  }
+
+  // Copy rate law with local and global variables substituted:
+  GiNaC::ex ratelaw = forward->getRateLaw()-reverse->getRateLaw();
+  forward->setRateLaw(GiNaC::collect_common_factors(ratelaw.subs(translation_table)));
+
+  // Done.
+  return;
+}
 
 void
 ModelCopyist::updateKineticLaw(Ast::KineticLaw *node, GiNaC::exmap &translation_table)

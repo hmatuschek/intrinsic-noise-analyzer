@@ -1,5 +1,5 @@
-#ifndef __FLUC_IOSMODEL_HH__
-#define __FLUC_IOSMODEL_HH__
+#ifndef __INA_IOSMODEL_HH__
+#define __INA_IOSMODEL_HH__
 
 #include "LNAmodel.hh"
 

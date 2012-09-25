@@ -52,6 +52,11 @@ public:
    */
   static Ast::KineticLaw *dupKineticLaw(Ast::KineticLaw *law, GiNaC::exmap &param_table);
 
+  /**
+   * Function to create a kinetic law from two individual irreversible reactions. The result will refer to the
+   * original species, global parameters etc. while holding local parameter copies obtained from both reactions.
+   */
+  static void mergeReversibleKineticLaw(Ast::KineticLaw *forward, const Ast::KineticLaw *reverse);
 
 protected:
   /** Helper function to copy function definitions. */
@@ -67,7 +72,7 @@ protected:
 
   /** This function updates the symbols of the initial value of the paramter definition using
    * the given translation table. */
-  static void updateParamter(Ast::Parameter *node, GiNaC::exmap &translation_table);
+  static void updateParameter(Ast::Parameter *node, GiNaC::exmap &translation_table);
 
   /** Helper function to copy compartment definitions. */
   static Ast::Compartment *copyCompartmentDefinition(Ast::Compartment *node,

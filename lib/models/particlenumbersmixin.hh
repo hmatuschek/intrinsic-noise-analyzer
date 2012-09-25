@@ -1,5 +1,5 @@
-#ifndef __FLUC_MODELS_PARTICLENUMBERSMIXIN_HH
-#define __FLUC_MODELS_PARTICLENUMBERSMIXIN_HH
+#ifndef __INA_MODELS_PARTICLENUMBERSMIXIN_HH
+#define __INA_MODELS_PARTICLENUMBERSMIXIN_HH
 
 #include "constcompartmentmixin.hh"
 #include "extensivespeciesmixin.hh"

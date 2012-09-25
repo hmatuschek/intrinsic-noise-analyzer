@@ -90,15 +90,18 @@ MainWindow::createMenus()
   fileMenu = menuBar()->addMenu(tr("&File"));
   fileMenu->addAction(Application::getApp()->importModelAction());
   fileMenu->addAction(Application::getApp()->exportModelAction());
-  fileMenu->addAction(Application::getApp()->editModelAction());
   fileMenu->addAction(Application::getApp()->closeModelAction());
   fileMenu->addSeparator();
   fileMenu->addAction(quitAct);
 
-  this->analysisMenu = this->menuBar()->addMenu(tr("&Analyses"));
-  this->analysisMenu->addAction(Application::getApp()->expandRevReacAction());
-  this->analysisMenu->addAction(Application::getApp()->combineIrrevReacAction());
-  this->analysisMenu->addSeparator();
+  this->modelMenu = this->menuBar()->addMenu(tr("&Edit")); //< or name "Model"
+
+  this->modelMenu->addAction(Application::getApp()->expandRevReacAction());
+  this->modelMenu->addAction(Application::getApp()->combineIrrevReacAction());
+  this->modelMenu->addSeparator();
+  this->modelMenu->addAction(Application::getApp()->editModelAction());
+
+  this->analysisMenu = this->menuBar()->addMenu(tr("&Analysis"));
 
   this->helpMenu = this->menuBar()->addMenu(tr("&Help"));
   this->helpMenu->addAction(this->onlineHelp);

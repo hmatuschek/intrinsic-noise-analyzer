@@ -148,6 +148,12 @@ SET(libina_nlesolve_HEADERS
    nlesolve/newtonraphson.hh
    nlesolve/hybridsolver.hh)
 
+# Add source for unsupported modules
+SET(libina_unsupported_SOURCES
+   models/unsupported/spectrumrecorder.cc)
+SET(libina_unsupported_HEADERS
+   models/unsupported/spectrumrecorder.hh)
+
 # Add sources for ODE solvers etc.
 SET(libina_ode_SOURCES
     ode/lsodadriver.cc
@@ -216,6 +222,7 @@ SET(libina_SOURCES
     ${libina_models_SOURCES}
     ${libina_nlesolve_SOURCES}
     ${libina_ode_SOURCES}
+    ${libina_unsupported_SOURCES}
     ${libina_eval_SOURCES})
 
 # and list of all headers:
@@ -228,6 +235,7 @@ SET(libina_HEADERS
     ${libina_models_HEADERS}
     ${libina_nlesolve_HEADERS}
     ${libina_ode_HEADERS}
+    ${libina_unsupported_HEADERS}
     ${libina_eval_HEADERS})
 
 #

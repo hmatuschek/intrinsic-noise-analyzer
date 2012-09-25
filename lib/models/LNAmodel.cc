@@ -11,7 +11,6 @@ LNAmodel::LNAmodel(const Ast::Model &model)
   postConstructor();
 }
 
-
 void
 LNAmodel::postConstructor()
 {

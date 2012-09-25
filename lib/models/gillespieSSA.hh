@@ -1,5 +1,5 @@
-#ifndef __FLUC_GILLESPIESSA_H
-#define __FLUC_GILLESPIESSA_H
+#ifndef __INA_GILLESPIESSA_HH
+#define __INA_GILLESPIESSA_HH
 
 #include "stochasticsimulator.hh"
 #include "constantstoichiometrymixin.hh"

@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
     Ast::Parameter* param = model.getReaction(0)->getKineticLaw()->getParameter(0);
 
     // make list with values
-    std::vector<GiNaC::exmap> parameters(10);
+    std::vector<iNA::Models::ParameterSet> parameters(10);
 
     double minVal = 0.1e-5;
     double maxVal = 2.e-5;
@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
     for(int j=0; j<10; j++)
     {
         double val = minVal + dx*(j);
-        parameters[j].insert(std::pair<GiNaC::ex,GiNaC::ex>(param->getSymbol(),val));
+        parameters[j].insert(std::pair<std::string,double>(param->getIdentifier(),val));
     }
 
 
@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
     for(size_t j=0; j<result.size();j++)
     {
 
-        std::cout << (*parameters[j].find(param->getSymbol())).second << "\t";
+        std::cout << (*parameters[j].find(param->getIdentifier())).second << "\t";
         model.fullState(result[j],concentrations,cov,emre);
         for(size_t i=0; i<model.numSpecies(); i++)
         {

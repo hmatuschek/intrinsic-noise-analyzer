@@ -318,7 +318,9 @@ public:
 
       // solve JacobianM*dx=-REs
       //dx = JacobianM.fullPivLu().solve(-REs);
-      dx = this->JacobianM.lu().solve(-this->ODEs);
+      Eigen::FullPivLU<Eigen::MatrixXd> dec(this->JacobianM);
+      //dx = this->JacobianM.lu().solve(-this->ODEs);
+      dx = dec.solve(-this->ODEs);
 
       LineSearchStatus lcheck;
 
@@ -424,7 +426,8 @@ public:
           {
               if (lambda == 1.0)
                   tmplambda = -slope/(2.*(f-fold-slope));
-              else {
+              else
+              {
                  rhs1 = f-fold-lambda*slope;
                  rhs2 = f2-fold-lambda2*slope;
                  a = (rhs1/(lambda*lambda)-rhs2/(lambda2*lambda2))/(lambda-lambda2);

@@ -66,6 +66,11 @@ public:
     // Pass...
   }
 
+  virtual ~TestCallerInterface()
+  {
+
+  }
+
   virtual const std::string &getDescription()
   {
     return this->description;

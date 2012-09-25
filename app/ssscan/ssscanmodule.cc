@@ -14,7 +14,7 @@ ParamScanModule::ParamScanModule(QObject *parent) :
 
   // Create Menu:
   // Register menus
-  this->scanAction = new QAction(tr("&Parameter Scan (SSE)"), this);
+  this->scanAction = new QAction(tr("&Steady State Parameter Scan (SSE)"), this);
   Application::getApp()->addToAnalysesMenu(this->scanAction);
   QObject::connect(this->scanAction, SIGNAL(triggered()), this, SLOT(configTask()));
 }

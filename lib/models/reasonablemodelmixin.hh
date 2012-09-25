@@ -1,5 +1,5 @@
-#ifndef __FLUC_MODELS_REASONABLEMODELMIXIN_HH__
-#define __FLUC_MODELS_REASONABLEMODELMIXIN_HH__
+#ifndef __INA_MODELS_REASONABLEMODELMIXIN_HH__
+#define __INA_MODELS_REASONABLEMODELMIXIN_HH__
 
 #include "basemodel.hh"
 #include "assertnoconstantspeciesmixin.hh"

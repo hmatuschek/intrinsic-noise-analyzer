@@ -1,5 +1,5 @@
-#ifndef __FLUC_MODELS_GIBSONBRUCKSSA_H
-#define __FLUC_MODELS_GIBSONBRUCKSSA_H
+#ifndef __INA_MODELS_GIBSONBRUCKSSA_H
+#define __INA_MODELS_GIBSONBRUCKSSA_H
 
 #include "stochasticsimulator.hh"
 #include "constantstoichiometrymixin.hh"

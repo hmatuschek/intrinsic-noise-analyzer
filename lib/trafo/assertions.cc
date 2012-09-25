@@ -219,7 +219,7 @@ void
 ConstStoichiometryAssertion::apply(const Ast::Reaction *reac) throw (SBMLFeatureNotSupported)
 {
   // Check reactants:
-  for (Ast::Reaction::const_iterator item=reac->reacBegin(); item!=reac->reacEnd(); item++) {
+  for (Ast::Reaction::const_iterator item=reac->reactantsBegin(); item!=reac->reactantsEnd(); item++) {
     SBMLFeatureNotSupported err;
     err << "Stoichiometry expression for reactant " << item->first->getIdentifier()
         << " in reaction " << reac->getIdentifier() << " is not a constant! "
@@ -228,7 +228,7 @@ ConstStoichiometryAssertion::apply(const Ast::Reaction *reac) throw (SBMLFeature
   }
 
   // Check products:
-  for (Ast::Reaction::const_iterator item=reac->prodBegin(); item!=reac->prodEnd(); item++) {
+  for (Ast::Reaction::const_iterator item=reac->productsBegin(); item!=reac->productsEnd(); item++) {
     SBMLFeatureNotSupported err;
     err << "Stoichiometry expression for product " << item->first->getIdentifier()
         << " in reaction " << reac->getIdentifier() << " is not a constant! "
