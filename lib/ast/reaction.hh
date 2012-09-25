@@ -324,7 +324,7 @@ public:
   void setReversible(bool val);
 
   /**
-   * Tells you wether the reaction can be considered as the reverse of another.
+   * Tells you wether the reaction can be considered as the reverse of another and vice versa.
    */
   bool isReverseOf(Reaction * other);
 

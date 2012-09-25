@@ -318,7 +318,9 @@ public:
 
       // solve JacobianM*dx=-REs
       //dx = JacobianM.fullPivLu().solve(-REs);
-      dx = this->JacobianM.lu().solve(-this->ODEs);
+      Eigen::FullPivLU<Eigen::MatrixXd> dec(this->JacobianM);
+      //dx = this->JacobianM.lu().solve(-this->ODEs);
+      dx = dec.solve(-this->ODEs);
 
       LineSearchStatus lcheck;
 

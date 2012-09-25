@@ -298,7 +298,7 @@ Reaction::setReversible(bool val)
 bool
 Reaction::isReverseOf(Reaction * other)
 {
-    return ( (this->reactants == other->products) && (this->products == other->reactants));
+    return ( (this->reactants == other->products) && (this->products == other->reactants) );
 }
 
 Reaction::iterator

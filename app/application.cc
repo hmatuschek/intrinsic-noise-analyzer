@@ -318,7 +318,7 @@ void Application::onCombineIrrevReactions()
   if (0 == (document = dynamic_cast<DocumentItem *>(getParentDocumentItem(_selected_item)))) { return; }
   iNA::Ast::Model &model = document->getModel();
 
-  iNA::Trafo::IrreversibleReactionCollapsor collector; collector.apply(model);
+  iNA::Trafo::IrreversibleReactionCollapser collector; collector.apply(model);
   docTree()->resetCompleteTree();
 
 }
