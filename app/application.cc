@@ -139,6 +139,8 @@ Application::resetSelectedItem() {
   _exportModel->setEnabled(false);
   _editModel->setEnabled(false);
   _closeModel->setEnabled(false);
+  _expandRevReaction->setEnabled(false);
+  _combineIrvReaction->setEnabled(false);
 }
 
 
@@ -275,6 +277,7 @@ void Application::onCloseModel()
   if (0 == (document = dynamic_cast<DocumentItem *>(getParentDocumentItem(_selected_item)))) { return; }
   // signal document to close
   document->closeDocument();
+  resetSelectedItem();
 }
 
 
@@ -307,7 +310,7 @@ void Application::onExpandRevReactions()
   iNA::Ast::Model &model = document->getModel();
 
   iNA::Trafo::ReversibleReactionConverter converter; converter.apply(model);
-  docTree()->resetCompleteTree();
+
 }
 
 void Application::onCombineIrrevReactions()
@@ -319,7 +322,6 @@ void Application::onCombineIrrevReactions()
   iNA::Ast::Model &model = document->getModel();
 
   iNA::Trafo::IrreversibleReactionCollapser collector; collector.apply(model);
-  docTree()->resetCompleteTree();
 
 }
 

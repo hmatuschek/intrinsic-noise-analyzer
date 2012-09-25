@@ -28,7 +28,7 @@ DocumentItem::DocumentItem(const QString &path, QObject *parent)
       = QString("%1 (%2)").arg(this->getModel().getName().c_str()).arg(this->file_path);
 
   // Construct context menu:
-  this->closeAct = new QAction(tr("close document"), this);
+  this->closeAct = new QAction(tr("Close document"), this);
   QObject::connect(this->closeAct, SIGNAL(triggered()), this, SLOT(closeDocument()));
 
   this->contextMenu = new QMenu();
@@ -130,7 +130,9 @@ DocumentItem::closeDocument()
 
   // Remove document from tree:
   Application::getApp()->docTree()->removeDocument(this);
+  // Reset selected item:
+  Application::getApp()->resetSelectedItem();
 
-  // mark document for deletion:
+  // Mark document for deletion:
   this->deleteLater();
 }
