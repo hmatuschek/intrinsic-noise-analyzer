@@ -8,6 +8,6 @@
 #ifndef __FLUC_MODELS_UNSUPPORTED_HH
 #define __FLUC_MODELS_UNSUPPORTED_HH
 
-//#include "models/unsupported/spectrumrecorder.hh"
+#include "models/unsupported/spectrumrecorder.hh"
 
 #endif // __FLUC_MODELS_UNSUPPORTED_HH

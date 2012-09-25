@@ -8,15 +8,15 @@
  time = second
 
 @compartments
- compartment_1 = 100 "compartment"
+ compartment_1 = 100000 "compartment"
 
 @species
- compartment_1: [species_1]  = 0  "X"
- compartment_1: [species_2]  = 0  "Y"
+ compartment_1: species_1  = 0  "X"
+ compartment_1: species_2  = 0  "Y"
 
 @parameters
- parameter_1=3 "a"
- parameter_2=9.95 "b"
+ a = 3 "a"
+ b = 9.95 "b"
 
 @reactions
  @r= reaction_1 "reaction_1"
@@ -25,11 +25,11 @@
 
  @r= reaction_2 "reaction_2"
   2 species_1 + species_2 -> 3 species_1
-  (species_1*-1+compartment_1^-1.0)*species_1*parameter_1*species_2*compartment_1*-1
+  (species_1*-1+compartment_1^-1.0)*species_1*a^2*species_2*compartment_1*-1
 
  @r= reaction_3 "reaction_3"
   species_1 -> species_2
-  species_1*parameter_2*compartment_1
+  species_1*b*compartment_1
 
  @r= reaction_4 "reaction_4"
   species_1 -> 
