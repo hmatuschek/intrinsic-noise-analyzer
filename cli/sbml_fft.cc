@@ -28,8 +28,8 @@ int main(int argc, char *argv[])
     size_t realizations=4;
     // Construct SSA model from SBML model
 
-    const double fMax   = 20*6/(3.14);//20*0.75/(3.14);
-    const double deltaf = 0.0025;
+    const double fMax   = 20*0.1/(3.14);//20*0.75/(3.14);
+    const double deltaf = 0.01;
 
     Models::SpectrumRecorder<Models::OptimizedSSA> specEval(sbml_model,realizations,fMax,deltaf,realizations);
 
