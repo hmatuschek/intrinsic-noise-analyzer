@@ -57,7 +57,9 @@ Writer::visit(const GiNaC::power &node)
   int old_precedence = _current_precedence; _current_precedence = 3;
   if (old_precedence >= _current_precedence) { _output << "("; }
 
-  _output << node.op(0) << "^" << node.op(1);
+  node.op(0).accept(*this);
+  _output << "^";
+  node.op(1).accept(*this);
 
   if (old_precedence >= _current_precedence) { _output << ")"; }
   _current_precedence = old_precedence;
