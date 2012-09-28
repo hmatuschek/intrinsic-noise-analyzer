@@ -150,8 +150,10 @@ SET(libina_nlesolve_HEADERS
 
 # Add source for unsupported modules
 SET(libina_unsupported_SOURCES
+   models/unsupported/maximumentropy.cc
    models/unsupported/spectrumrecorder.cc)
 SET(libina_unsupported_HEADERS
+   models/unsupported/maximumentropy.hh
    models/unsupported/spectrumrecorder.hh)
 
 # Add sources for ODE solvers etc.

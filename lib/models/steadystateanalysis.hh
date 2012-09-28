@@ -179,6 +179,9 @@ public:
 
         x.segment(offset,lnaLength) = B.lu().solve(-A);
 
+        double relative_error = (B*x.segment(offset,lnaLength) + A).norm() / A.norm(); // norm() is L2 norm
+        std::cout << "The relative error is:\n" << relative_error << std::endl;
+
         // substitute LNA
         subs_table.clear();
         for (size_t i=0; i<lnaLength; i++)
@@ -253,6 +256,10 @@ public:
 
         x.head(offset) = conc;
         x.tail(sseLength-lnaLength) = B.lu().solve(-A);
+
+        double relative_error = (B*x.tail(sseLength-lnaLength) + A).norm() / A.norm(); // norm() is L2 norm
+        std::cout << "The relative error is:\n" << relative_error << std::endl;
+
 
         return iter;
     }
@@ -375,6 +382,9 @@ public:
         }
 
         x.tail(sseLength-lnaLength) = B.lu().solve(-A);
+
+        double relative_error = (B*x.tail(sseLength-lnaLength) + A).norm() / A.norm(); // norm() is L2 norm
+        std::cout << "IOS, The relative error is:\n" << relative_error << std::endl;
 
     }
 

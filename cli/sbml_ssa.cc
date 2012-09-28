@@ -1,6 +1,7 @@
 #include "sbml_ssa.hh"
 #include <parser/sbml/sbml.hh>
 #include <fstream>
+#include "models/unsupported.hh"
 
 using namespace iNA;
 
@@ -22,6 +23,50 @@ int main(int argc, char *argv[])
     Models::OptimizedSSA model(sbml_model, 30, 1024);
     double dt=0.1;
 
+    // Construct Steady state analysis
+    Models::IOSmodel SSEmodel(sbml_model);
+    Models::SteadyStateAnalysis<Models::IOSmodel> analysis(SSEmodel);
+    Eigen::VectorXd state(SSEmodel.getDimension()); SSEmodel.getInitialState(state);
+    analysis.calcSteadyState(state);
+
+    Eigen::VectorXd first;
+    Eigen::MatrixXd second;
+    Eigen::VectorXd third;
+    Eigen::VectorXd fourth;
+
+    SSEmodel.getCentralMoments(state,first,second,third,fourth);
+
+    Eigen::VectorXd moments(2);
+    moments(0) = first(2);
+    moments(1) = second(2,2);
+
+    std::cerr << moments.transpose() << std::endl;
+
+//    Eigen::VectorXd moments(4);
+//    moments(0) = 0;
+//    moments(1) = 0.2;
+//    moments(2) = 0.05;
+//    moments(3) = 0.1;
+
+
+    Eigen::VectorXd domain(200);
+
+    //double Min = -1; double Max = 1;
+    double Min =1.e-7, Max= 1.e-6;
+
+    double x=Min;
+    for(int i=0; i<domain.size(); i++, x+=(Max-Min)/domain.size())
+        domain(i) = x;
+
+    Models::MaximumEntropyPDF MEP;
+    Eigen::VectorXd pdf = MEP.computePDF(domain,moments);
+
+    std::ofstream histfile;
+    histfile.open ("MEPhistogram.dat");
+    for(int i=0; i<domain.size(); i++)
+        histfile << domain(i) << "\t" << pdf(i) << "\t"<<std::endl;
+    histfile.close();
+
     Eigen::VectorXd mean;
     Eigen::MatrixXd variance;
 
@@ -31,10 +76,12 @@ int main(int argc, char *argv[])
 
     Models::Histogram<double> hist;
 
-    std::ofstream histfile;
+    //std::ofstream histfile;
     model.run(1);
-    for(double t=0.; t<10.; t+=dt)
+    for(double t=0.; t<100.; t+=dt)
     {
+
+       // std::cout << "t=" << t <<std::endl;
 
        model.run(dt);
        model.getHistogram(2,hist);

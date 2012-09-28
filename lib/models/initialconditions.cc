@@ -4,6 +4,9 @@
 using namespace iNA;
 using namespace iNA::Models;
 
+/**
+* Constructs the initial conditions of a model.
+*/
 InitialConditions::InitialConditions(SSEBaseModel &model)
     : model(model)
 {
@@ -31,12 +34,16 @@ InitialConditions::InitialConditions(SSEBaseModel &model)
 }
 
 
+/**
+* Returns the initial state vector of the model.
+*/
 void
 InitialConditions::getInitialState(Eigen::VectorXd &x)
 {
   // deterministic initial conditions for state
     x.head(ICsPermuted.size())=this->ICsPermuted;
 }
+
 
 /**
 * A method that folds conservation constants in an expression.
@@ -65,9 +72,11 @@ InitialConditions::apply(const Eigen::MatrixXex &vecIn)
 
 }
 
+/**
+* Returns the conserved moieties of the model.
+*/
 const Eigen::VectorXd &
 InitialConditions::getConservedCycles()
 {
     return this->conserved_cycles;
 }
-

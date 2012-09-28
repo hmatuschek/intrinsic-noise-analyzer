@@ -279,9 +279,12 @@ IOSmodel::postConstructor()
 
 void
 IOSmodel::fullState(const Eigen::VectorXd &state, Eigen::VectorXd &concentrations,
-                                     Eigen::MatrixXd &cov, Eigen::VectorXd &emre, Eigen::MatrixXd &iosCov, Eigen::VectorXd &skewness, Eigen::VectorXd &iosemre)
+                                     Eigen::MatrixXd &cov, Eigen::VectorXd &emre, Eigen::MatrixXd &iosCov, Eigen::VectorXd &third, Eigen::VectorXd &iosemre)
 
 {
+
+    // Make sure there is enough space
+    third.resize(this->numSpecies()*(this->numSpecies()+1)*(this->numSpecies()+2)/6);
 
     // reconstruct full concentration vector and covariances in original permutation order
     LNAmodel::fullState(state,concentrations,cov,emre);
@@ -323,13 +326,11 @@ IOSmodel::fullState(const Eigen::VectorXd &state, Eigen::VectorXd &concentration
     // construct full third moment vector, restore original order and return
     for(size_t i=0; i<(unsigned)cmat.rows(); i++)
     {
-        skewness(i)=0.;
+        third(i)=0.;
         for(size_t j=0; j<(unsigned)cmat.cols(); j++)
             for(size_t k=0; k<(unsigned)cmat.cols(); k++)
                 for(size_t l=0; l<(unsigned)cmat.cols(); l++)
-                    skewness(i) += cmat(i,j) * cmat(i,k) * cmat(i,l) *thirdMomVariables[j](k,l);
-
-        skewness(i)/=cov(i,i)*sqrt(cov(i,i));
+                    third(i) += cmat(i,j) * cmat(i,k) * cmat(i,l) *thirdMomVariables[j](k,l);
     }
 
    // get reduced covariance vector
@@ -357,6 +358,38 @@ IOSmodel::fullState(const Eigen::VectorXd &state, Eigen::VectorXd &concentration
 
    // construct full iosemre vector, restore original order and return
    iosemre = cmat*tail;
+
+}
+
+
+void
+IOSmodel::getCentralMoments(const Eigen::VectorXd &state, Eigen::VectorXd &first,
+                     Eigen::MatrixXd &second, Eigen::VectorXd &third, Eigen::VectorXd &fourth)
+
+{
+
+
+    Eigen::VectorXd emre;
+    Eigen::VectorXd iosemre;
+    Eigen::MatrixXd iosCov;
+
+    fullState(state,first,second,emre,iosCov,third,iosemre);
+
+
+    // Make sure there is enough space
+
+    fourth.resize(this->numSpecies()*(this->numSpecies()+1)*(this->numSpecies()+2)*(this->numSpecies()+3)/24);
+
+    // construct fourth moment via Wick's theorem
+    size_t idx=0;
+    for(size_t i=0; i<this->numSpecies(); i++)
+        for(size_t j=0; j<=i; j++)
+            for(size_t k=0; k<=j; k++)
+                for(size_t l=0; l<=k; l++)
+                    fourth(idx++) = second(i,j)*second(k,l) + second(i,k)*second(j,l)+ second(i,l)*second(j,k);
+
+    first+=emre;
+    second+=iosCov;
 
 }
 

@@ -150,8 +150,8 @@ StochasticSimulator::getHistogram(size_t speciesId,std::map<double,double> &hist
 void
 StochasticSimulator::getHistogram(size_t speciesId,Histogram<double> &hist)
 {
-  hist.insert(observationMatrix.col(speciesId) *
-              Eigen::DiagonalMatrix<double, Eigen::Dynamic>(this->Omega).inverse());
+    // Divide by volume and add to histogram.
+    hist.insert(observationMatrix.col(speciesId) / this->Omega(speciesId));
 }
 
 void

@@ -151,7 +151,7 @@ protected:
   Eigen::VectorXd ics;
 
   /**
-  * Vector storing compartment volumes of reactants
+  * Vector containing the values of the compartment volumes for each reactant
   **/
   Eigen::VectorXd Omega;
 
@@ -161,7 +161,7 @@ protected:
   int ensembleSize;
 
   /**
-   * evaluate @c propensities given a realization of the vector of population numbers @c populationVec
+   * Evaluate @c propensities given a realization of the vector of population numbers @c populationVec
    **/
   virtual void evaluate(const Eigen::VectorXd &populationVec, Eigen::VectorXd &propensities);
 

@@ -7,6 +7,9 @@
 namespace iNA {
 namespace Models {
 
+/**
+* This module handles the initial conditions of a model and can be used to reconstruct a model.
+*/
 class InitialConditions
 
 {
@@ -16,7 +19,7 @@ class InitialConditions
      */
     InitialConditions(SSEBaseModel &model);
 
-private:
+protected:
 
     GiNaC::exmap substitutions;
 
@@ -71,6 +74,7 @@ public:
 
     }
 
+
     const Eigen::MatrixXd &
     getLink0CMatrix()
 
@@ -85,9 +89,6 @@ public:
     {
         return this->LinkCMatrixNumeric;
     }
-
-
-
 
 };
 

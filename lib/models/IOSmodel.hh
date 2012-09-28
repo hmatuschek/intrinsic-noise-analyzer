@@ -55,6 +55,12 @@ public:
   void fullState(const Eigen::VectorXd &state, Eigen::VectorXd &concentrations,
                  Eigen::MatrixXd &cov, Eigen::VectorXd &emre,  Eigen::MatrixXd &iosCov, Eigen::VectorXd &skewness, Eigen::VectorXd &iosemre);
 
+  /**
+  * Construct non-central moments.
+  **/
+  void getCentralMoments(const Eigen::VectorXd &state, Eigen::VectorXd &first,
+                       Eigen::MatrixXd &second, Eigen::VectorXd &third, Eigen::VectorXd &fourth);
+
 
   void fullState(InitialConditions &context, const Eigen::VectorXd &state, Eigen::VectorXd &concentrations,
                  Eigen::MatrixXd &cov, Eigen::VectorXd &emre,

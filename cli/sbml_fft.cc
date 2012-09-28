@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
   }
 
   // Construct LNA model from SBML model
-  Ast::Model sbml_model; Parser::Sbmlsh::importModel(sbml_model, argv[1]);
+  Ast::Model sbml_model; Parser::Sbml::importModel(sbml_model, argv[1]);
 
   // Do the work:
   try
@@ -24,12 +24,12 @@ int main(int argc, char *argv[])
 
     size_t steps = 500;
 
-    double transientTime = 5000;
+    double transientTime = 500;
     size_t realizations=4;
     // Construct SSA model from SBML model
 
-    const double fMax   = 20*0.1/(3.14);//20*0.75/(3.14);
-    const double deltaf = 0.01;
+    const double fMax   = 5;//20*0.75/(3.14);
+    const double deltaf = 0.001;
 
     Models::SpectrumRecorder<Models::OptimizedSSA> specEval(sbml_model,realizations,fMax,deltaf,realizations);
 
@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
             myfile.open(fileName.str().c_str(),std::ios_base::trunc);
             for(int fs=0;fs<freq.size()/2;fs++)
             {
-                myfile << freq(fs)*(2*constants::pi) << "\t"
+                myfile << freq(fs) << "\t"
                        << spec(fs) << "\n";
             }
             myfile.close();
