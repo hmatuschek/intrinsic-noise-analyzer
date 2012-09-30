@@ -9,8 +9,7 @@
 
 #include "erf.hh"
 #include "incompletegamma.hh"
-#include "kroneckerproduct.hh"
-
+#include <eigen3/Eigen/Eigen>
 
 namespace iNA {
 

@@ -131,12 +131,17 @@ ENDIF(LLVM_FOUND)
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/lib/config.hh.in ${CMAKE_CURRENT_BINARY_DIR}/lib/config.hh)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}/lib)
 
+#
+# Make sure unsupported module headers can be found
+#
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/unsupported)
 
 #
 # Traverse into source tree:
 #
 add_subdirectory(lib)
 add_subdirectory(app)
+add_subdirectory(unsupported)
 add_subdirectory(cli)
 
 #

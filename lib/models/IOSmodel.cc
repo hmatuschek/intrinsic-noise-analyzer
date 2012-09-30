@@ -278,8 +278,9 @@ IOSmodel::postConstructor()
 
 
 void
-IOSmodel::fullState(const Eigen::VectorXd &state, Eigen::VectorXd &concentrations,
-                                     Eigen::MatrixXd &cov, Eigen::VectorXd &emre, Eigen::MatrixXd &iosCov, Eigen::VectorXd &third, Eigen::VectorXd &iosemre)
+IOSmodel::fullState(const Eigen::VectorXd &state,
+                    Eigen::VectorXd &concentrations, Eigen::MatrixXd &cov, Eigen::VectorXd &emre,
+                    Eigen::MatrixXd &iosCov, Eigen::VectorXd &third, Eigen::VectorXd &iosemre)
 
 {
 
@@ -381,12 +382,8 @@ IOSmodel::getCentralMoments(const Eigen::VectorXd &state, Eigen::VectorXd &first
     fourth.resize(this->numSpecies()*(this->numSpecies()+1)*(this->numSpecies()+2)*(this->numSpecies()+3)/24);
 
     // construct fourth moment via Wick's theorem
-    size_t idx=0;
     for(size_t i=0; i<this->numSpecies(); i++)
-        for(size_t j=0; j<=i; j++)
-            for(size_t k=0; k<=j; k++)
-                for(size_t l=0; l<=k; l++)
-                    fourth(idx++) = second(i,j)*second(k,l) + second(i,k)*second(j,l)+ second(i,l)*second(j,k);
+       fourth(i) = 3.*second(i,i)*second(i,i);
 
     first+=emre;
     second+=iosCov;
@@ -394,8 +391,9 @@ IOSmodel::getCentralMoments(const Eigen::VectorXd &state, Eigen::VectorXd &first
 }
 
 void
-IOSmodel::fullState(InitialConditions &context, const Eigen::VectorXd &state, Eigen::VectorXd &concentrations,
-                                     Eigen::MatrixXd &cov, Eigen::VectorXd &emre, Eigen::MatrixXd &iosCov, Eigen::VectorXd &skewness, Eigen::VectorXd &iosemre)
+IOSmodel::fullState(InitialConditions &context, const Eigen::VectorXd &state,
+                    Eigen::VectorXd &concentrations, Eigen::MatrixXd &cov, Eigen::VectorXd &emre,
+                    Eigen::MatrixXd &iosCov, Eigen::VectorXd &third, Eigen::VectorXd &iosemre)
 
 {
 
@@ -437,13 +435,13 @@ IOSmodel::fullState(InitialConditions &context, const Eigen::VectorXd &state, Ei
     // construct full third moment vector, restore original order and return
     for(size_t i=0; i<(unsigned)context.getLinkCMatrix().rows(); i++)
     {
-        skewness(i)=0.;
+        third(i)=0.;
         for(size_t j=0; j<(unsigned)context.getLinkCMatrix().cols(); j++)
             for(size_t k=0; k<(unsigned)context.getLinkCMatrix().cols(); k++)
                 for(size_t l=0; l<(unsigned)context.getLinkCMatrix().cols(); l++)
-                    skewness(i) += context.getLinkCMatrix()(i,j) * context.getLinkCMatrix()(i,k) * context.getLinkCMatrix()(i,l) *thirdMomVariables[j](k,l);
+                    third(i) += context.getLinkCMatrix()(i,j) * context.getLinkCMatrix()(i,k) * context.getLinkCMatrix()(i,l) *thirdMomVariables[j](k,l);
 
-        skewness(i)/=cov(i,i)*sqrt(cov(i,i));
+        //third(i)/=cov(i,i)*sqrt(cov(i,i));
     }
 
    // get reduced covariance vector

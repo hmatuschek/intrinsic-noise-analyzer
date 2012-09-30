@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include "ina.hh"
-#include "models/unsupported.hh"
+#include "unsupported.hh"
 #include <sbml/SBMLTypes.h>
 #include <ginac/ginac.h>
 

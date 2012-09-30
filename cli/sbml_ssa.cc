@@ -1,7 +1,7 @@
 #include "sbml_ssa.hh"
 #include <parser/sbml/sbml.hh>
 #include <fstream>
-#include "models/unsupported.hh"
+#include "unsupported.hh"
 
 using namespace iNA;
 
@@ -36,11 +36,17 @@ int main(int argc, char *argv[])
 
     SSEmodel.getCentralMoments(state,first,second,third,fourth);
 
-    Eigen::VectorXd moments(2);
+    Eigen::VectorXd moments(4);
     moments(0) = first(2);
     moments(1) = second(2,2);
+    moments(2) = third(2);
+    moments(3) = fourth(2);
 
-    std::cerr << moments.transpose() << std::endl;
+    std::cout << "Fitting the moments:" << std::endl;
+    std::cout << moments.transpose() << std::endl;
+
+    std::cout << "non-central:" << std::endl;
+    std::cout << Models::MaximumEntropyPDF::getNonCentralMoments(moments).transpose() << std::endl;
 
 //    Eigen::VectorXd moments(4);
 //    moments(0) = 0;
@@ -52,10 +58,10 @@ int main(int argc, char *argv[])
     Eigen::VectorXd domain(200);
 
     //double Min = -1; double Max = 1;
-    double Min =1.e-7, Max= 1.e-6;
+    double Min = -1.e-6, Max= 5.e-6;
 
     double x=Min;
-    for(int i=0; i<domain.size(); i++, x+=(Max-Min)/domain.size())
+    for(int i=0; i<domain.size(); i++, x+=(Max-Min)/(domain.size()-1))
         domain(i) = x;
 
     Models::MaximumEntropyPDF MEP;
@@ -67,18 +73,18 @@ int main(int argc, char *argv[])
         histfile << domain(i) << "\t" << pdf(i) << "\t"<<std::endl;
     histfile.close();
 
+//    return 0;
+
     Eigen::VectorXd mean;
     Eigen::MatrixXd variance;
 
     Eigen::MatrixXd cov(model.numSpecies(),model.numSpecies());
 
-    //std::map<double,double> hist;
-
     Models::Histogram<double> hist;
 
     //std::ofstream histfile;
-    model.run(1);
-    for(double t=0.; t<100.; t+=dt)
+    model.run(100);
+    for(double t=0.; t<1000.; t+=dt)
     {
 
        // std::cout << "t=" << t <<std::endl;
@@ -87,7 +93,7 @@ int main(int argc, char *argv[])
        model.getHistogram(2,hist);
 
        histfile.open ("histogram.dat");
-       std::map<double,double> temp=hist.getNormalized();
+       std::map<double,double> temp=hist.getDensity();
        for(std::map<double,double>::iterator it=temp.begin();it!=temp.end();it++)
            histfile << it->first << "\t" << it->second << "\t"<<std::endl;
        histfile.close();

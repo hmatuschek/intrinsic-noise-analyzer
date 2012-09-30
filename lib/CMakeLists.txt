@@ -9,12 +9,12 @@
 # First, the base utils
 SET(libina_SOURCES
     exception.cc
-    erf.cc kroneckerproduct.cc incompletegamma.cc
+    erf.cc incompletegamma.cc
     ginacsupportforeigen.cc math.cc openmp.cc mersennetwister.cc)
 
 SET(libina_HEADERS ina.hh smartptr.hh linkedlist.hh
     exception.hh
-    erf.hh kroneckerproduct.hh incompletegamma.hh
+    erf.hh incompletegamma.hh
     ginacsupportforeigen.hh math.hh openmp.hh mersennetwister.hh)
 
 # Then, the AST classes:
@@ -148,13 +148,6 @@ SET(libina_nlesolve_HEADERS
    nlesolve/newtonraphson.hh
    nlesolve/hybridsolver.hh)
 
-# Add source for unsupported modules
-SET(libina_unsupported_SOURCES
-   models/unsupported/maximumentropy.cc
-   models/unsupported/spectrumrecorder.cc)
-SET(libina_unsupported_HEADERS
-   models/unsupported/maximumentropy.hh
-   models/unsupported/spectrumrecorder.hh)
 
 # Add sources for ODE solvers etc.
 SET(libina_ode_SOURCES
@@ -213,7 +206,6 @@ IF(WITH_EXECUTION_ENGINE_LLVM)
   SET(libina_eval_HEADERS ${libina_eval_HEADERS} ${libina_eval_llvm_HEADERS})
 ENDIF(WITH_EXECUTION_ENGINE_LLVM)
 
-
 # Finally assemble list of all sources
 SET(libina_SOURCES
     ${libina_SOURCES}
@@ -224,7 +216,6 @@ SET(libina_SOURCES
     ${libina_models_SOURCES}
     ${libina_nlesolve_SOURCES}
     ${libina_ode_SOURCES}
-    ${libina_unsupported_SOURCES}
     ${libina_eval_SOURCES})
 
 # and list of all headers:
@@ -237,7 +228,6 @@ SET(libina_HEADERS
     ${libina_models_HEADERS}
     ${libina_nlesolve_HEADERS}
     ${libina_ode_HEADERS}
-    ${libina_unsupported_HEADERS}
     ${libina_eval_HEADERS})
 
 #

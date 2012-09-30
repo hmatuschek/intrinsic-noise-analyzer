@@ -34,5 +34,5 @@ ADD_EXECUTABLE(sbml_fft ${sbml_fft_SOURCES})
 
 TARGET_LINK_LIBRARIES(sbml_lna ${LIBS} libina)
 TARGET_LINK_LIBRARIES(sbml_pscan ${LIBS} libina)
-TARGET_LINK_LIBRARIES(sbml_ssa ${LIBS} libina)
-TARGET_LINK_LIBRARIES(sbml_fft ${LIBS} libina)
+TARGET_LINK_LIBRARIES(sbml_ssa ${LIBS} libina libunsupported)
+TARGET_LINK_LIBRARIES(sbml_fft ${LIBS} libina libunsupported)
