@@ -7,16 +7,6 @@
 namespace iNA {
 namespace Models {
 
-template<class T>
-struct less_second
-: std::binary_function<T,T,bool>
-{
-   inline bool operator()(const T& lhs, const T& rhs)
-   {
-      return lhs.second < rhs.second;
-   }
-};
-
 /**
  * Implements a 1D histogram.
  *
