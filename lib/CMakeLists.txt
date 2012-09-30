@@ -94,6 +94,7 @@ SET(libina_models_SOURCES
     models/extensivespeciesmixin.cc
     models/intensivespeciesmixin.cc
     models/stochasticsimulator.cc
+    models/histogram.cc
     models/gillespieSSA.cc
     models/optimizedSSA.cc
     models/gibsonbruckSSA.cc
@@ -121,6 +122,7 @@ SET(libina_models_HEADERS models/models.hh
     models/extensivespeciesmixin.hh
     models/intensivespeciesmixin.hh
     models/stochasticsimulator.hh
+    models/histogram.hh
     models/gillespieSSA.hh
     models/optimizedSSA.hh
     models/gibsonbruckSSA.hh
