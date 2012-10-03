@@ -48,7 +48,8 @@ public:
    * Specifies the possible file-types to save a plot.
    */
   typedef enum {
-    FILETYPE_PNG  ///< Currently, onle the PNG format is supported.
+    FILETYPE_PNG,  ///< Save plot as PNG image (bitmap)
+    FILETYPE_SVG   ///< Save plot as SVG image (vector)
   } FileType;
 
 
@@ -139,6 +140,11 @@ public slots:
    * (Re-) Sets the plot-scheme.
    */
   void setScheme(Configuration::Scheme scheme);
+
+
+protected:
+  /** Handles mouse clicks inside the plot. */
+  void mousePressEvent(QGraphicsSceneMouseEvent *event);
 };
 
 

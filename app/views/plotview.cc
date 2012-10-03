@@ -5,6 +5,8 @@
 #include <QHBoxLayout>
 #include <QPushButton>
 #include <QFileDialog>
+#include <QFileInfo>
+#include <QMessageBox>
 
 
 PlotView::PlotView(PlotItem *plot_wrapper, QWidget *parent) :
@@ -60,9 +62,25 @@ void
 PlotView::onSavePlot()
 {
   QString fileName = QFileDialog::getSaveFileName(
-        this, tr("Save plot as ..."), "", tr("png (*.png)"));
+        this, tr("Save plot as ..."), "", tr("Image Files (*.png *.svg)"));
 
-  this->canvas->saveAs(fileName, Plot::Figure::FILETYPE_PNG);
+  // on cancel:
+  if (0 == fileName.size()) { return; }
+
+  // Determine file type by ending:
+  QFileInfo fileinfo(fileName);
+  Plot::Figure::FileType type;
+
+  if ("png" == fileinfo.suffix()) { type=Plot::Figure::FILETYPE_PNG; }
+  else if ("svg" == fileinfo.suffix()) { type=Plot::Figure::FILETYPE_SVG; }
+  else {
+    QMessageBox::critical(0, tr("Can not save plot."),
+                          tr("Unknown file suffix: {0}").arg(fileinfo.suffix()));
+    return;
+  }
+
+  // Save plot in file...
+  this->canvas->saveAs(fileName, type);
 }
 
 

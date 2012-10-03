@@ -192,6 +192,9 @@ public:
    * of the sampled values is uniform.
    */
   virtual void sample(Eigen::VectorXd &samples) const = 0;
+
+  /** Performs the inverse mapping from [0,1] into the plot range. */
+  virtual double inverseMap(const double &value) const = 0;
 };
 
 
@@ -223,10 +226,11 @@ public:
    */
   virtual double operator() (double x) const;
 
-  /**
-   * Samples equally from the source interval.
-   */
+  /** Samples equally from the source interval. */
   virtual void sample(Eigen::VectorXd &samples) const;
+
+  /** Performs the inverse mapping. */
+  virtual double inverseMap(const double &value) const;
 };
 
 
@@ -262,6 +266,9 @@ public:
    * Samples logarithmic from _range.
    */
   virtual void sample(Eigen::VectorXd &samples) const;
+
+  /** Performs the inverse mapping. */
+  virtual double inverseMap(const double &value) const;
 };
 
 
@@ -362,6 +369,9 @@ public:
    * Maps a given path to parent coordinates.
    */
   virtual QPainterPath operator() (const QPainterPath &path) const;
+
+  /** Maps parent coordinates to plot-coordinates. */
+  virtual QPointF inverseMapping(const QPointF &point) const;
 
   /**
    * Samples the x-axis.

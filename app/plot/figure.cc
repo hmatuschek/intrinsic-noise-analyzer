@@ -5,6 +5,9 @@
 #include "configuration.hh"
 
 #include <QImage>
+#include <QGraphicsSceneMouseEvent>
+#include <QtSvg/QSvgGenerator>
+
 
 using namespace Plot;
 
@@ -180,36 +183,56 @@ Figure::setYLabel(const QString &label)
 void
 Figure::save(const QString &filename, FileType type)
 {
-  // Construct image to paint on:
-  QImage *image = new QImage(this->width(), this->height(), QImage::Format_ARGB32_Premultiplied);
+  if (Figure::FILETYPE_PNG == type) {
+    // Construct image to paint on:
+    QImage *image = new QImage(this->width(), this->height(), QImage::Format_ARGB32_Premultiplied);
 
-  // Clear image (set all transparent):
-  image->fill(QColor(0,0,0,0).rgba());
+    // Clear image (set all transparent):
+    image->fill(QColor(0,0,0,0).rgba());
 
-  // Construct painter to render graphics-sceene into bitmap:
-  QPainter *painter = new QPainter(image);
-  // make it look good:
-  painter->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform |
-                          QPainter::TextAntialiasing);
+    // Construct painter to render graphics-sceene into bitmap:
+    QPainter *painter = new QPainter(image);
+    // make it look good:
+    painter->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform |
+                            QPainter::TextAntialiasing);
 
-  // Render plot on painter:
-  this->render(painter);
+    // Render plot on painter:
+    this->render(painter);
 
-  // Determine format:
-  const char *format = 0;
-  switch (type) {
-  case Figure::FILETYPE_PNG:
-    format = "PNG";
-    break;
+    // save image:
+    image->save(filename, "PNG");
+
+    // destroy painter & image:
+    delete painter;
+    delete image;
+  } else {
+    // Create SVG generator & painter
+    QSvgGenerator *generator = new QSvgGenerator();
+    generator->setFileName(filename);
+    generator->setSize(QSize(width(), height()));
+    QPainter *painter = new QPainter(generator);
+    // Render graphics
+    this->render(painter);
+    painter->end();
+    // delete painter, generator & close file.
+    delete painter;
+    delete generator;
   }
-
-  // save image:
-  image->save(filename, format);
-
-  // destroy painter:
-  delete painter;
-
-  // free image:
-  delete image;
 }
+
+
+void
+Figure::mousePressEvent(QGraphicsSceneMouseEvent *event)
+{
+  // Do not call default handler!
+  std::cerr << "Got mouse event at " << event->pos().x() << ", " << event->pos().y() << std::endl;
+
+  // Check if click is inside axes:
+  if (! axis->boundingRect().contains(event->pos())) { return; }
+
+  QPointF values = axis->getMapping()->inverseMapping(event->pos()-axis->pos());
+  std::cerr << "Click in " << values.x() << ", " << values.y() << std::endl;
+}
+
+
 

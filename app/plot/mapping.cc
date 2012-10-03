@@ -198,6 +198,12 @@ LinearMapFunction::sample(Eigen::VectorXd &samples) const
 }
 
 
+double
+LinearMapFunction::inverseMap(const double &value) const
+{
+  return value*this->range().delta()+this->range().min();
+}
+
 
 /* ********************************************************************************************* *
  * Implementation of log mapping.
@@ -241,6 +247,12 @@ LogMapFunction::sample(Eigen::VectorXd &samples) const
   }
 }
 
+
+double
+LogMapFunction::inverseMap(const double &value) const
+{
+  return (std::pow(10., value)-1)*range().delta()/9. + range().min();
+}
 
 
 /* ********************************************************************************************* *
@@ -385,4 +397,12 @@ void
 Mapping::sampleY(Eigen::VectorXd &samples) const
 {
   this->y_map->sample(samples);
+}
+
+
+QPointF
+Mapping::inverseMapping(const QPointF &point) const
+{
+  return QPointF(x_map->inverseMap(point.x()/plot_size.width()),
+                 y_map->inverseMap(1. - point.y()/plot_size.height()));
 }
