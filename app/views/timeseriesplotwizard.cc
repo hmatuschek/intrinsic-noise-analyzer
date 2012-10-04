@@ -90,6 +90,15 @@ TimeSeriesGraphList::graph(int idx)
   return _graphs[idx];
 }
 
+void
+TimeSeriesGraphList::removeGraph(int idx)
+{
+  if (idx < 0 || idx >= _graphs.size()) { return; }
+  beginRemoveRows(QModelIndex(), idx, idx);
+  _graphs.removeAt(idx);
+  endRemoveRows();
+}
+
 
 /* ******************************************************************************************** *
  * Implementation of TimeSeriesPlotDialog
@@ -109,7 +118,15 @@ TimeSeriesPlotDialog::TimeSeriesPlotDialog(Table *table, QWidget *parent)
   _add_graph  = new QPushButton(tr("+"));
   _rem_graph  = new QPushButton(tr("-"));
 
-  QHBoxLayout *layout = new QHBoxLayout();
+  _stack = new QStackedWidget();
+  _stack->addWidget(_plotview);
+  _stack->addWidget(new QLabel(tr("Add a graph to the plot by pressing '+'")));
+  _stack->setCurrentIndex(1);
+
+  QDialogButtonBox *buttons = new QDialogButtonBox(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
+
+  QVBoxLayout *layout = new QVBoxLayout();
+  QHBoxLayout *main_layout = new QHBoxLayout();
   QVBoxLayout *side_box = new QVBoxLayout();
   QHBoxLayout *button_box = new QHBoxLayout();
 
@@ -119,13 +136,16 @@ TimeSeriesPlotDialog::TimeSeriesPlotDialog(Table *table, QWidget *parent)
   side_box->setMargin(0);
   side_box->addWidget(_graph_list);
   side_box->addLayout(button_box);
-  layout->addWidget(_plotview, 1);
-  layout->addLayout(side_box, 0);
-
+  main_layout->addWidget(_stack, 1);
+  main_layout->addLayout(side_box, 0);
+  layout->addLayout(main_layout);
+  layout->addWidget(buttons);
   setLayout(layout);
 
   QObject::connect(_add_graph, SIGNAL(clicked()), this, SLOT(onAddGraph()));
   QObject::connect(_rem_graph, SIGNAL(clicked()), this, SLOT(onRemoveGraph()));
+  QObject::connect(buttons, SIGNAL(rejected()), this, SLOT(reject()));
+  QObject::connect(buttons, SIGNAL(accepted()), this, SLOT(onAccepted()));
 }
 
 
@@ -134,14 +154,21 @@ TimeSeriesPlotDialog::onAddGraph()
 {
   NewTimeSeriesGraphDialog add_graph_dialog(_data);
   if (QDialog::Rejected == add_graph_dialog.exec()) { return; }
-  std::cerr << "Add plot..." << std::endl;
   _graphs.addGraph(add_graph_dialog.getConfig());
+  _stack->setCurrentIndex(0);
   onUpdatePlot();
 }
 
 void
 TimeSeriesPlotDialog::onRemoveGraph()
 {
+  if (! _graph_list->selectionModel()->hasSelection()) { return; }
+  QModelIndexList selected_items =_graph_list->selectionModel()->selectedIndexes();
+  if (1 != selected_items.count()) { return; }
+
+  _graphs.removeGraph(selected_items.at(0).row());
+  if (0 == _graphs.rowCount(QModelIndex())) { _stack->setCurrentIndex(1); return; }
+  onUpdatePlot();
 }
 
 void
@@ -158,6 +185,12 @@ TimeSeriesPlotDialog::onUpdatePlot()
   _plotview->setPlot(_plot);
   _plot->updateAxes();
   _plotview->update();
+}
+
+void
+TimeSeriesPlotDialog::onAccepted() {
+  if (0 == _graphs.rowCount(QModelIndex())) { return; }
+  accept();
 }
 
 
@@ -267,6 +300,5 @@ NewTimeSeriesGraphDialog::checkInputAndExit()
     if (! _config.setVarColumn(_formula_mean->getFormula())) { return; }
   }
 
-  std::cerr << "done." << std::endl;
   accept();
 }

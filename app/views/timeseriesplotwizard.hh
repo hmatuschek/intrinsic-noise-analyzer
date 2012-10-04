@@ -8,6 +8,7 @@
 #include <QComboBox>
 #include <QAbstractListModel>
 #include <QLineEdit>
+#include <QStackedWidget>
 
 #include "../timeseries.hh"
 #include "../plot/canvas.hh"
@@ -15,20 +16,28 @@
 #include "../models/plotformulaparser.hh"
 
 
+/** Implements the configuration of a time-series graph. */
 class TimeSeriesGraphConfig
 {
 public:
+  /** Specifies which plot types are supported. */
   typedef enum {
     LINE_GRAPH,
     VARIANCE_GRAPH
   } PlotType;
 
 protected:
+  /** Holds the data table. */
   Table *_table;
+  /** Holds the symbol -> column translation, also implements expression evaluation. */
   PlotFormulaParser::Context _context;
+  /** Holds the type of the graph. */
   PlotType _type;
+  /** The mean value expression. */
   GiNaC::ex _mean_expression;
+  /** The variance expression if needed. */
   GiNaC::ex _var_expression;
+  /** Holds the graph label. */
   QString _label;
 
 public:
@@ -73,6 +82,7 @@ public:
 
   TimeSeriesGraphConfig &graph(int idx);
   void addGraph(const TimeSeriesGraphConfig &graph);
+  void removeGraph(int idx);
 
 private:
   QList<TimeSeriesGraphConfig> _graphs;
@@ -91,10 +101,12 @@ private slots:
   void onRemoveGraph();
   void onAddGraph();
   void onUpdatePlot();
+  void onAccepted();
 
 private:
   Table *_data;
   TimeSeriesGraphList _graphs;
+  QStackedWidget *_stack;
   Plot::Canvas *_plotview;
   Plot::Figure *_plot;
   QListView *_graph_list;
