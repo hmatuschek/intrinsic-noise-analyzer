@@ -79,6 +79,9 @@ protected:
    */
   QList<GraphStyle> styles;
 
+  /** If measures are enabled. */
+  bool _measures_enabled;
+
 
 public:
   /**
@@ -129,22 +132,17 @@ public:
    */
   void save(const QString &filename, FileType type);
 
+  /** Enables/Disables the measure feature. */
+  void enableMesure(bool enabled=true);
+  /** Shows a measure at the given point if enabled by @c enableMeasure. */
+  void showMeasure(const QPointF &point);
 
 public slots:
-  /**
-   * Replot.
-   */
+  /** Replot. */
   void updateAxes();
 
-  /**
-   * (Re-) Sets the plot-scheme.
-   */
+  /** (Re-) Sets the plot-scheme. */
   void setScheme(Configuration::Scheme scheme);
-
-
-protected:
-  /** Handles mouse clicks inside the plot. */
-  void mousePressEvent(QGraphicsSceneMouseEvent *event);
 };
 
 

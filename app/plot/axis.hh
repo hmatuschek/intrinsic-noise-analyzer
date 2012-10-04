@@ -13,9 +13,31 @@
 
 namespace Plot {
 
+class Axis;
 class Graph;
 class GraphStyle;
 class LineGraph;
+
+
+/** A simple graphics element to display a cross with some values (x,y). */
+class MeasureItem : public QObject, public QGraphicsItemGroup
+{
+public:
+  /** Constructor. */
+  MeasureItem(Axis *parent);
+
+  /** Reset values to display. */
+  void setValues(const QPointF &values);
+  /** Returns the current values. */
+  const QPointF &getValues() const;
+
+private:
+  /** Holds the current values. */
+  QPointF _values;
+  /** Holds the label item. */
+  QGraphicsTextItem *_label;
+};
+
 
 
 /**
@@ -100,6 +122,9 @@ protected:
    * Holds the y==0 line as a graphics element.
    */
   QGraphicsLineItem *y_zero;
+
+  /** Holds the measure instance. */
+  MeasureItem *_measure;
 
 
 public:
@@ -208,6 +233,9 @@ public:
    * Returns the mapping for the x- and y-axis.
    */
   Mapping *getMapping();
+
+  /** Shows a measure at the given coordinates. */
+  void showMeasure(const QPointF &point);
 
 
 public slots:

@@ -13,7 +13,7 @@ using namespace Plot;
 
 
 Figure::Figure(const QString &title, QObject *parent) :
-  QGraphicsScene(parent), legend_pos(TOP_RIGHT)
+  QGraphicsScene(parent), legend_pos(TOP_RIGHT), _measures_enabled(true)
 {
 
   const double fac = 255.;
@@ -222,17 +222,18 @@ Figure::save(const QString &filename, FileType type)
 
 
 void
-Figure::mousePressEvent(QGraphicsSceneMouseEvent *event)
+Figure::enableMesure(bool enabled)
 {
-  // Do not call default handler!
-  std::cerr << "Got mouse event at " << event->pos().x() << ", " << event->pos().y() << std::endl;
-
-  // Check if click is inside axes:
-  if (! axis->boundingRect().contains(event->pos())) { return; }
-
-  QPointF values = axis->getMapping()->inverseMapping(event->pos()-axis->pos());
-  std::cerr << "Click in " << values.x() << ", " << values.y() << std::endl;
+  _measures_enabled = enabled;
 }
 
+void
+Figure::showMeasure(const QPointF &point)
+{
+  // Skip if measures are disabled:
+  if (! _measures_enabled) { return; }
+  // Translate coordinates and forward to Axis instance.
+  this->axis->showMeasure(point-axis->pos());
+}
 
 

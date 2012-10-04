@@ -1,4 +1,5 @@
 #include "canvas.hh"
+#include <QMouseEvent>
 
 using namespace Plot;
 
@@ -91,4 +92,14 @@ Canvas::paintEvent(QPaintEvent *event)
   painter.fillRect(0,0, this->size().width(), this->size().height(), Qt::white);
 
   this->plot->render(&painter);
+}
+
+
+void
+Canvas::mousePressEvent(QMouseEvent *event)
+{
+  if (0 == plot) { return; }
+  // Do not call default handler!
+  plot->showMeasure(event->pos());
+  this->update();
 }
