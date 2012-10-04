@@ -1,4 +1,5 @@
 #include "plotformulaparser.hh"
+#include <utils/logger.hh>
 
 using namespace iNA;
 
@@ -87,6 +88,65 @@ protected:
   static PlotFormulaAtomicProduction *_instance;
 };
 
+class PlotFormulaFunction : public iNA::Parser::Production {
+public:
+  static iNA::Parser::Production *get();
+public:
+  PlotFormulaFunction();
+  static PlotFormulaFunction *_instance;
+};
+
+class PlotFormulaFunctionArgumentList : public iNA::Parser::Production {
+public:
+  static iNA::Parser::Production *get();
+protected:
+  PlotFormulaFunctionArgumentList();
+  static PlotFormulaFunctionArgumentList *_instance;
+};
+
+
+
+/* ******************************************************************************************** *
+ *  FunctionArgumentList := Expression [, FunctionArgumentList];
+ * ******************************************************************************************** */
+PlotFormulaFunctionArgumentList *PlotFormulaFunctionArgumentList::_instance = 0;
+Parser::Production *PlotFormulaFunctionArgumentList::get() {
+  if (0 == _instance) {
+    return new PlotFormulaFunctionArgumentList();
+  }
+  return _instance;
+}
+
+PlotFormulaFunctionArgumentList::PlotFormulaFunctionArgumentList()
+  : Parser::Production()
+{
+  _instance = this;
+  elements.push_back(PlotFormulaProduction::get());
+  elements.push_back(
+        new Parser::OptionalProduction(
+          new Parser::Production(2, new Parser::TokenProduction(T_COMMA), this)));
+}
+
+/* ******************************************************************************************** *
+ *  Identifier ([FunctionArgumentList]);
+ * ******************************************************************************************** */
+PlotFormulaFunction *PlotFormulaFunction::_instance = 0;
+Parser::Production *PlotFormulaFunction::get() {
+  if (0 == PlotFormulaFunction::_instance) {
+    return new PlotFormulaFunction();
+  }
+  return PlotFormulaFunction::_instance;
+}
+
+PlotFormulaFunction::PlotFormulaFunction()
+  : Parser::Production()
+{
+  _instance = this;
+  elements.push_back(new Parser::TokenProduction(T_IDENTIFIER));
+  elements.push_back(new Parser::TokenProduction(T_LPAR));
+  elements.push_back(new Parser::OptionalProduction(PlotFormulaFunctionArgumentList::get()));
+  elements.push_back(new Parser::TokenProduction(T_RPAR));
+}
 
 /* ******************************************************************************************** *
  *  Number | FunctionCall | Identifier | ("(" Expression ")") | "-" AtomicExpression;
@@ -102,7 +162,7 @@ PlotFormulaAtomicProduction::PlotFormulaAtomicProduction()
 {
   _instance = this;
   //alternatives.push_back(NumberProduction::get());
-  //alternatives.push_back(FunctionCallProduction::get());
+  alternatives.push_back(PlotFormulaFunction::get());
   alternatives.push_back(new Parser::TokenProduction(T_COLUMN_ID));
   alternatives.push_back(
         new Parser::Production(
@@ -213,22 +273,82 @@ PlotFormulaGrammar::PlotFormulaGrammar()
 /* ******************************************************************************************** *
  * Implementation of assembler:
  * ******************************************************************************************** */
+void __plot_formula_process_function_arguments(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, PlotFormulaParser::Context &ctx, std::vector<GiNaC::ex> &args);
+GiNaC::ex __plot_formula_process_function(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, PlotFormulaParser::Context &ctx);
 GiNaC::ex __plot_formula_process_atomic(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, PlotFormulaParser::Context &ctx);
 GiNaC::ex __plot_formula_process_power(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, PlotFormulaParser::Context &ctx);
 GiNaC::ex __plot_formula_process_product(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, PlotFormulaParser::Context &ctx);
 GiNaC::ex __plot_formula_process_expression(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, PlotFormulaParser::Context &ctx);
 
-GiNaC::ex __plot_formula_process_atomic(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, PlotFormulaParser::Context &ctx) {
-  if (0 == node.getAltIdx()) {
+void __plot_formula_process_function_arguments(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, PlotFormulaParser::Context &ctx, std::vector<GiNaC::ex> &args)
+{
+  args.push_back(__plot_formula_process_expression(node[0], lexer, ctx));
+
+  if (node[1].matched()) {
+    __plot_formula_process_function_arguments(node[1][0][1], lexer, ctx, args);
+  }
+}
+
+GiNaC::ex __plot_formula_process_function(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, PlotFormulaParser::Context &ctx)
+{
+  std::string function_name = lexer[node[0].getTokenIdx()].getValue();
+  std::vector<GiNaC::ex> arguments;
+  if (node[2].matched()) {
+    __plot_formula_process_function_arguments(node[2][0], lexer, ctx, arguments);
+  }
+
+  // Dispatch function name:
+  if("sqrt" == function_name) {
+    if (1 != arguments.size()) {
+      Parser::SyntaxError err;
+      err << "Function 'sqrt' takes exactly 1 argument, " << arguments.size() << " are given.";
+      throw err;
+    }
+    return GiNaC::sqrt(arguments[0]);
+  } else if ("log" == function_name) {
+    if (1 != arguments.size()) {
+      Parser::SyntaxError err;
+      err << "Function 'log' takes exactly 1 argument, " << arguments.size() << " are given.";
+      throw err;
+    }
+    return GiNaC::log(arguments[0]);
+  } else if ("exp" == function_name) {
+    if (1 != arguments.size()) {
+      Parser::SyntaxError err;
+      err << "Function 'exp' takes exactly 1 argument, " << arguments.size() << " are given.";
+      throw err;
+    }
+    return GiNaC::exp(arguments[0]);
+  }
+
+  Parser::SyntaxError err;
+  err << "Unkown function " << function_name;
+  throw err;
+}
+
+GiNaC::ex __plot_formula_process_atomic(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, PlotFormulaParser::Context &ctx)
+{
+  switch (node.getAltIdx()) {
+  case 0: {
+    GiNaC::ex value = __plot_formula_process_function(node[0], lexer, ctx);
+    return value;
+  }
+  case 1: {
     std::stringstream buffer;
     buffer << lexer[node[0].getTokenIdx()].getValue().substr(1);
     size_t index; buffer >> index;
     return ctx.getColumnSymbol(index);
-  } else if (1 == node.getAltIdx()) {
+  }
+  case 2: {
     return __plot_formula_process_expression(node[0][1], lexer, ctx);
   }
-  // On alt-idx == 2:
-  return __plot_formula_process_atomic(node[0][1], lexer, ctx);
+  case 3: {
+    return __plot_formula_process_atomic(node[0][1], lexer, ctx);
+  }
+  default: break;
+  }
+
+  throw InternalError(__FILE__ ": Invalid CST node!");
 }
 
 GiNaC::ex __plot_formula_process_power(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, PlotFormulaParser::Context &ctx) {
@@ -290,9 +410,29 @@ PlotFormulaParser::Context::operator ()(size_t row, GiNaC::ex expression)
     values[_symbols[i]] = (*_table)(row, i);
   }
 
-  GiNaC::ex value = GiNaC::evalf(expression.subs(values));
+  GiNaC::ex value;
+  try {
+    value = GiNaC::evalf(expression.subs(values));
+  } catch (std::runtime_error &err) {
+    iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::ERROR);
+    message << "Can not evaluate expression " << expression
+            << ". Got: " << err.what();
+    iNA::Utils::Logger::get().log(message);
+    return std::numeric_limits<double>::quiet_NaN();
+  } catch (std::exception &err) {
+    iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::ERROR);
+    message << "Can not evaluate expression " << expression
+            << ". Got: " << err.what();
+    iNA::Utils::Logger::get().log(message);
+    return std::numeric_limits<double>::quiet_NaN();
+}
+
   if (! GiNaC::is_a<GiNaC::numeric>(value)) {
-    return 0./0.;
+    iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::ERROR);
+    message << "Can not evaluate expression " << expression
+            << ". Value not numeric: " << value;
+    iNA::Utils::Logger::get().log(message);
+    return std::numeric_limits<double>::quiet_NaN();
   }
   return GiNaC::ex_to<GiNaC::numeric>(value).to_double();
 }
@@ -327,6 +467,11 @@ PlotFormulaParser::check(const QString &formula, Context &context)
     PlotFormulaGrammar::get()->parse(lexer, cst);
     __plot_formula_process_expression(cst[0], lexer, context);
   } catch (Parser::ParserError &err) {
+    return false;
+  } catch (std::exception &err) {
+    Utils::Message message = LOG_MESSAGE(Utils::Message::ERROR);
+    message << "Unexpected exception: " << err.what();
+    Utils::Logger::get().log(message);
     return false;
   }
 
