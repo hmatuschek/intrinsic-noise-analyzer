@@ -9,6 +9,14 @@ DocumentTree::DocumentTree(QObject *parent)
 
 
 void
+DocumentTree::resetCompleteTree()
+{
+  resetTree();
+  this->reset();
+}
+
+
+void
 DocumentTree::addDocument(DocumentItem *document)
 {
   // Check if model is allready in list of open models:

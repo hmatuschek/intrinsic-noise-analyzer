@@ -64,3 +64,12 @@ TreeItem::removeChild(TreeItem *node)
     std::cerr << "OOps can not remove tree-item " << node << " not in list?" << std::endl;
   }
 }
+
+
+void
+TreeItem::resetTree()
+{
+  for (QList<TreeItem *>::iterator item=_children.begin(); item!=_children.end(); item++) {
+    (*item)->resetTree();
+  }
+}

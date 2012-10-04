@@ -5,6 +5,34 @@
 using namespace Plot;
 
 
+/* ********************************************************************************************* *
+ * Implementation of MeasureItem
+ * ********************************************************************************************* */
+MeasureItem::MeasureItem(Axis *parent)
+  : QObject(parent), QGraphicsItemGroup(), _values(0,0)
+{
+  setPos(0,0);
+
+  _label = new QGraphicsTextItem(this);
+  _label->setPos(3,-3);
+
+  new QGraphicsLineItem(-5, 0, 5, 0, this);
+  new QGraphicsLineItem(0, -5, 0, 5, this);
+
+  addToGroup(_label);
+  setVisible(false);
+}
+
+void
+MeasureItem::setValues(const QPointF &values)
+{
+  _values = values;
+  _label->setPlainText(QString("%1, %2").arg(_values.x()).arg(_values.y()));
+}
+
+const QPointF & MeasureItem::getValues() const { return _values; }
+
+
 
 /* ********************************************************************************************* *
  * Implementation of GraphGroup
@@ -62,9 +90,15 @@ Axis::Axis(QObject *parent)
   // Holds the graphs:
   this->graph_group = new GraphGroup();
 
+  // Construct measure:
+  this->_measure = new MeasureItem(this);
+  this->_measure->setVisible(false);
+  this->_measure->setPos(0,0);
+
   this->addToGroup(this->graph_group);
   this->addToGroup(this->x_zero);
   this->addToGroup(this->y_zero);
+  addToGroup(_measure);
 }
 
 
@@ -226,6 +260,27 @@ Axis::getMapping()
   return this->mapping;
 }
 
+void
+Axis::showMeasure(const QPointF &point)
+{
+  // Skip if not in plot region disbale measure:
+  if (! graph_group->boundingRect().contains(point-graph_group->pos())) {
+    _measure->setVisible(false);
+    return;
+  }
+
+  // Get coordinates of point:
+  QPointF values = mapping->inverseMapping(point-graph_group->pos());
+
+  // Show measure:
+  _measure->setValues(values);
+  _measure->setPos(point);
+  _measure->setVisible(true);
+
+  /*std::cerr << "Show measure of " << values.x() << ", " << values.y()
+            << " at " << point.x() << ", " << point.y() << std::endl;*/
+}
+
 
 void
 Axis::updatePlotSize()
@@ -293,6 +348,8 @@ Axis::forceRedraw()
   {
     (*iter)->updateGraph(*(this->mapping));
   }
+
+  /// @todo Redraw measure if visible
 
   /// \todo QT Redraw event needed?
 }
