@@ -311,6 +311,8 @@ void Application::onExpandRevReactions()
 
   iNA::Trafo::ReversibleReactionConverter converter; converter.apply(model);
 
+  docTree()->resetCompleteTree();
+
 }
 
 void Application::onCombineIrrevReactions()
@@ -322,6 +324,8 @@ void Application::onCombineIrrevReactions()
   iNA::Ast::Model &model = document->getModel();
 
   iNA::Trafo::IrreversibleReactionCollapser collector; collector.apply(model);
+
+  docTree()->resetCompleteTree();
 
 }
 
