@@ -401,6 +401,110 @@ GiNaC::ex __plot_formula_process_expression(Parser::ConcreteSyntaxTree &node, Pa
 }
 
 
+
+/* ******************************************************************************************** *
+ * Implementation of PlotFormulaSerializer
+ * ******************************************************************************************** */
+class PlotFormulaSerializer
+    : public GiNaC::visitor, public GiNaC::basic::visitor, public GiNaC::add::visitor,
+    public GiNaC::mul::visitor, public GiNaC::power::visitor, public GiNaC::function::visitor,
+    public GiNaC::symbol::visitor, public GiNaC::numeric::visitor
+{
+protected:
+  PlotFormulaParser::Context &_context;
+  int _current_precedence;
+  std::ostream &_stream;
+
+public:
+  PlotFormulaSerializer(std::ostream &stream, PlotFormulaParser::Context &context)
+    : _context(context), _stream(stream) {
+    // pass...
+  }
+
+  virtual void visit(const GiNaC::add &node) {
+    int old_precedence = _current_precedence;
+    _current_precedence = 1;
+
+    if (old_precedence > _current_precedence) { _stream << "("; }
+    if (0 < node.nops()) {
+      node.op(0).accept(*this);
+      for (size_t i=1; i<node.nops(); i++) {
+        _stream << "+";
+        node.op(i).accept(*this);
+      }
+    }
+    if (old_precedence > _current_precedence) { _stream << ")"; }
+
+    _current_precedence = old_precedence;
+  }
+
+  virtual void visit(const GiNaC::mul &node) {
+    int old_precedence = _current_precedence; _current_precedence = 2;
+    if (old_precedence > _current_precedence) { _stream << "("; }
+
+    if (0 < node.nops()) {
+      node.op(0).accept(*this);
+      for (size_t i=1; i<node.nops(); i++) {
+        _stream << "*";
+        node.op(i).accept(*this);
+      }
+    }
+
+    if (old_precedence > _current_precedence) { _stream << ")"; }
+    _current_precedence = old_precedence;
+  }
+
+  virtual void visit(const GiNaC::power &node) {
+    int old_precedence = _current_precedence; _current_precedence = 3;
+    if (old_precedence >= _current_precedence) { _stream << "("; }
+
+    node.op(0).accept(*this);
+    _stream << "^";
+    node.op(1).accept(*this);
+
+    if (old_precedence >= _current_precedence) { _stream << ")"; }
+    _current_precedence = old_precedence;
+  }
+
+  virtual void visit(const GiNaC::function &node) {
+    // Dispatch by function serial:
+    if (node.get_serial() == GiNaC::abs_SERIAL::serial) {
+      _stream << "abs("; node.op(0).accept(*this); _stream << ")"; return;
+    }
+
+    if (node.get_serial() == GiNaC::exp_SERIAL::serial) {
+      _stream << "exp("; node.op(0).accept(*this); _stream << ")"; return;
+    }
+
+    if (node.get_serial() == GiNaC::log_SERIAL::serial) {
+      _stream << "log("; node.op(0).accept(*this); _stream << ")"; return;
+    }
+
+    InternalError err;
+    err << "Can not serialize function call " << node << ": Unknown function.";
+    throw err;
+  }
+
+  virtual void visit(const GiNaC::symbol &node) {
+    _stream << "$" << _context.getColumnIdx(node);
+  }
+
+  virtual void visit(const GiNaC::numeric &node) {
+    if (node.is_integer()) {
+      _stream << node.to_long();
+    } else if (node.is_real()) {
+      _stream << node.to_double();
+    }
+  }
+
+  virtual void visit(const GiNaC::basic &node) {
+    InternalError err; err << "Can not serialize expression " << node << ": unknown expression type.";
+    throw err;
+  }
+
+};
+
+
 /* ******************************************************************************************** *
  * Implementation of PlotFormulaParser
  * ******************************************************************************************** */
@@ -424,6 +528,17 @@ PlotFormulaParser::Context::Context(const Context &other)
 GiNaC::symbol
 PlotFormulaParser::Context::getColumnSymbol(size_t column) {
   return _symbols[column];
+}
+
+size_t
+PlotFormulaParser::Context::getColumnIdx(GiNaC::symbol symbol) {
+  for (size_t i=0; i<_symbols.size(); i++) {
+    if (_symbols[i] == symbol) { return i; }
+  }
+
+  SymbolError err;
+  err << "Can not resolve symbol " << symbol << ": Unknown symbol.";
+  throw err;
 }
 
 double
@@ -530,4 +645,12 @@ PlotFormulaParser::parse(const QString &formula, Context &context)
   Parser::ConcreteSyntaxTree cst;
   PlotFormulaGrammar::get()->parse(lexer, cst);
   return __plot_formula_process_expression(cst[0], lexer, context);
+}
+
+
+void
+PlotFormulaParser::serialize(GiNaC::ex formula, std::ostream &stream, Context &context)
+{
+  PlotFormulaSerializer serializer(stream, context);
+  formula.accept(serializer);
 }

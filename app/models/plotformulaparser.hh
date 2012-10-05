@@ -24,6 +24,8 @@ public:
     Context(const Context &other);
     /** Resolves a column number to the corresponding GiNaC::symbol. */
     GiNaC::symbol getColumnSymbol(size_t column);
+    /** Resolves the given symbol to the corresponding column index. */
+    size_t getColumnIdx(GiNaC::symbol symbol);
     /** Evaluates the given expression (plot formula) for the given row of the table given to the
      * constructor. */
     double operator()(size_t row, GiNaC::ex expression);
@@ -41,6 +43,8 @@ public:
   /** Parses and returns the expression for the given formula in the given context.
    * You can use the context to evaluate the constructed expression. */
   static GiNaC::ex parse(const QString &formula, Context &context);
+  /** Serializes a given plot formula into its textual representation. */
+  static void serialize(GiNaC::ex formula, std::ostream &stream, Context &context);
 };
 
 #endif // PLOTFORMULAPARSER_HH

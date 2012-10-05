@@ -41,7 +41,7 @@ protected:
   QString _label;
 
 public:
-  TimeSeriesGraphConfig(Table *table, PlotType type, size_t mean_column, size_t var_column=0);
+  TimeSeriesGraphConfig(Table *table, PlotType type, const QString &label, size_t mean_column, size_t var_column=0);
   TimeSeriesGraphConfig(const TimeSeriesGraphConfig &other);
 
   /** Returns the current plot type. */
@@ -51,11 +51,15 @@ public:
 
   /** Returns the current plot formula for the mean. */
   GiNaC::ex meanColumn() const;
+  /** Returns the current plot formula as a string. */
+  QString meanColumnString();
   /** Resets the plot formula for the mean, returns false if the formula is not valid. */
   bool setMeanColumn(const QString &formula);
 
   /** Returns the current plot formula for the variance (if set). */
   GiNaC::ex varColumn() const;
+  /** Returns the current plot formula as a string. */
+  QString varColumnString();
   /** Resets the current plot formula for the variance, returns false if the given formular
    * is not valid. */
   bool setVarColumn(const QString &formula);
@@ -66,7 +70,7 @@ public:
   void setLabel(const QString &label);
 
   /** Returns the data table. */
-  const Table *table() const;
+  Table *table();
 
   /** Creates a new graph from this configuration. */
   Plot::Graph *create(const Plot::GraphStyle &style);
@@ -98,6 +102,8 @@ public:
   void addGraph(const TimeSeriesGraphConfig &graph);
   /** Removes a graph from the list. */
   void removeGraph(int idx);
+  /** Update graph at index. */
+  void updateGraph(int idx, const TimeSeriesGraphConfig &graph);
 
 private:
   /** The list of graphs. */
@@ -125,6 +131,8 @@ private slots:
   void onRemoveGraph();
   /** Callback to create a new graph. */
   void onAddGraph();
+  /** Callbeck to edit a existing graph. */
+  void onEditGraph(const QModelIndex &index);
   /** Updates the plot-preview window. */
   void onUpdatePlot();
   /** Checks if the configuration is valid. */
@@ -162,6 +170,8 @@ public:
   explicit TimeSeriesFormulaEditor(Table *table, QWidget *parent=0);
   /** Returns the formula as text. */
   inline QString getFormula() const { return _formula->text(); }
+  /** Resets the formula. */
+  inline void setFormula(const QString &formula) const { return _formula->setText(formula); }
 
 private slots:
   /** Assembles a list of column names ad shows them as a completer. */
@@ -183,13 +193,16 @@ private:
 
 
 /** A simple dialog to create a new graph for a time series plot. */
-class NewTimeSeriesGraphDialog : public QDialog
+class TimeSeriesGraphDialog : public QDialog
 {
   Q_OBJECT
 
 public:
-  /** Constructor. */
-  explicit NewTimeSeriesGraphDialog(Table *table, QWidget *parent=0);
+  /** Constructor for a new graph. */
+  explicit TimeSeriesGraphDialog(Table *table, QWidget *parent=0);
+  /** Constructor to edit an existing graph. */
+  explicit TimeSeriesGraphDialog(TimeSeriesGraphConfig &config, QWidget *parent=0);
+
   /** Returns the graph config. */
   inline const TimeSeriesGraphConfig &getConfig() const { return _config; }
 
@@ -198,6 +211,10 @@ private slots:
   void onPlotTypeSelect(int index);
   /** Validates the plot formulas and calls accepted() if they are valid. */
   void checkInputAndExit();
+
+private:
+  /** Internal used post-constructor to setup the GUI elements of the dialog. */
+  void __initGUI();
 
 private:
   /** Holds the data table. */

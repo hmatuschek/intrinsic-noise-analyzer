@@ -17,8 +17,8 @@
  * Implementation of TimeSeriesGraphConfig
  * ******************************************************************************************** */
 TimeSeriesGraphConfig::TimeSeriesGraphConfig(
-    Table *table, PlotType type, size_t mean_column, size_t var_column)
-  : _table(table), _context(table), _type(type), _mean_expression(mean_column), _var_expression(var_column), _label("Graph")
+    Table *table, PlotType type, const QString &label, size_t mean_column, size_t var_column)
+  : _table(table), _context(table), _type(type), _mean_expression(mean_column), _var_expression(var_column), _label(label)
 {
   // pass...
 }
@@ -46,6 +46,13 @@ TimeSeriesGraphConfig::meanColumn() const {
   return _mean_expression;
 }
 
+QString
+TimeSeriesGraphConfig::meanColumnString() {
+  std::stringstream buffer;
+  PlotFormulaParser::serialize(_mean_expression, buffer, _context);
+  return QString(buffer.str().c_str());
+}
+
 bool
 TimeSeriesGraphConfig::setMeanColumn(const QString &formula) {
   if (! PlotFormulaParser::check(formula, _context)) { return false; }
@@ -56,6 +63,13 @@ TimeSeriesGraphConfig::setMeanColumn(const QString &formula) {
 GiNaC::ex
 TimeSeriesGraphConfig::varColumn() const {
   return _var_expression;
+}
+
+QString
+TimeSeriesGraphConfig::varColumnString() {
+  std::stringstream buffer;
+  PlotFormulaParser::serialize(_var_expression, buffer, _context);
+  return QString(buffer.str().c_str());
 }
 
 bool
@@ -75,8 +89,8 @@ TimeSeriesGraphConfig::setLabel(const QString &label) {
   _label = label;
 }
 
-const Table *
-TimeSeriesGraphConfig::table() const {
+Table *
+TimeSeriesGraphConfig::table() {
   return _table;
 }
 
@@ -151,6 +165,13 @@ TimeSeriesGraphList::removeGraph(int idx) {
   endRemoveRows();
 }
 
+void
+TimeSeriesGraphList::updateGraph(int idx, const TimeSeriesGraphConfig &graph) {
+  if (idx < 0 || idx >= _graphs.size()) { return; }
+  _graphs.replace(idx, graph);
+  emit dataChanged(index(idx), index(idx));
+}
+
 
 /* ******************************************************************************************** *
  * Implementation of TimeSeriesPlotDialog
@@ -201,6 +222,8 @@ TimeSeriesPlotDialog::TimeSeriesPlotDialog(Table *table, QWidget *parent)
   QObject::connect(_rem_graph, SIGNAL(clicked()), this, SLOT(onRemoveGraph()));
   QObject::connect(buttons, SIGNAL(rejected()), this, SLOT(reject()));
   QObject::connect(buttons, SIGNAL(accepted()), this, SLOT(onAccepted()));
+  QObject::connect(_graph_list, SIGNAL(doubleClicked(QModelIndex)),
+                   this, SLOT(onEditGraph(QModelIndex)));
 }
 
 
@@ -217,10 +240,20 @@ TimeSeriesPlotDialog::graph(size_t i) {
 
 void
 TimeSeriesPlotDialog::onAddGraph() {
-  NewTimeSeriesGraphDialog add_graph_dialog(_data);
+  TimeSeriesGraphDialog add_graph_dialog(_data);
   if (QDialog::Rejected == add_graph_dialog.exec()) { return; }
   _graphs.addGraph(add_graph_dialog.getConfig());
   _stack->setCurrentIndex(0);
+  onUpdatePlot();
+}
+
+
+void
+TimeSeriesPlotDialog::onEditGraph(const QModelIndex &index) {
+  // get graph config and edit it:
+  TimeSeriesGraphDialog graph_dialog(_graphs.graph(index.row()));
+  if (QDialog::Rejected == graph_dialog.exec()) { return; }
+  _graphs.updateGraph(index.row(), graph_dialog.getConfig());
   onUpdatePlot();
 }
 
@@ -304,23 +337,49 @@ TimeSeriesFormulaEditor::showPopUp() {
 }
 
 
+
 /* ******************************************************************************************** *
- * Implementation of NewTimeSeriesGraphDialog
+ * Implementation of TimeSeriesGraphDialog
  * ******************************************************************************************** */
-NewTimeSeriesGraphDialog::NewTimeSeriesGraphDialog(Table *table, QWidget *parent)
-  : QDialog(parent), _data(table), _config(table, TimeSeriesGraphConfig::LINE_GRAPH, 0, 0)
+TimeSeriesGraphDialog::TimeSeriesGraphDialog(Table *table, QWidget *parent)
+  : QDialog(parent), _data(table), _config(table, TimeSeriesGraphConfig::LINE_GRAPH, "graph", 0, 0)
+{
+  // Setup GUI
+  __initGUI();
+}
+
+TimeSeriesGraphDialog::TimeSeriesGraphDialog(TimeSeriesGraphConfig &config, QWidget *parent)
+  : QDialog(parent), _data(config.table()), _config(config)
+{
+  // Setup GUI
+  __initGUI();
+}
+
+
+void
+TimeSeriesGraphDialog::__initGUI()
 {
   setWindowTitle("Graph-o-mat");
 
   _plot_type    = new QComboBox();
   _plot_type->addItem(tr("Line plot"));
   _plot_type->addItem(tr("Variance plot"));
-  _plot_type->setCurrentIndex(0);
+  if (TimeSeriesGraphConfig::LINE_GRAPH == _config.plotType()) {
+    _plot_type->setCurrentIndex(0);
+  } else {
+    _plot_type->setCurrentIndex(1);
+  }
 
-  _label = new QLineEdit("graph");
+  _label = new QLineEdit(_config.label());
   _formula_mean = new TimeSeriesFormulaEditor(_data);
+  _formula_mean->setFormula(_config.meanColumnString());
   _formula_var  = new TimeSeriesFormulaEditor(_data);
-  _formula_var->setEnabled(false);
+  if (TimeSeriesGraphConfig::VARIANCE_GRAPH == _config.plotType()) {
+    _formula_var->setFormula(_config.varColumnString());
+    _formula_var->setEnabled(true);
+  } else {
+    _formula_var->setEnabled(false);
+  }
 
   QDialogButtonBox *buttons = new QDialogButtonBox(QDialogButtonBox::Cancel|QDialogButtonBox::Ok);
 
@@ -343,7 +402,7 @@ NewTimeSeriesGraphDialog::NewTimeSeriesGraphDialog(Table *table, QWidget *parent
 
 
 void
-NewTimeSeriesGraphDialog::onPlotTypeSelect(int index)
+TimeSeriesGraphDialog::onPlotTypeSelect(int index)
 {
   if (0 == index) {
     _formula_var->setEnabled(false);
@@ -356,7 +415,7 @@ NewTimeSeriesGraphDialog::onPlotTypeSelect(int index)
 
 
 void
-NewTimeSeriesGraphDialog::checkInputAndExit()
+TimeSeriesGraphDialog::checkInputAndExit()
 {
   // Configure plot label
   _config.setLabel(_label->text());
