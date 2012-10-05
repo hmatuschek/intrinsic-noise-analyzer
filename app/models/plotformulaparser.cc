@@ -105,7 +105,6 @@ protected:
 };
 
 
-
 /* ******************************************************************************************** *
  *  FunctionArgumentList := Expression [, FunctionArgumentList];
  * ******************************************************************************************** */
@@ -161,7 +160,8 @@ PlotFormulaAtomicProduction::PlotFormulaAtomicProduction()
   : Parser::AltProduction()
 {
   _instance = this;
-  //alternatives.push_back(NumberProduction::get());
+  alternatives.push_back(new Parser::TokenProduction(T_INTEGER));
+  alternatives.push_back(new Parser::TokenProduction(T_FLOAT));
   alternatives.push_back(PlotFormulaFunction::get());
   alternatives.push_back(new Parser::TokenProduction(T_COLUMN_ID));
   alternatives.push_back(
@@ -329,22 +329,38 @@ GiNaC::ex __plot_formula_process_function(Parser::ConcreteSyntaxTree &node, Pars
 GiNaC::ex __plot_formula_process_atomic(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, PlotFormulaParser::Context &ctx)
 {
   switch (node.getAltIdx()) {
-  case 0: {
+  // On integer | float
+  case 0:
+  case 1: {
+    std::stringstream buffer; buffer << lexer[node[0].getTokenIdx()].getValue();
+    double value; buffer >> value;
+    return value;
+  }
+
+  // On function call
+  case 2: {
     GiNaC::ex value = __plot_formula_process_function(node[0], lexer, ctx);
     return value;
   }
-  case 1: {
+
+  // On column identifier
+  case 3: {
     std::stringstream buffer;
     buffer << lexer[node[0].getTokenIdx()].getValue().substr(1);
     size_t index; buffer >> index;
     return ctx.getColumnSymbol(index);
   }
-  case 2: {
+
+  // On ( Expression )
+  case 4: {
     return __plot_formula_process_expression(node[0][1], lexer, ctx);
   }
-  case 3: {
-    return __plot_formula_process_atomic(node[0][1], lexer, ctx);
+
+  // On negation
+  case 5: {
+    return -__plot_formula_process_atomic(node[0][1], lexer, ctx);
   }
+
   default: break;
   }
 
@@ -391,11 +407,19 @@ GiNaC::ex __plot_formula_process_expression(Parser::ConcreteSyntaxTree &node, Pa
 PlotFormulaParser::Context::Context(Table *table)
   : _table(table)
 {
+  // Assign for each column a symbol.
   _symbols.resize(_table->getNumColumns());
   for (size_t i=0; i<_table->getNumColumns(); i++) {
     _symbols[i] = GiNaC::symbol(table->getColumnName(i).toStdString());
   }
 }
+
+PlotFormulaParser::Context::Context(const Context &other)
+  : _table(other._table), _symbols(other._symbols)
+{
+  // pass...
+}
+
 
 GiNaC::symbol
 PlotFormulaParser::Context::getColumnSymbol(size_t column) {

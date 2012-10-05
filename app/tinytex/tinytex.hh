@@ -58,7 +58,7 @@ protected:
   std::map<std::string, QString> _symbol_table;
 
 protected:
-  /** Hidden constructor, use @parse. */
+  /** Hidden constructor, use @c parse. */
   TinyTex(iNA::Parser::Lexer &lexer);
 
   /** Assembles a MathFormula from the CST. */
