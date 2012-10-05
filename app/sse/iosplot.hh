@@ -17,23 +17,6 @@ public:
 };
 
 
-/**
- * Trivial specialization to the variance plot.
- *
- * This class plots the mean and std.dev. determined by the LNA.
- */
-class IOSLNATimeSeriesPlot : public VariancePlot
-{
-  Q_OBJECT
-
-public:
-  /** Constructor. */
-  explicit IOSLNATimeSeriesPlot(size_t num_species, Table *data,
-                                const QString &species_unit, const QString &time_unit,
-                                QObject *parent=0);
-};
-
-
 class IOSEMREComparePlot : public Plot::Figure
 {
   Q_OBJECT
@@ -41,17 +24,6 @@ class IOSEMREComparePlot : public Plot::Figure
 public:
   explicit IOSEMREComparePlot(const QStringList &selected_species, IOSTask *task,
                               QObject *parent=0);
-};
-
-
-class IOSLNACorrelationPlot : public Plot::Figure
-{
-  Q_OBJECT
-
-public:
-  explicit IOSLNACorrelationPlot(IOSTask *taks,
-                                 const QString &time_unit,
-                                 QObject *parent=0);
 };
 
 
