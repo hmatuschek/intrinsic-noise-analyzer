@@ -6,7 +6,7 @@
 #include <QLabel>
 #include "retask.hh"
 
-/** Simple plot dialog to assemble quickly some default plots for the RE analysis. */
+/** Simple plot dialog to assemble quickly some default plots for the SSE analysis. */
 class SSEPlotDialog : public QDialog
 {
   Q_OBJECT

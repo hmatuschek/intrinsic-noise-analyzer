@@ -94,6 +94,7 @@ public:
    */
   virtual QString getLabel();
 
+  inline const SSETaskConfig &getConfig() const { return config; }
 
 protected:
   /**

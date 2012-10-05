@@ -10,6 +10,7 @@
 #include "../application.hh"
 #include "../doctree/plotitem.hh"
 #include "lnaplot.hh"
+#include "replotdialog.hh"
 
 
 /* ********************************************************************************************* *
@@ -67,40 +68,25 @@ LNAResultWidget::LNAResultWidget(LNATaskWrapper *task_wrapper, QWidget *parent):
 void
 LNAResultWidget::plotButtonPressed()
 {
-  std::stringstream unit_str;
-  this->lna_task_wrapper->getLNATask()->getSpeciesUnit().dump(unit_str, true);
-  QString concentration_unit(unit_str.str().c_str());
+  SSEPlotDialog dialog(lna_task_wrapper->getLNATask()->getConfig().getModel());
+  dialog.setWindowTitle(tr("LNA quick plot dialog"));
+  dialog.setTitle(tr("Select the species to plot."));
 
-  unit_str.str("");
-  this->lna_task_wrapper->getLNATask()->getTimeUnit().dump(unit_str, true);
-  QString time_unit(unit_str.str().c_str());
-
+  if (QDialog::Rejected == dialog.exec()) { return; }
+  QStringList selected_species = dialog.getSelectedSpecies();
 
   // Add timeseries plot:
   Application::getApp()->docTree()->addPlot(
         this->lna_task_wrapper,
-        new PlotItem(
-          new LNATimeSeriesPlot(this->lna_task_wrapper->getLNATask()->getSelectedSpecies().size(),
-                                this->lna_task_wrapper->getLNATask()->getTimeSeries(),
-                                concentration_unit, time_unit)));
+        new PlotItem(new LNATimeSeriesPlot(selected_species, lna_task_wrapper->getLNATask())));
 
   // Add correlation coefficient plot (if there are more than one species selected).
   if (1 < this->lna_task_wrapper->getLNATask()->getSelectedSpecies().size()) {
     Application::getApp()->docTree()->addPlot(
           this->lna_task_wrapper,
           new PlotItem(
-            new LNACorrelationPlot(this->lna_task_wrapper->getLNATask(),
-                                   time_unit)));
+            new LNACorrelationPlot(selected_species, lna_task_wrapper->getLNATask())));
   }
-
-
-  // Add EMRE plot:
-//  Application::getApp()->docTree()->addPlot(
-//        this->lna_task_wrapper,
-//        new PlotItem(
-//          new EMRETimeSeriesPlot(this->lna_task_wrapper->getLNATask()->getSelectedSpecies().size(),
-//                                 this->lna_task_wrapper->getLNATask()->getTimeSeries(),
-//                                 concentration_unit, time_unit)));
 }
 
 

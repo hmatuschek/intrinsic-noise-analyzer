@@ -25,7 +25,6 @@ SSEWizard::SSEWizard(QWidget *parent) :
   this->setWindowTitle("Time Course Analysis (SSE)");
 
   this->setPage(SSEWizard::MODEL_SELECTION_PAGE, new SSEModelSelectionPage(this));
-  this->setPage(SSEWizard::SPECIES_SELECTION_PAGE, new SSESpeciesSelectionPage(this));
   this->setPage(SSEWizard::ENGINE_SELECTION_PAGE, new SSEEngineSelectionPage(this));
   this->setPage(SSEWizard::INTEGRATOR_CONFIG_PAGE, new SSEIntegratorPage(this));
   this->setPage(SSEWizard::SUMMARY_PAGE, new SSESummaryPage(this));
@@ -95,9 +94,18 @@ SSEModelSelectionPage::validatePage()
     }
   } catch (Exception err) {
     // Simply show a warning and done.
-    QMessageBox::warning(0, tr("Can not construct RE anlysis from model: "), err.what());
+    QMessageBox::warning(0, tr("Can not construct SSE anlysis from model: "), err.what());
     return false;
   }
+
+  /// @todo Remove that shit as soon as possible!
+  // Assemble list of selected species (all species in order of their definition):
+  QStringList selected_species;
+  iNA::Ast::Model &model = config.getModelDocument()->getModel();
+  for (size_t i=0; i<model.numSpecies(); i++) {
+    selected_species.append(model.getSpecies(i)->getIdentifier().c_str());
+  }
+  config.setSelectedSpecies(selected_species);
 
   return true;
 }

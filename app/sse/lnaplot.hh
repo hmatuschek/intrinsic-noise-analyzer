@@ -8,20 +8,24 @@
 #include "lnatask.hh"
 
 
-/**
- * Collects data from a @c Table and updates the
- * @c VarianceLinesGraph instance.
- */
+/** Implements a simple quick plot for the RE mean and LAN var. */
 class LNATimeSeriesPlot : public Plot::Figure
 {
   Q_OBJECT
 
 public:
-  explicit LNATimeSeriesPlot(size_t num_species, Table *data,
-                             const QString &species_unit, const QString &time_unit,
-                             QObject *parent=0);
+  explicit LNATimeSeriesPlot(QList<QString> &selected_species, LNATask *task, QObject *parent=0);
 };
 
+
+/** Implements a simple correlation plot for LNA covariances. */
+class LNACorrelationPlot : public Plot::Figure
+{
+  Q_OBJECT
+
+public:
+  explicit LNACorrelationPlot(QList<QString> &selected_species, LNATask *task, QObject *parent=0);
+};
 
 
 class EMRETimeSeriesPlot : public Plot::Figure
@@ -35,15 +39,6 @@ public:
 };
 
 
-
-class LNACorrelationPlot : public Plot::Figure
-{
-  Q_OBJECT
-
-public:
-  explicit LNACorrelationPlot(LNATask *taks, const QString &time_unit,
-                              QObject *parent=0);
-};
 
 
 /**
