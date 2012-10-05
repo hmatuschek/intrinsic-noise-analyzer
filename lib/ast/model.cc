@@ -375,7 +375,7 @@ Model::setTimeUnit(const Unit &unit, bool scale_model)
   }
 
   // Set unit:
-  _area_unit = unit;
+  _time_unit = unit;
 
   if (scale_model) {
     throw InternalError("Rescaleing of model by time units is not implemented yet.");
