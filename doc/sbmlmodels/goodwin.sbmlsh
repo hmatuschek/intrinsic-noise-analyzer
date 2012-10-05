@@ -16,9 +16,9 @@
  compartment_1: [species_4]  = 0  "P2"
 
 @parameters
- a=c*((c/b)-1) "a"
  b=0.2 "b"
  c=10 "c"
+ a=c*(sqrt(c/b)-1) "a"
 
 @reactions
  @r= reaction_1 "transscription"
