@@ -117,8 +117,7 @@ Parser::Sbml::__process_model(LIBSBML_CPP_NAMESPACE_QUALIFIER Model *model, Pars
 
   /* Process all function definitions in model by forwarding them to
    * __process_function_definition. */
-  for (size_t i=0; i<model->getNumFunctionDefinitions(); i++)
-  {
+  for (size_t i=0; i<model->getNumFunctionDefinitions(); i++) {
     LIBSBML_CPP_NAMESPACE_QUALIFIER FunctionDefinition *func_def = model->getFunctionDefinition(i);
     Ast::FunctionDefinition *def = __process_function_definition(func_def, ctx);
     ctx.model().addDefinition(def);
@@ -175,6 +174,37 @@ Parser::Sbml::__process_model(LIBSBML_CPP_NAMESPACE_QUALIFIER Model *model, Pars
     Ast::VariableDefinition *sp_def = __process_species_definition(sp, ctx, scaling);
     // store
     ctx.model().addDefinition(sp_def);
+  }
+
+  /* Process initial assignments. */
+  for (size_t i=0; i<model->getNumInitialAssignments(); i++) {
+    LIBSBML_CPP_NAMESPACE_QUALIFIER InitialAssignment *sbml_assignment = model->getInitialAssignment(i);
+    // Search for variable
+    if (!ctx.model().hasVariable(sbml_assignment->getId())) {
+      SymbolError err;
+      err << "Can not process initial assingment for identifier "
+          << sbml_assignment->getId() << "; Unknown variable.";
+      throw err;
+    }
+    Ast::VariableDefinition *var = ctx.model().getVariable(sbml_assignment->getId());
+    var->setValue(__process_expression(sbml_assignment->getMath(), ctx));
+
+    // Initial values of species must be handled separately:
+    if (Ast::Node::isSpecies(var)) {
+      // Cast to Ast::Species:
+      Ast::Species *species = static_cast<Ast::Species *>(var);
+      // Get SBML species by id
+      LIBSBML_CPP_NAMESPACE_QUALIFIER Species *sbml_species = model->getSpecies(var->getIdentifier());
+      // Is model in substance or concentration units?
+      bool species_have_substance_units = ctx.model().speciesHasSubstanceUnits();
+      if (sbml_species->getHasOnlySubstanceUnits() && (! species_have_substance_units)) {
+        // Initial value vas given in substance units but model has concentration units:
+        species->setValue(species->getValue()/species->getCompartment()->getSymbol());
+      } else if (species_have_substance_units){
+        // Initial value was given in concentrations but model is in substance units:
+        species->setValue(species->getValue()*species->getCompartment()->getSymbol());
+      }
+    }
   }
 
   /* Process rules for variables: */
@@ -274,28 +304,6 @@ Parser::Sbml::__process_species_definition(
     }
   }
 
-  // Search for initial value in initial assignments:
-  const LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model = node->getModel();
-  for (size_t i=0; i<sbml_model->getNumInitialAssignments(); i++) {
-    const LIBSBML_CPP_NAMESPACE_QUALIFIER InitialAssignment *assignment
-        = sbml_model->getInitialAssignment(i);
-    if (assignment->getId() == node->getId()) {
-      if (node->getHasOnlySubstanceUnits()) {
-        if (species_have_substance_units) {
-          init_value = __process_expression(assignment->getMath(), ctx);
-        } else {
-          init_value = __process_expression(assignment->getMath(), ctx)/compartment->getSymbol();
-        }
-      } else {
-        if (species_have_substance_units) {
-          init_value = __process_expression(assignment->getMath(), ctx) * compartment->getSymbol();
-        } else {
-          init_value = __process_expression(assignment->getMath(), ctx);
-        }
-      }
-    }
-  }
-
   // Assemble species definition
   Ast::Species *species = new Ast::Species(node->getId(), init_value, compartment, node->getName(),
                                            node->getConstant());
@@ -372,16 +380,6 @@ Parser::Sbml::__process_parameter_definition(LIBSBML_CPP_NAMESPACE_QUALIFIER Par
     init_value = GiNaC::numeric(node->getValue());
   }
 
-  // Search for initial value in initial assignments:
-  const LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model = node->getModel();
-  for (size_t i=0; i<sbml_model->getNumInitialAssignments(); i++) {
-    const LIBSBML_CPP_NAMESPACE_QUALIFIER InitialAssignment *assignment
-        = sbml_model->getInitialAssignment(i);
-    if (assignment->getId() == node->getId()) {
-      init_value = __process_expression(assignment->getMath(), ctx);
-    }
-  }
-
   // Get units for parameter (it there is one):
   Ast::Unit unit(Ast::Unit::dimensionless());
   if (node->isSetUnits()) {
@@ -420,15 +418,6 @@ Parser::Sbml::__process_compartment_definition(
   GiNaC::ex init_value;
   if (node->isSetSize()) {
     init_value = GiNaC::numeric(node->getSize());
-  }
-  // Search for initial value in initial assignments:
-  const LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model = node->getModel();
-  for (size_t i=0; i<sbml_model->getNumInitialAssignments(); i++) {
-    const LIBSBML_CPP_NAMESPACE_QUALIFIER InitialAssignment *assignment
-        = sbml_model->getInitialAssignment(i);
-    if (assignment->getId() == node->getId()) {
-      init_value = __process_expression(assignment->getMath(), ctx);
-    }
   }
 
   Ast::Unit unit(ctx.model().getVolumeUnit());
