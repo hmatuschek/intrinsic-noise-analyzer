@@ -10,6 +10,7 @@
 #include "../application.hh"
 #include "../doctree/plotitem.hh"
 #include "replot.hh"
+#include "../views/timeseriesplotwizard.hh"
 
 
 /* ********************************************************************************************* *
@@ -67,6 +68,9 @@ REResultWidget::REResultWidget(RETaskWrapper *task_wrapper, QWidget *parent):
 void
 REResultWidget::plotButtonPressed()
 {
+  TimeSeriesPlotDialog dialog(re_task_wrapper->getRETask()->getTimeSeries());
+  dialog.exec();
+
   std::stringstream unit_str;
   this->re_task_wrapper->getRETask()->getSpeciesUnit().dump(unit_str, true);
   QString concentration_unit(unit_str.str().c_str());

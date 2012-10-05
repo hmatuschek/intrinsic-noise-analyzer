@@ -11,6 +11,22 @@
 using namespace std;
 
 
+class ExceptionApplication : public QApplication
+{
+public:
+  ExceptionApplication(int argc, char *argv[]) : QApplication(argc, argv) { }
+
+  bool notify(QObject *obj, QEvent *event)
+  {
+    try {
+      return QApplication::notify(obj, event);
+    } catch (std::exception &err) {
+      std::cerr << "Oops, there was an error: " << err.what() << std::endl;
+      return false;
+    }
+  }
+};
+
 int main(int argc, char *argv[])
 {
   // Instantiate Logger and handler:
@@ -18,7 +34,7 @@ int main(int argc, char *argv[])
   //      new Fluc::Utils::TextMessageHandler(std::cerr, Fluc::Utils::Message::DEBUG));
 
   // Instantiate a QApplication
-  QApplication qapp(argc, argv);
+  ExceptionApplication qapp(argc, argv);
 
   // Instantiate our own application model, holds all the data of the running application
   Application *app = Application::getApp();
