@@ -143,10 +143,10 @@ TokenRule::onAlphaNum(State *A, State *B)
  * Implementation of Lexer:
  * ******************************************************************************************** */
 Lexer::Lexer(std::istream &input)
-  : input(input), history(0), reader()
+  : input(input), history(0), reader(), _line_no(1)
 {
   // Initialize stack of token pointer:
-  this->stack.push_back(State(0,1,1));
+  this->stack.push_back(State(0,false));
 
   // Store default EOF token-name:
   this->addTokenName(Token::END_OF_INPUT, "end-of-input");
@@ -162,31 +162,42 @@ const Token &
 Lexer::next()
 {
   // Needs to read token from input?
-  if ((this->stack.back().idx+1) == this->history.size()) {
+  if ((this->stack.back().index+1) == this->history.size()) {
     this->parseToken();
   }
 
   // If token already read:
-  this->stack.back().idx++;
+  this->stack.back().index++;
   // Return token from history
-  return this->history[this->stack.back().idx];
+  return this->history[this->stack.back().index];
 }
 
 
 const Token &
 Lexer::current() {
   // If there is no token parsed -> parse one more
-  if (this->stack.back().idx == this->history.size()) {
+  if (this->stack.back().index == this->history.size()) {
     this->parseToken();
   }
-  return this->history[this->stack.back().idx];
+  return this->history[this->stack.back().index];
 }
 
 
 size_t
 Lexer::currentIndex() const
 {
-  return this->stack.back().idx;
+  return this->stack.back().index;
+}
+
+
+void
+Lexer::setTerminal(bool terminal) {
+  this->stack.back().is_terminal = terminal;
+}
+
+bool
+Lexer::isTerminal() const {
+  return this->stack.back().is_terminal;
 }
 
 
@@ -195,6 +206,7 @@ Lexer::push_state()
 {
   //std::cerr << "Save LexerState: " << this->stack.back() << std::endl;
   this->stack.push_back(this->stack.back());
+  this->stack.back().is_terminal = false;
 }
 
 
@@ -219,7 +231,8 @@ void
 Lexer::reset()
 {
   this->stack.clear();
-  this->stack.push_back(State(0, 1, 1));
+  this->stack.push_back(State(0, false));
+  _line_no = 1;
 }
 
 
@@ -274,7 +287,7 @@ Lexer::parseToken()
 
   input.peek();
   // Read chars until EOF or NFA does not accept the next char:
-  while ((!input.eof()) &&reader.accepts(input.peek()))
+  while ((!input.eof()) && reader.accepts(input.peek()))
   {
     char c; input.get(c); input.peek();
     reader.accept(c);
@@ -283,8 +296,8 @@ Lexer::parseToken()
 
   // If the reader is not in a final state:
   if (! reader.inFinalState()) {
-    ParserError err(stack.back().line);
-    err << "@line: " << stack.back().line
+    ParserError err(_line_no);
+    err << "@line: " << _line_no
         << "Lexer: unexpected char: " << (unsigned char)(input.peek());
     throw err;
   }
@@ -293,11 +306,11 @@ Lexer::parseToken()
   TokenRule *rule = static_cast<TokenRule *>(reader.getMatchingAutomata());
 
   // Store parsed token in history:
-  Token token = rule->getToken(_buffer.str(), stack.back().line);
+  Token token = rule->getToken(_buffer.str(), _line_no);
 
   // If token is NEW_LINE token:
   if (0 != new_line_token.count(token.getId())) {
-    stack.back().line++;
+    _line_no++;
   }
 
   // If parsed token is ignored -> read another one...
@@ -337,7 +350,6 @@ EOLTokenRule::EOLTokenRule(unsigned id)
   State *s4 = createState(true);
   onChar('\n', s1, s2);
   onChar('\r', s1, s3);
-  onChar('\r', s3, s4);
   onChar('\n', s3, s4);
 }
 

@@ -230,17 +230,24 @@ public:
   class State {
   public:
     /** Holds the index of the current token. */
-    size_t idx;
-    /** Holds the current line number. */
-    size_t line;
-    /** Holds the current column number. */
-    size_t column;
+    size_t index;
+    /** If true, the lexer is in terminal state, no alternatives are processed on error. */
+    bool is_terminal;
 
   public:
     /** Constructor. */
-    State(size_t idx, size_t line, size_t column) : idx(idx), line(line), column(column) { }
+    State(size_t idx, bool terminal)
+      : index(idx), is_terminal(terminal) { }
+
     /** Copy constructor. */
-    State(const State &other) : idx(other.idx), line(other.line), column(other.column) { }
+    State(const State &other)
+      : index(other.index), is_terminal(other.is_terminal) { }
+
+    /** Assignment operator. */
+    inline const State &operator=(const State &other) {
+      index=other.index; is_terminal=other.is_terminal;
+      return *this;
+    }
   };
 
 
@@ -261,6 +268,8 @@ protected:
   std::map<unsigned, std::string> token_table;
   /** This buffer collects the chars that are accepted by a token. */
   std::stringstream _buffer;
+  /** Line numer counter. */
+  size_t _line_no;
 
 public:
   /** Constructs a general lexer for the given input. */
@@ -278,6 +287,12 @@ public:
 
   /** Returns the index of the current token. */
   size_t currentIndex() const;
+
+  /** Sets the current state as terminal. */
+  void setTerminal(bool terminal);
+
+  /** Retruns true if the current state is terminal. */
+  bool isTerminal() const;
 
   /** Saves the current state on the stack. */
   void push_state();

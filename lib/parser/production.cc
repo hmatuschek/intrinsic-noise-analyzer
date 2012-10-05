@@ -176,23 +176,12 @@ Production::parse(Lexer &lexer, ConcreteSyntaxTree &element)
 }
 
 
-void
-Production::notify(Lexer &lexer, ConcreteSyntaxTree &element)
-{
-  std::list<Production *>::iterator iter = this->elements.begin();
-  for (size_t i=0; i<this->elements.size(); i++, iter++)
-  {
-    (*iter)->notify(lexer, element[i]);
-  }
-}
-
-
 
 /* ******************************************************************************************** *
  * Implementation of TokenProduction:
  * ******************************************************************************************** */
-TokenProduction::TokenProduction(unsigned id)
-  : Production(), id(id)
+TokenProduction::TokenProduction(unsigned id, bool is_terminal)
+  : Production(), _id(id), _is_terminal(is_terminal)
 {
   // Pass...
 }
@@ -201,29 +190,28 @@ TokenProduction::TokenProduction(unsigned id)
 void
 TokenProduction::parse(Lexer &lexer, ConcreteSyntaxTree &element)
 {
-  if (this->id != lexer.current().getId()) {
+  // Check if the current token of the lexer matches token _id.
+  if (_id != lexer.current().getId()) {
     SyntaxError err(lexer.current().getLine());
     err << "@line "<< lexer.current().getLine() << ": "
         << "Unexpected token: " << lexer.getTokenName(lexer.current().getId())
-        << " expected: " << lexer.getTokenName(this->id);
+        << " expected: " << lexer.getTokenName(_id);
+    err.addExpectedTokenId(lexer.getTokenName(_id));
     throw err;
   }
 
+  // If matches -> initialize element as token node.
   ConcreteSyntaxTree::asTokenNode(element, lexer.currentIndex());
 
-  /*std::cerr << "Parsed token " << lexer.current().getId()
-            << " @line " << lexer.current().getLine()
-            << ": \"" << lexer.current().getValue() << "\"" << std::endl;*/
-
   // Consume token...
+  lexer.setTerminal(_is_terminal);
   lexer.next();
 }
 
 
-void
-TokenProduction::notify(Lexer &lexer, ConcreteSyntaxTree &element)
-{
-  // Pass...
+bool
+TokenProduction::isTerminal() const {
+  return _is_terminal;
 }
 
 
@@ -262,6 +250,9 @@ AltProduction::parse(Lexer &lexer, ConcreteSyntaxTree &element)
 {
   ConcreteSyntaxTree::asAltNode(element);
 
+  SyntaxError coll_err(lexer.current().getLine());
+  coll_err << "Unexpected token " << lexer.getTokenName(lexer.current().getId()) << ".";
+
   for (size_t i=0; i<this->alternatives.size(); i++)
   {
     try
@@ -275,23 +266,28 @@ AltProduction::parse(Lexer &lexer, ConcreteSyntaxTree &element)
       // And return
       return;
     }
-    catch (ParserError &err) {
-      // On error, reset lexer
+    catch (SyntaxError &err) {
+      coll_err.addExpectedTokens(err.getExpectedTokens());
+
+      // If the lexer state is terminal, forward error
+      if (lexer.isTerminal()) {
+        throw err;
+      }
+
+      // On error, restore lexer state
       lexer.restore_state();
 
       // If this was the last try -> abort no alternative matched
       if ((i+1) == this->alternatives.size()) {
+        coll_err << "expected one of: ";
+        for (std::set<std::string>::const_iterator iter=coll_err.getExpectedTokens().begin();
+             iter != coll_err.getExpectedTokens().end(); iter++) {
+          err << *iter << ", ";
+        }
         throw err;
       }
     }
   }
-}
-
-
-void
-AltProduction::notify(Lexer &lexer, ConcreteSyntaxTree &element)
-{
-  this->alternatives[element.getAltIdx()]->notify(lexer, element[0]);
 }
 
 
@@ -310,12 +306,6 @@ EmptyProduction::parse(Lexer &lexer, ConcreteSyntaxTree &element)
 {
   // Initialize element as empty:
   ConcreteSyntaxTree::asEmptyNode(element);
-}
-
-void
-EmptyProduction::notify(Lexer &lexer, ConcreteSyntaxTree &element)
-{
-  // Pass...
 }
 
 
@@ -341,17 +331,13 @@ OptionalProduction::parse(Lexer &lexer, ConcreteSyntaxTree &element)
     this->production->parse(lexer, element[0]);
     lexer.drop_state();
     element.setMatched(true);
-  } catch (ParserError &err) {
+  } catch (SyntaxError &err) {
+    // If lexer is in terminal state -> forward error
+    if (lexer.isTerminal()) {
+      throw err;
+    }
+    // otherwise ignore error;
     lexer.restore_state();
     element.setMatched(false);
-  }
-}
-
-
-void
-OptionalProduction::notify(Lexer &lexer, ConcreteSyntaxTree &element)
-{
-  if (element.matched()) {
-    this->production->notify(lexer, element[0]);
   }
 }

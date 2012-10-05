@@ -44,6 +44,10 @@ ODETest::ODETest()
   }
 }
 
+ODETest::~ODETest()
+{
+  // Pass...
+}
 
 
 void

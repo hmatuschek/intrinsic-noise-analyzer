@@ -181,14 +181,14 @@ void
 Pass::cleanupReaction(Reaction *node)
 {
   // Check for cleanup in reactants:
-  for (Reaction::iterator iter = node->reacBegin(); iter != node->reacEnd(); iter++)
+  for (Reaction::iterator iter = node->reactantsBegin(); iter != node->reactantsEnd(); iter++)
   {
     // Replace stoichiometric expression:
     iter->second = iter->second.subs(this->substitutions);
   }
 
   // Check for cleanup in products:
-  for (Reaction::iterator iter = node->prodBegin(); iter != node->prodEnd(); iter++)
+  for (Reaction::iterator iter = node->productsBegin(); iter != node->productsEnd(); iter++)
   {
     // Replace stoichiometric expression:
     iter->second = iter->second.subs(this->substitutions);

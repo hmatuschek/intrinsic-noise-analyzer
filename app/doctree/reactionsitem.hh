@@ -1,5 +1,5 @@
-#ifndef __INA_APP_DOCTREE_SBMLMODELREACTIONS_HH__
-#define __INA_APP_DOCTREE_SBMLMODELREACTIONS_HH__
+#ifndef __INA_APP_DOCTREE_REACTIONSITEM_HH__
+#define __INA_APP_DOCTREE_REACTIONSITEM_HH__
 
 #include <QObject>
 #include "ast/model.hh"
@@ -28,6 +28,10 @@ public:
   /** Returns a weak reference to the list of reactions. */
   ReactionList *reactionList();
 
+protected:
+  /** Updates the reaction list (children) from model. */
+  virtual void resetTree();
+
 private:
   /** Holds the item label ("Reactions"). */
   QString _itemLabel;
@@ -36,4 +40,4 @@ private:
 };
 
 
-#endif // __INA_APP_DOCTREE_SBMLMODELREACTIONS_HH__
+#endif // __INA_APP_DOCTREE_REACTIONSITEM_HH__

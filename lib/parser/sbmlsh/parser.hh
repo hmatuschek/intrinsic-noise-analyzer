@@ -136,9 +136,9 @@ class Parser
 {
 protected:
   /** Hold the lexer. */
-  Lexer lexer;
+  Lexer _lexer;
   /** Holds the root of the grammar. */
-  iNA::Parser::Production *grammar;
+  iNA::Parser::Production *_grammar;
 
 public:
   /** Constructor. */

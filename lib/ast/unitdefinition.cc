@@ -168,15 +168,18 @@ Unit::operator =(const Unit &other)
 
 
 double
-Unit::getMultiplier() const
-{
+Unit::getMultiplier() const {
   return this->common_multiplier;
 }
 
 double
-Unit::getScale() const
-{
+Unit::getScale() const {
   return this->common_scale;
+}
+
+size_t
+Unit::size() const {
+  return units.size();
 }
 
 
@@ -222,8 +225,8 @@ Unit::hasVariantOf(ScaledBaseUnit::BaseUnit baseUnit, int expo) const
 bool
 Unit::isSubstanceUnit() const
 {
-  if (0 == this->units.size())
-  {
+  // Dimensionless is a valid substabce unit.
+  if (0 == this->units.size()) {
     return true;
   }
 
@@ -234,20 +237,21 @@ Unit::isSubstanceUnit() const
 bool
 Unit::hasSubstanceUnit() const
 {
-  return (this->hasVariantOf(Ast::ScaledBaseUnit::MOLE) || this->hasVariantOf(Ast::ScaledBaseUnit::ITEM) );
+  return (hasVariantOf(Ast::ScaledBaseUnit::MOLE) || hasVariantOf(Ast::ScaledBaseUnit::ITEM) ||
+          hasVariantOf(Ast::ScaledBaseUnit::GRAM) || hasVariantOf(Ast::ScaledBaseUnit::KILOGRAM));
 }
 
 
 bool
 Unit::isConcentrationUnit() const
 {
-  if (this->isVariantOf(Ast::ScaledBaseUnit::DIMENSIONLESS, -1) || this->isVariantOf(Ast::ScaledBaseUnit::LITRE, -1) || this->isVariantOf(Ast::ScaledBaseUnit::METRE, -3))
-  {
+  if (this->isVariantOf(Ast::ScaledBaseUnit::DIMENSIONLESS, -1) ||
+      this->isVariantOf(Ast::ScaledBaseUnit::LITRE, -1) ||
+      this->isVariantOf(Ast::ScaledBaseUnit::METRE, -3)) {
     return false;
   }
 
-  if (2 != this->units.size())
-  {
+  if (2 != this->units.size()) {
     return false;
   }
 
@@ -256,6 +260,31 @@ Unit::isConcentrationUnit() const
                                       this->hasVariantOf(Ast::ScaledBaseUnit::METRE, -3));
 }
 
+
+bool
+Unit::isVolumeUnit() const {
+  return isVariantOf(Ast::ScaledBaseUnit::LITRE, 1) ||
+      isVariantOf(Ast::ScaledBaseUnit::METRE, 3) ||
+      isVariantOf(Ast::ScaledBaseUnit::DIMENSIONLESS);
+}
+
+bool
+Unit::isAreaUnit() const {
+  return isVariantOf(Ast::ScaledBaseUnit::METRE, 2) ||
+      isVariantOf(Ast::ScaledBaseUnit::DIMENSIONLESS);
+}
+
+bool
+Unit::isLengthUnit() const {
+  return isVariantOf(Ast::ScaledBaseUnit::METRE, 1) ||
+      isVariantOf(Ast::ScaledBaseUnit::DIMENSIONLESS);
+}
+
+bool
+Unit::isTimeUnit() const {
+  return isVariantOf(Ast::ScaledBaseUnit::SECOND, 1) ||
+      isVariantOf(Ast::ScaledBaseUnit::DIMENSIONLESS);
+}
 
 bool
 Unit::isDimensionless() const
@@ -274,12 +303,16 @@ Unit::isExactlyDimensionless() const
 ScaledBaseUnit
 Unit::asScaledBaseUnit() const
 {
+  // Handle dimensionless unit explicitly:
+  if (this->isDimensionless()) {
+    return ScaledBaseUnit(ScaledBaseUnit::DIMENSIONLESS, 1, 0, 1);
+  }
+
   if (1 != this->units.size())
   {
     InternalError err;
-    std::stringstream str; this->dump(str);
     err << "Cannot construct a scaled base-unit from non-atomic unit: "
-        << str.str();
+        << this->dump();
     throw err;
   }
 
@@ -438,8 +471,14 @@ Unit::dump(std::ostream &str, bool html) const
     if (1 != this->common_multiplier || 0 != this->common_scale)
         str << ")";
   }
+}
 
 
+std::string
+Unit::dump(bool html) const {
+  std::stringstream buffer;
+  dump(buffer, html);
+  return buffer.str();
 }
 
 

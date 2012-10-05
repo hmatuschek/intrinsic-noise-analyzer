@@ -4,6 +4,7 @@
 
 #include <sbml/SBMLTypes.h>
 #include "ast/ast.hh"
+#include "trafo/substitution.hh"
 
 namespace iNA {
 namespace Models {
@@ -46,7 +47,7 @@ protected:
   /**
    * Holds the table: constant -> value and assignment rule substitutions.
    */
-  GiNaC::exmap constant_substitution_table;
+  Trafo::Substitution constant_substitution_table;
 
 
 public:

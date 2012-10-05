@@ -163,14 +163,14 @@ void
 Walker::handleReaction(Reaction *node)
 {
   // First, process reactants:
-  for (Reaction::iterator iter = node->reacBegin(); iter != node->reacEnd(); iter++)
+  for (Reaction::iterator iter = node->reactantsBegin(); iter != node->reactantsEnd(); iter++)
   {
     // Process stoichiometry expression
     this->handleExpression(iter->second);
   }
 
   // then, process products:
-  for (Reaction::iterator iter = node->prodBegin(); iter != node->prodEnd(); iter++)
+  for (Reaction::iterator iter = node->productsBegin(); iter != node->productsEnd(); iter++)
   {
     // Process stoichiometry expression
     this->handleExpression(iter->second);

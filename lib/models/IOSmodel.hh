@@ -1,5 +1,5 @@
-#ifndef __FLUC_IOSMODEL_HH__
-#define __FLUC_IOSMODEL_HH__
+#ifndef __INA_IOSMODEL_HH__
+#define __INA_IOSMODEL_HH__
 
 #include "LNAmodel.hh"
 
@@ -55,8 +55,14 @@ public:
   void fullState(const Eigen::VectorXd &state, Eigen::VectorXd &concentrations,
                  Eigen::MatrixXd &cov, Eigen::VectorXd &emre,  Eigen::MatrixXd &iosCov, Eigen::VectorXd &skewness, Eigen::VectorXd &iosemre);
 
+  /**
+  * Construct non-central moments.
+  **/
+  void getCentralMoments(const Eigen::VectorXd &state, Eigen::VectorXd &first,
+                       Eigen::MatrixXd &second, Eigen::VectorXd &third, Eigen::VectorXd &fourth);
 
-  void fullState(ConservationConstantCollector &context, const Eigen::VectorXd &state, Eigen::VectorXd &concentrations,
+
+  void fullState(InitialConditions &context, const Eigen::VectorXd &state, Eigen::VectorXd &concentrations,
                  Eigen::MatrixXd &cov, Eigen::VectorXd &emre,
                  Eigen::MatrixXd &iosCov, Eigen::VectorXd &skewness, Eigen::VectorXd &iosemre);
 

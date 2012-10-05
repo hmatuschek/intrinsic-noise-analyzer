@@ -1,5 +1,5 @@
-#ifndef __FLUC_STOCHASTICSIMULATOR_HH__
-#define __FLUC_STOCHASTICSIMULATOR_HH__
+#ifndef __INA_STOCHASTICSIMULATOR_HH__
+#define __INA_STOCHASTICSIMULATOR_HH__
 
 #include "mersennetwister.hh"
 
@@ -9,108 +9,12 @@
 #include "basemodel.hh"
 #include "particlenumbersmixin.hh"
 #include "reasonablemodelmixin.hh"
+#include "histogram.hh"
 #include "openmp.hh"
 
 
 namespace iNA {
 namespace Models {
-
-template<class T>
-struct less_second
-: std::binary_function<T,T,bool>
-{
-   inline bool operator()(const T& lhs, const T& rhs)
-   {
-      return lhs.second < rhs.second;
-   }
-};
-
-/**
- * Implements a 1D histogram.
- *
- * @ingroup ssa
- */
-
-template <typename T, typename U = T>
-class Histogram
-{
-
-public:
-
-    typedef std::map<T,U> histType;
-
-
-    histType histogram;
-
-    Histogram()
-    {
-        // pass...
-    };
-
-    void insert(const Eigen::Matrix<T, Eigen::Dynamic, 1> &observation)
-
-    {
-        for(int sid=0; sid < observation.rows(); sid++)
-        {
-            T val = observation(sid,0);
-            typename histType::iterator it = histogram.find(val);
-            if( it == histogram.end() )
-                histogram.insert( std::make_pair<T,U>(val,1.) );
-            else
-                it->second+=1.;
-        }
-    }
-
-    U getNorm()
-
-    {
-        U norm = 0.;
-        for(typename histType::iterator it=histogram.begin(); it!=histogram.end(); it++)
-            norm += it->second;
-        return norm;
-    }
-
-    histType getHistogram()
-
-    {
-        return histogram;
-    }
-
-    histType getNormalized()
-
-    {
-
-        U norm = getNorm();
-
-        histType nHist(histogram);
-        for(typename histType::iterator it=nHist.begin(); it != nHist.end(); it++)
-            it->second/=norm;
-
-        return nHist;
-
-    }
-
-    histType getDensity()
-
-    {
-
-        histType density(getNormalized());
-
-        for(typename histType::iterator it=density.begin(); it!=density.end()-1; it++)
-            it->second/=((*it).first-(*it+1).first);
-
-        // remove last element
-        density.erase(density.end());
-
-        return density;
-
-    }
-
-
-
-
-};
-
 
 /**
  * Base model for all stochastic simulators.
@@ -136,11 +40,6 @@ protected:
   std::vector<MersenneTwister> rand;
 
   /**
-   * needs interpreter to set initial conditons
-   **/
-  Ast::EvaluateModel interpreter;
-
-  /**
   * index map for bytecode interpreter
   **/
   std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> stateIndex;
@@ -156,7 +55,7 @@ protected:
   Eigen::VectorXd ics;
 
   /**
-  * Vector storing compartment volumes of reactants
+  * Vector containing the values of the compartment volumes for each reactant
   **/
   Eigen::VectorXd Omega;
 
@@ -166,7 +65,7 @@ protected:
   int ensembleSize;
 
   /**
-   * evaluate @c propensities given a realization of the vector of population numbers @c populationVec
+   * Evaluate @c propensities given a realization of the vector of population numbers @c populationVec
    **/
   virtual void evaluate(const Eigen::VectorXd &populationVec, Eigen::VectorXd &propensities);
 

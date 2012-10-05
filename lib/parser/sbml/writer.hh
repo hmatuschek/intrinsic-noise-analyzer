@@ -53,9 +53,9 @@ protected:
   /** Creates a rule for a variable. */
   static void processRule(Ast::VariableDefinition *var, LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model, Ast::Model &model);
   /** Helper function to test if a variable has its default unit. */
-  static bool hasDefaultUnit(Ast::VariableDefinition *var, Ast::Model &model);
+  static bool hasDefaultUnit(Ast::Parameter *var, Ast::Model &model);
   /** Returns the identifier of the unit definition of a variable. */
-  static std::string getUnitIdentifier(Ast::VariableDefinition *var, Ast::Model &model);
+  static std::string getUnitIdentifier(Ast::Parameter *var, Ast::Model &model);
   /** Translates a GiNaC expression. */
   static LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *processExpression(GiNaC::ex, Ast::Model &model);
 };

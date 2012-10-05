@@ -14,7 +14,7 @@ ParamScanModule::ParamScanModule(QObject *parent) :
 
   // Create Menu:
   // Register menus
-  this->scanAction = new QAction(tr("&Parameter Scan (SSE)"), this);
+  this->scanAction = new QAction(tr("&Steady State Parameter Scan (SSE)"), this);
   Application::getApp()->addToAnalysesMenu(this->scanAction);
   QObject::connect(this->scanAction, SIGNAL(triggered()), this, SLOT(configTask()));
 }
@@ -35,7 +35,7 @@ ParamScanModule::configTask()
     task = new ParamScanTask(this->wizard->getConfigCast<ParamScanTask::Config>());
   } catch (iNA::Exception &err) {
     QMessageBox::warning(
-          0, tr("Can not construct parameter scan from model: "), err.what());
+          0, tr("Cannot construct parameter scan from model: "), err.what());
     return;
   }
 

@@ -224,7 +224,7 @@ SpeciesList::_getUnit(iNA::Ast::Species *species, int role) const
 {
   if ((Qt::DecorationRole != role)) { return QVariant(); }
 
-  UnitRenderer renderer(species->getUnit());
+  UnitRenderer renderer(_model->getSpeciesUnit());
   return renderer.toPixmap();
 }
 
@@ -385,8 +385,7 @@ SpeciesList::addSpecies()
   int new_idx = _model->numSpecies();
   beginInsertRows(QModelIndex(), new_idx, new_idx);
   _model->addDefinition(
-        new iNA::Ast::Species(
-          identifier, _model->getDefaultSubstanceUnit(), compartment, false));
+        new iNA::Ast::Species(identifier, compartment, false));
   endInsertRows();
 }
 

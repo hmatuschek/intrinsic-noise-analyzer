@@ -9,6 +9,14 @@ DocumentTree::DocumentTree(QObject *parent)
 
 
 void
+DocumentTree::resetCompleteTree()
+{
+  resetTree();
+  this->reset();
+}
+
+
+void
 DocumentTree::addDocument(DocumentItem *document)
 {
   // Check if model is allready in list of open models:
@@ -243,7 +251,7 @@ DocumentTree::getTreeData(int column) const
 {
   if (0 == column)
   {
-    return QVariant("open models");
+    return QVariant("Models");
   }
 
   return QVariant();

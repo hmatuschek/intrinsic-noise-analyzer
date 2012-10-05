@@ -29,8 +29,11 @@ template <class InType, class OutType=InType>
 class Engine
 {
 public:
+  /** The code class for this engine. */
   typedef bcimp::Code Code;
+  /** The compiler class of this engine. */
   typedef bcimp::Compiler<InType, OutType> Compiler;
+  /** The interpreter class for this engine. */
   typedef bcimp::Interpreter<InType, OutType> Interpreter;
 };
 

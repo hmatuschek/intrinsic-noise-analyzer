@@ -34,6 +34,9 @@ public:
   virtual void addChild(TreeItem *node);
 
   virtual void removeChild(TreeItem *node);
+
+protected:
+  virtual void resetTree();
 };
 
 

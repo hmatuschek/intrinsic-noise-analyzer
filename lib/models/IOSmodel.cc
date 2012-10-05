@@ -10,7 +10,6 @@ IOSmodel::IOSmodel(const Ast::Model &model)
   postConstructor();
 }
 
-
 void
 IOSmodel::postConstructor()
 {
@@ -279,10 +278,14 @@ IOSmodel::postConstructor()
 
 
 void
-IOSmodel::fullState(const Eigen::VectorXd &state, Eigen::VectorXd &concentrations,
-                                     Eigen::MatrixXd &cov, Eigen::VectorXd &emre, Eigen::MatrixXd &iosCov, Eigen::VectorXd &skewness, Eigen::VectorXd &iosemre)
+IOSmodel::fullState(const Eigen::VectorXd &state,
+                    Eigen::VectorXd &concentrations, Eigen::MatrixXd &cov, Eigen::VectorXd &emre,
+                    Eigen::MatrixXd &iosCov, Eigen::VectorXd &third, Eigen::VectorXd &iosemre)
 
 {
+
+    // Make sure there is enough space
+    third.resize(this->numSpecies()*(this->numSpecies()+1)*(this->numSpecies()+2)/6);
 
     // reconstruct full concentration vector and covariances in original permutation order
     LNAmodel::fullState(state,concentrations,cov,emre);
@@ -324,13 +327,11 @@ IOSmodel::fullState(const Eigen::VectorXd &state, Eigen::VectorXd &concentration
     // construct full third moment vector, restore original order and return
     for(size_t i=0; i<(unsigned)cmat.rows(); i++)
     {
-        skewness(i)=0.;
+        third(i)=0.;
         for(size_t j=0; j<(unsigned)cmat.cols(); j++)
             for(size_t k=0; k<(unsigned)cmat.cols(); k++)
                 for(size_t l=0; l<(unsigned)cmat.cols(); l++)
-                    skewness(i) += cmat(i,j) * cmat(i,k) * cmat(i,l) *thirdMomVariables[j](k,l);
-
-        skewness(i)/=cov(i,i)*sqrt(cov(i,i));
+                    third(i) += cmat(i,j) * cmat(i,k) * cmat(i,l) *thirdMomVariables[j](k,l);
     }
 
    // get reduced covariance vector
@@ -361,9 +362,38 @@ IOSmodel::fullState(const Eigen::VectorXd &state, Eigen::VectorXd &concentration
 
 }
 
+
 void
-IOSmodel::fullState(ConservationConstantCollector &context, const Eigen::VectorXd &state, Eigen::VectorXd &concentrations,
-                                     Eigen::MatrixXd &cov, Eigen::VectorXd &emre, Eigen::MatrixXd &iosCov, Eigen::VectorXd &skewness, Eigen::VectorXd &iosemre)
+IOSmodel::getCentralMoments(const Eigen::VectorXd &state, Eigen::VectorXd &first,
+                     Eigen::MatrixXd &second, Eigen::VectorXd &third, Eigen::VectorXd &fourth)
+
+{
+
+
+    Eigen::VectorXd emre;
+    Eigen::VectorXd iosemre;
+    Eigen::MatrixXd iosCov;
+
+    fullState(state,first,second,emre,iosCov,third,iosemre);
+
+
+    // Make sure there is enough space
+
+    fourth.resize(this->numSpecies()*(this->numSpecies()+1)*(this->numSpecies()+2)*(this->numSpecies()+3)/24);
+
+    // construct fourth moment via Wick's theorem
+    for(size_t i=0; i<this->numSpecies(); i++)
+       fourth(i) = 3.*second(i,i)*second(i,i);
+
+    first+=emre;
+    second+=iosCov;
+
+}
+
+void
+IOSmodel::fullState(InitialConditions &context, const Eigen::VectorXd &state,
+                    Eigen::VectorXd &concentrations, Eigen::MatrixXd &cov, Eigen::VectorXd &emre,
+                    Eigen::MatrixXd &iosCov, Eigen::VectorXd &third, Eigen::VectorXd &iosemre)
 
 {
 
@@ -405,13 +435,13 @@ IOSmodel::fullState(ConservationConstantCollector &context, const Eigen::VectorX
     // construct full third moment vector, restore original order and return
     for(size_t i=0; i<(unsigned)context.getLinkCMatrix().rows(); i++)
     {
-        skewness(i)=0.;
+        third(i)=0.;
         for(size_t j=0; j<(unsigned)context.getLinkCMatrix().cols(); j++)
             for(size_t k=0; k<(unsigned)context.getLinkCMatrix().cols(); k++)
                 for(size_t l=0; l<(unsigned)context.getLinkCMatrix().cols(); l++)
-                    skewness(i) += context.getLinkCMatrix()(i,j) * context.getLinkCMatrix()(i,k) * context.getLinkCMatrix()(i,l) *thirdMomVariables[j](k,l);
+                    third(i) += context.getLinkCMatrix()(i,j) * context.getLinkCMatrix()(i,k) * context.getLinkCMatrix()(i,l) *thirdMomVariables[j](k,l);
 
-        skewness(i)/=cov(i,i)*sqrt(cov(i,i));
+        //third(i)/=cov(i,i)*sqrt(cov(i,i));
     }
 
    // get reduced covariance vector

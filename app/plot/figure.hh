@@ -48,7 +48,8 @@ public:
    * Specifies the possible file-types to save a plot.
    */
   typedef enum {
-    FILETYPE_PNG  ///< Currently, onle the PNG format is supported.
+    FILETYPE_PNG,  ///< Save plot as PNG image (bitmap)
+    FILETYPE_SVG   ///< Save plot as SVG image (vector)
   } FileType;
 
 
@@ -77,6 +78,9 @@ protected:
    * List of graph styles for automatic styles of graphs.
    */
   QList<GraphStyle> styles;
+
+  /** If measures are enabled. */
+  bool _measures_enabled;
 
 
 public:
@@ -128,16 +132,16 @@ public:
    */
   void save(const QString &filename, FileType type);
 
+  /** Enables/Disables the measure feature. */
+  void enableMesure(bool enabled=true);
+  /** Shows a measure at the given point if enabled by @c enableMeasure. */
+  void showMeasure(const QPointF &point);
 
 public slots:
-  /**
-   * Replot.
-   */
+  /** Replot. */
   void updateAxes();
 
-  /**
-   * (Re-) Sets the plot-scheme.
-   */
+  /** (Re-) Sets the plot-scheme. */
   void setScheme(Configuration::Scheme scheme);
 };
 

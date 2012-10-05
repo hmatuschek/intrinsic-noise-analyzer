@@ -8,7 +8,7 @@ using namespace iNA::Trafo;
 /* ********************************************************************************************* *
  * Implementation of ConstSubstitutionCollector visitor.
  * ********************************************************************************************* */
-ConstSubstitutionCollector::ConstSubstitutionCollector(Substitution &substitutions, unsigned flags, const excludeType &excludes)
+SubstitutionCollector::SubstitutionCollector(Substitution &substitutions, unsigned flags, const excludeType &excludes)
     : _substitutions(substitutions), _flags(flags) , _excludes(excludes)
 {
   // pass...
@@ -16,14 +16,17 @@ ConstSubstitutionCollector::ConstSubstitutionCollector(Substitution &substitutio
 
 
 void
-ConstSubstitutionCollector::visit(const Ast::VariableDefinition *var)
+SubstitutionCollector::visit(const Ast::VariableDefinition *var)
 {
 
   // Skip to exclude
   if(_excludes.find(var->getSymbol())!=_excludes.end()) return;
 
-  // Skip non constant variables:
-  if ( (! var->isConst()) || (! var->hasValue()) ) return;
+  // Skip variables without assigned values:
+  if (! var->hasValue()) return;
+
+  // Skip non-constant variables if not filtered:
+  if ( (! var->isConst()) && (!(_flags & Filter::NON_CONST)) ) return;
 
   if (Ast::Node::isSpecies(var) && (_flags & Filter::SPECIES) ) {
     _substitutions.add(var->getSymbol(), var->getValue(), false);
@@ -37,52 +40,68 @@ ConstSubstitutionCollector::visit(const Ast::VariableDefinition *var)
 
 
 /* ********************************************************************************************* *
- * Implementation of ConstantFolder
+ * Implementation of InitialValueFolder
  * ********************************************************************************************* */
-ConstantFolder::ConstantFolder(const Ast::Model &model, unsigned flags, const excludeType &excludes)
+InitialValueFolder::InitialValueFolder(const Ast::Model &model, unsigned flags, const excludeType &excludes)
   : Substitution()
 {
   // Apply const subs. collector on model
-  ConstSubstitutionCollector collector(*this, flags, excludes);
+  SubstitutionCollector collector(*this, flags, excludes);
   model.accept(collector);
   // normalize collected substitutions:
   this->normalize();
 }
 
 void
-ConstantFolder::apply(Ast::Model &model)
+InitialValueFolder::apply(Ast::Model &model)
 {
   // apply substitution operator on model
   model.apply(*this);
 }
 
 GiNaC::ex
-ConstantFolder::apply(const GiNaC::ex & expr)
+InitialValueFolder::apply(const GiNaC::ex & expr)
 {
   // apply substitutions on expression:
   return expr.subs(this->getTable());
 }
 
-//void
-//ConstantFolder::apply(Eigen::VectorXex &expr)
-//{
-//  // apply substitutions to vector:
-//    for(int i=0;i<expr.size();i++)
-//        expr(i)=expr(i).subs(this->getTable());
-//}
+double
+InitialValueFolder::evaluate(const GiNaC::ex &expr)
+{
+  // Apply substitutions on expression:
+  GiNaC::ex res = GiNaC::evalf(apply(expr));
+  // Assert that the result is a numeric value:
+  if (! GiNaC::is_a<GiNaC::numeric>(res)) {
+    SymbolError err;
+    err << "Cannot evaluate expression: " << expr << ": It is not reduced to a value!"
+        << " Minimal expression: " << res;
+    throw err;
+  }
+
+  return GiNaC::ex_to<GiNaC::numeric>(res).to_double();
+}
 
 Eigen::MatrixXex
-ConstantFolder::apply(const Eigen::MatrixXex &vecIn)
+InitialValueFolder::apply(const Eigen::MatrixXex &vecIn)
 {
+  Eigen::MatrixXex vecOut;
+  vecOut.resize(vecIn.rows(),vecIn.cols());
 
-    Eigen::MatrixXex vecOut;
-    vecOut.resize(vecIn.rows(),vecIn.cols());
-
-    for (int i=0; i<vecIn.rows(); i++)
+  for (int i=0; i<vecIn.rows(); i++)
     for (int j=0; j<vecIn.cols(); j++)
-            vecOut(i,j)=vecIn(i,j).subs(this->getTable());
+      vecOut(i,j)=vecIn(i,j).subs(this->getTable());
 
-    return vecOut;
+  return vecOut;
+}
 
+
+/* ********************************************************************************************* *
+ * Implementation of ConstantFolder
+ * ********************************************************************************************* */
+ConstantFolder::ConstantFolder(const Ast::Model &model, unsigned flags, const excludeType &excludes)
+  : InitialValueFolder(model, flags, excludes)
+{
+  // Done...
 }
 

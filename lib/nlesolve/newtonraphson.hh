@@ -7,6 +7,15 @@
 namespace iNA {
 namespace NLEsolve {
 
+
+inline double
+maxNorm(const Eigen::VectorXd &vector)
+
+{
+    return vector.lpNorm<Eigen::Infinity>();
+}
+
+
     enum LineSearchMethod {
         NoLineSearch = 0,
         Damped = 1,
@@ -183,7 +192,7 @@ public:
               Jac(i,j) = constants.apply(model.getJacobian()(i,j));
       }
 
-      set(model.stateIndex, updateVector, Jac);
+      this->set(model.stateIndex, updateVector, Jac);
 
   }
 
@@ -196,7 +205,7 @@ public:
         parameters(model.numIndSpecies())
 
   {
-      set(model.stateIndex, updateVector, Jacobian);
+      this->set(model.stateIndex, updateVector, Jacobian);
   }
 
   const Eigen::MatrixXd&
@@ -309,7 +318,9 @@ public:
 
       // solve JacobianM*dx=-REs
       //dx = JacobianM.fullPivLu().solve(-REs);
-      dx = this->JacobianM.lu().solve(-this->ODEs);
+      Eigen::FullPivLU<Eigen::MatrixXd> dec(this->JacobianM);
+      //dx = this->JacobianM.lu().solve(-this->ODEs);
+      dx = dec.solve(-this->ODEs);
 
       LineSearchStatus lcheck;
 
@@ -415,7 +426,8 @@ public:
           {
               if (lambda == 1.0)
                   tmplambda = -slope/(2.*(f-fold-slope));
-              else {
+              else
+              {
                  rhs1 = f-fold-lambda*slope;
                  rhs2 = f2-fold-lambda2*slope;
                  a = (rhs1/(lambda*lambda)-rhs2/(lambda2*lambda2))/(lambda-lambda2);
@@ -493,12 +505,6 @@ public:
 
 };
 
-inline double
-maxNorm(const Eigen::VectorXd &vector)
-
-{
-    return vector.lpNorm<Eigen::Infinity>();
-}
 
 
 }

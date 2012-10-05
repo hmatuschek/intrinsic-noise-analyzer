@@ -39,24 +39,20 @@ public:
    * Minimal constructor for a compartment.
    *
    * @param id Specifies the unique identifier of the compartment.
-   * @param unit Specifies the unit of the compartment, must fit to the spatial dimension and must
-   *             be a length, area or volume unit.
    * @param dim Specifies the spacial dimension of the compartment.
    * @param is_const Specifies if the compartment size is constant or not.
    */
-  Compartment(const std::string &id, const Unit &unit, SpatialDimension dim, bool is_const=false);
+  Compartment(const std::string &id, SpatialDimension dim, bool is_const=false);
 
   /**
    * Constructor for a compartment.
    *
    * @param id Specifies the unique identifier of the compartment.
    * @param init_val Specifies the initial volume of the compartment.
-   * @param unit Specifies the unit of the compartment, must fit to the spatial dimension and must
-   *             be a length, area or volume unit.
    * @param dim Specifies the spatial dimension of the compartment.
    * @param is_const Specifies if the compartment size is constant or not.
    */
-  Compartment(const std::string &id, const GiNaC::ex &init_val, const Unit &unit,
+  Compartment(const std::string &id, const GiNaC::ex &init_val,
               SpatialDimension dim, bool is_const=false);
 
   /** Returns the spacial dimension of the compartment. */

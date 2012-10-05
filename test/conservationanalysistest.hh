@@ -20,7 +20,6 @@ public:
 
   void testDirect();
   void testWithAssignmentRule();
-  void testWithAlgebraicConstraint();
 
 public:
   static UnitTest::TestSuite *suite();

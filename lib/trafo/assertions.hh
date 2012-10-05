@@ -19,6 +19,10 @@ public:
   virtual void visit(const Ast::VariableDefinition *var);
 
 public:
+  /** Checks if the given variable definition has a @c Ast::RateRule assigned. If there is a
+   * rate rule assinged, a @c SBMLFeatureNotSupported exception is thrown. */
+  static void apply(const Ast::VariableDefinition *var) throw (SBMLFeatureNotSupported);
+
   /** Applies the assertion on the given model.
    * @throws SBMLFeatureNotSupported If there is a rate-rule for any variable. */
   static void apply(const Ast::Model &model);
@@ -46,6 +50,10 @@ public:
   virtual void visit(const Ast::Species *var);
 
 public:
+  /** Checks if the given species is constant, if the species is constant a
+   * @c SBMLFeatureNotSupported exception is thrown. */
+  static void apply(const Ast::Species *var) throw (SBMLFeatureNotSupported);
+
   /** This method applies the assertion on the model. */
   static void apply(const Ast::Model &model);
 };
@@ -71,6 +79,10 @@ public:
   virtual void visit(const Ast::VariableDefinition *var);
 
 public:
+  /** Checks if the given variable has an @c Ast::AssignmentRule attached. If there is an
+   * assignment rule, it throws a @c SBMLFeatureNotSupported exception. */
+  static void apply(const Ast::VariableDefinition *var) throw (SBMLFeatureNotSupported);
+
   /** Applies this assertion on the given model. */
   static void apply(const Ast::Model &model);
 };
@@ -87,31 +99,6 @@ public:
 };
 
 
-/** This class checks if there is no algebraic constraint defined.
- * @ingroup trafo */
-class NoAlgebraicConstraintAssertion :
-    public Ast::Visitor, public Ast::Constraint::Visitor
-{
-public:
-  /** Checks if the constraint is an @c AlgebraicConstraint. */
-  virtual void visit(const Ast::Constraint *constraint);
-
-public:
-  /** Performs the assertion on the given model. */
-  static void apply(const Ast::Model &model);
-};
-
-
-/** This class implements the @c NoAlgebraicConstraintAssertion as a model mixin.
- * @ingroup trafo */
-class NoAlgebraicConstraintMixin
-{
-public:
-  /** Checks if the given model has an algebraic constraint. */
-  NoAlgebraicConstraintMixin(const Ast::Model &model);
-};
-
-
 /** This class checks if there are reversible reactions.
  * @ingroup trafo */
 class NoReversibleReactionAssertion :
@@ -122,6 +109,10 @@ public:
   virtual void visit(const Ast::Reaction *reac);
 
 public:
+  /** Checks if the given reaction is declared as reversible. If the reaction is reversible, a
+   * @c SBMLFeatureNotSupported exception is thrown. */
+  static void apply(const Ast::Reaction *reac) throw (SBMLFeatureNotSupported);
+
   /** This method checks if the given model has a reversible reaction. */
   static void apply(const Ast::Model &model);
 };
@@ -148,6 +139,10 @@ public:
   virtual void visit(const Ast::Parameter *param);
 
 public:
+  /** Checks if the given parameter is constant, if not a @c SBMLFeatureNotSupported exception is
+   * thrown. */
+  static void apply(const Ast::Parameter *param) throw (SBMLFeatureNotSupported);
+
   /** Applies the constraint on the given model. */
   static void apply(const Ast::Model &model);
 };
@@ -173,6 +168,10 @@ public:
   virtual void visit(const Ast::Compartment *comp);
 
 public:
+  /** Checks if the given compartment is defined constant, if not a @c SBMLFeatureNotSupported
+   * exception is thrown. */
+  static void apply(const Ast::Compartment *comp) throw (SBMLFeatureNotSupported);
+
   /** Applies the assertion on the given model. */
   static void apply(const Ast::Model &model);
 };
@@ -188,6 +187,10 @@ public:
   virtual void visit(const Ast::Reaction *reac);
 
 public:
+  /** Check if the stoichiomery of the given reaction is constant, if not a
+   * @c SBMLFeatureNotSupported exception is thrown. */
+  static void apply(const Ast::Reaction *reac) throw (SBMLFeatureNotSupported);
+
   /** Applies the assertion on the given model. */
   static void apply(const Ast::Model &model);
 };
@@ -196,7 +199,8 @@ public:
 /** This class checks if any expression is explict time-dependent.
  * @ingroup trafo */
 class NoExplicitTimeDependenceAssertion :
-    public Ast::Visitor, Ast::VariableDefinition::Visitor, Ast::Rule::Visitor, Ast::KineticLaw::Visitor
+    public Ast::Visitor, public Ast::VariableDefinition::Visitor, public Ast::Rule::Visitor,
+    public Ast::KineticLaw::Visitor
 {
 protected:
   /** Holds a reference to the global time-symbol. */
@@ -228,7 +232,7 @@ public:
  * @ingroup trafo */
 class ReasonableModelAssertion
     : public NoExplicitTimeDependenceAssertion,
-    public NoAlgebraicConstraintAssertion, public ConstParameterAssertion,
+    public ConstParameterAssertion,
     public NoAssignmentRuleAssertion, public NoRateRuleAssertion
 {
 public:
@@ -239,9 +243,6 @@ public:
   /** Applies the @c NoRateRuleAssertion, @c NoAssignmentRuleAssertion and
    * @c NoExplicitTimeDependenceAssertion on the variable. */
   virtual void visit(const Ast::VariableDefinition *var);
-
-  /** Applies the @c NoAlgebraicConstraintAssertion on the given constraint. */
-  virtual void visit(const Ast::Constraint *constraint);
 
   /** Applies the @c ConstParamterAssertion on the parameter. */
   virtual void visit(const Ast::Parameter *param);

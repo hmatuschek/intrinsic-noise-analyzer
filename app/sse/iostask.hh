@@ -113,12 +113,12 @@ public:
   /**
    * Returns the (common) unit of the species.
    */
-  const iNA::Ast::Unit &getSpeciesUnit() const;
+  iNA::Ast::Unit getSpeciesUnit() const;
 
   /**
    * Returns the (common) unit of time.
    */
-  const iNA::Ast::Unit &getTimeUnit() const;
+  iNA::Ast::Unit getTimeUnit() const;
 
   /**
    * Returns the task label.

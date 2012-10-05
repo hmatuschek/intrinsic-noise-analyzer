@@ -200,6 +200,10 @@ public:
   /** Returns the common scale of the unit. */
   double getScale() const;
 
+  /** Returns the number of scaled base units that form this unit. Note, for a dimensionless unit
+   * this figure is 0. */
+  size_t size() const;
+
   /** Returns true, if the unit is a scaled variant of the given base-unit with given exponent. */
   bool isVariantOf(ScaledBaseUnit::BaseUnit baseUnit, int expo = 1.0) const;
   /** Retunrs true, if the unit contains a variant of the given base-unit with given exponent. */
@@ -211,6 +215,14 @@ public:
   /** Returns true, if the unit is a linear scaled substance unit divied by a linear scaled
    * volume unit. */
   bool isConcentrationUnit() const;
+  /** Returns true, if the unit is a linear scaled volume unit. */
+  bool isVolumeUnit() const;
+  /** Retunrs true if the unit is a area unit. */
+  bool isAreaUnit() const;
+  /** Returns true if the unit is a length unit. */
+  bool isLengthUnit() const;
+  /** Returns true if the unit is a time unit. */
+  bool isTimeUnit() const;
   /** Retunrs true, if the unit is dimensionless. */
   bool isDimensionless() const;
   /** Retunrs true if the unit is dimensionless, has multiplier 1 and scale 0. */
@@ -218,6 +230,8 @@ public:
 
   /** Dumps the unit into the given stream. */
   void dump(std::ostream &str, bool html=false) const;
+  /** Dumps the unit as a string. */
+  std::string dump(bool html=false) const;
 
   /** Returns the unit as a scaled base unit.
    * @note This method only returns a proper @c ScaledUnit instance if the unit consists of a

@@ -79,6 +79,11 @@ private:
   QMenu *analysisMenu;
 
   /**
+   * Holds the 'Model' menu.
+   */
+  QMenu *modelMenu;
+
+  /**
    * Holds teh 'Help' menu.
    */
   QMenu *helpMenu;

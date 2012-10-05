@@ -115,7 +115,7 @@ ParameterScanIOSPlot::ParameterScanIOSPlot(size_t num_species, Table *series,
 ParameterScanCovPlot::ParameterScanCovPlot(size_t num_species, Table *series,
                                      const QString &species_unit, const QString &time_unit,
                                      QObject *parent)
-    : Plot::Figure("Coeff of variation (EMRE & IOS var)", parent)
+    : Plot::Figure("Coefficient of variation (EMRE & IOS var)", parent)
 {
   // Create a plot:
   this->setXLabel(tr("%1").arg(series->getColumnName(0)));
@@ -172,6 +172,7 @@ ParameterScanCovIOSPlot::ParameterScanCovIOSPlot(size_t num_species, Table *seri
                                      QObject *parent)
     : Plot::Figure("Coeff of variation (EMRE & IOS var)", parent)
 {
+
   // Create a plot:
   this->setXLabel(tr("%1").arg(series->getColumnName(0)));
   this->setYLabel(tr("concentrations [%1]").arg(species_unit));
@@ -219,4 +220,5 @@ ParameterScanCovIOSPlot::ParameterScanCovIOSPlot(size_t num_species, Table *seri
   }
 
   this->updateAxes();
+
 }

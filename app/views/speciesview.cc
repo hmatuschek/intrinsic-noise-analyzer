@@ -18,7 +18,7 @@ SpeciesView::SpeciesView(SpeciesItem *species ,QWidget *parent) :
   this->setBackgroundRole(QPalette::Window);
 
   // Label
-  QLabel *label = new QLabel(tr("Model Species"));
+  QLabel *label = new QLabel(tr("Species"));
   label->setFont(Application::getApp()->getH1Font());
   label->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
 

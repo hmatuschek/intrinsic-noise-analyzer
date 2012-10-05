@@ -1,8 +1,8 @@
-#ifndef __FLUC_MODELS_STEADYSTATEANALYSIS_HH
-#define __FLUC_MODELS_STEADYSTATEANALYSIS_HH
+#ifndef __INA_MODELS_STEADYSTATEANALYSIS_HH
+#define __INA_MODELS_STEADYSTATEANALYSIS_HH
 
 #include "nlesolve/nlesolve.hh"
-#include "REmodel.hh"
+#include "LNAmodel.hh"
 #include "math.hh"
 
 namespace iNA {
@@ -28,6 +28,7 @@ public:
     {
 
     }
+
 
     /**
     * A method that folds all constants in a vector or matrix.
@@ -79,6 +80,7 @@ public:
     */
     SteadyStateAnalysis(M &model)
       : sseModel(model), solver(model), max_time(1e9), min_time_step(1e-1)
+
     {
       // Pass...
     }
@@ -88,6 +90,7 @@ public:
     */
     SteadyStateAnalysis(M &model, size_t iter, double epsilon, double t_max=1e9, double dt=1e-1)
       : sseModel(model), solver(model), max_time(t_max), min_time_step(dt)
+
     {
       this->setPrecision(epsilon);
       this->setMaxIterations(iter);
@@ -145,7 +148,6 @@ public:
 
     }
 
-
     /**
      * Solves for steady state of the reduced state vector and returns number of function evaluations
      * used.
@@ -153,10 +155,10 @@ public:
      * @param x: Outputs the steady state concentrations, covariance and EMRE vector in reduced
      *        coordinates. Contents of x will be overwritten.
      */
-    void calcLNA(Eigen::VectorXd &x, Eigen::VectorXex &sseUpdate)
+    void calcLNA(LNAmodel &model,Eigen::VectorXd &x, Eigen::VectorXex &sseUpdate)
 
     {
-        size_t offset = sseModel.numIndSpecies();
+        size_t offset = model.numIndSpecies();
         size_t lnaLength = offset*(offset+1)/2;
 
         Eigen::VectorXd A(lnaLength);
@@ -165,25 +167,35 @@ public:
         // calc coeff-matrices
         GiNaC::exmap subs_table;
         for (size_t i=0; i<lnaLength; i++)
-            subs_table.insert( std::pair<GiNaC::ex,GiNaC::ex>( sseModel.getSSEvar(i), 0 ) );
+            subs_table.insert( std::pair<GiNaC::ex,GiNaC::ex>( model.getSSEvar(i), 0 ) );
         for(size_t i=0; i<lnaLength; i++)
         {
             A(i) = GiNaC::ex_to<GiNaC::numeric>( sseUpdate(i).subs(subs_table) ).to_double();
             for(size_t j=0; j<lnaLength; j++)
             {
-               B(i,j) = GiNaC::ex_to<GiNaC::numeric>( sseUpdate(i).diff(sseModel.getSSEvar(j)) ).to_double();
+               B(i,j) = GiNaC::ex_to<GiNaC::numeric>( sseUpdate(i).diff(model.getSSEvar(j)) ).to_double();
             }
         }
 
         x.segment(offset,lnaLength) = B.lu().solve(-A);
 
+        double relative_error = (B*x.segment(offset,lnaLength) + A).norm() / A.norm(); // norm() is L2 norm
+        std::cout << "The relative error is:\n" << relative_error << std::endl;
+
         // substitute LNA
         subs_table.clear();
         for (size_t i=0; i<lnaLength; i++)
-            subs_table.insert( std::pair<GiNaC::ex,GiNaC::ex>( sseModel.getSSEvar(i), x(offset+i) ) );
+            subs_table.insert( std::pair<GiNaC::ex,GiNaC::ex>( model.getSSEvar(i), x(offset+i) ) );
         for(int i=0; i<sseUpdate.size(); i++)
             sseUpdate(i)=sseUpdate(i).subs(subs_table);
 
+    }
+
+
+    void calcLNA(Eigen::VectorXd &x, Eigen::VectorXex &sseUpdate)
+
+    {
+        calcLNA(sseModel,x,sseUpdate);
     }
 
     /**
@@ -245,6 +257,10 @@ public:
         x.head(offset) = conc;
         x.tail(sseLength-lnaLength) = B.lu().solve(-A);
 
+        double relative_error = (B*x.tail(sseLength-lnaLength) + A).norm() / A.norm(); // norm() is L2 norm
+        std::cout << "The relative error is:\n" << relative_error << std::endl;
+
+
         return iter;
     }
 
@@ -256,19 +272,19 @@ public:
      * @param resultSet: Outputs the steady state concentrations, covariance and EMRE vector in reduced
      *        coordinates. Contents will be overwritten.
      */
-    int parameterScan(std::vector<GiNaC::exmap> &parameterSets, std::vector<Eigen::VectorXd> &resultSet, const size_t &numThreads=OpenMP::getMaxThreads())
+    int parameterScan(std::vector<ParameterSet> &parameterSets, std::vector<Eigen::VectorXd> &resultSet, const size_t &numThreads=OpenMP::getMaxThreads())
 
     {
 
-        // first make space
+        // First make space
         resultSet.resize(parameterSets.size());
 
-        // initialize with initial concentrations
+        // Initialize with initial concentrations
         Eigen::VectorXd x(sseModel.getDimension());
         sseModel.getInitialState(x);
         Eigen::VectorXd conc=x.head(sseModel.numIndSpecies());
 
-        // get the SSE vector
+        // Get the SSE vector
         size_t offset = sseModel.numIndSpecies();
         //size_t lnaLength = offset*(offset+1)/2;
         size_t sseLength = sseModel.getUpdateVector().size()-sseModel.numIndSpecies();
@@ -278,192 +294,109 @@ public:
         int iter=0;
 
         std::vector< NLEsolve::HybridSolver<M> > solvers(numThreads,solver);
-        //for(size_t i=0; i<solvers.size(); i++)
-          //  solvers[i].set
 
+        // Copy models for parallelization
+        std::vector< M * > models(numThreads);
+        models[0] = &sseModel;
+        for(size_t j=1; j<numThreads; j++)
+            models[j] = new M(sseModel);
 
-//#pragma omp parallel for if(numThreads>1) num_threads(numThreads) schedule(dynamic) private(updateVector,iter,x)
-        // iterate over all parameter sets
+#pragma omp parallel for if(numThreads>1) num_threads(numThreads) schedule(dynamic) private(iter,x,conc)
+        // Iterate over all parameter sets
         for(size_t j = 0; j < parameterSets.size(); j++)
         {
 
-            // collect all the values of constant parameters except variable parameters
-            Trafo::ConstantFolder constants(sseModel, Trafo::Filter::ALL, parameterSets[j]);
-            // collect the variable parameters
-            ParameterFolder parameters(parameterSets[j]);
+            // Generate parameter substitution table
+            GiNaC::exmap ptab = models[OpenMP::getThreadNum()]->translate(parameterSets[j]);
 
-            // fold variable parameters first and then all the rest as constant parameters
-            updateVector = parameters.apply(constants.apply( sseModel.getUpdateVector() ) );
+            // Collect all the values of constant parameters except variable parameters
+            Trafo::ConstantFolder constants(*(models[OpenMP::getThreadNum()]), Trafo::Filter::ALL, ptab);
+
+            // Translate identifier to parameters collect variable parameters
+            ParameterFolder parameters(ptab);
+
+            // Fold variable parameters and all the rest
+            Eigen::VectorXex updateVector = parameters.apply(constants.apply( models[OpenMP::getThreadNum()]->getUpdateVector() ) );
             Eigen::VectorXex REs = updateVector.head(offset);
             Eigen::VectorXex sseUpdate = updateVector.segment(offset,sseLength);
-            Eigen::MatrixXex Jacobian = parameters.apply(constants.apply( sseModel.getJacobian()) );
+            Eigen::MatrixXex Jacobian = parameters.apply(constants.apply( models[OpenMP::getThreadNum()]->getJacobian()) );
 
-            // setup solver and solve for RE concentrations
+            // Setup solver and solve for RE concentrations
             try
             {
 
-                solvers[OpenMP::getThreadNum()].set(sseModel.stateIndex,REs,Jacobian);
+                solvers[OpenMP::getThreadNum()].set(models[OpenMP::getThreadNum()]->stateIndex,REs,Jacobian);
                 iter = solvers[OpenMP::getThreadNum()].solve(conc, max_time, min_time_step);
                 x.head(offset) = conc;
 
                 // ... and substitute RE concentrations
                 GiNaC::exmap subs_table;
-                for (size_t s=0; s<sseModel.numIndSpecies(); s++)
-                    subs_table.insert( std::pair<GiNaC::ex,GiNaC::ex>( sseModel.getREvar(s), conc(s) ) );
+                for (size_t s=0; s<models[OpenMP::getThreadNum()]->numIndSpecies(); s++)
+                    subs_table.insert( std::pair<GiNaC::ex,GiNaC::ex>( models[OpenMP::getThreadNum()]->getREvar(s), conc(s) ) );
                 for (size_t i=0; i<sseLength; i++)
                     sseUpdate(i) = sseUpdate(i).subs(subs_table);
 
-                // calc LNA & IOS
-                calcLNA(x,sseUpdate);
-                calcIOS(x,sseUpdate);
+                // Calc LNA & IOS
+                calcLNA(*models[OpenMP::getThreadNum()],x,sseUpdate);
+                calcIOS(*models[OpenMP::getThreadNum()],x,sseUpdate);
 
-                // save result in matrix
+                // Store result
                 resultSet[j] = x;
 
             }
             catch (iNA::NumericError &err)
             {
-                // generate a vector of nans the easy way
-                resultSet[j] = Eigen::VectorXd::Zero(sseModel.getDimension())/0.;
+                // Generate a vector of nans the easy way
+                resultSet[j] = Eigen::VectorXd::Zero(models[OpenMP::getThreadNum()]->getDimension())/0.;
             }
-
 
         }
 
         return iter;
     }
 
+
     void
-    calcIOS(Eigen::VectorXd &x, const Eigen::VectorXex &sseUpdate)
+    calcIOS(LNAmodel &model, Eigen::VectorXd &x, const Eigen::VectorXex &sseUpdate)
     {
 
-        // get the SSE vector
-        size_t offset = sseModel.numIndSpecies();
+        // Get the SSE vector
+        size_t offset = model.numIndSpecies();
         size_t lnaLength = offset*(offset+1)/2;
-        size_t sseLength = sseModel.getUpdateVector().size()-sseModel.numIndSpecies();
+        size_t sseLength = model.getUpdateVector().size()-model.numIndSpecies();
 
-        // calc coefficient matrices
+        // Calc coefficient matrices
         Eigen::VectorXd A(sseLength-lnaLength);
         Eigen::MatrixXd B(sseLength-lnaLength,sseLength-lnaLength);
 
         GiNaC::exmap subs_table;
         for (size_t i=lnaLength; i<sseLength; i++)
-            subs_table.insert( std::pair<GiNaC::ex,GiNaC::ex>( sseModel.getSSEvar(i), 0 ) );
+            subs_table.insert( std::pair<GiNaC::ex,GiNaC::ex>( model.getSSEvar(i), 0 ) );
         for(size_t i=lnaLength; i<sseLength; i++)
         {
             A(i-lnaLength) = GiNaC::ex_to<GiNaC::numeric>( sseUpdate(i).subs(subs_table) ).to_double();
             for(size_t j=lnaLength; j<sseLength; j++)
             {
-               B(i-lnaLength,j-lnaLength) = GiNaC::ex_to<GiNaC::numeric>( sseUpdate(i).diff(sseModel.getSSEvar(j)) ).to_double();
+               B(i-lnaLength,j-lnaLength) = GiNaC::ex_to<GiNaC::numeric>( sseUpdate(i).diff(model.getSSEvar(j)) ).to_double();
             }
         }
 
         x.tail(sseLength-lnaLength) = B.lu().solve(-A);
 
+        double relative_error = (B*x.tail(sseLength-lnaLength) + A).norm() / A.norm(); // norm() is L2 norm
+        std::cout << "IOS, The relative error is:\n" << relative_error << std::endl;
+
     }
 
-    int
-    calcSteadyStateOld(Eigen::VectorXd &x)
-
+    void
+    calcIOS(Eigen::VectorXd &x, const Eigen::VectorXex &sseUpdate)
     {
-
-
-
-        // initialize with initial concentrations
-        Eigen::VectorXd conc(sseModel.getDimension());
-        sseModel.getInitialState(x);
-        conc=x.head(sseModel.numIndSpecies());
-
-        int iter = this->calcConcentrations(conc);
-
-        // construct Diffusion vector
-        Eigen::VectorXd DiffusionVec(sseModel.numIndSpecies()*sseModel.numIndSpecies());
-        sseModel.getDiffusionVec(DiffusionVec);
-
-        // solve for covariances
-        Eigen::VectorXd sol(sseModel.numIndSpecies()*sseModel.numIndSpecies());
-        sol = (-KroneckerSum(solver.getJacobianM(),solver.getJacobianM())).lu().solve(DiffusionVec);
-
-        // should be check here if this is a good solution (requires a new epsilon!!!)
-        //bool a_solution_exists = (JMsum*sol).isApprox(-DiffusionVec, 1.E-10);
-
-        Eigen::VectorXd covVec((sseModel.numIndSpecies()*(sseModel.numIndSpecies()+1))/2);
-        Eigen::MatrixXd cov(sseModel.numIndSpecies(),sseModel.numIndSpecies());
-
-        // take only important elements into reduced state vector
-        size_t idx=0;
-        for(size_t i=0;i<sseModel.numIndSpecies();i++)
-        {
-          for(size_t j=0;j<=i;j++)
-          {
-
-            size_t idy=i+j*sseModel.numIndSpecies();
-            covVec(idx)=sol(idy);
-            cov(i,j) =sol(idy);//=covarianceMatrix(i,j);
-            idx++;
-            cov(j,i)=cov(i,j);
-
-          }
-        }
-        // covariance finished
-
-        // calculate EMRE
-
-        Eigen::VectorXd Delta(sseModel.numIndSpecies());
-
-        // get Rate corrections
-        Eigen::VectorXd REcorr;
-        sseModel.getRateCorrections(REcorr);
-
-        // get stacked up Hessian
-        Eigen::MatrixXd HessianM;
-        sseModel.getHessian(HessianM);
-
-        for (size_t i=0; i<sseModel.numIndSpecies(); i++)
-        {
-          Delta(i)=0.;
-          idx=0;
-          for (size_t j=0; j<sseModel.numIndSpecies(); j++)
-          {
-            for (size_t k=0; k<=j; k++)
-            {
-
-                if(k==j)
-                {
-                    Delta(i) += HessianM(i,idx)*cov(j,k);
-                }
-                else
-                {
-                    Delta(i) += 2.*HessianM(i,idx)*cov(j,k);
-                }
-                idx++;
-
-            }
-          }
-          Delta(i)/=2.;
-          // add RE corrections
-          Delta(i)+=REcorr(i);
-        }
-
-        // solve EMRE
-        Eigen::VectorXd emre(sseModel.numIndSpecies());
-        emre=solver.getJacobianM().lu().solve(-Delta);
-
-        // update reduced state vector
-        // for concentrations
-        // and covariances
-        // and emre
-
-        x.resize(sseModel.getDimension());
-        x << conc, covVec, emre;
-
-        return iter;
-
+        calcIOS(sseModel, x, sseUpdate);
     }
 
 };
 
 
-}} // close namespaces
+}} // Close namespaces
 
 #endif // __FLUC_MODELS_STEADYSTATEANALYSIS_HH

@@ -17,7 +17,6 @@
 #define __FLUC_COMPILER_AST_HH__
 
 #include "node.hh"
-#include "module.hh"
 #include "model.hh"
 #include "constraint.hh"
 
@@ -32,10 +31,9 @@
 #include "compartment.hh"
 #include "parameter.hh"
 
-#include "evaluate.hh"
 #include "visitor.hh"
 
-#include "trafo/trafo.hh"
 #include "unitconverter.hh"
+#include "modelcopyist.hh"
 
 #endif // __FLUC_COMPILER_AST_HH__

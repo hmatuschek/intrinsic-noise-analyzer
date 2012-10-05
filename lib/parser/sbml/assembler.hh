@@ -10,6 +10,7 @@
 #include "ast/parameter.hh"
 #include "exception.hh"
 #include "ast/model.hh"
+#include "trafo/variablescaling.hh"
 
 
 namespace iNA {
@@ -77,36 +78,52 @@ public:
 };
 
 
-
 void __process_model(LIBSBML_CPP_NAMESPACE_QUALIFIER Model *model, ParserContext &ctx);
 
-Ast::VariableDefinition *__process_species_definition(LIBSBML_CPP_NAMESPACE_QUALIFIER Species *node, ParserContext &ctx);
+Ast::FunctionDefinition *__process_function_definition(
+  LIBSBML_CPP_NAMESPACE_QUALIFIER FunctionDefinition *funcdef, ParserContext &ctx);
 
-Ast::FunctionDefinition *__process_function_definition(LIBSBML_CPP_NAMESPACE_QUALIFIER FunctionDefinition *funcdef, ParserContext &ctx);
+bool __is_default_unit_redefinition(
+  LIBSBML_CPP_NAMESPACE_QUALIFIER UnitDefinition *node, ParserContext &ctx);
 
-Ast::VariableDefinition *__process_parameter_definition(LIBSBML_CPP_NAMESPACE_QUALIFIER Parameter *node, ParserContext &ctx);
+void __process_default_unit_redefinition(
+  LIBSBML_CPP_NAMESPACE_QUALIFIER UnitDefinition *node, ParserContext &ctx);
 
-Ast::VariableDefinition *__process_compartment_definition(LIBSBML_CPP_NAMESPACE_QUALIFIER Compartment *node, ParserContext &ctx);
+Ast::UnitDefinition *__process_unit_definition(
+  LIBSBML_CPP_NAMESPACE_QUALIFIER UnitDefinition *node, ParserContext &ctx);
 
-bool __is_default_unit_redefinition(LIBSBML_CPP_NAMESPACE_QUALIFIER UnitDefinition *node, ParserContext &ctx);
+Ast::ScaledBaseUnit __process_unit(
+  LIBSBML_CPP_NAMESPACE_QUALIFIER Unit *unit, ParserContext &ctx);
 
-void __process_default_unit_redefinition(LIBSBML_CPP_NAMESPACE_QUALIFIER UnitDefinition *node, ParserContext &ctx);
+Ast::VariableDefinition *__process_parameter_definition(
+  LIBSBML_CPP_NAMESPACE_QUALIFIER Parameter *node, ParserContext &ctx);
 
-Ast::UnitDefinition *__process_unit_definition(LIBSBML_CPP_NAMESPACE_QUALIFIER UnitDefinition *node, ParserContext &ctx);
+Ast::VariableDefinition *__process_compartment_definition(
+  LIBSBML_CPP_NAMESPACE_QUALIFIER Compartment *node, ParserContext &ctx, Trafo::VariableScaling &subs);
 
-Ast::ScaledBaseUnit __process_unit(LIBSBML_CPP_NAMESPACE_QUALIFIER Unit *unit, ParserContext &ctx);
+Ast::VariableDefinition *__process_species_definition(
+  LIBSBML_CPP_NAMESPACE_QUALIFIER Species *node, ParserContext &ctx, Trafo::VariableScaling &subs);
 
-Ast::Reaction *__process_reaction(LIBSBML_CPP_NAMESPACE_QUALIFIER Reaction *node, ParserContext &ctx);
+Ast::Reaction *__process_reaction(
+  LIBSBML_CPP_NAMESPACE_QUALIFIER Reaction *node, ParserContext &ctx);
 
-Ast::KineticLaw *__process_kinetic_law(LIBSBML_CPP_NAMESPACE_QUALIFIER KineticLaw *node, ParserContext &ctx);
+Ast::KineticLaw *__process_kinetic_law(
+  LIBSBML_CPP_NAMESPACE_QUALIFIER KineticLaw *node, ParserContext &ctx);
 
-GiNaC::ex __process_expression(const LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *node, ParserContext &ctx);
-GiNaC::ex __process_const_boolean(const LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *node, ParserContext &ctx);
-GiNaC::ex __process_const_integer(const LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *node, ParserContext &ctx);
-GiNaC::ex __process_const_float(const LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *node, ParserContext &ctx);
-GiNaC::ex __process_arithmetic_operator(const LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *node, ParserContext &ctx);
-GiNaC::symbol __process_symbol(const LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *node, ParserContext &ctx);
-GiNaC::ex __process_function_call(const LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *node, ParserContext &ctx);
+GiNaC::ex __process_expression(
+  const LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *node, ParserContext &ctx);
+GiNaC::ex __process_const_boolean(
+  const LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *node, ParserContext &ctx);
+GiNaC::ex __process_const_integer(
+  const LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *node, ParserContext &ctx);
+GiNaC::ex __process_const_float(
+  const LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *node, ParserContext &ctx);
+GiNaC::ex __process_arithmetic_operator(
+  const LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *node, ParserContext &ctx);
+GiNaC::symbol __process_symbol(
+  const LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *node, ParserContext &ctx);
+GiNaC::ex __process_function_call(
+  const LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *node, ParserContext &ctx);
 
 
 }

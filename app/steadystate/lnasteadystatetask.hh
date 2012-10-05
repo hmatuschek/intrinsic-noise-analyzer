@@ -102,7 +102,7 @@ public:
 
   const QString &getSpeciesName(int i);
 
-  const iNA::Ast::Unit &getSpeciesUnit() const;
+  iNA::Ast::Unit getSpeciesUnit() const;
 
   virtual QString getLabel();
 

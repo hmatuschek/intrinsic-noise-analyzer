@@ -10,17 +10,27 @@ namespace iNA {
 namespace Utils {
 
 
-/**
- * A simple message class.
+/** A simple message class.
+ * This message class is used to hold log messages for the @c Logger system. Each message must have
+ * a level indicating the significance of the actual message. Usually a log message is created using
+ * the @c LOG_MESSAGE macro, wich also sets the origin of the message.
  *
+ * \code{.cpp}
+ * using namespace iNA::Utils;
+ *
+ * Message message = LOG_MESSAGE(Message::DEBUG);
+ * message << "A debug message...";
+ * Logger::get().log(message);
+ * \endcode
+ *
+ * With @c Logger::get() you obtain the global default logger instance, which is used to handle
+ * the log message here.
  * @ingroup utils
  */
 class Message : public std::stringstream
 {
 public:
-  /**
-   * Lists all levels of messages.
-   */
+  /** Lists all levels of messages. */
   typedef enum {
     DEBUG,  ///< Debug message.
     INFO,   ///< Status updates.
@@ -66,9 +76,12 @@ public:
 
 
 
-/**
- * Message handler interface.
- *
+/** Message handler interface.
+ * Each @c Logger instance can forward log messages to one or more message handlers. There is a
+ * single pre-defined message handler @c TextMessageHandler, which formats all message with a
+ * a defined log level as text messages and forward this text into a defined text stream. It is
+ * easy to meet the MessageHandler interface as just one method must be implemented to receive
+ * messages.
  * @ingroup utils
  */
 class MessageHandler {
@@ -127,9 +140,12 @@ private:
 
 
 
-/**
- * The default handler class, prints messages into a text stream (i.e. stdout).
- *
+/** The default handler class, prints messages into a text stream (i.e. stdout).
+ * Call something like
+ * \code{.cpp}
+ * Logger::get().addHandler(new TextMessageHandler(std::cerr));
+ * \endcode
+ * to install the text message handler to the global default logger.
  * @ingroup utils
  */
 class TextMessageHandler : public MessageHandler

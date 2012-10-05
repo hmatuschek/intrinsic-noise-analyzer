@@ -230,7 +230,7 @@ LNATask::getSpeciesNames() const
 }
 
 
-const iNA::Ast::Unit &
+iNA::Ast::Unit
 LNATask::getSpeciesUnit() const
 {
   return this->config.getModelAs<iNA::Models::LNAmodel>()->getConcentrationUnit();

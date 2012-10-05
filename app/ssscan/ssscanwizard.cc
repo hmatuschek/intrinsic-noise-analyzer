@@ -1,6 +1,7 @@
 #include "ssscanwizard.hh"
 #include "../application.hh"
 #include "../models/scopeitemmodel.hh"
+#include "trafo/constantfolder.hh"
 #include <QMessageBox>
 #include <QVBoxLayout>
 #include <QFormLayout>
@@ -145,10 +146,10 @@ ParameterScanConfigPage::ParameterScanConfigPage(GeneralTaskWizard *parent)
   param_layout->addRow(tr("Steps"), p_num);
   param_box->setLayout(param_layout);
 
-//  QGroupBox *mp_box = new QGroupBox(tr("Parallel process"));
-//  QFormLayout *mp_layout = new QFormLayout();
-//  mp_layout->addRow(tr("Thread count"), thread_count);
-//  mp_box->setLayout(mp_layout);
+  QGroupBox *mp_box = new QGroupBox(tr("Parallel process"));
+  QFormLayout *mp_layout = new QFormLayout();
+  mp_layout->addRow(tr("Thread count"), thread_count);
+  mp_box->setLayout(mp_layout);
 
   QGroupBox *ss_box = new QGroupBox(tr("Steady state solver"));
   QFormLayout *ss_layout = new QFormLayout();
@@ -159,7 +160,7 @@ ParameterScanConfigPage::ParameterScanConfigPage(GeneralTaskWizard *parent)
 
   QVBoxLayout *layout = new QVBoxLayout();
   layout->addWidget(param_box);
-  //layout->addWidget(mp_box);
+  layout->addWidget(mp_box);
   layout->addWidget(ss_box);
   setLayout(layout);
 }
@@ -167,24 +168,28 @@ ParameterScanConfigPage::ParameterScanConfigPage(GeneralTaskWizard *parent)
 void
 ParameterScanConfigPage::refreshParamRange(int)
 {
+  // Get the config:
+  ParamScanWizard *wizard = static_cast<ParamScanWizard *>(this->wizard());
+  ParamScanTask::Config &config = wizard->getConfigCast<ParamScanTask::Config>();
 
-    // Get the config:
-    ParamScanWizard *wizard = static_cast<ParamScanWizard *>(this->wizard());
-    ParamScanTask::Config &config = wizard->getConfigCast<ParamScanTask::Config>();
+  // Get parameter
+  QString idp = p_select->currentText();
+  if (! config.getModel()->hasParameter(idp.toStdString())) { return; }
+  iNA::Ast::Parameter * parameter = config.getModel()->getParameter(idp.toStdString());
 
-    QString idp = p_select->currentText();
-
-    if (! config.getModel()->hasParameter(idp.toStdString())) { return; }
-    iNA::Ast::Parameter * parameter = config.getModel()->getParameter(idp.toStdString());
-
-    // Set range
-    if(parameter->hasValue() && GiNaC::is_a<GiNaC::numeric>(parameter->getValue()))
-    {
-        double val = GiNaC::ex_to<GiNaC::numeric>(parameter->getValue()).to_double();
-        p_min->setText(QString("%1").arg(val));
-        p_max->setText(QString("%1").arg(1.1*val));
+  // Set range (if parameter has an initial value assigned)
+  if(parameter->hasValue())
+  {
+    GiNaC::ex value = parameter->getValue();
+    // Fold constants in parameter initial value:
+    iNA::Trafo::ConstantFolder folder(*(config.getModel()));
+    value = folder.apply(value);
+    if (GiNaC::is_a<GiNaC::numeric>(value)) {
+      double val = GiNaC::ex_to<GiNaC::numeric>(parameter->getValue()).to_double();
+      p_min->setText(QString("%1").arg(val));
+      p_max->setText(QString("%1").arg(1.1*val));
     }
-
+  }
 }
 
 void

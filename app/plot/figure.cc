@@ -5,12 +5,15 @@
 #include "configuration.hh"
 
 #include <QImage>
+#include <QGraphicsSceneMouseEvent>
+#include <QtSvg/QSvgGenerator>
+
 
 using namespace Plot;
 
 
 Figure::Figure(const QString &title, QObject *parent) :
-  QGraphicsScene(parent), legend_pos(TOP_RIGHT)
+  QGraphicsScene(parent), legend_pos(TOP_RIGHT), _measures_enabled(true)
 {
 
   const double fac = 255.;
@@ -180,36 +183,57 @@ Figure::setYLabel(const QString &label)
 void
 Figure::save(const QString &filename, FileType type)
 {
-  // Construct image to paint on:
-  QImage *image = new QImage(this->width(), this->height(), QImage::Format_ARGB32_Premultiplied);
+  if (Figure::FILETYPE_PNG == type) {
+    // Construct image to paint on:
+    QImage *image = new QImage(this->width(), this->height(), QImage::Format_ARGB32_Premultiplied);
 
-  // Clear image (set all transparent):
-  image->fill(QColor(0,0,0,0).rgba());
+    // Clear image (set all transparent):
+    image->fill(QColor(0,0,0,0).rgba());
 
-  // Construct painter to render graphics-sceene into bitmap:
-  QPainter *painter = new QPainter(image);
-  // make it look good:
-  painter->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform |
-                          QPainter::TextAntialiasing);
+    // Construct painter to render graphics-sceene into bitmap:
+    QPainter *painter = new QPainter(image);
+    // make it look good:
+    painter->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform |
+                            QPainter::TextAntialiasing);
 
-  // Render plot on painter:
-  this->render(painter);
+    // Render plot on painter:
+    this->render(painter);
 
-  // Determine format:
-  const char *format = 0;
-  switch (type) {
-  case Figure::FILETYPE_PNG:
-    format = "PNG";
-    break;
+    // save image:
+    image->save(filename, "PNG");
+
+    // destroy painter & image:
+    delete painter;
+    delete image;
+  } else {
+    // Create SVG generator & painter
+    QSvgGenerator *generator = new QSvgGenerator();
+    generator->setFileName(filename);
+    generator->setSize(QSize(width(), height()));
+    QPainter *painter = new QPainter(generator);
+    // Render graphics
+    this->render(painter);
+    painter->end();
+    // delete painter, generator & close file.
+    delete painter;
+    delete generator;
   }
-
-  // save image:
-  image->save(filename, format);
-
-  // destroy painter:
-  delete painter;
-
-  // free image:
-  delete image;
 }
+
+
+void
+Figure::enableMesure(bool enabled)
+{
+  _measures_enabled = enabled;
+}
+
+void
+Figure::showMeasure(const QPointF &point)
+{
+  // Skip if measures are disabled:
+  if (! _measures_enabled) { return; }
+  // Translate coordinates and forward to Axis instance.
+  this->axis->showMeasure(point-axis->pos());
+}
+
 

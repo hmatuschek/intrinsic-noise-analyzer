@@ -12,6 +12,12 @@ using namespace iNA::Trafo;
 void
 NoRateRuleAssertion::visit(const Ast::VariableDefinition *var)
 {
+  apply(var);
+}
+
+void
+NoRateRuleAssertion::apply(const Ast::VariableDefinition *var) throw (SBMLFeatureNotSupported)
+{
   if (var->hasRule() && Ast::Node::isRateRule(var->getRule())) {
     SBMLFeatureNotSupported err;
     err << "Rate-rules for variables not supported yet: "
@@ -36,7 +42,12 @@ NoRateRuleMixin::NoRateRuleMixin(const Ast::Model &model)
  * Implements no constant species assertions:
  * ********************************************************************************************* */
 void
-NoConstSpeciesAssertion::visit(const Ast::Species *var)
+NoConstSpeciesAssertion::visit(const Ast::Species *var) {
+  apply(var);
+}
+
+void
+NoConstSpeciesAssertion::apply(const Ast::Species *var) throw (SBMLFeatureNotSupported)
 {
   if (var->isConst()) {
     SBMLFeatureNotSupported err;
@@ -65,6 +76,12 @@ NoConstSpeciesMixin::NoConstSpeciesMixin(const Ast::Model &model)
 void
 NoAssignmentRuleAssertion::visit(const Ast::VariableDefinition *var)
 {
+  apply(var);
+}
+
+void
+NoAssignmentRuleAssertion::apply(const Ast::VariableDefinition *var)  throw (SBMLFeatureNotSupported)
+{
   if ( var->hasRule() && Ast::Node::isAssignmentRule(var->getRule()) ) {
     SBMLFeatureNotSupported err;
     err << "Assignment rules for variables not supported yet: "
@@ -87,35 +104,16 @@ NoAssignmentRuleMixin::NoAssignmentRuleMixin(const Ast::Model &model)
 
 
 /* ********************************************************************************************* *
- * Implements no algebraic constraint assertions:
- * ********************************************************************************************* */
-void
-NoAlgebraicConstraintAssertion::visit(const Ast::Constraint *constraint)
-{
-  if (Ast::Node::isAlgebraicConstraint(constraint)) {
-    SBMLFeatureNotSupported err;
-    err << "This implementation can not yet handle algebraic rules applied to the model.";
-    throw err;
-  }
-}
-
-void
-NoAlgebraicConstraintAssertion::apply(const Ast::Model &model){
-  NoAlgebraicConstraintAssertion assertion; model.accept(assertion);
-}
-
-NoAlgebraicConstraintMixin::NoAlgebraicConstraintMixin(const Ast::Model &model)
-{
-  NoAlgebraicConstraintAssertion::apply(model);
-}
-
-
-
-/* ********************************************************************************************* *
  * Implements no revsersible reaction assertions:
  * ********************************************************************************************* */
 void
 NoReversibleReactionAssertion::visit(const Ast::Reaction *reac)
+{
+  apply(reac);
+}
+
+void
+NoReversibleReactionAssertion::apply(const Ast::Reaction *reac) throw (SBMLFeatureNotSupported)
 {
   if (reac->isReversible()) {
     SBMLFeatureNotSupported err;
@@ -143,6 +141,12 @@ NoReversibleReactionMixin::NoReversibleReactionMixin(const Ast::Model &model)
  * ********************************************************************************************* */
 void
 ConstParameterAssertion::visit(const Ast::Parameter *param)
+{
+  apply(param);
+}
+
+void
+ConstParameterAssertion::apply(const Ast::Parameter *param) throw (SBMLFeatureNotSupported)
 {
   // Check if parameter is constant:
   if (! param->isConst())
@@ -180,6 +184,12 @@ ConstParamteterMixin::ConstParamteterMixin(const Ast::Model &model)
  * ********************************************************************************************* */
 void
 ConstCompartmentAssertion::visit(const Ast::Compartment *comp) {
+  apply(comp);
+}
+
+void
+ConstCompartmentAssertion::apply(const Ast::Compartment *comp) throw (SBMLFeatureNotSupported)
+{
   if (! comp->isConst())
   {
     SBMLFeatureNotSupported err;
@@ -202,8 +212,14 @@ ConstCompartmentAssertion::apply(const Ast::Model &model)
 void
 ConstStoichiometryAssertion::visit(const Ast::Reaction *reac)
 {
+  apply(reac);
+}
+
+void
+ConstStoichiometryAssertion::apply(const Ast::Reaction *reac) throw (SBMLFeatureNotSupported)
+{
   // Check reactants:
-  for (Ast::Reaction::const_iterator item=reac->reacBegin(); item!=reac->reacEnd(); item++) {
+  for (Ast::Reaction::const_iterator item=reac->reactantsBegin(); item!=reac->reactantsEnd(); item++) {
     SBMLFeatureNotSupported err;
     err << "Stoichiometry expression for reactant " << item->first->getIdentifier()
         << " in reaction " << reac->getIdentifier() << " is not a constant! "
@@ -212,7 +228,7 @@ ConstStoichiometryAssertion::visit(const Ast::Reaction *reac)
   }
 
   // Check products:
-  for (Ast::Reaction::const_iterator item=reac->prodBegin(); item!=reac->prodEnd(); item++) {
+  for (Ast::Reaction::const_iterator item=reac->productsBegin(); item!=reac->productsEnd(); item++) {
     SBMLFeatureNotSupported err;
     err << "Stoichiometry expression for product " << item->first->getIdentifier()
         << " in reaction " << reac->getIdentifier() << " is not a constant! "
@@ -298,8 +314,8 @@ void
 ReasonableModelAssertion::visit(const Ast::VariableDefinition *var)
 {
   // Apply assertions:
-  NoRateRuleAssertion::visit(var);
-  NoAssignmentRuleAssertion::visit(var);
+  NoRateRuleAssertion::apply(var);
+  NoAssignmentRuleAssertion::apply(var);
   NoExplicitTimeDependenceAssertion::visit(var);
 
   // If there is a rule define -> check:
@@ -310,7 +326,7 @@ void
 ReasonableModelAssertion::visit(const Ast::Parameter *param)
 {
   // Apply assertions:
-  ConstParameterAssertion::visit(param);
+  ConstParameterAssertion::apply(param);
   // Check base class:
   ReasonableModelAssertion::visit((Ast::VariableDefinition *)(param));
 }
@@ -320,13 +336,6 @@ ReasonableModelAssertion::visit(const Ast::Rule *rule)
 {
   // apply assertions:
   NoExplicitTimeDependenceAssertion::visit(rule);
-}
-
-void
-ReasonableModelAssertion::visit(const Ast::Constraint *constraint)
-{
-  // apply assertions
-  NoAlgebraicConstraintAssertion::visit(constraint);
 }
 
 void

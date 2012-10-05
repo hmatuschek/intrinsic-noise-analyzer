@@ -94,6 +94,11 @@ public:
    **/
    size_t numDepSpecies();
 
+   const Eigen::MatrixXd & getPermutationMatrix()
+   {
+        return this->PermutationM;
+   }
+
 };
 
 

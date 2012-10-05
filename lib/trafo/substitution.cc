@@ -114,26 +114,18 @@ Substitution::act(Ast::Rule *rule)
 
 
 void
-Substitution::act(Ast::AlgebraicConstraint *constraint)
-{
-  // Perform substitutions
-  constraint->setConstraint(constraint->getConstraint().subs(_substitution_table));
-}
-
-
-void
 Substitution::act(Ast::Reaction *reac)
 {
   // Traverse into kinetic law
   reac->traverse(*this);
 
   // handle reactants:
-  for (Ast::Reaction::iterator item=reac->reacBegin(); item!=reac->reacEnd(); item++) {
+  for (Ast::Reaction::iterator item=reac->reactantsBegin(); item!=reac->reactantsEnd(); item++) {
     item->second = item->second.subs(_substitution_table);
   }
 
   // handle products:
-  for (Ast::Reaction::iterator item=reac->prodBegin(); item!=reac->prodEnd(); item++) {
+  for (Ast::Reaction::iterator item=reac->productsBegin(); item!=reac->productsEnd(); item++) {
     item->second = item->second.subs(_substitution_table);
   }
 }

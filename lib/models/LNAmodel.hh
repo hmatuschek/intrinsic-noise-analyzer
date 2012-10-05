@@ -1,7 +1,8 @@
-#ifndef __FLUC_LNAMODEL_HH__
-#define __FLUC_LNAMODEL_HH__
+#ifndef __INA_LNAMODEL_HH__
+#define __INA_LNAMODEL_HH__
 
 #include "REmodel.hh"
+#include "initialconditions.hh"
 
 namespace iNA {
 namespace Models {
@@ -69,11 +70,11 @@ public:
   void fullState(const Eigen::VectorXd &state,
                  Eigen::VectorXd &concentrations, Eigen::MatrixXd &covariance, Eigen::VectorXd &emre);
 
-  void fullState(ConservationConstantCollector &context,
+  void fullState(InitialConditions &context,
                  const Eigen::VectorXd &state, Eigen::VectorXd &concentrations, Eigen::MatrixXd &cov, Eigen::VectorXd &emre);
 
 
-  void fullState(ConservationConstantCollector &context,
+  void fullState(InitialConditions &context,
                  const Eigen::VectorXd &state, Eigen::VectorXd &concentrations, Eigen::MatrixXd &cov);
 
 

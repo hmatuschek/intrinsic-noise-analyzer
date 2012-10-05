@@ -89,30 +89,6 @@ ConservationAnalysisTest::testWithAssignmentRule()
 }
 
 
-void
-ConservationAnalysisTest::testWithAlgebraicConstraint()
-{
-  GiNaC::ex E  = _model->getSpecies("E")->getSymbol();
-  GiNaC::ex S  = _model->getSpecies("S")->getSymbol();
-  GiNaC::ex ES = _model->getSpecies("ES")->getSymbol();
-  GiNaC::ex P  = _model->getSpecies("P")->getSymbol();
-
-  // Define a conserved cycle explicitly as algebraic constraint: 0 == ES + P + S
-  _model->addConstraint(new Ast::AlgebraicConstraint(ES+P+S));
-
-  // Resolve algebraic constraints as assignment rules: in this case ES = -P - S
-  Trafo::AlgebraicConstraintSolver::apply(*_model);
-
-  // now perform conservation analysis on remainting independent species:
-  Trafo::ConservationAnalysis::apply(*_model);
-
-  // Should find conserved cycle E = P + S;
-  UT_ASSERT(_model->getSpecies("E")->hasRule());
-  UT_ASSERT(Ast::Node::isAssignmentRule(_model->getSpecies("E")->getRule()));
-  UT_ASSERT_EQUAL(_model->getSpecies("E")->getRule()->getRule(), P+S);
-}
-
-
 
 UnitTest::TestSuite *
 ConservationAnalysisTest::suite()
@@ -124,9 +100,6 @@ ConservationAnalysisTest::suite()
 
   s->addTest(new UnitTest::TestCaller<ConservationAnalysisTest>(
                "with assignment rules", &ConservationAnalysisTest::testWithAssignmentRule));
-
-  s->addTest(new UnitTest::TestCaller<ConservationAnalysisTest>(
-               "with algebraic constraints", &ConservationAnalysisTest::testWithAlgebraicConstraint));
 
   return s;
 }

@@ -60,6 +60,9 @@ protected:
    * Handles the paint-event.
    */
   virtual void paintEvent(QPaintEvent *event);
+
+  /** Handles mouse events. */
+  virtual void mousePressEvent(QMouseEvent *event);
 };
 
 

@@ -1,5 +1,5 @@
 #include "converter.hh"
-#include "trafo/modelcopyist.hh"
+#include "modelcopyist.hh"
 #include "utils/logger.hh"
 
 
@@ -38,12 +38,12 @@ void Convert2Irreversible::process()
       GiNaC::ex constantFlux = numerator;
 
       // swap reactant and products in reverse reaction
-      for(Ast::Reaction::iterator reactant = reaction->reacBegin(); reactant!=reaction->reacEnd(); reactant++)
+      for(Ast::Reaction::iterator reactant = reaction->reactantsBegin(); reactant!=reaction->reactantsEnd(); reactant++)
       {
           backwardLaw=backwardLaw.subs(reactant->first->getSymbol()==0);
           constantFlux=constantFlux.subs(reactant->first->getSymbol()==0);
       }
-      for(Ast::Reaction::iterator product = reaction->prodBegin(); product!=reaction->prodEnd(); product++)
+      for(Ast::Reaction::iterator product = reaction->productsBegin(); product!=reaction->productsEnd(); product++)
       {
           forwardLaw=forwardLaw.subs(product->first->getSymbol()==0);
           constantFlux=constantFlux.subs(product->first->getSymbol()==0);
@@ -53,9 +53,9 @@ void Convert2Irreversible::process()
       // from reactions with nonzero stoichiometries
       if(!constantFlux.is_zero())
       {
-          if(reaction->reacBegin()==reaction->reacEnd())
+          if(reaction->reactantsBegin()==reaction->reactantsEnd())
               backwardLaw-=constantFlux;
-          else if(reaction->prodBegin()==reaction->prodEnd())
+          else if(reaction->productsBegin()==reaction->productsEnd())
               forwardLaw-=constantFlux;
           else
               continue;
@@ -84,7 +84,7 @@ void Convert2Irreversible::process()
 
       // Create copy of kinetic law:
       GiNaC::exmap param_subst;
-      Ast::KineticLaw *kineticLaw = Ast::Trafo::ModelCopyist::dupKineticLaw(reaction->getKineticLaw(), param_subst);
+      Ast::KineticLaw *kineticLaw = Ast::ModelCopyist::dupKineticLaw(reaction->getKineticLaw(), param_subst);
       // Substitute local paramters (if there are some):
       kineticLaw->setRateLaw(backwardLaw.subs(param_subst));
       // Assemble reverse reaction:
@@ -92,12 +92,12 @@ void Convert2Irreversible::process()
 
 
       // swap reactant and products in reverse reaction
-      for(Ast::Reaction::iterator species = reaction->reacBegin(); species!=reaction->reacEnd(); species++)
+      for(Ast::Reaction::iterator species = reaction->reactantsBegin(); species!=reaction->reactantsEnd(); species++)
       {
               GiNaC::ex st = (reaction->getReactantStoichiometry(species->first->getSymbol()));
               backwardReaction->setProductStoichiometry( species->first,st );
       }
-      for(Ast::Reaction::iterator species = reaction->prodBegin(); species!=reaction->prodEnd(); species++)
+      for(Ast::Reaction::iterator species = reaction->productsBegin(); species!=reaction->productsEnd(); species++)
       {
               GiNaC::ex st = ( reaction->getProductStoichiometry(species->first->getSymbol()) );
               backwardReaction->setReactantStoichiometry( species->first,st );

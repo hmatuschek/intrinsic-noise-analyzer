@@ -74,26 +74,29 @@ public:
  */
 class SyntaxError: public ParserError
 {
+protected:
+  /** Holds a list of expected tokens by the parser. */
+  std::set<std::string> _expected_tokens;
+
 public:
-  /**
-   * Constructor.
-   */
+  /** Constructor. */
   SyntaxError(int line=-1);
 
-  /**
-   * Constructor with message.
-   */
+  /** Constructor with message. */
   SyntaxError(const std::string &message, int line=-1);
 
-  /**
-   * Copy constructor.
-   */
+  /** Copy constructor. */
   SyntaxError(const SyntaxError &other);
 
-  /**
-   * Destructor.
-   */
+  /** Destructor. */
   virtual ~SyntaxError() throw();
+
+  /** Returns a list of tokens, that where expected by the parser. */
+  const std::set<std::string> &getExpectedTokens() const;
+  /** Adds the token id/name to the list of expected tokens. */
+  void addExpectedTokenId(const std::string &id);
+  /** Adds a list of expected token ids. */
+  void addExpectedTokens(const std::set<std::string> &ids);
 };
 
 

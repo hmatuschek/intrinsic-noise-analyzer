@@ -201,10 +201,10 @@ LNASteadyStateTask::getLabel()
 }
 
 
-const iNA::Ast::Unit &
+iNA::Ast::Unit
 LNASteadyStateTask::getSpeciesUnit() const
 {
-  return config.getModel()->getSpecies(0)->getUnit();
+  return config.getModel()->getSpeciesUnit();
 }
 
 Eigen::VectorXd &

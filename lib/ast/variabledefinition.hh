@@ -39,9 +39,6 @@ protected:
   /** Holds the rule applied to the variable or 0 if there is no rule. */
   Rule *rule;
 
-  /** Holds a unit of the variable. */
-  Unit unit;
-
 
 public:
   /**
@@ -52,7 +49,7 @@ public:
    * @param unit Specifies the unit of the variable.
    * @param is_const Specifies if the variable is a constant.
    */
-  VariableDefinition(Node::NodeType type, const std::string &id, const Unit &unit, bool is_const=false);
+  VariableDefinition(Node::NodeType type, const std::string &id, bool is_const=false);
 
   /**
    * Constructs a (complete) variable definition.
@@ -67,7 +64,7 @@ public:
    * @param is_const Specifies if the variable is a constant.
    */
   VariableDefinition(Node::NodeType type, const std::string &id, GiNaC::ex value,
-                     const Unit &unit, const std::string &name, bool is_const=false);
+                     const std::string &name, bool is_const=false);
 
   /**
    * Constructs a variable definition with attached rule.
@@ -82,7 +79,7 @@ public:
    * @param is_const Specifies if the variable is a constant.
    */
   VariableDefinition(Node::NodeType type, const std::string &id, GiNaC::ex value, Rule *rule,
-                     const Unit &unit, bool is_const=false);
+                     bool is_const=false);
 
   /**
    * Destructor. Also frees the initial value expression, if present.
@@ -132,21 +129,6 @@ public:
    * (Re-) Sets the attached rule for the variable.
    */
   void setRule(Rule *rule);
-
-  /**
-   * Returns true, if the variable as a unit assigned.
-   */
-  bool isDimensionLess() const;
-
-  /**
-   * Returns the unit of the variable.
-   */
-  const Unit &getUnit() const;
-
-  /**
-   * Resets the unit of the variable.
-   */
-  void setUnit(const Unit &unit);
 
   /**
    * Just dumps a simple string representation of the variable definition into the given stream.

@@ -13,7 +13,7 @@ namespace Trafo {
 /** This class collects assignment-rules from a model.
  * @ingroup trafo */
 class AssignmentRuleCollector
-    : public Ast::Visitor, Ast::VariableDefinition::Visitor
+    : public Ast::Visitor, public Ast::VariableDefinition::Visitor
 {
 public:
 protected:
