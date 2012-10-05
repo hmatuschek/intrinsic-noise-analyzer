@@ -1,0 +1,42 @@
+@model:3.1.1 = Model_1 "Goodwin Hopf Bifurcation"
+
+@units
+ substance = item
+ volume = litre
+ area = metre: e=2
+ length = metre
+ time = second
+
+@compartments
+ compartment_1 = 10 "cytosol"
+
+@species
+ compartment_1: [species_2]  = 0  "M"
+ compartment_1: [species_3]  = 0  "P"
+ compartment_1: [species_4]  = 0  "P2"
+
+@parameters
+ a=c*((c/b)-1) "a"
+ b=0.2 "b"
+ c=10 "c"
+
+@reactions
+ @r= reaction_1 "transscription"
+   -> species_2 : species_4
+  compartment_1*K*(species_4+K)^-1*a: K=1
+
+ @r= reaction_2 "translate"
+  species_2 -> species_2 + species_3
+  compartment_1*b*species_2
+
+ @r= reaction_9 "enzyme degradation"
+  species_4 -> 
+  c*species_4*compartment_1*(Km+species_4)^-1: Km=1
+
+ @r= reaction_7 "m degrad"
+  species_2 -> 
+  compartment_1*b*species_2
+
+ @r= reaction_13 "transport out"
+  species_3 -> species_4
+  species_3*compartment_1*b
