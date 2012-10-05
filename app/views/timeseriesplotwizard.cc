@@ -30,6 +30,56 @@ TimeSeriesGraphConfig::TimeSeriesGraphConfig(const TimeSeriesGraphConfig &other)
   // pass...
 }
 
+
+TimeSeriesGraphConfig::PlotType
+TimeSeriesGraphConfig::plotType() const {
+  return _type;
+}
+
+void
+TimeSeriesGraphConfig::setPlotType(PlotType type) {
+  _type = type;
+}
+
+GiNaC::ex
+TimeSeriesGraphConfig::meanColumn() const {
+  return _mean_expression;
+}
+
+bool
+TimeSeriesGraphConfig::setMeanColumn(const QString &formula) {
+  if (! PlotFormulaParser::check(formula, _context)) { return false; }
+  _mean_expression = PlotFormulaParser::parse(formula, _context);
+  return true;
+}
+
+GiNaC::ex
+TimeSeriesGraphConfig::varColumn() const {
+  return _var_expression;
+}
+
+bool
+TimeSeriesGraphConfig::setVarColumn(const QString &formula) {
+  if (! PlotFormulaParser::check(formula, _context)) { return false; }
+  _var_expression = PlotFormulaParser::parse(formula, _context);
+  return true;
+}
+
+const QString &
+TimeSeriesGraphConfig::label() const {
+  return _label;
+}
+
+void
+TimeSeriesGraphConfig::setLabel(const QString &label) {
+  _label = label;
+}
+
+const Table *
+TimeSeriesGraphConfig::table() const {
+  return _table;
+}
+
 Plot::Graph *
 TimeSeriesGraphConfig::create(const Plot::GraphStyle &style)
 {
@@ -48,8 +98,15 @@ TimeSeriesGraphConfig::create(const Plot::GraphStyle &style)
   return graph;
 }
 
-double TimeSeriesGraphConfig::evalMean(size_t row) { return _context(row, _mean_expression); }
-double TimeSeriesGraphConfig::evalVar(size_t row) { return _context(row, _var_expression); }
+double
+TimeSeriesGraphConfig::evalMean(size_t row) {
+  return _context(row, _mean_expression);
+}
+
+double
+TimeSeriesGraphConfig::evalVar(size_t row) {
+  return _context(row, _var_expression);
+}
 
 
 
@@ -63,36 +120,31 @@ TimeSeriesGraphList::TimeSeriesGraphList(QObject *parent)
 }
 
 int
-TimeSeriesGraphList::rowCount(const QModelIndex &parent) const
-{
+TimeSeriesGraphList::rowCount(const QModelIndex &parent) const {
   return _graphs.size();
 }
 
 QVariant
-TimeSeriesGraphList::data(const QModelIndex &index, int role) const
-{
+TimeSeriesGraphList::data(const QModelIndex &index, int role) const {
   if (Qt::DisplayRole != role) { return QVariant(); }
   if (index.row() >= _graphs.size()) { return QVariant(); }
   return _graphs.at(index.row()).label();
 }
 
 void
-TimeSeriesGraphList::addGraph(const TimeSeriesGraphConfig &graph)
-{
+TimeSeriesGraphList::addGraph(const TimeSeriesGraphConfig &graph) {
   beginInsertRows(QModelIndex(), _graphs.size(), _graphs.size());
   _graphs.append(graph);
   endInsertRows();
 }
 
 TimeSeriesGraphConfig &
-TimeSeriesGraphList::graph(int idx)
-{
+TimeSeriesGraphList::graph(int idx) {
   return _graphs[idx];
 }
 
 void
-TimeSeriesGraphList::removeGraph(int idx)
-{
+TimeSeriesGraphList::removeGraph(int idx) {
   if (idx < 0 || idx >= _graphs.size()) { return; }
   beginRemoveRows(QModelIndex(), idx, idx);
   _graphs.removeAt(idx);
@@ -106,14 +158,17 @@ TimeSeriesGraphList::removeGraph(int idx)
 TimeSeriesPlotDialog::TimeSeriesPlotDialog(Table *table, QWidget *parent)
   : QDialog(parent), _data(table), _graphs()
 {
+  setWindowTitle("Plot-o-mat");
+
   // Assemble view:
   _plot = new Plot::Figure();
   _plotview = new Plot::Canvas();
   _plotview->setMinimumSize(320,240);
   _plotview->setPlot(_plot);
-  _plotview->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+  _plotview->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
   _graph_list = new QListView();
-  _graph_list->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
+  _graph_list->setMaximumWidth(160);
+  _graph_list->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
   _graph_list->setModel(&_graphs);
   _add_graph  = new QPushButton(tr("+"));
   _rem_graph  = new QPushButton(tr("-"));
@@ -133,11 +188,11 @@ TimeSeriesPlotDialog::TimeSeriesPlotDialog(Table *table, QWidget *parent)
   button_box->setMargin(0);
   button_box->addWidget(_add_graph);
   button_box->addWidget(_rem_graph);
-  side_box->setMargin(0);
+  side_box->setMargin(0); side_box->setSpacing(0);
   side_box->addWidget(_graph_list);
   side_box->addLayout(button_box);
-  main_layout->addWidget(_stack, 1);
-  main_layout->addLayout(side_box, 0);
+  main_layout->addWidget(_stack);
+  main_layout->addLayout(side_box);
   layout->addLayout(main_layout);
   layout->addWidget(buttons);
   setLayout(layout);
@@ -149,9 +204,19 @@ TimeSeriesPlotDialog::TimeSeriesPlotDialog(Table *table, QWidget *parent)
 }
 
 
+size_t
+TimeSeriesPlotDialog::numGraphs() const {
+  return _graphs.rowCount(QModelIndex());
+}
+
+TimeSeriesGraphConfig &
+TimeSeriesPlotDialog::graph(size_t i) {
+  return _graphs.graph(i);
+}
+
+
 void
-TimeSeriesPlotDialog::onAddGraph()
-{
+TimeSeriesPlotDialog::onAddGraph() {
   NewTimeSeriesGraphDialog add_graph_dialog(_data);
   if (QDialog::Rejected == add_graph_dialog.exec()) { return; }
   _graphs.addGraph(add_graph_dialog.getConfig());
@@ -160,8 +225,7 @@ TimeSeriesPlotDialog::onAddGraph()
 }
 
 void
-TimeSeriesPlotDialog::onRemoveGraph()
-{
+TimeSeriesPlotDialog::onRemoveGraph() {
   if (! _graph_list->selectionModel()->hasSelection()) { return; }
   QModelIndexList selected_items =_graph_list->selectionModel()->selectedIndexes();
   if (1 != selected_items.count()) { return; }
@@ -174,7 +238,10 @@ TimeSeriesPlotDialog::onRemoveGraph()
 void
 TimeSeriesPlotDialog::onUpdatePlot()
 {
+  // Free old plot
   if (0 != _plot) { delete _plot; }
+
+  // Assemble new plot
   _plot = new Plot::Figure();
   for (int i=0; i<_graphs.rowCount(QModelIndex()); i++) {
     Plot::Graph *graph = _graphs.graph(i).create(_plot->getStyle(i));
@@ -182,6 +249,7 @@ TimeSeriesPlotDialog::onUpdatePlot()
     _plot->addToLegend(_graphs.graph(i).label(), graph);
   }
 
+  // Add plot and update figure
   _plotview->setPlot(_plot);
   _plot->updateAxes();
   _plotview->update();
@@ -210,7 +278,7 @@ TimeSeriesFormulaEditor::TimeSeriesFormulaEditor(Table *table, QWidget *parent)
   _select_column = new QPushButton("+");
 
   QHBoxLayout *layout = new QHBoxLayout();
-  layout->setMargin(0);
+  layout->setMargin(0); layout->setSpacing(0);
   layout->addWidget(_formula);
   layout->addWidget(_select_column);
   setLayout(layout);
@@ -221,8 +289,7 @@ TimeSeriesFormulaEditor::TimeSeriesFormulaEditor(Table *table, QWidget *parent)
 
 
 void
-TimeSeriesFormulaEditor::onColumnSelected(QModelIndex index)
-{
+TimeSeriesFormulaEditor::onColumnSelected(QModelIndex index) {
   QAbstractProxyModel *proxy = static_cast<QAbstractProxyModel *>(_columns->completionModel());
   index = proxy->mapToSource(index);
   QString formula = _formula->text();
@@ -243,6 +310,8 @@ TimeSeriesFormulaEditor::showPopUp() {
 NewTimeSeriesGraphDialog::NewTimeSeriesGraphDialog(Table *table, QWidget *parent)
   : QDialog(parent), _data(table), _config(table, TimeSeriesGraphConfig::LINE_GRAPH, 0, 0)
 {
+  setWindowTitle("Graph-o-mat");
+
   _plot_type    = new QComboBox();
   _plot_type->addItem(tr("Line plot"));
   _plot_type->addItem(tr("Variance plot"));

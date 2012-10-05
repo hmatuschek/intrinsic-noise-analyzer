@@ -32,7 +32,7 @@ protected:
 };
 
 
-/** A class describing the metrics of a MathFormulaItem.
+/** A the metrics of a MathFormulaItem.
  * This class is essential for the layout of the formula, as it describes important measures
  * of a formula item. */
 class MathMetrics {

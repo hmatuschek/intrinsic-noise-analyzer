@@ -407,11 +407,19 @@ GiNaC::ex __plot_formula_process_expression(Parser::ConcreteSyntaxTree &node, Pa
 PlotFormulaParser::Context::Context(Table *table)
   : _table(table)
 {
+  // Assign for each column a symbol.
   _symbols.resize(_table->getNumColumns());
   for (size_t i=0; i<_table->getNumColumns(); i++) {
     _symbols[i] = GiNaC::symbol(table->getColumnName(i).toStdString());
   }
 }
+
+PlotFormulaParser::Context::Context(const Context &other)
+  : _table(other._table), _symbols(other._symbols)
+{
+  // pass...
+}
+
 
 GiNaC::symbol
 PlotFormulaParser::Context::getColumnSymbol(size_t column) {
