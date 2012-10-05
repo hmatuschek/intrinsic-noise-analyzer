@@ -130,6 +130,8 @@ public:
    */
   bool hasNegativeVariance() const;
 
+  inline const SSETaskConfig &getConfig() const { return config; }
+
 
 protected:
   /**

@@ -31,22 +31,34 @@ IOSLNATimeSeriesPlot::IOSLNATimeSeriesPlot(size_t num_species, Table *series,
 
 
 
-IOSEMRETimeSeriesPlot::IOSEMRETimeSeriesPlot(size_t num_species, Table *series,
-                                             const QString &species_unit, const QString &time_unit,
-                                             QObject *parent)
+IOSEMRETimeSeriesPlot::IOSEMRETimeSeriesPlot(const QStringList &selected_species,
+                                             IOSTask *task, QObject *parent)
   : VariancePlot("Mean concentrations (EMRE & IOS Var.)", parent)
 {
-  // Create a plot:
+  // Get time & species units and assemble axis labels
+  std::stringstream unit_str;
+  task->getSpeciesUnit().dump(unit_str, true);
+  QString species_unit(unit_str.str().c_str());
+  unit_str.str("");
+  task->getTimeUnit().dump(unit_str, true);
+  QString time_unit(unit_str.str().c_str());
   this->setXLabel(tr("time [%1]").arg(time_unit));
   this->setYLabel(tr("concentrations [%1]").arg(species_unit));
 
-  size_t offset_mean = 1+num_species+(num_species*(num_species+1))/2;
-  size_t offset_cov  = offset_mean+num_species;
-  for (size_t i=0; i<num_species; i++)
-  {
-    this->addVarianceGraph(series->getColumn(0), series->getColumn(i+offset_mean),
-                           series->getColumn(offset_cov), series->getColumnName(i+offset_mean));
-    offset_cov += num_species-i;
+  // Determine some numbers
+  iNA::Ast::Model *model = task->getConfig().getModel();
+  size_t Nss = selected_species.size();
+  size_t Ns = model->numSpecies();    // Number of species in model
+  size_t offset = 1+Ns+(Ns*(Ns+1))/2; // skip time, RE & LNA
+  Table *series = task->getTimeSeries();
+
+  // Assemble plots
+  for (size_t i=0; i<Nss; i++) {
+    size_t species_idx = model->getSpeciesIdx(selected_species.at(i).toStdString());
+    size_t mean_idx = offset + species_idx;
+    size_t var_idx  = offset+Ns + species_idx*(Ns+1) - (species_idx*(species_idx+1))/2;
+    this->addVarianceGraph(series->getColumn(0), series->getColumn(mean_idx),
+                           series->getColumn(var_idx), series->getColumnName(mean_idx));
   }
 
   // Force y plot-range to be [0, AUTO]:
@@ -58,26 +70,36 @@ IOSEMRETimeSeriesPlot::IOSEMRETimeSeriesPlot(size_t num_species, Table *series,
 
 
 
-IOSEMREComparePlot::IOSEMREComparePlot(size_t num_species, Table *series,
-                                       const QString &species_unit, const QString &time_unit,
+IOSEMREComparePlot::IOSEMREComparePlot(const QStringList &selected_species, IOSTask *task,
                                        QObject *parent)
   : Plot::Figure("Mean concentrations (RE, EMRE & IOS)", parent)
 {
-  // Create a plot:
+  // Get time & species units and assemble axis labels
+  std::stringstream unit_str;
+  task->getSpeciesUnit().dump(unit_str, true);
+  QString species_unit(unit_str.str().c_str());
+  unit_str.str("");
+  task->getTimeUnit().dump(unit_str, true);
+  QString time_unit(unit_str.str().c_str());
   this->setXLabel(tr("time [%1]").arg(time_unit));
   this->setYLabel(tr("concentrations [%1]").arg(species_unit));
 
-  QVector<Plot::LineGraph *> re_graphs(num_species);
-  QVector<Plot::LineGraph *> emre_graphs(num_species);
-  QVector<Plot::LineGraph *> ios_graphs(num_species);
-
+  iNA::Ast::Model *model = task->getConfig().getModel();
+  Table *series = task->getTimeSeries();
+  size_t Ns  = model->numSpecies();
+  size_t Nss = selected_species.size();
   size_t off_re   = 1;
-  size_t off_emre = 1 + num_species + (num_species*(num_species+1))/2;
-  size_t off_ios  = off_emre + num_species + (num_species*(num_species+1))/2;
+  size_t off_emre = 1 + Ns + (Ns*(Ns+1))/2;
+  size_t off_ios  = off_emre + Ns + (Ns*(Ns+1))/2;
+
+  QVector<Plot::LineGraph *> re_graphs(Nss);
+  QVector<Plot::LineGraph *> emre_graphs(Nss);
+  QVector<Plot::LineGraph *> ios_graphs(Nss);
 
   // Allocate a graph for each colum in time-series:
-  for (size_t i=0; i<num_species; i++)
+  for (size_t i=0; i<Nss; i++)
   {
+    size_t species_idx = model->getSpeciesIdx(selected_species.at(i).toStdString());
     Plot::GraphStyle style = this->getStyle(i);
     ios_graphs[i]  = new Plot::LineGraph(style);
 
@@ -89,31 +111,29 @@ IOSEMREComparePlot::IOSEMREComparePlot(size_t num_species, Table *series,
     style.setLineColor(line_color);
     re_graphs[i] = new Plot::LineGraph(style);
 
-    this->axis->addGraph(ios_graphs[i]);
-    this->axis->addGraph(emre_graphs[i]);
-    this->axis->addGraph(re_graphs[i]);
+    this->axis->addGraph(ios_graphs[species_idx]);
+    this->axis->addGraph(emre_graphs[species_idx]);
+    this->axis->addGraph(re_graphs[species_idx]);
 
-    this->addToLegend(series->getColumnName(i+off_ios),  ios_graphs[i]);
-    this->addToLegend(series->getColumnName(i+off_emre), emre_graphs[i]);
-    this->addToLegend(series->getColumnName(i+off_re), re_graphs[i]);
+    this->addToLegend(series->getColumnName(species_idx+off_ios),  ios_graphs[i]);
+    this->addToLegend(series->getColumnName(species_idx+off_emre), emre_graphs[i]);
+    this->addToLegend(series->getColumnName(species_idx+off_re), re_graphs[i]);
 
   }
 
   // Do not plot all
   int idx_incr = 0;
-  if (0 == (idx_incr = series->getNumRows()/100))
-  {
+  if (0 == (idx_incr = series->getNumRows()/100)) {
     idx_incr = 1;
   }
 
   // Plot time-series:
-  for (size_t j=0; j<series->getNumRows(); j+=idx_incr)
-  {
-    for (size_t i=0; i<num_species; i++)
-    {
-      re_graphs[i]->addPoint((*series)(j,0), (*series)(j, i+off_re));
-      emre_graphs[i]->addPoint((*series)(j, 0), (*series)(j, i+off_emre));
-      ios_graphs[i]->addPoint((*series)(j, 0), (*series)(j, i+off_ios));
+  for (size_t j=0; j<series->getNumRows(); j+=idx_incr) {
+    for (size_t i=0; i<Nss; i++) {
+      size_t species_idx = model->getSpeciesIdx(selected_species.at(i).toStdString());
+      re_graphs[i]->addPoint((*series)(j,0), (*series)(j, species_idx+off_re));
+      emre_graphs[i]->addPoint((*series)(j, 0), (*series)(j, species_idx+off_emre));
+      ios_graphs[i]->addPoint((*series)(j, 0), (*series)(j, species_idx+off_ios));
     }
   }
 
@@ -122,8 +142,7 @@ IOSEMREComparePlot::IOSEMREComparePlot(size_t num_species, Table *series,
         Plot::RangePolicy(Plot::RangePolicy::FIXED, Plot::RangePolicy::AUTOMATIC));
   this->getAxis()->setYRange(0, 1);
 
-  for (size_t i=0; i<num_species; i++)
-  {
+  for (size_t i=0; i<Nss; i++) {
     re_graphs[i]->commit();
     emre_graphs[i]->commit();
     ios_graphs[i]->commit();
@@ -218,63 +237,65 @@ IOSLNACorrelationPlot::IOSLNACorrelationPlot(IOSTask *task,
 /* ********************************************************************************************* *
  * Implementation of correlation plot.
  * ********************************************************************************************* */
-IOSEMRECorrelationPlot::IOSEMRECorrelationPlot(IOSTask *task,
-                                               const QString &time_unit,
-                                               QObject *parent)
+IOSEMRECorrelationPlot::IOSEMRECorrelationPlot(const QStringList &selected_species, IOSTask *task, QObject *parent)
   : Figure("Correlation Coefficients (IOS)", parent)
 {
+  std::stringstream unit_str;
+  task->getTimeUnit().dump(unit_str, true);
+  QString time_unit(unit_str.str().c_str());
   this->setXLabel(tr("time [%1]").arg(time_unit));
   this->setYLabel(tr("correlation coefficient"));
 
-  size_t num_species = task->getSelectedSpecies().size();
-  size_t N_cov = (num_species*(num_species-1))/2;
-  QVector<Plot::LineGraph *> graphs(N_cov);
-  Table *data = task->getTimeSeries();
+  iNA::Ast::Model *model = task->getConfig().getModel();
+  Table *series = task->getTimeSeries();
+  size_t Nss = selected_species.size();
+  size_t Ns = model->numSpecies();
+  size_t Ncov = (Nss*(Nss-1))/2;
+  QVector<Plot::LineGraph *> graphs(Ncov);
 
   // Allocate a graph for each colum in time-series:
-  size_t graph_idx = 0;
-  size_t column_idx = 1+2*num_species+(num_species*(num_species+1))/2;
-  Eigen::MatrixXi index_table(num_species, num_species);
-  for (size_t i=0; i<num_species; i++)
+  Eigen::MatrixXi index_table(Nss, Nss); size_t graph_idx=0;
+  for (size_t i=0; i<Nss; i++)
   {
-    index_table(i,i) = column_idx; column_idx++;
-    for (size_t j=i+1; j<num_species; j++, graph_idx++, column_idx++)
+    iNA::Ast::Species *species_i = model->getSpecies(selected_species.at(i).toStdString());
+    QString species_name_i = species_i->getIdentifier().c_str();
+    if (species_i->hasName()) { species_name_i = species_i->getName().c_str(); }
+
+    size_t species_idx = model->getSpeciesIdx(species_i);
+    index_table(i,i) = 1+2*Ns+(Ns*(Ns+1))/2; // offset to first cov column
+    index_table(i,i) += species_idx*(model->numSpecies()+1) - (species_idx*(species_idx+1))/2;
+    for (size_t j=i+1; j<Nss; j++, graph_idx++)
     {
+      index_table(i,j) = index_table(j,i) = index_table(i,i)+j-i;
+
+      iNA::Ast::Species *species_j = model->getSpecies(selected_species.at(j).toStdString());
+      QString species_name_j = species_j->getIdentifier().c_str();
+      if (species_j->hasName()) { species_name_j = species_j->getName().c_str(); }
+
       Plot::GraphStyle style = this->getStyle(graph_idx);
       graphs[graph_idx] = new Plot::LineGraph(style);
       this->axis->addGraph(graphs[graph_idx]);
       this->addToLegend(
-            QString("corr(%1, %2)").arg(task->getSpeciesName(i)).arg(task->getSpeciesName(j)),
-            graphs[graph_idx]);
-      index_table(i,j) = index_table(j,i) = column_idx;
+            QString("corr(%1, %2)").arg(species_name_i).arg(species_name_j), graphs[graph_idx]);
     }
   }
 
   // Do not plot all
   int idx_incr ;
-  if (0 == (idx_incr = data->getNumRows()/100))
-  {
-    idx_incr = 1;
-  }
+  if (0 == (idx_incr = series->getNumRows()/100)) { idx_incr = 1; }
 
   // Plot time-series:
-  for (size_t k=0; k<data->getNumRows(); k+=idx_incr)
-  {
+  for (size_t k=0; k<series->getNumRows(); k+=idx_incr) {
     size_t idx = 0;
-    for (size_t i=0; i<num_species; i++)
-    {
-      for (size_t j=i+1; j<num_species; j++, idx++)
-      {
-        double x = (*data)(k, 0);
+    for (size_t i=0; i<Nss; i++) {
+      for (size_t j=i+1; j<Nss; j++, idx++) {
+        double x = (*series)(k, 0);
         double y = 0.0;
-
-        if ((0.0 != (*data)(k, index_table(i,i))) && (0.0 != (*data)(k, index_table(j,j))))
-        {
-          y = (*data)(k, index_table(i,j)) /
-              (std::sqrt((*data)(k, index_table(i,i))) *
-               std::sqrt((*data)(k, index_table(j,j))));
+        if ((0.0 != (*series)(k, index_table(i,i))) && (0.0 != (*series)(k, index_table(j,j)))) {
+          y = (*series)(k, index_table(i,j)) /
+              (std::sqrt((*series)(k, index_table(i,i))) *
+               std::sqrt((*series)(k, index_table(j,j))));
         }
-
         graphs[idx]->addPoint(x, y);
       }
     }
@@ -286,10 +307,8 @@ IOSEMRECorrelationPlot::IOSEMRECorrelationPlot(IOSTask *task,
   this->getAxis()->setYRange(-1.1, 1.1);
 
   // Finally commit changes:
-  for (size_t i=0; i<N_cov; i++)
-  {
+  for (size_t i=0; i<Ncov; i++) {
     graphs[i]->commit();
   }
-
   this->updateAxes();
 }

@@ -10,6 +10,7 @@
 #include "../application.hh"
 #include "../doctree/plotitem.hh"
 #include "iosplot.hh"
+#include "replotdialog.hh"
 
 
 /* ********************************************************************************************* *
@@ -75,40 +76,29 @@ IOSResultWidget::plotButtonPressed()
   this->ios_task_wrapper->getIOSTask()->getTimeUnit().dump(unit_str, true);
   QString time_unit(unit_str.str().c_str());
 
+  SSEPlotDialog dialog(ios_task_wrapper->getIOSTask()->getConfig().getModel());
+  dialog.setWindowTitle(tr("IOS quick plot dialog"));
+  dialog.setTitle(tr("Select the species to plot."));
 
-  // Add timeseries plot:
-//  Application::getApp()->docTree()->addPlot(
-//        this->ios_task_wrapper,
-//        new PlotItem(
-//          new IOSLNATimeSeriesPlot(this->ios_task_wrapper->getIOSTask()->getSelectedSpecies().size(),
-//                                this->ios_task_wrapper->getIOSTask()->getTimeSeries(),
-//                                concentration_unit, time_unit)));
-
-//  Application::getApp()->docTree()->addPlot(
-//        this->ios_task_wrapper,
-//        new PlotItem(
-//          new IOSLNACorrelationPlot(this->ios_task_wrapper->getIOSTask(), time_unit)));
+  if (QDialog::Rejected == dialog.exec()) { return; }
+  QStringList selected_species = dialog.getSelectedSpecies();
 
   Application::getApp()->docTree()->addPlot(
         this->ios_task_wrapper,
         new PlotItem(
-          new IOSEMRETimeSeriesPlot(this->ios_task_wrapper->getIOSTask()->getSelectedSpecies().size(),
-                                    this->ios_task_wrapper->getIOSTask()->getTimeSeries(),
-                                    concentration_unit, time_unit)));
+          new IOSEMRETimeSeriesPlot(selected_species, ios_task_wrapper->getIOSTask())));
 
+  if (0 < selected_species.size()) {
+    Application::getApp()->docTree()->addPlot(
+          this->ios_task_wrapper,
+          new PlotItem(
+            new IOSEMRECorrelationPlot(selected_species, ios_task_wrapper->getIOSTask())));
+  }
 
   Application::getApp()->docTree()->addPlot(
         this->ios_task_wrapper,
         new PlotItem(
-          new IOSEMRECorrelationPlot(this->ios_task_wrapper->getIOSTask(), time_unit)));
-
-  Application::getApp()->docTree()->addPlot(
-        this->ios_task_wrapper,
-        new PlotItem(
-          new IOSEMREComparePlot(this->ios_task_wrapper->getIOSTask()->getSelectedSpecies().size(),
-                                 this->ios_task_wrapper->getIOSTask()->getTimeSeries(),
-                                 concentration_unit, time_unit)));
-
+          new IOSEMREComparePlot(selected_species,ios_task_wrapper->getIOSTask())));
 }
 
 
