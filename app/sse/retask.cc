@@ -441,9 +441,14 @@ RETask::process()
 
 
 QString
-RETask::getLabel()
-{
+RETask::getLabel() {
   return "Time Course Analysis (RE)";
+}
+
+
+const SSETaskConfig &
+RETask::getConfig() const {
+  return config;
 }
 
 

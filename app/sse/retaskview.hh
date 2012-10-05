@@ -36,21 +36,17 @@ class REResultWidget : public QWidget
 protected:
   RETaskWrapper *re_task_wrapper;
 
-
 public:
   explicit REResultWidget(RETaskWrapper *re_task_wrapper, QWidget *parent = 0);
 
-
 private slots:
-  void plotButtonPressed();
+  void quickPlotButtonPressed();
+  void genericPlotButtonPressed();
   void saveButtonPressed();
-
 
 private:
   TableWrapper *tableWrapper;
   QTableView   *dataTable;
-  QPushButton  *plotButton;
-  QPushButton  *saveButton;
 };
 
 #endif // RETASKVIEW_HH

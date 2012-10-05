@@ -107,8 +107,8 @@ SpeciesSelectionWizardPage::initializePage()
 
     QListWidgetItem *item = new QListWidgetItem(species_name);
     item->setData(Qt::UserRole, species_id);
-    item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
-    item->setCheckState(Qt::Unchecked);
+    //item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
+    item->setCheckState(Qt::Checked);
     this->speciesList->addItem(item);
   }
 }

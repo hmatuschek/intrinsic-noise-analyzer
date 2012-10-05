@@ -4,19 +4,34 @@
 #include <QVector>
 
 
-RETimeSeriesPlot::RETimeSeriesPlot(size_t num_species, Table *series,
-                                   const QString &species_unit, const QString &time_unit,
-                                   QObject *parent)
+RETimeSeriesPlot::RETimeSeriesPlot(QList<QString> &selected_species, RETask *task, QObject *parent)
   : Plot::Figure("Mean concentrations (RE)", parent)
 {
-  // Create a plot:
+  // Get species unit
+  std::stringstream unit_str;
+  task->getSpeciesUnit().dump(unit_str, true);
+  QString species_unit(unit_str.str().c_str());
+  // Get time unit
+  unit_str.str("");
+  task->getTimeUnit().dump(unit_str, true);
+  QString time_unit(unit_str.str().c_str());
+  // Set axis labels with units:
   this->setXLabel(tr("time [%1]").arg(time_unit));
   this->setYLabel(tr("concentrations [%1]").arg(species_unit));
 
-  QVector<Plot::LineGraph *> graphs(num_species);
+  /* Assemble plot. */
+  QVector<Plot::LineGraph *> graphs(selected_species.size());
+
+  // Maps each selected species to the column in the analyis data:
+  QVector<size_t> mean_index_table(selected_species.size());
+  for (int i=0; i<selected_species.size(); i++) {
+    size_t idx = task->getConfig().getModel()->getSpeciesIdx(selected_species.at(i).toStdString());
+    mean_index_table[i] = idx+1; // +1 since column 0 is time
+  }
 
   // Allocate a graph for each colum in time-series:
-  for (size_t i=0; i<num_species; i++)
+  Table *series = task->getTimeSeries();
+  for (int i=0; i<selected_species.size(); i++)
   {
     Plot::GraphStyle style = this->getStyle(i);
     graphs[i] = new Plot::LineGraph(style);
@@ -26,17 +41,12 @@ RETimeSeriesPlot::RETimeSeriesPlot(size_t num_species, Table *series,
 
   // Do not plot all
   int idx_incr = 0;
-  if (0 == (idx_incr = series->getNumRows()/100))
-  {
-    idx_incr = 1;
-  }
+  if (0 == (idx_incr = series->getNumRows()/100)) { idx_incr = 1; }
 
   // Plot time-series:
-  for (size_t j=0; j<series->getNumRows(); j+=idx_incr)
-  {
-    for (size_t i=0; i<num_species; i++)
-    {
-      graphs[i]->addPoint((*series)(j, 0), (*series)(j, 1+i));
+  for (size_t j=0; j<series->getNumRows(); j+=idx_incr) {
+    for (int i=0; i<selected_species.size(); i++) {
+      graphs[i]->addPoint((*series)(j, 0), (*series)(j, mean_index_table[i]));
     }
   }
 
@@ -45,8 +55,7 @@ RETimeSeriesPlot::RETimeSeriesPlot(size_t num_species, Table *series,
         Plot::RangePolicy(Plot::RangePolicy::FIXED, Plot::RangePolicy::AUTOMATIC));
   this->getAxis()->setYRange(0, 1);
 
-  for (size_t i=0; i<num_species; i++)
-  {
+  for (int i=0; i<selected_species.size(); i++) {
     graphs[i]->commit();
   }
 

@@ -90,6 +90,8 @@ public:
    */
   virtual QString getLabel();
 
+  /** Returns the task config. */
+  const SSETaskConfig &getConfig() const;
 
 protected:
   /**

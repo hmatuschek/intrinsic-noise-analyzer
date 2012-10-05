@@ -32,12 +32,14 @@ SET(ina_app_sse_SOURCES sse/ssetaskconfig.cc
     sse/ssemodule.cc sse/ssewizard.cc
     sse/iostask.cc sse/iostaskwrapper.cc sse/iostaskview.cc sse/iosplot.cc
     sse/lnatask.cc sse/lnataskwrapper.cc sse/lnataskview.cc sse/lnaplot.cc
-    sse/retask.cc  sse/retaskwrapper.cc  sse/retaskview.cc  sse/replot.cc)
+    sse/retask.cc  sse/retaskwrapper.cc  sse/retaskview.cc  sse/replot.cc
+    sse/replotdialog.cc)
 SET(ina_app_sse_HEADERS
     sse/ssemodule.hh sse/ssewizard.hh
     sse/iostask.hh sse/iostaskwrapper.hh sse/iostaskview.hh sse/iosplot.hh
     sse/lnatask.hh sse/lnataskwrapper.hh sse/lnataskview.hh sse/lnaplot.hh
-    sse/retask.hh  sse/retaskwrapper.hh  sse/retaskview.hh  sse/replot.hh)
+    sse/retask.hh  sse/retaskwrapper.hh  sse/retaskview.hh  sse/replot.hh
+    sse/replotdialog.hh)
 
 SET(ina_app_steadystate_SOURCES
     steadystate/lnasteadystatetask.cc steadystate/lnasteadystatetaskwrapper.cc

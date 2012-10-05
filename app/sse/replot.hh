@@ -4,16 +4,14 @@
 #include "../plot/plot.hh"
 #include "../plot/graph.hh"
 #include "../timeseries.hh"
-
+#include "retask.hh"
 
 class RETimeSeriesPlot : public Plot::Figure
 {
   Q_OBJECT
 
 public:
-  explicit RETimeSeriesPlot(size_t num_species, Table *data,
-                            const QString &species_unit, const QString &time_unit,
-                            QObject *parent=0);
+  explicit RETimeSeriesPlot(QList<QString> &selected_species, RETask *data, QObject *parent=0);
 };
 
 
