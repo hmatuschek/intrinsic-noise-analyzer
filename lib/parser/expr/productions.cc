@@ -144,14 +144,14 @@ PowerExpressionProduction::get()
  * Implementation of FunctionCallArgumentsProduction:
  *
  * FunctionCallArguments =
- *   Identifier [, FunctionCallArguments];
+ *   Expression [, FunctionCallArguments];
  * ******************************************************************************************** */
 FunctionCallArgumentsProduction::FunctionCallArgumentsProduction()
   : Production()
 {
   FunctionCallArgumentsProduction::instance = this;
 
-  this->elements.push_back(new Parser::TokenProduction(T_IDENTIFIER));
+  this->elements.push_back(ExpressionProduction::get());
 
   this->elements.push_back(
         new Parser::OptionalProduction(
