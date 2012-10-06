@@ -360,16 +360,10 @@ RETask::process()
   Eigen::VectorXd concentrations(config.getModel()->numSpecies());
 
   // Holds a row of the output-table:
-  Eigen::VectorXd output_vector(1 + config.getNumSpecies());
+  Eigen::VectorXd output_vector(1 + config.getModel()->numSpecies());
 
   // Maps the i-th selected species to an index in the concentrations vector:
-  size_t N_sel_species = this->config.getNumSpecies();
-  std::vector<size_t> species_index(N_sel_species);
-  for (size_t i=0; i<N_sel_species; i++)
-  {
-    species_index[i] = this->config.getModel()->getSpeciesIdx(
-          this->config.getSelectedSpecies().value(i).toStdString());
-  }
+  size_t N_species = config.getModel()->numSpecies();
 
   // initialize (reduced) state
   config.getModelAs<iNA::Models::REmodel>()->getInitialState(x);
@@ -386,10 +380,8 @@ RETask::process()
 
   // store initial state:
   output_vector(0) = t;
-  for (size_t j=0; j<N_sel_species; j++)
-  {
-    size_t index_i = species_index[j];
-    output_vector(1+j) = concentrations(index_i);
+  for (size_t j=0; j<N_species; j++) {
+    output_vector(1+j) = concentrations(j);
   }
   this->timeseries.append(output_vector);
 
@@ -399,8 +391,7 @@ RETask::process()
   for (size_t i=0; i<N_steps; i++)
   {
     // Check if task shall terminate:
-    if (Task::TERMINATING == this->getState())
-    {
+    if (Task::TERMINATING == this->getState()) {
       this->setState(Task::ERROR, tr("Task was terminated by user."));
       return;
     }
@@ -409,10 +400,9 @@ RETask::process()
 
     // Determine update:
     this->stepper->step(x, t, dx);
-    // Update state:
-    x+=dx;
-    // Update time
-    t += dt;
+
+    // Update state & time
+    x+=dx; t += dt;
 
     // Skip immediate steps
     if(0 != N_intermediate && 0 != i%(1+N_intermediate))
@@ -423,12 +413,9 @@ RETask::process()
 
     // Store new time:
     output_vector(0) = t;
-
     // Store states of selected species:
-    for (size_t j=0; j<N_sel_species; j++)
-    {
-      size_t index_i = species_index[j];
-      output_vector(1+j) = concentrations(index_i);
+    for (size_t j=0; j<N_species; j++) {
+      output_vector(1+j) = concentrations(j);
     }
 
     this->timeseries.append(output_vector);
@@ -456,13 +443,6 @@ Table *
 RETask::getTimeSeries()
 {
   return &(this->timeseries);
-}
-
-
-const QList<QString> &
-RETask::getSelectedSpecies() const
-{
-  return config.getSelectedSpecies();
 }
 
 

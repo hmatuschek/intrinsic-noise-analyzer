@@ -97,9 +97,12 @@ Parser::Sbmlsh::Lexer::Lexer(std::istream &input)
   this->addTokenName(T_LBRAC, "LBRAC");
   this->addRule(new Parser::KeyWordTokenRule(T_RBRAC, "]"));
   this->addTokenName(T_RBRAC, "RBRAC");
+  this->addRule(new LineCommentTokenRule());
+  this->addTokenName(T_COMMENT, "COMMENT");
 
   // Ignore white-spaces:
   this->ignored_token.insert(T_WHITESPACE);
+  this->ignored_token.insert(T_COMMENT);
 
   // New-Line-Token:
   this->new_line_token.insert(T_END_OF_LINE);
@@ -112,6 +115,7 @@ Parser::Sbmlsh::Lexer::Lexer(std::istream &input)
 VersionNumberTokenRule::VersionNumberTokenRule()
   : TokenRule(T_VERSION_NUMBER)
 {
+  allocStates(4);
   State *si = createState(false);
   State *s1 = createState(false);
   State *s2 = createState(false);
@@ -122,4 +126,18 @@ VersionNumberTokenRule::VersionNumberTokenRule()
   onChar('.', s1, s2);
   onNumber(s2, s3);
   onNumber(s3,s3);
+}
+
+
+/* ********************************************************************************************* *
+ * Implementation of LineCommentTokenRule
+ * ********************************************************************************************* */
+LineCommentTokenRule::LineCommentTokenRule()
+  : TokenRule(T_COMMENT)
+{
+  allocStates(2);
+  State *si = createState(false);
+  State *sf = createState(true);
+  onChar('#', si, sf);
+  onNoneOf("\n\r", sf, sf);
 }

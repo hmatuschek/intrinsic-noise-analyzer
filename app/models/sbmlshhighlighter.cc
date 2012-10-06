@@ -16,8 +16,16 @@ SbmlshHighlighter::SbmlshHighlighter(QTextDocument *doc) :
   qs_format.setForeground(Qt::darkGray);
   QRegExp qs_expression("\"[^\"]*\"");
 
+  QTextCharFormat com_format;
+  com_format.setFontFamily("Courier");
+  com_format.setFontWeight(QFont::Normal);
+  com_format.setFontItalic(true);
+  com_format.setForeground(Qt::darkGray);
+  QRegExp com_expression("#.*$");
+
   _rules.append(QPair<QRegExp,QTextCharFormat>(kw_expression, kw_format));
   _rules.append(QPair<QRegExp,QTextCharFormat>(qs_expression, qs_format));
+  _rules.append(QPair<QRegExp,QTextCharFormat>(com_expression, com_format));
 
   _default_format.setFontFamily("Courier");
   _default_format.setFontWeight(QFont::Normal);

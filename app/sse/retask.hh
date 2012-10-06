@@ -66,11 +66,6 @@ public:
   virtual ~RETask();
 
   /**
-   * Returns the list of selected species.
-   */
-  const QList<QString> &getSelectedSpecies() const;
-
-  /**
    * Returns the time-series table.
    */
   Table *getTimeSeries();

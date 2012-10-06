@@ -83,6 +83,18 @@ TokenRule::onNotChar(char c, State *A, State *B)
 }
 
 void
+TokenRule::onNoneOf(const std::string &chars, State *A, State *B)
+{
+  Condition &cond = A->createTransition(B);
+  cond.addOnValue(chars[0]);
+  for (size_t i=1; i<chars.size(); i++) {
+    cond.addOnValue(chars[i]);
+    cond.addOr();
+  }
+  cond.addNot();
+}
+
+void
 TokenRule::onWhiteSpace(State *A, State *B)
 {
   Condition &cond = A->createTransition(B);

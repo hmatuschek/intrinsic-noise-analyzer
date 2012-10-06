@@ -65,7 +65,8 @@ typedef enum {
   T_LBRAC,            ///< '['
   T_RBRAC,            ///< ']'
 
-  T_VERSION_NUMBER    ///< 'INT.INT.INT'
+  T_VERSION_NUMBER,   ///< 'INT.INT.INT'
+  T_COMMENT           ///< Line comment "#...";
 } TokenId;
 
 
@@ -81,6 +82,15 @@ class VersionNumberTokenRule : public iNA::Parser::TokenRule
 public:
   /** Constructor. */
   VersionNumberTokenRule();
+};
+
+
+/** Helper token rule to parse comments. */
+class LineCommentTokenRule : public iNA::Parser::TokenRule
+{
+public:
+  /** Constructor. */
+  LineCommentTokenRule();
 };
 
 
