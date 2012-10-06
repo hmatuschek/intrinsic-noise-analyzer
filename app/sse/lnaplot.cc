@@ -16,8 +16,13 @@ LNATimeSeriesPlot::LNATimeSeriesPlot(QList<QString> &selected_species, LNATask *
   task->getTimeUnit().dump(unit_str, true);
   QString time_unit(unit_str.str().c_str());
   // Set axis labels with units:
-  this->setXLabel(tr("time [%1]").arg(time_unit));
-  this->setYLabel(tr("concentrations [%1]").arg(species_unit));
+  setXLabel(tr("time [%1]").arg(time_unit));
+  if (task->getSpeciesUnit().isConcentrationUnit()) {
+    setYLabel(tr("concentrations [%1]").arg(species_unit));
+  } else {
+    setYLabel(tr("amount [%1]").arg(species_unit));
+  }
+
 
   size_t num_species = selected_species.size();
   iNA::Ast::Model *model = task->getConfig().getModel();

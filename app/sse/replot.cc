@@ -16,8 +16,12 @@ RETimeSeriesPlot::RETimeSeriesPlot(QList<QString> &selected_species, RETask *tas
   task->getTimeUnit().dump(unit_str, true);
   QString time_unit(unit_str.str().c_str());
   // Set axis labels with units:
-  this->setXLabel(tr("time [%1]").arg(time_unit));
-  this->setYLabel(tr("concentrations [%1]").arg(species_unit));
+  setXLabel(tr("time [%1]").arg(time_unit));
+  if (task->getSpeciesUnit().isConcentrationUnit()) {
+    setYLabel(tr("concentrations [%1]").arg(species_unit));
+  } else {
+    setYLabel(tr("amount [%1]").arg(species_unit));
+  }
 
   /* Assemble plot. */
   QVector<Plot::LineGraph *> graphs(selected_species.size());

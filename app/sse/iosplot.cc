@@ -15,8 +15,12 @@ IOSEMRETimeSeriesPlot::IOSEMRETimeSeriesPlot(const QStringList &selected_species
   unit_str.str("");
   task->getTimeUnit().dump(unit_str, true);
   QString time_unit(unit_str.str().c_str());
-  this->setXLabel(tr("time [%1]").arg(time_unit));
-  this->setYLabel(tr("concentrations [%1]").arg(species_unit));
+  setXLabel(tr("time [%1]").arg(time_unit));
+  if (task->getSpeciesUnit().isConcentrationUnit()) {
+    setYLabel(tr("concentrations [%1]").arg(species_unit));
+  } else {
+    setYLabel(tr("amount [%1]").arg(species_unit));
+  }
 
   // Determine some numbers
   iNA::Ast::Model *model = task->getConfig().getModel();
@@ -54,8 +58,12 @@ IOSEMREComparePlot::IOSEMREComparePlot(const QStringList &selected_species, IOST
   unit_str.str("");
   task->getTimeUnit().dump(unit_str, true);
   QString time_unit(unit_str.str().c_str());
-  this->setXLabel(tr("time [%1]").arg(time_unit));
-  this->setYLabel(tr("concentrations [%1]").arg(species_unit));
+  setXLabel(tr("time [%1]").arg(time_unit));
+  if (task->getSpeciesUnit().isConcentrationUnit()) {
+    setYLabel(tr("concentrations [%1]").arg(species_unit));
+  } else {
+    setYLabel(tr("amount [%1]").arg(species_unit));
+  }
 
   iNA::Ast::Model *model = task->getConfig().getModel();
   Table *series = task->getTimeSeries();
