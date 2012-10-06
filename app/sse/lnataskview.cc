@@ -81,7 +81,7 @@ LNAResultWidget::plotButtonPressed()
         new PlotItem(new LNATimeSeriesPlot(selected_species, lna_task_wrapper->getLNATask())));
 
   // Add correlation coefficient plot (if there are more than one species selected).
-  if (1 < this->lna_task_wrapper->getLNATask()->getSelectedSpecies().size()) {
+  if (1 < selected_species.size()) {
     Application::getApp()->docTree()->addPlot(
           this->lna_task_wrapper,
           new PlotItem(

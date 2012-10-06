@@ -22,53 +22,40 @@ class LNATask : public Task
   Q_OBJECT
 
 protected:
-  /**
-   * Holds the configuration for the task.
-   */
-  SSETaskConfig config;
+  /** Holds the configuration for the task. */
+  SSETaskConfig _config;
 
-  /**
-   * Holds an instance of the interpreter for the LNA model, this object also implements
-   * the @c System interface for the integrators.
-   */
-  iNA::Models::SSEInterpreterInterface *interpreter;
+  /** Holds the number of species in the analyzed model. */
+  size_t _Ns;
 
-  /**
-   * Holds the stepper being used.
-   */
-  iNA::ODE::Stepper *stepper;
+  /** Holds an instance of the interpreter for the LNA model, this object also implements
+   * the @c System interface for the integrators. */
+  iNA::Models::SSEInterpreterInterface *_interpreter;
 
-  /**
-   * This table will hold the results of the integration as a time-series.
-   *
-   * Lets assume there are N species selected for the analysis, then this table will have
+  /** Holds the stepper being used. */
+  iNA::ODE::Stepper *_stepper;
+
+  /** This table will hold the results of the integration as a time-series.
+   * Lets assume there are N species , then this table will have
    * 1 + N + (N*(N+1))/2 + N columns. The first column holds the integration time,
    * the next N columns hold the mean for the N selected species for each time-step. The next
    * N*(N+1)/2 columns hold the vectorized upper-triangular part of the LNA covariance matrix.
    * The triangular covariance matrix is vectorized row-by-row. The last N columns hold the EMRE
-   * corrections + LNA means.
-   */
-  Table timeseries;
+   * corrections + LNA means. */
+  Table _timeseries;
 
-  /** Holds the vector of display names of the selected species. */
-  QVector<QString> species_names;
+  /** Holds the vector of display names of the species. */
+  QVector<QString> _species_names;
 
 
 public:
-  /**
-   * Constructs a Task.
-   */
-  explicit LNATask(const SSETaskConfig &config, QObject *parent = 0);
+  /** Constructs a LNA anlysis task.*/
+  explicit LNATask(const SSETaskConfig &_config, QObject *parent = 0);
 
   /**
    * Destructor.
    */
   virtual ~LNATask();
-
-  /**
-   * Returns the list of selected species.
-   */
-  const QList<QString> &getSelectedSpecies() const;
 
   const QString &getSpeciesName(size_t i) const;
 
@@ -94,7 +81,7 @@ public:
    */
   virtual QString getLabel();
 
-  inline const SSETaskConfig &getConfig() const { return config; }
+  inline const SSETaskConfig &getConfig() const { return _config; }
 
 protected:
   /**

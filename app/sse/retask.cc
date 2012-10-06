@@ -16,7 +16,7 @@ using namespace iNA;
 RETask::RETask(const SSETaskConfig &config, QObject *parent) :
   Task(parent), config(config),
   interpreter(0), stepper(0),
-  timeseries(1 + config.getNumSpecies(),
+  timeseries(1 + config.getModel()->numSpecies(),
     1+config.getIntegrationRange().getSteps()/(1+config.getIntermediateSteps()))
 {
   // First, construct interpreter and integerator by selected execution engine:
