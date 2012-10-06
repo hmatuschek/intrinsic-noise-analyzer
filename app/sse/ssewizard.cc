@@ -98,28 +98,7 @@ SSEModelSelectionPage::validatePage()
     return false;
   }
 
-  /// @todo Remove that shit as soon as possible!
-  // Assemble list of selected species (all species in order of their definition):
-  QStringList selected_species;
-  iNA::Ast::Model &model = config.getModelDocument()->getModel();
-  for (size_t i=0; i<model.numSpecies(); i++) {
-    selected_species.append(model.getSpecies(i)->getIdentifier().c_str());
-  }
-  config.setSelectedSpecies(selected_species);
-
   return true;
-}
-
-
-
-/* ********************************************************************************************* *
- * Implementation of the species selection page:
- * ********************************************************************************************* */
-SSESpeciesSelectionPage::SSESpeciesSelectionPage(GeneralTaskWizard *parent)
-  : SpeciesSelectionWizardPage(parent)
-{
-  this->setTitle(tr("Time Course Analysis (SSE)"));
-  this->setSubTitle(tr("Select some species for analysis."));
 }
 
 
@@ -160,10 +139,6 @@ SSESummaryPage::SSESummaryPage(GeneralTaskWizard *parent)
   this->model_name = new QLabel();
   this->model_name->setTextFormat(Qt::LogText);
 
-  this->selected_species = new QLabel();
-  this->selected_species->setTextFormat(Qt::LogText);
-  this->selected_species->setWordWrap(true);
-
   this->integration_range = new QLabel();
   this->integration_range->setTextFormat(Qt::LogText);
 
@@ -172,7 +147,6 @@ SSESummaryPage::SSESummaryPage(GeneralTaskWizard *parent)
 
   QFormLayout *layout = new QFormLayout();
   layout->addRow("Model:", this->model_name);
-  layout->addRow("Selected species:", this->selected_species);
   layout->addRow("Plot range:", this->integration_range);
   layout->addRow("Approx. memory used:", this->memory);
   this->setLayout(layout);
@@ -186,14 +160,13 @@ SSESummaryPage::initializePage()
   SSETaskConfig &config = wizard->getConfigCast<SSETaskConfig>();
 
   this->model_name->setText(config.getModelDocument()->getModel().getName().c_str());
-  this->selected_species->setText(config.getSelectedSpecies().join(", "));
 
   ODE::IntegrationRange range = config.getIntegrationRange();
   QString range_str("From %1 to %2 in %3 steps.");
   this->integration_range->setText(
         range_str.arg(range.getStartTime()).arg(range.getEndTime()).arg(range.getSteps()));
 
-  size_t N_species = config.getNumSpecies();
+  size_t N_species = config.getModel()->numSpecies();
   size_t N = 1 + 2*N_species + (N_species*(N_species+1));
   QString mem_str("%1 MB");
   this->memory->setText(mem_str.arg(double(8*N*range.getSteps())/126976));

@@ -14,10 +14,9 @@ using namespace iNA;
  * Implementation of RETask
  * ******************************************************************************************** */
 RETask::RETask(const SSETaskConfig &config, QObject *parent) :
-  Task(parent), config(config),
+  Task(parent), config(config), _Ns(config.getModel()->numSpecies()),
   interpreter(0), stepper(0),
-  timeseries(1 + config.getModel()->numSpecies(),
-    1+config.getIntegrationRange().getSteps()/(1+config.getIntermediateSteps()))
+  timeseries(1 + _Ns, 1+config.getIntegrationRange().getSteps()/(1+config.getIntermediateSteps()))
 {
   // First, construct interpreter and integerator by selected execution engine:
   switch(config.getEngine()) {
@@ -318,17 +317,18 @@ RETask::RETask(const SSETaskConfig &config, QObject *parent) :
 
 
   size_t column = 0;
-  QVector<QString> species_names(config.getNumSpecies());
+  QVector<QString> species_names(_Ns);
   this->timeseries.setColumnName(column, "t"); column++;
-  for (int i=0; i<(int)config.getNumSpecies(); i++, column++)
+  for (int i=0; i<(int)_Ns; i++, column++)
   {
-    QString species_id = config.getSelectedSpecies().value(i);
-    iNA::Ast::Species *species = config.getModel()->getSpecies(species_id.toStdString());
+    iNA::Ast::Species *species = config.getModel()->getSpecies(i);
+    QString species_id = species->getIdentifier().c_str();
 
-    if (species->hasName())
-      species_names[i] = QString("%1").arg(species->getName().c_str());
-    else
+    if (species->hasName()) {
+      species_names[i] = species->getName().c_str();
+    } else {
       species_names[i] = species_id;
+    }
 
     this->timeseries.setColumnName(column, QString("%1").arg(species_names[i]));
   }
@@ -362,9 +362,6 @@ RETask::process()
   // Holds a row of the output-table:
   Eigen::VectorXd output_vector(1 + config.getModel()->numSpecies());
 
-  // Maps the i-th selected species to an index in the concentrations vector:
-  size_t N_species = config.getModel()->numSpecies();
-
   // initialize (reduced) state
   config.getModelAs<iNA::Models::REmodel>()->getInitialState(x);
   // get full initial concentrations and covariance
@@ -380,7 +377,7 @@ RETask::process()
 
   // store initial state:
   output_vector(0) = t;
-  for (size_t j=0; j<N_species; j++) {
+  for (size_t j=0; j<_Ns; j++) {
     output_vector(1+j) = concentrations(j);
   }
   this->timeseries.append(output_vector);
@@ -414,7 +411,7 @@ RETask::process()
     // Store new time:
     output_vector(0) = t;
     // Store states of selected species:
-    for (size_t j=0; j<N_species; j++) {
+    for (size_t j=0; j<_Ns; j++) {
       output_vector(1+j) = concentrations(j);
     }
 
@@ -449,7 +446,7 @@ RETask::getTimeSeries()
 iNA::Ast::Unit
 RETask::getSpeciesUnit() const
 {
-  return this->config.getModelAs<iNA::Models::REmodel>()->getConcentrationUnit();
+  return this->config.getModelAs<iNA::Models::REmodel>()->getSpeciesUnit();
 }
 
 

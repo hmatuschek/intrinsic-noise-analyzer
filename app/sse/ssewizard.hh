@@ -78,17 +78,6 @@ private:
 
 
 /**
- * Specialization of SpeciesSelectionWizardPage.
- */
-class SSESpeciesSelectionPage : public SpeciesSelectionWizardPage
-{
-public:
-  /** Constructor. */
-  explicit SSESpeciesSelectionPage(GeneralTaskWizard *parent);
-};
-
-
-/**
  * Specialization of EngineWizardPage.
  */
 class SSEEngineSelectionPage : public EngineWizardPage
@@ -123,7 +112,6 @@ public:
 
 private:
   QLabel *model_name;
-  QLabel *selected_species;
   QLabel *integration_range;
   QLabel *memory;
 };
