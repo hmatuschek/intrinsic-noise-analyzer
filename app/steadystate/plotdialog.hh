@@ -1,12 +1,12 @@
-#ifndef __INA_APP_REPLOTDIALOG_HH__
-#define __INA_APP_REPLOTDIALOG_HH__
+#ifndef __INA_APP_STEADYSTATE_PLOTDIALOG_HH__
+#define __INA_APP_STEADYSTATE_PLOTDIALOG_HH__
 
 #include <QDialog>
 #include <QListWidget>
 #include <QLabel>
 #include <ast/model.hh>
 
-/** Simple plot dialog to assemble quickly some default plots for the SSE analysis. */
+/** Simple plot dialog to assemble quickly some default plots for the steady state analysis. */
 class SteadyStatePlotDialog : public QDialog
 {
   Q_OBJECT
@@ -34,4 +34,4 @@ private:
   QListWidget *_species_list;
 };
 
-#endif // __INA_APP_REPLOTDIALOG_HH__
+#endif // __INA_APP_STEADYSTATE_PLOTDIALOG_HH__
