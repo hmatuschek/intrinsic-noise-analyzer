@@ -46,6 +46,8 @@ public:
   /** Constructor.
    * The constructor will parse the given SBML file and constructs an @c Models::BaseModel instance.
    *
+   * @todo Unify constructors.
+   *
    * @param path Specifies the path of the SBML file to be parsed.
    * @param parent Specifies the "logical" parent of the instance.
    */

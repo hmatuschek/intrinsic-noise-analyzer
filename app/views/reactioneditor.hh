@@ -15,13 +15,13 @@
 
 
 /** Simple editor dialog to create/modify a reaction. */
-class ReactionCreator : public QDialog
+class ReactionEditor : public QDialog
 {
   Q_OBJECT
 
 public:
   /** Constructor. */
-  ReactionCreator(iNA::Ast::Model &model, QWidget *parent = 0);
+  ReactionEditor(iNA::Ast::Model &model, QWidget *parent = 0);
 
 private slots:
   /** Called if the automatic update of the kinetic law is toggled. */

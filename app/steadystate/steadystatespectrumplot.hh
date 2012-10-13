@@ -20,7 +20,7 @@ class SteadyStatePlot : public Plot::Figure
   Q_OBJECT
 
 public:
-  explicit SteadyStatePlot(LNASteadyStateTask *task, QObject *parent=0);
+  explicit SteadyStatePlot(LNASteadyStateTask *task, const QStringList selected_species, QObject *parent=0);
 };
 
 #endif // STEADYSTATESPECTRUMPLOT_HH

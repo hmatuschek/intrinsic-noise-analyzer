@@ -5,7 +5,7 @@
 #include "../application.hh"
 
 #include <QMessageBox>
-
+#include <QFileInfo>
 
 using namespace iNA;
 
@@ -24,8 +24,9 @@ DocumentItem::DocumentItem(const QString &path, QObject *parent)
   this->_children.append(this->analyses);
 
   // Construct label:
+  QFileInfo file_info(file_path);
   this->label
-      = QString("%1 (%2)").arg(this->getModel().getName().c_str()).arg(this->file_path);
+      = QString("%1 (%2)").arg(this->getModel().getName().c_str()).arg(file_info.fileName());
 
   // Construct context menu:
   this->closeAct = new QAction(tr("Close document"), this);
@@ -50,8 +51,9 @@ DocumentItem::DocumentItem(iNA::Ast::Model *model, const QString &path, QObject 
   this->_children.append(this->analyses);
 
   // Construct label:
+  QFileInfo file_info(file_path);
   this->label
-      = QString("%1 (%2)").arg(this->getModel().getName().c_str()).arg(this->file_path);
+      = QString("%1 (%2)").arg(this->getModel().getName().c_str()).arg(file_info.fileName());
 
   // Construct context menu:
   this->closeAct = new QAction(tr("close document"), this);

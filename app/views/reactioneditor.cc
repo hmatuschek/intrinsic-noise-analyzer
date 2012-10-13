@@ -6,7 +6,7 @@
 #include "../models/scopeitemmodel.hh"
 
 
-ReactionCreator::ReactionCreator(iNA::Ast::Model &model, QWidget *parent)
+ReactionEditor::ReactionEditor(iNA::Ast::Model &model, QWidget *parent)
   : QDialog(parent), _model(model)
 {
   // General Dialog config:
@@ -58,7 +58,7 @@ ReactionCreator::ReactionCreator(iNA::Ast::Model &model, QWidget *parent)
 
 
 void
-ReactionCreator::onMassActionToggled(bool state)
+ReactionEditor::onMassActionToggled(bool state)
 {
   if (state) {
     _kineticLawEditor->setEnabled(false);
@@ -72,7 +72,7 @@ ReactionCreator::onMassActionToggled(bool state)
 
 
 void
-ReactionCreator::updateKineticLaw()
+ReactionEditor::updateKineticLaw()
 {
   // Do not update anything if autoupdate is not enabled.
   if (! _autoupdate->isChecked()) { return; }
@@ -104,7 +104,7 @@ ReactionCreator::updateKineticLaw()
     formula.appendItem(assembleFactor(item->second, item->first));
   }
 
-  // If reaction is reversible, inclide reverse rate
+  // If reaction is reversible, include reverse rate
   if (is_reversible) {
     formula.appendItem(new MathSpace(MathSpace::MEDIUM_SPACE));
     formula.appendItem(new MathText("-"));
@@ -125,7 +125,7 @@ ReactionCreator::updateKineticLaw()
 
 
 bool
-ReactionCreator::parseEquation(
+ReactionEditor::parseEquation(
   const QString &text, QList< QPair<int, QString> > &reactants,
   QList< QPair<int, QString> > &products, bool &reversible)
 {
@@ -157,7 +157,7 @@ ReactionCreator::parseEquation(
 
 
 bool
-ReactionCreator::parseStoichiometry(
+ReactionEditor::parseStoichiometry(
   const QString &text, QList< QPair<int, QString> > &stoichiometry)
 {
   QStringList sums = text.split('+');
@@ -193,7 +193,7 @@ ReactionCreator::parseStoichiometry(
 
 
 bool
-ReactionCreator::parseIdentifier(QString &text)
+ReactionEditor::parseIdentifier(QString &text)
 {
   text = text.simplified();
   if (! QRegExp("[a-zA-Z_][a-zA-Z0-9_]*$").exactMatch(text)) { return false; }
@@ -202,7 +202,7 @@ ReactionCreator::parseIdentifier(QString &text)
 
 
 MathItem *
-ReactionCreator::assembleFactor(QString &id, int exponent)
+ReactionEditor::assembleFactor(QString &id, int exponent)
 {
   MathItem *name = assembleName(id);
   MathFormula     *factor = new MathFormula();
@@ -229,7 +229,7 @@ ReactionCreator::assembleFactor(QString &id, int exponent)
 
 
 MathItem *
-ReactionCreator::assembleCompartment()
+ReactionEditor::assembleCompartment()
 {
   // if there is no compartment defined use \Omega
   if (0 == _model.numCompartments()) {
@@ -246,7 +246,7 @@ ReactionCreator::assembleCompartment()
 
 
 MathItem *
-ReactionCreator::assembleName(const QString &id)
+ReactionEditor::assembleName(const QString &id)
 {
   // Assemble name of the factor
   if (_model.hasVariable(id.toStdString())) {

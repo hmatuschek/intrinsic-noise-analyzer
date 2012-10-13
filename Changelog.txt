@@ -1,0 +1,31 @@
+iNA (0.4.0);
+
+  * A parameter scan of the steady state, allowing to analyze the dependence of the steady state
+    from model parameters.
+  * Improved usability of iNA, including an improved equation rendering and ploting.
+  * Model editing capabilities.
+
+ -- ???, ?? ??? 2012
+
+
+iNA (0.3.1);
+
+  * The Inverse Omega Squared analysis (IOS) which yields more accurate noise estimates than the
+    Linear Noise Approximation. At the same time it predicts the average concentrations more
+    accurate than the EMREs.
+  * Just-in-time compilation based on the LLVM framework delivering high performance to iNA's
+    analyses.
+  * Support for the efficient ODE integrator LSODA for our time course analysis.
+  * A very robust steady state solver which uses a combination of the fast Newton-Raphson method
+    and the reliable ODE integrator LSODA.
+  * Support for even more SBML features such as constant species and automatic conversion of
+    reversible reactions into irreversible ones.
+
+ -- Sun, 1 Jul 2012
+
+
+iNA (0.2.0);
+
+  * Initial release of iNA.
+
+ -- Thu, 12 Apr 2012

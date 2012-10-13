@@ -18,8 +18,7 @@ public:
    */
   class Config :
       public GeneralTaskConfig,
-      public ModelSelectionTaskConfig,
-      public SpeciesSelectionTaskConfig
+      public ModelSelectionTaskConfig
   {
   protected:
     iNA::Models::IOSmodel *model;
@@ -67,6 +66,8 @@ public:
 protected:
   /** Holds the task configuration. */
   Config config;
+  /** Holds the number of species in the selected model. */
+  size_t _Ns;
   /** Holds an instance of the analysis. */
   iNA::Models::SteadyStateAnalysis<iNA::Models::IOSmodel> steady_state;
   Eigen::VectorXd concentrations;
@@ -74,8 +75,6 @@ protected:
   Eigen::VectorXd ios_corrections;
   Eigen::MatrixXd lna_covariances;
   Eigen::MatrixXd ios_covariances;
-  QVector<QString> species;
-  QVector<QString> species_name;
 
   //Eigen::VectorXd frequencies;
   Table spectrum;
@@ -98,14 +97,15 @@ public:
 
   Table &getSpectrum();
 
-  const QString &getSpeciesId(int i);
+  QString getSpeciesId(int i);
 
-  const QString &getSpeciesName(int i);
+  QString getSpeciesName(int i);
 
   iNA::Ast::Unit getSpeciesUnit() const;
 
   virtual QString getLabel();
 
+  inline const Config &getConfig() const { return config; }
 
 protected:
   virtual void process();

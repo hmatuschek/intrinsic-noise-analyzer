@@ -48,17 +48,6 @@ public:
 };
 
 
-
-class LNASteadyStateSpeciesSelectionPage : public SpeciesSelectionWizardPage
-{
-  Q_OBJECT
-
-public:
-  explicit LNASteadyStateSpeciesSelectionPage(GeneralTaskWizard *parent);
-};
-
-
-
 class LNASteadyStateSpectrumConfigPage : public QWizardPage
 {
   Q_OBJECT
@@ -93,7 +82,6 @@ public:
 
 private:
   QLabel *model_name;
-  QLabel *species;
   QLabel *spectrum;
   QLabel *memory;
 };

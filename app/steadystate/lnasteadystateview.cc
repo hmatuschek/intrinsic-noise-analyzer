@@ -12,6 +12,8 @@
 #include "../application.hh"
 #include "../doctree/plotitem.hh"
 #include "steadystatespectrumplot.hh"
+#include "plotdialog.hh"
+
 
 
 LNASteadyStateView::LNASteadyStateView(LNASteadyStateTaskWrapper *task_wrapper, QWidget *parent)
@@ -138,16 +140,16 @@ LNASteadyStateResultWidget::LNASteadyStateResultWidget(LNASteadyStateTaskWrapper
 void
 LNASteadyStateResultWidget::plotSpectrum()
 {
+  // Ask user to choose species to plot:
+  SteadyStatePlotDialog plotdialog(ss_task_wrapper->getSteadyStateTask()->getConfig().getModel());
+  if (QDialog::Rejected == plotdialog.exec()) { return; }
+  QStringList selected_species = plotdialog.getSelectedSpecies();
+
+  // Create plot
   Application::getApp()->docTree()->addPlot(
         this->ss_task_wrapper,
-        new PlotItem(new SteadyStatePlot(this->ss_task_wrapper->getSteadyStateTask())));
-
-//  Application::getApp()->docTree()->addPlot(
-//        this->ss_task_wrapper,
-//        new PlotItem(new SteadyStateSpectrumPlot(
-//                          this->ss_task_wrapper->getSteadyStateTask()->getSpectrum(),
-//                          this->ss_task_wrapper->getSteadyStateTask()->getModel()->getConcentrationUnit(),
-//                          this->ss_task_wrapper->getSteadyStateTask()->getModel()->getTimeUnit())));
+        new PlotItem(new SteadyStatePlot(
+                       this->ss_task_wrapper->getSteadyStateTask(), selected_species)));
 }
 
 

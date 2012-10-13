@@ -44,11 +44,13 @@ SET(ina_app_sse_HEADERS
 SET(ina_app_steadystate_SOURCES
     steadystate/lnasteadystatetask.cc steadystate/lnasteadystatetaskwrapper.cc
     steadystate/lnasteadystatewizard.cc steadystate/lnasteadystateview.cc
-    steadystate/lnasteadystatemodule.cc steadystate/steadystatespectrumplot.cc)
+    steadystate/lnasteadystatemodule.cc steadystate/steadystatespectrumplot.cc
+    steadystate/plotdialog.cc)
 SET(ina_app_steadystate_HEADERS
     steadystate/lnasteadystatetask.hh steadystate/lnasteadystatetaskwrapper.hh
     steadystate/lnasteadystatewizard.hh steadystate/lnasteadystateview.hh
-    steadystate/lnasteadystatemodule.hh steadystate/steadystatespectrumplot.hh)
+    steadystate/lnasteadystatemodule.hh steadystate/steadystatespectrumplot.hh
+    steadystate/plotdialog.hh)
 
 SET(ina_app_ssa_SOURCES
     ssa/ssamodule.cc ssa/ssatask.cc ssa/ssawizard.cc ssa/ssataskwrapper.cc ssa/ssaplot.cc

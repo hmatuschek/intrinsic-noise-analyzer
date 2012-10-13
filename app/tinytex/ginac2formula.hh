@@ -22,12 +22,17 @@ class Ginac2Formula :
     public GiNaC::add::visitor, public GiNaC::mul::visitor, public GiNaC::power::visitor,
     public GiNaC::basic::visitor
 {
+  /** Stack of temporary formula elements. */
   QList<MathItem *> _stack;
+  /** A weak reference to the variable scope used to resolved GiNaC symbols. */
   iNA::Ast::Scope &_scope;
+  /** Specifies if names should be rendered as TeX if enclosed in "$". */
   bool _tex_names;
+  /** The current operator precedence. */
   int _current_precedence;
 
 public:
+  /** Constructor, needs the variable scope for symbol resolution. */
   Ginac2Formula(iNA::Ast::Scope &scope, bool tex_names=true);
 
   virtual void visit(const GiNaC::symbol &node);
@@ -35,13 +40,18 @@ public:
   virtual void visit(const GiNaC::add &node);
   virtual void visit(const GiNaC::mul &node);
   virtual void visit(const GiNaC::power &node);
-
   virtual void visit(const GiNaC::basic &node);
 
+  /** Retunrs the assembled formula. */
   MathItem *getFormula();
 
 public:
-  /** Renders an expression as a Formula. */
+  /** Renders an expression as a MathItem instance.
+   * @param expression Specifies the expression to render.
+   * @param scope Specifies the variable scope of the expression, this scope is used to resolve
+   *        symbols in the given expression.
+   * @param tex_names If the name of a resolved symbol is enclosed in "$", it may be rendered as
+   *        tex. If this option is true, this will happen. */
   static MathItem *toFormula(GiNaC::ex expression, iNA::Ast::Scope &scope, bool tex_names=true);
 
   /** Very helpful function to render a given expression into a formula. The formula is returned

@@ -20,7 +20,6 @@ LNASteadyStateWizard::LNASteadyStateWizard(QWidget *parent) :
   this->setWindowTitle("System Size Expansion");
 
   this->setPage(LNASteadyStateWizard::MODEL_SELECTION_PAGE, new LNASteadyStateModelSelectionPage(this));
-  this->setPage(LNASteadyStateWizard::SPECIES_SELECTION_PAGE, new LNASteadyStateSpeciesSelectionPage(this));
   this->setPage(LNASteadyStateWizard::FREQUENCY_RANGE_PAGE, new LNASteadyStateSpectrumConfigPage(this));
   this->setPage(LNASteadyStateWizard::SUMMARY_PAGE, new LNASteadyStateSummaryPage(this));
   this->page(LNASteadyStateWizard::SUMMARY_PAGE)->setFinalPage(true);
@@ -60,18 +59,6 @@ LNASteadyStateModelSelectionPage::validatePage()
   }
 
   return true;
-}
-
-
-
-/* ********************************************************************************************* *
- * Implementation of species selection page:
- * ********************************************************************************************* */
-LNASteadyStateSpeciesSelectionPage::LNASteadyStateSpeciesSelectionPage(GeneralTaskWizard *parent)
-  : SpeciesSelectionWizardPage(parent)
-{
-  this->setTitle(tr("Steady State Analysis"));
-  this->setSubTitle(tr("Select some species for analysis."));
 }
 
 
@@ -190,10 +177,6 @@ LNASteadyStateSummaryPage::LNASteadyStateSummaryPage(QWidget *parent)
   this->model_name = new QLabel();
   this->model_name->setTextFormat(Qt::LogText);
 
-  this->species = new QLabel();
-  this->species->setTextFormat(Qt::LogText);
-  this->species->setWordWrap(true);
-
   //this->spectrum = new QLabel();
   //this->spectrum->setTextFormat(Qt::LogText);
 
@@ -202,7 +185,6 @@ LNASteadyStateSummaryPage::LNASteadyStateSummaryPage(QWidget *parent)
 
   QFormLayout *layout = new QFormLayout();
   layout->addRow("Model:", this->model_name);
-  layout->addRow("Selected species:", this->species);
   //layout->addRow("Calculate spectrum:", this->spectrum);
   layout->addRow("Approx. memory used:", this->memory);
   this->setLayout(layout);
@@ -216,8 +198,6 @@ LNASteadyStateSummaryPage::initializePage()
   LNASteadyStateTask::Config &config = wizard->getConfigCast<LNASteadyStateTask::Config>();
 
   this->model_name->setText(config.getModelDocument()->getModel().getName().c_str());
-  QStringList species(config.getSelectedSpecies());
-  this->species->setText(species.join(", "));
 
 //  QString spectrum("From %1 to %2 in %3 steps");
 //  this->spectrum->setText(
@@ -227,7 +207,7 @@ LNASteadyStateSummaryPage::initializePage()
 //    this->spectrum->setText("automatic");
 
   QString mem_str("%1 MB");
-  int N = config.getNumSpecies();
+  int N = config.getModel()->numSpecies();
   this->memory->setText(mem_str.arg(double(8*(2*N+N*N))/126976.));
 }
 

@@ -42,7 +42,7 @@ SteadyStateSpectrumPlot::SteadyStateSpectrumPlot(Table &spectrum, const iNA::Ast
 
 
 
-SteadyStatePlot::SteadyStatePlot(LNASteadyStateTask *task, QObject *parent)
+SteadyStatePlot::SteadyStatePlot(LNASteadyStateTask *task, const QStringList selected_species, QObject *parent)
   : Plot::Figure("Steady state concentrations", parent)
 {
   // Get string representation of unit:
@@ -73,12 +73,13 @@ SteadyStatePlot::SteadyStatePlot(LNASteadyStateTask *task, QObject *parent)
   Eigen::MatrixXd &lna_cov  = task->getLNACovariances();
   Eigen::MatrixXd &ios_cov  = task->getIOSCovariances();
 
-  for (int i=0; i<mean.rows(); i++)
+  for (int i=0; i<selected_species.size(); i++)
   {
-    lna->addBox(mean(i), std::sqrt(lna_cov(i,i)));
-    emre->addBox(mean(i)+emre_cor(i), sqrt(lna_cov(i,i)+ios_cov(i,i)));
-    ios->addBox(mean(i)+emre_cor(i)+ios_cor(i));
-    ticks->addTick(new Plot::AxisTick(i+0.5, task->getSpeciesName(i), Plot::AxisTick::BOTTOM));
+    size_t idx = task->getConfig().getModel()->getSpeciesIdx(selected_species.at(i).toStdString());
+    lna->addBox(mean(idx), std::sqrt(lna_cov(idx,idx)));
+    emre->addBox(mean(idx)+emre_cor(idx), sqrt(lna_cov(idx,idx)+ios_cov(idx,idx)));
+    ios->addBox(mean(idx)+emre_cor(idx)+ios_cor(idx));
+    ticks->addTick(new Plot::AxisTick(i+0.5, task->getSpeciesName(idx), Plot::AxisTick::BOTTOM));
   }
 
   // Force y plot-range to be [0, AUTO]:

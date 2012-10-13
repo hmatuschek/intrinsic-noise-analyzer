@@ -21,7 +21,7 @@ AboutDialog::AboutDialog(QWidget *parent)
   title->setFont(Application::getApp()->getH1Font());
   title->setAlignment(Qt::AlignCenter);
 
-  QLabel *version = new QLabel(tr("Version 0.3.1"));
+  QLabel *version = new QLabel(tr("Version 0.4.0"));
   version->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
   version->setTextFormat(Qt::LogText);
   version->setAlignment(Qt::AlignCenter);
