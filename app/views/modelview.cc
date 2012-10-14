@@ -9,6 +9,7 @@
 #include <QPalette>
 #include <QGroupBox>
 #include <QFormLayout>
+#include <QMessageBox>
 
 
 ModelView::ModelView(ModelItem *model_item, QWidget *parent)
@@ -85,25 +86,45 @@ ModelView::onSpeciesUnitSelected(int index)
 
 void
 ModelView::onSubstanceUnitChanged() {
-  _model->setSubstanceUnit(_substance_unit_editor->unit(), true);
+  try {
+    _model->setSubstanceUnit(_substance_unit_editor->unit(), true);
+  } catch (iNA::Exception &err) {
+    QMessageBox::critical(0, "Can not set substance unit.", err.what());
+  }
 }
 
 void
 ModelView::onVolumeUnitChanged() {
-  _model->setVolumeUnit(_volume_unit_editor->unit(), true);
+  try {
+    _model->setVolumeUnit(_volume_unit_editor->unit(), true);
+  } catch (iNA::Exception &err) {
+    QMessageBox::critical(0, "Can not set volume unit.", err.what());
+  }
 }
 
 void
 ModelView::onAreaUnitChanged() {
-  _model->setAreaUnit(_area_unit_editor->unit(), true);
+  try {
+    _model->setAreaUnit(_area_unit_editor->unit(), true);
+  } catch (iNA::Exception &err) {
+    QMessageBox::critical(0, "Can not set area unit.", err.what());
+  }
 }
 
 void
 ModelView::onLengthUnitChanged() {
-  _model->setLengthUnit(_length_unit_editor->unit(), true);
+  try {
+    _model->setLengthUnit(_length_unit_editor->unit(), true);
+  } catch (iNA::Exception &err) {
+    QMessageBox::critical(0, "Can not set length unit.", err.what());
+  }
 }
 
 void
 ModelView::onTimeUnitChanged() {
-  _model->setTimeUnit(_time_unit_editor->unit(), true);
+  try {
+    _model->setTimeUnit(_time_unit_editor->unit(), true);
+  } catch (iNA::Exception &err) {
+    QMessageBox::critical(0, "Can not set time unit.", err.what());
+  }
 }

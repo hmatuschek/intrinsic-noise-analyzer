@@ -21,7 +21,8 @@ public:
     try {
       return QApplication::notify(obj, event);
     } catch (std::exception &err) {
-      std::cerr << "Oops, there was an error: " << err.what() << std::endl;
+      std::cerr << __FILE__ << " @" << __LINE__
+                << ": Oops, there was an error: " << err.what() << std::endl;
       return false;
     }
   }

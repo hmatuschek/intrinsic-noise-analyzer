@@ -48,16 +48,6 @@ public:
 
 
 
-class ParamScanSpeciesSelectionPage : public SpeciesSelectionWizardPage
-{
-  Q_OBJECT
-
-public:
-  explicit ParamScanSpeciesSelectionPage(GeneralTaskWizard *parent);
-};
-
-
-
 class ParameterScanConfigPage : public QWizardPage
 {
   Q_OBJECT

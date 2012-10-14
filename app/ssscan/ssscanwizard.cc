@@ -19,7 +19,6 @@ ParamScanWizard::ParamScanWizard(QWidget *parent) :
   this->setWindowTitle("System Size Expansion");
 
   this->setPage(ParamScanWizard::MODEL_SELECTION_PAGE, new ParamScanModelSelectionPage(this));
-  this->setPage(ParamScanWizard::SPECIES_SELECTION_PAGE, new ParamScanSpeciesSelectionPage(this));
   this->setPage(ParamScanWizard::SCAN_CONFIG_PAGE, new ParameterScanConfigPage(this));
   this->setPage(ParamScanWizard::SUMMARY_PAGE, new ParamScanSummaryPage(this));
   this->page(ParamScanWizard::SUMMARY_PAGE)->setFinalPage(true);
@@ -58,19 +57,16 @@ ParamScanModelSelectionPage::validatePage()
     return false;
   }
 
+  // Now select all species:
+  /// @todo Remove that as soon as possible.
+  ParamScanTask::Config &config = static_cast<ParamScanWizard *>(wizard())->getConfigCast<ParamScanTask::Config>();
+  QStringList selected_species;
+  for (size_t i=0; i<config.getModel()->numSpecies(); i++) {
+    selected_species.append(config.getModel()->getSpecies(i)->getIdentifier().c_str());
+  }
+  config.setSelectedSpecies(selected_species);
+
   return true;
-}
-
-
-
-/* ********************************************************************************************* *
- * Implementation of species selection page:
- * ********************************************************************************************* */
-ParamScanSpeciesSelectionPage::ParamScanSpeciesSelectionPage(GeneralTaskWizard *parent)
-  : SpeciesSelectionWizardPage(parent)
-{
-  this->setTitle(tr("Parameter scan"));
-  this->setSubTitle(tr("Select some species for parameter scan."));
 }
 
 
