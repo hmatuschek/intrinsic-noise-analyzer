@@ -1,7 +1,8 @@
 #ifndef __INA_APP_VIEWS_REACTIONEDITOR_HH__
 #define __INA_APP_VIEWS_REACTIONEDITOR_HH__
 
-#include <QDialog>
+#include <QWizard>
+#include <QWizardPage>
 #include <QLineEdit>
 #include <QCheckBox>
 #include <QList>
@@ -14,14 +15,36 @@
 #include "../tinytex/formula.hh"
 
 
-/** Simple editor dialog to create/modify a reaction. */
-class ReactionEditor : public QDialog
+/** A wizard to create or edit reactions. */
+class ReactionEditor : public QWizard
+{
+  Q_OBJECT
+
+public:
+  explicit ReactionEditor(iNA::Ast::Model &model, QWidget *parent=0);
+
+  /** Returns a weak reference to the model instance. */
+  iNA::Ast::Model &model();
+
+private:
+  /** A weak reference to the model. */
+  iNA::Ast::Model &_model;
+};
+
+
+
+/** Wizard page to define reaction & kinetic law. */
+class ReactionEditorPage : public QWizardPage
 {
   Q_OBJECT
 
 public:
   /** Constructor. */
-  ReactionEditor(iNA::Ast::Model &model, QWidget *parent = 0);
+  ReactionEditorPage(ReactionEditor *editor);
+
+  /** Validates the stoichiometry/reaction equation and kinetic law. */
+  virtual bool validatePage();
+
 
 private slots:
   /** Called if the automatic update of the kinetic law is toggled. */
@@ -32,12 +55,12 @@ private slots:
 
 private:
   /** Parses a (incomplete) reaction equation. */
-  bool parseEquation(const QString &text, QList< QPair<int, QString> > &reactants,
+  bool _parseEquation(const QString &text, QList< QPair<int, QString> > &reactants,
                      QList< QPair<int, QString> > &product, bool &reversible);
   /** Parses a single stoichiometry expression. */
-  bool parseStoichiometry(const QString &text, QList< QPair<int, QString> > &stoichiometry);
+  bool _parseStoichiometry(const QString &text, QList< QPair<int, QString> > &stoichiometry);
   /** Helper function to parse identifier. */
-  bool parseIdentifier(QString &text);
+  bool _parseIdentifier(QString &text);
 
   /** Helper function to render a factor. */
   MathItem *assembleFactor(QString &id, int exponent);
@@ -63,6 +86,10 @@ private:
   QCheckBox *_autoupdate;
   /** A delay timer for the update function. */
   QTimer    *_delayTimer;
+  /** Holds the default background color of the equaiton editor. */
+  QColor _default_background;
+  /** Holds the error background color (if the reaction equation is invalid, red). */
+  QColor _error_background;
 };
 
 

@@ -87,7 +87,7 @@ ModelView::onSpeciesUnitSelected(int index)
 void
 ModelView::onSubstanceUnitChanged() {
   try {
-    _model->setSubstanceUnit(_substance_unit_editor->unit(), true);
+    _model->setSubstanceUnit(_substance_unit_editor->unit(), false);
   } catch (iNA::Exception &err) {
     QMessageBox::critical(0, "Can not set substance unit.", err.what());
   }
@@ -96,7 +96,7 @@ ModelView::onSubstanceUnitChanged() {
 void
 ModelView::onVolumeUnitChanged() {
   try {
-    _model->setVolumeUnit(_volume_unit_editor->unit(), true);
+    _model->setVolumeUnit(_volume_unit_editor->unit(), false);
   } catch (iNA::Exception &err) {
     QMessageBox::critical(0, "Can not set volume unit.", err.what());
   }
@@ -105,7 +105,7 @@ ModelView::onVolumeUnitChanged() {
 void
 ModelView::onAreaUnitChanged() {
   try {
-    _model->setAreaUnit(_area_unit_editor->unit(), true);
+    _model->setAreaUnit(_area_unit_editor->unit(), false);
   } catch (iNA::Exception &err) {
     QMessageBox::critical(0, "Can not set area unit.", err.what());
   }
@@ -114,7 +114,7 @@ ModelView::onAreaUnitChanged() {
 void
 ModelView::onLengthUnitChanged() {
   try {
-    _model->setLengthUnit(_length_unit_editor->unit(), true);
+    _model->setLengthUnit(_length_unit_editor->unit(), false);
   } catch (iNA::Exception &err) {
     QMessageBox::critical(0, "Can not set length unit.", err.what());
   }
@@ -123,7 +123,7 @@ ModelView::onLengthUnitChanged() {
 void
 ModelView::onTimeUnitChanged() {
   try {
-    _model->setTimeUnit(_time_unit_editor->unit(), true);
+    _model->setTimeUnit(_time_unit_editor->unit(), false);
   } catch (iNA::Exception &err) {
     QMessageBox::critical(0, "Can not set time unit.", err.what());
   }
