@@ -17,15 +17,17 @@ namespace Expr {
  *
  * This class is also used by the SBML-SH parser to parse expressions.
  */
-class Assembler : public Context
+class Assembler
 {
 protected:
   /** Holds the lexer. */
   Parser::Lexer &_lexer;
+  /** Holds the parser context. */
+  Context &_context;
 
 public:
   /** Constructs the assembler for the given scope. */
-  Assembler(Ast::Scope *root, Parser::Lexer &lexer);
+  Assembler(Context &root, Parser::Lexer &lexer);
 
 public:
   /** Entry point to parse an expression in the given context. */

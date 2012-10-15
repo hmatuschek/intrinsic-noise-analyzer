@@ -9,7 +9,7 @@ using namespace iNA::Parser::Sbmlsh;
 
 
 Assembler::Assembler(Ast::Model &model, Parser::Lexer &lexer)
-  : Expr::Assembler(&model, lexer), _model(model)
+  : Expr::ScopeContext(&model), Expr::Assembler(*this, lexer), _model(model)
 {
   // Assemble base unit map;
   _base_unit_map["ampere"] = Ast::ScaledBaseUnit::AMPERE;

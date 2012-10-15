@@ -8,37 +8,41 @@ namespace iNA {
 namespace Parser {
 namespace Expr {
 
-/**
- * Represents an expression context for symbol resolution.
- *
- * This class is used by all assemblers to perfrom symbol resolution in nested contexts.
- *
- * @deprecated This class is not needed anymore, as scopes are nested.
- */
+/** Represents an expression context for symbol resolution.
+ * This class is used by all assemblers to perfrom symbol resolution in nested contexts. */
 class Context {
+public:
+  /** Resolves a given identifier to its symbol or throws a @c SymbolError exception if
+   * the symbol can not be resolved. */
+  virtual GiNaC::symbol resolve(const std::string &identifier) = 0;
+};
+
+
+/** Implementes symbol resolution using @c iNA::Ast::Scope instances. */
+class ScopeContext : public Context
+{
 protected:
-  /** Holds the stack of scopes for symbol resolution. */
+  /** Holds the stack of scopes for symbol resolution.
+   * @deprecated Scopes are nested anyway. */
   std::vector<Ast::Scope *> _scope_stack;
 
 public:
   /** Constructs an expression context using the given model as the global namespace/context. */
-  Context(Ast::Scope *model);
+  ScopeContext(Ast::Scope *model);
 
-  /** Pushes a (local) scope on the scope stack.  */
+  /** Pushes a (local) scope on the scope stack.
+   * @deprecated Scopes are nested anyway. */
   void pushScope(Ast::Scope *scope);
-  /** Removes a scope from the scope stack. */
+  /** Removes a scope from the scope stack.
+   * @deprecated Scopes are nested anyway. */
   void popScope();
 
-  /**
-   * Resolves the given symbol name using the current context.
-   *
-   * @throws SymbolError If the name can not be resolved.
-   */
-  GiNaC::symbol resolve(const std::string &name);
+  /** Resolves the given symbol name using the current context.
+   * @throws SymbolError If the name can not be resolved. */
+  virtual GiNaC::symbol resolve(const std::string &name);
 
-  /**
-   * Resolves the given variable name using the current context.
-   *
+  /** Resolves the given variable name using the current context.
+   * @deprecated Use resolve() instead.
    * @throws SymbolError If the name can not be resolved.
    */
   Ast::VariableDefinition *resolveVariable(const std::string &name);
@@ -47,7 +51,11 @@ public:
 
 /** Parses an expression in the given variable scope.
  * The scope (context) is used to resolve symbols of species, compartments and parameters.
- *
+ * @ingroup modelio */
+GiNaC::ex parseExpression(const std::string &text, Context &scope);
+
+/** Parses an expression in the given variable scope.
+ * The scope (context) is used to resolve symbols of species, compartments and parameters.
  * @ingroup modelio */
 GiNaC::ex parseExpression(const std::string &text, Ast::Scope *scope);
 

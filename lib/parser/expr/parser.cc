@@ -12,7 +12,7 @@ using namespace iNA;
 using namespace iNA::Parser::Expr;
 
 
-Context::Context(Ast::Scope *model)
+ScopeContext::ScopeContext(Ast::Scope *model)
   : _scope_stack()
 {
   _scope_stack.push_back(model);
@@ -20,26 +20,26 @@ Context::Context(Ast::Scope *model)
 
 
 void
-Context::pushScope(Ast::Scope *scope) {
+ScopeContext::pushScope(Ast::Scope *scope) {
   _scope_stack.push_back(scope);
 }
 
 void
-Context::popScope() {
+ScopeContext::popScope() {
   _scope_stack.pop_back();
 }
 
 
 
 GiNaC::symbol
-Context::resolve(const std::string &name)
+ScopeContext::resolve(const std::string &name)
 {
   return resolveVariable(name)->getSymbol();
 }
 
 
 Ast::VariableDefinition *
-Context::resolveVariable(const std::string &name)
+ScopeContext::resolveVariable(const std::string &name)
 {
   std::vector<Ast::Scope *>::reverse_iterator scope=_scope_stack.rbegin();
   for ( ; scope != _scope_stack.rend(); scope++) {
@@ -69,7 +69,14 @@ Context::resolveVariable(const std::string &name)
 
 
 GiNaC::ex
-Parser::Expr::parseExpression(const std::string &text, Ast::Scope *scope)
+Parser::Expr::parseExpression(const std::string &text, Ast::Scope *scope) {
+  ScopeContext ctx(scope);
+  return parseExpression(text, ctx);
+}
+
+
+GiNaC::ex
+Parser::Expr::parseExpression(const std::string &text, Context &ctx)
 {
   std::stringstream stream(text);
 
@@ -92,5 +99,5 @@ Parser::Expr::parseExpression(const std::string &text, Ast::Scope *scope)
   Parser::ConcreteSyntaxTree cst;
   ExpressionGrammar::get()->parse(lexer, cst);
 
-  return Expr::Assembler(scope, lexer).processExpression(cst[0]);
+  return Expr::Assembler(ctx, lexer).processExpression(cst[0]);
 }

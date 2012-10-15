@@ -16,8 +16,8 @@ using namespace iNA::Parser::Expr;
 
 
 
-Assembler::Assembler(Ast::Scope *model, Parser::Lexer &lexer)
-  : Context(model), _lexer(lexer)
+Assembler::Assembler(Context &context, Parser::Lexer &lexer)
+  : _lexer(lexer), _context(context)
 {
   // pass...
 }
@@ -103,7 +103,7 @@ Assembler::processAtomic(Parser::ConcreteSyntaxTree &expr)
     return processFunctionCall(expr[0]);
   } else if (2 == expr.getAltIdx()) {
     std::string identifier = _lexer[expr[0].getTokenIdx()].getValue();
-    return resolve(identifier);
+    return _context.resolve(identifier);
   } else if (3 == expr.getAltIdx()) {
     return processExpression(expr[0][1]);
   } else {

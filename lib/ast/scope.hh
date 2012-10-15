@@ -95,12 +95,10 @@ protected:
   Scope *_parent_scope;
 
 
-protected:
+public:
   /** Constructs an empty scope. Is protected to avoid direct instantiation. */
   Scope(Scope *parent=0, bool is_close=false);
 
-
-public:
   /** Destroyes the scope and all members. */
   virtual ~Scope();
 

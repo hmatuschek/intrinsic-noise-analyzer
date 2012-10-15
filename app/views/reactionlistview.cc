@@ -47,5 +47,8 @@ ReactionListView::ReactionListView(ReactionsItem *reactions, QWidget *parent)
 void
 ReactionListView::onNewReaction() {
   ReactionEditor editor(_reactions->getModel());
-  editor.exec();
+  if (QDialog::Rejected == editor.exec()) { return; }
+
+  editor.commitReactionScope();
+  Application::getApp()->docTree()->resetCompleteTree();
 }

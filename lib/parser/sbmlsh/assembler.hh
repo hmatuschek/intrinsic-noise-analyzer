@@ -28,7 +28,7 @@ namespace Sbmlsh {
 
 /** This class takes the concrete syntax tree (CST) of some parsed SBML-SH code and assembles a
  * @c Ast::Model instance from it. */
-class Assembler : public Expr::Assembler
+class Assembler : protected Expr::ScopeContext, public Expr::Assembler
 {
 protected:
   /** Holds a weak reference to the model being assembled. */
