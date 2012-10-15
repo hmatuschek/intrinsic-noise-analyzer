@@ -127,7 +127,7 @@ ReactionEditor::commitReactionScope()
 ReactionEditorPage::ReactionEditorPage(ReactionEditor *editor)
   : QWizardPage(editor), _model(editor->model())
 {
-  setTitle(tr("Define stoichiometry and kinetic law."));
+  setTitle(tr("Specify chemical equation and propensity"));
 
   // The name field
   _name = new QLineEdit("reaction");
@@ -140,12 +140,12 @@ ReactionEditorPage::ReactionEditorPage(ReactionEditor *editor)
   _equation->setCompleter(completer);
   // Get default color and define error color for equation editor:
   _default_background = _equation->palette().color(QPalette::Base);
-  _error_background = Qt::red;
+  _error_background = QColor(Qt::red).lighter();
 
   // The kinetic law expression
   _kinetic_law_type = new QComboBox();
-  _kinetic_law_type->addItem("Mass action - single compartment", (unsigned) MASSACTION_SINGLE);
-  _kinetic_law_type->addItem("Mass action - multi compartment", (unsigned) MASSACTION_MULTI);
+  _kinetic_law_type->addItem("Mass action", (unsigned) MASSACTION_SINGLE);
+  _kinetic_law_type->addItem("Multi-compartment", (unsigned) MASSACTION_MULTI);
   _kinetic_law_type->addItem("User defined", (unsigned) USER_DEFINED);
   _kinetic_law_type->setCurrentIndex(0);
 
@@ -161,9 +161,9 @@ ReactionEditorPage::ReactionEditorPage(ReactionEditor *editor)
   // Layout
   QFormLayout *layout = new QFormLayout();
   layout->addRow(tr("Name"), _name);
-  layout->addRow(tr("Reaction equation"), _equation);
+  layout->addRow(tr("Chemical equation"), _equation);
   layout->addRow(tr("Type"), _kinetic_law_type);
-  layout->addRow(tr("Kinetic law"), _kineticLaw);
+  layout->addRow(tr("Propensity"), _kineticLaw);
   setLayout(layout);
 
   // Delay timer
@@ -572,7 +572,7 @@ ReactionEditorPage::_createReaction(const QString &name, QList<QPair<int, QStrin
 
   // Create reaction and add to scope:
   iNA::Ast::Reaction *new_reaction = new iNA::Ast::Reaction(
-        identifier, new iNA::Ast::KineticLaw(0), is_reversible);
+              identifier, name.toStdString(), new iNA::Ast::KineticLaw(0), is_reversible);
   scope->addDefinition(new_reaction);
 
   // Create reactants:
