@@ -105,7 +105,7 @@ LNASteadyStateResultWidget::LNASteadyStateResultWidget(LNASteadyStateTaskWrapper
   this->spectrum_view->setModel(this->ss_task_wrapper->getSpectrum());
 
   this->spec_plot_button = new QPushButton(tr("Plot steady state statistics"));
-  this->spec_save_button = new QPushButton(tr("Save spectrum to file"));
+  //this->spec_save_button = new QPushButton(tr("Save spectrum to file"));
   this->data_save_button = new QPushButton(tr("Save data to file"));
   QObject::connect(this->spec_plot_button, SIGNAL(clicked()), this, SLOT(plotSpectrum()));
   //QObject::connect(this->spec_save_button, SIGNAL(clicked()), this, SLOT(saveSpectrum()));
@@ -116,14 +116,15 @@ LNASteadyStateResultWidget::LNASteadyStateResultWidget(LNASteadyStateTaskWrapper
   button_layout->addWidget(this->data_save_button);
   //button_layout->addWidget(this->spec_save_button);
 
-  QVBoxLayout *spectrum_layout = new QVBoxLayout();
+  //QVBoxLayout *spectrum_layout = new QVBoxLayout();
   //spectrum_layout->addWidget(this->spec_label);
   //spectrum_layout->addWidget(this->spectrum_view);
-  spectrum_layout->addLayout(button_layout);
+  //spectrum_layout->addLayout(button_layout);
 
   QVBoxLayout *layout = new QVBoxLayout();
+  layout->addLayout(button_layout);
   layout->addLayout(state_layout);
-  layout->addLayout(spectrum_layout);
+  //layout->addLayout(spectrum_layout);
   this->setLayout(layout);
 
   // Connect signals:

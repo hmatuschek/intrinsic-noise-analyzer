@@ -58,8 +58,8 @@ SSScanResultWidget::SSScanResultWidget(SSScanTaskWrapper *task_wrapper, QWidget 
   button_box->addWidget(this->saveButton);
 
   QVBoxLayout *layout = new QVBoxLayout();
-  layout->addWidget(this->dataTable);
   layout->addLayout(button_box);
+  layout->addWidget(this->dataTable);
   this->setLayout(layout);
 }
 

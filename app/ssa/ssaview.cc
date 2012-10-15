@@ -59,8 +59,8 @@ SSAResultWidget::SSAResultWidget(SSATaskWrapper *wrapper, QWidget *parent) :
 
   // Panel layout
   QVBoxLayout *layout = new QVBoxLayout();
-  layout->addWidget(this->data_view);
   layout->addLayout(button_box);
+  layout->addWidget(this->data_view);
   this->setLayout(layout);
 }
 

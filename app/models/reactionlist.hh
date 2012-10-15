@@ -31,6 +31,10 @@ public:
   /** Returns the number of columns. */
   int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
+  /** A updates the complete table. */
+  void updateTable();
+
+
 private:
   QVariant getName(iNA::Ast::Reaction *reaction, int role) const;
   QVariant getReaction(iNA::Ast::Reaction *reaction, int role) const;

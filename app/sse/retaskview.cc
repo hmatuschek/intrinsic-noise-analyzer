@@ -63,8 +63,8 @@ REResultWidget::REResultWidget(RETaskWrapper *task_wrapper, QWidget *parent):
   button_box->addWidget(saveButton);
 
   QVBoxLayout *layout = new QVBoxLayout();
-  layout->addWidget(this->dataTable);
   layout->addLayout(button_box);
+  layout->addWidget(this->dataTable);
   this->setLayout(layout);
 }
 
