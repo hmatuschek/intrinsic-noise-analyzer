@@ -8,6 +8,7 @@
 #include "../tinytex/tinytex.hh"
 #include "../models/scopeitemmodel.hh"
 
+#include <ast/unitconverter.hh>
 #include <parser/exception.hh>
 #include <utils/logger.hh>
 
@@ -610,7 +611,7 @@ ReactionEditorPage::_createKineticLaw(iNA::Ast::Reaction *reaction)
   switch (kineticLawType()) {
   case MASSACTION_SINGLE:
   case MASSACTION_MULTI:
-    _createMassActionKineticLaw(reaction);
+    _createMAKineticLaw(reaction);
     break;
 
   case USER_DEFINED:
@@ -621,7 +622,7 @@ ReactionEditorPage::_createKineticLaw(iNA::Ast::Reaction *reaction)
 
 
 void
-ReactionEditorPage::_createMassActionKineticLaw(iNA::Ast::Reaction *reaction)
+ReactionEditorPage::_createMAKineticLaw(iNA::Ast::Reaction *reaction)
 {
   iNA::Ast::Parameter *k_fwd=0, *k_rev=0;
   iNA::Ast::KineticLaw *law = reaction->getKineticLaw();
@@ -640,32 +641,111 @@ ReactionEditorPage::_createMassActionKineticLaw(iNA::Ast::Reaction *reaction)
     law->addDefinition(k_rev);
   }
 
-  GiNaC::ex factor_fwd = k_fwd->getSymbol();
+  GiNaC::ex factor_fwd = 0;
   GiNaC::ex factor_rev = 0;
+
+  factor_fwd = k_fwd->getSymbol();
+  if (reaction->isReversible()) {
+    factor_rev = k_rev->getSymbol();
+  }
+
+  if (MASSACTION_SINGLE == kineticLawType()) {
+    iNA::Ast::Compartment *compartment=0;
+    // Obtain compartment of reaction:
+    for (iNA::Ast::Reaction::iterator reac=reaction->reactantsBegin(); reac != reaction->reactantsEnd(); reac++) {
+      compartment = reac->first->getCompartment(); break;
+    }
+    for (iNA::Ast::Reaction::iterator prod=reaction->productsBegin(); prod != reaction->productsEnd(); prod++) {
+      compartment = prod->first->getCompartment(); break;
+    }
+
+    factor_fwd *= compartment->getSymbol();
+    factor_rev *= compartment->getSymbol();
+  }
+
   // Iterate over reactants:
   for (iNA::Ast::Reaction::iterator reac=reaction->reactantsBegin(); reac!=reaction->reactantsEnd(); reac++) {
-    if (_model.speciesHasSubstanceUnits()) {
-      factor_fwd *= GiNaC::pow(reac->first->getSymbol()/reac->first->getCompartment()->getSymbol(), reac->second);
-    } else {
-      factor_fwd *= GiNaC::pow(reac->first->getSymbol(), reac->second);
-    }
+    factor_fwd *= _createMAFactor(reac->first, reac->second);
   }
 
   // Iterate over products if reaction is reversible:
   if (reaction->isReversible()) {
-    factor_rev = k_rev->getSymbol();
     // Iterate over reactants:
     for (iNA::Ast::Reaction::iterator prod=reaction->productsBegin(); prod!=reaction->productsEnd(); prod++) {
-      if (_model.speciesHasSubstanceUnits()) {
-        factor_rev *= GiNaC::pow(prod->first->getSymbol()/prod->first->getCompartment()->getSymbol(), prod->second);
-      } else {
-        factor_rev *= GiNaC::pow(prod->first->getSymbol(), prod->second);
-      }
+      factor_rev *= _createMAFactor(prod->first, prod->second);
     }
   }
 
   // Assemble and assign kinetic law:
   law->setRateLaw(factor_fwd - factor_rev);
+}
+
+
+GiNaC::ex
+ReactionEditorPage::_createMAFactor(iNA::Ast::Species *species, GiNaC::ex stoichiometry)
+{
+  // Check type of stoichiometry
+  if (! GiNaC::is_a<GiNaC::numeric>(stoichiometry)) {
+    iNA::InternalError err;
+    err << "Can not assemble kinetic law for stoichiometry " << stoichiometry
+        << ": is not an numeric value.";
+    throw err;
+  }
+
+  GiNaC::numeric value = GiNaC::ex_to<GiNaC::numeric>(stoichiometry);
+  if (! value.is_pos_integer()) {
+    iNA::InternalError err;
+    err << "Can not assemble kinetic law for stoichiometry " << stoichiometry
+        << ": is not a positive integer.";
+    throw err;
+  }
+
+  // dispatch
+  if (MASSACTION_SINGLE == kineticLawType()) {
+    return _createMASingleFactor(species, value.to_int());
+  }
+  return _createMAMultiFactor(species, value.to_int());
+}
+
+
+GiNaC::ex
+ReactionEditorPage::_createMASingleFactor(iNA::Ast::Species *species, int stoichiometry)
+{
+  if (0 >= stoichiometry) { return 1; }
+
+  // Get species "symbol"
+  GiNaC::ex species_expr = species->getSymbol();
+  // If species are defined in substance units:
+  if (_model.speciesHasSubstanceUnits()) {
+    species_expr /= species->getCompartment()->getSymbol();
+  }
+  // If substance units are not item
+  species_expr *= iNA::Ast::UnitConverter::conversionFactor(
+        iNA::Ast::ScaledBaseUnit(iNA::Ast::ScaledBaseUnit::ITEM, 1, 0, 1),
+        _model.getSubstanceUnit());
+
+  GiNaC::ex factor=species_expr;
+  for (int i=1; i<stoichiometry; i++) {
+    factor *= (species_expr-i/species->getCompartment()->getSymbol());
+  }
+
+  return factor;
+}
+
+
+GiNaC::ex
+ReactionEditorPage::_createMAMultiFactor(iNA::Ast::Species *species, int stoichiometry)
+{
+  if (0 >= stoichiometry) { return 1; }
+
+  // Get species "symbol"
+  GiNaC::ex species_expr = species->getSymbol();
+  // If species are defined in substance units:
+  if (_model.speciesHasSubstanceUnits()) {
+    species_expr /= species->getCompartment()->getSymbol();
+  }
+
+  return GiNaC::pow(species_expr, stoichiometry);
 }
 
 

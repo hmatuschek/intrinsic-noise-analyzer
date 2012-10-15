@@ -146,7 +146,10 @@ private:
   void _createKineticLaw(iNA::Ast::Reaction *reaction);
 
   /** Creates the mass action kinetic law for the given reaction. */
-  void _createMassActionKineticLaw(iNA::Ast::Reaction *reaction);
+  void _createMAKineticLaw(iNA::Ast::Reaction *reaction);
+  GiNaC::ex _createMAFactor(iNA::Ast::Species *species, GiNaC::ex stoichiometry);
+  GiNaC::ex _createMASingleFactor(iNA::Ast::Species *species, int stoichiometry);
+  GiNaC::ex _createMAMultiFactor(iNA::Ast::Species *species, int stiochiometry);
 
   /** Creates the kinetic law for this reaction from the kinetic law expression editor. */
   void _parseAndCreateKineticLaw(iNA::Ast::Reaction *reaction);
