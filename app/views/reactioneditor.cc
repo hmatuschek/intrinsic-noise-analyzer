@@ -389,11 +389,33 @@ ReactionEditorPage::_renderKineticLaw(bool is_reversible, QList<QPair<int, QStri
     formula->appendItem(_renderCompartment(*(compartments.begin())));
   }
 
+  // Collect reactants and assemble stoichiometries
+  std::map<QString,int> reactantsStoi;
   for (QList< QPair<int, QString> >::iterator item=reactants.begin(); item != reactants.end(); item++)
   {
-    formula->appendItem(new MathText(QChar(0x00B7)));
-    formula->appendItem(_renderFactor(item->second, item->first));
+     std::map< QString, int >::iterator it= reactantsStoi.find(item->second) ;
+     if( it!=reactantsStoi.end())
+     {
+          it->second+=item->first;
+     }
+     else
+     {
+         reactantsStoi.insert(std::pair<QString,int>(item->second,item->first));
+     }
   }
+
+  for (std::map< QString, int>::iterator item=reactantsStoi.begin(); item != reactantsStoi.end(); item++)
+  {
+    formula->appendItem(new MathText(QChar(0x00B7)));
+    formula->appendItem(_renderFactor(item->first, int(item->second)));
+  }
+
+
+//  for (QList< QPair<int, QString> >::iterator item=reactants.begin(); item != reactants.end(); item++)
+//  {
+//    formula->appendItem(new MathText(QChar(0x00B7)));
+//    formula->appendItem(_renderFactor(item->second, item->first));
+//  }
 
   // If reaction is reversible, include reverse rate
   if (is_reversible) {
@@ -408,11 +430,32 @@ ReactionEditorPage::_renderKineticLaw(bool is_reversible, QList<QPair<int, QStri
       formula->appendItem(_renderCompartment(*(compartments.begin())));
     }
 
+    // Collect products and assemble stoichiometries
+    std::map<QString,int> productsStoi;
     for (QList< QPair<int, QString> >::iterator item=products.begin(); item != products.end(); item++)
     {
-      formula->appendItem(new MathText(QChar(0x00B7)));
-      formula->appendItem(_renderFactor(item->second, item->first));
+       std::map< QString, int >::iterator it= productsStoi.find(item->second) ;
+       if( it!=productsStoi.end())
+       {
+            it->second+=item->first;
+       }
+       else
+       {
+           productsStoi.insert(std::pair<QString,int>(item->second,item->first));
+       }
     }
+
+    for (std::map<QString,int>::iterator item=productsStoi.begin(); item != productsStoi.end(); item++)
+    {
+      formula->appendItem(new MathText(QChar(0x00B7)));
+      formula->appendItem(_renderFactor(item->first, item->second));
+    }
+
+//    for (QList< QPair<int, QString> >::iterator item=productsStoi.begin(); item != products.end(); item++)
+//    {
+//      formula->appendItem(new MathText(QChar(0x00B7)));
+//      formula->appendItem(_renderFactor(item->second, item->first));
+//    }
   }
 
   return formula;
@@ -420,7 +463,7 @@ ReactionEditorPage::_renderKineticLaw(bool is_reversible, QList<QPair<int, QStri
 
 
 MathItem *
-ReactionEditorPage::_renderFactor(QString &id, int exponent)
+ReactionEditorPage::_renderFactor(const QString &id, int exponent)
 {
   MathFormula *name = new MathFormula();
   name->appendItem(new MathText("["));

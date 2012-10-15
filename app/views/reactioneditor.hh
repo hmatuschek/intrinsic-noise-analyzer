@@ -124,7 +124,7 @@ private:
                               QList< QPair<int, QString> > &products);
 
   /** Helper function to render a factor. */
-  MathItem *_renderFactor(QString &id, int exponent);
+  MathItem *_renderFactor(const QString &id, int exponent);
   /** Renders the name of the compartment of the specified species. */
   MathItem *_renderCompartmentOf(const QString &id);
   /** Renders the name of the compartment of the specified species. */
