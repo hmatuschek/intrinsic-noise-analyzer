@@ -2,10 +2,15 @@
 #include <QFormLayout>
 #include <QHBoxLayout>
 #include <QCompleter>
+#include <QGroupBox>
+
 #include "reactionequationrenderer.hh"
 #include "../tinytex/tinytex.hh"
 #include "../models/scopeitemmodel.hh"
+
 #include <parser/exception.hh>
+#include <utils/logger.hh>
+
 
 
 /* ********************************************************************************************* *
@@ -74,6 +79,12 @@ ReactionEditor::reaction() {
 }
 
 
+iNA::Ast::Scope *
+ReactionEditor::reactionScope() {
+  return _current_reaction_scope;
+}
+
+
 void
 ReactionEditor::setReactionScope(iNA::Ast::Scope *reaction_scope)
 {
@@ -131,8 +142,12 @@ ReactionEditorPage::ReactionEditorPage(ReactionEditor *editor)
   _error_background = Qt::red;
 
   // The kinetic law expression
-  _autoupdate = new QCheckBox("mass action");
-  _autoupdate->setChecked(true);
+  _kinetic_law_type = new QComboBox();
+  _kinetic_law_type->addItem("Mass action - single compartment", (unsigned) MASSACTION_SINGLE);
+  _kinetic_law_type->addItem("Mass action - multi compartment", (unsigned) MASSACTION_MULTI);
+  _kinetic_law_type->addItem("User defined", (unsigned) USER_DEFINED);
+  _kinetic_law_type->setCurrentIndex(0);
+
   _kineticLaw = new QStackedWidget();
   _kineticLawFormula = new QLabel();
   _kineticLaw->addWidget(_kineticLawFormula);
@@ -143,39 +158,50 @@ ReactionEditorPage::ReactionEditorPage(ReactionEditor *editor)
   _kineticLaw->setCurrentIndex(0);
 
   // Layout
-  QHBoxLayout *kinlaw_layout = new QHBoxLayout();
-  kinlaw_layout->addWidget(_kineticLaw);
-  kinlaw_layout->addWidget(_autoupdate);
-
   QFormLayout *layout = new QFormLayout();
   layout->addRow(tr("Name"), _name);
   layout->addRow(tr("Reaction equation"), _equation);
-  layout->addRow(tr("Kinetic law"), kinlaw_layout);
+  layout->addRow(tr("Type"), _kinetic_law_type);
+  layout->addRow(tr("Kinetic law"), _kineticLaw);
   setLayout(layout);
 
   // Delay timer
   _delayTimer = new QTimer(); _delayTimer->setSingleShot(true); _delayTimer->setInterval(500);
 
   // Connect all signals
-  QObject::connect(_autoupdate, SIGNAL(toggled(bool)), this, SLOT(_onMassActionToggled(bool)));
+  QObject::connect(_kinetic_law_type, SIGNAL(currentIndexChanged(int)), this, SLOT(_onKineticLawTypeChanged(int)));
   QObject::connect(_equation, SIGNAL(editingFinished()), this, SLOT(_updateKineticLaw()));
   QObject::connect(_equation, SIGNAL(textChanged(QString)), _delayTimer, SLOT(start()));
   QObject::connect(_delayTimer, SIGNAL(timeout()), this, SLOT(_updateKineticLaw()));
 }
 
 
+ReactionEditorPage::KineticLawType
+ReactionEditorPage::kineticLawType() const {
+  return (KineticLawType)(_kinetic_law_type->itemData(_kinetic_law_type->currentIndex()).toUInt());
+}
+
 void
-ReactionEditorPage::_onMassActionToggled(bool state)
+ReactionEditorPage::setKineticLawType(KineticLawType type)
 {
-  if (state) {
-    _kineticLawEditor->setEnabled(false);
-    _kineticLaw->setCurrentIndex(0);
-    _updateKineticLaw();
-  } else {
-    _kineticLawEditor->setEnabled(true);
-    _kineticLaw->setCurrentIndex(1);
+  QList< QPair<int, QString> > reactants, products;
+  bool is_reversible=false, is_valid=false, is_multicompartment=false;
+
+  is_valid = _parseEquation(_equation->text(), reactants, products, is_reversible);
+  is_multicompartment = (1 != _collectCompartments(reactants, products).size());
+
+  // If mass action single compartment is selected, but reaction is multicompartment:
+  if (is_valid && is_multicompartment && (MASSACTION_SINGLE == type)) {
+    type = MASSACTION_MULTI;
+  }
+
+  switch (type) {
+  case MASSACTION_SINGLE: _kinetic_law_type->setCurrentIndex(0); break;
+  case MASSACTION_MULTI: _kinetic_law_type->setCurrentIndex(1); break;
+  case USER_DEFINED: _kinetic_law_type->setCurrentIndex(2); break;
   }
 }
+
 
 
 void
@@ -198,42 +224,37 @@ ReactionEditorPage::_updateKineticLaw()
   equation_palette.setColor(QPalette::Base, _default_background);
   _equation->setPalette(equation_palette);
 
+
   // Do not update anything if autoupdate is not enabled.
-  if (! _autoupdate->isChecked()) { return; }
+  if (USER_DEFINED == kineticLawType()) { return; }
+
+  // If mass action single compartment is selected but reaction is multicompartment:
+  if ((MASSACTION_SINGLE == kineticLawType()) && 1<_collectCompartments(reactants, products).size()) {
+    setKineticLawType(MASSACTION_MULTI);
+  }
 
   // Assemble formula
-  MathFormula formula;
+  MathItem *formula = _renderKineticLaw(is_reversible, reactants, products);
+  _kineticLawFormula->setPixmap(formula->renderItem());
+  delete formula;
+}
 
-  // Handle reactants:
-  if (is_reversible) {
-    formula.appendItem(new MathSub(new MathText("k"), new MathText("fwd")));
-  } else {
-    formula.appendItem(new MathText("k"));
+
+void
+ReactionEditorPage::_onKineticLawTypeChanged(int index) {
+  switch (kineticLawType()) {
+  case MASSACTION_SINGLE:
+  case MASSACTION_MULTI:
+    _kineticLawEditor->setEnabled(false);
+    _kineticLaw->setCurrentIndex(0);
+    _updateKineticLaw();
+    break;
+
+  case USER_DEFINED:
+    _kineticLawEditor->setEnabled(true);
+    _kineticLaw->setCurrentIndex(1);
+    break;
   }
-
-  for (QList< QPair<int, QString> >::iterator item=reactants.begin();
-       item != reactants.end(); item++)
-  {
-    formula.appendItem(new MathText(QChar(0x00B7)));
-    formula.appendItem(_assembleFactor(item->second, item->first));
-  }
-
-  // If reaction is reversible, include reverse rate
-  if (is_reversible) {
-    formula.appendItem(new MathSpace(MathSpace::MEDIUM_SPACE));
-    formula.appendItem(new MathText("-"));
-    formula.appendItem(new MathSpace(MathSpace::MEDIUM_SPACE));
-
-    formula.appendItem(new MathSub(new MathText("k"), new MathText("rev")));
-    for (QList< QPair<int, QString> >::iterator item=products.begin();
-         item != products.end(); item++)
-    {
-      formula.appendItem(new MathText(QChar(0x00B7)));
-      formula.appendItem(_assembleFactor(item->second, item->first));
-    }
-  }
-
-  _kineticLawFormula->setPixmap(formula.renderItem());
 }
 
 
@@ -249,23 +270,23 @@ ReactionEditorPage::_parseEquation(
   if (reversible) {
     QStringList parts = text.split("=");
     if (2 != parts.size()) { return false; }
+
     if (! _parseStoichiometry(parts.at(0).simplified(), reactants)) { return false; }
-    return _parseStoichiometry(parts.at(1).simplified(), products);
+    if (! _parseStoichiometry(parts.at(1).simplified(), products)) { return false; }
+    if ((0 == reactants.size()) && (0 == products.size())) { return false; }
+
+    return true;
   }
 
   // irreversible...
-
   QStringList parts = text.split("->");
-  if (1 == parts.size()) {
-    return _parseStoichiometry(parts.at(0).simplified(), reactants);
-  }
+  if (2 != parts.size()) { return false; }
 
-  if (2 == parts.size()) {
-    if (! _parseStoichiometry(parts.at(0).simplified(), reactants)) { return false; }
-    return _parseStoichiometry(parts.at(1).simplified(), products);
-  }
+  if (! _parseStoichiometry(parts.at(0).simplified(), reactants)) { return false; }
+  if (! _parseStoichiometry(parts.at(1).simplified(), products)) { return false; }
+  if ((0==reactants.size()) && (0==products.size())) { return false; }
 
-  return false;
+  return true;
 }
 
 
@@ -275,6 +296,9 @@ ReactionEditorPage::_parseStoichiometry(
 {
   QStringList sums = text.split('+');
 
+  // Check for empty stoichiometry:
+  if (1==sums.size() && (0 == sums.at(0).size())) { return true; }
+
   // For each product in sum
   for (QStringList::iterator prod=sums.begin(); prod!=sums.end(); prod++) {
     QStringList factors = prod->split('*');
@@ -283,7 +307,7 @@ ReactionEditorPage::_parseStoichiometry(
     if (1 == factors.size()) {
       // Unpack species
       species_id = factors.at(0);
-      if (! _parseIdentifier(species_id)) { return 0; }
+      if (! _parseIdentifier(species_id)) { return false; }
     } else if (2 == factors.size()) {
       bool success = true;
       // Unpack factor
@@ -314,43 +338,149 @@ ReactionEditorPage::_parseIdentifier(QString &text)
 }
 
 
-MathItem *
-ReactionEditorPage::_assembleFactor(QString &id, int exponent)
+std::set<iNA::Ast::Compartment *>
+ReactionEditorPage::_collectCompartments(QList<QPair<int, QString> > &reactants,
+                                         QList<QPair<int, QString> > &products)
 {
-  MathItem    *name = _assembleName(id);
-  MathFormula *factor = new MathFormula();
-
-  factor->appendItem(new MathText("["));
-  factor->appendItem(name);
-  factor->appendItem(new MathText("]"));
-
-  if (exponent > 1) {
-    return new MathSup(factor, new MathText(QString("%1").arg(exponent)));
+  std::set<iNA::Ast::Compartment *> compartments;
+  // Handle list of reactants:
+  for (QList< QPair<int, QString> >::iterator item=reactants.begin(); item!=reactants.end(); item++)
+  {
+    if (! _model.hasSpecies(item->second.toStdString())) {
+      compartments.insert(_model.getCompartment(0));
+    } else {
+      compartments.insert(_model.getSpecies(item->second.toStdString())->getCompartment());
+    }
+  }
+  // Handle list of products
+  for (QList< QPair<int, QString> >::iterator item=products.begin(); item!=products.end(); item++)
+  {
+    if (! _model.hasSpecies(item->second.toStdString())) {
+      compartments.insert(_model.getCompartment(0));
+    } else {
+      compartments.insert(_model.getSpecies(item->second.toStdString())->getCompartment());
+    }
   }
 
+  return compartments;
+}
+
+
+
+MathItem *
+ReactionEditorPage::_renderKineticLaw(bool is_reversible, QList<QPair<int, QString> > &reactants,
+                                      QList<QPair<int, QString> > &products)
+{
+  std::set<iNA::Ast::Compartment *> compartments = _collectCompartments(reactants, products);
+
+
+  MathFormula *formula = new MathFormula();
+
+  // Handle reactants:
+  if (is_reversible) {
+    formula->appendItem(new MathSub(new MathText("k"), new MathText("fwd")));
+  } else {
+    formula->appendItem(new MathText("k"));
+  }
+
+  if (MASSACTION_SINGLE == kineticLawType()) {
+    formula->appendItem(new MathText(QChar(0x00B7)));
+    formula->appendItem(_renderCompartment(*(compartments.begin())));
+  }
+
+  for (QList< QPair<int, QString> >::iterator item=reactants.begin(); item != reactants.end(); item++)
+  {
+    formula->appendItem(new MathText(QChar(0x00B7)));
+    formula->appendItem(_renderFactor(item->second, item->first));
+  }
+
+  // If reaction is reversible, include reverse rate
+  if (is_reversible) {
+    formula->appendItem(new MathSpace(MathSpace::MEDIUM_SPACE));
+    formula->appendItem(new MathText("-"));
+    formula->appendItem(new MathSpace(MathSpace::MEDIUM_SPACE));
+
+    formula->appendItem(new MathSub(new MathText("k"), new MathText("rev")));
+
+    if (MASSACTION_SINGLE == kineticLawType()) {
+      formula->appendItem(new MathText(QChar(0x00B7)));
+      formula->appendItem(_renderCompartment(*(compartments.begin())));
+    }
+
+    for (QList< QPair<int, QString> >::iterator item=products.begin(); item != products.end(); item++)
+    {
+      formula->appendItem(new MathText(QChar(0x00B7)));
+      formula->appendItem(_renderFactor(item->second, item->first));
+    }
+  }
+
+  return formula;
+}
+
+
+MathItem *
+ReactionEditorPage::_renderFactor(QString &id, int exponent)
+{
+  MathFormula *name = new MathFormula();
+  name->appendItem(new MathText("["));
+  name->appendItem(_renderName(id));
+  name->appendItem(new MathText("]"));
+
+  MathFormula *factor = new MathFormula();
+
+  if (MASSACTION_MULTI == kineticLawType()) {
+    if (1 == exponent) {
+      factor->appendItem(name->copy());
+    } else {
+      factor->appendItem(new MathSup(name->copy(), new MathText(QString("%1").arg(exponent))));
+    }
+  } else if (MASSACTION_SINGLE == kineticLawType()) {
+    factor->appendItem(name->copy());
+    for (int i=1; i<exponent; i++) {
+      MathFormula *term = new MathFormula();
+      term->appendItem(name->copy());
+      term->appendItem(new MathText("-"));
+      if (i > 1) {
+        term->appendItem(new MathText(QString("%1").arg(i)));
+        term->appendItem(new MathText(QChar(0x00B7)));
+      }
+      term->appendItem(new MathSup(_renderCompartmentOf(id), new MathText("-1")));
+      factor->appendItem(new MathBlock(term, new MathText("("), new MathText(")")));
+    }
+  }
+
+  delete name;
   return factor;
 }
 
 
 MathItem *
-ReactionEditorPage::_assembleCompartment()
+ReactionEditorPage::_renderCompartmentOf(const QString &id)
 {
   // if there is no compartment defined use \Omega
   if (0 == _model.numCompartments()) {
     return new MathText(QChar(0x03A9));
   }
 
-  // Otherwise, get first compartment and take its name (if present)
-  iNA::Ast::Compartment *comp = _model.getCompartment(0);
-  if (comp->hasName()) { return TinyTex::parseQuoted(comp->getName().c_str()); }
+  if (! _model.hasSpecies(id.toStdString())) {
+    return _renderCompartment(_model.getCompartment(0));
+  }
 
-  // If compartment has no name -> use identifier
-  return new MathText(comp->getIdentifier().c_str());
+  return _renderCompartment(_model.getSpecies(id.toStdString())->getCompartment());
 }
 
 
 MathItem *
-ReactionEditorPage::_assembleName(const QString &id)
+ReactionEditorPage::_renderCompartment(iNA::Ast::Compartment *compartment)
+{
+  // If compartment has no name -> use identifier
+  if (compartment->hasName()) { return TinyTex::parseQuoted(compartment->getName().c_str()); }
+  return new MathText(compartment->getIdentifier().c_str());
+}
+
+
+MathItem *
+ReactionEditorPage::_renderName(const QString &id)
 {
   // Assemble name of the factor
   if (_model.hasVariable(id.toStdString())) {
@@ -477,10 +607,15 @@ ReactionEditorPage::_createReaction(const QString &name, QList<QPair<int, QStrin
 void
 ReactionEditorPage::_createKineticLaw(iNA::Ast::Reaction *reaction)
 {
-  if (_autoupdate->isChecked()) {
+  switch (kineticLawType()) {
+  case MASSACTION_SINGLE:
+  case MASSACTION_MULTI:
     _createMassActionKineticLaw(reaction);
-  } else {
+    break;
+
+  case USER_DEFINED:
     _parseAndCreateKineticLaw(reaction);
+    break;
   }
 }
 
@@ -574,10 +709,16 @@ ReactionEditorPage::validatePage()
   }
 
   // Check kinetic law (if defined by user):
-  if (! _autoupdate->isChecked()) {
+  if (USER_DEFINED == kineticLawType()) {
     ReactionEditorContext ctx(&_model);
-    try { iNA::Parser::Expr::parseExpression(_kineticLawFormula->text().toStdString(), ctx); }
-    catch (iNA::Parser::ParserError &err) { return false; }
+    try {
+      iNA::Parser::Expr::parseExpression(_kineticLawFormula->text().toStdString(), ctx);
+    } catch (iNA::Parser::ParserError &err) {
+      iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::INFO);
+      message << "Invalid kinetic law expression: " << err.what();
+      iNA::Utils::Logger::get().log(message);
+      return false;
+    }
   }
 
   // Construct new scope, holding all undefined variables:
@@ -609,11 +750,20 @@ ReactionEditorSummaryPage::ReactionEditorSummaryPage(ReactionEditor *wizard)
   setTitle(tr("Summary"));
 
   // Reaction preview
+  QGroupBox *prev_box = new QGroupBox(tr("Reaction Preview"));
   _reaction_preview = new QLabel();
+  QVBoxLayout *prev_box_layout = new QVBoxLayout();
+  prev_box_layout->addWidget(_reaction_preview);
+  prev_box->setLayout(prev_box_layout);
+
+  QFormLayout *species_layout = new QFormLayout();
+  _created_species = new QLabel();
+  species_layout->addRow(tr("Created species"), _created_species);
 
   // Assemble layout
   QVBoxLayout *layout = new QVBoxLayout();
-  layout->addWidget(_reaction_preview);
+  layout->addWidget(prev_box);
+  layout->addLayout(species_layout);
   setLayout(layout);
 }
 
@@ -622,7 +772,22 @@ void
 ReactionEditorSummaryPage::initializePage()
 {
   ReactionEditor *editor = static_cast<ReactionEditor *>(wizard());
+
   // Render equation
   MathContext ctx; ctx.setFontSize(ctx.fontSize()*0.66);
   _reaction_preview->setPixmap(ReactionEquationRenderer::renderReaction(editor->reaction()));
+
+  // Assemble list of created species:
+  QStringList created_species;
+  iNA::Ast::Scope *scope = editor->reactionScope();
+  for (iNA::Ast::Scope::iterator item=scope->begin(); item!=scope->end(); item++) {
+    if (! iNA::Ast::Node::isSpecies(*item)) { continue; }
+    created_species.append((*item)->getIdentifier().c_str());
+  }
+
+  if (0 == created_species.size()) {
+    _created_species->setText(tr("<none>"));
+  } else {
+    _created_species->setText(created_species.join(", "));
+  }
 }

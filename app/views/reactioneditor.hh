@@ -10,6 +10,7 @@
 #include <QStackedWidget>
 #include <QLabel>
 #include <QTimer>
+#include <QComboBox>
 
 #include <ast/model.hh>
 #include <parser/expr/parser.hh>
@@ -54,6 +55,8 @@ public:
   /** Returns a weak reference to the defined reaction (or 0 if there is no reaction defined). */
   iNA::Ast::Reaction *reaction();
 
+  iNA::Ast::Scope *reactionScope();
+
   /** REsets the current reaction scope. This scope holds the reaction definition
    * as well as all newly created species for that scope. */
   void setReactionScope(iNA::Ast::Scope *reaction_scope);
@@ -74,6 +77,12 @@ class ReactionEditorPage : public QWizardPage
 {
   Q_OBJECT
 
+protected:
+  typedef enum {
+    MASSACTION_SINGLE, MASSACTION_MULTI, USER_DEFINED
+  } KineticLawType;
+
+
 public:
   /** Constructor. */
   ReactionEditorPage(ReactionEditor *editor);
@@ -82,12 +91,19 @@ public:
   virtual bool validatePage();
 
 
-private slots:
-  /** Called if the automatic update of the kinetic law is toggled. */
-  void _onMassActionToggled(bool state);
+protected:
+  /** Returns the currently selected kinetic law type. */
+  KineticLawType kineticLawType() const;
+  /** Resets the currently selected kinetic law type. */
+  void setKineticLawType(KineticLawType type);
 
+
+private slots:
   /** Implements the automatic update of the kinetic law. */
   void _updateKineticLaw();
+
+  /** Whenever the type of kinetic law changed. */
+  void _onKineticLawTypeChanged(int index);
 
 
 private:
@@ -99,12 +115,22 @@ private:
   /** Helper function to parse identifier. */
   bool _parseIdentifier(QString &text);
 
+  /** Returns the set of compartments, the reaction takes place in.*/
+  std::set<iNA::Ast::Compartment *> _collectCompartments(QList< QPair<int, QString> > &reactants,
+                                                         QList< QPair<int, QString> > &products);
+
+  /** Renders the kinetic law. */
+  MathItem *_renderKineticLaw(bool is_reversible, QList< QPair<int, QString> > &reactants,
+                              QList< QPair<int, QString> > &products);
+
   /** Helper function to render a factor. */
-  MathItem *_assembleFactor(QString &id, int exponent);
-  /** Assembles the name of the compartment. */
-  MathItem *_assembleCompartment();
+  MathItem *_renderFactor(QString &id, int exponent);
+  /** Renders the name of the compartment of the specified species. */
+  MathItem *_renderCompartmentOf(const QString &id);
+  /** Renders the name of the compartment of the specified species. */
+  MathItem *_renderCompartment(iNA::Ast::Compartment *compartment);
   /** Assembles the name of an identifier. */
-  MathItem *_assembleName(const QString &id);
+  MathItem *_renderName(const QString &id);
 
   /** Creates a species definition for each undefined species in the stoichiometry. */
   void _defineUnknownSpecies(QList< QPair<int, QString> > &reactants,
@@ -138,8 +164,8 @@ private:
   QLineEdit *_kineticLawEditor;
   /** View of the kinetic law. */
   QLabel    *_kineticLawFormula;
-  /** Checkbox to enable the automatic update of the kinetic law. */
-  QCheckBox *_autoupdate;
+  /** Combobox to select the type of kinetic law. */
+  QComboBox *_kinetic_law_type;
   /** A delay timer for the update function. */
   QTimer    *_delayTimer;
   /** Holds the default background color of the equaiton editor. */
@@ -157,6 +183,7 @@ class ReactionEditorSummaryPage : public QWizardPage
   Q_OBJECT
 
 public:
+  /** Constructor. */
   explicit ReactionEditorSummaryPage(ReactionEditor *wizard);
 
   /** Updates the reaction preview. */
@@ -167,6 +194,8 @@ private:
   iNA::Ast::Model &_model;
   /** Displays the preview of the reaction. */
   QLabel *_reaction_preview;
+  /** Displays the species being created. */
+  QLabel *_created_species;
 };
 
 

@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
   //      new Fluc::Utils::TextMessageHandler(std::cerr, Fluc::Utils::Message::DEBUG));
 
   // Instantiate a QApplication
-  ExceptionApplication qapp(argc, argv);
+  QApplication qapp(argc, argv);
 
   // Instantiate our own application model, holds all the data of the running application
   Application *app = Application::getApp();
