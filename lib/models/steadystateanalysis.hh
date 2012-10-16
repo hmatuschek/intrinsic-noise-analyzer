@@ -301,7 +301,7 @@ public:
         for(size_t j=1; j<numThreads; j++)
             models[j] = new M(sseModel);
 
-#pragma omp parallel for if(numThreads>1) num_threads(numThreads) schedule(dynamic) private(iter,x,conc)
+//#pragma omp parallel for if(numThreads>1) num_threads(numThreads) schedule(dynamic) private(iter,x,conc)
         // Iterate over all parameter sets
         for(size_t j = 0; j < parameterSets.size(); j++)
         {
@@ -310,7 +310,7 @@ public:
             GiNaC::exmap ptab = models[OpenMP::getThreadNum()]->translate(parameterSets[j]);
 
             // Collect all the values of constant parameters except variable parameters
-            Trafo::ConstantFolder constants(*(models[OpenMP::getThreadNum()]), Trafo::Filter::ALL, ptab);
+            Trafo::ConstantFolder constants(*(models[OpenMP::getThreadNum()]), Trafo::Filter::ALL_CONST, ptab);
 
             // Translate identifier to parameters collect variable parameters
             ParameterFolder parameters(ptab);
