@@ -266,7 +266,7 @@ public:
 
 
     /**
-     * Does a parameter scan of the steady state analysis and returns a .
+     * Perform a parameter scan using the steady state analysis.
      *
      * @param parameterSets: Vector of parameter sets to perform analysis for.
      * @param resultSet: Outputs the steady state concentrations, covariance and EMRE vector in reduced
@@ -298,10 +298,14 @@ public:
         // Copy models for parallelization
         std::vector< M * > models(numThreads);
         models[0] = &sseModel;
+        Ast::Model* base = dynamic_cast<Ast::Model*>(&sseModel);
+//#pragma omp parallel for if(numThreads>1) num_threads(numThreads)
         for(size_t j=1; j<numThreads; j++)
-            models[j] = new M(sseModel);
+        {
+            models[j] = new M((*base));
+        }
 
-//#pragma omp parallel for if(numThreads>1) num_threads(numThreads) schedule(dynamic) private(iter,x,conc)
+#pragma omp parallel for if(numThreads>1) num_threads(numThreads) schedule(dynamic) firstprivate(iter,x,conc)
         // Iterate over all parameter sets
         for(size_t j = 0; j < parameterSets.size(); j++)
         {
