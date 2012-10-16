@@ -12,7 +12,7 @@
 #include "../application.hh"
 #include "../doctree/plotitem.hh"
 #include "steadystatespectrumplot.hh"
-#include "plotdialog.hh"
+#include "../views/speciesselectiondialog.hh"
 
 
 
@@ -142,9 +142,11 @@ void
 LNASteadyStateResultWidget::plotSpectrum()
 {
   // Ask user to choose species to plot:
-  SteadyStatePlotDialog plotdialog(ss_task_wrapper->getSteadyStateTask()->getConfig().getModel());
-  if (QDialog::Rejected == plotdialog.exec()) { return; }
-  QStringList selected_species = plotdialog.getSelectedSpecies();
+  SpeciesSelectionDialog dialog(ss_task_wrapper->getSteadyStateTask()->getConfig().getModel());
+  dialog.setWindowTitle(tr("Steady State quick plot"));
+  dialog.setTitle(tr("Select the species to plot."));
+  if (QDialog::Rejected == dialog.exec()) { return; }
+  QStringList selected_species = dialog.getSelectedSpecies();
 
   // Create plot
   Application::getApp()->docTree()->addPlot(

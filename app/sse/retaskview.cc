@@ -10,7 +10,7 @@
 #include "../application.hh"
 #include "../doctree/plotitem.hh"
 #include "replot.hh"
-#include "replotdialog.hh"
+#include "../views/speciesselectiondialog.hh"
 #include "../views/timeseriesplotwizard.hh"
 
 
@@ -73,8 +73,8 @@ void
 REResultWidget::quickPlotButtonPressed()
 {
   // Create SSE quick plot dialog
-  SSEPlotDialog re_dialog(re_task_wrapper->getRETask()->getConfig().getModel());
-  re_dialog.setWindowTitle(tr("RE quick plot dialog"));
+  SpeciesSelectionDialog re_dialog(re_task_wrapper->getRETask()->getConfig().getModel());
+  re_dialog.setWindowTitle(tr("RE quick plot"));
   re_dialog.setTitle(tr("Select the species to plot."));
 
   // Exec & get selected species

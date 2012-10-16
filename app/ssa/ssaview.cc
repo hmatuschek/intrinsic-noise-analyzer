@@ -71,6 +71,8 @@ SSAResultWidget::showPlot()
 {
   // Ask user to select some species:
   SpeciesSelectionDialog dialog(ssa_task_wrapper->getSSATask()->getModel());
+  dialog.setWindowTitle(tr("SSA quick plot"));
+  dialog.setTitle(tr("Select the species to plot."));
   if (QDialog::Accepted != dialog.exec()) { return; }
   QStringList selected_species = dialog.getSelectedSpecies();
 

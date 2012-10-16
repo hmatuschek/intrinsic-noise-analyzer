@@ -32,25 +32,21 @@ SET(ina_app_sse_SOURCES sse/ssetaskconfig.cc
     sse/ssemodule.cc sse/ssewizard.cc
     sse/iostask.cc sse/iostaskwrapper.cc sse/iostaskview.cc sse/iosplot.cc
     sse/lnatask.cc sse/lnataskwrapper.cc sse/lnataskview.cc sse/lnaplot.cc
-    sse/retask.cc  sse/retaskwrapper.cc  sse/retaskview.cc  sse/replot.cc
-    sse/replotdialog.cc)
+    sse/retask.cc  sse/retaskwrapper.cc  sse/retaskview.cc  sse/replot.cc)
 SET(ina_app_sse_HEADERS
     sse/ssemodule.hh sse/ssewizard.hh
     sse/iostask.hh sse/iostaskwrapper.hh sse/iostaskview.hh sse/iosplot.hh
     sse/lnatask.hh sse/lnataskwrapper.hh sse/lnataskview.hh sse/lnaplot.hh
-    sse/retask.hh  sse/retaskwrapper.hh  sse/retaskview.hh  sse/replot.hh
-    sse/replotdialog.hh)
+    sse/retask.hh  sse/retaskwrapper.hh  sse/retaskview.hh  sse/replot.hh)
 
 SET(ina_app_steadystate_SOURCES
     steadystate/lnasteadystatetask.cc steadystate/lnasteadystatetaskwrapper.cc
     steadystate/lnasteadystatewizard.cc steadystate/lnasteadystateview.cc
-    steadystate/lnasteadystatemodule.cc steadystate/steadystatespectrumplot.cc
-    steadystate/plotdialog.cc)
+    steadystate/lnasteadystatemodule.cc steadystate/steadystatespectrumplot.cc)
 SET(ina_app_steadystate_HEADERS
     steadystate/lnasteadystatetask.hh steadystate/lnasteadystatetaskwrapper.hh
     steadystate/lnasteadystatewizard.hh steadystate/lnasteadystateview.hh
-    steadystate/lnasteadystatemodule.hh steadystate/steadystatespectrumplot.hh
-    steadystate/plotdialog.hh)
+    steadystate/lnasteadystatemodule.hh steadystate/steadystatespectrumplot.hh)
 
 SET(ina_app_ssa_SOURCES
     ssa/ssamodule.cc ssa/ssatask.cc ssa/ssawizard.cc ssa/ssataskwrapper.cc ssa/ssaplot.cc
@@ -61,10 +57,10 @@ SET(ina_app_ssa_HEADERS
 
 SET(ina_app_ssscan_SOURCES
     ssscan/ssscantask.cc ssscan/ssscanwizard.cc ssscan/ssscanmodule.cc ssscan/ssscantaskview.cc
-    ssscan/ssscantaskwrapper.cc ssscan/ssscanplot.cc ssscan/plotdialog.cc)
+    ssscan/ssscantaskwrapper.cc ssscan/ssscanplot.cc)
 SET(ina_app_ssscan_HEADERS
     ssscan/ssscantask.hh ssscan/ssscanwizard.hh ssscan/ssscanmodule.hh ssscan/ssscantaskview.hh
-    ssscan/ssscantaskwrapper.hh ssscan/ssscanplot.hh ssscan/plotdialog.hh)
+    ssscan/ssscantaskwrapper.hh ssscan/ssscanplot.hh)
 
 SET(ina_app_doctree_SOURCES doctree/documenttreeitem.cc doctree/treeitem.cc
     doctree/compartmentsitem.cc doctree/documenttree.cc doctree/speciesitem.cc

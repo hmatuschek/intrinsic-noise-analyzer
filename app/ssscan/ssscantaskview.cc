@@ -10,7 +10,7 @@
 #include "../application.hh"
 #include "../doctree/plotitem.hh"
 #include "ssscanplot.hh"
-#include "plotdialog.hh"
+#include "../views/speciesselectiondialog.hh"
 
 
 
@@ -70,7 +70,9 @@ void
 SSScanResultWidget::plotButtonPressed()
 {
   // Ask user for species to plot.
-  SSScanPlotDialog dialog(ssscan_task_wrapper->getSSScanTask()->getConfig().getModel());
+  SpeciesSelectionDialog dialog(ssscan_task_wrapper->getSSScanTask()->getConfig().getModel());
+  dialog.setWindowTitle(tr("Parameter scan quick plot"));
+  dialog.setTitle(tr("Select the species to plot."));
   if (QDialog::Accepted != dialog.exec()) { return; }
   QStringList selected_species = dialog.getSelectedSpecies();
 

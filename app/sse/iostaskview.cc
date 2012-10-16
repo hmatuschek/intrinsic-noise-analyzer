@@ -10,7 +10,7 @@
 #include "../application.hh"
 #include "../doctree/plotitem.hh"
 #include "iosplot.hh"
-#include "replotdialog.hh"
+#include "../views/speciesselectiondialog.hh"
 
 
 /* ********************************************************************************************* *
@@ -68,18 +68,9 @@ IOSResultWidget::IOSResultWidget(IOSTaskWrapper *task_wrapper, QWidget *parent):
 void
 IOSResultWidget::plotButtonPressed()
 {
-  std::stringstream unit_str;
-  this->ios_task_wrapper->getIOSTask()->getSpeciesUnit().dump(unit_str, true);
-  QString concentration_unit(unit_str.str().c_str());
-
-  unit_str.str("");
-  this->ios_task_wrapper->getIOSTask()->getTimeUnit().dump(unit_str, true);
-  QString time_unit(unit_str.str().c_str());
-
-  SSEPlotDialog dialog(ios_task_wrapper->getIOSTask()->getConfig().getModel());
-  dialog.setWindowTitle(tr("IOS quick plot dialog"));
+  SpeciesSelectionDialog dialog(ios_task_wrapper->getIOSTask()->getConfig().getModel());
+  dialog.setWindowTitle(tr("IOS quick plot"));
   dialog.setTitle(tr("Select the species to plot."));
-
   if (QDialog::Rejected == dialog.exec()) { return; }
   QStringList selected_species = dialog.getSelectedSpecies();
 
