@@ -22,8 +22,10 @@ NewModelDialog::NewModelDialog(QWidget *parent) :
   QVBoxLayout *layout = new QVBoxLayout();
   layout->addLayout(dialog_layout);
   layout->addWidget(buttons);
-
   setLayout(layout);
+
+  QObject::connect(buttons, SIGNAL(accepted()), this, SLOT(accept()));
+  QObject::connect(buttons, SIGNAL(rejected()), this, SLOT(reject()));
 }
 
 
