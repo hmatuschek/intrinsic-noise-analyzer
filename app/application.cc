@@ -220,7 +220,7 @@ void Application::onNewModel()
 
   iNA::Ast::Model *new_model = new iNA::Ast::Model(
         dialog.getModelIdentifier().toStdString(), dialog.getModelName().toStdString());
-  docTree()->addDocument(new DocumentItem(new_model, ""));
+  docTree()->addDocument(new DocumentItem(new_model));
 }
 
 
@@ -305,12 +305,12 @@ void Application::onEditModel()
   if (0 == (document = dynamic_cast<DocumentItem *>(getParentDocumentItem(_selected_item)))) { return; }
 
   // Create model editor dialog:
-  SbmlshEditorDialog *dialog = new SbmlshEditorDialog();
-  dialog->setModel(document->getModel());
-  if (QDialog::Accepted != dialog->exec()) { delete dialog; return; }
+  SbmlshEditorDialog dialog;
+  dialog.setModel(document->getModel());
+  if (QDialog::Accepted != dialog.exec()) { return; }
 
   // Obtain model from dialog
-  iNA::Ast::Model *new_model = dialog->takeModel(); delete dialog;
+  iNA::Ast::Model *new_model = dialog.takeModel();
   // Assemble new document item and add it to the tree...
   DocumentItem *new_doc = new DocumentItem(new_model);
   docTree()->addDocument(new_doc);
