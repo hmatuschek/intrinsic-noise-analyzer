@@ -88,6 +88,7 @@ void
 MainWindow::createMenus()
 {
   fileMenu = menuBar()->addMenu(tr("&File"));
+  fileMenu->addAction(Application::getApp()->newModelAction());
   fileMenu->addAction(Application::getApp()->importModelAction());
   fileMenu->addAction(Application::getApp()->exportModelAction());
   fileMenu->addAction(Application::getApp()->closeModelAction());

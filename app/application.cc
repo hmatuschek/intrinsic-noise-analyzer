@@ -2,13 +2,13 @@
 #include "mainwindow.hh"
 #include "views/importmodeldialog.hh"
 #include "views/exportmodeldialog.hh"
+#include "views/sbmlsheditordialog.hh"
+#include "views/newmodeldialog.hh"
 
 #include <QMessageBox>
 
-#include "views/sbmlsheditordialog.hh"
-
-#include "parser/parser.hh"
-#include "parser/exception.hh"
+#include <parser/parser.hh>
+#include <parser/exception.hh>
 
 #include <trafo/reversiblereactionconverter.hh>
 
@@ -70,6 +70,10 @@ Application::Application() :
   _selected_item = 0;
 
   // Assemble menu actions:
+  _importModel = new QAction(tr("New model..."), this);
+  _importModel->setEnabled(true);
+  _importModel->setStatusTip(tr("Creates a new & empty model"));
+
   _importModel = new QAction(tr("Open model..."), this);
   _importModel->setEnabled(true);
   _importModel->setStatusTip(tr("Open a model description file"));
@@ -197,6 +201,7 @@ DocumentTree * Application::docTree() { return this->document_tree; }
 /* ******************************************************************************************** *
  * ...
  * ******************************************************************************************** */
+QAction *Application::newModelAction() { return _newModel; }
 QAction *Application::importModelAction() { return _importModel; }
 QAction *Application::exportModelAction() { return _exportModel; }
 QAction *Application::closeModelAction()  { return _closeModel; }
@@ -208,6 +213,17 @@ QAction *Application::combineIrrevReacAction() { return _combineIrvReaction; }
 /* ******************************************************************************************** *
  * Implementation of callbacks/event handlers...
  * ******************************************************************************************** */
+void Application::onNewModel()
+{
+  NewModelDialog dialog;
+  if (QDialog::Accepted != dialog.exec()) { return; }
+
+  iNA::Ast::Model *new_model = new iNA::Ast::Model(
+        dialog.getModelIdentifier().toStdString(), dialog.getModelName().toStdString());
+  docTree()->addDocument(new DocumentItem(new_model, ""));
+}
+
+
 void Application::onImportModel()
 {
   // Show a file-dialog for files:
