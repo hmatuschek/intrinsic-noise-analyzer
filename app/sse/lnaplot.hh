@@ -20,7 +20,7 @@ public:
 
 
 /** Implements a simple correlation plot for LNA covariances. */
-class LNACorrelationPlot : public Plot::Figure
+class LNACorrelationPlot : public LinePlot
 {
   Q_OBJECT
 
