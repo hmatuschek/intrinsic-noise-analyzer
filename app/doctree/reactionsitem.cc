@@ -44,6 +44,9 @@ ReactionsItem::resetTree()
     ReactionItem *reaction = new ReactionItem(_reactionList.getModel().getReaction(i), this);
     reaction->setTreeParent(this); this->_children.append(reaction);
   }
+
+  // update reaction list table model:
+  _reactionList.updateTable();
 }
 
 
