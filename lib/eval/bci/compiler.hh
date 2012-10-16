@@ -1,5 +1,5 @@
-#ifndef __FLUC_EVALUATE_BCI_COMPILER_HH__
-#define __FLUC_EVALUATE_BCI_COMPILER_HH__
+#ifndef __INA_EVAL_BCI_COMPILER_HH__
+#define __INA_EVAL_BCI_COMPILER_HH__
 
 #include "code.hh"
 #include <map>
@@ -28,14 +28,10 @@ template <class InType, class OutType=InType>
 class Compiler : public CompilerCommon<InType, OutType>
 {
 protected:
-  /**
-   * Holds the code to be executed.
-   */
+  /** Holds the code to be executed. */
   Code *code;
 
-  /**
-   * Maps a GiNaC symbol to an index of the input vector.
-   */
+  /** Maps a GiNaC symbol to an index of the input vector. */
   std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> index_table;
 
 
@@ -53,9 +49,7 @@ public:
   }
 
 
-  /**
-   * Constructs a compiler using the given index-table.
-   */
+  /** Constructs a compiler using the given index-table. */
   Compiler(const std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> &index_table)
     : code(), index_table(index_table)
   {
@@ -63,9 +57,7 @@ public:
   }
 
 
-  /**
-   * Constructs a compiler using the symbol->index mapping of the given @c Ast::Model.
-   */
+  /** Constructs a compiler using the symbol->index mapping of the given @c Ast::Model. */
   Compiler(const Ast::Model &model)
   {
     // Associate species symbol with its index in model:
@@ -75,19 +67,15 @@ public:
   }
 
 
-  /**
-   * Resets the compiler, deletes all code.
-   */
+  /** Resets the compiler, deletes all code.  */
   void setCode(Code *code)
   {
     this->code = code;
   }
 
 
-  /**
-   * Compiles expression and creates a STORE instruction, that will store the value of the
-   * expression at the given index in the output-vector during evaluation.
-   */
+  /** Compiles expression and creates a STORE instruction, that will store the value of the
+   * expression at the given index in the output-vector during evaluation.  */
   virtual void compileExpressionAndStore(const GiNaC::ex &expression, size_t index)
   {
     Assembler assembler(this->code, this->index_table);
@@ -96,17 +84,13 @@ public:
   }
 
 
-  /**
-   * Performs some optimizations on the byte-code.
-   */
+  /** Performs some optimizations on the byte-code. */
   virtual void finalize(size_t level=0)
   {
     this->code->check();
-    /*
-     * In general, for the byte-code interpreter: The shortest code is the fastest!
-     *
-     * There some simple passes, trying to optimize the byte-code for a faster execution.
-     */
+
+    /* In general, for the byte-code interpreter: The shortest code is the fastest!
+     * There some simple passes, trying to optimize the byte-code for a faster execution. */
     ImmediateValueRHSPass   imm_rhs_pass;
     ImmediateValuePass      imm_pass;
     ConstantPropagation     const_prop;

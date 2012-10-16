@@ -58,7 +58,8 @@ ReactionList::data(const QModelIndex &index, int role) const
 void
 ReactionList::updateTable() {
   // Signal view that everything has changed
-  emit dataChanged(index(0,0), index(rowCount()-1, columnCount()-1));
+  emit layoutAboutToBeChanged();
+  emit layoutChanged();
 }
 
 

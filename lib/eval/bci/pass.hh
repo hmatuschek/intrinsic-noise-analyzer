@@ -1,5 +1,5 @@
-#ifndef __FLUC_EVALUATE_BCI_PASS_HH__
-#define __FLUC_EVALUATE_BCI_PASS_HH__
+#ifndef __INA_EVAL_BCI_PASS_HH__
+#define __INA_EVAL_BCI_PASS_HH__
 
 #include "dependencetree.hh"
 #include "interpreter.hh"
@@ -23,20 +23,18 @@ namespace bci {
 class Pass
 {
 public:
-  /**
-   * This method may be overridden by any implementation of a @c Pass to perform the actual
+  /** This method may be overridden by any implementation of a @c Pass to perform the actual
    * transformation.
    *
    * By default this method terverses recursively the dependence-tree and returns true immediately,
-   * once a pass applied on a value.
-   */
+   * once a pass applied on a value. */
   virtual bool handleValue(SmartPtr<Value> &value) = 0;
 };
 
 
+
 /**
  * A pass manager collect passes and applies them on the dependence tree of a byte-code.
- *
  * @ingroup bci
  */
 class PassManager
@@ -47,29 +45,22 @@ protected:
 
 
 public:
-  /**
-   * Entry point.
-   */
+  /** Entry point. */
   void apply(Code &bytecode);
 
-  /**
-   * Adds a pass to the manager.
-   */
+  /** Adds a pass to the manager. */
   void addPass(Pass *pass);
 
 
 protected:
-  /**
-   * Traverses the dependence tree.
-   */
+  /** Traverses the dependence tree. */
   bool handleValue(SmartPtr<Value> &value);
 
-  /**
-   * Applies all passes on the given value unless they can not be applied anymore. If a pass applied
-   * on that value, the function returns true.
-   */
+  /** Applies all passes on the given value unless they can not be applied anymore. If a pass
+   * applied on that value, the function returns true. */
   bool applyOnValue(SmartPtr<Value> &value);
 };
+
 
 
 /**
@@ -81,9 +72,7 @@ protected:
  */
 class ImmediateValueRHSPass : public Pass {
 public:
-  /**
-   * Implements the actual pass.
-   */
+  /** Implements the actual pass. */
   virtual bool handleValue(SmartPtr<Value> &value);
 };
 
@@ -100,9 +89,7 @@ public:
 class ImmediateValuePass : public Pass
 {
 public:
-  /**
-   * Implements the actual pass.
-   */
+  /** Implements the actual pass. */
   virtual bool handleValue(SmartPtr<Value> &value);
 };
 
@@ -115,9 +102,7 @@ public:
 class RemoveUnitsPass : public Pass
 {
 public:
-  /**
-   * Implements the actual pass.
-   */
+  /** Implements the actual pass. */
   virtual bool handleValue(SmartPtr<Value> &value);
 };
 
@@ -130,9 +115,7 @@ public:
 class ConstantFoldingPass : public Pass
 {
 public:
-  /**
-   * Implements the actual pass.
-   */
+  /** Implements the actual pass. */
   virtual bool handleValue(SmartPtr<Value> &value);
 };
 
@@ -145,8 +128,8 @@ public:
 class IPowPass : public Pass
 {
 public:
-    /** Implements the actual pass. */
-    virtual bool handleValue(SmartPtr<Value> &value);
+  /** Implements the actual pass. */
+  virtual bool handleValue(SmartPtr<Value> &value);
 };
 
 
@@ -158,9 +141,7 @@ public:
 class ZeroStorePass : public Pass
 {
 public:
-  /**
-   * Implements the actual pass.
-   */
+  /** Implements the actual pass. */
   virtual bool handleValue(SmartPtr<Value> &value);
 };
 
@@ -176,6 +157,7 @@ public:
 class ConstantPropagation : public Pass
 {
 public:
+  /** Implements the actual pass. */
   virtual bool handleValue(SmartPtr<Value> &value);
 };
 
@@ -188,6 +170,7 @@ public:
 class InstructionCanonization : public Pass
 {
 public:
+  /** Implements the actual pass. */
   virtual bool handleValue(SmartPtr<Value> &value);
 };
 

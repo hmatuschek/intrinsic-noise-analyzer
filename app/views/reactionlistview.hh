@@ -22,6 +22,10 @@ public:
 private slots:
   /** Callback for the "new reaction" button. */
   void onNewReaction();
+  /** Callback to remove the selected reaction. */
+  void onRemReaction();
+  /** Enables or disabled the "delete reaction" button. */
+  void onSelectionChanged(const QItemSelection &selected, const QItemSelection &deseleced);
 
 private:
   /** Holds a weak reference to the list of reactions. */
@@ -30,6 +34,8 @@ private:
   QTableView *_reactionList;
   /** Shows the "new reaction" editor. */
   QPushButton *_newReacButton;
+  /** Removes the selected reaction. */
+  QPushButton *_remReacButton;
 };
 
 #endif // REACTIONLISTVIEW_HH

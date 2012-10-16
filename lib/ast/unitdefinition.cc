@@ -10,10 +10,14 @@ using namespace iNA::Ast;
 template <typename T, typename U> class create_map
 {
 private:
+  /** A temprary map. */
   std::map<T, U> m_map;
 public:
+  /** Constructor, generates the first entry in the map. Instantiates the temporary map. */
   create_map(const T& key, const U& val){ m_map[key] = val; }
+  /** Adds an item to the map and returns it. */
   create_map<T, U>& operator()(const T& key, const U& val) { m_map[key] = val; return *this; }
+  /** Cast operator, returns the map. */
   operator std::map<T, U>() { return m_map; }
 };
 
