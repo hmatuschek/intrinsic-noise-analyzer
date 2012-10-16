@@ -17,7 +17,7 @@ public:
 };
 
 
-class IOSEMREComparePlot : public Plot::Figure
+class IOSEMREComparePlot : public LinePlot
 {
   Q_OBJECT
 

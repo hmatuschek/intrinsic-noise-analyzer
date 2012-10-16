@@ -49,7 +49,7 @@ IOSEMRETimeSeriesPlot::IOSEMRETimeSeriesPlot(const QStringList &selected_species
 
 IOSEMREComparePlot::IOSEMREComparePlot(const QStringList &selected_species, IOSTask *task,
                                        QObject *parent)
-  : Plot::Figure("Mean concentrations (RE, EMRE & IOS)", parent)
+  : LinePlot("Mean concentrations (RE, EMRE & IOS)", parent)
 {
   // Get time & species units and assemble axis labels
   std::stringstream unit_str;
@@ -67,20 +67,21 @@ IOSEMREComparePlot::IOSEMREComparePlot(const QStringList &selected_species, IOST
 
   iNA::Ast::Model *model = task->getConfig().getModel();
   Table *series = task->getTimeSeries();
-  size_t Ns  = model->numSpecies();
-  size_t Nss = selected_species.size();
+  size_t Ntot  = model->numSpecies();
+  size_t Nsel = selected_species.size();
   size_t off_re   = 1;
-  size_t off_emre = 1 + Ns + (Ns*(Ns+1))/2;
-  size_t off_ios  = off_emre + Ns + (Ns*(Ns+1))/2;
+  size_t off_emre = 1 + Ntot + (Ntot*(Ntot+1))/2;
+  size_t off_ios  = off_emre + Ntot + (Ntot*(Ntot+1))/2;
 
-  QVector<Plot::LineGraph *> re_graphs(Nss);
-  QVector<Plot::LineGraph *> emre_graphs(Nss);
-  QVector<Plot::LineGraph *> ios_graphs(Nss);
+  QVector<Plot::LineGraph *> re_graphs(Nsel);
+  QVector<Plot::LineGraph *> emre_graphs(Nsel);
+  QVector<Plot::LineGraph *> ios_graphs(Nsel);
 
   // Allocate a graph for each colum in time-series:
-  for (size_t i=0; i<Nss; i++)
+  for (size_t i=0; i<Nsel; i++)
   {
     size_t species_idx = model->getSpeciesIdx(selected_species.at(i).toStdString());
+
     Plot::GraphStyle style = this->getStyle(i);
     ios_graphs[i]  = new Plot::LineGraph(style);
 
@@ -92,14 +93,13 @@ IOSEMREComparePlot::IOSEMREComparePlot(const QStringList &selected_species, IOST
     style.setLineColor(line_color);
     re_graphs[i] = new Plot::LineGraph(style);
 
-    this->axis->addGraph(ios_graphs[species_idx]);
-    this->axis->addGraph(emre_graphs[species_idx]);
-    this->axis->addGraph(re_graphs[species_idx]);
+    this->axis->addGraph(ios_graphs[i]);
+    this->axis->addGraph(emre_graphs[i]);
+    this->axis->addGraph(re_graphs[i]);
 
     this->addToLegend(series->getColumnName(species_idx+off_ios),  ios_graphs[i]);
     this->addToLegend(series->getColumnName(species_idx+off_emre), emre_graphs[i]);
     this->addToLegend(series->getColumnName(species_idx+off_re), re_graphs[i]);
-
   }
 
   // Do not plot all
@@ -110,7 +110,7 @@ IOSEMREComparePlot::IOSEMREComparePlot(const QStringList &selected_species, IOST
 
   // Plot time-series:
   for (size_t j=0; j<series->getNumRows(); j+=idx_incr) {
-    for (size_t i=0; i<Nss; i++) {
+    for (size_t i=0; i<Nsel; i++) {
       size_t species_idx = model->getSpeciesIdx(selected_species.at(i).toStdString());
       re_graphs[i]->addPoint((*series)(j,0), (*series)(j, species_idx+off_re));
       emre_graphs[i]->addPoint((*series)(j, 0), (*series)(j, species_idx+off_emre));
@@ -123,7 +123,7 @@ IOSEMREComparePlot::IOSEMREComparePlot(const QStringList &selected_species, IOST
         Plot::RangePolicy(Plot::RangePolicy::FIXED, Plot::RangePolicy::AUTOMATIC));
   this->getAxis()->setYRange(0, 1);
 
-  for (size_t i=0; i<Nss; i++) {
+  for (size_t i=0; i<Nsel; i++) {
     re_graphs[i]->commit();
     emre_graphs[i]->commit();
     ios_graphs[i]->commit();
