@@ -105,6 +105,9 @@ private slots:
   /** Whenever the type of kinetic law changed. */
   void _onKineticLawTypeChanged(int index);
 
+  /** Whenever the user defined kinetic law changes. */
+  void _onKineticLawExpressionChanged();
+
 
 private:
   /** Parses a (incomplete) reaction equation. */

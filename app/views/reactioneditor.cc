@@ -29,7 +29,7 @@ ReactionEditorContext::resolve(const std::string &identifier)
 {
   try {
     return iNA::Parser::Expr::ScopeContext::resolve(identifier);
-  } catch (iNA::Parser::ParserError &err) {
+  } catch (iNA::Exception &err) {
     // pass...
   }
 
@@ -170,6 +170,7 @@ ReactionEditorPage::ReactionEditorPage(ReactionEditor *editor)
   _delayTimer = new QTimer(); _delayTimer->setSingleShot(true); _delayTimer->setInterval(500);
 
   // Connect all signals
+  QObject::connect(_kineticLawEditor, SIGNAL(textChanged(QString)), this, SLOT(_onKineticLawExpressionChanged()));
   QObject::connect(_kinetic_law_type, SIGNAL(currentIndexChanged(int)), this, SLOT(_onKineticLawTypeChanged(int)));
   QObject::connect(_equation, SIGNAL(editingFinished()), this, SLOT(_updateKineticLaw()));
   QObject::connect(_equation, SIGNAL(textChanged(QString)), _delayTimer, SLOT(start()));
@@ -255,6 +256,31 @@ ReactionEditorPage::_onKineticLawTypeChanged(int index) {
     _kineticLawEditor->setEnabled(true);
     _kineticLaw->setCurrentIndex(1);
     break;
+  }
+}
+
+
+void
+ReactionEditorPage::_onKineticLawExpressionChanged()
+{
+  // Try to parse the expression:
+  if (USER_DEFINED == kineticLawType())
+  {
+    ReactionEditorContext ctx(&_model);
+    try {
+      // Try to parse the expression
+      iNA::Parser::Expr::parseExpression(_kineticLawEditor->text().toStdString(), ctx);
+      // On success, reset formula background color
+      QPalette palette = _kineticLawEditor->palette();
+      palette.setColor(QPalette::Base, _default_background);
+      _kineticLawEditor->setPalette(palette);
+    } catch (iNA::Exception &err) {
+      std::cerr << "Invalid propensity: " << err.what() << std::endl;
+      // On on, set formula background color to red
+      QPalette palette = _kineticLawEditor->palette();
+      palette.setColor(QPalette::Base, _error_background);
+      _kineticLawEditor->setPalette(palette);
+    }
   }
 }
 
@@ -799,7 +825,7 @@ ReactionEditorPage::_parseAndCreateKineticLaw(iNA::Ast::Reaction *reaction)
   iNA::Ast::KineticLaw *law = reaction->getKineticLaw();
   ReactionEditorContext ctx(law);
   GiNaC::ex rate_law = iNA::Parser::Expr::parseExpression(
-        _kineticLawFormula->text().toStdString(), ctx);
+        _kineticLawEditor->text().toStdString(), ctx);
 
   // get symbols of unresolved variables (parameters):
   GiNaC::exmap substitution;
@@ -835,8 +861,18 @@ ReactionEditorPage::validatePage()
   if (USER_DEFINED == kineticLawType()) {
     ReactionEditorContext ctx(&_model);
     try {
-      iNA::Parser::Expr::parseExpression(_kineticLawFormula->text().toStdString(), ctx);
+      // Try to parse the expression
+      iNA::Parser::Expr::parseExpression(_kineticLawEditor->text().toStdString(), ctx);
+      // On success, reset formula background color
+      QPalette palette = _kineticLawEditor->palette();
+      palette.setColor(QPalette::Base, _default_background);
+      _kineticLawEditor->setPalette(palette);
     } catch (iNA::Parser::ParserError &err) {
+      // On on, set formula background color to red
+      QPalette palette = _kineticLawEditor->palette();
+      palette.setColor(QPalette::Base, _error_background);
+      _kineticLawEditor->setPalette(palette);
+      // and send a message to the logger
       iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::INFO);
       message << "Invalid kinetic law expression: " << err.what();
       iNA::Utils::Logger::get().log(message);
