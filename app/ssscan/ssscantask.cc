@@ -129,7 +129,6 @@ ParamScanTask::ParamScanTask(const Config &config, QObject *parent)
 }
 
 
-
 void
 ParamScanTask::process()
 {
@@ -206,6 +205,12 @@ ParamScanTask::process()
    iNA::Utils::Logger::get().log(message);
   }
 
+}
+
+
+const ParamScanTask::Config &
+ParamScanTask::getConfig() const {
+  return config;
 }
 
 

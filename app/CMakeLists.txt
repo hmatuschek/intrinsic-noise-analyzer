@@ -61,10 +61,10 @@ SET(ina_app_ssa_HEADERS
 
 SET(ina_app_ssscan_SOURCES
     ssscan/ssscantask.cc ssscan/ssscanwizard.cc ssscan/ssscanmodule.cc ssscan/ssscantaskview.cc
-    ssscan/ssscantaskwrapper.cc ssscan/ssscanplot.cc)
+    ssscan/ssscantaskwrapper.cc ssscan/ssscanplot.cc ssscan/plotdialog.cc)
 SET(ina_app_ssscan_HEADERS
     ssscan/ssscantask.hh ssscan/ssscanwizard.hh ssscan/ssscanmodule.hh ssscan/ssscantaskview.hh
-    ssscan/ssscantaskwrapper.hh ssscan/ssscanplot.hh)
+    ssscan/ssscantaskwrapper.hh ssscan/ssscanplot.hh ssscan/plotdialog.hh)
 
 SET(ina_app_doctree_SOURCES doctree/documenttreeitem.cc doctree/treeitem.cc
     doctree/compartmentsitem.cc doctree/documenttree.cc doctree/speciesitem.cc

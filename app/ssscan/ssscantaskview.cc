@@ -10,6 +10,8 @@
 #include "../application.hh"
 #include "../doctree/plotitem.hh"
 #include "ssscanplot.hh"
+#include "plotdialog.hh"
+
 
 
 /* ********************************************************************************************* *
@@ -73,36 +75,34 @@ SSScanResultWidget::plotButtonPressed()
   QString concentration_unit(unit_str.str().c_str());
   QString time_unit("a.u.");
 
+  // Ask user for species to plot.
+  SSScanPlotDialog dialog(ssscan_task_wrapper->getSSScanTask()->getConfig().getModel());
+  if (QDialog::Accepted != dialog.exec()) { return; }
+  QStringList selected_species = dialog.getSelectedSpecies();
+
   // Add LNA parameter plot:
   Application::getApp()->docTree()->addPlot(
         this->ssscan_task_wrapper,
         new PlotItem(
-          new ParameterScanPlot(this->ssscan_task_wrapper->getSSScanTask()->numSpecies(),
-                                &(this->ssscan_task_wrapper->getSSScanTask()->getParameterScan()),
-                                concentration_unit, time_unit)));
+          new ParameterScanPlot(selected_species,this->ssscan_task_wrapper->getSSScanTask())));
+
   // Add IOS parameter plot
   Application::getApp()->docTree()->addPlot(
         this->ssscan_task_wrapper,
         new PlotItem(
-          new ParameterScanIOSPlot(this->ssscan_task_wrapper->getSSScanTask()->numSpecies(),
-                                &(this->ssscan_task_wrapper->getSSScanTask()->getParameterScan()),
-                                concentration_unit, time_unit)));
+          new ParameterScanIOSPlot(selected_species,this->ssscan_task_wrapper->getSSScanTask())));
 
   // Add IOS COV plot
   Application::getApp()->docTree()->addPlot(
         this->ssscan_task_wrapper,
         new PlotItem(
-          new ParameterScanCovPlot(this->ssscan_task_wrapper->getSSScanTask()->numSpecies(),
-                                &(this->ssscan_task_wrapper->getSSScanTask()->getParameterScan()),
-                                concentration_unit, time_unit)));
+          new ParameterScanCovPlot(selected_species,this->ssscan_task_wrapper->getSSScanTask())));
 
   // Add IOS COV plot
   Application::getApp()->docTree()->addPlot(
         this->ssscan_task_wrapper,
         new PlotItem(
-          new ParameterScanCovIOSPlot(this->ssscan_task_wrapper->getSSScanTask()->numSpecies(),
-                                &(this->ssscan_task_wrapper->getSSScanTask()->getParameterScan()),
-                                concentration_unit, time_unit)));
+          new ParameterScanCovIOSPlot(selected_species,this->ssscan_task_wrapper->getSSScanTask())));
 
 }
 

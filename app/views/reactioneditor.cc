@@ -275,7 +275,6 @@ ReactionEditorPage::_onKineticLawExpressionChanged()
       palette.setColor(QPalette::Base, _default_background);
       _kineticLawEditor->setPalette(palette);
     } catch (iNA::Exception &err) {
-      std::cerr << "Invalid propensity: " << err.what() << std::endl;
       // On on, set formula background color to red
       QPalette palette = _kineticLawEditor->palette();
       palette.setColor(QPalette::Base, _error_background);
@@ -867,7 +866,7 @@ ReactionEditorPage::validatePage()
       QPalette palette = _kineticLawEditor->palette();
       palette.setColor(QPalette::Base, _default_background);
       _kineticLawEditor->setPalette(palette);
-    } catch (iNA::Parser::ParserError &err) {
+    } catch (iNA::Exception &err) {
       // On on, set formula background color to red
       QPalette palette = _kineticLawEditor->palette();
       palette.setColor(QPalette::Base, _error_background);

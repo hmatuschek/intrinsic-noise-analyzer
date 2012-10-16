@@ -2,211 +2,158 @@
 #include "../plot/plot.hh"
 #include "../plot/linegraph.hh"
 #include <QVector>
+#include "../views/varianceplot.hh"
 
 
-ParameterScanPlot::ParameterScanPlot(size_t num_species, Table *series,
-                                     const QString &species_unit, const QString &time_unit,
+ParameterScanPlot::ParameterScanPlot(const QStringList &selected_species, ParamScanTask *task,
                                      QObject *parent)
-    : Plot::Figure("Mean concentrations (RE & LNA)", parent)
+    : VariancePlot("Mean concentrations (RE & LNA)", parent)
 {
+  // Get species units:
+  std::stringstream unit_str;
+  task->getSpeciesUnit().dump(unit_str, true);
+  QString species_unit(unit_str.str().c_str());
+  QString parameter_unit("a.u.");
+
+  // Get parameter scan table:
+  Table &data = task->getParameterScan();
+  // Number of species in model
+  size_t Ntot = task->getConfig().getModel()->numSpecies();
+  // Number of selected species
+  size_t Nsel = selected_species.size();
+
   // Create a plot:
-  this->setXLabel(tr("%1").arg(series->getColumnName(0)));
+  this->setXLabel(tr("%1").arg(data.getColumnName(0)));
   this->setYLabel(tr("concentrations [%1]").arg(species_unit));
 
-  QVector<Plot::VarianceLineGraph *> graphs(num_species);
-
-  // Allocate a graph for each colum in time-series:
-  for (size_t i=0; i<num_species; i++)
+  // Allocate a graph for each selected species
+  size_t offset = 1; // skip parameter column
+  for (size_t i=0; i<Nsel; i++)
   {
-    Plot::GraphStyle style = this->getStyle(i);
-    graphs[i] = new Plot::VarianceLineGraph(style);
-    this->axis->addGraph(graphs[i]);
-    this->addToLegend(series->getColumnName(i+1), graphs[i]);
-  }
-
-  // Do not plot all
-  int idx_incr = 0;
-  if (0 == (idx_incr = series->getNumRows()/100))
-  {
-    idx_incr = 1;
-  }
-
-  // Plot time-series:
-  for (size_t j=0; j<series->getNumRows(); j+=idx_incr)
-  {
-    size_t N = graphs.size();
-    size_t offset = N+1; size_t increment = N;
-    for (size_t i=0; i<num_species; i++)
-    {
-      graphs[i]->addPoint((*series)(j, 0), (*series)(j, 1+i), std::sqrt((*series)(j, offset)));
-      offset += increment; increment -= 1;
-    }
+    size_t species_idx = task->getConfig().getModel()->getSpeciesIdx(selected_species.at(i).toStdString());
+    size_t mean_idx = offset + species_idx;
+    size_t var_idx  = offset+Ntot + species_idx*(Ntot+1) - (species_idx*(species_idx+1))/2;
+    this->addVarianceGraph(data.getColumn(0), data.getColumn(mean_idx), data.getColumn(var_idx),
+                           data.getColumnName(mean_idx));
   }
 
   // Force y plot-range to be [0, AUTO]:
   this->getAxis()->setYRangePolicy(
         Plot::RangePolicy(Plot::RangePolicy::FIXED, Plot::RangePolicy::AUTOMATIC));
   this->getAxis()->setYRange(0, 1);
-
-  for (size_t i=0; i<num_species; i++)
-  {
-    graphs[i]->commit();
-  }
 
   this->updateAxes();
 }
 
 
-ParameterScanIOSPlot::ParameterScanIOSPlot(size_t num_species, Table *series,
-                                     const QString &species_unit, const QString &time_unit,
+ParameterScanIOSPlot::ParameterScanIOSPlot(const QStringList &selected_species, ParamScanTask *task,
                                      QObject *parent)
-    : Plot::Figure("Mean concentrations (EMRE & IOS var)", parent)
+    : VariancePlot("Mean concentrations (EMRE & IOS var)", parent)
 {
+  // Get species units:
+  std::stringstream unit_str;
+  task->getSpeciesUnit().dump(unit_str, true);
+  QString species_unit(unit_str.str().c_str());
+  QString parameter_unit("a.u.");
+
+  // Get parameter scan table:
+  Table &data = task->getParameterScan();
+  // Number of species in model
+  size_t Ntot = task->getConfig().getModel()->numSpecies();
+  // Number of selected species
+  size_t Nsel = selected_species.size();
+
   // Create a plot:
-  this->setXLabel(tr("%1").arg(series->getColumnName(0)));
+  this->setXLabel(tr("%1").arg(data.getColumnName(0)));
   this->setYLabel(tr("concentrations [%1]").arg(species_unit));
 
-  QVector<Plot::VarianceLineGraph *> graphs(num_species);
-
-  size_t IOSoffset = num_species+num_species*(num_species+1)/2;
-
-  // Allocate a graph for each colum in time-series:
-  for (size_t i=0; i<num_species; i++)
+  // Allocate a graph for each selected species
+  size_t offset = 1+Ntot+((Ntot+1)*Ntot)/2; // skip parameter+EMRE+LNA columns
+  for (size_t i=0; i<Nsel; i++)
   {
-    Plot::GraphStyle style = this->getStyle(i);
-    graphs[i] = new Plot::VarianceLineGraph(style);
-    this->axis->addGraph(graphs[i]);
-    this->addToLegend(series->getColumnName(i+1+IOSoffset), graphs[i]);
-  }
-
-  // Do not plot all
-  int idx_incr = 0;
-  if (0 == (idx_incr = series->getNumRows()/100))
-  {
-    idx_incr = 1;
-  }
-
-  // Plot time-series:
-  for (size_t j=0; j<series->getNumRows(); j+=idx_incr)
-  {
-    size_t N = graphs.size();
-    size_t offset = N+1; size_t increment = N;
-    for (size_t i=0; i<num_species; i++)
-    {
-      graphs[i]->addPoint((*series)(j, 0), (*series)(j, 1+i+IOSoffset), std::sqrt((*series)(j, offset)));
-      offset += increment; increment -= 1;
-    }
+    size_t species_idx = task->getConfig().getModel()->getSpeciesIdx(selected_species.at(i).toStdString());
+    size_t mean_idx = offset + species_idx;
+    size_t var_idx  = offset+Ntot + species_idx*(Ntot+1) - (species_idx*(species_idx+1))/2;
+    this->addVarianceGraph(data.getColumn(0), data.getColumn(mean_idx), data.getColumn(var_idx),
+                           data.getColumnName(mean_idx));
   }
 
   // Force y plot-range to be [0, AUTO]:
   this->getAxis()->setYRangePolicy(
         Plot::RangePolicy(Plot::RangePolicy::FIXED, Plot::RangePolicy::AUTOMATIC));
   this->getAxis()->setYRange(0, 1);
-
-  for (size_t i=0; i<num_species; i++)
-  {
-    graphs[i]->commit();
-  }
 
   this->updateAxes();
 }
 
 
-ParameterScanCovPlot::ParameterScanCovPlot(size_t num_species, Table *series,
-                                     const QString &species_unit, const QString &time_unit,
-                                     QObject *parent)
-    : Plot::Figure("Coefficient of variation (EMRE & IOS var)", parent)
+ParameterScanCovPlot::ParameterScanCovPlot(const QStringList &selected_species, ParamScanTask *task,
+                                           QObject *parent)
+    : LinePlot("Coefficient of variation (EMRE & IOS var)", parent)
 {
+  // Get species units:
+  QString parameter_unit("a.u.");
+
+  // Get parameter scan table:
+  Table &data = task->getParameterScan();
+  // Number of species in model
+  size_t Ntot = task->getConfig().getModel()->numSpecies();
+  // Number of selected species
+  size_t Nsel = selected_species.size();
+
   // Create a plot:
-  this->setXLabel(tr("%1").arg(series->getColumnName(0)));
-  this->setYLabel(tr("concentrations [%1]").arg(species_unit));
+  this->setXLabel(tr("%1").arg(data.getColumnName(0)));
+  this->setYLabel(tr("coefficient of variation"));
 
-  QVector<Plot::LineGraph *> graphs(num_species);
-
-  size_t IOSoffset = 0;
-
-  // Allocate a graph for each colum in time-series:
-  for (size_t i=0; i<num_species; i++)
+  // Allocate a graph for each selected species
+  size_t offset = 1; // skip parameter column
+  for (size_t i=0; i<Nsel; i++)
   {
-    Plot::GraphStyle style = this->getStyle(i);
-    graphs[i] = new Plot::LineGraph(style);
-    this->axis->addGraph(graphs[i]);
-    this->addToLegend(series->getColumnName(i+1+IOSoffset), graphs[i]);
-  }
-
-  // Do not plot all
-  int idx_incr = 0;
-  if (0 == (idx_incr = series->getNumRows()/100))
-  {
-    idx_incr = 1;
-  }
-
-  // Plot time-series:
-  for (size_t j=0; j<series->getNumRows(); j+=idx_incr)
-  {
-    size_t N = graphs.size();
-    size_t offset = N+1; size_t increment = N;
-    for (size_t i=0; i<num_species; i++)
-    {
-      graphs[i]->addPoint((*series)(j, 0), std::sqrt((*series)(j, offset)/(*series)(j, 1+i+IOSoffset)));
-      offset += increment; increment -= 1;
-    }
+    size_t species_idx = task->getConfig().getModel()->getSpeciesIdx(selected_species.at(i).toStdString());
+    size_t mean_idx = offset + species_idx;
+    size_t var_idx  = offset+Ntot + species_idx*(Ntot+1) - (species_idx*(species_idx+1))/2;
+    // Coefficient wise operation -> coefficient of variation std.dev(X)/mean(X):
+    Eigen::VectorXd cov = data.getColumn(var_idx).array().sqrt() / data.getColumn(mean_idx).array();
+    this->addLineGraph(data.getColumn(0), cov, data.getColumnName(mean_idx));
   }
 
   // Force y plot-range to be [0, AUTO]:
   this->getAxis()->setYRangePolicy(
         Plot::RangePolicy(Plot::RangePolicy::FIXED, Plot::RangePolicy::AUTOMATIC));
   this->getAxis()->setYRange(0, 1);
-
-  for (size_t i=0; i<num_species; i++)
-  {
-    graphs[i]->commit();
-  }
 
   this->updateAxes();
 }
 
 
-ParameterScanCovIOSPlot::ParameterScanCovIOSPlot(size_t num_species, Table *series,
-                                     const QString &species_unit, const QString &time_unit,
+ParameterScanCovIOSPlot::ParameterScanCovIOSPlot(const QStringList &selected_species, ParamScanTask *task,
                                      QObject *parent)
-    : Plot::Figure("Coeff of variation (EMRE & IOS var)", parent)
+    : LinePlot("Coeff of variation (EMRE & IOS var)", parent)
 {
+  // Get species units:
+  QString parameter_unit("a.u.");
+
+  // Get parameter scan table:
+  Table &data = task->getParameterScan();
+  // Number of species in model
+  size_t Ntot = task->getConfig().getModel()->numSpecies();
+  // Number of selected species
+  size_t Nsel = selected_species.size();
 
   // Create a plot:
-  this->setXLabel(tr("%1").arg(series->getColumnName(0)));
-  this->setYLabel(tr("concentrations [%1]").arg(species_unit));
+  this->setXLabel(tr("%1").arg(data.getColumnName(0)));
+  this->setYLabel(tr("coefficient of variation"));
 
-  QVector<Plot::LineGraph *> graphs(num_species);
-
-  size_t IOSoffset = num_species+num_species*(num_species+1)/2;
-
-  // Allocate a graph for each colum in time-series:
-  for (size_t i=0; i<num_species; i++)
+  // Allocate a graph for each selected species
+  size_t offset = 1+Ntot+((Ntot+1)*Ntot)/2;
+  for (size_t i=0; i<Nsel; i++)
   {
-    Plot::GraphStyle style = this->getStyle(i);
-    graphs[i] = new Plot::LineGraph(style);
-    this->axis->addGraph(graphs[i]);
-    this->addToLegend(series->getColumnName(i+1+IOSoffset), graphs[i]);
-  }
-
-  // Do not plot all
-  int idx_incr = 0;
-  if (0 == (idx_incr = series->getNumRows()/100))
-  {
-    idx_incr = 1;
-  }
-
-  // Plot time-series:
-  for (size_t j=0; j<series->getNumRows(); j+=idx_incr)
-  {
-    size_t N = graphs.size();
-    size_t offset = N+1; size_t increment = N;
-    for (size_t i=0; i<num_species; i++)
-    {
-      graphs[i]->addPoint((*series)(j, 0), std::sqrt((*series)(j, offset)/(*series)(j, 1+i+IOSoffset)));
-      offset += increment; increment -= 1;
-    }
+    size_t species_idx = task->getConfig().getModel()->getSpeciesIdx(selected_species.at(i).toStdString());
+    size_t mean_idx = offset + species_idx;
+    size_t var_idx  = offset+Ntot + species_idx*(Ntot+1) - (species_idx*(species_idx+1))/2;
+    // Coefficient wise operation -> coefficient of variation std.dev(X)/mean(X):
+    Eigen::VectorXd cov = data.getColumn(var_idx).array().sqrt() / data.getColumn(mean_idx).array();
+    this->addLineGraph(data.getColumn(0), cov, data.getColumnName(mean_idx));
   }
 
   // Force y plot-range to be [0, AUTO]:
@@ -214,11 +161,5 @@ ParameterScanCovIOSPlot::ParameterScanCovIOSPlot(size_t num_species, Table *seri
         Plot::RangePolicy(Plot::RangePolicy::FIXED, Plot::RangePolicy::AUTOMATIC));
   this->getAxis()->setYRange(0, 1);
 
-  for (size_t i=0; i<num_species; i++)
-  {
-    graphs[i]->commit();
-  }
-
   this->updateAxes();
-
 }

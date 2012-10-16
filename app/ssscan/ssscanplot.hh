@@ -6,62 +6,54 @@
 #include "../plot/variancelinegraph.hh"
 #include "../timeseries.hh"
 #include "ssscantask.hh"
-
+#include "../views/varianceplot.hh"
 
 /**
  * Collects data from a @c Table and updates the
  * @c VarianceLinesGraph instance.
  */
-class ParameterScanPlot : public Plot::Figure
+class ParameterScanPlot : public VariancePlot
 {
   Q_OBJECT
 
 public:
-  explicit ParameterScanPlot(size_t num_species, Table *data,
-                             const QString &species_unit, const QString &time_unit,
-                             QObject *parent=0);
+  explicit ParameterScanPlot(const QStringList &selected_species, ParamScanTask *task, QObject *parent=0);
 };
 
 /**
  * Collects data from a @c Table and updates the
  * @c VarianceLinesGraph instance.
  */
-class ParameterScanIOSPlot : public Plot::Figure
+class ParameterScanIOSPlot : public VariancePlot
 {
   Q_OBJECT
 
 public:
-  explicit ParameterScanIOSPlot(size_t num_species, Table *data,
-                             const QString &species_unit, const QString &time_unit,
-                             QObject *parent=0);
+  explicit ParameterScanIOSPlot(const QStringList &selected_species, ParamScanTask *task, QObject *parent=0);
 };
 
 /**
  * Collects data from a @c Table and updates the
  * @c VarianceLinesGraph instance.
  */
-class ParameterScanCovPlot : public Plot::Figure
+class ParameterScanCovPlot : public LinePlot
 {
   Q_OBJECT
 
 public:
-  explicit ParameterScanCovPlot(size_t num_species, Table *data,
-                             const QString &species_unit, const QString &time_unit,
-                             QObject *parent=0);
+  explicit ParameterScanCovPlot(const QStringList &selected_species, ParamScanTask *task, QObject *parent=0);
 };
 
 /**
  * Collects data from a @c Table and updates the
  * @c VarianceLinesGraph instance.
  */
-class ParameterScanCovIOSPlot : public Plot::Figure
+class ParameterScanCovIOSPlot : public LinePlot
 {
   Q_OBJECT
 
 public:
-  explicit ParameterScanCovIOSPlot(size_t num_species, Table *data,
-                             const QString &species_unit, const QString &time_unit,
-                             QObject *parent=0);
+  explicit ParameterScanCovIOSPlot(const QStringList &selected_species, ParamScanTask *task, QObject *parent=0);
 };
 
 

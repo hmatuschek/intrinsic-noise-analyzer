@@ -104,6 +104,7 @@ public:
 
   virtual QString getLabel();
 
+  const ParamScanTask::Config & getConfig() const;
 
 protected:
   virtual void process();
