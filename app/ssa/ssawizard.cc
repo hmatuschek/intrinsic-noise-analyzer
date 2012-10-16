@@ -201,7 +201,7 @@ SSASummaryPage::initializePage()
   SSAWizard *wizard = static_cast<SSAWizard *>(this->wizard());
   SSATaskConfig &config = wizard->getConfigCast<SSATaskConfig>();
 
-  this->document->setText(QString("%1").arg(config.getModel().getName().c_str()));
+  this->document->setText(QString("%1").arg(config.getModel()->getName().c_str()));
   this->ensemble_size->setText(QString("%1").arg(config.getEnsembleSize()));
   this->final_time->setText(QString("%1").arg(config.getFinalTime()));
   this->num_samples->setText(QString("%1").arg(config.getSteps()));

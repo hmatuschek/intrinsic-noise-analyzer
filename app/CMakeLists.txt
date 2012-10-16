@@ -40,13 +40,13 @@ SET(ina_app_sse_HEADERS
     sse/retask.hh  sse/retaskwrapper.hh  sse/retaskview.hh  sse/replot.hh)
 
 SET(ina_app_steadystate_SOURCES
-    steadystate/lnasteadystatetask.cc steadystate/lnasteadystatetaskwrapper.cc
-    steadystate/lnasteadystatewizard.cc steadystate/lnasteadystateview.cc
-    steadystate/lnasteadystatemodule.cc steadystate/steadystatespectrumplot.cc)
+    steadystate/steadystatetask.cc steadystate/steadystatetaskwrapper.cc
+    steadystate/steadystatewizard.cc steadystate/steadystateview.cc
+    steadystate/steadystatemodule.cc steadystate/steadystatespectrumplot.cc)
 SET(ina_app_steadystate_HEADERS
-    steadystate/lnasteadystatetask.hh steadystate/lnasteadystatetaskwrapper.hh
-    steadystate/lnasteadystatewizard.hh steadystate/lnasteadystateview.hh
-    steadystate/lnasteadystatemodule.hh steadystate/steadystatespectrumplot.hh)
+    steadystate/steadystatetask.hh steadystate/steadystatetaskwrapper.hh
+    steadystate/steadystatewizard.hh steadystate/steadystateview.hh
+    steadystate/steadystatemodule.hh steadystate/steadystatespectrumplot.hh)
 
 SET(ina_app_ssa_SOURCES
     ssa/ssamodule.cc ssa/ssatask.cc ssa/ssawizard.cc ssa/ssataskwrapper.cc ssa/ssaplot.cc

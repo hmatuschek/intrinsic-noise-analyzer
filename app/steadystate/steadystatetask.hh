@@ -1,5 +1,5 @@
-#ifndef LNASTEADYSTATETASK_HH
-#define LNASTEADYSTATETASK_HH
+#ifndef __INA_APP_STEADYSTATE_STEADYSTATETASK_HH__
+#define __INA_APP_STEADYSTATE_STEADYSTATETASK_HH__
 
 #include "../task.hh"
 #include "models/IOSmodel.hh"
@@ -8,7 +8,7 @@
 #include "../models/generaltaskconfig.hh"
 
 
-class LNASteadyStateTask : public Task
+class SteadyStateTask : public Task
 {
   Q_OBJECT
 
@@ -83,7 +83,7 @@ protected:
 
 
 public:
-  explicit LNASteadyStateTask(const Config &config, QObject *parent=0);
+  explicit SteadyStateTask(const Config &config, QObject *parent=0);
 
   Eigen::VectorXd &getConcentrations();
 
@@ -111,4 +111,4 @@ protected:
   virtual void process();
 };
 
-#endif // LNASTEADYSTATETASK_HH
+#endif // __INA_APP_STEADYSTATE_STEADYSTATETASK_HH__

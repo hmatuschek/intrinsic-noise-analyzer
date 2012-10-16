@@ -1,5 +1,5 @@
-#ifndef LNASTEADYSTATEVIEW_HH
-#define LNASTEADYSTATEVIEW_HH
+#ifndef __INA_APP_STEADYSTATE_LNASTEADYSTATEVIEW_HH__
+#define __INA_APP_STEADYSTATE_LNASTEADYSTATEVIEW_HH__
 
 #include <QWidget>
 #include <QLabel>
@@ -9,13 +9,13 @@
 #include <QProgressBar>
 #include <QTextStream>
 
-#include "lnasteadystatetaskwrapper.hh"
+#include "steadystatetaskwrapper.hh"
 #include "../views/taskview.hh"
 
 
-class LNASteadyStateView : public TaskView {
+class SteadyStateView : public TaskView {
 public:
-  explicit LNASteadyStateView(LNASteadyStateTaskWrapper *task_item, QWidget *parent=0);
+  explicit SteadyStateView(SteadyStateTaskWrapper *task_item, QWidget *parent=0);
 
 protected:
   virtual QWidget *createResultWidget(TaskItem *task_item);
@@ -23,16 +23,16 @@ protected:
 
 
 
-class LNASteadyStateResultWidget : public QWidget
+class SteadyStateResultWidget : public QWidget
 {
   Q_OBJECT
 
 protected:
-  LNASteadyStateTaskWrapper *ss_task_wrapper;
+  SteadyStateTaskWrapper *ss_task_wrapper;
 
 
 public:
-  explicit LNASteadyStateResultWidget(LNASteadyStateTaskWrapper *task_wrapper, QWidget *parent = 0);
+  explicit SteadyStateResultWidget(SteadyStateTaskWrapper *task_wrapper, QWidget *parent = 0);
 
 
 private slots:
@@ -58,4 +58,4 @@ private:
   QPushButton  *data_save_button;
 };
 
-#endif // LNASTEADYSTATEVIEW_HH
+#endif

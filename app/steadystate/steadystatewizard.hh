@@ -1,5 +1,5 @@
-#ifndef LNASTEADYSTATEWIZARD_HH
-#define LNASTEADYSTATEWIZARD_HH
+#ifndef __INA_APP_STEADYSTATE_STEADYSTATEWIZARD_HH__
+#define __INA_APP_STEADYSTATE_STEADYSTATEWIZARD_HH__
 
 #include <QWizard>
 #include <QComboBox>
@@ -8,11 +8,11 @@
 
 
 #include "../doctree/documentitem.hh"
-#include "lnasteadystatetask.hh"
+#include "steadystatetask.hh"
 #include "../views/generaltaskwizard.hh"
 
 
-class LNASteadyStateWizard : public GeneralTaskWizard
+class SteadyStateWizard : public GeneralTaskWizard
 {
   Q_OBJECT
 
@@ -27,11 +27,11 @@ public:
 
 protected:
   /** The task configuration. This instance will be populated by the wizard. */
-  LNASteadyStateTask::Config config;
+  SteadyStateTask::Config config;
 
 public:
   /** Default constructor. */
-  explicit LNASteadyStateWizard(QWidget *parent = 0);
+  explicit SteadyStateWizard(QWidget *parent = 0);
   /** Implements GeneralTaskWizard interface. */
   virtual GeneralTaskConfig &getConfig();
 };
