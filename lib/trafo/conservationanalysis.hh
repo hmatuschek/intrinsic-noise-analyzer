@@ -11,6 +11,9 @@ namespace Trafo {
  * rate or assignment rule). Note that all @c Ast::AlgebraicConstraint must be solved and
  * transformed into @c Ast::AssignmentRule before performing this analysis
  * (@c Ast::AlgebraicConstraintSolver).
+ *
+ * @bug Ignores the initial values of the system.
+ *
  * @ingroup trafo */
 class ConservationAnalysis
 {

@@ -1,5 +1,5 @@
-#ifndef __FLUC_EVALUATE_COMPILERCOMMON_HH__
-#define __FLUC_EVALUATE_COMPILERCOMMON_HH__
+#ifndef __INA_EVAL_COMPILERCOMMON_HH__
+#define __INA_EVAL_COMPILERCOMMON_HH__
 
 #include <eigen3/Eigen/Eigen>
 #include "ginacsupportforeigen.hh"
@@ -21,24 +21,16 @@ template<class InType, class OutType=InType>
 class CompilerCommon
 {
 public:
-  /**
-   * Needs to be implemented by any compiler to finalize (compile and optimize) the generated code.
-   */
+  /** Needs to be implemented by any compiler to finalize (compile and optimize) the generated code. */
   virtual void finalize(size_t opt_level=0) = 0;
 
-  /**
-   * Defines the interface for singe-expression compilation, implemented by the execution-engine
-   * specific compiler.
-   */
+  /** Defines the interface for singe-expression compilation, implemented by the execution-engine
+   * specific compiler. */
   virtual void compileExpressionAndStore(const GiNaC::ex &expr, size_t index) = 0;
 
-
-  /**
-   * Compiles a vector of expressions.
-   *
+  /** Compiles a vector of expressions.
    * The value of the i-th expression will be stored at the i-th index in the output-vector
-   * during evaluation.
-   */
+   * during evaluation. */
   void compileVector(const Eigen::VectorXex &vector)
   {
     for (int index = 0; index < vector.rows(); index++)
@@ -47,11 +39,8 @@ public:
     }
   }
 
-
-  /**
-   * Compiles a matrix of expressions, that will evaluate to an @c Eigen::MatrixXd of the same
-   * shape.
-   */
+  /** Compiles a matrix of expressions, that will evaluate to an @c Eigen::MatrixXd of the same
+   * shape. */
   void compileMatrix(const Eigen::MatrixXex &matrix)
   {
     for (int i=0; i<matrix.rows(); i++)
@@ -75,4 +64,4 @@ public:
 }
 
 
-#endif // COMPILERCOMMON_HH
+#endif

@@ -1,5 +1,5 @@
-#ifndef __FLUC_EVALUATE_BCI_INTERPRETER_HH__
-#define __FLUC_EVALUATE_BCI_INTERPRETER_HH__
+#ifndef __INA_EVAL_BCI_INTERPRETER_HH__
+#define __INA_EVAL_BCI_INTERPRETER_HH__
 
 #include <ginac/ginac.h>
 
@@ -300,51 +300,38 @@ template <class InType, class OutType=InType>
 class Interpreter : public InterpreterCore<typename InType::Scalar, typename OutType::Scalar>
 {
 protected:
-  /**
-   * Holds the interpreter-stack.
-   *
-   * @todo Use Interpreter::Value instead.
-   */
+  /** Holds the interpreter-stack.
+   * @todo Use Interpreter::Value instead. */
   std::vector<InterpreterValue> stack;
 
-  /**
-   * Holds a weak reference to the code to be evaluated.
-   */
+  /** Holds a weak reference to the code to be evaluated. */
   Code *code;
 
 
 public:
-  /**
-   * Constructs an interpreter with-out any byte-code, you may add some code to be executed
-   * using @c setCode.
-   */
+  /** Constructs an interpreter with-out any byte-code, you may add some code to be executed
+   * using @c setCode. */
   Interpreter()
     : stack(0), code(0)
   {
     // Pass...
   }
 
-  /**
-   * Constructs an interpreter with the given byte-code.
-   */
+  /** Constructs an interpreter with the given byte-code. */
   Interpreter(Code *code)
     : stack(code->getMinStackSize()), code(code)
   {
     // pass...
   }
 
-  /**
-   * Resets the code.
-   */
+  /** Resets the code. */
   void setCode(Code *code)
   {
     this->code = code;
     this->stack.reserve(code->getMinStackSize());
   }
 
-  /**
-   * Executes the byte-code in a stack-machine.
-   */
+  /** Executes the byte-code in a stack-machine. */
   inline void run(const InType &input, OutType &output)
   {
       this->run(input.data(), output.data());

@@ -1,5 +1,5 @@
-#ifndef __FLUC_EVALUATE_BCIMP_INTERPRETER_HH__
-#define __FLUC_EVALUATE_BCIMP_INTERPRETER_HH__
+#ifndef __INA_EVAL_BCIMP_INTERPRETER_HH__
+#define __INA_EVAL_BCIMP_INTERPRETER_HH__
 
 #include "code.hh"
 #include "eval/bci/interpreter.hh"
@@ -20,34 +20,25 @@ template <class InType, class OutType = InType>
 class Interpreter
 {
 protected:
-  /**
-   * Holds a vector of interpreters, one for each thread.
-   */
+  /** Holds a vector of interpreters, one for each thread. */
   std::vector< bci::Interpreter<InType, OutType> > interpreters;
 
 
 public:
-  /**
-   * Constructs an "empty" interpreter.
-   *
-   * Use @c setCode to assign some byte-code to the interpreter.
-   */
+  /** Constructs an "empty" interpreter.
+   * Use @c setCode to assign some byte-code to the interpreter. */
   Interpreter()
   {
     // Pass...
   }
 
-  /**
-   * Constructs an interpreter.
-   */
+  /** Constructs an interpreter. */
   Interpreter(Code *code)
   {
     this->setCode(code);
   }
 
-  /**
-   * (Re-) Sets the byte-code.
-   */
+  /** (Re-) Sets the byte-code. */
   void setCode(Code *code)
   {
     // Instantiate enough interpreters for each thread.
@@ -58,14 +49,14 @@ public:
     }
   }
 
-  /**
-   * Executes all interpreters in separate threads.
-   */
+  /** Executes all interpreters in separate threads. */
   inline void run(const InType &input, OutType &output)
   {
-      this->run(input.data(), output.data());
+    // Just forward the call...
+    this->run(input.data(), output.data());
   }
 
+  /** Executes the bytecode in parallel using several interpreters & OpenMP. */
   inline void run(const typename InType::Scalar *input, typename OutType::Scalar *output)
   {
 #pragma omp parallel for if(interpreters.size()>1)
