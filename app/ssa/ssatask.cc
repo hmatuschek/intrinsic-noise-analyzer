@@ -7,7 +7,7 @@ using namespace iNA;
  * Implementation of SSATaskConfig.
  * ******************************************************************************************** */
 SSATaskConfig::SSATaskConfig()
-  : GeneralTaskConfig(), ModelSelectionTaskConfig(), SpeciesSelectionTaskConfig(),
+  : GeneralTaskConfig(), ModelSelectionTaskConfig(),
     EngineTaskConfig(), method(SSATaskConfig::DIRECT_SSA), ensemble_size(0), final_time(0),
     steps(0), num_threads(0), simulator(0)
 {
@@ -15,7 +15,7 @@ SSATaskConfig::SSATaskConfig()
 }
 
 SSATaskConfig::SSATaskConfig(const SSATaskConfig &other)
-  : GeneralTaskConfig(), ModelSelectionTaskConfig(other), SpeciesSelectionTaskConfig(other),
+  : GeneralTaskConfig(), ModelSelectionTaskConfig(other),
     EngineTaskConfig(other), method(other.method), ensemble_size(other.ensemble_size),
     final_time(other.final_time), steps(other.steps), num_threads(other.num_threads),
     simulator(other.simulator)
@@ -124,58 +124,40 @@ SSATaskConfig::setNumThreads(size_t num)
  * Implementation of SSATaskConfig.
  * ******************************************************************************************** */
 SSATask::SSATask(const SSATaskConfig &config, QObject *parent)
-  : Task(parent), simulator(config.getSimulator()),
-    species_id(config.getNumSpecies()), species_name(config.getNumSpecies()),
+  : Task(parent), simulator(config.getSimulator()), _Ns(config.getModel()->numSpecies()),
     final_time(config.getFinalTime()),
-    time_series(1+2*config.getNumSpecies()+(config.getNumSpecies()*(config.getNumSpecies()+1))/2,
-      config.getSteps()+1),
-    mean_index_table(config.getNumSpecies()),
-    cov_index_table(config.getNumSpecies(), config.getNumSpecies()),
-    skew_index_table(config.getNumSpecies()),
-    species_index_table(config.getNumSpecies())
+    time_series(1+2*_Ns+(_Ns*(_Ns+1))/2, config.getSteps()+1)
 {
   // First, column is time:
   this->time_series.setColumnName(0, "t"); size_t column = 1;
 
-  // Assemble list of species and index_table
-  for (int i=0; i<(int)config.getNumSpecies(); i++, column++)
+  // Assemble table header
+  QVector<QString> species_names(_Ns);
+  for (size_t i=0; i<_Ns; i++, column++)
   {
-    // Store species ID
-    this->species_id[i] = config.getSelectedSpecies().at(i);
-
-    // Get name of species or use ID as name:
-    if (simulator->getSpecies(this->species_id[i].toStdString())->hasName()) {
-      this->species_name[i] = simulator->getSpecies(this->species_id[i].toStdString())->getName().c_str();
-    } else {
-      this->species_name[i] = this->species_id[i];
+    species_names[i] = simulator->getSpecies(i)->getIdentifier().c_str();
+    if (simulator->getSpecies(i)->hasName()) {
+      species_names[i] = simulator->getSpecies(i)->getName().c_str();
     }
 
-    // Get index of species:
-    this->mean_index_table[i] = column;
-    // Associate i-th selected species with original index:
-    this->species_index_table[i] = simulator->getSpeciesIdx(this->species_id[i].toStdString());
-
     // Assign column name for species:
-    this->time_series.setColumnName(column, this->species_name[i]);
+    this->time_series.setColumnName(column, species_names[i]);
   }
 
   // Assign names to covariances:
-  for (int i=0; i<this->species_id.size(); i++)
+  for (size_t i=0; i<_Ns; i++)
   {
-    for (int j=i; j<this->species_id.size(); j++, column++)
+    for (size_t j=i; j<_Ns; j++, column++)
     {
-      QString name_a = this->species_name[i];
-      QString name_b = this->species_name[j];
+      QString name_a = species_names[i];
+      QString name_b = species_names[j];
       this->time_series.setColumnName(column, QString("cov(%1,%2)").arg(name_a).arg(name_b));
-      this->cov_index_table(i,j) = column;
-      this->cov_index_table(j,i) = column;
     }
   }
 
   // Assign names to skewness:
-  for (int i=0; i<this->species_id.size(); i++, column++) {
-    this->time_series.setColumnName(column, QString("Skewness %1").arg(this->species_name[i]));
-    this->skew_index_table[i] = column;
+  for (size_t i=0; i<_Ns; i++, column++) {
+    this->time_series.setColumnName(column, QString("Skewness %1").arg(species_names[i]));
   }
 }
 
@@ -186,9 +168,9 @@ SSATask::process()
   this->setState(Task::INITIALIZED);
   double dt = this->final_time/(this->time_series.getNumRows()-1);
 
-  Eigen::VectorXd mean(this->simulator->numSpecies());
-  Eigen::MatrixXd cov(this->simulator->numSpecies(), this->simulator->numSpecies());
-  Eigen::VectorXd skewness(this->simulator->numSpecies());
+  Eigen::VectorXd mean(_Ns);
+  Eigen::MatrixXd cov(_Ns, _Ns);
+  Eigen::VectorXd skewness(_Ns);
 
   this->setState(Task::RUNNING);
   this->setProgress(0.0);
@@ -208,13 +190,12 @@ SSATask::process()
     // Assemble timeseries row:
     Eigen::VectorXd row(this->time_series.getNumColumns());
     row(0) = i*dt;
-    for (size_t j=0; j<this->numSpecies(); j++) {
-      size_t index_j = this->species_index_table[j];
-      row(this->mean_index_table[j]) = mean(index_j);
-      row(this->skew_index_table[j]) = skewness(index_j);
-      for (size_t k=j; k<this->numSpecies(); k++) {
-        size_t index_k = this->species_index_table[k];
-        row(this->cov_index_table(j,k)) = cov(index_j, index_k);
+    for (size_t j=0; j<_Ns; j++) {
+      row(1+j) = mean(j);
+      row(1+_Ns+(_Ns*(_Ns+1))/2+j) = skewness(j);
+      for (size_t k=j; k<_Ns; k++) {
+        size_t cov_jk = 1+2*_Ns+j*(_Ns+1)-(j*(j+1))/2 + (k-j);
+        row(cov_jk) = cov(j, k);
       }
     }
     this->time_series.append(row);
@@ -250,11 +231,4 @@ Table &
 SSATask::getTimeSeries()
 {
   return this->time_series;
-}
-
-
-size_t
-SSATask::numSpecies() const
-{
-  return this->species_id.size();
 }

@@ -11,7 +11,6 @@
 class SSATaskConfig:
     public GeneralTaskConfig,
     public ModelSelectionTaskConfig,
-    public SpeciesSelectionTaskConfig,
     public EngineTaskConfig
 {
 public:
@@ -70,25 +69,15 @@ class SSATask : public Task
 
 protected:
   iNA::Models::StochasticSimulator *simulator;
-
-  QVector<QString> species_id;
-  QVector<QString> species_name;
-
+  size_t _Ns;
   double final_time;
   size_t time_steps;
   Table time_series;
-
-  Eigen::VectorXi mean_index_table;
-  Eigen::MatrixXi cov_index_table;
-  Eigen::VectorXi skew_index_table;
-  Eigen::VectorXi species_index_table;
 
 public:
   SSATask(const SSATaskConfig &config, QObject *parent=0);
 
   Table &getTimeSeries();
-
-  size_t numSpecies() const;
 
   iNA::Models::StochasticSimulator *getModel();
 

@@ -53,16 +53,6 @@ SSAModelSelectionPage::SSAModelSelectionPage(GeneralTaskWizard *parent)
 
 
 bool SSAModelSelectionPage::validatePage() {
-  if (! ModelSelectionWizardPage::validatePage()) { return false; }
-  SSAWizard *_wizard = static_cast<SSAWizard *>(wizard());
-  iNA::Ast::Model *model = _wizard->getConfigCast<SSATaskConfig>().getModel();
-
-  // Remove that as soon as possible:
-  QStringList selected_species;
-  for (size_t i=0; i<model->numSpecies(); i++) {
-    selected_species.append(model->getSpecies(i)->getIdentifier().c_str());
-  }
-  _wizard->getConfigCast<SSATaskConfig>().setSelectedSpecies(selected_species);
   return true;
 }
 
@@ -174,10 +164,6 @@ SSASummaryPage::SSASummaryPage(SSAWizard *parent)
   this->document = new QLabel("");
   this->document->setTextFormat(Qt::LogText);
 
-  this->selected_species = new QLabel("");
-  this->selected_species->setTextFormat(Qt::LogText);
-  this->selected_species->setWordWrap(true);
-
   this->ensemble_size = new QLabel("");
   this->ensemble_size->setTextFormat(Qt::LogText);
 
@@ -198,7 +184,6 @@ SSASummaryPage::SSASummaryPage(SSAWizard *parent)
 
   QFormLayout *layout = new QFormLayout();
   layout->addRow(tr("Model"), this->document);
-  layout->addRow(tr("Selected species"), this->selected_species);
   layout->addRow(tr("Ensemble size"), this->ensemble_size);
   layout->addRow(tr("Final time"), this->final_time);
   layout->addRow(tr("Plot points"), this->num_samples);
@@ -215,9 +200,6 @@ SSASummaryPage::initializePage()
   // Get the wizard:
   SSAWizard *wizard = static_cast<SSAWizard *>(this->wizard());
   SSATaskConfig &config = wizard->getConfigCast<SSATaskConfig>();
-
-  QStringList species(config.getSelectedSpecies());
-  this->selected_species->setText(species.join(", "));
 
   this->document->setText(QString("%1").arg(config.getModelDocument()->getModel().getName().c_str()));
   this->ensemble_size->setText(QString("%1").arg(config.getEnsembleSize()));
@@ -237,7 +219,8 @@ SSASummaryPage::initializePage()
     break;
   }
   this->thread_count->setText(QString("%1").arg(config.getNumThreads()));
-  int mem_usage = 8*config.getSteps()*(1 + species.size() + (species.size()*(1+species.size()))/2);
+  size_t num_species = config.getModel()->numSpecies();
+  int mem_usage = 8*config.getSteps()*(1 + num_species + (num_species*(1+num_species))/2);
   this->mem_usage->setText(QString("%1MB").arg(double(mem_usage)/(1024*1024)));
 }
 

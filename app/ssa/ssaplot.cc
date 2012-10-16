@@ -66,7 +66,7 @@ SSACorrelationPlot::SSACorrelationPlot(const QStringList &selected_species, SSAT
   this->setXLabel(tr("time [%1]").arg(time_unit));
   this->setYLabel(tr("correlation coefficient"));
 
-  size_t Ntot = task->numSpecies();
+  size_t Ntot = task->getModel()->numSpecies();
   size_t Nsel = selected_species.size();
 
   // Allocate a graph for each colum in time-series:
