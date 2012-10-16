@@ -6,10 +6,11 @@
 #include "../plot/variancelinegraph.hh"
 #include "../timeseries.hh"
 #include "lnatask.hh"
+#include "../views/varianceplot.hh"
 
 
 /** Implements a simple quick plot for the RE mean and LAN var. */
-class LNATimeSeriesPlot : public Plot::Figure
+class LNATimeSeriesPlot : public LinePlot
 {
   Q_OBJECT
 

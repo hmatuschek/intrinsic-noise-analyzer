@@ -70,7 +70,7 @@ protected:
   size_t _Ns;
   /** Holds an instance of the analysis. */
   iNA::Models::SteadyStateAnalysis<iNA::Models::IOSmodel> steady_state;
-  Eigen::VectorXd concentrations;
+  Eigen::VectorXd re_concentrations;
   Eigen::VectorXd emre_corrections;
   Eigen::VectorXd ios_corrections;
   Eigen::MatrixXd lna_covariances;

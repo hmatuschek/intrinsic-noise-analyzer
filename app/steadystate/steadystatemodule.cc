@@ -37,7 +37,7 @@ SteadyStateModule::configSteadyState()
   SteadyStateTask *task = 0;
 
   try {
-    task = new SteadyStateTask(this->wizard->getConfigCast<LNASteadyStateTask::Config>());
+    task = new SteadyStateTask(this->wizard->getConfigCast<SteadyStateTask::Config>());
   } catch (iNA::Exception &err) {
     QMessageBox::warning(
           0, tr("Can not construct stochastic simulation analysis from model: "), err.what());
@@ -46,7 +46,7 @@ SteadyStateModule::configSteadyState()
 
   // Add task to application and run it:
   Application::getApp()->docTree()->addTask(
-        this->wizard->getConfigCast<LNASteadyStateTask::Config>().getModelDocument(),
+        this->wizard->getConfigCast<SteadyStateTask::Config>().getModelDocument(),
         new SteadyStateTaskWrapper(task));
 
   task->start();

@@ -140,7 +140,7 @@ LNASteadyStateSpectrumConfigPage::validatePage()
 {
   // Get the wizard:
   SteadyStateWizard *wizard = static_cast<SteadyStateWizard *>(this->wizard());
-  SteadyStateTask::Config &config = wizard->getConfigCast<LNASteadyStateTask::Config>();
+  SteadyStateTask::Config &config = wizard->getConfigCast<SteadyStateTask::Config>();
 
 //  wizard->setFrequencyAutoRange(this->field("f_automatic").toBool());
 //  wizard->setFrequencyRange(this->field("f_min").toDouble(),
@@ -195,7 +195,7 @@ void
 LNASteadyStateSummaryPage::initializePage()
 {
   SteadyStateWizard *wizard = static_cast<SteadyStateWizard *>(this->wizard());
-  SteadyStateTask::Config &config = wizard->getConfigCast<LNASteadyStateTask::Config>();
+  SteadyStateTask::Config &config = wizard->getConfigCast<SteadyStateTask::Config>();
 
   this->model_name->setText(config.getModelDocument()->getModel().getName().c_str());
 

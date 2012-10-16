@@ -5,7 +5,7 @@
 
 
 LNATimeSeriesPlot::LNATimeSeriesPlot(QList<QString> &selected_species, LNATask *task, QObject *parent)
-  : Plot::Figure("Mean concentrations (RE & LNA)", parent)
+  : LinePlot("Mean concentrations (RE & LNA)", parent)
 {
   // Get species unit
   std::stringstream unit_str;
@@ -23,40 +23,19 @@ LNATimeSeriesPlot::LNATimeSeriesPlot(QList<QString> &selected_species, LNATask *
     setYLabel(tr("amount [%1]").arg(species_unit));
   }
 
-
-  size_t num_species = selected_species.size();
   iNA::Ast::Model *model = task->getConfig().getModel();
   Table *series = task->getTimeSeries();
+  size_t Ntot = model->numSpecies();
+  size_t Nsel = selected_species.size();
 
-  // Allocate a graph for each colum in time-series:
-  QVector<Plot::VarianceLineGraph *> graphs(num_species);
-  for (size_t i=0; i<num_species; i++) {
-    Plot::GraphStyle style = this->getStyle(i);
-    graphs[i] = new Plot::VarianceLineGraph(style);
-    this->axis->addGraph(graphs[i]);
-    this->addToLegend(series->getColumnName(i+1), graphs[i]);
-  }
-
-  // Create index tables to map selected species idx -> RE mean & LNA var columns:
-  Eigen::VectorXi mean_idx(num_species);
-  Eigen::VectorXi  var_idx(num_species);
-  for (size_t i=0; i<num_species; i++) {
+  // Create a graph for each colum in time-series:
+  for (size_t i=0; i<Nsel; i++) {
     size_t species_idx = model->getSpeciesIdx(selected_species.at(i).toStdString());
-    mean_idx[i] = 1+species_idx;
-    var_idx[i]  = 1+model->numSpecies(); // offset, first cov column
-    var_idx[i]  += species_idx*(model->numSpecies()+1) - (species_idx*(species_idx+1))/2;
-  }
-
-  // Do not plot all
-  int idx_incr = 0;
-  if (0 == (idx_incr = series->getNumRows()/100)) { idx_incr = 1; }
-
-  // Plot time-series:
-  for (size_t j=0; j<series->getNumRows(); j+=idx_incr) {
-    for (size_t i=0; i<num_species; i++) {
-      graphs[i]->addPoint(
-            (*series)(j, 0), (*series)(j, mean_idx(i)), std::sqrt((*series)(j, var_idx(i))));
-    }
+    size_t mean_idx = 1+species_idx;
+    size_t var_idx  = 1+Ntot; // offset, first cov column
+    var_idx  += species_idx*(Ntot+1) - (species_idx*(species_idx+1))/2;
+    addVarianceGraph(series->getColumn(0), series->getColumn(mean_idx), series->getColumn(var_idx),
+                     series->getColumnName(mean_idx));
   }
 
   // Force y plot-range to be [0, AUTO]:
@@ -64,9 +43,6 @@ LNATimeSeriesPlot::LNATimeSeriesPlot(QList<QString> &selected_species, LNATask *
         Plot::RangePolicy(Plot::RangePolicy::FIXED, Plot::RangePolicy::AUTOMATIC));
   this->getAxis()->setYRange(0, 1);
 
-  for (size_t i=0; i<num_species; i++) {
-    graphs[i]->commit();
-  }
   this->updateAxes();
 }
 

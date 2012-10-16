@@ -4,9 +4,10 @@
 #include "../plot/plot.hh"
 #include "../plot/graph.hh"
 #include "../timeseries.hh"
+#include "../views/varianceplot.hh"
 #include "retask.hh"
 
-class RETimeSeriesPlot : public Plot::Figure
+class RETimeSeriesPlot : public LinePlot
 {
   Q_OBJECT
 

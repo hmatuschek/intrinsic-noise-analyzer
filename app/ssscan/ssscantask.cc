@@ -213,7 +213,7 @@ ParamScanTask::getConfig() const {
 QString
 ParamScanTask::getLabel()
 {
-  return "Steady State Analysis (SSE)";
+  return "Parameter Scan (SSE)";
 }
 
 

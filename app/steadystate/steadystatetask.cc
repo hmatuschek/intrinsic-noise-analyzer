@@ -81,9 +81,8 @@ SteadyStateTask::SteadyStateTask(const Config &config, QObject *parent)
   : Task(parent), config(config), _Ns(config.getModel()->numSpecies()),
     steady_state(dynamic_cast<iNA::Models::IOSmodel &>(*config.getModel()),
       config.getMaxIterations(), config.getEpsilon(), config.getMaxTimeStep()),
-    concentrations(_Ns), emre_corrections(_Ns), ios_corrections(_Ns),
-    lna_covariances(_Ns, _Ns), ios_covariances(_Ns, _Ns),
-    spectrum(1, _Ns+1)
+    re_concentrations(_Ns), emre_corrections(_Ns), ios_corrections(_Ns),
+    lna_covariances(_Ns, _Ns), ios_covariances(_Ns, _Ns), spectrum(1, _Ns+1)
 {
   // Pass...
 }
@@ -96,11 +95,11 @@ SteadyStateTask::process()
   this->setState(Task::INITIALIZED);
   this->setProgress(0);
 
-  iNA::Models::IOSmodel *lna_model
+  iNA::Models::IOSmodel *ios_model
       = dynamic_cast<iNA::Models::IOSmodel *>(config.getModel());
 
   // Allocate reduced state vector (independent species)
-  Eigen::VectorXd reduced_state(lna_model->getDimension());
+  Eigen::VectorXd reduced_state(ios_model->getDimension());
 
   // Calc steadystate:
   this->steady_state.calcSteadyState(reduced_state);
@@ -113,9 +112,9 @@ SteadyStateTask::process()
   }
 
   // Get full state and covariance and EMRE corrections for steady state;
-  Eigen::VectorXd thirdOrder(config.getModel()->numSpecies());
-  lna_model->fullState(reduced_state, this->concentrations, this->lna_covariances, this->emre_corrections,
-                       this->ios_covariances, thirdOrder, this->ios_corrections);
+  Eigen::VectorXd thirdOrder(_Ns);
+  ios_model->fullState(reduced_state, re_concentrations, lna_covariances, emre_corrections,
+                       ios_covariances, thirdOrder, ios_corrections);
 
 //  // Get steadystate spectrum:
 //  Eigen::MatrixXd spectrum(this->frequencies.size(), this->model->numSpecies());
@@ -165,7 +164,7 @@ SteadyStateTask::getSpeciesUnit() const
 Eigen::VectorXd &
 SteadyStateTask::getConcentrations()
 {
-  return this->concentrations;
+  return this->re_concentrations;
 }
 
 
