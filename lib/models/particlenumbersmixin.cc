@@ -11,7 +11,7 @@ ParticleNumbersMixin::ParticleNumbersMixin(BaseModel &base)
   : ConstCompartmentMixin(base), ExtensiveSpeciesMixin(base)
 {
   // Check if species have substance units:
-  if (! base.speciesHasSubstanceUnits()) {
+  if (! base.speciesHaveSubstanceUnits()) {
     InternalError err;
     err << "Expected model to be in substance units! But species are defined in "
         << base.getSpeciesUnit().dump();

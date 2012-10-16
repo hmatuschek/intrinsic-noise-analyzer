@@ -157,11 +157,11 @@ public:
    * @c getSpeciesUnit will return the substance unit as returned by @c getSubstanceUnit. If false
    * all species are defined in concentration units and @c getSpeciesUnit will return
    * the quotient of the units returned by @c getSubstanceUnit and @c getVolumeUnit. */
-  bool speciesHasSubstanceUnits() const;
+  bool speciesHaveSubstanceUnits() const;
 
   /** Resets if the species in the model are defined in substance units, fixes complete model
    * to maintain consistency. */
-  void setSpeciesHasSubstanceUnits(bool has_substance_units);
+  void setSpeciesHaveSubstanceUnits(bool has_substance_units);
 
   /** Returns the unit, the species are measured in. The species unit can not be changed directly
    * as it is defined implicitly by the substance and volume unit. */

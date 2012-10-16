@@ -29,7 +29,7 @@ ModelView::ModelView(ModelItem *model_item, QWidget *parent)
   _species_unit_selector = new QComboBox();
   _species_unit_selector->addItem(tr("concentrations"));
   _species_unit_selector->addItem(tr("amount"));
-  if (_model->speciesHasSubstanceUnits()) { _species_unit_selector->setCurrentIndex(1); }
+  if (_model->speciesHaveSubstanceUnits()) { _species_unit_selector->setCurrentIndex(1); }
   else { _species_unit_selector->setCurrentIndex(0); }
 
   // Editors:
@@ -78,9 +78,9 @@ void
 ModelView::onSpeciesUnitSelected(int index)
 {
   if (0 == index) {
-    _model->setSpeciesHasSubstanceUnits(false);
+    _model->setSpeciesHaveSubstanceUnits(false);
   } else {
-    _model->setSpeciesHasSubstanceUnits(true);
+    _model->setSpeciesHaveSubstanceUnits(true);
   }
 }
 

@@ -7,10 +7,10 @@ using namespace iNA::Models;
 IntensiveSpeciesMixin::IntensiveSpeciesMixin(BaseModel &base)
 {
   // If model is defined in concentration units (intensive) -> skip:
-  if (! base.speciesHasSubstanceUnits()) { return; }
+  if (! base.speciesHaveSubstanceUnits()) { return; }
 
   // Otherwise do so:
-  base.setSpeciesHasSubstanceUnits(false);
+  base.setSpeciesHaveSubstanceUnits(false);
 
   // Holds forward and back substitutions:
   GiNaC::exmap  forward_subst;

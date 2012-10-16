@@ -393,7 +393,7 @@ Assembler::processSpeciesDefinition(Parser::ConcreteSyntaxTree &spec)
   GiNaC::ex initial_value;
   bool has_substance_units=false; bool has_boundary_condition=false; bool is_constant=false;
   bool has_initial_amount=true;
-  bool species_have_substance_units = _model.speciesHasSubstanceUnits();
+  bool species_have_substance_units = _model.speciesHaveSubstanceUnits();
 
   Ast::Compartment *compartment = _model.getCompartment(compartment_id);
   if (0 == spec[2].getAltIdx()) {

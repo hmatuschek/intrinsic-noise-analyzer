@@ -9,10 +9,10 @@ using namespace iNA::Models;
 ExtensiveSpeciesMixin::ExtensiveSpeciesMixin(BaseModel &base)
 {
   // If model is defined in extensive units -> skip:
-  if (base.speciesHasSubstanceUnits()) { return; }
+  if (base.speciesHaveSubstanceUnits()) { return; }
 
   // Otherwise update model:
-  base.setSpeciesHasSubstanceUnits(true);
+  base.setSpeciesHaveSubstanceUnits(true);
 
   // Holds forward and back substitutions:
   GiNaC::exmap  forward_subst;
