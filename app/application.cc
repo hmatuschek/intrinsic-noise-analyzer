@@ -97,6 +97,7 @@ Application::Application() :
   _combineIrvReaction->setEnabled(false);
 
   // Connect signals
+  QObject::connect(_newModel, SIGNAL(triggered()), this, SLOT(onNewModel()));
   QObject::connect(_importModel, SIGNAL(triggered()), this, SLOT(onImportModel()));
   QObject::connect(_exportModel, SIGNAL(triggered()), this, SLOT(onExportModel()));
   QObject::connect(_closeModel, SIGNAL(triggered()), this, SLOT(onCloseModel()));
