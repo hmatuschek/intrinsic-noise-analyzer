@@ -70,9 +70,9 @@ Application::Application() :
   _selected_item = 0;
 
   // Assemble menu actions:
-  _importModel = new QAction(tr("New model..."), this);
-  _importModel->setEnabled(true);
-  _importModel->setStatusTip(tr("Creates a new & empty model"));
+  _newModel = new QAction(tr("New model..."), this);
+  _newModel->setEnabled(true);
+  _newModel->setStatusTip(tr("Creates a new & empty model"));
 
   _importModel = new QAction(tr("Open model..."), this);
   _importModel->setEnabled(true);
