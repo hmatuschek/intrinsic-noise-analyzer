@@ -57,15 +57,6 @@ ParamScanModelSelectionPage::validatePage()
     return false;
   }
 
-  // Now select all species:
-  /// @todo Remove that as soon as possible.
-  ParamScanTask::Config &config = static_cast<ParamScanWizard *>(wizard())->getConfigCast<ParamScanTask::Config>();
-  QStringList selected_species;
-  for (size_t i=0; i<config.getModel()->numSpecies(); i++) {
-    selected_species.append(config.getModel()->getSpecies(i)->getIdentifier().c_str());
-  }
-  config.setSelectedSpecies(selected_species);
-
   return true;
 }
 
@@ -244,10 +235,6 @@ ParamScanSummaryPage::ParamScanSummaryPage(QWidget *parent)
   this->model_name = new QLabel();
   this->model_name->setTextFormat(Qt::LogText);
 
-  this->species = new QLabel();
-  this->species->setTextFormat(Qt::LogText);
-  this->species->setWordWrap(true);
-
   this->param = new QLabel();
   this->param->setTextFormat(Qt::LogText);
   this->param->setWordWrap(true);
@@ -257,7 +244,6 @@ ParamScanSummaryPage::ParamScanSummaryPage(QWidget *parent)
 
   QFormLayout *layout = new QFormLayout();
   layout->addRow("Model:", this->model_name);
-  layout->addRow("Selected species:", this->species);
   layout->addRow("Selected parameter:", this->param);
   layout->addRow("Approx. memory used:", this->memory);
   this->setLayout(layout);
@@ -271,13 +257,11 @@ ParamScanSummaryPage::initializePage()
   ParamScanTask::Config &config = wizard->getConfigCast<ParamScanTask::Config>();
 
   this->model_name->setText(config.getModelDocument()->getModel().getName().c_str());
-  QStringList species(config.getSelectedSpecies());
-  this->species->setText(species.join(", "));
 
   this->param->setText(QString((config.getParameter().hasName() ? config.getParameter().getName() : config.getParameter().getIdentifier()).c_str()));
 
   QString mem_str("%1 MB");
-  int N = config.getNumSpecies();
+  int N = config.getModel()->numSpecies();
   this->memory->setText(mem_str.arg(double(8*(2*N+N*(N-1)))/126976.));
 }
 

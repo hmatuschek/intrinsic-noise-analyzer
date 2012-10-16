@@ -23,7 +23,7 @@ SSAWizard::SSAWizard(QWidget *parent) :
   this->setWindowTitle("Stochastic Simulation Algorithm");
 
   this->setPage(SSAWizard::MODEL_SELECTION_PAGE, new SSAModelSelectionPage(this));
-  this->setPage(SSAWizard::SPECIES_SELECTION_PAGE, new SSASpeciesSelectionPage(this));
+  //this->setPage(SSAWizard::SPECIES_SELECTION_PAGE, new SSASpeciesSelectionPage(this));
   this->setPage(SSAWizard::ENGINE_SELECTION_PAGE, new SSAEngineSelectionPage(this));
   this->setPage(SSAWizard::CONFIG_PAGE, new SSAConfigPage(this));
   this->setPage(SSAWizard::SUMMARY_PAGE, new SSASummaryPage(this));
@@ -51,6 +51,20 @@ SSAModelSelectionPage::SSAModelSelectionPage(GeneralTaskWizard *parent)
   this->setSubTitle(tr("Select a model to analyze."));
 }
 
+
+bool SSAModelSelectionPage::validatePage() {
+  if (! ModelSelectionWizardPage::validatePage()) { return false; }
+  SSAWizard *_wizard = static_cast<SSAWizard *>(wizard());
+  iNA::Ast::Model *model = _wizard->getConfigCast<SSATaskConfig>().getModel();
+
+  // Remove that as soon as possible:
+  QStringList selected_species;
+  for (size_t i=0; i<model->numSpecies(); i++) {
+    selected_species.append(model->getSpecies(i)->getIdentifier().c_str());
+  }
+  _wizard->getConfigCast<SSATaskConfig>().setSelectedSpecies(selected_species);
+  return true;
+}
 
 
 /* ********************************************************************************************* *

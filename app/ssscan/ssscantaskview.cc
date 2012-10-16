@@ -69,12 +69,6 @@ SSScanResultWidget::SSScanResultWidget(SSScanTaskWrapper *task_wrapper, QWidget 
 void
 SSScanResultWidget::plotButtonPressed()
 {
-  std::stringstream unit_str;
-  this->ssscan_task_wrapper->getSSScanTask()->getSpeciesUnit().dump(unit_str, true);
-
-  QString concentration_unit(unit_str.str().c_str());
-  QString time_unit("a.u.");
-
   // Ask user for species to plot.
   SSScanPlotDialog dialog(ssscan_task_wrapper->getSSScanTask()->getConfig().getModel());
   if (QDialog::Accepted != dialog.exec()) { return; }
@@ -103,7 +97,6 @@ SSScanResultWidget::plotButtonPressed()
         this->ssscan_task_wrapper,
         new PlotItem(
           new ParameterScanCovIOSPlot(selected_species,this->ssscan_task_wrapper->getSSScanTask())));
-
 }
 
 

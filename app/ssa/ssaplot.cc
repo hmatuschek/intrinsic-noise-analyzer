@@ -7,11 +7,11 @@
 /* ******************************************************************************************** *
  * SSA Timeseries Plot
  * ******************************************************************************************** */
-SSAPlot::SSAPlot(SSATask *task, QObject *parent)
-  : Plot::Figure("Stochastic Simulation Algorithm", parent)
+SSAPlot::SSAPlot(const QStringList &selected_species, SSATask *task, QObject *parent)
+  : LinePlot("Stochastic Simulation Algorithm", parent)
 {
-  size_t N = task->numSpecies();
-  QVector<Plot::VarianceLineGraph *> graphs(N);
+  size_t Ntot = task->getModel()->numSpecies();
+  size_t Nsel = selected_species.size();
 
   // Serialize unit of species:
   std::stringstream unit_str;
@@ -26,25 +26,16 @@ SSAPlot::SSAPlot(SSATask *task, QObject *parent)
   this->setXLabel(tr("time [%1]").arg(time_unit));
   this->setYLabel(tr("concentrations [%1]").arg(concentration_unit));
 
-  for (size_t i=0; i<N; i++)
+  size_t offset = 1;
+  for (size_t i=0; i<Nsel; i++)
   {
-    Plot::GraphStyle style = this->getStyle(i);
-    graphs[i] = new Plot::VarianceLineGraph(style);
-    this->getAxis()->addGraph(graphs[i]);
-    this->addToLegend(task->getTimeSeries().getColumnName(i+1), graphs[i]);
-  }
-
-  // Plot time-series:
-  for (size_t j=0; j<task->getTimeSeries().getNumRows(); j++)
-  {
-    size_t offset = N+1; size_t increment = N;
-    for (size_t i=0; i<N; i++)
-    {
-      graphs[i]->addPoint(task->getTimeSeries().matrix()(j, 0),
-                          task->getTimeSeries().matrix()(j, 1+i),
-                          std::sqrt(std::abs(task->getTimeSeries().matrix()(j, offset))));
-      offset += increment; increment -= 1;
-    }
+    size_t species_idx = task->getModel()->getSpeciesIdx(selected_species.at(i).toStdString());
+    size_t mean_idx = offset + species_idx;
+    size_t var_idx  = offset+Ntot + species_idx*(Ntot+1) - (species_idx*(species_idx+1))/2;
+    addVarianceGraph(task->getTimeSeries().getColumn(0),
+                     task->getTimeSeries().getColumn(mean_idx),
+                     task->getTimeSeries().getColumn(var_idx),
+                     task->getTimeSeries().getColumnName(mean_idx));
   }
 
   // Force y plot-range to be [0, AUTO]:
@@ -56,10 +47,7 @@ SSAPlot::SSAPlot(SSATask *task, QObject *parent)
         Plot::RangePolicy(Plot::RangePolicy::FIXED, Plot::RangePolicy::AUTOMATIC));
   this->getAxis()->setXRange(0, 1);
 
-  for (size_t i=0; i<N; i++)
-  {
-    graphs[i]->commit();
-  }
+  updateAxes();
 }
 
 
@@ -67,8 +55,8 @@ SSAPlot::SSAPlot(SSATask *task, QObject *parent)
 /* ******************************************************************************************** *
  * SSA Correlation Plot
  * ******************************************************************************************** */
-SSACorrelationPlot::SSACorrelationPlot(SSATask *task, QObject *parent)
-  : Plot::Figure("Correlation Coefficients (SSA)", parent)
+SSACorrelationPlot::SSACorrelationPlot(const QStringList &selected_species, SSATask *task, QObject *parent)
+  : LinePlot("Correlation Coefficients (SSA)", parent)
 {
   // Serialize unit of species:
   std::stringstream unit_str;
@@ -78,61 +66,45 @@ SSACorrelationPlot::SSACorrelationPlot(SSATask *task, QObject *parent)
   this->setXLabel(tr("time [%1]").arg(time_unit));
   this->setYLabel(tr("correlation coefficient"));
 
-  Table &data = task->getTimeSeries();
-  size_t num_species = task->numSpecies();
-  size_t N_cov = num_species*(num_species-1)/2;
-  QVector<Plot::LineGraph *> graphs(N_cov);
+  size_t Ntot = task->numSpecies();
+  size_t Nsel = selected_species.size();
 
   // Allocate a graph for each colum in time-series:
-  size_t graph_idx = 0;
-  size_t column_idx = 1+num_species;
-  Eigen::MatrixXi index_table(num_species, num_species);
-  for (size_t i=0; i<num_species; i++)
-  {
-    index_table(i,i) = column_idx; column_idx++;
-    for (size_t j=i+1; j<num_species; j++, graph_idx++, column_idx++)
-    {
-      Plot::GraphStyle style = this->getStyle(graph_idx);
-      graphs[graph_idx] = new Plot::LineGraph(style);
-      this->axis->addGraph(graphs[graph_idx]);
-      this->addToLegend(
-            QString("corr(%1, %2)").arg(data.getColumnName(1+i)).arg(data.getColumnName(1+j)),
-            graphs[graph_idx]);
-      index_table(i,j) = index_table(j,i) = column_idx;
+  size_t offset = 1;
+  for (size_t i=0; i<Nsel; i++) {
+    // Get species index for i-th selected species
+    size_t species_idx_i = task->getModel()->getSpeciesIdx(selected_species.at(i).toStdString());
+    // Get its variance columne
+    size_t var_idx_i = offset+Ntot+species_idx_i*(Ntot+1)-(species_idx_i*(species_idx_i+1))/2;
+    // Get its name
+    QString species_name_i = task->getModel()->getSpecies(species_idx_i)->getIdentifier().c_str();
+    if (task->getModel()->getSpecies(species_idx_i)->hasName()) {
+      species_name_i = task->getModel()->getSpecies(species_idx_i)->getName().c_str();
     }
-  }
 
-  // Plot time-series:
-  for (size_t k=0; k<data.getNumRows(); k++)
-  {
-    size_t idx = 0;
-    for (size_t i=0; i<num_species; i++)
-    {
-      for (size_t j=i+1; j<num_species; j++, idx++)
-      {
-        double x = data(k, 0);
-        double y = data(k, index_table(i,j)) /
-            (std::sqrt(data(k, index_table(i,i))) *
-             std::sqrt(data(k, index_table(j,j))));
-        graphs[idx]->addPoint(x, y);
+    for (size_t j=i+1; j<Nsel; j++) {
+      // Get species index for the j-th selected species
+      size_t species_idx_j = task->getModel()->getSpeciesIdx(selected_species.at(j).toStdString());
+      // Its variance index
+      size_t var_idx_j = offset+Ntot+species_idx_j*(Ntot+1)-(species_idx_j*(species_idx_j+1))/2;
+      // Its name
+      QString species_name_j = task->getModel()->getSpecies(species_idx_j)->getIdentifier().c_str();
+      if (task->getModel()->getSpecies(species_idx_j)->hasName()) {
+        species_name_j = task->getModel()->getSpecies(species_idx_j)->getName().c_str();
       }
+      // The index for the covariance of i & j:
+      size_t cov_index_ij = std::min(var_idx_i, var_idx_j) +
+          (std::max(species_idx_i, species_idx_j) - std::min(species_idx_i, species_idx_j));
+      // Calc correlation coefficients
+      Eigen::VectorXd var_i = task->getTimeSeries().getColumn(var_idx_i);
+      Eigen::VectorXd var_j = task->getTimeSeries().getColumn(var_idx_j);
+      Eigen::VectorXd cov_ij = task->getTimeSeries().getColumn(cov_index_ij);
+      Eigen::VectorXd corr = cov_ij.array()/(var_i.array()*var_j.array()).sqrt();
+      // Add correlation function plot
+      addLineGraph(task->getTimeSeries().getColumn(0), corr,
+                   QString("corr(%1, %2)").arg(species_name_i).arg(species_name_j));
     }
   }
 
-  // Force y plot-range to be [-1, 1]:
-  this->getAxis()->setYRangePolicy(
-        Plot::RangePolicy(Plot::RangePolicy::FIXED, Plot::RangePolicy::FIXED));
-  this->getAxis()->setYRange(-1.1, 1.1);
-
-  this->getAxis()->setXRangePolicy(
-        Plot::RangePolicy(Plot::RangePolicy::FIXED, Plot::RangePolicy::AUTOMATIC));
-  this->getAxis()->setXRange(0, 1);
-
-  // Finally commit changes:
-  for (size_t i=0; i<N_cov; i++)
-  {
-    graphs[i]->commit();
-  }
-
-  this->updateAxes();
+  updateAxes();
 }

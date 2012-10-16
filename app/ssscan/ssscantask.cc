@@ -4,7 +4,7 @@
  * Implementation of ParamScanTask::Config, the task configuration.
  * ******************************************************************************************* */
 ParamScanTask::Config::Config()
-  : GeneralTaskConfig(), ModelSelectionTaskConfig(), SpeciesSelectionTaskConfig(),
+  : GeneralTaskConfig(), ModelSelectionTaskConfig(),
     _model(0), num_threads(0), max_iterations(0), max_time_step(0), epsilon(0),
     parameter(), start_value(0), end_value(1),
     steps(1)
@@ -13,7 +13,7 @@ ParamScanTask::Config::Config()
 }
 
 ParamScanTask::Config::Config(const Config &other)
-  : GeneralTaskConfig(), ModelSelectionTaskConfig(other), SpeciesSelectionTaskConfig(other),
+  : GeneralTaskConfig(), ModelSelectionTaskConfig(other),
     _model(other._model), num_threads(other.num_threads), max_iterations(other.max_iterations), max_time_step(other.max_time_step),
     epsilon(other.epsilon),
     parameter(other.parameter), start_value(other.start_value), end_value(other.end_value),
@@ -84,25 +84,22 @@ ParamScanTask::Config::setEpsilon(double eps)
  * Implementation of ParamScanTask::Config, the task configuration.
  * ******************************************************************************************* */
 ParamScanTask::ParamScanTask(const Config &config, QObject *parent)
-  : Task(parent), config(config),
+  : Task(parent), config(config), _Ns(config.getModel()->numSpecies()),
     steady_state(dynamic_cast<iNA::Models::IOSmodel &>(*config.getModel()),
-      config.getMaxIterations(), config.getEpsilon(), config.getMaxTimeStep()),
-    species_name(config.getNumSpecies()),
-    parameterScan(1+2*config.getNumSpecies()+config.getNumSpecies()*(config.getNumSpecies()+1), config.getSteps()+1),
-    index_table(config.getNumSpecies())
+                 config.getMaxIterations(), config.getEpsilon(), config.getMaxTimeStep()),
+    parameterScan(1+2*_Ns+_Ns*(_Ns+1), config.getSteps()+1)
 {
-
     size_t column = 0;
+    std::vector<QString> species_name(2*_Ns+_Ns*(_Ns+1));
 
     // first column parameter name
     this->parameterScan.setColumnName(column++, config.getParameter().hasName() ? config.getParameter().getName().c_str() : config.getParameter().getIdentifier().c_str() );
 
-    for (size_t i=0; i<config.getNumSpecies(); i++, column++)
+    for (size_t i=0; i<_Ns; i++, column++)
     {
       // fill index table
-      QString species_id = config.getSelectedSpecies().value(i);
+      QString species_id = config.getModel()->getSpecies(i)->getIdentifier().c_str();
       iNA::Ast::Species *species = config.getModel()->getSpecies(species_id.toStdString());      
-      this->index_table[i] = config.getModel()->getSpeciesIdx(species_id.toStdString());
 
       if (species->hasName())
         species_name[i] = QString("%1").arg(species->getName().c_str());
@@ -112,17 +109,17 @@ ParamScanTask::ParamScanTask(const Config &config, QObject *parent)
       this->parameterScan.setColumnName(column, QString("%1").arg(species_name[i]));
     }
 
-    for (int i=0; i<(int)config.getNumSpecies(); i++)
-      for (int j=i; j<(int)config.getNumSpecies(); j++, column++)
+    for (size_t i=0; i<_Ns; i++)
+      for (size_t j=i; j<_Ns; j++, column++)
         this->parameterScan.setColumnName(
               column,QString("cov(%1,%2)").arg(species_name[i]).arg(species_name[j]));
 
-    for (size_t i=0; i<config.getNumSpecies(); i++, column++)
+    for (size_t i=0; i<_Ns; i++, column++)
       this->parameterScan.setColumnName(
             column, QString("EMRE(%1)").arg(species_name[i]));
 
-    for (size_t i=0; i<config.getNumSpecies(); i++)
-      for (size_t j=i; j<config.getNumSpecies(); j++, column++)
+    for (size_t i=0; i<_Ns; i++)
+      for (size_t j=i; j<_Ns; j++, column++)
         this->parameterScan.setColumnName(
               column,QString("cov(%1,%2)").arg(species_name[i]).arg(species_name[j]));
 
@@ -181,19 +178,18 @@ ParamScanTask::process()
       int col=1;
 
       // output LNA
-      for (size_t i=0; i<config.getNumSpecies(); i++)
-        parameterScan(pid,col++) = concentrations(index_table[i]);
-      for (size_t i=0; i<config.getNumSpecies(); i++)
-        for (size_t j=i; j<config.getNumSpecies(); j++)
-            parameterScan(pid,col++) = lna_covariances(index_table[i], index_table[j]);
+      for (size_t i=0; i<_Ns; i++)
+        parameterScan(pid,col++) = concentrations(i);
+      for (size_t i=0; i<_Ns; i++)
+        for (size_t j=i; j<_Ns; j++)
+            parameterScan(pid,col++) = lna_covariances(i,j);
 
       // output IOS
-      for (size_t i=0; i<config.getNumSpecies(); i++)
-        parameterScan(pid,col++) = concentrations(index_table[i])+emre_corrections(index_table[i]);
-      for (size_t i=0; i<config.getNumSpecies(); i++)
-        for (size_t j=i; j<config.getNumSpecies(); j++)
-            parameterScan(pid,col++) = lna_covariances(index_table[i], index_table[j])+ios_covariances(index_table[i], index_table[j]);
-
+      for (size_t i=0; i<_Ns; i++)
+        parameterScan(pid,col++) = concentrations(i)+emre_corrections(i);
+      for (size_t i=0; i<_Ns; i++)
+        for (size_t j=i; j<_Ns; j++)
+            parameterScan(pid,col++) = lna_covariances(i,j)+ios_covariances(i,j);
   }
 
   // Done...
@@ -227,11 +223,5 @@ ParamScanTask::getSpeciesUnit() const
   return config.getModel()->getSpeciesUnit();
 }
 
-
-const QString &
-ParamScanTask::getSpeciesName(int i)
-{
-  return this->species_name[i];
-}
 
 Table & ParamScanTask::getParameterScan() { return parameterScan; }

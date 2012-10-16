@@ -87,7 +87,6 @@ public:
 private:
 
   QLabel *model_name;
-  QLabel *species;
   QLabel *param;
   QLabel *spectrum;
   QLabel *memory;
