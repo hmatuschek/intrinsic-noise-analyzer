@@ -36,7 +36,7 @@ protected:
 public:
   /** Constructor.
    * @param substitutions Specifies the set of substitutions to be populated by the collector.
-   * @param flags Specifies which types of varaibles are collected. By default all constant
+   * @param flags Specifies which types of variables are collected. By default all constant
    *        variables are collected. By specifying @c Filter::ALL, it is possible to collect all
    *        initial values of even non-constant variables.
    * @param excludes Specifies a set of variable symbols, that are to be skipped during substitution

@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
     Models::SteadyStateAnalysis<Models::LNAmodel> steadyState(model);
 
     // choose parameter
-    Ast::Parameter* param = model.getReaction(0)->getKineticLaw()->getParameter(0);
+    Ast::Parameter* param = model.getParameter(0);
 
     // make list with values
     std::vector<iNA::Models::ParameterSet> parameters(10);
