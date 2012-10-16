@@ -29,6 +29,7 @@ public:
  * General purpose variance plot.
  *
  * Only 100 points of the timeseries are plotted.
+ * @deprecated Use @c LinePlot instead.
  */
 class VariancePlot : public Plot::Figure
 {
