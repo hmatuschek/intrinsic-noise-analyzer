@@ -194,22 +194,22 @@ Assembler::processFunctionCallArguments(Parser::ConcreteSyntaxTree &expr, std::v
 }
 
 
-double
+GiNaC::numeric
 Assembler::processNumber(Parser::ConcreteSyntaxTree &num)
 {
   /* Number =
    *   ["-"] (INTEGER | FLOAT); */
-  double value = 1.0;
-
-  if (num[0].matched()) {
-    value = -1.0;
-  }
-
+  // On integer
   if (0 == num[1].getAltIdx()) {
-    value *= toNumber<int>(_lexer[num[1][0].getTokenIdx()].getValue());
-  } else {
-    value *= toNumber<double>(_lexer[num[1][0].getTokenIdx()].getValue());
+    if (num[0].matched()) {
+      return -toNumber<int>(_lexer[num[1][0].getTokenIdx()].getValue());
+    }
+    return toNumber<int>(_lexer[num[1][0].getTokenIdx()].getValue());
   }
 
-  return value;
+  // On double:
+  if (num[0].matched()) {
+    return -toNumber<double>(_lexer[num[1][0].getTokenIdx()].getValue());
+  }
+  return toNumber<double>(_lexer[num[1][0].getTokenIdx()].getValue());
 }

@@ -77,9 +77,9 @@ public:
   size_t numArguments() const;
   /** Returns the i-th child node if the node. */
   SmartPtr<Node> &argument(size_t i);
-  long intValue() const;
-  const double &realValue() const;
-  const std::complex<double> &complexValue() const;
+  long &intValue();
+  double &realValue();
+  std::complex<double> &complexValue();
   /** Serializes the node into the given stream. */
   void serialize(std::ostream &stream, Context &ctx);
 
@@ -94,7 +94,7 @@ public:
   /** Creates a product node. */
   static SmartPtr<Node> createMul(SmartPtr<Node> lhs, SmartPtr<Node> rhs);
   /** Creates a division node. */
-  static SmartPtr<Node> createDiv(SmartPtr<Node> lhs, SmartPtr<Node> rhs);
+  static SmartPtr<Node> createDiv(SmartPtr<Node> nom, SmartPtr<Node> denom);
   /** Creates a power node. */
   static SmartPtr<Node> createPow(SmartPtr<Node> base, SmartPtr<Node> exponent);
   /** Creates a negation node. */
@@ -164,11 +164,51 @@ protected:
   bool applyOnNode(SmartPtr<Node> &value);
 };
 
+
 /** Translates any (X)^(-INTEGER) -> 1/(X^INTEGER). */
-class PowerToDevisitionPass : public Pass
+class PowerToDivisionPass : public Pass
 {
 public:
   /** Performs the transformation. */
+  bool apply(SmartPtr<Node> &node);
+};
+
+/** Remove units pass, tries to remove equivalent expressions.
+ * This includes 0+a, 1*a, a/1, a^1, a^0. */
+class RemoveUnitsPass : public Pass {
+public:
+  /** Performs the transformation. */
+  bool apply(SmartPtr<Node> &node);
+
+private:
+  bool _applyOnAdd(SmartPtr<Node> &node);
+  bool _applyOnSub(SmartPtr<Node> &node);
+  bool _applyOnMul(SmartPtr<Node> &node);
+  bool _applyOnDiv(SmartPtr<Node> &node);
+  bool _applyOnPow(SmartPtr<Node> &node);
+  bool _applyOnNeg(SmartPtr<Node> &node);
+};
+
+
+/** Translates a+-b -> a-b etc. */
+class NormalizeOperatorPass : public Pass
+{
+public:
+  bool apply(SmartPtr<Node> &node);
+
+private:
+  bool _applyOnAdd(SmartPtr<Node> &node);
+  bool _applyOnSub(SmartPtr<Node> &node);
+  bool _applyOnMul(SmartPtr<Node> &node);
+  bool _applyOnDiv(SmartPtr<Node> &node);
+};
+
+
+/** Normalizes values.
+ * This includes -1 -> (-1), as well as 1.0 -> 1 etc. */
+class NormalizeValuesPass : public Pass
+{
+public:
   bool apply(SmartPtr<Node> &node);
 };
 

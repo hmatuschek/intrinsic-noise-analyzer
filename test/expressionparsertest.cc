@@ -22,7 +22,7 @@ ExpressionParserTest::testParser() {
   // And parse serialized expression again:
   GiNaC::ex expression_2 = Parser::Expr::parseExpression(buffer.str(), ctx);
 
-  UT_ASSERT_EQUAL(expression_1, expression_2);
+  UT_ASSERT_EQUAL(expression_1.expand(), expression_2.expand());
 }
 
 
@@ -39,13 +39,13 @@ ExpressionParserTest::testPrettySerialization() {
   // Parse expression;
   GiNaC::ex expression_1 = Parser::Expr::parseExpression(buffer.str(), ctx);
   // Serialize expression back into string:
-  buffer.str(""); Parser::Expr::serializeExpression(expression_1, buffer, ctx,
-                                                    Parser::Expr::SERIALIZE_PRETTY);
+  buffer.str("");
+  Parser::Expr::serializeExpression(expression_1, buffer, ctx, Parser::Expr::SERIALIZE_PRETTY);
   std::cerr << "Serialized expression: " << buffer.str();
   // And parse serialized expression again:
   GiNaC::ex expression_2 = Parser::Expr::parseExpression(buffer.str(), ctx);
 
-  UT_ASSERT_EQUAL(expression_1, expression_2);
+  UT_ASSERT_EQUAL(expression_1.expand(), expression_2.expand());
 }
 
 UnitTest::TestSuite *

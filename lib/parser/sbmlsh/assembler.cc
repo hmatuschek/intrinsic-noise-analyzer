@@ -312,11 +312,11 @@ Assembler::processScaledUnitModifierList(Parser::ConcreteSyntaxTree &sulist,
 
   const Parser::Token &flag = _lexer[sulist[0].getTokenIdx()];
   if ("m" == flag.getValue()) {
-    multiplier = processNumber(sulist[2]);
+    multiplier = processNumber(sulist[2]).to_double();
   } else if ("s" == flag.getValue()) {
-    scale = int(processNumber(sulist[2]));
+    scale = processNumber(sulist[2]).to_int();
   } else if ("e" == flag.getValue()) {
-    exponent = int(processNumber(sulist[2]));
+    exponent = processNumber(sulist[2]).to_int();
   } else {
     SBMLParserError err;
     err << "@line " << flag.getLine()

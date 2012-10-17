@@ -45,7 +45,7 @@ protected:
   /** Parses the arguments of a function call. */
   void processFunctionCallArguments(Parser::ConcreteSyntaxTree &expr, std::vector<GiNaC::ex> &args);
   /** Parses a number. */
-  double processNumber(Parser::ConcreteSyntaxTree &expr);
+  GiNaC::numeric processNumber(Parser::ConcreteSyntaxTree &expr);
 
 protected:
   /** Tiny helper function to parse numbers from strings. */

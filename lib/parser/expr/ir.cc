@@ -138,9 +138,9 @@ bool Node::hasArguments() const { return 0 != _args.size(); }
 size_t Node::numArguments() const { return _args.size(); }
 SmartPtr<Node> &Node::argument(size_t i) { return _args[i]; }
 
-long Node::intValue() const { return _integer; }
-const double &Node::realValue() const { return _real; }
-const std::complex<double> &Node::complexValue() const { return _complex; }
+long &Node::intValue() { return _integer; }
+double &Node::realValue() { return _real; }
+std::complex<double> &Node::complexValue() { return _complex; }
 
 
 void
@@ -178,10 +178,10 @@ Node::_serialize(std::ostream &stream, Context &ctx, size_t precedence)
   }
 
   if (isNegNode()) {
-    if (precedence > 2) { stream << "("; }
+    if (precedence >= 2) { stream << "("; }
     stream << "-";
     argument(0)->_serialize(stream, ctx, 2);
-    if (precedence > 2) { stream << ")"; }
+    if (precedence >= 2) { stream << ")"; }
   }
 
   if (isFunctionNode()) {
@@ -253,12 +253,12 @@ Node::createMul(SmartPtr<Node> lhs, SmartPtr<Node> rhs)
 }
 
 SmartPtr<Node>
-Node::createDiv(SmartPtr<Node> lhs, SmartPtr<Node> rhs)
+Node::createDiv(SmartPtr<Node> nom, SmartPtr<Node> denom)
 {
   Node *node = new Node(DIVISION);
   node->_args.reserve(2);
-  node->_args.push_back(lhs);
-  node->_args.push_back(rhs);
+  node->_args.push_back(nom);
+  node->_args.push_back(denom);
   return SmartPtr<Node>(node);
 }
 
@@ -319,7 +319,7 @@ Node::createFuncExp(SmartPtr<Node> arg)
 {
   Node *node = new Node(FUNCTION);
   node->_args.reserve(1);
-  node->_args[0] = arg;
+  node->_args.push_back(arg);
   node->_function = FUNCTION_EXP;
   return SmartPtr<Node>(node);
 }
@@ -329,7 +329,7 @@ Node::createFuncLog(SmartPtr<Node> arg)
 {
   Node *node = new Node(FUNCTION);
   node->_args.reserve(1);
-  node->_args[0] = arg;
+  node->_args.push_back(arg);
   node->_function = FUNCTION_LOG;
   return SmartPtr<Node>(node);
 }
@@ -354,18 +354,21 @@ PassManager::addPass(Pass *pass) {
 bool
 PassManager::apply(SmartPtr<Node> &node) {
   // First, apply passes
-  bool matched = applyOnNode(node);
+  bool matched = false;
+
+rerun:
+  matched = applyOnNode(node);
 
   // then, traverse into child-nodes:
   bool child_matched = false;
-  for (size_t i=0; i<node->numArguments(); i++)
-  {
+  for (size_t i=0; i<node->numArguments(); i++) {
     child_matched = (child_matched || apply(node->argument(i)));
   }
 
   // If one of the child nodes was modified, re-run passes on this node:
-  if (child_matched)
-    matched |= applyOnNode(node);
+  if (child_matched) {
+    goto rerun;
+  }
 
   return matched | child_matched;
 }
@@ -377,7 +380,7 @@ PassManager::applyOnNode(SmartPtr<Node> &value)
   bool matched = false;
 
 rerun:
-  for (std::list<Pass *>::iterator pass = _passes.begin(); pass != _passes.end(); pass++)
+  for (std::list<Pass *>::iterator pass=_passes.begin(); pass!=_passes.end(); pass++)
   {
     if ((*pass)->apply(value)) {
       matched = true; goto rerun;
@@ -390,23 +393,380 @@ rerun:
 
 
 /* ********************************************************************************************* *
- * PASS: (X)^(-INTEGER) -> 1/(X^INTEGER)
+ * PASS: a^(-b) -> 1/a^b
  * ********************************************************************************************* */
 bool
-PowerToDevisitionPass::apply(SmartPtr<Node> &node)
+PowerToDivisionPass::apply(SmartPtr<Node> &node)
 {
   // Skip non power expressions:
   if (! node->isPowNode()) { return false; }
-  // Check if exponent is integer && negative
-  if (! node->argument(1)->isIntegerNode()) { return false; }
-  if (0 <= node->argument(1)->intValue()) { return false; }
 
   SmartPtr<Node> base = node->argument(0);
-  long exponent = node->argument(1)->intValue();
-  node = Node::createDiv(Node::createValue(1L), Node::createPow(base, Node::createValue(-exponent)));
+  SmartPtr<Node> exponent = node->argument(1);
 
+  // Check if exponent is a negation:
+  if (! exponent->isNegNode()) { return false; }
+
+  // a^(-b) -> 1/a^b
+  node = Node::createDiv(Node::createValue(1L), Node::createPow(base, exponent->argument(0)));
   return true;
 }
+
+
+/* ********************************************************************************************* *
+ * PASS: 0+a, 1*a, etc.
+ * ********************************************************************************************* */
+bool
+RemoveUnitsPass::apply(SmartPtr<Node> &node)
+{
+  // Dispatch by node type:
+  if (node->isAddNode()) {
+    return _applyOnAdd(node);
+  } else if (node->isSubNode()) {
+    return _applyOnSub(node);
+  } else if (node->isMulNode()) {
+    return _applyOnMul(node);
+  } else if (node->isDivNode()) {
+    return _applyOnDiv(node);
+  } else if (node->isPowNode()) {
+    return _applyOnPow(node);
+  } else if (node->isNegNode()) {
+    return _applyOnNeg(node);
+  }
+  return false;
+}
+
+
+bool
+RemoveUnitsPass::_applyOnAdd(SmartPtr<Node> &node)
+{
+  SmartPtr<Node> lhs = node->argument(0);
+  SmartPtr<Node> rhs = node->argument(1);
+
+  if ( (lhs->isIntegerNode() && (0 == lhs->intValue())) ||
+       (lhs->isRealNode() && (0 == lhs->realValue())) ||
+       (lhs->isComplexNode() && (0. == lhs->complexValue())) )
+  {
+    node = rhs;
+    return true;
+  }
+
+  if ( (rhs->isIntegerNode() && (0 == rhs->intValue())) ||
+       (rhs->isRealNode() && (0 == rhs->realValue())) ||
+       (rhs->isComplexNode() && (0. == rhs->complexValue())) )
+  {
+    node = lhs;
+    return true;
+  }
+
+  return false;
+}
+
+
+bool
+RemoveUnitsPass::_applyOnSub(SmartPtr<Node> &node)
+{
+  SmartPtr<Node> lhs = node->argument(0);
+  SmartPtr<Node> rhs = node->argument(1);
+
+  if ( (lhs->isIntegerNode() && (0 == lhs->intValue())) ||
+       (lhs->isRealNode() && (0 == lhs->realValue())) ||
+       (lhs->isComplexNode() && (0. == lhs->complexValue())) )
+  {
+    node = Node::createNeg(rhs);
+    return true;
+  }
+
+  if ( (rhs->isIntegerNode() && (0 == rhs->intValue())) ||
+       (rhs->isRealNode() && (0 == rhs->realValue())) ||
+       (rhs->isComplexNode() && (0. == rhs->complexValue())) )
+  {
+    node = lhs;
+    return true;
+  }
+
+  return false;
+}
+
+
+bool
+RemoveUnitsPass::_applyOnMul(SmartPtr<Node> &node)
+{
+  SmartPtr<Node> lhs = node->argument(0);
+  SmartPtr<Node> rhs = node->argument(1);
+
+  if ( (lhs->isIntegerNode() && (0 == lhs->intValue())) ||
+       (lhs->isRealNode() && (0 == lhs->realValue())) ||
+       (lhs->isComplexNode() && (0. == lhs->complexValue())) )
+  {
+    node = Node::createValue(0L);
+    return true;
+  }
+
+  if ( (rhs->isIntegerNode() && (0 == rhs->intValue())) ||
+       (rhs->isRealNode() && (0 == rhs->realValue())) ||
+       (rhs->isComplexNode() && (0. == rhs->complexValue())) )
+  {
+    node = Node::createValue(0L);
+    return true;
+  }
+
+  if ( (lhs->isIntegerNode() && (1 == lhs->intValue())) ||
+       (lhs->isRealNode() && (1 == lhs->realValue())) ||
+       (lhs->isComplexNode() && (1. == lhs->complexValue())) )
+  {
+    node = rhs;
+    return true;
+  }
+
+  if ( (rhs->isIntegerNode() && (1 == rhs->intValue())) ||
+       (rhs->isRealNode() && (1 == rhs->realValue())) ||
+       (rhs->isComplexNode() && (1. == rhs->complexValue())) )
+  {
+    node = lhs;
+    return true;
+  }
+
+  return false;
+}
+
+
+bool
+RemoveUnitsPass::_applyOnDiv(SmartPtr<Node> &node)
+{
+  SmartPtr<Node> nom = node->argument(0);
+  SmartPtr<Node> denom = node->argument(1);
+
+  if ( (denom->isIntegerNode() && (1 == denom->intValue())) ||
+       (denom->isRealNode() && (1 == denom->realValue())) ||
+       (denom->isComplexNode() && (1. == denom->complexValue())) )
+  {
+    node = nom;
+    return true;
+  }
+
+  return false;
+}
+
+
+bool
+RemoveUnitsPass::_applyOnPow(SmartPtr<Node> &node)
+{
+  SmartPtr<Node> base = node->argument(0);
+  SmartPtr<Node> exponent = node->argument(1);
+
+  if ( (exponent->isIntegerNode() && (0 == exponent->intValue())) ||
+       (exponent->isRealNode() && (0 == exponent->realValue())) ||
+       (exponent->isComplexNode() && (0. == exponent->complexValue())) )
+  {
+    node = Node::createValue(1L);
+    return true;
+  }
+
+  if ( (exponent->isIntegerNode() && (1 == exponent->intValue())) ||
+       (exponent->isRealNode() && (1 == exponent->realValue())) ||
+       (exponent->isComplexNode() && (1. == exponent->complexValue())) )
+  {
+    node = base;
+    return true;
+  }
+
+  return false;
+}
+
+
+bool
+RemoveUnitsPass::_applyOnNeg(SmartPtr<Node> &node)
+{
+  SmartPtr<Node> arg = node->argument(0);
+
+  // -(-(a)) -> a
+  if (arg->isNegNode()) {
+    // looks wired but necessary to avoid direct setting of references, which breakes
+    // reference counter.
+    arg = arg->argument(0);
+    node = arg;
+  }
+
+  return false;
+}
+
+
+
+/* ********************************************************************************************* *
+ * PASS: a+(-b) -> a-b; a-(-b) -> a+b; -a-b -> -(a+b); etc
+ * ********************************************************************************************* */
+bool
+NormalizeOperatorPass::apply(SmartPtr<Node> &node)
+{
+  // Dispatch
+  if (node->isAddNode()) {
+    return _applyOnAdd(node);
+  } else if (node->isSubNode()) {
+    return _applyOnSub(node);
+  } else if (node->isMulNode()) {
+    return _applyOnMul(node);
+  } else if (node->isDivNode()) {
+    return _applyOnDiv(node);
+  }
+
+  return false;
+}
+
+
+bool
+NormalizeOperatorPass::_applyOnAdd(SmartPtr<Node> &node)
+{
+  SmartPtr<Node> lhs = node->argument(0);
+  SmartPtr<Node> rhs = node->argument(1);
+
+  // (-a)+b -> b-a
+  if (lhs->isNegNode()) {
+    node = Node::createSub(rhs, lhs->argument(0));
+    return true;
+  }
+
+  // a+(-b) -> a-b
+  if (rhs->isNegNode()) {
+    node = Node::createSub(lhs, rhs->argument(0));
+    return true;
+  }
+
+  return false;
+}
+
+
+bool
+NormalizeOperatorPass::_applyOnSub(SmartPtr<Node> &node)
+{
+  SmartPtr<Node> lhs = node->argument(0);
+  SmartPtr<Node> rhs = node->argument(1);
+
+  // a-(-b) -> a+b
+  if (rhs->isNegNode()) {
+    node = Node::createAdd(lhs, rhs->argument(0));
+    return true;
+  }
+
+  // -a-b -> -(a+b)
+  if (lhs->isNegNode()) {
+    node = Node::createNeg(Node::createAdd(rhs, lhs->argument(0)));
+    return true;
+  }
+
+
+  return false;
+}
+
+
+bool
+NormalizeOperatorPass::_applyOnMul(SmartPtr<Node> &node)
+{
+  SmartPtr<Node> lhs = node->argument(0);
+  SmartPtr<Node> rhs = node->argument(1);
+
+  // -a*b -> -(a*b)
+  if (lhs->isNegNode()) {
+    node = Node::createNeg(Node::createMul(lhs->argument(0), rhs));
+    return true;
+  }
+
+  // a*(-b) -> -(a*b)
+  if (rhs->isNegNode()) {
+    node = Node::createNeg(Node::createMul(lhs, rhs->argument(0)));
+    return true;
+  }
+
+  // a*(b/c) -> (a*b)/c iff a is not a quotient:
+  if ((!lhs->isDivNode()) && rhs->isDivNode()) {
+    SmartPtr<Node> nom = rhs->argument(0);
+    SmartPtr<Node> denom = rhs->argument(1);
+    node = Node::createDiv(Node::createMul(lhs, nom), denom);
+    return true;
+  }
+
+  // (a/b)*c -> (a*c)/b iff a is not a quotient:
+  if (lhs->isDivNode() && (!rhs->isDivNode())) {
+    SmartPtr<Node> nom = lhs->argument(0);
+    SmartPtr<Node> denom = lhs->argument(1);
+    node = Node::createDiv(Node::createMul(rhs, nom), denom);
+    return true;
+  }
+
+  // (a/b)*(c/d) -> (a*c)/(b*d)
+  if (lhs->isDivNode() && rhs->isDivNode()) {
+    SmartPtr<Node> a = lhs->argument(0);
+    SmartPtr<Node> b = lhs->argument(1);
+    SmartPtr<Node> c = rhs->argument(0);
+    SmartPtr<Node> d = rhs->argument(1);
+    node = Node::createDiv(Node::createMul(a,c), Node::createMul(b,d));
+    return true;
+  }
+
+  return false;
+}
+
+
+bool
+NormalizeOperatorPass::_applyOnDiv(SmartPtr<Node> &node)
+{
+  SmartPtr<Node> nom = node->argument(0);
+  SmartPtr<Node> denom = node->argument(1);
+
+  // (-a)/b -> -(a/b)
+  if (nom->isNegNode()) {
+    node = Node::createNeg(Node::createDiv(nom->argument(0), denom));
+    return true;
+  }
+
+  // a/(-b) -> -(a/b)
+  if (denom->isNegNode()) {
+    node = Node::createNeg(Node::createDiv(nom, denom->argument(0)));
+    return true;
+  }
+
+  return false;
+}
+
+
+
+/* ********************************************************************************************* *
+ * PASS: -1 -> -(1), 1.0 -> 1 etc...
+ * ********************************************************************************************* */
+bool
+NormalizeValuesPass::apply(SmartPtr<Node> &node)
+{
+  // -1 -> -(1)
+  if (node->isIntegerNode() && (0 > node->intValue())) {
+    std::cerr << "Subs: " << node->intValue() << " -> " << -node->intValue() << std::endl;
+    node = Node::createNeg(Node::createValue(-node->intValue()));
+    return true;
+  }
+
+  // -1.0 -> -(1.0)
+  if (node->isRealNode() && (0. > node->realValue())) {
+    std::cerr << "Subs: " << node->realValue() << " -> " << -node->realValue() << std::endl;
+    node = Node::createNeg(Node::createValue(-node->realValue()));
+    return true;
+  }
+
+  // 1.0 -> 1
+  if (node->isRealNode() && (node->realValue() == double(long(node->realValue())))) {
+    std::cerr << "Subs: " << node->realValue() << " -> " << long(node->realValue()) << std::endl;
+    node = Node::createValue(long(node->realValue()));
+    return true;
+  }
+
+  // 1.0 + 0.0j -> 1.0
+  if (node->isComplexNode() && (0. == node->complexValue().imag())) {
+    std::cerr << "Subs: " << node->complexValue() << " -> " << node->complexValue().real() << std::endl;
+    node = Node::createValue(node->complexValue().real());
+    return true;
+  }
+
+  return false;
+}
+
 
 
 /* ********************************************************************************************* *
@@ -416,9 +776,17 @@ SmartPtr<Node> &
 PrettySerializationTrafo::apply(SmartPtr<Node> &expression)
 {
   PassManager manager;
-  // (X)^(-INTEGER) -> 1/(X^INTEGER)
-  manager.addPass(new PowerToDevisitionPass());
 
+  // Normalize values like 1.0 -> 1 etc.
+  manager.addPass(new NormalizeValuesPass());
+  // 1*a -> a etc...
+  manager.addPass(new RemoveUnitsPass());
+  // a+(-b) -> a-b etc...
+  manager.addPass(new NormalizeOperatorPass());
+  // a^-1 -> 1/a etc...
+  manager.addPass(new PowerToDivisionPass());
+
+  // Apply passes on expression:
   manager.apply(expression);
   return expression;
 }
