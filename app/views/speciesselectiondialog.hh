@@ -1,19 +1,20 @@
-#ifndef __INA_APP_STEADYSTATE_PLOTDIALOG_HH__
-#define __INA_APP_STEADYSTATE_PLOTDIALOG_HH__
+#ifndef __INA_APP_VIEWS_SPECIESSELECTIONDIALOG_HH__
+#define __INA_APP_VIEWS_SPECIESSELECTIONDIALOG_HH__
 
 #include <QDialog>
 #include <QListWidget>
 #include <QLabel>
 #include <ast/model.hh>
 
-/** Simple plot dialog to assemble quickly some default plots for the steady state analysis. */
-class SSScanPlotDialog : public QDialog
+/** Simple plot to select some species from the model.
+ * Mostly used by the quick plots. */
+class SpeciesSelectionDialog : public QDialog
 {
   Q_OBJECT
 
 public:
   /** Constructor. */
-  explicit SSScanPlotDialog(iNA::Ast::Model *model, QWidget *parent = 0);
+  explicit SpeciesSelectionDialog(iNA::Ast::Model *model, QWidget *parent = 0);
   
   /** Retunrs the list of selected species. */
   QList<QString> getSelectedSpecies() const;
@@ -34,4 +35,4 @@ private:
   QListWidget *_species_list;
 };
 
-#endif // __INA_APP_STEADYSTATE_PLOTDIALOG_HH__
+#endif

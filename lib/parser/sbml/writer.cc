@@ -289,7 +289,7 @@ Writer::processSpeciesList(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIER Mo
   for (size_t i=0; i<model.numSpecies(); i++) {
     Ast::Species *species = model.getSpecies(i);
     LIBSBML_CPP_NAMESPACE_QUALIFIER Species *sbml_species = sbml_model->createSpecies();
-    sbml_species->setHasOnlySubstanceUnits(model.speciesHasSubstanceUnits());
+    sbml_species->setHasOnlySubstanceUnits(model.speciesHaveSubstanceUnits());
     processSpecies(species, sbml_species);
 
     sbml_species->setCompartment(species->getCompartment()->getIdentifier());

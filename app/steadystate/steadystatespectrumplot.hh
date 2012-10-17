@@ -1,9 +1,9 @@
-#ifndef STEADYSTATESPECTRUMPLOT_HH
-#define STEADYSTATESPECTRUMPLOT_HH
+#ifndef __INA_APP_STEADYSTATE_STEADYSTATESPECTRUMPLOT_HH__
+#define __INA_APP_STEADYSTATE_STEADYSTATESPECTRUMPLOT_HH__
 
 #include "../plot/plot.hh"
 #include "../timeseries.hh"
-#include "lnasteadystatetask.hh"
+#include "steadystatetask.hh"
 
 
 class SteadyStateSpectrumPlot : public Plot::Figure
@@ -20,7 +20,7 @@ class SteadyStatePlot : public Plot::Figure
   Q_OBJECT
 
 public:
-  explicit SteadyStatePlot(LNASteadyStateTask *task, const QStringList selected_species, QObject *parent=0);
+  explicit SteadyStatePlot(SteadyStateTask *task, const QStringList selected_species, QObject *parent=0);
 };
 
-#endif // STEADYSTATESPECTRUMPLOT_HH
+#endif // __INA_APP_STEADYSTATE_STEADYSTATESPECTRUMPLOT_HH__

@@ -18,8 +18,7 @@ public:
    */
   class Config :
       public GeneralTaskConfig,
-      public ModelSelectionTaskConfig,
-      public SpeciesSelectionTaskConfig
+      public ModelSelectionTaskConfig
   {
   protected:
     iNA::Models::IOSmodel *_model;
@@ -82,23 +81,18 @@ public:
 protected:
   /** Holds the task configuration. */
   Config config;
+  /** Holds the number of species defined in the selected model. */
+  size_t _Ns;
   /** Holds an instance of the analysis. */
   iNA::Models::SteadyStateAnalysis<iNA::Models::IOSmodel> steady_state;
-  QVector<QString> species_name;
-
+  /** Will hold the results. */
   Table parameterScan;
-
-  QVector<size_t> index_table;
 
 
 public:
   explicit ParamScanTask(const Config &config, QObject *parent=0);
 
   Table &getParameterScan();
-
-  inline size_t numSpecies() const { return config.getNumSpecies(); }
-
-  const QString &getSpeciesName(int i);
 
   iNA::Ast::Unit getSpeciesUnit() const;
 

@@ -8,6 +8,7 @@
 
 #include "../application.hh"
 #include "../doctree/plotitem.hh"
+#include "../views/speciesselectiondialog.hh"
 #include "ssaplot.hh"
 
 
@@ -68,13 +69,20 @@ SSAResultWidget::SSAResultWidget(SSATaskWrapper *wrapper, QWidget *parent) :
 void
 SSAResultWidget::showPlot()
 {
+  // Ask user to select some species:
+  SpeciesSelectionDialog dialog(ssa_task_wrapper->getSSATask()->getModel());
+  dialog.setWindowTitle(tr("SSA quick plot"));
+  dialog.setTitle(tr("Select the species to plot."));
+  if (QDialog::Accepted != dialog.exec()) { return; }
+  QStringList selected_species = dialog.getSelectedSpecies();
+
   // Simply construct and add plot to task:
   Application::getApp()->docTree()->addPlot(
         this->ssa_task_wrapper,
-        new PlotItem(new SSAPlot(this->ssa_task_wrapper->getSSATask())));
+        new PlotItem(new SSAPlot(selected_species, this->ssa_task_wrapper->getSSATask())));
   Application::getApp()->docTree()->addPlot(
         this->ssa_task_wrapper,
-        new PlotItem(new SSACorrelationPlot(this->ssa_task_wrapper->getSSATask())));
+        new PlotItem(new SSACorrelationPlot(selected_species, this->ssa_task_wrapper->getSSATask())));
 }
 
 

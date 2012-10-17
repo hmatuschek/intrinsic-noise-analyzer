@@ -1,9 +1,9 @@
-#include "lnasteadystatetask.hh"
+#include "steadystatetask.hh"
 
 /* ******************************************************************************************* *
  * Implementation of LNASteadyStateTask::Config, the task configuration.
  * ******************************************************************************************* */
-LNASteadyStateTask::Config::Config()
+SteadyStateTask::Config::Config()
   : GeneralTaskConfig(), ModelSelectionTaskConfig(),
     model(0), max_iterations(0), max_time_step(0), epsilon(0), auto_frequencies(false),
     min_frequency(0), max_frequency(0), num_frequency(0)
@@ -11,7 +11,7 @@ LNASteadyStateTask::Config::Config()
   // Pass...
 }
 
-LNASteadyStateTask::Config::Config(const Config &other)
+SteadyStateTask::Config::Config(const Config &other)
   : GeneralTaskConfig(), ModelSelectionTaskConfig(other),
     model(other.model), max_iterations(other.max_iterations), max_time_step(other.max_time_step),
     epsilon(other.epsilon), auto_frequencies(other.auto_frequencies),
@@ -22,7 +22,7 @@ LNASteadyStateTask::Config::Config(const Config &other)
 }
 
 void
-LNASteadyStateTask::Config::setModelDocument(DocumentItem *document)
+SteadyStateTask::Config::setModelDocument(DocumentItem *document)
 {
   ModelSelectionTaskConfig::setModelDocument(document);
   // Construct LNA model from SBML model associated with the selected document
@@ -30,44 +30,44 @@ LNASteadyStateTask::Config::setModelDocument(DocumentItem *document)
 }
 
 iNA::Ast::Model *
-LNASteadyStateTask::Config::getModel() const
+SteadyStateTask::Config::getModel() const
 {
   return this->model;
 }
 
 
 size_t
-LNASteadyStateTask::Config::getMaxIterations() const
+SteadyStateTask::Config::getMaxIterations() const
 {
   return this->max_iterations;
 }
 
 void
-LNASteadyStateTask::Config::setMaxIterations(size_t num)
+SteadyStateTask::Config::setMaxIterations(size_t num)
 {
   this->max_iterations = num;
 }
 
 double
-LNASteadyStateTask::Config::getMaxTimeStep() const
+SteadyStateTask::Config::getMaxTimeStep() const
 {
   return max_time_step;
 }
 
 void
-LNASteadyStateTask::Config::setMaxTimeStep(double t_max)
+SteadyStateTask::Config::setMaxTimeStep(double t_max)
 {
   max_time_step = t_max;
 }
 
 double
-LNASteadyStateTask::Config::getEpsilon() const
+SteadyStateTask::Config::getEpsilon() const
 {
   return this->epsilon;
 }
 
 void
-LNASteadyStateTask::Config::setEpsilon(double eps)
+SteadyStateTask::Config::setEpsilon(double eps)
 {
   this->epsilon = eps;
 }
@@ -77,13 +77,12 @@ LNASteadyStateTask::Config::setEpsilon(double eps)
 /* ******************************************************************************************* *
  * Implementation of LNASteadyStateTask::Config, the task configuration.
  * ******************************************************************************************* */
-LNASteadyStateTask::LNASteadyStateTask(const Config &config, QObject *parent)
+SteadyStateTask::SteadyStateTask(const Config &config, QObject *parent)
   : Task(parent), config(config), _Ns(config.getModel()->numSpecies()),
     steady_state(dynamic_cast<iNA::Models::IOSmodel &>(*config.getModel()),
       config.getMaxIterations(), config.getEpsilon(), config.getMaxTimeStep()),
-    concentrations(_Ns), emre_corrections(_Ns), ios_corrections(_Ns),
-    lna_covariances(_Ns, _Ns), ios_covariances(_Ns, _Ns),
-    spectrum(1, _Ns+1)
+    re_concentrations(_Ns), emre_corrections(_Ns), ios_corrections(_Ns),
+    lna_covariances(_Ns, _Ns), ios_covariances(_Ns, _Ns), spectrum(1, _Ns+1)
 {
   // Pass...
 }
@@ -91,16 +90,16 @@ LNASteadyStateTask::LNASteadyStateTask(const Config &config, QObject *parent)
 
 
 void
-LNASteadyStateTask::process()
+SteadyStateTask::process()
 {
   this->setState(Task::INITIALIZED);
   this->setProgress(0);
 
-  iNA::Models::IOSmodel *lna_model
+  iNA::Models::IOSmodel *ios_model
       = dynamic_cast<iNA::Models::IOSmodel *>(config.getModel());
 
   // Allocate reduced state vector (independent species)
-  Eigen::VectorXd reduced_state(lna_model->getDimension());
+  Eigen::VectorXd reduced_state(ios_model->getDimension());
 
   // Calc steadystate:
   this->steady_state.calcSteadyState(reduced_state);
@@ -113,9 +112,9 @@ LNASteadyStateTask::process()
   }
 
   // Get full state and covariance and EMRE corrections for steady state;
-  Eigen::VectorXd thirdOrder(config.getModel()->numSpecies());
-  lna_model->fullState(reduced_state, this->concentrations, this->lna_covariances, this->emre_corrections,
-                       this->ios_covariances, thirdOrder, this->ios_corrections);
+  Eigen::VectorXd thirdOrder(_Ns);
+  ios_model->fullState(reduced_state, re_concentrations, lna_covariances, emre_corrections,
+                       ios_covariances, thirdOrder, ios_corrections);
 
 //  // Get steadystate spectrum:
 //  Eigen::MatrixXd spectrum(this->frequencies.size(), this->model->numSpecies());
@@ -150,63 +149,63 @@ LNASteadyStateTask::process()
 
 
 QString
-LNASteadyStateTask::getLabel()
+SteadyStateTask::getLabel()
 {
   return "Steady State Analysis (SSE)";
 }
 
 
 iNA::Ast::Unit
-LNASteadyStateTask::getSpeciesUnit() const
+SteadyStateTask::getSpeciesUnit() const
 {
   return config.getModel()->getSpeciesUnit();
 }
 
 Eigen::VectorXd &
-LNASteadyStateTask::getConcentrations()
+SteadyStateTask::getConcentrations()
 {
-  return this->concentrations;
+  return this->re_concentrations;
 }
 
 
 Eigen::VectorXd &
-LNASteadyStateTask::getEMRECorrections()
+SteadyStateTask::getEMRECorrections()
 {
   return this->emre_corrections;
 }
 
 Eigen::VectorXd &
-LNASteadyStateTask::getIOSCorrections()
+SteadyStateTask::getIOSCorrections()
 {
   return this->ios_corrections;
 }
 
 Eigen::MatrixXd &
-LNASteadyStateTask::getLNACovariances()
+SteadyStateTask::getLNACovariances()
 {
   return this->lna_covariances;
 }
 
 Eigen::MatrixXd &
-LNASteadyStateTask::getIOSCovariances()
+SteadyStateTask::getIOSCovariances()
 {
   return this->ios_covariances;
 }
 
 Table &
-LNASteadyStateTask::getSpectrum()
+SteadyStateTask::getSpectrum()
 {
   return this->spectrum;
 }
 
 QString
-LNASteadyStateTask::getSpeciesId(int i)
+SteadyStateTask::getSpeciesId(int i)
 {
   return config.getModel()->getSpecies(i)->getIdentifier().c_str();
 }
 
 QString
-LNASteadyStateTask::getSpeciesName(int i)
+SteadyStateTask::getSpeciesName(int i)
 {
   iNA::Ast::Species *species = config.getModel()->getSpecies(i);
   if (species->hasName()) { return species->getName().c_str(); }

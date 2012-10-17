@@ -1,7 +1,7 @@
 #include "main.hh"
 
 #include "ssa/ssamodule.hh"
-#include "steadystate/lnasteadystatemodule.hh"
+#include "steadystate/steadystatemodule.hh"
 #include "sse/ssemodule.hh"
 #include "ssscan/ssscanmodule.hh"
 #include "doctree/documentitem.hh"
@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
 
 
   // Load SteadyState module:
-  app->addModule(new LNASteadyStateModule(app));
+  app->addModule(new SteadyStateModule(app));
   // Load parameter scan module
   app->addModule(new ParamScanModule(app));
 

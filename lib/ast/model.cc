@@ -120,12 +120,12 @@ Model::isExplTimeDep(const GiNaC::ex &expression) const {
 
 
 bool
-Model::speciesHasSubstanceUnits() const {
+Model::speciesHaveSubstanceUnits() const {
   return _species_have_substance_units;
 }
 
 void
-Model::setSpeciesHasSubstanceUnits(bool has_substance_units)
+Model::setSpeciesHaveSubstanceUnits(bool has_substance_units)
 {
   // If nothing changes -> skip
   if (_species_have_substance_units == has_substance_units) { return; }

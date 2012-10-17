@@ -391,97 +391,128 @@ ReactionEditorPage::_collectCompartments(QList<QPair<int, QString> > &reactants,
   return compartments;
 }
 
+std::map<QString,int>
+ReactionEditorPage::_collectStoichiometries(QList<QPair<int, QString> > &reactants)
+{
+    // Collect reactants and assemble stoichiometries
+    std::map<QString,int> stoichiometries;
+    for (QList< QPair<int, QString> >::iterator item=reactants.begin(); item != reactants.end(); item++)
+    {
+       std::map< QString, int >::iterator it= stoichiometries.find(item->second) ;
+       if( it!=stoichiometries.end())
+       {
+            it->second+=item->first;
+       }
+       else
+       {
+           stoichiometries.insert(std::pair<QString,int>(item->second,item->first));
+       }
+    }
+
+    return stoichiometries;
+
+}
 
 
 MathItem *
 ReactionEditorPage::_renderKineticLaw(bool is_reversible, QList<QPair<int, QString> > &reactants,
                                       QList<QPair<int, QString> > &products)
 {
-  std::set<iNA::Ast::Compartment *> compartments = _collectCompartments(reactants, products);
 
+  // Collect reactants and assemble stoichiometries
+  std::map<QString,int> reactantsStoi = _collectStoichiometries(reactants);
+
+  std::set<iNA::Ast::Compartment *> compartments = _collectCompartments(reactants, products);
 
   MathFormula *formula = new MathFormula();
 
-  // Handle reactants:
-  if (is_reversible) {
-    formula->appendItem(new MathSub(new MathText("k"), new MathText("fwd")));
-  } else {
-    formula->appendItem(new MathText("k"));
-  }
+      // Handle reactants:
+      if (is_reversible) {
+        formula->appendItem(new MathSub(new MathText("k"), new MathText("fwd")));
+      } else {
+        formula->appendItem(new MathText("k"));
+      }
 
-  if (MASSACTION_SINGLE == kineticLawType()) {
-    formula->appendItem(new MathText(QChar(0x00B7)));
-    formula->appendItem(_renderCompartment(*(compartments.begin())));
-  }
+      if (MASSACTION_SINGLE == kineticLawType()) {
+        if(_model.speciesHaveSubstanceUnits())
+        {
+            int exponent = -1;
+            for(std::map<QString,int>::iterator it=reactantsStoi.begin(); it!=reactantsStoi.end(); it++)
+                exponent += it->second;
+            switch(exponent)
+            {
+               case 0:
+                break;
+               case -1:
+                formula->appendItem(new MathText(QChar(0x00B7)));
+                formula->appendItem(_renderCompartment(*(compartments.begin())));
+                break;
+               default:
+                formula->appendItem(new MathText(QChar(0x00B7)));
+                formula->appendItem(new MathSup(_renderCompartment(*(compartments.begin())), new MathText(QString("-%1").arg(exponent))));
+                break;
+            }
+        }
+        else
+        {
+            formula->appendItem(new MathText(QChar(0x00B7)));
+            formula->appendItem(_renderCompartment(*(compartments.begin())));
+        }
+      }
 
-  // Collect reactants and assemble stoichiometries
-  std::map<QString,int> reactantsStoi;
-  for (QList< QPair<int, QString> >::iterator item=reactants.begin(); item != reactants.end(); item++)
-  {
-     std::map< QString, int >::iterator it= reactantsStoi.find(item->second) ;
-     if( it!=reactantsStoi.end())
-     {
-          it->second+=item->first;
-     }
-     else
-     {
-         reactantsStoi.insert(std::pair<QString,int>(item->second,item->first));
-     }
-  }
 
-  for (std::map< QString, int>::iterator item=reactantsStoi.begin(); item != reactantsStoi.end(); item++)
-  {
-    formula->appendItem(new MathText(QChar(0x00B7)));
-    formula->appendItem(_renderFactor(item->first, int(item->second)));
-  }
+      for (std::map< QString, int>::iterator item=reactantsStoi.begin(); item != reactantsStoi.end(); item++)
+      {
+        formula->appendItem(new MathText(QChar(0x00B7)));
+        formula->appendItem(_renderFactor(item->first, int(item->second)));
+      }
 
+      // If reaction is reversible, include reverse rate
+      if (is_reversible) {
 
-//  for (QList< QPair<int, QString> >::iterator item=reactants.begin(); item != reactants.end(); item++)
-//  {
-//    formula->appendItem(new MathText(QChar(0x00B7)));
-//    formula->appendItem(_renderFactor(item->second, item->first));
-//  }
+        // Collect products and assemble stoichiometries
+        std::map<QString,int> productsStoi = _collectStoichiometries(products);
 
-  // If reaction is reversible, include reverse rate
-  if (is_reversible) {
-    formula->appendItem(new MathSpace(MathSpace::MEDIUM_SPACE));
-    formula->appendItem(new MathText("-"));
-    formula->appendItem(new MathSpace(MathSpace::MEDIUM_SPACE));
+        formula->appendItem(new MathSpace(MathSpace::MEDIUM_SPACE));
+        formula->appendItem(new MathText("-"));
+        formula->appendItem(new MathSpace(MathSpace::MEDIUM_SPACE));
 
-    formula->appendItem(new MathSub(new MathText("k"), new MathText("rev")));
+        formula->appendItem(new MathSub(new MathText("k"), new MathText("rev")));
 
-    if (MASSACTION_SINGLE == kineticLawType()) {
-      formula->appendItem(new MathText(QChar(0x00B7)));
-      formula->appendItem(_renderCompartment(*(compartments.begin())));
-    }
+        if (MASSACTION_SINGLE == kineticLawType()) {
+            if(_model.speciesHaveSubstanceUnits())
+            {
+                int exponent = -1;
+                for(std::map<QString,int>::iterator it=productsStoi.begin(); it!=productsStoi.end(); it++)
+                    exponent += it->second;
+                switch(exponent)
+                {
+                   case 0:
+                    break;
+                   case -1:
+                    formula->appendItem(new MathText(QChar(0x00B7)));
+                    formula->appendItem(_renderCompartment(*(compartments.begin())));
+                    break;
+                   default:
+                    formula->appendItem(new MathText(QChar(0x00B7)));
+                    formula->appendItem(new MathSup(_renderCompartment(*(compartments.begin())), new MathText(QString("-%1").arg(exponent))));
+                    break;
+                }
+            }
+            else
+            {
+                formula->appendItem(new MathText(QChar(0x00B7)));
+                formula->appendItem(_renderCompartment(*(compartments.begin())));
+            }
+        }
 
-    // Collect products and assemble stoichiometries
-    std::map<QString,int> productsStoi;
-    for (QList< QPair<int, QString> >::iterator item=products.begin(); item != products.end(); item++)
-    {
-       std::map< QString, int >::iterator it= productsStoi.find(item->second) ;
-       if( it!=productsStoi.end())
-       {
-            it->second+=item->first;
-       }
-       else
-       {
-           productsStoi.insert(std::pair<QString,int>(item->second,item->first));
-       }
-    }
+        for (std::map<QString,int>::iterator item=productsStoi.begin(); item != productsStoi.end(); item++)
+        {
+          formula->appendItem(new MathText(QChar(0x00B7)));
+          formula->appendItem(_renderFactor(item->first, item->second));
+        }
 
-    for (std::map<QString,int>::iterator item=productsStoi.begin(); item != productsStoi.end(); item++)
-    {
-      formula->appendItem(new MathText(QChar(0x00B7)));
-      formula->appendItem(_renderFactor(item->first, item->second));
-    }
-
-//    for (QList< QPair<int, QString> >::iterator item=productsStoi.begin(); item != products.end(); item++)
-//    {
-//      formula->appendItem(new MathText(QChar(0x00B7)));
-//      formula->appendItem(_renderFactor(item->second, item->first));
-//    }
-  }
+      }
 
   return formula;
 }
@@ -490,33 +521,42 @@ ReactionEditorPage::_renderKineticLaw(bool is_reversible, QList<QPair<int, QStri
 MathItem *
 ReactionEditorPage::_renderFactor(const QString &id, int exponent)
 {
-  MathFormula *name = new MathFormula();
-  name->appendItem(new MathText("["));
-  name->appendItem(_renderName(id));
-  name->appendItem(new MathText("]"));
 
-  MathFormula *factor = new MathFormula();
+      MathFormula *name = new MathFormula();
 
-  if (MASSACTION_MULTI == kineticLawType()) {
-    if (1 == exponent) {
-      factor->appendItem(name->copy());
-    } else {
-      factor->appendItem(new MathSup(name->copy(), new MathText(QString("%1").arg(exponent))));
-    }
-  } else if (MASSACTION_SINGLE == kineticLawType()) {
-    factor->appendItem(name->copy());
-    for (int i=1; i<exponent; i++) {
-      MathFormula *term = new MathFormula();
-      term->appendItem(name->copy());
-      term->appendItem(new MathText("-"));
-      if (i > 1) {
-        term->appendItem(new MathText(QString("%1").arg(i)));
-        term->appendItem(new MathText(QChar(0x00B7)));
+      if(!_model.speciesHaveSubstanceUnits() || MASSACTION_MULTI == kineticLawType()) name->appendItem(new MathText("["));
+      name->appendItem(_renderName(id));
+      if(!_model.speciesHaveSubstanceUnits() || MASSACTION_MULTI == kineticLawType()) name->appendItem(new MathText("]"));
+
+      MathFormula *factor = new MathFormula();
+
+      if (MASSACTION_MULTI == kineticLawType()) {
+        if (1 == exponent) {
+          factor->appendItem(name->copy());
+        } else {
+          factor->appendItem(new MathSup(name->copy(), new MathText(QString("%1").arg(exponent))));
+        }
+      } else if (MASSACTION_SINGLE == kineticLawType()) {
+        factor->appendItem(name->copy());
+        for (int i=1; i<exponent; i++) {
+          MathFormula *term = new MathFormula();
+          term->appendItem(name->copy());
+          term->appendItem(new MathText("-"));
+          if (i > 1) {
+            term->appendItem(new MathText(QString("%1").arg(i)));
+          }
+          if(!_model.speciesHaveSubstanceUnits())
+          {
+               term->appendItem(new MathText(QChar(0x00B7)));
+              term->appendItem(new MathSup(_renderCompartmentOf(id), new MathText("-1")));
+          }
+          else if(i==1)
+          {
+              term->appendItem(new MathText("1"));
+          }
+          factor->appendItem(new MathBlock(term, new MathText("("), new MathText(")")));
+        }
       }
-      term->appendItem(new MathSup(_renderCompartmentOf(id), new MathText("-1")));
-      factor->appendItem(new MathBlock(term, new MathText("("), new MathText(")")));
-    }
-  }
 
   delete name;
   return factor;
@@ -784,7 +824,7 @@ ReactionEditorPage::_createMASingleFactor(iNA::Ast::Species *species, int stoich
   // Get species "symbol"
   GiNaC::ex species_expr = species->getSymbol();
   // If species are defined in substance units:
-  if (_model.speciesHasSubstanceUnits()) {
+  if (_model.speciesHaveSubstanceUnits()) {
     species_expr /= species->getCompartment()->getSymbol();
   }
   // If substance units are not item
@@ -809,7 +849,7 @@ ReactionEditorPage::_createMAMultiFactor(iNA::Ast::Species *species, int stoichi
   // Get species "symbol"
   GiNaC::ex species_expr = species->getSymbol();
   // If species are defined in substance units:
-  if (_model.speciesHasSubstanceUnits()) {
+  if (_model.speciesHaveSubstanceUnits()) {
     species_expr /= species->getCompartment()->getSymbol();
   }
 

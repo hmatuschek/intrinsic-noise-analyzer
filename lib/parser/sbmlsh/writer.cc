@@ -244,10 +244,10 @@ Writer::processSpeciesList(Ast::Model &model, std::ostream &output) {
 void
 Writer::processSpecies(Ast::Species *species, const Ast::Model &model, std::ostream &output) {
   output << std::endl << " " << species->getCompartment()->getIdentifier() << ": ";
-  if (model.speciesHasSubstanceUnits()) { output << species->getIdentifier() << " "; }
+  if (model.speciesHaveSubstanceUnits()) { output << species->getIdentifier() << " "; }
   else {output << "[" << species->getIdentifier() << "] "; }
   output << " = "; Parser::Expr::Writer::write(species->getValue(), model, output); output << " ";
-  if (model.speciesHasSubstanceUnits()) { output << "s"; }
+  if (model.speciesHaveSubstanceUnits()) { output << "s"; }
   if (species->isConst()) { output << "c"; }
   if (species->hasName()) { output << " \"" << species->getName() << "\""; }
 }

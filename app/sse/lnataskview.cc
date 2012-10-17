@@ -10,7 +10,7 @@
 #include "../application.hh"
 #include "../doctree/plotitem.hh"
 #include "lnaplot.hh"
-#include "replotdialog.hh"
+#include "../views/speciesselectiondialog.hh"
 
 
 /* ********************************************************************************************* *
@@ -68,8 +68,8 @@ LNAResultWidget::LNAResultWidget(LNATaskWrapper *task_wrapper, QWidget *parent):
 void
 LNAResultWidget::plotButtonPressed()
 {
-  SSEPlotDialog dialog(lna_task_wrapper->getLNATask()->getConfig().getModel());
-  dialog.setWindowTitle(tr("LNA quick plot dialog"));
+  SpeciesSelectionDialog dialog(lna_task_wrapper->getLNATask()->getConfig().getModel());
+  dialog.setWindowTitle(tr("LNA quick plot"));
   dialog.setTitle(tr("Select the species to plot."));
 
   if (QDialog::Rejected == dialog.exec()) { return; }

@@ -54,7 +54,7 @@ Ginac2Formula::visit(const GiNaC::symbol &node)
 
   // Now, the name has been rendered. If variable was a species with concentration untis ->
   // put name in brackets:
-  if (iNA::Ast::Node::isSpecies(var) && !(model->speciesHasSubstanceUnits())) {
+  if (iNA::Ast::Node::isSpecies(var) && !(model->speciesHaveSubstanceUnits())) {
     MathFormula *tmp = new MathFormula();
     tmp->appendItem(new MathText("["));
     tmp->appendItem(_stack.back()); _stack.pop_back();

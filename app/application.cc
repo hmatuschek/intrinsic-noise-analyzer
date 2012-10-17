@@ -2,13 +2,13 @@
 #include "mainwindow.hh"
 #include "views/importmodeldialog.hh"
 #include "views/exportmodeldialog.hh"
+#include "views/sbmlsheditordialog.hh"
+#include "views/newmodeldialog.hh"
 
 #include <QMessageBox>
 
-#include "views/sbmlsheditordialog.hh"
-
-#include "parser/parser.hh"
-#include "parser/exception.hh"
+#include <parser/parser.hh>
+#include <parser/exception.hh>
 
 #include <trafo/reversiblereactionconverter.hh>
 
@@ -70,6 +70,10 @@ Application::Application() :
   _selected_item = 0;
 
   // Assemble menu actions:
+  _newModel = new QAction(tr("New model..."), this);
+  _newModel->setEnabled(true);
+  _newModel->setStatusTip(tr("Creates a new & empty model"));
+
   _importModel = new QAction(tr("Open model..."), this);
   _importModel->setEnabled(true);
   _importModel->setStatusTip(tr("Open a model description file"));
@@ -93,6 +97,7 @@ Application::Application() :
   _combineIrvReaction->setEnabled(false);
 
   // Connect signals
+  QObject::connect(_newModel, SIGNAL(triggered()), this, SLOT(onNewModel()));
   QObject::connect(_importModel, SIGNAL(triggered()), this, SLOT(onImportModel()));
   QObject::connect(_exportModel, SIGNAL(triggered()), this, SLOT(onExportModel()));
   QObject::connect(_closeModel, SIGNAL(triggered()), this, SLOT(onCloseModel()));
@@ -197,6 +202,7 @@ DocumentTree * Application::docTree() { return this->document_tree; }
 /* ******************************************************************************************** *
  * ...
  * ******************************************************************************************** */
+QAction *Application::newModelAction() { return _newModel; }
 QAction *Application::importModelAction() { return _importModel; }
 QAction *Application::exportModelAction() { return _exportModel; }
 QAction *Application::closeModelAction()  { return _closeModel; }
@@ -208,6 +214,17 @@ QAction *Application::combineIrrevReacAction() { return _combineIrvReaction; }
 /* ******************************************************************************************** *
  * Implementation of callbacks/event handlers...
  * ******************************************************************************************** */
+void Application::onNewModel()
+{
+  NewModelDialog dialog;
+  if (QDialog::Accepted != dialog.exec()) { return; }
+
+  iNA::Ast::Model *new_model = new iNA::Ast::Model(
+        dialog.getModelIdentifier().toStdString(), dialog.getModelName().toStdString());
+  docTree()->addDocument(new DocumentItem(new_model));
+}
+
+
 void Application::onImportModel()
 {
   // Show a file-dialog for files:
@@ -289,12 +306,12 @@ void Application::onEditModel()
   if (0 == (document = dynamic_cast<DocumentItem *>(getParentDocumentItem(_selected_item)))) { return; }
 
   // Create model editor dialog:
-  SbmlshEditorDialog *dialog = new SbmlshEditorDialog();
-  dialog->setModel(document->getModel());
-  if (QDialog::Accepted != dialog->exec()) { delete dialog; return; }
+  SbmlshEditorDialog dialog;
+  dialog.setModel(document->getModel());
+  if (QDialog::Accepted != dialog.exec()) { return; }
 
   // Obtain model from dialog
-  iNA::Ast::Model *new_model = dialog->takeModel(); delete dialog;
+  iNA::Ast::Model *new_model = dialog.takeModel();
   // Assemble new document item and add it to the tree...
   DocumentItem *new_doc = new DocumentItem(new_model);
   docTree()->addDocument(new_doc);

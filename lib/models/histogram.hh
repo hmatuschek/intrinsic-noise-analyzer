@@ -19,7 +19,6 @@ class Histogram
 
 public:
 
-
     /**
     * The histogram data type.
     **/

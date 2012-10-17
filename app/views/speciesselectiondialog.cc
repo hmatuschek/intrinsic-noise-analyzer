@@ -1,4 +1,4 @@
-#include "replotdialog.hh"
+#include "speciesselectiondialog.hh"
 #include <QLabel>
 #include <QVBoxLayout>
 #include <QDialogButtonBox>
@@ -7,7 +7,7 @@
 using namespace iNA;
 
 
-SSEPlotDialog::SSEPlotDialog(Ast::Model *model, QWidget *parent)
+SpeciesSelectionDialog::SpeciesSelectionDialog(Ast::Model *model, QWidget *parent)
   : QDialog(parent), _model(model)
 {
   // Allocate label.
@@ -46,7 +46,7 @@ SSEPlotDialog::SSEPlotDialog(Ast::Model *model, QWidget *parent)
 
 
 QList<QString>
-SSEPlotDialog::getSelectedSpecies() const {
+SpeciesSelectionDialog::getSelectedSpecies() const {
   // Assemble list of enabled species:
   QList<QString> selected_species;
   for(size_t i=0; i<_model->numSpecies(); i++) {
@@ -60,13 +60,13 @@ SSEPlotDialog::getSelectedSpecies() const {
 
 
 void
-SSEPlotDialog::setTitle(const QString &text) {
+SpeciesSelectionDialog::setTitle(const QString &text) {
   _head_label->setText(text);
   _head_label->setVisible(true);
 }
 
 void
-SSEPlotDialog::onAccepted() {
+SpeciesSelectionDialog::onAccepted() {
   QList<QString> selected_species = getSelectedSpecies();
   if (0 == selected_species.size()) { return; }
   accept();

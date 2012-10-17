@@ -10,7 +10,7 @@
 #include "../application.hh"
 #include "../doctree/plotitem.hh"
 #include "ssscanplot.hh"
-#include "plotdialog.hh"
+#include "../views/speciesselectiondialog.hh"
 
 
 
@@ -69,14 +69,10 @@ SSScanResultWidget::SSScanResultWidget(SSScanTaskWrapper *task_wrapper, QWidget 
 void
 SSScanResultWidget::plotButtonPressed()
 {
-  std::stringstream unit_str;
-  this->ssscan_task_wrapper->getSSScanTask()->getSpeciesUnit().dump(unit_str, true);
-
-  QString concentration_unit(unit_str.str().c_str());
-  QString time_unit("a.u.");
-
   // Ask user for species to plot.
-  SSScanPlotDialog dialog(ssscan_task_wrapper->getSSScanTask()->getConfig().getModel());
+  SpeciesSelectionDialog dialog(ssscan_task_wrapper->getSSScanTask()->getConfig().getModel());
+  dialog.setWindowTitle(tr("Parameter scan quick plot"));
+  dialog.setTitle(tr("Select the species to plot."));
   if (QDialog::Accepted != dialog.exec()) { return; }
   QStringList selected_species = dialog.getSelectedSpecies();
 
@@ -103,7 +99,6 @@ SSScanResultWidget::plotButtonPressed()
         this->ssscan_task_wrapper,
         new PlotItem(
           new ParameterScanCovIOSPlot(selected_species,this->ssscan_task_wrapper->getSSScanTask())));
-
 }
 
 

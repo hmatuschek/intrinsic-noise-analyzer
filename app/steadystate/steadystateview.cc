@@ -1,4 +1,4 @@
-#include "lnasteadystateview.hh"
+#include "steadystateview.hh"
 
 #include <QLabel>
 #include <QVBoxLayout>
@@ -12,11 +12,11 @@
 #include "../application.hh"
 #include "../doctree/plotitem.hh"
 #include "steadystatespectrumplot.hh"
-#include "plotdialog.hh"
+#include "../views/speciesselectiondialog.hh"
 
 
 
-LNASteadyStateView::LNASteadyStateView(LNASteadyStateTaskWrapper *task_wrapper, QWidget *parent)
+SteadyStateView::SteadyStateView(SteadyStateTaskWrapper *task_wrapper, QWidget *parent)
   : TaskView(task_wrapper, parent)
 {
   // Update main-widget:
@@ -25,15 +25,15 @@ LNASteadyStateView::LNASteadyStateView(LNASteadyStateTaskWrapper *task_wrapper, 
 
 
 QWidget *
-LNASteadyStateView::createResultWidget(TaskItem *task_item)
+SteadyStateView::createResultWidget(TaskItem *task_item)
 {
-  return new LNASteadyStateResultWidget(static_cast<LNASteadyStateTaskWrapper *>(task_item));
+  return new SteadyStateResultWidget(static_cast<SteadyStateTaskWrapper *>(task_item));
 }
 
 
 
 
-LNASteadyStateResultWidget::LNASteadyStateResultWidget(LNASteadyStateTaskWrapper *task_wrapper, QWidget *parent)
+SteadyStateResultWidget::SteadyStateResultWidget(SteadyStateTaskWrapper *task_wrapper, QWidget *parent)
   : QWidget(parent), ss_task_wrapper(task_wrapper)
 {
   this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
@@ -139,12 +139,14 @@ LNASteadyStateResultWidget::LNASteadyStateResultWidget(LNASteadyStateTaskWrapper
 
 
 void
-LNASteadyStateResultWidget::plotSpectrum()
+SteadyStateResultWidget::plotSpectrum()
 {
   // Ask user to choose species to plot:
-  SteadyStatePlotDialog plotdialog(ss_task_wrapper->getSteadyStateTask()->getConfig().getModel());
-  if (QDialog::Rejected == plotdialog.exec()) { return; }
-  QStringList selected_species = plotdialog.getSelectedSpecies();
+  SpeciesSelectionDialog dialog(ss_task_wrapper->getSteadyStateTask()->getConfig().getModel());
+  dialog.setWindowTitle(tr("Steady State quick plot"));
+  dialog.setTitle(tr("Select the species to plot."));
+  if (QDialog::Rejected == dialog.exec()) { return; }
+  QStringList selected_species = dialog.getSelectedSpecies();
 
   // Create plot
   Application::getApp()->docTree()->addPlot(
@@ -155,7 +157,7 @@ LNASteadyStateResultWidget::plotSpectrum()
 
 
 void
-LNASteadyStateResultWidget::saveSpectrum()
+SteadyStateResultWidget::saveSpectrum()
 {
   QString filename = QFileDialog::getSaveFileName(
         this, tr("Save as text..."), "", tr("Text Files (*.txt *.csv)"));
@@ -181,7 +183,7 @@ LNASteadyStateResultWidget::saveSpectrum()
 
 
 void
-LNASteadyStateResultWidget::saveData()
+SteadyStateResultWidget::saveData()
 {
   // First get file-name from user:
   QString filename = QFileDialog::getSaveFileName(
@@ -203,7 +205,7 @@ LNASteadyStateResultWidget::saveData()
   }
 
   // Get data from task
-  LNASteadyStateTask *task = this->ss_task_wrapper->getSteadyStateTask();
+  SteadyStateTask *task = this->ss_task_wrapper->getSteadyStateTask();
   Eigen::VectorXd conc = task->getConcentrations();
   Eigen::VectorXd emre = task->getEMRECorrections();
   Eigen::VectorXd ios  = task->getIOSCorrections();
@@ -260,9 +262,9 @@ LNASteadyStateResultWidget::saveData()
 
 
 void
-LNASteadyStateResultWidget::setValues()
+SteadyStateResultWidget::setValues()
 {
-  LNASteadyStateTask *task = this->ss_task_wrapper->getSteadyStateTask();
+  SteadyStateTask *task = this->ss_task_wrapper->getSteadyStateTask();
   Eigen::VectorXd conc = task->getConcentrations();
   Eigen::VectorXd emre = task->getEMRECorrections();
   Eigen::VectorXd iosemre = task->getIOSCorrections();
@@ -300,7 +302,7 @@ LNASteadyStateResultWidget::setValues()
 
 
 void
-LNASteadyStateResultWidget::taskStateChanged()
+SteadyStateResultWidget::taskStateChanged()
 {
   if (Task::DONE == this->ss_task_wrapper->getTask()->getState())
   {

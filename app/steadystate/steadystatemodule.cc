@@ -1,15 +1,15 @@
-#include "lnasteadystatemodule.hh"
-#include "lnasteadystatetask.hh"
-#include "lnasteadystatetaskwrapper.hh"
+#include "steadystatemodule.hh"
+#include "steadystatetask.hh"
+#include "steadystatetaskwrapper.hh"
 #include "../application.hh"
 #include <QMessageBox>
 
 
-LNASteadyStateModule::LNASteadyStateModule(QObject *parent) :
+SteadyStateModule::SteadyStateModule(QObject *parent) :
   Module(parent)
 {
   // Create wizard:
-  this->wizard = new LNASteadyStateWizard();
+  this->wizard = new SteadyStateWizard();
   this->wizard->setModal(true);
 
   // Create Menu:
@@ -23,7 +23,7 @@ LNASteadyStateModule::LNASteadyStateModule(QObject *parent) :
 
 
 void
-LNASteadyStateModule::configSteadyState()
+SteadyStateModule::configSteadyState()
 {
   this->wizard->restart();
 
@@ -34,10 +34,10 @@ LNASteadyStateModule::configSteadyState()
   }
 
   // Construct a task from configuration:
-  LNASteadyStateTask *task = 0;
+  SteadyStateTask *task = 0;
 
   try {
-    task = new LNASteadyStateTask(this->wizard->getConfigCast<LNASteadyStateTask::Config>());
+    task = new SteadyStateTask(this->wizard->getConfigCast<SteadyStateTask::Config>());
   } catch (iNA::Exception &err) {
     QMessageBox::warning(
           0, tr("Can not construct stochastic simulation analysis from model: "), err.what());
@@ -46,8 +46,8 @@ LNASteadyStateModule::configSteadyState()
 
   // Add task to application and run it:
   Application::getApp()->docTree()->addTask(
-        this->wizard->getConfigCast<LNASteadyStateTask::Config>().getModelDocument(),
-        new LNASteadyStateTaskWrapper(task));
+        this->wizard->getConfigCast<SteadyStateTask::Config>().getModelDocument(),
+        new SteadyStateTaskWrapper(task));
 
   task->start();
 }

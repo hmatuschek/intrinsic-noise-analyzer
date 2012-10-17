@@ -1,4 +1,4 @@
-#include "lnasteadystatewizard.hh"
+#include "steadystatewizard.hh"
 #include "../application.hh"
 #include <QMessageBox>
 #include <QVBoxLayout>
@@ -14,19 +14,19 @@ using namespace iNA;
 
 
 
-LNASteadyStateWizard::LNASteadyStateWizard(QWidget *parent) :
+SteadyStateWizard::SteadyStateWizard(QWidget *parent) :
   GeneralTaskWizard(parent), config()
 {
   this->setWindowTitle("System Size Expansion");
 
-  this->setPage(LNASteadyStateWizard::MODEL_SELECTION_PAGE, new LNASteadyStateModelSelectionPage(this));
-  this->setPage(LNASteadyStateWizard::FREQUENCY_RANGE_PAGE, new LNASteadyStateSpectrumConfigPage(this));
-  this->setPage(LNASteadyStateWizard::SUMMARY_PAGE, new LNASteadyStateSummaryPage(this));
-  this->page(LNASteadyStateWizard::SUMMARY_PAGE)->setFinalPage(true);
+  this->setPage(SteadyStateWizard::MODEL_SELECTION_PAGE, new LNASteadyStateModelSelectionPage(this));
+  this->setPage(SteadyStateWizard::FREQUENCY_RANGE_PAGE, new LNASteadyStateSpectrumConfigPage(this));
+  this->setPage(SteadyStateWizard::SUMMARY_PAGE, new LNASteadyStateSummaryPage(this));
+  this->page(SteadyStateWizard::SUMMARY_PAGE)->setFinalPage(true);
 }
 
 GeneralTaskConfig &
-LNASteadyStateWizard::getConfig()
+SteadyStateWizard::getConfig()
 {
   return this->config;
 }
@@ -139,8 +139,8 @@ bool
 LNASteadyStateSpectrumConfigPage::validatePage()
 {
   // Get the wizard:
-  LNASteadyStateWizard *wizard = static_cast<LNASteadyStateWizard *>(this->wizard());
-  LNASteadyStateTask::Config &config = wizard->getConfigCast<LNASteadyStateTask::Config>();
+  SteadyStateWizard *wizard = static_cast<SteadyStateWizard *>(this->wizard());
+  SteadyStateTask::Config &config = wizard->getConfigCast<SteadyStateTask::Config>();
 
 //  wizard->setFrequencyAutoRange(this->field("f_automatic").toBool());
 //  wizard->setFrequencyRange(this->field("f_min").toDouble(),
@@ -194,8 +194,8 @@ LNASteadyStateSummaryPage::LNASteadyStateSummaryPage(QWidget *parent)
 void
 LNASteadyStateSummaryPage::initializePage()
 {
-  LNASteadyStateWizard *wizard = static_cast<LNASteadyStateWizard *>(this->wizard());
-  LNASteadyStateTask::Config &config = wizard->getConfigCast<LNASteadyStateTask::Config>();
+  SteadyStateWizard *wizard = static_cast<SteadyStateWizard *>(this->wizard());
+  SteadyStateTask::Config &config = wizard->getConfigCast<SteadyStateTask::Config>();
 
   this->model_name->setText(config.getModelDocument()->getModel().getName().c_str());
 

@@ -42,7 +42,7 @@ SteadyStateSpectrumPlot::SteadyStateSpectrumPlot(Table &spectrum, const iNA::Ast
 
 
 
-SteadyStatePlot::SteadyStatePlot(LNASteadyStateTask *task, const QStringList selected_species, QObject *parent)
+SteadyStatePlot::SteadyStatePlot(SteadyStateTask *task, const QStringList selected_species, QObject *parent)
   : Plot::Figure("Steady state concentrations", parent)
 {
   // Get string representation of unit:

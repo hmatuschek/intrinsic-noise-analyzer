@@ -196,7 +196,7 @@ Parser::Sbml::__process_model(LIBSBML_CPP_NAMESPACE_QUALIFIER Model *model, Pars
       // Get SBML species by id
       LIBSBML_CPP_NAMESPACE_QUALIFIER Species *sbml_species = model->getSpecies(var->getIdentifier());
       // Is model in substance or concentration units?
-      bool species_have_substance_units = ctx.model().speciesHasSubstanceUnits();
+      bool species_have_substance_units = ctx.model().speciesHaveSubstanceUnits();
       if (sbml_species->getHasOnlySubstanceUnits() && (! species_have_substance_units)) {
         // Initial value vas given in substance units but model has concentration units:
         species->setValue(species->getValue()/species->getCompartment()->getSymbol());
@@ -285,7 +285,7 @@ Parser::Sbml::__process_species_definition(
   Ast::Compartment *compartment = ctx.model().getCompartment(node->getCompartment());
 
   /* Second, process unit and initial value of species. */
-  bool species_have_substance_units = ctx.model().speciesHasSubstanceUnits();
+  bool species_have_substance_units = ctx.model().speciesHaveSubstanceUnits();
   Ast::Unit substance_unit = ctx.model().getSubstanceUnit();
 
   /* Setup initial value. */

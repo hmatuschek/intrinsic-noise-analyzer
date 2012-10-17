@@ -122,6 +122,10 @@ private:
   std::set<iNA::Ast::Compartment *> _collectCompartments(QList< QPair<int, QString> > &reactants,
                                                          QList< QPair<int, QString> > &products);
 
+
+  /** Collect reactants and assemble stoichiometries */
+  std::map<QString,int> _collectStoichiometries(QList<QPair<int, QString> > &reactants);
+
   /** Renders the kinetic law. */
   MathItem *_renderKineticLaw(bool is_reversible, QList< QPair<int, QString> > &reactants,
                               QList< QPair<int, QString> > &products);
