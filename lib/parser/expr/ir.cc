@@ -16,6 +16,7 @@ class Ginac2Node :
     public GiNaC::function::visitor, public GiNaC::basic::visitor
 {
 protected:
+  /** Internal stack of expressions. */
   std::list< SmartPtr<Node> > _stack;
 
 public:
@@ -132,6 +133,10 @@ bool Node::isComplexNode() const { return VALUE_COMPLEX == _type; }
 bool Node::isFunctionNode() const { return FUNCTION == _type; }
 bool Node::isFuncExpNode() const { return isFunctionNode() && (FUNCTION_EXP == _function); }
 bool Node::isFuncLogNode() const { return isFunctionNode() && (FUNCTION_LOG == _function); }
+
+bool Node::hasArguments() const { return 0 != _args.size(); }
+size_t Node::numArguments() const { return _args.size(); }
+SmartPtr<Node> &Node::argument(size_t i) { return _args[i]; }
 
 
 SmartPtr<Node>
@@ -251,4 +256,57 @@ Node::createFuncLog(SmartPtr<Node> arg)
   node->_args[0] = arg;
   node->_function = FUNCTION_LOG;
   return SmartPtr<Node>(node);
+}
+
+
+
+/* ********************************************************************************************* *
+ * Implementation of PassManager
+ * ********************************************************************************************* */
+PassManager::~PassManager()
+{
+  for (std::list<Pass *>::iterator pass=_passes.begin(); pass!=_passes.end(); pass++) {
+    delete *pass;
+  }
+}
+
+void
+PassManager::addPass(Pass *pass) {
+  _passes.push_back(pass);
+}
+
+bool
+PassManager::apply(SmartPtr<Node> &node) {
+  // First, apply passes
+  bool matched = applyOnNode(node);
+
+  // then, traverse into child-nodes:
+  bool child_matched = false;
+  for (size_t i=0; i<node->numArguments(); i++)
+  {
+    child_matched = (child_matched || apply(node->argument(i)));
+  }
+
+  // If one of the child nodes was modified, re-run passes on this node:
+  if (child_matched)
+    matched |= applyOnNode(node);
+
+  return matched | child_matched;
+}
+
+
+bool
+PassManager::applyOnNode(SmartPtr<Node> &value)
+{
+  bool matched = false;
+
+rerun:
+  for (std::list<Pass *>::iterator pass = _passes.begin(); pass != _passes.end(); pass++)
+  {
+    if ((*pass)->apply(value)) {
+      matched = true; goto rerun;
+    }
+  }
+
+  return matched;
 }

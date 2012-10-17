@@ -37,6 +37,16 @@ ReactionEditorContext::resolve(const std::string &identifier)
   return _undefined_symbols[identifier];
 }
 
+
+std::string
+ReactionEditorContext::identifier(GiNaC::symbol symbol)
+{
+  iNA::InternalError err;
+  err << "Can not resolve symbol " << symbol
+      << ": Symbol resolution is not implemented.";
+  throw err;
+}
+
 const std::map<std::string, GiNaC::symbol> &
 ReactionEditorContext::undefinedSymbols() const {
   return _undefined_symbols;

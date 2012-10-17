@@ -38,6 +38,13 @@ ScopeContext::resolve(const std::string &name)
 }
 
 
+std::string
+ScopeContext::identifier(GiNaC::symbol symbol)
+{
+  return _scope_stack.back()->getVariable(symbol)->getIdentifier();
+}
+
+
 Ast::VariableDefinition *
 ScopeContext::resolveVariable(const std::string &name)
 {

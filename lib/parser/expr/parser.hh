@@ -15,6 +15,9 @@ public:
   /** Resolves a given identifier to its symbol or throws a @c SymbolError exception if
    * the symbol can not be resolved. */
   virtual GiNaC::symbol resolve(const std::string &identifier) = 0;
+  /** Returns the idenfitier for the given symbol. This is used for serializing expressions into
+   * text. */
+  virtual std::string identifier(GiNaC::symbol symbol) = 0;
 };
 
 
@@ -40,6 +43,9 @@ public:
   /** Resolves the given symbol name using the current context.
    * @throws SymbolError If the name can not be resolved. */
   virtual GiNaC::symbol resolve(const std::string &name);
+
+  /** Resolves the given GiNaC symbol to its identifier. */
+  virtual std::string identifier(GiNaC::symbol symbol);
 
   /** Resolves the given variable name using the current context.
    * @deprecated Use resolve() instead.

@@ -41,7 +41,7 @@ PassManager::handleValue(SmartPtr<Value> &value)
   bool child_matched = false;
   for (size_t i=0; i<value->numArguments(); i++)
   {
-    child_matched = this->handleValue(value->argument(i));
+    child_matched = (child_matched || this->handleValue(value->argument(i)));
   }
 
   // If one of the child nodes was modified, re-run passes on this node:

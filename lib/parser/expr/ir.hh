@@ -70,6 +70,12 @@ public:
   bool isFuncExpNode() const;
   /** Returns true if the node is a log() function node. */
   bool isFuncLogNode() const;
+  /** Returns true if the node has child nodes. */
+  bool hasArguments() const;
+  /** Returns the number of child nodes. */
+  size_t numArguments() const;
+  /** Returns the i-th child node if the node. */
+  SmartPtr<Node> &argument(size_t i);
 
 public:
   /** Constructs a IR expressions from the given GiNaC expression. */
@@ -116,6 +122,34 @@ private:
   std::complex<double> _complex;
 };
 
+
+/** Generic expression pass. */
+class Pass {
+public:
+  /** Implement this method to apply any modifications on that. */
+  virtual bool apply(SmartPtr<Node> &node) = 0;
+};
+
+
+/** Applies passes on an expression IR. */
+class PassManager {
+protected:
+  /** Holds the list of passes. */
+  std::list<Pass *> _passes;
+
+public:
+  /** Destructor, also frees the passes. */
+  ~PassManager();
+  /** Adds a pass to the list of passes.*/
+  void addPass(Pass *pass);
+  /** Applies the passes on the node. */
+  bool apply(SmartPtr<Node> &node);
+
+protected:
+  /** Applies all passes on the given node unless they can not be applied anymore. If a pass
+   * was applied on that node, the function returns true. */
+  bool applyOnNode(SmartPtr<Node> &value);
+};
 
 }
 }
