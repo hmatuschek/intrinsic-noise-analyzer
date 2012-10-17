@@ -64,7 +64,7 @@ RegressionTest::testNonConstantCompartment()
 
 
 void
-RegressionTest::testAlgebraicConstraint()
+RegressionTest::testNoAlgebraicConstraint()
 {
   Ast::Model *model = Parser::Sbml::importModel("test/regression-tests/algebraicrules.xml");
 
@@ -97,7 +97,7 @@ RegressionTest::suite()
   s->addTest(new UnitTest::TestCaller<RegressionTest>(
                "Species by assignment rule.", &RegressionTest::testSpeciesByAssignmentRule));
   s->addTest(new UnitTest::TestCaller<RegressionTest>(
-               "Algebraic constraints.", &RegressionTest::testAlgebraicConstraint));
+               "Algebraic constraints.", &RegressionTest::testNoAlgebraicConstraint));
   s->addTest(new UnitTest::TestCaller<RegressionTest>(
                "Non-constant parameters.", &RegressionTest::testNonConstantParameter));
   s->addTest(new UnitTest::TestCaller<RegressionTest>(

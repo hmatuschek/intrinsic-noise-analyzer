@@ -21,7 +21,7 @@ typedef enum {
   T_MINUS,            ///< '-'
   T_TIMES,            ///< '*'
   T_POWER,            ///< '**' or '^'
-  T_DIVIVE,           ///< '/'
+  T_DIVIDE,           ///< '/'
   T_LPAR,             ///< '('
   T_RPAR,              ///< ')'
   T_FIRST_NON_EXPRESSION_TOKEN

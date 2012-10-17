@@ -138,6 +138,10 @@ bool Node::hasArguments() const { return 0 != _args.size(); }
 size_t Node::numArguments() const { return _args.size(); }
 SmartPtr<Node> &Node::argument(size_t i) { return _args[i]; }
 
+long Node::intValue() const { return _integer; }
+const double &Node::realValue() const { return _real; }
+const std::complex<double> &Node::complexValue() const { return _complex; }
+
 
 void
 Node::serialize(std::ostream &stream, Context &ctx) {
@@ -381,4 +385,40 @@ rerun:
   }
 
   return matched;
+}
+
+
+
+/* ********************************************************************************************* *
+ * PASS: (X)^(-INTEGER) -> 1/(X^INTEGER)
+ * ********************************************************************************************* */
+bool
+PowerToDevisitionPass::apply(SmartPtr<Node> &node)
+{
+  // Skip non power expressions:
+  if (! node->isPowNode()) { return false; }
+  // Check if exponent is integer && negative
+  if (! node->argument(1)->isIntegerNode()) { return false; }
+  if (0 <= node->argument(1)->intValue()) { return false; }
+
+  SmartPtr<Node> base = node->argument(0);
+  long exponent = node->argument(1)->intValue();
+  node = Node::createDiv(Node::createValue(1L), Node::createPow(base, Node::createValue(-exponent)));
+
+  return true;
+}
+
+
+/* ********************************************************************************************* *
+ * Implementation of PrettySerializationTrafo
+ * ********************************************************************************************* */
+SmartPtr<Node> &
+PrettySerializationTrafo::apply(SmartPtr<Node> &expression)
+{
+  PassManager manager;
+  // (X)^(-INTEGER) -> 1/(X^INTEGER)
+  manager.addPass(new PowerToDevisitionPass());
+
+  manager.apply(expression);
+  return expression;
 }

@@ -14,7 +14,7 @@ public:
   void testSpeciesByAssignmentRule();
   void testNonConstantParameter();
   void testNonConstantCompartment();
-  void testAlgebraicConstraint();
+  void testNoAlgebraicConstraint();
   void testSpeciesByRateRule();
 
 public:

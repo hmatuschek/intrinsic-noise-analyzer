@@ -93,7 +93,7 @@ ProductExpressionProduction::ProductExpressionProduction()
       new Parser::Production(
         3, PowerExpressionProduction::get(),
         new Parser::AltProduction(
-          2, new Parser::TokenProduction(T_TIMES), new Parser::TokenProduction(T_DIVIVE)),
+          2, new Parser::TokenProduction(T_TIMES), new Parser::TokenProduction(T_DIVIDE)),
         ProductExpressionProduction::get());
 
   this->alternatives[1] = PowerExpressionProduction::get();

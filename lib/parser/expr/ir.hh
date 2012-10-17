@@ -77,6 +77,9 @@ public:
   size_t numArguments() const;
   /** Returns the i-th child node if the node. */
   SmartPtr<Node> &argument(size_t i);
+  long intValue() const;
+  const double &realValue() const;
+  const std::complex<double> &complexValue() const;
   /** Serializes the node into the given stream. */
   void serialize(std::ostream &stream, Context &ctx);
 
@@ -160,6 +163,24 @@ protected:
    * was applied on that node, the function returns true. */
   bool applyOnNode(SmartPtr<Node> &value);
 };
+
+/** Translates any (X)^(-INTEGER) -> 1/(X^INTEGER). */
+class PowerToDevisitionPass : public Pass
+{
+public:
+  /** Performs the transformation. */
+  bool apply(SmartPtr<Node> &node);
+};
+
+
+/** Simply collects some passes to bring the expression into a form for pretty serialization. */
+class PrettySerializationTrafo
+{
+public:
+  /** Applies the passes and returns the modified expression. */
+  static SmartPtr<Node> &apply(SmartPtr<Node> &expression);
+};
+
 
 }
 }

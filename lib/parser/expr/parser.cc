@@ -140,17 +140,29 @@ Parser::Expr::parseExpression(const std::string &text, Context &ctx)
   iNA::Parser::Lexer lexer(stream);
   lexer.addRule(new Parser::WhiteSpaceTokenRule(T_WHITESPACE));
   lexer.addRule(new Parser::IdentifierTokenRule(T_IDENTIFIER));
+  lexer.addTokenName(T_IDENTIFIER, "SYMBOL");
   lexer.addRule(new Parser::IntegerTokenRule(T_INTEGER));
+  lexer.addTokenName(T_INTEGER, "INTEGER");
   lexer.addRule(new Parser::FloatTokenRule(T_FLOAT));
+  lexer.addTokenName(T_FLOAT, "FLOAT");
   lexer.addRule(new Parser::KeyWordTokenRule(T_COMMA, ","));
+  lexer.addTokenName(T_COMMA, "','");
   lexer.addRule(new Parser::KeyWordTokenRule(T_PLUS, "+"));
+  lexer.addTokenName(T_PLUS, "'+'");
   lexer.addRule(new Parser::KeyWordTokenRule(T_MINUS, "-"));
+  lexer.addTokenName(T_MINUS, "'-'");
   lexer.addRule(new Parser::KeyWordTokenRule(T_TIMES, "*"));
+  lexer.addTokenName(T_TIMES, "'*'");
   lexer.addRule(new Parser::KeyWordTokenRule(T_POWER, "**"));
   lexer.addRule(new Parser::KeyWordTokenRule(T_POWER, "^"));
-  lexer.addRule(new Parser::KeyWordTokenRule(T_DIVIVE, "/"));
+  lexer.addTokenName(T_POWER, "'**'");
+  lexer.addRule(new Parser::KeyWordTokenRule(T_DIVIDE, "/"));
+  lexer.addTokenName(T_DIVIDE, "'/'");
   lexer.addRule(new Parser::KeyWordTokenRule(T_LPAR, "("));
+  lexer.addTokenName(T_LPAR, "'('");
   lexer.addRule(new Parser::KeyWordTokenRule(T_RPAR, ")"));
+  lexer.addTokenName(T_RPAR, "')'");
+
   lexer.addIgnoredToken(T_WHITESPACE);
 
   Parser::ConcreteSyntaxTree cst;
@@ -160,11 +172,23 @@ Parser::Expr::parseExpression(const std::string &text, Context &ctx)
 }
 
 
-void Parser::Expr::serializeExpression(GiNaC::ex expression, std::ostream &stream, Context &ctx)
+void Parser::Expr::serializeExpression(GiNaC::ex expression, std::ostream &stream, Context &ctx,
+                                       SerializationType stategy)
 {
   // First, create IR from expression
   SmartPtr<Node> node = Node::fromExpression(expression);
-  /// @todo Apply passes to get readable output:
+
+  // Apply trafos on expression if needed:
+  switch (stategy) {
+  case SERIALIZE_PLAIN:
+    // No trafo
+    break;
+  case SERIALIZE_PRETTY:
+    // Make expression more readable:
+    PrettySerializationTrafo::apply(node);
+    break;
+  }
+
   // Serialize IR into stream:
   node->serialize(stream, ctx);
 }

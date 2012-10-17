@@ -55,6 +55,13 @@ public:
 };
 
 
+/** Defined different serialization methods. */
+typedef enum {
+  SERIALIZE_PLAIN,   ///< Direct serialization.
+  SERIALIZE_PRETTY   ///< Tries to serialize expressions more readable.
+} SerializationType;
+
+
 /** A simple parser context mainly for testing. It holds a simple identifier->symbol table to
  * resolve symbol names. */
 class TableContext : public Context {
@@ -85,7 +92,8 @@ GiNaC::ex parseExpression(const std::string &text, Context &scope);
 GiNaC::ex parseExpression(const std::string &text, Ast::Scope *scope);
 
 /** Serializes the given expression into the given stream using the given context. */
-void serializeExpression(GiNaC::ex expression, std::ostream &stream, Context &ctx);
+void serializeExpression(GiNaC::ex expression, std::ostream &stream, Context &ctx,
+                         SerializationType stategy=SERIALIZE_PLAIN);
 
 }
 }

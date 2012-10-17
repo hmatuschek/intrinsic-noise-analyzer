@@ -12,6 +12,9 @@ public:
   /** Simply tests parser and assembler w/o any passes. */
   void testParser();
 
+  /** Simply tests parser and assembler with pretty serialization passes. */
+  void testPrettySerialization();
+
 public:
   /** Constructs the test suite. */
   static UnitTest::TestSuite *suite();

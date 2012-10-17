@@ -27,7 +27,7 @@ typedef enum {
   T_MINUS = Expr::T_MINUS,            ///< '-'
   T_TIMES = Expr::T_TIMES,            ///< '*'
   T_POWER = Expr::T_POWER,            ///< '**', '^'
-  T_DIVIVE = Expr::T_DIVIVE,          ///< '/'
+  T_DIVIVE = Expr::T_DIVIDE,          ///< '/'
   T_LPAR = Expr::T_LPAR,              ///< '('
   T_RPAR = Expr::T_RPAR,              ///< ')'
 
