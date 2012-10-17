@@ -139,6 +139,78 @@ size_t Node::numArguments() const { return _args.size(); }
 SmartPtr<Node> &Node::argument(size_t i) { return _args[i]; }
 
 
+void
+Node::serialize(std::ostream &stream, Context &ctx) {
+  _serialize(stream, ctx, 0);
+}
+
+void
+Node::_serialize(std::ostream &stream, Context &ctx, size_t precedence)
+{
+  if (isAddNode() || isSubNode()) {
+    if (precedence > 1) { stream << "("; }
+    argument(0)->_serialize(stream, ctx, 1);
+    if (isAddNode()) { stream << "+"; }
+    else {stream << "-"; }
+    argument(1)->_serialize(stream, ctx, 1);
+    if (precedence > 1) { stream << ")"; }
+  }
+
+  if (isMulNode() || isDivNode()) {
+    if (precedence > 2) { stream << "("; }
+    argument(0)->_serialize(stream, ctx, 2);
+    if (isMulNode()) { stream << "*"; }
+    else {stream << "/"; }
+    argument(1)->_serialize(stream, ctx, 2);
+    if (precedence > 2) { stream << ")"; }
+  }
+
+  if (isPowNode()) {
+    if (precedence >= 3) { stream << "("; }
+    argument(0)->_serialize(stream, ctx, 3);
+    stream << "**";
+    argument(1)->_serialize(stream, ctx, 3);
+    if (precedence >= 3) { stream << ")"; }
+  }
+
+  if (isNegNode()) {
+    if (precedence > 2) { stream << "("; }
+    stream << "-";
+    argument(0)->_serialize(stream, ctx, 2);
+    if (precedence > 2) { stream << ")"; }
+  }
+
+  if (isFunctionNode()) {
+    if (isFuncExpNode()) {
+      stream << "exp(";
+      argument(0)->_serialize(stream, ctx, 0);
+      stream << ")";
+    }
+    if (isFuncLogNode()) {
+      stream << "log(";
+      argument(0)->_serialize(stream, ctx, 0);
+      stream << ")";
+    }
+  }
+
+  if (isSymbolNode()) {
+    stream << ctx.identifier(_symbol);
+  }
+
+  if (isIntegerNode()) {
+    stream << _integer;
+  }
+  if (isRealNode()) {
+    stream << _real;
+  }
+  if (isComplexNode()) {
+    if (precedence > 1) { stream << "("; }
+    stream << _complex.real() << "+" << _complex.imag() << "j";
+    if (precedence > 1) { stream << ")"; }
+  }
+}
+
+
 SmartPtr<Node>
 Node::fromExpression(GiNaC::ex expression)
 {

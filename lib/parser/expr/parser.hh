@@ -55,6 +55,25 @@ public:
 };
 
 
+/** A simple parser context mainly for testing. It holds a simple identifier->symbol table to
+ * resolve symbol names. */
+class TableContext : public Context {
+protected:
+  /** Holds the identifier -> symbol table. */
+  std::map<std::string, GiNaC::symbol> _symbol_table;
+
+public:
+  /** Constructor. */
+  TableContext();
+  /** Adds a symbol to the table. */
+  void addSymbol(const std::string &name, GiNaC::symbol symbol);
+  /** Resolves a symbol identifier. */
+  GiNaC::symbol resolve(const std::string &identifier);
+  /** Resolves a symbol. */
+  std::string identifier(GiNaC::symbol symbol);
+};
+
+
 /** Parses an expression in the given variable scope.
  * The scope (context) is used to resolve symbols of species, compartments and parameters.
  * @ingroup modelio */
@@ -64,6 +83,9 @@ GiNaC::ex parseExpression(const std::string &text, Context &scope);
  * The scope (context) is used to resolve symbols of species, compartments and parameters.
  * @ingroup modelio */
 GiNaC::ex parseExpression(const std::string &text, Ast::Scope *scope);
+
+/** Serializes the given expression into the given stream using the given context. */
+void serializeExpression(GiNaC::ex expression, std::ostream &stream, Context &ctx);
 
 }
 }

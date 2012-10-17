@@ -5,6 +5,7 @@
 #include "smartptr.hh"
 #include <vector>
 #include <complex>
+#include "parser.hh"
 
 
 namespace iNA {
@@ -17,23 +18,23 @@ class Node {
 public:
   /** Lists all expression types. */
   typedef enum {
-    ADDITION,
-    SUBTRACTION,
-    MULTIPLICATION,
-    DIVISION,
-    POWER,
-    NEGATION,
-    FUNCTION,
-    SYMBOL,
-    VALUE_INTEGER,
-    VALUE_REAL,
-    VALUE_COMPLEX
+    ADDITION,        ///< +
+    SUBTRACTION,     ///< -
+    MULTIPLICATION,  ///< *
+    DIVISION,        ///< /
+    POWER,           ///< **
+    NEGATION,        ///< -()
+    FUNCTION,        ///< f(x)
+    SYMBOL,          ///< x
+    VALUE_INTEGER,   ///< 1
+    VALUE_REAL,      ///< 1.0
+    VALUE_COMPLEX    ///< 1+1j;
   } NodeType;
 
   /** Lists all known functions. */
   typedef enum {
-    FUNCTION_EXP,
-    FUNCTION_LOG
+    FUNCTION_EXP,    ///< exp(x)
+    FUNCTION_LOG     ///< log(x)
   } FunctionId;
 
 
@@ -76,6 +77,9 @@ public:
   size_t numArguments() const;
   /** Returns the i-th child node if the node. */
   SmartPtr<Node> &argument(size_t i);
+  /** Serializes the node into the given stream. */
+  void serialize(std::ostream &stream, Context &ctx);
+
 
 public:
   /** Constructs a IR expressions from the given GiNaC expression. */
@@ -104,6 +108,12 @@ public:
   static SmartPtr<Node> createFuncExp(SmartPtr<Node> arg);
   /** Creates a log() function call. */
   static SmartPtr<Node> createFuncLog(SmartPtr<Node> arg);
+
+
+protected:
+  /** Serializes this node into the given stream. */
+  void _serialize(std::ostream &stream, Context &ctx, size_t precedence);
+
 
 private:
   /** Holds the node type. */

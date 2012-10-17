@@ -6,12 +6,15 @@
 #include "lexer.hh"
 #include "productions.hh"
 #include "assembler.hh"
-
+#include "ir.hh"
 
 using namespace iNA;
 using namespace iNA::Parser::Expr;
 
 
+/* ******************************************************************************************** *
+ * Implementation of ScopeContext, a context for Ast::Scopes
+ * ******************************************************************************************** */
 ScopeContext::ScopeContext(Ast::Scope *model)
   : _scope_stack()
 {
@@ -75,6 +78,53 @@ ScopeContext::resolveVariable(const std::string &name)
 
 
 
+/* ******************************************************************************************** *
+ * Implementation of TableContext, a context for unit tests:
+ * ******************************************************************************************** */
+TableContext::TableContext()
+  : _symbol_table()
+{
+  // pass...
+}
+
+void
+TableContext::addSymbol(const std::string &name, GiNaC::symbol symbol)
+{
+  _symbol_table[name] = symbol;
+}
+
+GiNaC::symbol
+TableContext::resolve(const std::string &identifier)
+{
+  if (0 == _symbol_table.count(identifier)) {
+    SymbolError err;
+    err << "Can not resolve identifier " << identifier << ": Unknown.";
+    throw err;
+  }
+  return _symbol_table[identifier];
+}
+
+std::string
+TableContext::identifier(GiNaC::symbol symbol)
+{
+  for (std::map<std::string, GiNaC::symbol>::iterator item=_symbol_table.begin();
+       item != _symbol_table.end(); item++)
+  {
+    if (item->second == symbol) {
+      return item->first;
+    }
+  }
+
+  SymbolError err;
+  err << "Can not resolve symbol " << symbol << ": Unknown.";
+  throw err;
+}
+
+
+
+/* ******************************************************************************************** *
+ * Implementation of utility functions.
+ * ******************************************************************************************** */
 GiNaC::ex
 Parser::Expr::parseExpression(const std::string &text, Ast::Scope *scope) {
   ScopeContext ctx(scope);
@@ -107,4 +157,14 @@ Parser::Expr::parseExpression(const std::string &text, Context &ctx)
   ExpressionGrammar::get()->parse(lexer, cst);
 
   return Expr::Assembler(ctx, lexer).processExpression(cst[0]);
+}
+
+
+void Parser::Expr::serializeExpression(GiNaC::ex expression, std::ostream &stream, Context &ctx)
+{
+  // First, create IR from expression
+  SmartPtr<Node> node = Node::fromExpression(expression);
+  /// @todo Apply passes to get readable output:
+  // Serialize IR into stream:
+  node->serialize(stream, ctx);
 }
