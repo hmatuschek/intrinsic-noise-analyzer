@@ -194,7 +194,7 @@ SSATask::process()
       row(1+j) = mean(j);
       row(1+_Ns+(_Ns*(_Ns+1))/2+j) = skewness(j);
       for (size_t k=j; k<_Ns; k++) {
-        size_t cov_jk = 1+2*_Ns+j*(_Ns+1)-(j*(j+1))/2 + (k-j);
+        size_t cov_jk = 1+_Ns+j*(_Ns+1)-(j*(j+1))/2 + (k-j);
         row(cov_jk) = cov(j, k);
       }
     }
