@@ -32,6 +32,13 @@ ModelExpressionContext::identifier(GiNaC::symbol symbol)
   return var->getIdentifier();
 }
 
+bool
+ModelExpressionContext::hasConcentrationUnits(GiNaC::symbol symbol) {
+  const iNA::Ast::Model *model = dynamic_cast<const iNA::Ast::Model *>(_scope.getRootScope());
+  if (0 == model) { return false; }
+  return (iNA::Ast::Node::isSpecies(_scope.getVariable(symbol)) &&
+          (!model->speciesHaveSubstanceUnits()));
+}
 
 
 /* ********************************************************************************************* *
@@ -50,8 +57,10 @@ Ginac2Formula::_assembleFormula(SmartPtr<Parser::Expr::Node> node, size_t preced
   if (node->isAddNode() || node->isSubNode()) {
     MathFormula *formula = new MathFormula();
     formula->appendItem(_assembleFormula(node->argument(0), 1));
+    formula->appendItem(new MathSpace(MathSpace::THIN_SPACE));
     if (node->isAddNode()) { formula->appendItem(new MathText("+")); }
     else { formula->appendItem(new MathText("-")); }
+    formula->appendItem(new MathSpace(MathSpace::THIN_SPACE));
     formula->appendItem(_assembleFormula(node->argument(1), 1));
     if (precedence > 1) { return new MathBlock(formula, new MathText("("), new MathText(")")); }
     return formula;
@@ -60,7 +69,9 @@ Ginac2Formula::_assembleFormula(SmartPtr<Parser::Expr::Node> node, size_t preced
   if (node->isMulNode()) {
     MathFormula *formula = new MathFormula();
     formula->appendItem(_assembleFormula(node->argument(0), 2));
-    formula->appendItem(new MathText("*"));
+    formula->appendItem(new MathSpace(MathSpace::THIN_SPACE));
+    formula->appendItem(new MathText(QChar(0x00B7)));
+    formula->appendItem(new MathSpace(MathSpace::THIN_SPACE));
     formula->appendItem(_assembleFormula(node->argument(1), 2));
     if (precedence > 2) {
       return new MathBlock(formula, new MathText("("), new MathText(")"));
@@ -114,8 +125,9 @@ Ginac2Formula::_assembleFormula(SmartPtr<Parser::Expr::Node> node, size_t preced
   }
 
   if (node->isSymbolNode()) {
+    // Get symbols
     if (_tex_names) {
-      return TinyTex::parse(_context.identifier(node->symbol()).c_str());
+      return TinyTex::parseQuoted(_context.identifier(node->symbol()).c_str());
     }
     return new MathText(_context.identifier(node->symbol()).c_str());
   }

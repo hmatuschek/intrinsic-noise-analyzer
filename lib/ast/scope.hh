@@ -108,6 +108,9 @@ public:
   /** Returns the root scope (model). */
   Scope *getRootScope();
 
+  /** Returns the root scope (model). */
+  const Scope *getRootScope() const;
+
   /** Returns the parent scope. */
   Scope *getParentScope();
 
