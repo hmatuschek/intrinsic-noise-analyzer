@@ -19,8 +19,7 @@ int main(int argc, char *argv[])
   Ast::Model sbml_model; Parser::Sbml::importModel(sbml_model, argv[1]);
 
   // Do the work:
-  try
-  {
+
 
     size_t steps = 500;
 
@@ -75,10 +74,5 @@ int main(int argc, char *argv[])
 
     }
 
-  }
-  catch (Exception err)
-  {
-    std::cerr << "Can not perform SSA. " << std::endl;
-    return -1;
-  }
+
 }
