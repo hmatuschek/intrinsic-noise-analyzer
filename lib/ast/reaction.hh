@@ -136,35 +136,23 @@ public:
 
 
 protected:
-  /**
-   * Holds the stoichiometric expressions for all reactants of the reaction.
-   */
-  std::map<Species *, GiNaC::ex> reactants;
+  /** Holds the stoichiometric expressions for all reactants of the reaction. */
+  std::map<Species *, GiNaC::ex> _reactants;
 
-  /**
-   * Holds the stoichiometric expressions for all products of the reaction.
-   */
-  std::map<Species *, GiNaC::ex> products;
+  /** Holds the stoichiometric expressions for all products of the reaction. */
+  std::map<Species *, GiNaC::ex> _products;
 
-  /**
-   * Holds a set of species being modifier of the reaction.
-   */
-  std::set<Species *> modifiers;
+  /** Holds a set of species being modifier of the reaction. */
+  std::set<Species *> _modifiers;
 
-  /**
-   * Holds the kinetic law of the reaction.
-   */
-  KineticLaw *kinetic_law;
+  /** Holds the kinetic law of the reaction. */
+  KineticLaw *_kinetic_law;
 
-  /**
-   * Is true, if the reaction is declared to be reversible.
-   */
-  bool is_reversible;
+  /** Is true, if the reaction is declared to be reversible. */
+  bool _is_reversible;
 
-  /**
-   * Holds the optional display name of the reaction.
-   */
-  std::string name;
+  /** Holds the optional display name of the reaction. */
+  std::string _name;
 
 
 public:
@@ -190,7 +178,7 @@ public:
    *        passed to the reaction.
    * @param reversible Specifies if the reaction is reversible.
    */
-  Reaction(const std::string &id, const std::string &name, KineticLaw *law, bool reversible);
+  Reaction(const std::string &id, const std::string &_name, KineticLaw *law, bool reversible);
 
   /**
    * Destroies the reaction.
@@ -242,6 +230,9 @@ public:
    */
   void addReactantStoichiometry(Species *species, GiNaC::ex st);
 
+  /** Removes all reactants from the reaction. */
+  void clearReactants();
+
   /**
    * Retunrs true if the given species specifies a product of the reaction.
    */
@@ -275,6 +266,9 @@ public:
    */
   void addProductStoichiometry(Species *species, GiNaC::ex st);
 
+  /** Removes all products from the reaction. */
+  void clearProducts();
+
   /**
    * Adds a species to be modifier of the reaction.
    */
@@ -300,6 +294,9 @@ public:
    * Returns true if the given species is a modifier of the reaction.
    */
   bool isModifier(const GiNaC::symbol &id) const;
+
+  /** Removes all modifiers from the reaction. */
+  void clearModifier();
 
   /**
    * Returns the kinetic law of the reaction.

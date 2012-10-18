@@ -54,6 +54,7 @@ ReactionListView::ReactionListView(ReactionsItem *reactions, QWidget *parent)
   QObject::connect(
         _reactionList->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
         this, SLOT(onSelectionChanged(QItemSelection,QItemSelection)));
+  QObject::connect(_reactionList, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(onReactionEditing(QModelIndex)));
 }
 
 
@@ -104,4 +105,23 @@ ReactionListView::onSelectionChanged(const QItemSelection &selected, const QItem
   QModelIndex index = indices.at(0);
   if (0 != index.column()) { _remReacButton->setEnabled(false); return; }
   _remReacButton->setEnabled(true);
+}
+
+
+void
+ReactionListView::onReactionEditing(const QModelIndex &index)
+{
+  // Get selected reaction:
+  if (index.row() >= (int)_reactions->getModel().numReactions()) { return; }
+  if (index.row() < 0) { return; }
+  iNA::Ast::Reaction *reaction = _reactions->getModel().getReaction(index.row());
+
+  // Show reaction editor wizard:
+  ReactionEditor editor(_reactions->getModel(), reaction);
+  if (QDialog::Rejected == editor.exec()) { return; }
+
+  // Add new reaction and new species to the model
+  editor.commitReactionScope();
+  // Update document tree
+  Application::getApp()->docTree()->resetCompleteTree();
 }

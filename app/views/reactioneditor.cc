@@ -57,13 +57,13 @@ ReactionEditorContext::undefinedSymbols() const {
 /* ********************************************************************************************* *
  * Implementation of ReactionEditor
  * ********************************************************************************************* */
-ReactionEditor::ReactionEditor(iNA::Ast::Model &model, QWidget *parent)
+ReactionEditor::ReactionEditor(iNA::Ast::Model &model, iNA::Ast::Reaction *reaction, QWidget *parent)
   : QWizard(parent), _model(model), _current_reaction_scope(0)
 {
   setWindowTitle(tr("Create new reaction"));
 
   // Assemble wizard pages:
-  addPage(new ReactionEditorPage(this));
+  addPage(new ReactionEditorPage(reaction, this));
   addPage(new ReactionEditorSummaryPage(this));
 }
 
@@ -134,20 +134,28 @@ ReactionEditor::commitReactionScope()
 /* ********************************************************************************************* *
  * Implementation of ReactionEditorPage
  * ********************************************************************************************* */
-ReactionEditorPage::ReactionEditorPage(ReactionEditor *editor)
-  : QWizardPage(editor), _model(editor->model())
+ReactionEditorPage::ReactionEditorPage(iNA::Ast::Reaction *reaction, ReactionEditor *editor)
+  : QWizardPage(editor), _model(editor->model()), _current_reaction(reaction)
 {
   setTitle(tr("Specify chemical equation and propensity"));
 
   // The name field
   _name = new QLineEdit("reaction");
   _name->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
+  // Initialize name line edit if a reaction is given:
+  if ((0 != _current_reaction) && (_current_reaction->hasName())) {
+    _name->setText(_current_reaction->getName().c_str());
+  }
 
   // The reactants stoichiometry
   _equation = new QLineEdit();
   _equation->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
   QCompleter *completer = new QCompleter(ScopeItemModel::collectIdentifiers(_model, ScopeItemModel::SELECT_ALL));
   _equation->setCompleter(completer);
+  if ((0 != _current_reaction)) {
+    _equation->setText(_serializeReactionEquation());
+  }
+
   // Get default color and define error color for equation editor:
   _default_background = _equation->palette().color(QPalette::Base);
   _error_background = QColor(Qt::red).lighter();
@@ -157,7 +165,9 @@ ReactionEditorPage::ReactionEditorPage(ReactionEditor *editor)
   _kinetic_law_type->addItem("Mass action", (unsigned) MASSACTION_SINGLE);
   _kinetic_law_type->addItem("Multi-compartment", (unsigned) MASSACTION_MULTI);
   _kinetic_law_type->addItem("User defined", (unsigned) USER_DEFINED);
-  _kinetic_law_type->setCurrentIndex(0);
+  // Select mass action no reaction is given, user defined otherwise
+  if (0 == _current_reaction) { _kinetic_law_type->setCurrentIndex(0); }
+  else { _kinetic_law_type->setCurrentIndex(2); }
 
   _kineticLaw = new QStackedWidget();
   _kineticLawFormula = new QLabel();
@@ -166,7 +176,14 @@ ReactionEditorPage::ReactionEditorPage(ReactionEditor *editor)
   _kineticLawEditor->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
   _kineticLawEditor->setEnabled(false);
   _kineticLaw->addWidget(_kineticLawEditor);
-  _kineticLaw->setCurrentIndex(0);
+  if (0 == _current_reaction) { _kineticLaw->setCurrentIndex(0); }
+  else { _kineticLaw->setCurrentIndex(1); }
+
+
+  // Initialize kinetic expression law editor if a reaction is given:
+  if (0 != _current_reaction) {
+    _kineticLawEditor->setText(_serializePropensity());
+  }
 
   // Layout
   QFormLayout *layout = new QFormLayout();
@@ -292,6 +309,51 @@ ReactionEditorPage::_onKineticLawExpressionChanged()
     }
   }
 }
+
+
+
+QString
+ReactionEditorPage::_serializeReactionEquation()
+{
+  QStringList reactants, products;
+
+  // First serialize reactants:
+  for (iNA::Ast::Reaction::iterator reac=_current_reaction->reactantsBegin();
+       reac!=_current_reaction->reactantsEnd(); reac++)
+  {
+    std::stringstream buffer;
+    iNA::Parser::Expr::serializeExpression(reac->second, buffer, &_model);
+    reactants.append(
+          QString("%1*%2").arg(buffer.str().c_str()).arg(reac->first->getIdentifier().c_str()));
+  }
+
+  // then, serialize products:
+  for (iNA::Ast::Reaction::iterator prod=_current_reaction->productsBegin();
+       prod!=_current_reaction->productsEnd(); prod++)
+  {
+    std::stringstream buffer;
+    iNA::Parser::Expr::serializeExpression(prod->second, buffer, &_model);
+    products.append(
+          QString("%1*%2").arg(buffer.str().c_str()).arg(prod->first->getIdentifier().c_str()));
+  }
+
+  // finally, assemble equation:
+  if (_current_reaction->isReversible()) {
+    return QString("%1 = %2").arg(reactants.join(" + ")).arg(products.join(" + "));
+  }
+  return QString("%1 -> %2").arg(reactants.join(" + ")).arg(products.join(" + "));
+}
+
+
+QString
+ReactionEditorPage::_serializePropensity()
+{
+  iNA::Ast::KineticLaw *kinlaw = _current_reaction->getKineticLaw();
+  std::stringstream buffer;
+  iNA::Parser::Expr::serializeExpression(kinlaw->getRateLaw(), buffer, kinlaw);
+  return buffer.str().c_str();
+}
+
 
 
 bool
@@ -894,6 +956,53 @@ ReactionEditorPage::_parseAndCreateKineticLaw(iNA::Ast::Reaction *reaction)
 }
 
 
+void
+ReactionEditorPage::_updateCurrentReaction(
+    const QString &name, QList<QPair<int, QString> > &reactants,
+    QList<QPair<int, QString> > &products, bool is_reversible, iNA::Ast::Scope *scope)
+{
+  // Update reaction name:
+  _current_reaction->setName(_name->text().toStdString());
+
+  // Clear reactants, products and modifiers of the reaction
+  _current_reaction->clearReactants();
+  _current_reaction->clearProducts();
+  _current_reaction->clearModifiers();
+
+  // Create reactants:
+  for (QList< QPair<int, QString> >::iterator item=reactants.begin(); item!=reactants.end(); item++) {
+    iNA::Ast::Definition *def = scope->getDefinition(item->second.toStdString());
+    if (! iNA::Ast::Node::isSpecies(def)) {
+      iNA::InternalError err;
+      err << "Identifier " << item->second.toStdString()
+          << " in reactants list does not name a species.";
+      throw err;
+    }
+
+    _current_reaction->addReactantStoichiometry(static_cast<iNA::Ast::Species *>(def), item->first);
+  }
+
+  // Create products:
+  for (QList< QPair<int, QString> >::iterator item=products.begin(); item!=products.end(); item++) {
+    iNA::Ast::Definition *def = scope->getDefinition(item->second.toStdString());
+    if (! iNA::Ast::Node::isSpecies(def)) {
+      iNA::InternalError err;
+      err << "Identifier " << item->second.toStdString()
+          << " in products list does not name a species.";
+      throw err;
+    }
+
+    _current_reaction->addProductStoichiometry(static_cast<iNA::Ast::Species *>(def), item->first);
+  }
+}
+
+
+void
+ReactionEditorPage::_updateCurrentReactionKineticLaw()
+{
+  _createKineticLaw(_current_reaction);
+}
+
 
 bool
 ReactionEditorPage::validatePage()
@@ -933,12 +1042,18 @@ ReactionEditorPage::validatePage()
   iNA::Ast::Scope *reaction_scope = new iNA::Ast::Scope(&_model);
   _defineUnknownSpecies(reactants, products, reaction_scope);
 
-  // Create reaction with empty kinetic law:
-  iNA::Ast::Reaction *new_reaction = _createReaction(
-        _name->text(), reactants, products, is_reversible, reaction_scope);
 
-  // Create kinetic law for that reaction
-  _createKineticLaw(new_reaction);
+  if (0 == _current_reaction) {
+    // Create reaction with empty kinetic law:
+    iNA::Ast::Reaction *new_reaction = _createReaction(
+          _name->text(), reactants, products, is_reversible, reaction_scope);
+    // Create kinetic law for that reaction
+    _createKineticLaw(new_reaction);
+  } else {
+    // Update current reaction and its kinetic law:
+    _updateCurrentReaction(_name->text(), reactants, products, is_reversible, reaction_scope);
+    _updateCurrentReactionKineticLaw();
+  }
 
   // Store reaction equation:
   ReactionEditor *editor = static_cast<ReactionEditor *>(wizard());

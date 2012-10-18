@@ -26,6 +26,9 @@ private slots:
   void onRemReaction();
   /** Enables or disabled the "delete reaction" button. */
   void onSelectionChanged(const QItemSelection &selected, const QItemSelection &deseleced);
+  /** Callback for double click on a reaction. */
+  void onReactionEditing(const QModelIndex &index);
+
 
 private:
   /** Holds a weak reference to the list of reactions. */

@@ -48,7 +48,9 @@ class ReactionEditor : public QWizard
   Q_OBJECT
 
 public:
-  explicit ReactionEditor(iNA::Ast::Model &model, QWidget *parent=0);
+  /** Creates the reaction editor wizard, if reaction != 0, the reaction equation and propensity
+   * is taken from this reaction. */
+  explicit ReactionEditor(iNA::Ast::Model &model, iNA::Ast::Reaction *reaction=0, QWidget *parent=0);
 
   /** Returns a weak reference to the model instance. */
   iNA::Ast::Model &model();
@@ -86,7 +88,7 @@ protected:
 
 public:
   /** Constructor. */
-  ReactionEditorPage(ReactionEditor *editor);
+  ReactionEditorPage(iNA::Ast::Reaction *reaction, ReactionEditor *editor);
 
   /** Validates the stoichiometry/reaction equation and kinetic law. */
   virtual bool validatePage();
@@ -111,6 +113,11 @@ private slots:
 
 
 private:
+  /** Serializes the reaction equation. */
+  QString _serializeReactionEquation();
+  /** Serializes the propensity of the reaction. */
+  QString _serializePropensity();
+
   /** Parses a (incomplete) reaction equation. */
   bool _parseEquation(const QString &text, QList< QPair<int, QString> > &reactants,
                      QList< QPair<int, QString> > &product, bool &reversible);
@@ -162,6 +169,15 @@ private:
   /** Creates the kinetic law for this reaction from the kinetic law expression editor. */
   void _parseAndCreateKineticLaw(iNA::Ast::Reaction *reaction);
 
+  /** Updates the current reaction. */
+  void _updateCurrentReaction(const QString &name, QList< QPair<int, QString> > &reactants,
+                              QList< QPair<int, QString> > &products, bool is_reversible,
+                              iNA::Ast::Scope *scope);
+
+  /** Updates the kinetic law of the current reaction. */
+  void _updateCurrentReactionKineticLaw();
+
+
 private:
   /** Holds a weak reference to the model. */
   iNA::Ast::Model &_model;
@@ -183,6 +199,8 @@ private:
   QColor _default_background;
   /** Holds the error background color (if the reaction equation is invalid, red). */
   QColor _error_background;
+  /** Holds the identifier of the expression being edited. Is empty on new reaction. */
+  iNA::Ast::Reaction *_current_reaction;
 };
 
 
