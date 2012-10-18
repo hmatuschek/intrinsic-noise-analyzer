@@ -58,7 +58,7 @@ ReactionEditorContext::undefinedSymbols() const {
  * Implementation of ReactionEditor
  * ********************************************************************************************* */
 ReactionEditor::ReactionEditor(iNA::Ast::Model &model, iNA::Ast::Reaction *reaction, QWidget *parent)
-  : QWizard(parent), _model(model), _current_reaction_scope(0)
+  : QWizard(parent), _model(model), _current_reaction_scope(0), _current_reaction(reaction)
 {
   setWindowTitle(tr("Create new reaction"));
 
@@ -76,7 +76,12 @@ ReactionEditor::model()
 
 
 iNA::Ast::Reaction *
-ReactionEditor::reaction() {
+ReactionEditor::reaction()
+{
+  // If we edit an existing reaction -> return this reaction
+  if (0 != _current_reaction) { return _current_reaction; }
+
+  // Otherwise get reaction from reaction scope:
   if (0 == _current_reaction_scope) { return 0; }
   for (iNA::Ast::Scope::iterator item = _current_reaction_scope->begin();
        item != _current_reaction_scope->end(); item++)
@@ -962,7 +967,7 @@ ReactionEditorPage::_updateCurrentReaction(
     QList<QPair<int, QString> > &products, bool is_reversible, iNA::Ast::Scope *scope)
 {
   // Update reaction name:
-  _current_reaction->setName(_name->text().toStdString());
+  _current_reaction->setName(name.toStdString());
 
   // Update reversible reaction
   _current_reaction->setReversible(is_reversible);
@@ -1037,13 +1042,13 @@ ReactionEditorPage::validatePage()
 
   // Construct new scope, holding all undefined variables:
   iNA::Ast::Scope *reaction_scope = new iNA::Ast::Scope(&_model);
+  iNA::Ast::Reaction *new_reaction = 0;
   _defineUnknownSpecies(reactants, products, reaction_scope);
 
 
   if (0 == _current_reaction) {
     // Create reaction with empty kinetic law:
-    iNA::Ast::Reaction *new_reaction = _createReaction(
-          _name->text(), reactants, products, is_reversible, reaction_scope);
+    new_reaction = _createReaction(_name->text(), reactants, products, is_reversible, reaction_scope);
     // Create kinetic law for that reaction
     _createKineticLaw(new_reaction);
   } else {
@@ -1058,7 +1063,6 @@ ReactionEditorPage::validatePage()
   // Store reaction equation:
   ReactionEditor *editor = static_cast<ReactionEditor *>(wizard());
   editor->setReactionScope(reaction_scope);
-
   return true;
 }
 

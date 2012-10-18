@@ -71,6 +71,7 @@ private:
   /** A weak reference to the model. */
   iNA::Ast::Model &_model;
   iNA::Ast::Scope *_current_reaction_scope;
+  iNA::Ast::Reaction *_current_reaction;
 };
 
 
