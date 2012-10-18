@@ -16,8 +16,8 @@ NewModelDialog::NewModelDialog(QWidget *parent) :
   QDialogButtonBox *buttons = new QDialogButtonBox(QDialogButtonBox::Cancel|QDialogButtonBox::Ok);
 
   QFormLayout *dialog_layout = new QFormLayout();
-  dialog_layout->addRow(tr("Model name"), _modelName);
-  dialog_layout->addRow(tr("Model identifier"), _modelIdentifier);
+  dialog_layout->addRow(tr("Name"), _modelName);
+  dialog_layout->addRow(tr("Identifier"), _modelIdentifier);
 
   QVBoxLayout *layout = new QVBoxLayout();
   layout->addLayout(dialog_layout);
