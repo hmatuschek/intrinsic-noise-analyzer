@@ -174,9 +174,6 @@ private:
                               QList< QPair<int, QString> > &products, bool is_reversible,
                               iNA::Ast::Scope *scope);
 
-  /** Updates the kinetic law of the current reaction. */
-  void _updateCurrentReactionKineticLaw();
-
 
 private:
   /** Holds a weak reference to the model. */

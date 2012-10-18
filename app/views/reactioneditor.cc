@@ -964,10 +964,13 @@ ReactionEditorPage::_updateCurrentReaction(
   // Update reaction name:
   _current_reaction->setName(_name->text().toStdString());
 
+  // Update reversible reaction
+  _current_reaction->setReversible(is_reversible);
+
   // Clear reactants, products and modifiers of the reaction
   _current_reaction->clearReactants();
   _current_reaction->clearProducts();
-  _current_reaction->clearModifiers();
+  _current_reaction->clearModifier();
 
   // Create reactants:
   for (QList< QPair<int, QString> >::iterator item=reactants.begin(); item!=reactants.end(); item++) {
@@ -996,12 +999,6 @@ ReactionEditorPage::_updateCurrentReaction(
   }
 }
 
-
-void
-ReactionEditorPage::_updateCurrentReactionKineticLaw()
-{
-  _createKineticLaw(_current_reaction);
-}
 
 
 bool
@@ -1051,8 +1048,11 @@ ReactionEditorPage::validatePage()
     _createKineticLaw(new_reaction);
   } else {
     // Update current reaction and its kinetic law:
+    // Remove current reaction from _model:
+    _model.remDefinition(_current_reaction); reaction_scope->addDefinition(_current_reaction);
     _updateCurrentReaction(_name->text(), reactants, products, is_reversible, reaction_scope);
-    _updateCurrentReactionKineticLaw();
+    _createKineticLaw(_current_reaction);
+    reaction_scope->remDefinition(_current_reaction); _model.addDefinition(_current_reaction);
   }
 
   // Store reaction equation:
