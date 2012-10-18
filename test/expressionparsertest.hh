@@ -15,6 +15,9 @@ public:
   /** Simply tests parser and assembler with pretty serialization passes. */
   void testPrettySerialization();
 
+  /** Test parenthesis in serializations. */
+  void testParenthesis();
+
 public:
   /** Constructs the test suite. */
   static UnitTest::TestSuite *suite();

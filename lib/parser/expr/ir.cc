@@ -151,21 +151,35 @@ Node::serialize(std::ostream &stream, Context &ctx) {
 void
 Node::_serialize(std::ostream &stream, Context &ctx, size_t precedence)
 {
-  if (isAddNode() || isSubNode()) {
+  if (isAddNode()) {
     if (precedence > 1) { stream << "("; }
     argument(0)->_serialize(stream, ctx, 1);
-    if (isAddNode()) { stream << "+"; }
-    else {stream << "-"; }
+    stream << "+";
     argument(1)->_serialize(stream, ctx, 1);
     if (precedence > 1) { stream << ")"; }
   }
 
-  if (isMulNode() || isDivNode()) {
+  if (isSubNode()) {
+    if (precedence > 1) { stream << "("; }
+    argument(0)->_serialize(stream, ctx, 1);
+    stream << "-";
+    argument(1)->_serialize(stream, ctx, 2);
+    if (precedence > 1) { stream << ")"; }
+  }
+
+  if (isMulNode()) {
     if (precedence > 2) { stream << "("; }
     argument(0)->_serialize(stream, ctx, 2);
-    if (isMulNode()) { stream << "*"; }
-    else {stream << "/"; }
+    stream << "*";
     argument(1)->_serialize(stream, ctx, 2);
+    if (precedence > 2) { stream << ")"; }
+  }
+
+  if (isDivNode()) {
+    if (precedence > 2) { stream << "("; }
+    argument(0)->_serialize(stream, ctx, 2);
+    stream << "/";
+    argument(1)->_serialize(stream, ctx, 3);
     if (precedence > 2) { stream << ")"; }
   }
 
