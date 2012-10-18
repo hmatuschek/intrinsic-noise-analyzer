@@ -30,7 +30,8 @@ public:
 
   /** Resolves or creates a symbol for the given identifier. */
   virtual GiNaC::symbol resolve(const std::string &identifier);
-
+  /** Resolves the given symbol to the identifier of the variable. */
+  virtual std::string identifier(GiNaC::symbol symbol);
   /** Returns the table (id -> symbol) of undefined symbols in the expression. */
   const std::map<std::string, GiNaC::symbol> &undefinedSymbols() const;
 

@@ -205,7 +205,8 @@ ParameterList::_getInitialValue(iNA::Ast::Parameter *param, int role) const
     return Ginac2Formula::toPixmap(param->getValue(), *_model);
   } else {
     // Serialize expression for editing:
-    std::stringstream buffer; buffer << param->getValue();
+    std::stringstream buffer;
+    iNA::Parser::Expr::serializeExpression(param->getValue(), buffer, _model);
     return QString(buffer.str().c_str());
   }
 }

@@ -16,6 +16,7 @@
 #include "conservationanalysistest.hh"
 #include "unitparsertest.hh"
 #include "benchmark.hh"
+#include "expressionparsertest.hh"
 
 #include "utils/option_parser.hh"
 #include "utils/logger.hh"
@@ -75,6 +76,8 @@ int main(int argc, char *argv[])
     runner.addSuite(MersenneTwisterTest::suite());
   if (0 == skipped_tests.count("Regression"))
     runner.addSuite(RegressionTest::suite());
+  if (0 == skipped_tests.count("ExpressionParser"))
+    runner.addSuite(ExpressionParserTest::suite());
   if (0 == skipped_tests.count("SBMLSH"))
     runner.addSuite(SBMLSHParserTest::suite());
   if (0 == skipped_tests.count("OptionParser"))

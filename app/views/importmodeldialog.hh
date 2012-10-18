@@ -7,10 +7,7 @@
 #include "fileselector.hh"
 
 
-/**
- * Simple QDialog to import a model (SBMl, SBML-SH, ...)
- */
-class ImportModelDialog : public QDialog
+class ModelFormatQuestion : public QDialog
 {
   Q_OBJECT
 
@@ -21,18 +18,14 @@ public:
   } Format;
 
 public:
-  explicit ImportModelDialog(QWidget *parent = 0);
-
-  QString getFileName() const;
+  /** Asks the user for the type of the model file. */
+  explicit ModelFormatQuestion(const QString &filename, QWidget *parent = 0);
   Format getFormat() const;
 
-private slots:
-  void __on_filename_selected(QString filename);
-
 private:
-  FileSelector *_file_selector;
   QComboBox *_format_selector;
   QDialogButtonBox *_buttons;
 };
+
 
 #endif // __INA_APP_IMPORTMODELDIALOG_HH__
