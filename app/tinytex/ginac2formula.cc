@@ -126,10 +126,13 @@ Ginac2Formula::_assembleFormula(SmartPtr<Parser::Expr::Node> node, size_t preced
 
   if (node->isSymbolNode()) {
     // Get symbols
-    if (_tex_names) {
-      return TinyTex::parseQuoted(_context.identifier(node->symbol()).c_str());
+    MathItem *symbol=0;
+    if (_tex_names) { symbol = TinyTex::parseQuoted(_context.identifier(node->symbol()).c_str()); }
+    else { symbol = new MathText(_context.identifier(node->symbol()).c_str()); }
+    if (_context.hasConcentrationUnits(node->symbol())) {
+      symbol = new MathBlock(symbol, new MathText("["), new MathText("]"));
     }
-    return new MathText(_context.identifier(node->symbol()).c_str());
+    return symbol;
   }
 
   if (node->isIntegerNode()) {
