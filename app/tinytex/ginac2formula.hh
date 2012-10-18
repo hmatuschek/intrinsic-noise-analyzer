@@ -9,7 +9,28 @@
 #include <parser/expr/ir.hh>
 
 
-/** Simple class to traverse a @c GiNaC::ex expression and assemble a nice looking
+/** Simple expression context that resolves GiNaC symbols to the displayname of the associates
+ * @c iNA::Ast::VariableDefinition. This class is used by the Ginac2Formula renderer to reverse
+ * lookup GiNaC symbols in expressions. */
+class ModelExpressionContext : public iNA::Parser::Expr::Context
+{
+public:
+  /** Constructor. */
+  ModelExpressionContext(const iNA::Ast::Scope &scope);
+  /** Resolves a variable identifier to its symbol. */
+  GiNaC::symbol resolve(const std::string &identifier);
+  /** Resolves a GiNaC symbol to the name of the corresponding @c iNA::Ast::VariableDefinition.
+   * If the variable has no name assigned, the identifier is returned. */
+  std::string identifier(GiNaC::symbol symbol);
+
+private:
+  /** Holds a weak reference to the scope context. */
+  const iNA::Ast::Scope &_scope;
+};
+
+
+
+/** Simple class to translate a @c GiNaC::ex expression and assemble a nice looking
  * representation of the expression.
  *
  * The symbols of the expressions are resolved within the given context. If the symbol
@@ -21,13 +42,13 @@
 class Ginac2Formula
 {
   /** A weak reference to the variable scope used to resolved GiNaC symbols. */
-  iNA::Ast::Scope &_scope;
+  ModelExpressionContext &_context;
   /** Specifies if names should be rendered as TeX if enclosed in "$". */
   bool _tex_names;
 
 public:
   /** Constructor, needs the variable scope for symbol resolution. */
-  Ginac2Formula(iNA::Ast::Scope &scope, bool tex_names=true);
+  Ginac2Formula(ModelExpressionContext &context, bool tex_names=true);
 
 private:
   /** Translates the expression IR into MathItem representing the expression. */

@@ -10,8 +10,35 @@
 using namespace iNA;
 
 
-Ginac2Formula::Ginac2Formula(iNA::Ast::Scope &scope, bool tex_names)
-  : _scope(scope), _tex_names(tex_names)
+/* ********************************************************************************************* *
+ * Implementation of ModelExpressionContext
+ * ********************************************************************************************* */
+ModelExpressionContext::ModelExpressionContext(const Ast::Scope &scope)
+  : _scope(scope)
+{
+  // Pass...
+}
+
+GiNaC::symbol
+ModelExpressionContext::resolve(const std::string &identifier) {
+  return _scope.getVariable(identifier)->getSymbol();
+}
+
+std::string
+ModelExpressionContext::identifier(GiNaC::symbol symbol)
+{
+  iNA::Ast::VariableDefinition *var = _scope.getVariable(symbol);
+  if (var->hasName()) { return var->getName(); }
+  return var->getIdentifier();
+}
+
+
+
+/* ********************************************************************************************* *
+ * Implementation of Ginac2Formula
+ * ********************************************************************************************* */
+Ginac2Formula::Ginac2Formula(ModelExpressionContext &context, bool tex_names)
+  : _context(context), _tex_names(tex_names)
 {
   // pass...
 }
@@ -44,7 +71,7 @@ Ginac2Formula::_assembleFormula(SmartPtr<Parser::Expr::Node> node, size_t preced
   if (node->isDivNode()) {
     MathFraction *formula =
         new MathFraction(_assembleFormula(node->argument(0), 2),
-                         _assembleFormula(node->argument(0), 3));
+                         _assembleFormula(node->argument(1), 3));
     if (precedence > 2) {
       return new MathBlock(formula, new MathText("("), new MathText(")"));
     }
@@ -87,7 +114,10 @@ Ginac2Formula::_assembleFormula(SmartPtr<Parser::Expr::Node> node, size_t preced
   }
 
   if (node->isSymbolNode()) {
-    return new MathText(_scope.getVariable(node->symbol())->getIdentifier().c_str());
+    if (_tex_names) {
+      return TinyTex::parse(_context.identifier(node->symbol()).c_str());
+    }
+    return new MathText(_context.identifier(node->symbol()).c_str());
   }
 
   if (node->isIntegerNode()) {
@@ -119,7 +149,8 @@ Ginac2Formula::toFormula(GiNaC::ex expression, Ast::Scope &scope, bool tex_names
   MathItem *formula = 0;
   try {
     // Assemble formula from GiNaC expression
-    Ginac2Formula converter(scope, tex_names);
+    ModelExpressionContext context(scope);
+    Ginac2Formula converter(context, tex_names);
     iNA::SmartPtr<iNA::Parser::Expr::Node> ir = iNA::Parser::Expr::Node::fromExpression(expression);
     iNA::Parser::Expr::PrettySerializationTrafo::apply(ir);
     formula = converter._assembleFormula(ir, 0);
