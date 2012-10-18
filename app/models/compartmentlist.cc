@@ -164,7 +164,7 @@ CompartmentList::_getInitValue(iNA::Ast::Compartment *comp, int role) const
     return Ginac2Formula::toPixmap(comp->getValue(), *_model);
   } else if (Qt::EditRole == role) {
     // Serialize expression for editing:
-    std::stringstream buffer; buffer << comp->getValue();
+    iNA::Parser::Expr::serializeExpression(comp->getValue(), buffer, _model);
     return QString(buffer.str().c_str());
   }
 

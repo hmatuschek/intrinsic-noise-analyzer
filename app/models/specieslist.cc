@@ -194,7 +194,7 @@ SpeciesList::_getInitialValue(iNA::Ast::Species *species, int role) const
   // Export formula as string
   std::stringstream buffer;
   if (species->hasValue()) {
-    iNA::Parser::Expr::Writer::write(species->getValue(), *_model, buffer);
+    iNA::Parser::Expr::serializeExpression(species->getValue(), buffer, _model);
   }
   return QString(buffer.str().c_str());
 }

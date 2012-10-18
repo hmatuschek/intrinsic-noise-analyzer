@@ -13,7 +13,12 @@ namespace Parser {
 namespace Expr {
 
 
-/** Generic node of expression intermediate representation. */
+/** Generic node of expression intermediate representation.
+ * This itermediate representation is generated from GiNaC expressions to apply several
+ * transformations in order to allow a more readable representation of the expression. The user
+ * may not utilize this representation directly, use @c iNA::Parser::serializeExpression
+ * to obtain a textual representation of an expression that can be parsed again by the expression
+ * parser. */
 class Node {
 public:
   /** Lists all expression types. */
@@ -39,7 +44,7 @@ public:
 
 
 protected:
-  /** Hidden constructor. */
+  /** Hidden constructor. Use one of the static factory methods to assemble an expression. */
   Node(NodeType type);
 
 public:
@@ -77,8 +82,11 @@ public:
   size_t numArguments() const;
   /** Returns the i-th child node if the node. */
   SmartPtr<Node> &argument(size_t i);
+  /** Returns the value of an integer expression. */
   long &intValue();
+  /** Returns the value of a real expression. */
   double &realValue();
+  /** Returns the value of a complex expression. */
   std::complex<double> &complexValue();
   /** Serializes the node into the given stream. */
   void serialize(std::ostream &stream, Context &ctx);
@@ -165,7 +173,8 @@ protected:
 };
 
 
-/** Translates any (X)^(-INTEGER) -> 1/(X^INTEGER). */
+/** Translates any a^-(b) -> 1/a^b.
+ * Move to operation normalization pass. */
 class PowerToDivisionPass : public Pass
 {
 public:
@@ -181,11 +190,17 @@ public:
   bool apply(SmartPtr<Node> &node);
 
 private:
+  /** Performs the pass on sums. */
   bool _applyOnAdd(SmartPtr<Node> &node);
+  /** Performs the pass on differences. */
   bool _applyOnSub(SmartPtr<Node> &node);
+  /** Performs the pass on products. */
   bool _applyOnMul(SmartPtr<Node> &node);
+  /** Performs the pass on quotients. */
   bool _applyOnDiv(SmartPtr<Node> &node);
+  /** Performs the pass on powers. */
   bool _applyOnPow(SmartPtr<Node> &node);
+  /** Performs the pass on negations. */
   bool _applyOnNeg(SmartPtr<Node> &node);
 };
 
@@ -194,12 +209,17 @@ private:
 class NormalizeOperatorPass : public Pass
 {
 public:
+  /** Performs the pass on the given expression. */
   bool apply(SmartPtr<Node> &node);
 
 private:
+  /** Performs the pass on sums. */
   bool _applyOnAdd(SmartPtr<Node> &node);
+  /** Performs the pass on differences .*/
   bool _applyOnSub(SmartPtr<Node> &node);
+  /** Performs the pass on products. */
   bool _applyOnMul(SmartPtr<Node> &node);
+  /** Performs the pass on quotients. */
   bool _applyOnDiv(SmartPtr<Node> &node);
 };
 
@@ -209,6 +229,7 @@ private:
 class NormalizeValuesPass : public Pass
 {
 public:
+  /** Applies the pass on the given expression. */
   bool apply(SmartPtr<Node> &node);
 };
 

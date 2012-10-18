@@ -16,64 +16,23 @@ using namespace iNA::Parser::Expr;
  * Implementation of ScopeContext, a context for Ast::Scopes
  * ******************************************************************************************** */
 ScopeContext::ScopeContext(const Ast::Scope *model)
-  : _scope_stack()
+  : _scope(model)
 {
-  _scope_stack.push_back(model);
+  // Pass...
 }
-
-
-void
-ScopeContext::pushScope(const Ast::Scope *scope) {
-  _scope_stack.push_back(scope);
-}
-
-void
-ScopeContext::popScope() {
-  _scope_stack.pop_back();
-}
-
 
 
 GiNaC::symbol
 ScopeContext::resolve(const std::string &name)
 {
-  return resolveVariable(name)->getSymbol();
+  return _scope->getVariable(name)->getSymbol();
 }
 
 
 std::string
 ScopeContext::identifier(GiNaC::symbol symbol)
 {
-  return _scope_stack.back()->getVariable(symbol)->getIdentifier();
-}
-
-
-Ast::VariableDefinition *
-ScopeContext::resolveVariable(const std::string &name)
-{
-  std::vector<const Ast::Scope *>::reverse_iterator scope=_scope_stack.rbegin();
-  for ( ; scope != _scope_stack.rend(); scope++) {
-    if ((*scope)->hasDefinition(name)) {
-      Ast::Definition *def = (*scope)->getDefinition(name);
-      Ast::VariableDefinition *var = 0;
-      if (0 == (var = dynamic_cast<Ast::VariableDefinition *>(def))) {
-        SymbolError err;
-        err << "Can not resolve symbol " << name << ": Identifier does not refer to a variable!";
-        throw err;
-      }
-      return var;
-    }
-
-    if ((*scope)->isClosed()) {
-      SymbolError err;
-      err << "Can not resolve symbol " << name << ": Identifier not found.";
-      throw err;
-    }
-  }
-
-  SymbolError err;
-  err << "Can not resolve symbol " << name << ": Identifier not found.";
-  throw err;
+  return _scope->getVariable(symbol)->getIdentifier();
 }
 
 

@@ -212,9 +212,9 @@ ReactionParameterList::_getInitialValue(iNA::Ast::Parameter *param, int role) co
 
   if (Qt::EditRole == role) {
     // Export formula as string
-    std::stringstream str;
-    if (param->hasValue()) { str << param->getValue(); }
-    return QString(str.str().c_str());
+    std::stringstream buffer;
+    iNA::Parser::Expr::serializeExpression(param->getValue(), buffer, _kinetic_law);
+    return QString(buffer.str().c_str());
   }
 
   return QVariant();
