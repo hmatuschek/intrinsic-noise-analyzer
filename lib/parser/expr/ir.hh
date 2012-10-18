@@ -88,6 +88,8 @@ public:
   double &realValue();
   /** Returns the value of a complex expression. */
   std::complex<double> &complexValue();
+  /** Returns the symbol instance. */
+  GiNaC::symbol symbol() const;
   /** Serializes the node into the given stream. */
   void serialize(std::ostream &stream, Context &ctx);
 

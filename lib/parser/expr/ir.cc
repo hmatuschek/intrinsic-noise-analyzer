@@ -141,7 +141,7 @@ SmartPtr<Node> &Node::argument(size_t i) { return _args[i]; }
 long &Node::intValue() { return _integer; }
 double &Node::realValue() { return _real; }
 std::complex<double> &Node::complexValue() { return _complex; }
-
+GiNaC::symbol Node::symbol() const { return _symbol; }
 
 void
 Node::serialize(std::ostream &stream, Context &ctx) {

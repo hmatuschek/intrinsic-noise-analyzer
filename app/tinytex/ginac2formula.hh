@@ -6,6 +6,7 @@
 #include <QList>
 #include <QVariant>
 #include "formula.hh"
+#include <parser/expr/ir.hh>
 
 
 /** Simple class to traverse a @c GiNaC::ex expression and assemble a nice looking
@@ -17,33 +18,20 @@
  * name will be rendered using @c TinyTex, allowing to use a rudimentary TeX within
  * variable names, note that only super and sub scripts as well as greek letters and some
  * arrows are allowed. */
-class Ginac2Formula :
-    public GiNaC::visitor, public GiNaC::symbol::visitor, public GiNaC::numeric::visitor,
-    public GiNaC::add::visitor, public GiNaC::mul::visitor, public GiNaC::power::visitor,
-    public GiNaC::basic::visitor
+class Ginac2Formula
 {
-  /** Stack of temporary formula elements. */
-  QList<MathItem *> _stack;
   /** A weak reference to the variable scope used to resolved GiNaC symbols. */
   iNA::Ast::Scope &_scope;
   /** Specifies if names should be rendered as TeX if enclosed in "$". */
   bool _tex_names;
-  /** The current operator precedence. */
-  int _current_precedence;
 
 public:
   /** Constructor, needs the variable scope for symbol resolution. */
   Ginac2Formula(iNA::Ast::Scope &scope, bool tex_names=true);
 
-  virtual void visit(const GiNaC::symbol &node);
-  virtual void visit(const GiNaC::numeric &node);
-  virtual void visit(const GiNaC::add &node);
-  virtual void visit(const GiNaC::mul &node);
-  virtual void visit(const GiNaC::power &node);
-  virtual void visit(const GiNaC::basic &node);
-
-  /** Retunrs the assembled formula. */
-  MathItem *getFormula();
+private:
+  /** Translates the expression IR into MathItem representing the expression. */
+  MathItem *_assembleFormula(iNA::SmartPtr<iNA::Parser::Expr::Node> expression, size_t precedence);
 
 public:
   /** Renders an expression as a MathItem instance.
