@@ -6,6 +6,7 @@
 #include "views/newmodeldialog.hh"
 
 #include <QMessageBox>
+#include <QFileDialog>
 
 #include <parser/parser.hh>
 #include <parser/exception.hh>
@@ -228,21 +229,31 @@ void Application::onNewModel()
 void Application::onImportModel()
 {
   // Show a file-dialog for files:
-  ImportModelDialog *dialog = new ImportModelDialog();
-  if (QDialog::Accepted != dialog->exec()) return;
+  QString fileName = QFileDialog::getOpenFileName(
+        0, tr("Import model"), "",
+        tr("All Models (*.xml *.sbml *.mod *.sbmlsh);;SBML Models (*.xml *.sbml);;SBML-SH Models (*.mod *.sbmlsh);;All Files (*.*"));
+  if (0 == fileName.size()) { return; }
 
-  // Get filename and description format
-  QString fileName = dialog->getFileName();
-  ImportModelDialog::Format format = dialog->getFormat();
-  delete dialog;
+  QFileInfo info(fileName);
+  // Check if file is readable:
+  if (! info.isReadable()) {
+    QMessageBox::critical(0, tr("Can not import model"),
+                          tr("Can not import model from file %1: File not readable.").arg(info.fileName()));
+    return;
+  }
 
-  DocumentItem *new_doc = 0;
   try {
-    // Try to construct model from file:
-    if (ImportModelDialog::SBML_MODEL == format) {
+    DocumentItem *new_doc = 0;
+    // Try to determine file type by extension:
+    if (("xml" == info.suffix()) || ("sbml" == info.suffix())) {
       new_doc = new DocumentItem(Parser::Sbml::importModel(fileName.toStdString()), fileName);
-    } else if (ImportModelDialog::SBMLSH_MODEL == format) {
+    } else if (("mod" == info.suffix()) || ("sbmlsh" == info.suffix())) {
       new_doc = new DocumentItem(Parser::Sbmlsh::importModel(fileName.toStdString()), fileName);
+    }
+    // Add new document to tree:
+    if (0 != new_doc) {
+      docTree()->addDocument(new_doc);
+      return;
     }
   } catch (iNA::Parser::ParserError &err) {
     QMessageBox::warning(
@@ -253,8 +264,33 @@ void Application::onImportModel()
     return;
   }
 
-  // Add new document to tree:
-  docTree()->addDocument(new_doc);
+  // If unknown extension -> ask the user
+  ModelFormatQuestion dialog(fileName);
+  if (QDialog::Accepted != dialog.exec()) { return; }
+  ModelFormatQuestion::Format format = dialog.getFormat();
+
+  // load model.
+  try {
+    DocumentItem *new_doc = 0;
+    // Try to determine file type by extension:
+    if (ModelFormatQuestion::SBML_MODEL == format) {
+      new_doc = new DocumentItem(Parser::Sbml::importModel(fileName.toStdString()), fileName);
+    } else if (ModelFormatQuestion::SBMLSH_MODEL == format) {
+      new_doc = new DocumentItem(Parser::Sbmlsh::importModel(fileName.toStdString()), fileName);
+    }
+    // Add new document to tree:
+    if (0 != new_doc) {
+      docTree()->addDocument(new_doc);
+      return;
+    }
+  } catch (iNA::Parser::ParserError &err) {
+    QMessageBox::warning(
+          0, tr("Can not open model"), err.what());
+    return;
+  } catch (iNA::Exception &err) {
+    QMessageBox::warning(0, tr("Can not open model"), err.what());
+    return;
+  }
 }
 
 
