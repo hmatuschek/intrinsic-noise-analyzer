@@ -27,15 +27,15 @@ class ScopeContext : public Context
 protected:
   /** Holds the stack of scopes for symbol resolution.
    * @deprecated Scopes are nested anyway. */
-  std::vector<Ast::Scope *> _scope_stack;
+  std::vector<const Ast::Scope *> _scope_stack;
 
 public:
   /** Constructs an expression context using the given model as the global namespace/context. */
-  ScopeContext(Ast::Scope *model);
+  ScopeContext(const Ast::Scope *model);
 
   /** Pushes a (local) scope on the scope stack.
    * @deprecated Scopes are nested anyway. */
-  void pushScope(Ast::Scope *scope);
+  void pushScope(const Ast::Scope *scope);
   /** Removes a scope from the scope stack.
    * @deprecated Scopes are nested anyway. */
   void popScope();
@@ -93,6 +93,10 @@ GiNaC::ex parseExpression(const std::string &text, Ast::Scope *scope);
 
 /** Serializes the given expression into the given stream using the given context. */
 void serializeExpression(GiNaC::ex expression, std::ostream &stream, Context &ctx,
+                         SerializationType stategy=SERIALIZE_PLAIN);
+
+/** Serializes the given expression into the given stream using the given context. */
+void serializeExpression(GiNaC::ex expression, std::ostream &stream, const Ast::Scope *scope,
                          SerializationType stategy=SERIALIZE_PLAIN);
 
 }

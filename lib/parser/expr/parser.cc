@@ -15,7 +15,7 @@ using namespace iNA::Parser::Expr;
 /* ******************************************************************************************** *
  * Implementation of ScopeContext, a context for Ast::Scopes
  * ******************************************************************************************** */
-ScopeContext::ScopeContext(Ast::Scope *model)
+ScopeContext::ScopeContext(const Ast::Scope *model)
   : _scope_stack()
 {
   _scope_stack.push_back(model);
@@ -23,7 +23,7 @@ ScopeContext::ScopeContext(Ast::Scope *model)
 
 
 void
-ScopeContext::pushScope(Ast::Scope *scope) {
+ScopeContext::pushScope(const Ast::Scope *scope) {
   _scope_stack.push_back(scope);
 }
 
@@ -51,7 +51,7 @@ ScopeContext::identifier(GiNaC::symbol symbol)
 Ast::VariableDefinition *
 ScopeContext::resolveVariable(const std::string &name)
 {
-  std::vector<Ast::Scope *>::reverse_iterator scope=_scope_stack.rbegin();
+  std::vector<const Ast::Scope *>::reverse_iterator scope=_scope_stack.rbegin();
   for ( ; scope != _scope_stack.rend(); scope++) {
     if ((*scope)->hasDefinition(name)) {
       Ast::Definition *def = (*scope)->getDefinition(name);
@@ -172,8 +172,18 @@ Parser::Expr::parseExpression(const std::string &text, Context &ctx)
 }
 
 
-void Parser::Expr::serializeExpression(GiNaC::ex expression, std::ostream &stream, Context &ctx,
-                                       SerializationType stategy)
+void
+Parser::Expr::serializeExpression(
+    GiNaC::ex expression, std::ostream &stream, const Ast::Scope *scope, SerializationType stategy)
+{
+  ScopeContext context(scope);
+  serializeExpression(expression, stream, context, stategy);
+}
+
+
+void
+Parser::Expr::serializeExpression(
+    GiNaC::ex expression, std::ostream &stream, Context &ctx, SerializationType stategy)
 {
   // First, create IR from expression
   SmartPtr<Node> node = Node::fromExpression(expression);

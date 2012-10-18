@@ -28,9 +28,12 @@ namespace Sbmlsh {
 
 /** This class takes the concrete syntax tree (CST) of some parsed SBML-SH code and assembles a
  * @c Ast::Model instance from it. */
-class Assembler : protected Expr::ScopeContext, public Expr::Assembler
+class Assembler
 {
 protected:
+  /** Holds a weak reference to the Lexer instance. */
+  iNA::Parser::Lexer &_lexer;
+
   /** Holds a weak reference to the model being assembled. */
   Ast::Model &_model;
 
@@ -78,7 +81,7 @@ protected:
   /** Handels the kinetic law of a reaction. */
   Ast::KineticLaw *processKineticLaw(iNA::Parser::ConcreteSyntaxTree &law);
   /** Handles the list of local parameters of a kinetic law. */
-  void processLocalParameters(iNA::Parser::ConcreteSyntaxTree &params);
+  void processLocalParameters(Ast::KineticLaw *scope, iNA::Parser::ConcreteSyntaxTree &params);
   /** Handles a reaction equation. */
   void processReactionEquation(iNA::Parser::ConcreteSyntaxTree &law, Ast::Reaction *reaction);
   /** Handles the reactants of a reaction. */

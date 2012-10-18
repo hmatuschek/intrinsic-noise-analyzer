@@ -13,6 +13,7 @@ namespace Expr {
 /** Serializes GiNaC::ex expressions into strings.
  * This uses a much nicer serialization than the one implemented by GiNaC. It also can only
  * serialize those expressions that can be parsed using the Fluc::Parser::Expr parsers.
+ * @deprecated Use @c iNA::Parser::Expr::serializeExpression instead.
  */
 class Writer :
     public GiNaC::visitor, public GiNaC::basic::visitor, public GiNaC::add::visitor,

@@ -18,7 +18,7 @@ ExpressionParserTest::testParser() {
   GiNaC::ex expression_1 = Parser::Expr::parseExpression(buffer.str(), ctx);
   // Serialize expression back into string:
   buffer.str(""); Parser::Expr::serializeExpression(expression_1, buffer, ctx);
-  std::cerr << "Serialized expression: " << buffer.str();
+  //std::cerr << "Serialized expression: " << buffer.str();
   // And parse serialized expression again:
   GiNaC::ex expression_2 = Parser::Expr::parseExpression(buffer.str(), ctx);
 
@@ -41,7 +41,7 @@ ExpressionParserTest::testPrettySerialization() {
   // Serialize expression back into string:
   buffer.str("");
   Parser::Expr::serializeExpression(expression_1, buffer, ctx, Parser::Expr::SERIALIZE_PRETTY);
-  std::cerr << "Serialized expression: " << buffer.str();
+  //std::cerr << "Serialized expression: " << buffer.str();
   // And parse serialized expression again:
   GiNaC::ex expression_2 = Parser::Expr::parseExpression(buffer.str(), ctx);
 

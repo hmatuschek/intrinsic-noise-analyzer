@@ -355,15 +355,15 @@ bool
 PassManager::apply(SmartPtr<Node> &node) {
   // First, apply passes
   bool matched = false;
+  bool child_matched = false;
 
 rerun:
-  matched = applyOnNode(node);
-
+  child_matched = false;
   // then, traverse into child-nodes:
-  bool child_matched = false;
   for (size_t i=0; i<node->numArguments(); i++) {
     child_matched = (child_matched || apply(node->argument(i)));
   }
+  matched = applyOnNode(node);
 
   // If one of the child nodes was modified, re-run passes on this node:
   if (child_matched) {
@@ -738,28 +738,24 @@ NormalizeValuesPass::apply(SmartPtr<Node> &node)
 {
   // -1 -> -(1)
   if (node->isIntegerNode() && (0 > node->intValue())) {
-    std::cerr << "Subs: " << node->intValue() << " -> " << -node->intValue() << std::endl;
     node = Node::createNeg(Node::createValue(-node->intValue()));
     return true;
   }
 
   // -1.0 -> -(1.0)
   if (node->isRealNode() && (0. > node->realValue())) {
-    std::cerr << "Subs: " << node->realValue() << " -> " << -node->realValue() << std::endl;
     node = Node::createNeg(Node::createValue(-node->realValue()));
     return true;
   }
 
   // 1.0 -> 1
   if (node->isRealNode() && (node->realValue() == double(long(node->realValue())))) {
-    std::cerr << "Subs: " << node->realValue() << " -> " << long(node->realValue()) << std::endl;
     node = Node::createValue(long(node->realValue()));
     return true;
   }
 
   // 1.0 + 0.0j -> 1.0
   if (node->isComplexNode() && (0. == node->complexValue().imag())) {
-    std::cerr << "Subs: " << node->complexValue() << " -> " << node->complexValue().real() << std::endl;
     node = Node::createValue(node->complexValue().real());
     return true;
   }

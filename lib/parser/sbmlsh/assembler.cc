@@ -9,7 +9,7 @@ using namespace iNA::Parser::Sbmlsh;
 
 
 Assembler::Assembler(Ast::Model &model, Parser::Lexer &lexer)
-  : Expr::ScopeContext(&model), Expr::Assembler(*this, lexer), _model(model)
+  : _lexer(lexer), _model(model)
 {
   // Assemble base unit map;
   _base_unit_map["ampere"] = Ast::ScaledBaseUnit::AMPERE;
@@ -311,12 +311,14 @@ Assembler::processScaledUnitModifierList(Parser::ConcreteSyntaxTree &sulist,
    *     ScaledUnitModifierList]                : sulist[3][0][1]   */
 
   const Parser::Token &flag = _lexer[sulist[0].getTokenIdx()];
+  Parser::Expr::ScopeContext context(&_model);
+  Parser::Expr::Assembler expr_assembler(context, _lexer);
   if ("m" == flag.getValue()) {
-    multiplier = processNumber(sulist[2]).to_double();
+    multiplier = expr_assembler.processNumber(sulist[2]).to_double();
   } else if ("s" == flag.getValue()) {
-    scale = processNumber(sulist[2]).to_int();
+    scale = expr_assembler.processNumber(sulist[2]).to_int();
   } else if ("e" == flag.getValue()) {
-    exponent = processNumber(sulist[2]).to_int();
+    exponent = expr_assembler.processNumber(sulist[2]).to_int();
   } else {
     SBMLParserError err;
     err << "@line " << flag.getLine()
@@ -353,7 +355,9 @@ Assembler::processCompartmentDefinitions(Parser::ConcreteSyntaxTree &comp)
 
   // Handle initial value (if defined)
   if (comp[2].matched()) {
-    compartment->setValue(processExpression(comp[2][0][1]));
+    Parser::Expr::ScopeContext context(&_model);
+    Parser::Expr::Assembler expr_assembler(context, _lexer);
+    compartment->setValue(expr_assembler.processExpression(comp[2][0][1]));
   }
 
   // Set name if defined:
@@ -404,7 +408,9 @@ Assembler::processSpeciesDefinition(Parser::ConcreteSyntaxTree &spec)
     has_initial_amount = true;
   }
 
-  initial_value = processExpression(spec[4]);
+  Parser::Expr::ScopeContext context(&_model);
+  Parser::Expr::Assembler expr_assembler(context, _lexer);
+  initial_value = expr_assembler.processExpression(spec[4]);
   if (spec[5].matched()) {
     processSpeciesModifierList(spec[5], has_substance_units, has_boundary_condition, is_constant);
   }
@@ -494,7 +500,9 @@ Assembler::processParameterDefinition(Parser::ConcreteSyntaxTree &params)
    *   [EOL ParameterDefinitionList];     : params[5], ParameterDefinitionList = params[5][0][1] */
 
   std::string identifier = _lexer[params[0].getTokenIdx()].getValue();
-  GiNaC::ex value = processExpression(params[2]);
+  Parser::Expr::ScopeContext context(&_model);
+  Parser::Expr::Assembler expr_assembler(context, _lexer);
+  GiNaC::ex value = expr_assembler.processExpression(params[2]);
   bool is_constant = true;
 
   // There is just one modifier, making paramerer non-constant
@@ -535,9 +543,12 @@ Assembler::processRuleDefinitionList(Parser::ConcreteSyntaxTree &rules)
    *     RuleDefinitionList];      : rules[5][0][1]  */
 
   // Get variable addressed by identifier:
-  Ast::VariableDefinition *var = resolveVariable(_lexer[rules[2].getTokenIdx()].getValue());
+
+  Ast::VariableDefinition *var = _model.getVariable(_lexer[rules[2].getTokenIdx()].getValue());
   // Parse expression
-  GiNaC::ex expr = processExpression(rules[4]);
+  Parser::Expr::ScopeContext context(&_model);
+  Parser::Expr::Assembler expr_assembler(context, _lexer);
+  GiNaC::ex expr = expr_assembler.processExpression(rules[4]);
 
   // Determine type of rule
   if (! rules[0].matched()) {
@@ -627,7 +638,7 @@ Assembler::processReactionModifierList(Parser::ConcreteSyntaxTree &lst, std::lis
    *   Identifier                    : lst[0]
    *   [',', ReactionModifierList]   : lst[1], lst[1][0][1] -> ReactionModifierList  */
 
-  Ast::VariableDefinition *var = resolveVariable(_lexer[lst[0].getTokenIdx()].getValue());
+  Ast::VariableDefinition *var = _model.getVariable(_lexer[lst[0].getTokenIdx()].getValue());
   if (! Ast::Node::isSpecies(var)) {
     SBMLParserError err;
     err << "@line "<< _lexer[lst[0].getTokenIdx()].getLine()
@@ -652,20 +663,17 @@ Assembler::processKineticLaw(Parser::ConcreteSyntaxTree &law)
 
   GiNaC::ex expression;
   Ast::KineticLaw *kinetic_law = new Ast::KineticLaw(expression);
-
-  // push kinetic_law on stack of variable scopes
-  pushScope(kinetic_law);
+  kinetic_law->setParent(&_model);
 
   // First, process local parameters
   if (law[1].matched()) {
-    processLocalParameters(law[1][0][1]);
+    processLocalParameters(kinetic_law, law[1][0][1]);
   }
 
   // Assemble expression...
-  expression = processExpression(law[0]);
-
-  // Done, remove from scope stack...
-  popScope();
+  Parser::Expr::ScopeContext context(kinetic_law);
+  Parser::Expr::Assembler expr_assembler(context, _lexer);
+  expression = expr_assembler.processExpression(law[0]);
 
   // Update kinetic_law
   kinetic_law->setRateLaw(expression);
@@ -676,7 +684,7 @@ Assembler::processKineticLaw(Parser::ConcreteSyntaxTree &law)
 
 
 void
-Assembler::processLocalParameters(Parser::ConcreteSyntaxTree &params)
+Assembler::processLocalParameters(Ast::KineticLaw *kinetic_law, Parser::ConcreteSyntaxTree &params)
 {
   /* LocalPrameterList =        : params
    *   Identifier                 : params[0]
@@ -684,14 +692,17 @@ Assembler::processLocalParameters(Parser::ConcreteSyntaxTree &params)
    *   Expression                 : params[2]
    *   ["," LocalParameterList];  : params[3] */
   std::string identifier = _lexer[params[0].getTokenIdx()].getValue();
-  GiNaC::ex expression = processExpression(params[2]);
 
-  _scope_stack.back()->addDefinition(
+  Parser::Expr::ScopeContext context(kinetic_law);
+  Parser::Expr::Assembler expr_assembler(context, _lexer);
+  GiNaC::ex expression = expr_assembler.processExpression(params[2]);
+
+  kinetic_law->addDefinition(
         new Ast::Parameter(identifier, expression, Ast::Unit::dimensionless(), true));
 
   // Process remaining parameters...
   if (params[3].matched()) {
-    processLocalParameters(params[3][0][1]);
+    processLocalParameters(kinetic_law, params[3][0][1]);
   }
 }
 
@@ -725,7 +736,8 @@ Assembler::processReactants(Parser::ConcreteSyntaxTree &sum, Ast::Reaction *reac
   double stoichiometry = 1;
 
   if (sum[0].matched()) {
-    stoichiometry = toNumber<int>(_lexer[sum[0][0].getTokenIdx()].getValue());
+    stoichiometry = Parser::Expr::Assembler::toNumber<int>(
+          _lexer[sum[0][0].getTokenIdx()].getValue());
   }
 
   std::string identifier = _lexer[sum[1].getTokenIdx()].getValue();
@@ -745,7 +757,8 @@ Assembler::processProducts(Parser::ConcreteSyntaxTree &sum, Ast::Reaction *react
   double stoichiometry = 1;
 
   if (sum[0].matched()) {
-    stoichiometry = toNumber<int>(_lexer[sum[0][0].getTokenIdx()].getValue());
+    stoichiometry = Parser::Expr::Assembler::toNumber<int>(
+          _lexer[sum[0][0].getTokenIdx()].getValue());
   }
 
   std::string identifier = _lexer[sum[1].getTokenIdx()].getValue();

@@ -32,8 +32,6 @@ public:
 public:
   /** Entry point to parse an expression in the given context. */
   GiNaC::ex processExpression(Parser::ConcreteSyntaxTree &expr);
-
-protected:
   /** Parses a product expression. */
   GiNaC::ex processProduct(Parser::ConcreteSyntaxTree &expr);
   /** Parses a power expression. */
@@ -47,7 +45,7 @@ protected:
   /** Parses a number. */
   GiNaC::numeric processNumber(Parser::ConcreteSyntaxTree &expr);
 
-protected:
+public:
   /** Tiny helper function to parse numbers from strings. */
   template <typename T>
   static T toNumber(const std::string &string)

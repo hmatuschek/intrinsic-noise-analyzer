@@ -2,7 +2,7 @@
 #include "ast/model.hh"
 #include "ast/reaction.hh"
 #include "exception.hh"
-#include "parser/expr/writer.hh"
+#include "parser/expr/parser.hh"
 #include <fstream>
 
 
@@ -222,7 +222,7 @@ Writer::processCompartment(Ast::Compartment *comp, const Ast::Model &scope, std:
 
   if (comp->hasValue()) {
     output << " = ";
-    Parser::Expr::Writer::write(comp->getValue(), scope, output);
+    Parser::Expr::serializeExpression(comp->getValue(), output, &scope);
   }
 
   if (comp->hasName())  { output << " \"" << comp->getName() << "\""; }
@@ -246,7 +246,7 @@ Writer::processSpecies(Ast::Species *species, const Ast::Model &model, std::ostr
   output << std::endl << " " << species->getCompartment()->getIdentifier() << ": ";
   if (model.speciesHaveSubstanceUnits()) { output << species->getIdentifier() << " "; }
   else {output << "[" << species->getIdentifier() << "] "; }
-  output << " = "; Parser::Expr::Writer::write(species->getValue(), model, output); output << " ";
+  output << " = "; Parser::Expr::serializeExpression(species->getValue(), output, &model); output << " ";
   if (model.speciesHaveSubstanceUnits()) { output << "s"; }
   if (species->isConst()) { output << "c"; }
   if (species->hasName()) { output << " \"" << species->getName() << "\""; }
@@ -271,7 +271,7 @@ void
 Writer::processParameter(Ast::Parameter *param, const Ast::Model &model, std::ostream &output)
 {
   output << std::endl << " " << param->getIdentifier() << "=";
-  Parser::Expr::Writer::write(param->getValue(), model, output);
+  Parser::Expr::serializeExpression(param->getValue(), output, &model);
   if (! param->isConst()) { output << " v"; }
   if (param->hasName()) { output << " \"" << param->getName() << "\""; }
 }
@@ -309,7 +309,7 @@ Writer::processRule(Ast::VariableDefinition *var, const Ast::Model &model, std::
   } else if (Ast::Node::isRateRule(var->getRule())) {
     Ast::RateRule *rule = static_cast<Ast::RateRule *>(var->getRule());
     output << "@rate: " << var->getIdentifier() << " = ";
-    Parser::Expr::Writer::write(rule->getRule(), model, output);
+    Parser::Expr::serializeExpression(rule->getRule(), output, &model);
   }
 }
 
@@ -418,7 +418,7 @@ void
 Writer::processKineticLaw(Ast::KineticLaw *law, std::ostream &output)
 {
   output << std::endl << "  ";
-  Parser::Expr::Writer::write(law->getRateLaw(), *law, output);
+  Parser::Expr::serializeExpression(law->getRateLaw(), output, law);
 
   // Serialize local parameters
   if (0 < law->numParameters())
@@ -444,7 +444,7 @@ Writer::processKineticLaw(Ast::KineticLaw *law, std::ostream &output)
 
       param = law->getParameter(i);
       output << param->getIdentifier() << "=";
-      Parser::Expr::Writer::write(param->getValue(), *law, output);
+      Parser::Expr::serializeExpression(param->getValue(), output, law);
       output << ", ";
     }
 
@@ -465,7 +465,7 @@ Writer::processKineticLaw(Ast::KineticLaw *law, std::ostream &output)
 
     param = law->getParameter(i);
     output << param->getIdentifier() << "=";
-    Parser::Expr::Writer::write(param->getValue(), *law, output);
+    Parser::Expr::serializeExpression(param->getValue(), output, law);
   }
 }
 
