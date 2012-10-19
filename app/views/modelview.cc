@@ -111,7 +111,7 @@ void
 ModelView::onModelNameChanged()
 {
   /// @todo Update model item in DocTree and movel view!
-  _model->setName(_model_identifier->text().simplified().toStdString());
+  _model->setName(_model_name->text().simplified().toStdString());
 }
 
 
