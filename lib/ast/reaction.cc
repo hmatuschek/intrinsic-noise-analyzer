@@ -468,7 +468,7 @@ Reaction::traverse(Ast::Operator &op)
  * Implementation of kinetic law:
  * ********************************************************************************************* */
 KineticLaw::KineticLaw(GiNaC::ex expr)
-  : Node(Node::KINETIC_LAW), Scope(0, false), expression(expr)
+  : Node(Node::KINETIC_LAW), Scope(0, false), _expression(expr)
 {
   // Done.
 }
@@ -483,14 +483,14 @@ KineticLaw::~KineticLaw()
 GiNaC::ex
 KineticLaw::getRateLaw() const
 {
-  return this->expression;
+  return this->_expression;
 }
 
 
 void
 KineticLaw::setRateLaw(GiNaC::ex node)
 {
-  this->expression = node;
+  this->_expression = node;
 }
 
 
@@ -509,18 +509,18 @@ KineticLaw::addDefinition(Definition *def)
   Scope::addDefinition(def);
 
   // Also store reference in vector:
-  this->parameters.push_back(static_cast<Parameter *>(def));
+  this->_parameters.push_back(static_cast<Parameter *>(def));
 }
 
 void
 KineticLaw::cleanUpParameters()
 {
 
-  for(std::vector<Parameter *>::iterator param=parameters.begin(); param!=parameters.end(); param++)
+  for(std::vector<Parameter *>::iterator param=_parameters.begin(); param!=_parameters.end(); param++)
   {
       if(!this->getRateLaw().has((*param)->getSymbol()))
       {
-          parameters.erase(param);
+          _parameters.erase(param);
           cleanUpParameters();
           return;
       }
@@ -532,7 +532,7 @@ KineticLaw::cleanUpParameters()
 size_t
 KineticLaw::numParameters() const
 {
-  return this->parameters.size();
+  return this->_parameters.size();
 }
 
 
@@ -540,14 +540,26 @@ Parameter *
 KineticLaw::getParameter(size_t i)
 {
   // Simply get paramter:
-  return this->parameters[i];
+  return this->_parameters[i];
+}
+
+Parameter *
+KineticLaw::getParameter(const std::string &identifier)
+{
+  VariableDefinition *var = this->getVariable(identifier);
+  if (! Node::isParameter(var)) {
+    SymbolError err;
+    err << "Can not resolve paramter " << identifier << ": Not defined.";
+    throw err;
+  }
+  return static_cast<Ast::Parameter *>(var);
 }
 
 
 void
 KineticLaw::dump(std::ostream &str)
 {
-  str << this->expression << " where ";
+  str << this->_expression << " where ";
   Scope::dump(str);
 }
 

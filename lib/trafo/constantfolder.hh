@@ -46,6 +46,12 @@ public:
 
   /** Check if the variable is constant. */
   virtual void visit(const Ast::VariableDefinition *var);
+
+public:
+  /** Applies a collector with the given parameters to the given model. */
+  static void collect(Ast::Model *model, Substitution &substitutions,
+                      unsigned flags=Filter::ALL_CONST, const excludeType &excludes=excludeType(),
+                      bool normalize=false);
 };
 
 

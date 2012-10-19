@@ -2,7 +2,7 @@
 #include "assembler.hh"
 #include "writer.hh"
 #include <sbml/SBMLTypes.h>
-
+#include <trafo/consistencycheck.hh>
 
 
 using namespace iNA;
@@ -29,8 +29,12 @@ Parser::Sbml::importModel(Ast::Model &model, const std::string &filename)
     throw err;
   }
 
+  // Assemble Ast::Model
   ParserContext ctx(model);
   __process_model(document->getModel(), ctx);
+
+  // Check model consistency:
+  Trafo::ConsistencyCheck::assertConsistent(&model);
 }
 
 

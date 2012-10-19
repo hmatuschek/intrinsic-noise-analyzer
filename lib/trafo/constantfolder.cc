@@ -38,6 +38,20 @@ SubstitutionCollector::visit(const Ast::VariableDefinition *var)
 }
 
 
+void
+SubstitutionCollector::collect(Ast::Model *model, Substitution &substitutions, unsigned flags,
+                               const excludeType &excludes, bool normalize)
+{
+  // Configure and apply collector on model:
+  SubstitutionCollector collector(substitutions, flags, excludes);
+  model->accept(collector);
+  // Normalize substitutions if required:
+  if (normalize) {
+    substitutions.normalize();
+  }
+}
+
+
 
 /* ********************************************************************************************* *
  * Implementation of InitialValueFolder
