@@ -305,7 +305,7 @@ public:
             models[j] = new M((*base));
         }
 
-#pragma omp parallel for if(numThreads>1) num_threads(numThreads) schedule(dynamic) firstprivate(iter,x,conc)
+//#pragma omp parallel for if(numThreads>1) num_threads(numThreads) schedule(dynamic) firstprivate(iter,x,conc)
         // Iterate over all parameter sets
         for(size_t j = 0; j < parameterSets.size(); j++)
         {
