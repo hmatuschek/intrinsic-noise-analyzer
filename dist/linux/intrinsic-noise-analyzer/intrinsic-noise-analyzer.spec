@@ -1,6 +1,6 @@
 Summary: An analysis tool for biochemical reaction networks
 
-%define version 0.3.1
+%define version 0.4.0
 
 License: GPLv2
 Group: Productivity/Scientific/Chemistry
@@ -11,8 +11,8 @@ Source: intrinsic-noise-analyzer-%{version}.tar.gz
 URL: https://googlecode.com/p/intrinsic-noise-analyzer
 Version: %{version}
 Buildroot: /tmp/intrinsicnoiseanalyzerrpm
-BuildRequires: gcc-c++, cmake, libsbml-cppnamespace-devel = 5.0.0
-Requires: libsbml-cppnamespace = 5.0.0, libina = %{version}-%{release}
+BuildRequires: gcc-c++, cmake, libsbml-devel = 5.6.0
+Requires: libsbml = 5.6.0, libina = %{version}-%{release}
 %if 0%{?suse_version}
 BuildRequires: libqt4-devel >= 4.5, libginac-devel, llvm-devel >= 2.9
 Requires: libqt4 >= 4.5, libginac2, llvm >= 2.9
@@ -23,23 +23,21 @@ Requires: qt4 >= 4.5, ginac, llvm >= 2.9
 %endif
 
 %description
-The intrinsic Noise Analyzer (iNA) is an easy-to-use computational tool for 
-efficient analysis of intrinsic noise in biochemical reaction networks. The 
-SBML-based software combines two complementary approaches to analyze the 
-Chemical Master Equation:
-
- - the System Size Expansion - a systematic analytical approximation method,
- - the Stochastic Simulation Algorithm - a widely used Monte Carlo method.
-
-iNA is based on the computer algebra system Ginac and facilitates multi-core
-simulations.
+iNA is a computational tool for quantitative analysis of fluctuations in biochemical reaction
+networks. Such fluctuations, also known as intrinsic noise, arise due to the stochastic nature of
+chemical reactions and cannot be ignored when some molecules are present in very low copy numbers
+only, as is the case in living cells. The SBML-based software computes statistical measures such
+as means and standard deviations of concentrations within a given accuracy. This is carried out
+automatically using the system size expansion whose leading order term is the popular Linear Noise
+Approximation. The results of the analysis can be tested against the computationally much more
+expensive stochastic simulation algorithm.
 
 
 %package -n libina
 Summary: Runtime library for the intrinsic Noise Analyzer
 Group: Science
-BuildRequires: gcc-c++, cmake, libsbml-cppnamespace-devel = 5.0.0 
-Requires: libsbml-cppnamespace = 5.0.0
+BuildRequires: gcc-c++, cmake, libsbml-devel = 5.6.0
+Requires: libsbml = 5.6.0
 %if 0%{?suse_version}
 BuildRequires: libginac-devel
 Requires: libginac2
