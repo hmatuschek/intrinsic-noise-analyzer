@@ -163,6 +163,8 @@ private:
   QPushButton *_add_graph;
   /** Remove graph button. */
   QPushButton *_rem_graph;
+  /** Edit figure labels. */
+  QPushButton *_edit_labels;
   /** Figure title. */
   QString _figure_title;
   /** X label. */

@@ -193,6 +193,7 @@ TimeSeriesPlotDialog::TimeSeriesPlotDialog(Table *table, QWidget *parent)
   _graph_list->setModel(&_graphs);
   _add_graph  = new QPushButton(tr("+"));
   _rem_graph  = new QPushButton(tr("-"));
+  _edit_labels = new QPushButton(tr("labels"));
 
   _stack = new QStackedWidget();
   _stack->addWidget(_plotview);
@@ -209,6 +210,7 @@ TimeSeriesPlotDialog::TimeSeriesPlotDialog(Table *table, QWidget *parent)
   button_box->setMargin(0);
   button_box->addWidget(_add_graph);
   button_box->addWidget(_rem_graph);
+  button_box->addWidget(_edit_labels);
   side_box->setMargin(0); side_box->setSpacing(0);
   side_box->addWidget(_graph_list);
   side_box->addLayout(button_box);
@@ -220,6 +222,7 @@ TimeSeriesPlotDialog::TimeSeriesPlotDialog(Table *table, QWidget *parent)
 
   QObject::connect(_add_graph, SIGNAL(clicked()), this, SLOT(onAddGraph()));
   QObject::connect(_rem_graph, SIGNAL(clicked()), this, SLOT(onRemoveGraph()));
+  QObject::connect(_edit_labels, SIGNAL(clicked()), this, SLOT(onEditLabels()));
   QObject::connect(buttons, SIGNAL(rejected()), this, SLOT(reject()));
   QObject::connect(buttons, SIGNAL(accepted()), this, SLOT(onAccepted()));
   QObject::connect(_graph_list, SIGNAL(doubleClicked(QModelIndex)),
