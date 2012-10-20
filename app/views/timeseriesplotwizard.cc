@@ -177,7 +177,7 @@ TimeSeriesGraphList::updateGraph(int idx, const TimeSeriesGraphConfig &graph) {
  * Implementation of TimeSeriesPlotDialog
  * ******************************************************************************************** */
 TimeSeriesPlotDialog::TimeSeriesPlotDialog(Table *table, QWidget *parent)
-  : QDialog(parent), _data(table), _graphs(), _figure_title("New Plot")
+  : QDialog(parent), _data(table), _graphs(), _figure_title("New Plot"), _x_label(), _y_label()
 {
   setWindowTitle("Plot-o-mat");
 
@@ -310,6 +310,11 @@ TimeSeriesPlotDialog::onUpdatePlot()
     _plot->getAxis()->addGraph(graph);
     _plot->addToLegend(_graphs.graph(i).label(), graph);
   }
+
+  // Set labels:
+  _plot->setTitle(_figure_title);
+  _plot->setXLabel(_x_label);
+  _plot->setYLabel(_y_label);
 
   // Add plot and update figure
   _plotview->setPlot(_plot);
@@ -487,7 +492,11 @@ TimeSeriesLabelDialog::TimeSeriesLabelDialog(
   layout->addLayout(label_layout);
   layout->addWidget(button_box);
   setLayout(layout);
+
+  QObject::connect(button_box, SIGNAL(accepted()), this, SLOT(accept()));
+  QObject::connect(button_box, SIGNAL(rejected()), this, SLOT(reject()));
 }
+
 
 QString
 TimeSeriesLabelDialog::figureTitle() const  {
