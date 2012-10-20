@@ -179,7 +179,7 @@ ReactionEditorPage::ReactionEditorPage(iNA::Ast::Reaction *reaction, ReactionEdi
   _kineticLaw->addWidget(_kineticLawFormula);
   _kineticLawEditor = new QLineEdit();
   _kineticLawEditor->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
-  _kineticLawEditor->setEnabled(false);
+  _kineticLawEditor->setEnabled(true);
   _kineticLaw->addWidget(_kineticLawEditor);
   if (0 == _current_reaction) { _kineticLaw->setCurrentIndex(0); }
   else { _kineticLaw->setCurrentIndex(1); }
