@@ -5,8 +5,33 @@
 #include <QItemSelection>
 #include <QPushButton>
 #include <QTableView>
+
+#include <QGraphicsView>
 #include "../doctree/reactionsitem.hh"
 
+class ReactionGraphic
+        : public QGraphicsView
+{
+
+    Q_OBJECT
+
+public:
+    ReactionGraphic()
+        : QGraphicsView()
+    {
+        // Pass...
+    }
+
+protected:
+    void mouseDoubleClickEvent(QMouseEvent *event)
+    {
+        emit this->doubleClicked();
+    }
+
+signals:
+    void doubleClicked();
+
+};
 
 /** Simple widget to display a reaction.
  * The reaction will be shown as a title with the reaction name, the rendered reaction-equation
@@ -27,7 +52,8 @@ private slots:
   /** Will be called if the selection of the parameterlist is changed, is used to enable/disable
    * the "rem param" button. */
   void onSelectionChanged(const QItemSelection &selected,const QItemSelection &unselected);
-
+  /** Will be called for double click on kinetic law. */
+  void onReactionEditing();
 private:
   /** Holds a weak reference to the reaction item being shown. */
   ReactionItem *_reaction;

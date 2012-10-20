@@ -272,9 +272,12 @@ public:
      * @param resultSet: Outputs the steady state concentrations, covariance and EMRE vector in reduced
      *        coordinates. Contents will be overwritten.
      */
-    int parameterScan(std::vector<ParameterSet> &parameterSets, std::vector<Eigen::VectorXd> &resultSet, const size_t &numThreads=OpenMP::getMaxThreads())
+    int parameterScan(std::vector<ParameterSet> &parameterSets, std::vector<Eigen::VectorXd> &resultSet, size_t numThreads=OpenMP::getMaxThreads())
 
     {
+
+        // Only works with single thread due to Ginac
+        numThreads = 1;
 
         // First make space
         resultSet.resize(parameterSets.size());
@@ -305,7 +308,7 @@ public:
             models[j] = new M((*base));
         }
 
-#pragma omp parallel for if(numThreads>1) num_threads(numThreads) schedule(dynamic) firstprivate(iter,x,conc)
+//#pragma omp parallel for if(numThreads>1) num_threads(numThreads) schedule(dynamic) firstprivate(iter,x,conc)
         // Iterate over all parameter sets
         for(size_t j = 0; j < parameterSets.size(); j++)
         {

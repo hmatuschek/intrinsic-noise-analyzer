@@ -147,7 +147,7 @@ ParameterScanConfigPage::ParameterScanConfigPage(GeneralTaskWizard *parent)
 
   QVBoxLayout *layout = new QVBoxLayout();
   layout->addWidget(param_box);
-  layout->addWidget(mp_box);
+  //layout->addWidget(mp_box);
   layout->addWidget(ss_box);
   setLayout(layout);
 }

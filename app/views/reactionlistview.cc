@@ -23,12 +23,12 @@ ReactionListView::ReactionListView(ReactionsItem *reactions, QWidget *parent)
 
   // "new reaction" button
   _newReacButton = new QPushButton("+");
-  _newReacButton->setToolTip(tr("Add a new reaction"));
+  _newReacButton->setToolTip(tr("Add reaction"));
   _newReacButton->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
   // rem reaction button
   _remReacButton = new QPushButton("-");
-  _remReacButton->setToolTip(tr("Deletes the selected reaction"));
+  _remReacButton->setToolTip(tr("Delete reaction"));
   _remReacButton->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
   _remReacButton->setEnabled(false);
 
