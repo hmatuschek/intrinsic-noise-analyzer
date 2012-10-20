@@ -28,13 +28,13 @@ public:
   /** Constructor. */
   explicit ReactionItem(iNA::Ast::Reaction *_reaction, QObject *parent=0);
 
-  /** Retunrs the display name of the reaction. */
+  /** Returns the display name of the reaction. */
   virtual const QString &getLabel() const;
 
-  /** Retunrs the display name of the reaction. */
+  /** Returns the display name of the reaction. */
   QString getDisplayName() const;
 
-  /** Retunrs the reaction instance. */
+  /** Returns the reaction instance. */
   iNA::Ast::Reaction *getReaction();
 
   /** Returns the list of local paramters. */
