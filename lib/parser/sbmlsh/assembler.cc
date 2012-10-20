@@ -134,6 +134,36 @@ Assembler::processModel(Parser::ConcreteSyntaxTree &model)
   if (model[7].matched()) {
     throw SBMLFeatureNotSupported("Can not parse SBML SH: Event definitions are not supported yet.");
   }
+
+  // Once the model was created, link all expressions of the model
+  linkModel(model);
+}
+
+
+void
+Assembler::linkModel(ConcreteSyntaxTree &model)
+{
+  // If there are parameter definitions...
+  if (model[4].matched()) {
+    // link initial values of parameters:
+    linkParameterDefinition(model[4][0][1][2]);
+  }
+
+  // If there are Compartment definitions ...
+  if (model[2].matched()) {
+    // Link initial values of compartments
+    linkCompartmentDefinitions(model[2][0][1][2]);
+  }
+
+  // If there are species definitions...
+  if (model[3].matched()) {
+    linkSpeciesDefinition(model[3][0][1][2]);
+  }
+
+  // If there are reaction definitions...
+  if (model[6].matched()) {
+    linkReactionDefinitions(model[6][0][1][2]);
+  }
 }
 
 
@@ -353,12 +383,7 @@ Assembler::processCompartmentDefinitions(Parser::ConcreteSyntaxTree &comp)
     throw err;
   }
 
-  // Handle initial value (if defined)
-  if (comp[2].matched()) {
-    Parser::Expr::ScopeContext context(&_model);
-    Parser::Expr::Assembler expr_assembler(context, _lexer);
-    compartment->setValue(expr_assembler.processExpression(comp[2][0][1]));
-  }
+  // Skip initial values, will be processes in linkCompartmentDefinitions.
 
   // Set name if defined:
   if (comp[3].matched()) {
@@ -372,6 +397,26 @@ Assembler::processCompartmentDefinitions(Parser::ConcreteSyntaxTree &comp)
   // Process remaining compartments
   if (comp[4].matched()) {
     processCompartmentDefinitions(comp[4][0][1]);
+  }
+}
+
+
+void
+Assembler::linkCompartmentDefinitions(Parser::ConcreteSyntaxTree &comp)
+{
+  std::string id = _lexer[comp[0].getTokenIdx()].getValue();
+  Ast::Compartment *compartment = _model.getCompartment(id);
+
+  // Handle initial value (if defined)
+  if (comp[2].matched()) {
+    Parser::Expr::ScopeContext context(&_model);
+    Parser::Expr::Assembler expr_assembler(context, _lexer);
+    compartment->setValue(expr_assembler.processExpression(comp[2][0][1]));
+  }
+
+  // Process remaining compartments
+  if (comp[4].matched()) {
+    linkCompartmentDefinitions(comp[4][0][1]);
   }
 }
 
@@ -394,6 +439,51 @@ Assembler::processSpeciesDefinition(Parser::ConcreteSyntaxTree &spec)
 
   std::string compartment_id = _lexer[spec[0].getTokenIdx()].getValue();
   std::string identifier;
+  bool has_substance_units=false; bool has_boundary_condition=false; bool is_constant=false;
+
+  Ast::Compartment *compartment = _model.getCompartment(compartment_id);
+  if (0 == spec[2].getAltIdx()) {
+    identifier = _lexer[spec[2][0][1].getTokenIdx()].getValue();
+  } else {
+    identifier = _lexer[spec[2][0].getTokenIdx()].getValue();
+  }
+
+  // Parse modifier:
+  if (spec[5].matched()) {
+    processSpeciesModifierList(spec[5], has_substance_units, has_boundary_condition, is_constant);
+  }
+
+  // Check species modifier:
+  if (has_boundary_condition) {
+    SBMLFeatureNotSupported err;
+    err << "SBML feature 'boudary condition' for species is not implemented yet.";
+    throw err;
+  }
+
+  // Create species:
+  Ast::Species *species = new Ast::Species(identifier, compartment, is_constant);
+
+  // Handle name
+  if (spec[6].matched()) {
+    std::string name = _lexer[spec[6][0].getTokenIdx()].getValue();
+    unquote(name); species->setName(name);
+  }
+
+  // Add species definition to model:
+  _model.addDefinition(species);
+
+  // Handle remaining species definition:
+  if (spec[7].matched()) {
+    processSpeciesDefinition(spec[7][0][1]);
+  }
+}
+
+
+void
+Assembler::linkSpeciesDefinition(Parser::ConcreteSyntaxTree &spec)
+{
+  std::string compartment_id = _lexer[spec[0].getTokenIdx()].getValue();
+  std::string identifier;
   GiNaC::ex initial_value;
   bool has_substance_units=false; bool has_boundary_condition=false; bool is_constant=false;
   bool has_initial_amount=true;
@@ -408,6 +498,7 @@ Assembler::processSpeciesDefinition(Parser::ConcreteSyntaxTree &spec)
     has_initial_amount = true;
   }
 
+  // parse initial value:
   Parser::Expr::ScopeContext context(&_model);
   Parser::Expr::Assembler expr_assembler(context, _lexer);
   initial_value = expr_assembler.processExpression(spec[4]);
@@ -415,6 +506,7 @@ Assembler::processSpeciesDefinition(Parser::ConcreteSyntaxTree &spec)
     processSpeciesModifierList(spec[5], has_substance_units, has_boundary_condition, is_constant);
   }
 
+  // Check for boundary condition modifier:
   if (has_boundary_condition) {
     SBMLFeatureNotSupported err;
     err << "SBML feature 'boudary condition' for species is not implemented yet.";
@@ -432,24 +524,13 @@ Assembler::processSpeciesDefinition(Parser::ConcreteSyntaxTree &spec)
     }
   }
 
-  // Create species:
-  Ast::Species *species = new Ast::Species(identifier, compartment, is_constant);
-
-  // Set initial value...
+  // Set initial value
+  Ast::Species *species = _model.getSpecies(identifier);
   species->setValue(initial_value);
-
-  // Handle name
-  if (spec[6].matched()) {
-    std::string name = _lexer[spec[6][0].getTokenIdx()].getValue();
-    unquote(name); species->setName(name);
-  }
-
-  // Add species definition to model:
-  _model.addDefinition(species);
 
   // Handle remaining species definition:
   if (spec[7].matched()) {
-    processSpeciesDefinition(spec[7][0][1]);
+    linkSpeciesDefinition(spec[7][0][1]);
   }
 }
 
@@ -500,9 +581,6 @@ Assembler::processParameterDefinition(Parser::ConcreteSyntaxTree &params)
    *   [EOL ParameterDefinitionList];     : params[5], ParameterDefinitionList = params[5][0][1] */
 
   std::string identifier = _lexer[params[0].getTokenIdx()].getValue();
-  Parser::Expr::ScopeContext context(&_model);
-  Parser::Expr::Assembler expr_assembler(context, _lexer);
-  GiNaC::ex value = expr_assembler.processExpression(params[2]);
   bool is_constant = true;
 
   // There is just one modifier, making paramerer non-constant
@@ -511,7 +589,6 @@ Assembler::processParameterDefinition(Parser::ConcreteSyntaxTree &params)
   }
 
   Ast::Parameter *parameter = new Ast::Parameter(identifier, Ast::Unit::dimensionless(), is_constant);
-  parameter->setValue(value);
 
   // If a name is given
   if (params[4].matched()) {
@@ -525,6 +602,23 @@ Assembler::processParameterDefinition(Parser::ConcreteSyntaxTree &params)
   // Process remaining definitions...
   if (params[5].matched()) {
     processParameterDefinition(params[5][0][1]);
+  }
+}
+
+
+void
+Assembler::linkParameterDefinition(Parser::ConcreteSyntaxTree &params)
+{
+  std::string identifier = _lexer[params[0].getTokenIdx()].getValue();
+  Parser::Expr::ScopeContext context(&_model);
+  Parser::Expr::Assembler expr_assembler(context, _lexer);
+  GiNaC::ex value = expr_assembler.processExpression(params[2]);
+  Ast::Parameter *parameter = _model.getParameter(identifier);
+  parameter->setValue(value);
+
+  // Process remaining definitions...
+  if (params[5].matched()) {
+    linkParameterDefinition(params[5][0][1]);
   }
 }
 
@@ -632,6 +726,28 @@ Assembler::processReactionDefinitions(Parser::ConcreteSyntaxTree &reac)
 
 
 void
+Assembler::linkReactionDefinitions(Parser::ConcreteSyntaxTree &reac)
+{
+  // Get reaction identifier:
+  std::string identifier = _lexer[reac[2].getTokenIdx()].getValue();
+
+  // Get kinetic law
+  if (! reac[7].matched()) {
+    SBMLFeatureNotSupported err;
+    err << "Can not define reaction without kinetic law: Feature not supproted.";
+    throw err;
+  }
+
+  linkKineticLaw(_model.getReaction(identifier)->getKineticLaw(), reac[7][0][1]);
+
+  // Handle remaining reactions:
+  if (reac[8].matched()) {
+    linkReactionDefinitions(reac[8][0][1]);
+  }
+}
+
+
+void
 Assembler::processReactionModifierList(Parser::ConcreteSyntaxTree &lst, std::list<Ast::Species *> &mods)
 {
   /* ReactionModifierList          : lst
@@ -684,6 +800,16 @@ Assembler::processKineticLaw(Parser::ConcreteSyntaxTree &law)
 
 
 void
+Assembler::linkKineticLaw(Ast::KineticLaw *kinetic_law, Parser::ConcreteSyntaxTree &law)
+{
+  // First, process local parameters
+  if (law[1].matched()) {
+    linkLocalParameters(kinetic_law, law[1][0][1]);
+  }
+}
+
+
+void
 Assembler::processLocalParameters(Ast::KineticLaw *kinetic_law, Parser::ConcreteSyntaxTree &params)
 {
   /* LocalPrameterList =        : params
@@ -693,12 +819,10 @@ Assembler::processLocalParameters(Ast::KineticLaw *kinetic_law, Parser::Concrete
    *   ["," LocalParameterList];  : params[3] */
   std::string identifier = _lexer[params[0].getTokenIdx()].getValue();
 
-  Parser::Expr::ScopeContext context(kinetic_law);
-  Parser::Expr::Assembler expr_assembler(context, _lexer);
-  GiNaC::ex expression = expr_assembler.processExpression(params[2]);
-
+  // just predefine local parameter -> Initial value will be parsed by
+  // linkLocalParameters()
   kinetic_law->addDefinition(
-        new Ast::Parameter(identifier, expression, Ast::Unit::dimensionless(), true));
+        new Ast::Parameter(identifier, 0, Ast::Unit::dimensionless(), true));
 
   // Process remaining parameters...
   if (params[3].matched()) {
@@ -706,6 +830,22 @@ Assembler::processLocalParameters(Ast::KineticLaw *kinetic_law, Parser::Concrete
   }
 }
 
+
+void
+Assembler::linkLocalParameters(Ast::KineticLaw *kinetic_law, Parser::ConcreteSyntaxTree &params)
+{
+  std::string identifier = _lexer[params[0].getTokenIdx()].getValue();
+  Ast::Parameter *parameter = kinetic_law->getParameter(identifier);
+  Parser::Expr::ScopeContext context(kinetic_law);
+  Parser::Expr::Assembler expr_assembler(context, _lexer);
+  GiNaC::ex expression = expr_assembler.processExpression(params[2]);
+  parameter->setValue(expression);
+
+  // Process remaining parameters...
+  if (params[3].matched()) {
+    linkLocalParameters(kinetic_law, params[3][0][1]);
+  }
+}
 
 void
 Assembler::processReactionEquation(Parser::ConcreteSyntaxTree &equ, Ast::Reaction *reaction)

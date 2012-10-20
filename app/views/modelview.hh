@@ -17,6 +17,10 @@ public:
   explicit ModelView(ModelItem *model_item, QWidget *parent = 0);
 
 private slots:
+  /** If the model identifier has been changed. */
+  void onModelIdentifierChanged();
+  /** If the model name has been changed. */
+  void onModelNameChanged();
   /** Callback to update species units. */
   void onSpeciesUnitSelected(int index);
   /** Callback to update substance unit of model. */
@@ -34,6 +38,11 @@ private:
   /** Holds a weak reference to the model instance. */
   iNA::Ast::Model *_model;
 
+  /** Holds the line editor for the model identifier. */
+  QLineEdit *_model_identifier;
+  /** Holds the line editor for the model name. */
+  QLineEdit *_model_name;
+  /** Holds the line editor for the model name. */
   /** Holds the unit editor for the substance unit. */
   UnitEditor *_substance_unit_editor;
   /** Holds the unit editor for the volume unit. */

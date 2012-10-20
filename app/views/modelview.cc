@@ -25,6 +25,10 @@ ModelView::ModelView(ModelItem *model_item, QWidget *parent)
   label->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
   label->setAlignment(Qt::AlignRight);
 
+  // Assemble model identifier & name
+  _model_identifier = new QLineEdit(_model->getIdentifier().c_str());
+  _model_name = new QLineEdit(_model->getName().c_str());
+
   // Selector concentrations/amount
   _species_unit_selector = new QComboBox();
   _species_unit_selector->addItem(tr("concentrations"));
@@ -38,6 +42,14 @@ ModelView::ModelView(ModelItem *model_item, QWidget *parent)
   _area_unit_editor      = new UnitEditor(_model->getAreaUnit());
   _length_unit_editor    = new UnitEditor(_model->getLengthUnit());
   _time_unit_editor      = new UnitEditor(_model->getTimeUnit());
+
+  // Identifier & name box:
+  QGroupBox *name_frame = new QGroupBox(tr("General"));
+  name_frame->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
+  QFormLayout *name_layout = new QFormLayout();
+  name_layout->addRow(tr("Identifier"), _model_identifier);
+  name_layout->addRow(tr("Display name"), _model_name);
+  name_frame->setLayout(name_layout);
 
   // Unit box
   QGroupBox *unit_frame = new QGroupBox(tr("Units"));
@@ -54,7 +66,9 @@ ModelView::ModelView(ModelItem *model_item, QWidget *parent)
   // Layout
   QVBoxLayout *layout = new QVBoxLayout();
   layout->addWidget(label, 0);
-  layout->addWidget(unit_frame, 1);
+  layout->addWidget(name_frame, 0);
+  layout->addWidget(unit_frame, 0);
+  layout->addStretch(1);
   setLayout(layout);
 
   // Connect to "desroyed" signal of model_item to close view.
@@ -71,6 +85,33 @@ ModelView::ModelView(ModelItem *model_item, QWidget *parent)
         _length_unit_editor, SIGNAL(unitChanged()), this, SLOT(onLengthUnitChanged()));
   QObject::connect(
         _time_unit_editor, SIGNAL(unitChanged()), this, SLOT(onTimeUnitChanged()));
+  QObject::connect(
+        _model_identifier, SIGNAL(editingFinished()), this, SLOT(onModelIdentifierChanged()));
+  QObject::connect(
+        _model_name, SIGNAL(editingFinished()), this, SLOT(onModelNameChanged()));
+}
+
+
+void
+ModelView::onModelIdentifierChanged()
+{
+  if (! QRegExp("[_a-zA-Z][_a-zA-Z0-9]*").exactMatch(_model_identifier->text())) {
+    QMessageBox::critical(0, tr("Invalid model identifier"),
+                          tr("Model identifier must constist of alpha-numeric chars and '_', "
+                             "and must not start with a number."));
+    _model_identifier->setText(_model->getIdentifier().c_str());
+    return;
+  }
+  // Or simply set identifier.
+  /// @todo Update model item in DocTree and movel view!
+  _model->setIdentifier(_model_identifier->text().toStdString());
+}
+
+void
+ModelView::onModelNameChanged()
+{
+  /// @todo Update model item in DocTree and movel view!
+  _model->setName(_model_name->text().simplified().toStdString());
 }
 
 

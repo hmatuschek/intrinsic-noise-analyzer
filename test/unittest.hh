@@ -154,6 +154,10 @@ public:
 #define UT_ASSERT_NEAR(t, e) this->assertNear(t, e, __FILE__, __LINE__)
 #define UT_ASSERT_THROW(t, e) \
   try { t; throw UnitTest::TestFailure("No exception thrown!"); } catch (e &err) {}
+#define UT_ASSERT_NOTHROW(t) \
+  try { t; } catch (std::exception &err) { \
+  std::stringstream buffer; buffer << "An exception was thrown: " << err.what(); \
+  throw UnitTest::TestFailure(buffer.str()); }
 }
 }
 

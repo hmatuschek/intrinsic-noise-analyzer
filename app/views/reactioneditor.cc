@@ -904,10 +904,13 @@ ReactionEditorPage::_createMASingleFactor(iNA::Ast::Species *species, int stoich
   if (_model.speciesHaveSubstanceUnits()) {
     species_expr /= species->getCompartment()->getSymbol();
   }
+
+  // Philipp: iNA's convention is to infer the unit of the propensity from the units of the model
+  //
   // If substance units are not item
-  species_expr *= iNA::Ast::UnitConverter::conversionFactor(
-        iNA::Ast::ScaledBaseUnit(iNA::Ast::ScaledBaseUnit::ITEM, 1, 0, 1),
-        _model.getSubstanceUnit());
+  //species_expr *= iNA::Ast::UnitConverter::conversionFactor(
+  //      iNA::Ast::ScaledBaseUnit(iNA::Ast::ScaledBaseUnit::ITEM, 1, 0, 1),
+  //      _model.getSubstanceUnit());
 
   GiNaC::ex factor=species_expr;
   for (int i=1; i<stoichiometry; i++) {

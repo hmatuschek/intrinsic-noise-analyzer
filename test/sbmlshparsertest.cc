@@ -253,6 +253,33 @@ SBMLSHParserTest::testParserModel()
 }
 
 
+void
+SBMLSHParserTest::testVarDefOrder()
+{
+  std::stringstream text;
+  text << "@model:3.3.1 = enzymatic \"Enzymatic Reaction\"" << std::endl
+       << std::endl
+       << "@compartments" << std::endl
+       << "  cytosol = 1e5 \"Cytosol\"" << std::endl
+       << std::endl
+       << "@species" << std::endl
+       << "  cytosol: [ES] = P  \"ES\"" << std::endl
+       << "  cytosol: [P]  = 0  \"P\"" << std::endl
+       << "  cytosol: [S]  = 10 \"S\"" << std::endl
+       << "  cytosol: [E]  = 10 \"E\"" << std::endl
+       << std::endl
+       << "@reactions" << std::endl
+       << "  @r = veq \"veq\"" << std::endl
+       << "    E + S -> ES" << std::endl
+       << "    cytosol*(k1*E*S - k2*ES): k1=k2, k2=0.2" << std::endl
+       << "  @r = vcat \"vcat\"" << std::endl
+       << "    ES -> E + P" << std::endl
+       << "    cytosol*k1*ES: k1=1" << std::endl;   //
+
+  Sbmlsh::Parser parser(text);
+  UT_ASSERT_NOTHROW(parser.parse());
+}
+
 
 UnitTest::TestSuite *
 SBMLSHParserTest::suite()
@@ -261,36 +288,28 @@ SBMLSHParserTest::suite()
 
   s->addTest(new UnitTest::TestCaller<SBMLSHParserTest>(
                "Lexer: Integer", &SBMLSHParserTest::testLexerInteger));
-
   s->addTest(new UnitTest::TestCaller<SBMLSHParserTest>(
                "Lexer: Identifier", &SBMLSHParserTest::testLexerIdentifier));
-
   s->addTest(new UnitTest::TestCaller<SBMLSHParserTest>(
                "Lexer: String", &SBMLSHParserTest::testLexerString));
-
   s->addTest(new UnitTest::TestCaller<SBMLSHParserTest>(
                "Lexer: Float", &SBMLSHParserTest::testLexerFloat));
-
   s->addTest(new UnitTest::TestCaller<SBMLSHParserTest>(
                "Lexer: exp. Float", &SBMLSHParserTest::testLexerExpFloat));
-
   s->addTest(new UnitTest::TestCaller<SBMLSHParserTest>(
                "Lexer: Keywords", &SBMLSHParserTest::testLexerKeywords));
-
   s->addTest(new UnitTest::TestCaller<SBMLSHParserTest>(
                "Parser: ModelDefinition", &SBMLSHParserTest::testParserModelDefinition));
-
   s->addTest(new UnitTest::TestCaller<SBMLSHParserTest>(
                "Parser: UnitDefinition", &SBMLSHParserTest::testParserUnitDefinition));
-
   s->addTest(new UnitTest::TestCaller<SBMLSHParserTest>(
                "Parser: CompartmentDefinition", &SBMLSHParserTest::testParserCompartmentDefinition));
-
   s->addTest(new UnitTest::TestCaller<SBMLSHParserTest>(
                "Parser: SpeciesDefinition", &SBMLSHParserTest::testParserSpeciesDefinition));
-
   s->addTest(new UnitTest::TestCaller<SBMLSHParserTest>(
                "Parser: Model", &SBMLSHParserTest::testParserModel));
+  s->addTest(new UnitTest::TestCaller<SBMLSHParserTest>(
+               "Parser: Variable definition order.", &SBMLSHParserTest::testVarDefOrder));
 
   return s;
 }
