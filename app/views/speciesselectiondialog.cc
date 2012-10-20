@@ -2,7 +2,8 @@
 #include <QLabel>
 #include <QVBoxLayout>
 #include <QDialogButtonBox>
-
+#include <QPushButton>
+#include <QMenu>
 
 using namespace iNA;
 
@@ -32,15 +33,27 @@ SpeciesSelectionDialog::SpeciesSelectionDialog(Ast::Model *model, QWidget *paren
     _species_list->addItem(item);
   }
 
+  QPushButton *selection_button = new QPushButton("Select");
+  QMenu *selection_menu = new QMenu();
+  selection_menu->addAction(tr("Select all species"), this, SLOT(_onSelectAllSpecies()));
+  selection_menu->addAction(tr("Unselect all species"), this, SLOT(_onSelectNoSpecies()));
+  selection_menu->addAction(tr("Invert selection"), this, SLOT(_onInvertSelection()));
+  selection_button->setMenu(selection_menu);
+
   QDialogButtonBox *buttons = new QDialogButtonBox(QDialogButtonBox::Cancel|QDialogButtonBox::Ok);
+
+  QVBoxLayout *list_layout = new QVBoxLayout();
+  list_layout->setMargin(0);
+  list_layout->addWidget(selection_button);
+  list_layout->addWidget(_species_list);
 
   QVBoxLayout *layout = new QVBoxLayout();
   layout->addWidget(_head_label);
-  layout->addWidget(_species_list);
+  layout->addLayout(list_layout);
   layout->addWidget(buttons);
   setLayout(layout);
 
-  QObject::connect(buttons, SIGNAL(accepted()), this, SLOT(onAccepted()));
+  QObject::connect(buttons, SIGNAL(accepted()), this, SLOT(_onAccepted()));
   QObject::connect(buttons, SIGNAL(rejected()), this, SLOT(reject()));
 }
 
@@ -66,8 +79,36 @@ SpeciesSelectionDialog::setTitle(const QString &text) {
 }
 
 void
-SpeciesSelectionDialog::onAccepted() {
+SpeciesSelectionDialog::_onAccepted() {
   QList<QString> selected_species = getSelectedSpecies();
   if (0 == selected_species.size()) { return; }
   accept();
+}
+
+void
+SpeciesSelectionDialog::_onSelectAllSpecies()
+{
+  for (int i=0; i<_species_list->count(); i++) {
+    _species_list->item(i)->setCheckState(Qt::Checked);
+  }
+}
+
+void
+SpeciesSelectionDialog::_onSelectNoSpecies()
+{
+  for (int i=0; i<_species_list->count(); i++) {
+    _species_list->item(i)->setCheckState(Qt::Unchecked);
+  }
+}
+
+void
+SpeciesSelectionDialog::_onInvertSelection()
+{
+  for (int i=0; i<_species_list->count(); i++) {
+    if (Qt::Checked == _species_list->item(i)->checkState()) {
+      _species_list->item(i)->setCheckState(Qt::Unchecked);
+    } else {
+      _species_list->item(i)->setCheckState(Qt::Checked);
+    }
+  }
 }

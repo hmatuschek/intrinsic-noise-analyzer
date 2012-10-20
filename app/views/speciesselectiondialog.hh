@@ -24,7 +24,13 @@ public:
 
 private slots:
   /** Calcback on "ok", checks if the configuration is valid. */
-  void onAccepted();
+  void _onAccepted();
+  /** Callback to select all species. */
+  void _onSelectAllSpecies();
+  /** Callback to select no species. */
+  void _onSelectNoSpecies();
+  /** Callback to invert selection. */
+  void _onInvertSelection();
 
 private:
   /** A weak reference to the model to create list of species. */
