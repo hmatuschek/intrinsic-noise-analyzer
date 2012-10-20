@@ -581,9 +581,6 @@ Assembler::processParameterDefinition(Parser::ConcreteSyntaxTree &params)
    *   [EOL ParameterDefinitionList];     : params[5], ParameterDefinitionList = params[5][0][1] */
 
   std::string identifier = _lexer[params[0].getTokenIdx()].getValue();
-  Parser::Expr::ScopeContext context(&_model);
-  Parser::Expr::Assembler expr_assembler(context, _lexer);
-  GiNaC::ex value = expr_assembler.processExpression(params[2]);
   bool is_constant = true;
 
   // There is just one modifier, making paramerer non-constant
@@ -592,7 +589,6 @@ Assembler::processParameterDefinition(Parser::ConcreteSyntaxTree &params)
   }
 
   Ast::Parameter *parameter = new Ast::Parameter(identifier, Ast::Unit::dimensionless(), is_constant);
-  parameter->setValue(value);
 
   // If a name is given
   if (params[4].matched()) {
