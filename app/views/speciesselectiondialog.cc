@@ -43,7 +43,7 @@ SpeciesSelectionDialog::SpeciesSelectionDialog(Ast::Model *model, QWidget *paren
   QDialogButtonBox *buttons = new QDialogButtonBox(QDialogButtonBox::Cancel|QDialogButtonBox::Ok);
 
   QVBoxLayout *list_layout = new QVBoxLayout();
-  list_layout->setMargin(0);
+  list_layout->setMargin(0); list_layout->setSpacing(2);
   list_layout->addWidget(selection_button);
   list_layout->addWidget(_species_list);
 
