@@ -33,24 +33,23 @@ class IOSResultWidget : public QWidget
 {
   Q_OBJECT
 
-protected:
-  IOSTaskWrapper *ios_task_wrapper;
-
-
 public:
-  explicit IOSResultWidget(IOSTaskWrapper *ios_task_wrapper, QWidget *parent = 0);
+  explicit IOSResultWidget(IOSTaskWrapper *_ios_task_wrapper, QWidget *parent = 0);
 
 
 private slots:
-  void plotButtonPressed();
-  void saveButtonPressed();
+  void _onPlotButtonPressed();
+  void _onGenericPlotButtonPressed();
+  void _onSaveButtonPressed();
 
 
 private:
-  TableWrapper *tableWrapper;
-  QTableView   *dataTable;
-  QPushButton  *plotButton;
-  QPushButton  *saveButton;
+  IOSTaskWrapper *_ios_task_wrapper;
+  TableWrapper *_tableWrapper;
+  QTableView   *_dataTable;
+  QPushButton  *_plotButton;
+  QPushButton  *_genericPlotButton;
+  QPushButton  *_saveButton;
 };
 
 #endif // RETASKVIEW_HH
