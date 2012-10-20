@@ -68,6 +68,9 @@ public:
    * is added to the scope an @c InternalError exception is thrown. */
   virtual void addDefinition(Definition *def);
 
+  /** Removes the parameter from the list of local paramters. */
+  virtual void remDefinition(Definition *def);
+
   /** Returns the number of parameters defined in this scope. */
   size_t numParameters() const;
 

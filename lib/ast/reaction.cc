@@ -509,8 +509,32 @@ KineticLaw::addDefinition(Definition *def)
   Scope::addDefinition(def);
 
   // Also store reference in vector:
-  this->_parameters.push_back(static_cast<Parameter *>(def));
+  _parameters.push_back(static_cast<Parameter *>(def));
 }
+
+
+void
+KineticLaw::remDefinition(Definition *def)
+{
+  // Search parameter in vector of paramters:
+  std::vector<Ast::Parameter *>::iterator item = _parameters.begin();
+  for (; item!=_parameters.end(); item++) {
+    if ((*item) == def) { break; }
+  }
+
+  if (item == _parameters.end()) {
+    InternalError err;
+    err << "Can not remove paramter: " << def->getIdentifier() << " is not defined in "
+        << "kinetic law.";
+    throw err;
+  }
+
+  // Otherwise reomve locally:
+  Scope::remDefinition(def);
+  // remove parameter from vector:
+  _parameters.erase(item);
+}
+
 
 void
 KineticLaw::cleanUpParameters()
