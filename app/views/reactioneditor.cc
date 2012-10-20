@@ -446,11 +446,15 @@ ReactionEditorPage::_collectCompartments(QList<QPair<int, QString> > &reactants,
                                          QList<QPair<int, QString> > &products)
 {
   std::set<iNA::Ast::Compartment *> compartments;
+
+  iNA::Ast::Compartment * def_compartment =
+          (_model.numCompartments() ? _model.getCompartment(0) : new iNA::Ast::Compartment("compartment",iNA::Ast::Compartment::VOLUME,true) );
+
   // Handle list of reactants:
   for (QList< QPair<int, QString> >::iterator item=reactants.begin(); item!=reactants.end(); item++)
   {
     if (! _model.hasSpecies(item->second.toStdString())) {
-      compartments.insert(_model.getCompartment(0));
+      compartments.insert(def_compartment);
     } else {
       compartments.insert(_model.getSpecies(item->second.toStdString())->getCompartment());
     }
@@ -459,7 +463,7 @@ ReactionEditorPage::_collectCompartments(QList<QPair<int, QString> > &reactants,
   for (QList< QPair<int, QString> >::iterator item=products.begin(); item!=products.end(); item++)
   {
     if (! _model.hasSpecies(item->second.toStdString())) {
-      compartments.insert(_model.getCompartment(0));
+      compartments.insert(def_compartment);
     } else {
       compartments.insert(_model.getSpecies(item->second.toStdString())->getCompartment());
     }
@@ -701,11 +705,10 @@ ReactionEditorPage::_defineUnknownSpecies(QList<QPair<int, QString> > &reactants
       throw err;
     }
 
+    // Create a compartment if there is none.
     if (0 == _model.numCompartments()) {
-      iNA::InternalError err;
-      err << "Can not define species with identifier " << item->second.toStdString()
-          << ", no compartment defined.";
-      throw err;
+      iNA::Ast::Compartment * new_compartment = new iNA::Ast::Compartment("compartment", iNA::Ast::Compartment::VOLUME, true);
+      _model.addDefinition(new_compartment);
     }
 
     // identifier not in use -> define species with this identifier.

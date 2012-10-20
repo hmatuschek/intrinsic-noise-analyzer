@@ -217,12 +217,16 @@ QAction *Application::combineIrrevReacAction() { return _combineIrvReaction; }
  * ******************************************************************************************** */
 void Application::onNewModel()
 {
-  NewModelDialog dialog;
-  if (QDialog::Accepted != dialog.exec()) { return; }
+  //NewModelDialog dialog;
+  //if (QDialog::Accepted != dialog.exec()) { return; }
+
+  //iNA::Ast::Model *new_model = new iNA::Ast::Model(
+  //      dialog.getModelIdentifier().toStdString(), dialog.getModelName().toStdString());
 
   iNA::Ast::Model *new_model = new iNA::Ast::Model(
-        dialog.getModelIdentifier().toStdString(), dialog.getModelName().toStdString());
+              "New_model", "New model");
   docTree()->addDocument(new DocumentItem(new_model));
+
 }
 
 
