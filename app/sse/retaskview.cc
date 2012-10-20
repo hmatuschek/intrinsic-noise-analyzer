@@ -49,7 +49,7 @@ REResultWidget::REResultWidget(RETaskWrapper *task_wrapper, QWidget *parent):
   dataTable->setModel(this->tableWrapper);
 
   QPushButton *plotButton = new QPushButton(tr("Quick plot statistics"));
-  QPushButton *genericPlotButton = new QPushButton(tr("Expert plots"));
+  QPushButton *genericPlotButton = new QPushButton(tr("Custom plot"));
   QPushButton *saveButton = new QPushButton(tr("Save data to file"));
 
   QObject::connect(plotButton, SIGNAL(clicked()), this, SLOT(quickPlotButtonPressed()));

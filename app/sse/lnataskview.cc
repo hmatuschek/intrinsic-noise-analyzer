@@ -51,7 +51,7 @@ LNAResultWidget::LNAResultWidget(LNATaskWrapper *task_wrapper, QWidget *parent):
   _plotButton = new QPushButton(tr("Plot statistics"));
   QObject::connect(_plotButton, SIGNAL(clicked()), this, SLOT(_plotButtonPressed()));
 
-  _genericPlotButton = new QPushButton(tr("Expert plot"));
+  _genericPlotButton = new QPushButton(tr("Custom plot"));
   QObject::connect(_genericPlotButton, SIGNAL(clicked()), this, SLOT(_genericPlotButtonPressed()));
 
   _saveButton = new QPushButton(tr("Save data to file"));

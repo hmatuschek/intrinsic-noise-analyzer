@@ -51,7 +51,7 @@ IOSResultWidget::IOSResultWidget(IOSTaskWrapper *task_wrapper, QWidget *parent):
   _plotButton = new QPushButton(tr("Plot statistics"));
   QObject::connect(_plotButton, SIGNAL(clicked()), this, SLOT(_onPlotButtonPressed()));
 
-  _genericPlotButton = new QPushButton(tr("Expert plot"));
+  _genericPlotButton = new QPushButton(tr("Custom plot"));
   QObject::connect(_genericPlotButton, SIGNAL(clicked()), this, SLOT(_onGenericPlotButtonPressed()));
 
   this->_saveButton = new QPushButton(tr("Save data to file"));
