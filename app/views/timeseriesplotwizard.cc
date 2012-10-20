@@ -237,6 +237,21 @@ TimeSeriesPlotDialog::graph(size_t i) {
   return _graphs.graph(i);
 }
 
+QString
+TimeSeriesPlotDialog::figureTitle() const {
+  return _figure_title;
+}
+
+QString
+TimeSeriesPlotDialog::xLabel() const {
+  return _x_label;
+}
+
+QString
+TimeSeriesPlotDialog::yLabel() const {
+  return _y_label;
+}
+
 
 void
 TimeSeriesPlotDialog::onAddGraph() {
@@ -244,6 +259,17 @@ TimeSeriesPlotDialog::onAddGraph() {
   if (QDialog::Rejected == add_graph_dialog.exec()) { return; }
   _graphs.addGraph(add_graph_dialog.getConfig());
   _stack->setCurrentIndex(0);
+  onUpdatePlot();
+}
+
+
+void
+TimeSeriesPlotDialog::onEditLabels() {
+  TimeSeriesLabelDialog label_dialog(_figure_title, _x_label, _y_label);
+  if (QDialog::Accepted != label_dialog.exec()) { return; }
+  _figure_title = label_dialog.figureTitle();
+  _x_label = label_dialog.xLabel();
+  _y_label = label_dialog.yLabel();
   onUpdatePlot();
 }
 
@@ -429,4 +455,48 @@ TimeSeriesGraphDialog::checkInputAndExit()
   }
 
   accept();
+}
+
+
+
+/* ******************************************************************************************** *
+ * Implementation of TimeSeriesLabelDialog
+ * ******************************************************************************************** */
+TimeSeriesLabelDialog::TimeSeriesLabelDialog(
+    const QString &title, const QString &x_label, const QString &y_label, QWidget *parent)
+  : QDialog(parent)
+{
+  setWindowTitle("Plot label");
+
+  _figureTitle = new QLineEdit(title);
+  _xLabel = new QLineEdit(x_label);
+  _yLabel = new QLineEdit(y_label);
+
+  QFormLayout *label_layout = new QFormLayout();
+  label_layout->addRow(tr("Title"), _figureTitle);
+  label_layout->addRow(tr("X Label"), _xLabel);
+  label_layout->addRow(tr("Y Label"), _yLabel);
+
+  QDialogButtonBox *button_box = new QDialogButtonBox(
+        QDialogButtonBox::Cancel|QDialogButtonBox::Ok);
+
+  QVBoxLayout *layout = new QVBoxLayout();
+  layout->addLayout(label_layout);
+  layout->addWidget(button_box);
+  setLayout(layout);
+}
+
+QString
+TimeSeriesLabelDialog::figureTitle() const  {
+  return _figureTitle->text();
+}
+
+QString
+TimeSeriesLabelDialog::xLabel() const {
+  return _xLabel->text();
+}
+
+QString
+TimeSeriesLabelDialog::yLabel() const {
+  return _yLabel->text();
 }

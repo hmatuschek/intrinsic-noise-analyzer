@@ -11,6 +11,7 @@
 #include "../doctree/plotitem.hh"
 #include "lnaplot.hh"
 #include "../views/speciesselectiondialog.hh"
+#include "../views/timeseriesplotwizard.hh"
 
 
 /* ********************************************************************************************* *
@@ -36,39 +37,42 @@ LNATaskView::createResultWidget(TaskItem *task_item)
  * Implementation of LNAResultWidget, show the result of a LNA (SSE) analysis.
  * ********************************************************************************************* */
 LNAResultWidget::LNAResultWidget(LNATaskWrapper *task_wrapper, QWidget *parent):
-  QWidget(parent), lna_task_wrapper(task_wrapper)
+  QWidget(parent), _lna_task_wrapper(task_wrapper)
 {
-  this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
-  this->setBackgroundRole(QPalette::Window);
+  setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
+  setBackgroundRole(QPalette::Window);
 
-  this->dataTable = new QTableView();
-  this->dataTable->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
+  _dataTable = new QTableView();
+  _dataTable->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
 
-  this->tableWrapper = new TableWrapper(lna_task_wrapper->getLNATask()->getTimeSeries(), this);
-  dataTable->setModel(this->tableWrapper);
+  _tableWrapper = new TableWrapper(_lna_task_wrapper->getLNATask()->getTimeSeries(), this);
+  _dataTable->setModel(this->_tableWrapper);
 
-  this->plotButton = new QPushButton(tr("Plot statistics"));
-  QObject::connect(this->plotButton, SIGNAL(clicked()), this, SLOT(plotButtonPressed()));
+  _plotButton = new QPushButton(tr("Plot statistics"));
+  QObject::connect(_plotButton, SIGNAL(clicked()), this, SLOT(_plotButtonPressed()));
 
-  this->saveButton = new QPushButton(tr("Save data to file"));
-  QObject::connect(this->saveButton, SIGNAL(clicked()), this, SLOT(saveButtonPressed()));
+  _genericPlotButton = new QPushButton(tr("Expert plot"));
+  QObject::connect(_genericPlotButton, SIGNAL(clicked), this, SLOT(_genericPlotButtonPressed()));
 
+  _saveButton = new QPushButton(tr("Save data to file"));
+  QObject::connect(_saveButton, SIGNAL(clicked()), this, SLOT(_saveButtonPressed()));
 
   QHBoxLayout *button_box = new QHBoxLayout();
-  button_box->addWidget(this->plotButton);
-  button_box->addWidget(this->saveButton);
+  button_box->addWidget(_plotButton);
+  button_box->addWidget(_genericPlotButton);
+  button_box->addWidget(_saveButton);
 
   QVBoxLayout *layout = new QVBoxLayout();
   layout->addLayout(button_box);
-  layout->addWidget(this->dataTable);
-  this->setLayout(layout);
+  layout->addWidget(_dataTable);
+  setLayout(layout);
 }
 
 
 void
-LNAResultWidget::plotButtonPressed()
+LNAResultWidget::_plotButtonPressed()
 {
-  SpeciesSelectionDialog dialog(lna_task_wrapper->getLNATask()->getConfig().getModel());
+  SpeciesSelectionDialog dialog(_lna_task_wrapper->getLNATask()->getConfig().getModel());
   dialog.setWindowTitle(tr("LNA quick plot"));
   dialog.setTitle(tr("Select the species to plot."));
 
@@ -77,40 +81,57 @@ LNAResultWidget::plotButtonPressed()
 
   // Add timeseries plot:
   Application::getApp()->docTree()->addPlot(
-        this->lna_task_wrapper,
-        new PlotItem(new LNATimeSeriesPlot(selected_species, lna_task_wrapper->getLNATask())));
+        _lna_task_wrapper,
+        new PlotItem(new LNATimeSeriesPlot(selected_species, _lna_task_wrapper->getLNATask())));
 
   // Add correlation coefficient plot (if there are more than one species selected).
   if (1 < selected_species.size()) {
     Application::getApp()->docTree()->addPlot(
-          this->lna_task_wrapper,
+          _lna_task_wrapper,
           new PlotItem(
-            new LNACorrelationPlot(selected_species, lna_task_wrapper->getLNATask())));
+            new LNACorrelationPlot(selected_species, _lna_task_wrapper->getLNATask())));
   }
 }
 
 
 void
-LNAResultWidget::saveButtonPressed()
+LNAResultWidget::_genericPlotButtonPressed()
+{
+  // Show dialog
+  TimeSeriesPlotDialog dialog(_lna_task_wrapper->getLNATask()->getTimeSeries());
+  if (QDialog::Rejected == dialog.exec()) { return; }
+
+  // Create plot figure with labels.
+  Plot::Figure *figure = new Plot::Figure(dialog.figureTitle());
+  figure->getAxis()->setXLabel(dialog.xLabel());
+  figure->getAxis()->setYLabel(dialog.yLabel());
+
+  // Iterate over all graphs of the configured plot:
+  for (size_t i=0; i<dialog.numGraphs(); i++) {
+    figure->getAxis()->addGraph(dialog.graph(i).create(figure->getStyle(i)));
+  }
+
+  // Add timeseries plot:
+  Application::getApp()->docTree()->addPlot(_lna_task_wrapper, new PlotItem(figure));
+}
+
+
+void
+LNAResultWidget::_saveButtonPressed()
 {
   QString filename = QFileDialog::getSaveFileName(
         this, tr("Save as text..."), "", tr("Text Files (*.txt *.csv)"));
 
-  if ("" == filename)
-  {
-    return;
-  }
+  if ("" == filename) { return; }
 
   QFile file(filename);
-
-  if (!file.open(QIODevice::WriteOnly| QIODevice::Text))
-  {
+  if (!file.open(QIODevice::WriteOnly| QIODevice::Text)) {
     QMessageBox box;
     box.setWindowTitle(tr("Cannot open file"));
     box.setText(tr("Cannot open file %1 for writing").arg(filename));
     box.exec();
   }
 
-  this->lna_task_wrapper->getLNATask()->getTimeSeries()->saveAsText(file);
+  _lna_task_wrapper->getLNATask()->getTimeSeries()->saveAsText(file);
   file.close();
 }

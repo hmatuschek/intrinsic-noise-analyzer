@@ -92,23 +92,12 @@ REResultWidget::genericPlotButtonPressed()
 {
   // Show dialog
   TimeSeriesPlotDialog dialog(re_task_wrapper->getRETask()->getTimeSeries());
-  // on cancel -> return
   if (QDialog::Rejected == dialog.exec()) { return; }
 
-  // Get species unit
-  std::stringstream unit_str;
-  this->re_task_wrapper->getRETask()->getSpeciesUnit().dump(unit_str, true);
-  QString species_unit(unit_str.str().c_str());
-
-  // Get time unit
-  unit_str.str("");
-  this->re_task_wrapper->getRETask()->getTimeUnit().dump(unit_str, true);
-  QString time_unit(unit_str.str().c_str());
-
-  // Create plot figure
-  Plot::Figure *figure = new Plot::Figure("Mean concentrations (RE)");
-  figure->getAxis()->setXLabel(tr("time [%1]").arg(time_unit));
-  figure->getAxis()->setYLabel(tr("concentrations [%1]").arg(species_unit));
+  // Create plot figure with labels.
+  Plot::Figure *figure = new Plot::Figure(dialog.figureTitle());
+  figure->getAxis()->setXLabel(dialog.xLabel());
+  figure->getAxis()->setYLabel(dialog.yLabel());
 
   // Iterate over all graphs of the configured plot:
   for (size_t i=0; i<dialog.numGraphs(); i++) {
@@ -116,7 +105,7 @@ REResultWidget::genericPlotButtonPressed()
   }
 
   // Add timeseries plot:
-  Application::getApp()->docTree()->addPlot(this->re_task_wrapper, new PlotItem(figure));
+  Application::getApp()->docTree()->addPlot(re_task_wrapper, new PlotItem(figure));
 }
 
 

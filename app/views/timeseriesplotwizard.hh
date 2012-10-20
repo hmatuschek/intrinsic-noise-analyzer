@@ -125,12 +125,20 @@ public:
   size_t numGraphs() const;
   /** Returns the i-th graph config. */
   TimeSeriesGraphConfig &graph(size_t i);
+  /** Returns the figure title. */
+  QString figureTitle() const;
+  /** Returns the x-label. */
+  QString xLabel() const;
+  /** Returns the y-label. */
+  QString yLabel() const;
 
 private slots:
   /** Callback to remove a selected graph from the graph list. */
   void onRemoveGraph();
   /** Callback to create a new graph. */
   void onAddGraph();
+  /** Callback to edit figure labels & title. */
+  void onEditLabels();
   /** Callbeck to edit a existing graph. */
   void onEditGraph(const QModelIndex &index);
   /** Updates the plot-preview window. */
@@ -155,6 +163,13 @@ private:
   QPushButton *_add_graph;
   /** Remove graph button. */
   QPushButton *_rem_graph;
+  /** Figure title. */
+  QString _figure_title;
+  /** X label. */
+  QString _x_label;
+  /** Y label. */
+  QString _y_label;
+
 };
 
 
@@ -230,5 +245,25 @@ private:
   /** Holds the formula editor for the variance formula. */
   TimeSeriesFormulaEditor *_formula_var;
 };
+
+
+
+class TimeSeriesLabelDialog : public QDialog
+{
+  Q_OBJECT
+
+public:
+  explicit TimeSeriesLabelDialog(const QString &title, const QString &x_label, const QString &y_label, QWidget *parent=0);
+
+  QString figureTitle() const;
+  QString xLabel() const;
+  QString yLabel() const;
+
+private:
+  QLineEdit *_figureTitle;
+  QLineEdit *_xLabel;
+  QLineEdit *_yLabel;
+};
+
 
 #endif // __INA_APP_VIEWS_TIMESERIESPLOTWIZARD_HH__
