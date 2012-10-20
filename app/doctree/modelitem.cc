@@ -75,7 +75,7 @@ ModelItem::~ModelItem()
 const QString &
 ModelItem::getLabel() const
 {
-  return this->itemLabel;
+  return itemLabel;
 }
 
 
@@ -98,4 +98,10 @@ bool ModelItem::providesView() const { return true; }
 QWidget *
 ModelItem::createView() {
   return new ModelView(this);
+}
+
+
+void
+ModelItem::updateItem() {
+  // pass...
 }

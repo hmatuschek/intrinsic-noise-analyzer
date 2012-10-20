@@ -2,6 +2,12 @@
 #include <iostream>
 
 
+TreeItem::TreeItem()
+  : _tree_parent(0)
+{
+  // Pass...
+}
+
 
 TreeItem *
 TreeItem::getTreeChild(int row) const

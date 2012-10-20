@@ -33,11 +33,17 @@ private slots:
   void onLengthUnitChanged();
   /** Callback to update time unit of model. */
   void onTimeUnitChanged();
+  /** Callback to update model view. */
+  void onUpdateModelView();
 
 private:
+  /** Holds a weak reference to the model item. */
+  ModelItem *_model_item;
   /** Holds a weak reference to the model instance. */
   iNA::Ast::Model *_model;
 
+  /** The heading label. */
+  QLabel *_title;
   /** Holds the line editor for the model identifier. */
   QLineEdit *_model_identifier;
   /** Holds the line editor for the model name. */

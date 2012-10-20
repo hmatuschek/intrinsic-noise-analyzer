@@ -12,97 +12,86 @@ using namespace iNA;
 
 
 DocumentItem::DocumentItem(const QString &path, QObject *parent)
-  : QObject(parent), DocumentTreeItem(), file_path(path)
+  : QObject(parent), DocumentTreeItem(), _file_path(path)
 {
-  this->model = new ModelItem(file_path, this);
-  this->model->setTreeParent(this);
+  _model = new ModelItem(_file_path, this);
+  _model->setTreeParent(this);
 
-  this->analyses = new AnalysesItem(this);
-  this->analyses->setTreeParent(this);
+  _analyses = new AnalysesItem(this);
+  _analyses->setTreeParent(this);
 
-  this->_children.append(this->model);
-  this->_children.append(this->analyses);
-
-  // Construct label:
-  QFileInfo file_info(file_path);
-  this->label
-      = QString("%1 (%2)").arg(this->getModel().getName().c_str()).arg(file_info.fileName());
+  _children.append(this->_model);
+  _children.append(this->_analyses);
 
   // Construct context menu:
-  this->closeAct = new QAction(tr("Close document"), this);
-  QObject::connect(this->closeAct, SIGNAL(triggered()), this, SLOT(closeDocument()));
+  _closeAct = new QAction(tr("Close document"), this);
+  _contextMenu = new QMenu();
+  _contextMenu->addAction(_closeAct);
+  QObject::connect(_closeAct, SIGNAL(triggered()), this, SLOT(closeDocument()));
 
-  this->contextMenu = new QMenu();
-  this->contextMenu->addAction(this->closeAct);
+  // Update item label:
+  updateItemData();
 }
 
 
 
 DocumentItem::DocumentItem(iNA::Ast::Model *model, const QString &path, QObject *parent)
-  : QObject(parent), DocumentTreeItem(), file_path(path)
+  : QObject(parent), DocumentTreeItem(), _file_path(path)
 {
-  this->model = new ModelItem(model, this);
-  this->model->setTreeParent(this);
+  _model = new ModelItem(model, this);
+  _model->setTreeParent(this);
 
-  this->analyses = new AnalysesItem(this);
-  this->analyses->setTreeParent(this);
+  _analyses = new AnalysesItem(this);
+  _analyses->setTreeParent(this);
 
-  this->_children.append(this->model);
-  this->_children.append(this->analyses);
-
-  // Construct label:
-  QFileInfo file_info(file_path);
-  this->label
-      = QString("%1 (%2)").arg(this->getModel().getName().c_str()).arg(file_info.fileName());
+  _children.append(this->_model);
+  _children.append(this->_analyses);
 
   // Construct context menu:
-  this->closeAct = new QAction(tr("Close document"), this);
-  QObject::connect(this->closeAct, SIGNAL(triggered()), this, SLOT(closeDocument()));
+  _closeAct = new QAction(tr("Close document"), this);
+  QObject::connect(this->_closeAct, SIGNAL(triggered()), this, SLOT(closeDocument()));
 
-  this->contextMenu = new QMenu();
-  this->contextMenu->addAction(this->closeAct);
+  _contextMenu = new QMenu();
+  _contextMenu->addAction(this->_closeAct);
+
+  // Update label
+  updateItemData();
 }
 
 
-DocumentItem::~DocumentItem()
-{
+DocumentItem::~DocumentItem() {
   // mark Context menu for deletion:
-  this->contextMenu->deleteLater();
+  _contextMenu->deleteLater();
 }
 
 
 iNA::Ast::Model &
-DocumentItem::getModel()
-{
-  return this->model->getModel();
+DocumentItem::getModel() {
+  return _model->getModel();
 }
 
 
 const iNA::Ast::Model &
-DocumentItem::getModel() const
-{
-  return this->model->getModel();
+DocumentItem::getModel() const {
+  return _model->getModel();
 }
 
 
 void
-DocumentItem::addTask(TaskItem *task)
-{
-  this->analyses->addTask(task);
+DocumentItem::addTask(TaskItem *task) {
+  _analyses->addTask(task);
 }
 
 
 bool
-DocumentItem::providesContextMenu() const
-{
+DocumentItem::providesContextMenu() const {
   return true;
 }
 
 
 void
-DocumentItem::showContextMenu(const QPoint &global_pos)
-{
-  this->contextMenu->popup(global_pos);
+DocumentItem::showContextMenu(const QPoint &global_pos) {
+  _contextMenu->popup(global_pos);
 }
 
 
@@ -111,9 +100,26 @@ DocumentItem::showContextMenu(const QPoint &global_pos)
  * Implementation of the TreeItem interface.
  * ******************************************************************************************** */
 const QString &
-DocumentItem::getLabel() const
-{
-  return this->label;
+DocumentItem::getLabel() const {
+  return _label;
+}
+
+void
+DocumentItem::updateItemData() {
+  // Update item label:
+  if (0 != _model) {
+    QString model_name = _model->getModel().getIdentifier().c_str();
+    if (_model->getModel().hasName()) { model_name = _model->getModel().getName().c_str(); }
+    if (0 == _file_path.size())  {
+      _label = model_name;
+    } else {
+      QFileInfo info(_file_path);
+      _label = QString("%1 (%2)").arg(model_name).arg(info.fileName());
+    }
+  }
+
+  // signal doctree to update the data.
+  Application::getApp()->docTree()->markForUpdate(this);
 }
 
 
@@ -124,7 +130,7 @@ DocumentItem::getLabel() const
 void
 DocumentItem::closeDocument()
 {
-  if (this->analyses->tasksRunning())
+  if (this->_analyses->tasksRunning())
   {
     QMessageBox::warning(0, tr("Cannot close document"), tr("Analysis in progress."));
     return;

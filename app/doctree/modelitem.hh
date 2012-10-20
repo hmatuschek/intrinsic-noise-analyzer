@@ -40,6 +40,9 @@ public:
   /** Create a new model view. */
   virtual QWidget *createView();
 
+  /** Forces an update of the model. */
+  void updateItem();
+
 private:
   /** Holds the SBML document associated with the model. */
   iNA::Ast::Model *_model;
