@@ -56,7 +56,7 @@ DocumentItem::DocumentItem(iNA::Ast::Model *model, const QString &path, QObject 
       = QString("%1 (%2)").arg(this->getModel().getName().c_str()).arg(file_info.fileName());
 
   // Construct context menu:
-  this->closeAct = new QAction(tr("close document"), this);
+  this->closeAct = new QAction(tr("Close document"), this);
   QObject::connect(this->closeAct, SIGNAL(triggered()), this, SLOT(closeDocument()));
 
   this->contextMenu = new QMenu();
