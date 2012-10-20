@@ -177,7 +177,7 @@ TimeSeriesGraphList::updateGraph(int idx, const TimeSeriesGraphConfig &graph) {
  * Implementation of TimeSeriesPlotDialog
  * ******************************************************************************************** */
 TimeSeriesPlotDialog::TimeSeriesPlotDialog(Table *table, QWidget *parent)
-  : QDialog(parent), _data(table), _graphs()
+  : QDialog(parent), _data(table), _graphs(), _figure_title("New Plot")
 {
   setWindowTitle("Plot-o-mat");
 
