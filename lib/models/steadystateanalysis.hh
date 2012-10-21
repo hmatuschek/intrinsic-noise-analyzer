@@ -52,9 +52,10 @@ public:
         Trafo::ConstantFolder constants(model);
         InitialConditions ICs(model);
 
-//        solver.set(model.stateIndex,
-//                  ICs.apply(constants.apply( model.getUpdateVector().head(model.numIndSpecies()))),
-//                  ICs.apply(constants.apply( model.getJacobian() )) );
+        Eigen::VectorXex REs = ICs.apply(constants.apply( model.getUpdateVector().head(model.numIndSpecies())) );
+        Eigen::MatrixXex Jac = ICs.apply(constants.apply( model.getJacobian() ));
+
+        solver.set(model.stateIndex, REs, Jac);
 
     }
 
@@ -160,10 +161,9 @@ public:
             }
         }
 
-        x.segment(offset,lnaLength) = B.lu().solve(-A);
 
-        double relative_error = (B*x.segment(offset,lnaLength) + A).norm() / A.norm(); // norm() is L2 norm
-        std::cout << "The relative error is:\n" << relative_error << std::endl;
+        x.segment(offset,lnaLength) = precisionSolve(B,A);
+
 
         // substitute LNA
         subs_table.clear();
@@ -173,7 +173,25 @@ public:
             sseUpdate(i)=sseUpdate(i).subs(subs_table);
 
     }
+    /**
+     * Simple inline function that attempts to increase find a solution within the precision of the NLE solver (advantageous for stiff systems).
+     */
 
+    inline Eigen::VectorXd precisionSolve(Eigen::MatrixXd B, Eigen::VectorXd A)
+    {
+
+        // this is fast
+        Eigen::VectorXd x = B.lu().solve(-A);
+        if((B*x).isApprox(A,solver.parameters.epsilon))
+        {
+           // this is rather slow
+           Eigen::FullPivLU<Eigen::MatrixXd> LU(B);
+           x = LU.solve(-A);
+        }
+
+        return x;
+
+    }
 
     void calcLNA(Eigen::VectorXd &x, Eigen::VectorXex &sseUpdate)
 
@@ -276,7 +294,7 @@ public:
             }
         }
 
-        x.tail(sseLength-lnaLength) = B.lu().solve(-A);
+        x.tail(sseLength-lnaLength) = precisionSolve(B,A);
 
         double relative_error = (B*x.tail(sseLength-lnaLength) + A).norm() / A.norm(); // norm() is L2 norm
         std::cout << "IOS, The relative error is:\n" << relative_error << std::endl;
