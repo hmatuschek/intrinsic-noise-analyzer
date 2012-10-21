@@ -112,7 +112,7 @@ ParamScanTask::ParamScanTask(const Config &config, QObject *parent)
     for (size_t i=0; i<_Ns; i++)
       for (size_t j=i; j<_Ns; j++, column++)
         this->parameterScan.setColumnName(
-              column,QString("cov(%1,%2)").arg(species_name[i]).arg(species_name[j]));
+              column,QString("LNA cov(%1,%2)").arg(species_name[i]).arg(species_name[j]));
 
     for (size_t i=0; i<_Ns; i++, column++)
       this->parameterScan.setColumnName(
@@ -121,7 +121,7 @@ ParamScanTask::ParamScanTask(const Config &config, QObject *parent)
     for (size_t i=0; i<_Ns; i++)
       for (size_t j=i; j<_Ns; j++, column++)
         this->parameterScan.setColumnName(
-              column,QString("cov(%1,%2)").arg(species_name[i]).arg(species_name[j]));
+              column,QString("IOS cov(%1,%2)").arg(species_name[i]).arg(species_name[j]));
 
 }
 
@@ -170,7 +170,11 @@ ParamScanTask::process()
       Eigen::MatrixXd ios_covariances(config.getModel()->numSpecies(), config.getModel()->numSpecies());
       Eigen::VectorXd thirdOrder(config.getModel()->numSpecies());
 
-      model->fullState(scanResult[pid], concentrations, lna_covariances, emre_corrections,
+      // Get information on initial conditions
+      iNA::Trafo::excludeType ptab = model->makeExclusionTable(parameterSets[pid]);
+      iNA::Models::InitialConditions ICs(*model,ptab);
+
+      model->fullState(ICs, scanResult[pid], concentrations, lna_covariances, emre_corrections,
                        ios_covariances, thirdOrder, iosemre_corrections);
 
       parameterScan(pid,0) = GiNaC::ex_to<GiNaC::numeric>(parameterSets[pid][config.getParameter().getIdentifier()]).to_double();
