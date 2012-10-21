@@ -9,48 +9,13 @@ namespace iNA {
 namespace Models {
 
 /**
-* Folds a set of given constants from an parameter set.
+* Performs the Steady State Analysis on a model.
 */
-class ParameterFolder
-{
-
-    /**
-    * Holds a reference to the substitutions.
-    */
-    GiNaC::exmap &_substitutions;
-
-public:
-    /**
-    * Constructor
-    */
-    ParameterFolder(GiNaC::exmap &constants)
-        : _substitutions(constants)
-    {
-
-    }
-
-
-    /**
-    * A method that folds all constants in a vector or matrix.
-    */
-    Eigen::MatrixXex apply(const Eigen::MatrixXex &vecIn)
-    {
-
-        Eigen::MatrixXex vecOut(vecIn.rows(),vecIn.cols());
-        // ... and fold all constants due to conservation laws
-        for (int i=0; i<vecIn.rows(); i++)
-        for (int j=0; j<vecIn.cols(); j++)
-                vecOut(i,j)=vecIn(i,j).subs(_substitutions);
-
-        return vecOut;
-
-    }
-
-};
 
 template <typename M>
 class SteadyStateAnalysis
 {
+protected:
     /**
      * Holds a reference to a SSE model.
      */
@@ -82,7 +47,15 @@ public:
       : sseModel(model), solver(model), max_time(1e9), min_time_step(1e-1)
 
     {
-      // Pass...
+
+        // Fold all constants and get update vector
+        Trafo::ConstantFolder constants(model);
+        InitialConditions ICs(model);
+
+//        solver.set(model.stateIndex,
+//                  ICs.apply(constants.apply( model.getUpdateVector().head(model.numIndSpecies()))),
+//                  ICs.apply(constants.apply( model.getJacobian() )) );
+
     }
 
     /**
@@ -92,8 +65,18 @@ public:
       : sseModel(model), solver(model), max_time(t_max), min_time_step(dt)
 
     {
-      this->setPrecision(epsilon);
-      this->setMaxIterations(iter);
+
+        // Fold all constants and get update vector
+        Trafo::ConstantFolder constants(model);
+        InitialConditions ICs(model);
+
+        Eigen::VectorXex REs = ICs.apply(constants.apply( model.getUpdateVector().head(model.numIndSpecies())) );
+        Eigen::MatrixXex Jac = ICs.apply(constants.apply( model.getJacobian() ));
+
+        solver.set(model.stateIndex, REs, Jac);
+
+        this->setPrecision(epsilon);
+        this->setMaxIterations(iter);
     }
 
     /**
@@ -209,11 +192,13 @@ public:
 
     {
 
-
         // collect all the values of constant parameters except variable parameters
         Trafo::ConstantFolder constants(sseModel);
         // fold variable parameters first and then all the rest as constant parameters
         Eigen::VectorXex updateVector = constants.apply( sseModel.getUpdateVector() );
+
+        InitialConditions context(sseModel);
+        updateVector = context.apply(updateVector);
 
         // initialize with initial concentrations
         Eigen::VectorXd conc(sseModel.getDimension());
@@ -265,103 +250,6 @@ public:
     }
 
 
-    /**
-     * Perform a parameter scan using the steady state analysis.
-     *
-     * @param parameterSets: Vector of parameter sets to perform analysis for.
-     * @param resultSet: Outputs the steady state concentrations, covariance and EMRE vector in reduced
-     *        coordinates. Contents will be overwritten.
-     */
-    int parameterScan(std::vector<ParameterSet> &parameterSets, std::vector<Eigen::VectorXd> &resultSet, size_t numThreads=OpenMP::getMaxThreads())
-
-    {
-
-        // Only works with single thread due to Ginac
-        numThreads = 1;
-
-        // First make space
-        resultSet.resize(parameterSets.size());
-
-        // Initialize with initial concentrations
-        Eigen::VectorXd x(sseModel.getDimension());
-        sseModel.getInitialState(x);
-        Eigen::VectorXd conc=x.head(sseModel.numIndSpecies());
-
-        // Get the SSE vector
-        size_t offset = sseModel.numIndSpecies();
-        //size_t lnaLength = offset*(offset+1)/2;
-        size_t sseLength = sseModel.getUpdateVector().size()-sseModel.numIndSpecies();
-
-        Eigen::VectorXex updateVector;
-
-        int iter=0;
-
-        std::vector< NLEsolve::HybridSolver<M> > solvers(numThreads,solver);
-
-        // Copy models for parallelization
-        std::vector< M * > models(numThreads);
-        models[0] = &sseModel;
-        Ast::Model* base = dynamic_cast<Ast::Model*>(&sseModel);
-//#pragma omp parallel for if(numThreads>1) num_threads(numThreads)
-        for(size_t j=1; j<numThreads; j++)
-        {
-            models[j] = new M((*base));
-        }
-
-//#pragma omp parallel for if(numThreads>1) num_threads(numThreads) schedule(dynamic) firstprivate(iter,x,conc)
-        // Iterate over all parameter sets
-        for(size_t j = 0; j < parameterSets.size(); j++)
-        {
-
-            // Generate parameter substitution table
-            GiNaC::exmap ptab = models[OpenMP::getThreadNum()]->translate(parameterSets[j]);
-
-            // Collect all the values of constant parameters except variable parameters
-            Trafo::ConstantFolder constants(*(models[OpenMP::getThreadNum()]), Trafo::Filter::ALL_CONST, ptab);
-
-            // Translate identifier to parameters collect variable parameters
-            ParameterFolder parameters(ptab);
-
-            // Fold variable parameters and all the rest
-            Eigen::VectorXex updateVector = parameters.apply(constants.apply( models[OpenMP::getThreadNum()]->getUpdateVector() ) );
-            Eigen::VectorXex REs = updateVector.head(offset);
-            Eigen::VectorXex sseUpdate = updateVector.segment(offset,sseLength);
-            Eigen::MatrixXex Jacobian = parameters.apply(constants.apply( models[OpenMP::getThreadNum()]->getJacobian()) );
-
-            // Setup solver and solve for RE concentrations
-            try
-            {
-
-                solvers[OpenMP::getThreadNum()].set(models[OpenMP::getThreadNum()]->stateIndex,REs,Jacobian);
-                iter = solvers[OpenMP::getThreadNum()].solve(conc, max_time, min_time_step);
-                x.head(offset) = conc;
-
-                // ... and substitute RE concentrations
-                GiNaC::exmap subs_table;
-                for (size_t s=0; s<models[OpenMP::getThreadNum()]->numIndSpecies(); s++)
-                    subs_table.insert( std::pair<GiNaC::ex,GiNaC::ex>( models[OpenMP::getThreadNum()]->getREvar(s), conc(s) ) );
-                for (size_t i=0; i<sseLength; i++)
-                    sseUpdate(i) = sseUpdate(i).subs(subs_table);
-
-                // Calc LNA & IOS
-                calcLNA(*models[OpenMP::getThreadNum()],x,sseUpdate);
-                calcIOS(*models[OpenMP::getThreadNum()],x,sseUpdate);
-
-                // Store result
-                resultSet[j] = x;
-
-            }
-            catch (iNA::NumericError &err)
-            {
-                // Generate a vector of nans the easy way
-                resultSet[j] = Eigen::VectorXd::Zero(models[OpenMP::getThreadNum()]->getDimension())/0.;
-            }
-
-        }
-
-        return iter;
-    }
-
 
     void
     calcIOS(LNAmodel &model, Eigen::VectorXd &x, const Eigen::VectorXex &sseUpdate)
@@ -403,6 +291,136 @@ public:
 
 };
 
+
+/**
+* Extension of the SteadyStateAnalysis to perform a Parameter scan.
+*/
+template <typename M>
+class ParameterScan
+        : public SteadyStateAnalysis<M>
+{
+
+public:
+
+    ParameterScan(M &model)
+        : SteadyStateAnalysis<M>(model)
+    {
+
+        // Pass...
+
+    }
+
+    /**
+    * Constructor
+    */
+    ParameterScan(M &model, size_t iter, double epsilon, double t_max=1e9, double dt=1e-1)
+      : SteadyStateAnalysis<M>(model,iter,epsilon,t_max,dt)
+
+    {
+
+    }
+
+    /**
+     * Perform a parameter scan using the steady state analysis.
+     *
+     * @param parameterSets: Vector of parameter sets to perform analysis for.
+     * @param resultSet: Outputs the steady state concentrations, covariance and EMRE vector in reduced
+     *        coordinates. Contents will be overwritten.
+     */
+    int parameterScan(std::vector<ParameterSet> &parameterSets, std::vector<Eigen::VectorXd> &resultSet, size_t numThreads=OpenMP::getMaxThreads())
+
+    {
+
+        // Only works with single thread due to Ginac
+        numThreads = 1;
+
+        // First make space
+        resultSet.resize(parameterSets.size());
+
+        // Initialize with initial concentrations
+        Eigen::VectorXd x(this->sseModel.getDimension());
+        this->sseModel.getInitialState(x);
+        Eigen::VectorXd conc=x.head(this->sseModel.numIndSpecies());
+
+        // Get the SSE vector
+        size_t offset = this->sseModel.numIndSpecies();
+        //size_t lnaLength = offset*(offset+1)/2;
+        size_t sseLength = this->sseModel.getUpdateVector().size()-this->sseModel.numIndSpecies();
+
+        Eigen::VectorXex updateVector;
+
+        int iter=0;
+
+        std::vector< NLEsolve::HybridSolver<M> > solvers(numThreads,this->solver);
+
+        // Copy models for parallelization
+        std::vector< M * > models(numThreads);
+        models[0] = &this->sseModel;
+        Ast::Model* base = dynamic_cast<Ast::Model*>(&this->sseModel);
+//#pragma omp parallel for if(numThreads>1) num_threads(numThreads)
+        for(size_t j=1; j<numThreads; j++)
+        {
+            models[j] = new M((*base));
+        }
+
+//#pragma omp parallel for if(numThreads>1) num_threads(numThreads) schedule(dynamic) firstprivate(iter,x,conc)
+        // Iterate over all parameter sets
+        for(size_t j = 0; j < parameterSets.size(); j++)
+        {
+
+            // Generate parameter substitution table
+            Trafo::excludeType ptab = models[OpenMP::getThreadNum()]->makeExclusionTable(parameterSets[j]);
+
+            // Collect all the values of constant parameters except variable parameters
+            Trafo::ConstantFolder constants(*(models[OpenMP::getThreadNum()]), Trafo::Filter::ALL_CONST, ptab);
+            InitialConditions ICs(*(models[OpenMP::getThreadNum()]),ptab);
+
+            // Translate identifier to parameters collect variable parameters
+            ParameterFolder parameters(ptab);
+
+            // Fold variable parameters and all the rest
+            Eigen::VectorXex updateVector = ICs.apply(parameters.apply(constants.apply( models[OpenMP::getThreadNum()]->getUpdateVector() ) ));
+            Eigen::VectorXex REs = updateVector.head(offset);
+            Eigen::VectorXex sseUpdate = updateVector.segment(offset,sseLength);
+            Eigen::MatrixXex Jacobian = ICs.apply(parameters.apply(constants.apply( models[OpenMP::getThreadNum()]->getJacobian()) ));
+
+            // Setup solver and solve for RE concentrations
+            try
+            {
+
+                solvers[OpenMP::getThreadNum()].set(models[OpenMP::getThreadNum()]->stateIndex,REs,Jacobian);
+                iter = solvers[OpenMP::getThreadNum()].solve(conc, this->max_time, this->min_time_step);
+                x.head(offset) = conc;
+
+                // ... and substitute RE concentrations
+                GiNaC::exmap subs_table;
+                for (size_t s=0; s<models[OpenMP::getThreadNum()]->numIndSpecies(); s++)
+                    subs_table.insert( std::pair<GiNaC::ex,GiNaC::ex>( models[OpenMP::getThreadNum()]->getREvar(s), conc(s) ) );
+                for (size_t i=0; i<sseLength; i++)
+                    sseUpdate(i) = sseUpdate(i).subs(subs_table);
+
+                // Calc LNA & IOS
+                this->calcLNA(*models[OpenMP::getThreadNum()],x,sseUpdate);
+                this->calcIOS(*models[OpenMP::getThreadNum()],x,sseUpdate);
+
+                // Store result
+                resultSet[j] = x;
+
+            }
+            catch (iNA::NumericError &err)
+            {
+                // Generate a vector of nans the easy way
+                resultSet[j] = Eigen::VectorXd::Zero(models[OpenMP::getThreadNum()]->getDimension())/0.;
+            }
+
+        }
+
+        return iter;
+    }
+
+
+
+};
 
 }} // Close namespaces
 

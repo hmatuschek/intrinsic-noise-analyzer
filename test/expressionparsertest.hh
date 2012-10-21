@@ -21,6 +21,8 @@ public:
 public:
   /** Constructs the test suite. */
   static UnitTest::TestSuite *suite();
+
+  virtual ~ExpressionParserTest() {}
 };
 
 }

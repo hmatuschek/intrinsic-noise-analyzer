@@ -65,18 +65,35 @@ public:
    * @param state The reduced state.
    * @param full_state Vector of concentrations.
    */
+
   void fullState(const Eigen::VectorXd &state, Eigen::VectorXd &fullState);
 
-  void fullState(InitialConditions &context,const Eigen::VectorXd &state, Eigen::VectorXd &full_state);
+  /**
+   * Reconstruct concentration vector from state vector using specific initial conditions.
+   *
+   * @param ICs The initial condtions.
+   * @param state The reduced state.
+   * @param full_state Vector of concentrations.
+   */
 
-  GiNaC::exmap getFlux(const Eigen::VectorXd &state,  Eigen::VectorXd &flux);
+  void fullState(InitialConditions &ICs,const Eigen::VectorXd &state, Eigen::VectorXd &full_state);
+
+  GiNaC::exmap getFlux(const Eigen::VectorXd &state, Eigen::VectorXd &flux);
 
   double foldVertex(std::list<int> lower, std::list<int> upper);
+
 
   /**
    * Interface for the integrator: get initial state vector.
    */
-  virtual void getInitialState(Eigen::VectorXd &x);
+
+  void getInitialState(Eigen::VectorXd &x);
+
+  /**
+   * Get initial state vector for specific initial conditions.
+   */
+
+  virtual void getInitial(InitialConditions &ICs, Eigen::VectorXd &x);
 
 };
 

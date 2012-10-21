@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
   Ast::Model sbml_model; Parser::Sbml::importModel(sbml_model, argv[1]);
 
     Models::LNAmodel model(sbml_model);
-    Models::SteadyStateAnalysis<Models::LNAmodel> steadyState(model);
+    Models::ParameterScan<Models::LNAmodel> steadyState(model);
 
     // choose parameter
     Ast::Parameter* param = model.getParameter(0);

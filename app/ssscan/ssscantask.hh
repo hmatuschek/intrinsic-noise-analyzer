@@ -84,7 +84,7 @@ protected:
   /** Holds the number of species defined in the selected model. */
   size_t _Ns;
   /** Holds an instance of the analysis. */
-  iNA::Models::SteadyStateAnalysis<iNA::Models::IOSmodel> steady_state;
+  iNA::Models::ParameterScan<iNA::Models::IOSmodel> steady_state;
   /** Will hold the results. */
   Table parameterScan;
 

@@ -29,6 +29,11 @@ protected:
 protected:
 
     /**
+    * Holds symbols for dependence on initial conditions.
+    */
+    Eigen::VectorXex ICs;
+
+    /**
     * Holds symbols of constants arising from conservation laws
     */
     Eigen::VectorXex conservationConstants;
@@ -57,35 +62,41 @@ public:
     ConservationAnalysis(const Ast::Model &model);
 
     /**
-    * A method that generates a substituation table for all conservation laws arising from the model
+    * A method that generates a substitution table for all conservation laws arising from the model
     */
     GiNaC::exmap getConservationConstants(const Eigen::VectorXex &conserved_cycles);
 
     /**
-    * A method that generates a substituation table for all conservation laws arising from the model
+    * A method that generates a substitution table for all conservation laws arising from the model
     */
     GiNaC::exmap getConservationConstants(const Eigen::VectorXd &conserved_cycles);
 
-    /* Links concentration to full state */
+    /**
+    * A method that generates a substitution table for the initial conditions.
+    */
+    GiNaC::exmap getICconstants(const Eigen::VectorXd &initialcondition);
+
+    /** Links concentration to full state */
     const Eigen::MatrixXex & getLink0CMatrix();
 
-    /* Links concentrations to full state */
-    const Eigen::MatrixXex & getLinkCMatrix();
+    /** Links concentrations to full state */
+    const Eigen::MatrixXex getLinkCMatrix();
 
+    /** Yields the values of conserved cycles */
     Eigen::MatrixXex getConservedCycles(const Eigen::VectorXd &ICs);
 
-    /* Yields the conservation matrix in concentration space */
+    /** Yields the expressions for conserved cycles as functions of the initial conditions. */
+    Eigen::MatrixXex getConservedCycles(const Eigen::VectorXex &ICs);
+
+    /** Yields the conservation matrix in concentration space */
     Eigen::MatrixXex getConservationMatrix();
 
     Eigen::VectorXex conserved_cycles;
 
+
     Eigen::VectorXex Omega;
 
     Eigen::VectorXd ICsPermuted;
-
-    Eigen::MatrixXd Link0CMatrixNumeric;
-
-    Eigen::MatrixXd LinkCMatrixNumeric;
 
     /**
     * A method that folds all constants arising from conservation laws in a given expression

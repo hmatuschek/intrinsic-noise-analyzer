@@ -35,10 +35,9 @@ public:
   explicit IOSmodel(const Ast::Model &model);
 
   /**
-   * Interface for the integrator: get initial state vector.
+   * Get initial state vector for specific initial conditions.
    */
-  virtual void getInitialState(Eigen::VectorXd &x);
-
+  virtual void getInitial(InitialConditions &ICs, Eigen::VectorXd &x);
 
   void fluxAnalysis(const Eigen::VectorXd &state, Eigen::VectorXd &flux, Eigen::VectorXd &fluxEMRE,
                     Eigen::MatrixXd &fluxCovariance, Eigen::MatrixXd &fluxIOS);

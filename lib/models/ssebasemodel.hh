@@ -125,9 +125,9 @@ public:
     explicit SSEBaseModel(const Ast::Model &model);
 
     /**
-     * Translate a parameter list to substitution map (used by parameter scan method).
+     * Translate a parameter list to substitution map (used by ParameterScan method).
      */
-    GiNaC::exmap translate(const ParameterSet &parameters);
+    GiNaC::exmap makeExclusionTable(const ParameterSet &parameters);
 
 };
 

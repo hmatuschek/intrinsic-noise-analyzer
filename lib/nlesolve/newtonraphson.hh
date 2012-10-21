@@ -180,19 +180,7 @@ public:
 
   {
 
-      Eigen::VectorXex updateVector(model.numIndSpecies());
-      Eigen::MatrixXex Jac(model.numIndSpecies(),model.numIndSpecies());
-
-      // Fold all constants and get update vector
-      Trafo::ConstantFolder constants(model);
-      for(size_t i=0; i<model.numIndSpecies(); i++)
-      {
-          updateVector(i) = constants.apply(model.getUpdateVector()(i));
-          for(size_t j=0; j<model.numIndSpecies(); j++)
-              Jac(i,j) = constants.apply(model.getJacobian()(i,j));
-      }
-
-      this->set(model.stateIndex, updateVector, Jac);
+      // Pass...
 
   }
 
@@ -227,16 +215,15 @@ public:
       Eigen::VectorXd nablaf;
       Eigen::VectorXd dx;
 
-      // evaluate rate equations
+      // Evaluate ODEs
       this->interpreter.run(conc,this->ODEs);
 
-      // dimension
+      // Dimension
       size_t dim = conc.size();
 
-      // calc max step
+      // Calc max step
       const double stpmax=this->parameters.STPMX*std::max(conc.norm(),double(dim));
 
-      //Eigen::MatrixXd REs;
 
       for(this->iterations=1;this->iterations<this->parameters.maxIterations;this->iterations++)
       {

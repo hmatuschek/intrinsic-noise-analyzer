@@ -39,6 +39,8 @@ public:
 public:
   /** Creates test suite. */
   static UnitTest::TestSuite *suite();
+
+  virtual ~SBMLSHParserTest() {}
 };
 
 }

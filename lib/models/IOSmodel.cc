@@ -264,9 +264,9 @@ IOSmodel::postConstructor()
     Eigen::VectorXex EMREiosUpdate = ((this->JacobianM*iosemreVariables)+Delta);
 
     // fold conservation constants
-    this->foldConservationConstants(ThirdMomentUpdate);
-    this->foldConservationConstants(iosUpdate);
-    this->foldConservationConstants(EMREiosUpdate);
+    //this->foldConservationConstants(ThirdMomentUpdate);
+    //this->foldConservationConstants(iosUpdate);
+    //this->foldConservationConstants(EMREiosUpdate);
 
     // and attach to update vector
     this->updateVector.head(dimold) = LNAupdate;
@@ -284,109 +284,84 @@ IOSmodel::fullState(const Eigen::VectorXd &state,
 
 {
 
-    // Make sure there is enough space
-    third.resize(this->numSpecies()*(this->numSpecies()+1)*(this->numSpecies()+2)/6);
+    InitialConditions context(*this);
+    fullState(context,state,concentrations,cov,emre,iosCov,third,iosemre);
 
-    // reconstruct full concentration vector and covariances in original permutation order
-    LNAmodel::fullState(state,concentrations,cov,emre);
+//    // Make sure there is enough space
+//    third.resize(this->numSpecies()*(this->numSpecies()+1)*(this->numSpecies()+2)/6);
 
-    // reconstruct thirdmoments
-    // get reduced skewness vector (should better be a view rather then a copy)
-    Eigen::VectorXd tail = state.segment(2*this->numIndSpecies()+dimCOV,dim3M);
+//    // reconstruct full concentration vector and covariances in original permutation order
+//    LNAmodel::fullState(state,concentrations,cov,emre);
 
-    Eigen::VectorXd emreVal = state.segment(this->numIndSpecies()+dimCOV,this->numIndSpecies());
+//    // reconstruct thirdmoments
+//    // get reduced skewness vector (should better be a view rather then a copy)
+//    Eigen::VectorXd tail = state.segment(2*this->numIndSpecies()+dimCOV,dim3M);
 
-    std::vector< Eigen::MatrixXd > thirdMomVariables(this->numIndSpecies());
+//    Eigen::VectorXd emreVal = state.segment(this->numIndSpecies()+dimCOV,this->numIndSpecies());
 
-    double val = 0;
+//    std::vector< Eigen::MatrixXd > thirdMomVariables(this->numIndSpecies());
 
-    size_t idx = 0;
-    for(size_t i=0;i<this->numIndSpecies();i++)
-    {
-        thirdMomVariables[i].resize(this->numIndSpecies(),this->numIndSpecies());
-        for(size_t j=0;j<=i;j++)
-            for(size_t k=0;k<=j;k++)
-            {
-                val = tail[idx]-emreVal(i)*emreVal(j)*emreVal(k);
+//    double val = 0;
 
-                thirdMomVariables[i](j,k)=val;
-                thirdMomVariables[i](k,j)=val;
+//    size_t idx = 0;
+//    for(size_t i=0;i<this->numIndSpecies();i++)
+//    {
+//        thirdMomVariables[i].resize(this->numIndSpecies(),this->numIndSpecies());
+//        for(size_t j=0;j<=i;j++)
+//            for(size_t k=0;k<=j;k++)
+//            {
+//                val = tail[idx]-emreVal(i)*emreVal(j)*emreVal(k);
 
-                thirdMomVariables[j](i,k)=val;
-                thirdMomVariables[j](k,i)=val;
+//                thirdMomVariables[i](j,k)=val;
+//                thirdMomVariables[i](k,j)=val;
 
-                thirdMomVariables[k](i,j)=val;
-                thirdMomVariables[k](j,i)=val;
+//                thirdMomVariables[j](i,k)=val;
+//                thirdMomVariables[j](k,i)=val;
 
-                idx++; // counts i,j,k loop
-            }
-    }
+//                thirdMomVariables[k](i,j)=val;
+//                thirdMomVariables[k](j,i)=val;
 
-    Eigen::MatrixXd cmat = this->PermutationM.transpose()*this->LinkCMatrixNumeric;
+//                idx++; // counts i,j,k loop
+//            }
+//    }
 
-    // construct full third moment vector, restore original order and return
-    for(size_t i=0; i<(unsigned)cmat.rows(); i++)
-    {
-        third(i)=0.;
-        for(size_t j=0; j<(unsigned)cmat.cols(); j++)
-            for(size_t k=0; k<(unsigned)cmat.cols(); k++)
-                for(size_t l=0; l<(unsigned)cmat.cols(); l++)
-                    third(i) += cmat(i,j) * cmat(i,k) * cmat(i,l) *thirdMomVariables[j](k,l);
-    }
+//    Eigen::MatrixXd cmat = this->PermutationM.transpose()*this->LinkCMatrixNumeric;
 
-   // get reduced covariance vector
-   Eigen::VectorXd covvec = state.segment(2*this->numIndSpecies()+dimCOV+dim3M,dimCOV);
-   // reduced covariance
-   Eigen::MatrixXd cov_ind(this->numIndSpecies(),this->numIndSpecies());
+//    // construct full third moment vector, restore original order and return
+//    for(size_t i=0; i<(unsigned)cmat.rows(); i++)
+//    {
+//        third(i)=0.;
+//        for(size_t j=0; j<(unsigned)cmat.cols(); j++)
+//            for(size_t k=0; k<(unsigned)cmat.cols(); k++)
+//                for(size_t l=0; l<(unsigned)cmat.cols(); l++)
+//                    third(i) += cmat(i,j) * cmat(i,k) * cmat(i,l) *thirdMomVariables[j](k,l);
+//    }
 
-   // fill upper triangular
-   idx=0;
-   for(size_t i=0;i<this->numIndSpecies();i++)
-   {
-       for(size_t j=0;j<=i;j++)
-       {
-           cov_ind(i,j) = covvec(idx)-emreVal(i)*emreVal(j);
-           // fill rest by symmetry
-           cov_ind(j,i) = cov_ind(i,j);
-           idx++;
-       }
-   }
+//   // get reduced covariance vector
+//   Eigen::VectorXd covvec = state.segment(2*this->numIndSpecies()+dimCOV+dim3M,dimCOV);
+//   // reduced covariance
+//   Eigen::MatrixXd cov_ind(this->numIndSpecies(),this->numIndSpecies());
 
-   // restore full covariance in native permutation
-   iosCov = cmat*cov_ind*cmat.transpose();
+//   // fill upper triangular
+//   idx=0;
+//   for(size_t i=0;i<this->numIndSpecies();i++)
+//   {
+//       for(size_t j=0;j<=i;j++)
+//       {
+//           cov_ind(i,j) = covvec(idx)-emreVal(i)*emreVal(j);
+//           // fill rest by symmetry
+//           cov_ind(j,i) = cov_ind(i,j);
+//           idx++;
+//       }
+//   }
 
-   tail = state.segment(2*this->numIndSpecies()+2*dimCOV+dim3M,this->numIndSpecies());
+//   // restore full covariance in native permutation
+//   iosCov = cmat*cov_ind*cmat.transpose();
 
-   // construct full iosemre vector, restore original order and return
-   iosemre = cmat*tail;
+//   tail = state.segment(2*this->numIndSpecies()+2*dimCOV+dim3M,this->numIndSpecies());
 
-}
-
-
-void
-IOSmodel::getCentralMoments(const Eigen::VectorXd &state, Eigen::VectorXd &first,
-                     Eigen::MatrixXd &second, Eigen::VectorXd &third, Eigen::VectorXd &fourth)
-
-{
-
-
-    Eigen::VectorXd emre;
-    Eigen::VectorXd iosemre;
-    Eigen::MatrixXd iosCov;
-
-    fullState(state,first,second,emre,iosCov,third,iosemre);
-
-
-    // Make sure there is enough space
-
-    fourth.resize(this->numSpecies()*(this->numSpecies()+1)*(this->numSpecies()+2)*(this->numSpecies()+3)/24);
-
-    // construct fourth moment via Wick's theorem
-    for(size_t i=0; i<this->numSpecies(); i++)
-       fourth(i) = 3.*second(i,i)*second(i,i);
-
-    first+=emre;
-    second+=iosCov;
+//   // construct full iosemre vector, restore original order and return
+//   iosemre = cmat*tail;
 
 }
 
@@ -474,11 +449,38 @@ IOSmodel::fullState(InitialConditions &context, const Eigen::VectorXd &state,
 
 
 void
-IOSmodel::getInitialState(Eigen::VectorXd &x)
+IOSmodel::getCentralMoments(const Eigen::VectorXd &state, Eigen::VectorXd &first,
+                     Eigen::MatrixXd &second, Eigen::VectorXd &third, Eigen::VectorXd &fourth)
+
+{
+
+
+    Eigen::VectorXd emre;
+    Eigen::VectorXd iosemre;
+    Eigen::MatrixXd iosCov;
+
+    fullState(state,first,second,emre,iosCov,third,iosemre);
+
+
+    // Make sure there is enough space
+
+    fourth.resize(this->numSpecies()*(this->numSpecies()+1)*(this->numSpecies()+2)*(this->numSpecies()+3)/24);
+
+    // construct fourth moment via Wick's theorem
+    for(size_t i=0; i<this->numSpecies(); i++)
+       fourth(i) = 3.*second(i,i)*second(i,i);
+
+    first+=emre;
+    second+=iosCov;
+
+}
+
+void
+IOSmodel::getInitial(InitialConditions &ICs, Eigen::VectorXd &x)
 {
 
   // deterministic initial conditions for state
-  x<<(this->ICsPermuted).head(this->numIndSpecies()),
+  x<<ICs.getInitialState(),
      // zero covariance
      Eigen::VectorXd::Zero(dimCOV),
      // zero EMRE

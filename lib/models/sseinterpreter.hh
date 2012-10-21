@@ -39,6 +39,11 @@ protected:
    Sys &sseModel;
 
    /**
+   * Holds the initial conditions.
+   */
+   InitialConditions ICs;
+
+   /**
     * The bytecode interpreter instance to evaluate the ODEs.
     */
    typename SysEngine::Interpreter interpreter;
@@ -86,15 +91,20 @@ public:
    * @param compileJac Specifies if the Jacobian should be compiled immediately. If false, it will
    *        be compiled on demand.
    */
+
   GenericSSEinterpreter(Sys &model, size_t opt_level,
                  size_t num_threads=OpenMP::getMaxThreads(), bool compileJac = false)
-    : sseModel(model), bytecode(num_threads), jacobianCode(num_threads),
+    : sseModel(model), ICs(model), bytecode(num_threads), jacobianCode(num_threads),
       hasJacobian(false), opt_level(opt_level)
+
   {
 
     // Fold constants and get update vector
     Trafo::ConstantFolder constants(sseModel);
     updateVector = constants.apply(sseModel.getUpdateVector());
+
+    // Account for conservation laws
+    updateVector = ICs.apply(updateVector);
 
     // Compile expressions
     typename SysEngine::Compiler compiler(sseModel.stateIndex);
@@ -115,7 +125,9 @@ public:
    * Derives and compiles the Jacobian from the ODEs.
    * If the Jacobian was already compiled, this method does nothing.
    */
+
   void compileJacobian()
+
   {
     if(hasJacobian) return;
 
@@ -143,16 +155,22 @@ public:
   /**
    * Evaluates the joint ODE of the system size expansion.
    */
+
   template <typename T, typename U>
-  inline void evaluate(const T &state, double t, U &dx) {
+  inline void evaluate(const T &state, double t, U &dx)
+
+  {
     this->interpreter.run(state, dx);
   }
 
   /**
    * Evaluates the joint ODE of the system size expansion.
    */
+
   template <typename T, typename U>
-  inline void evaluate(const T* state, double t, U* dx) {
+  inline void evaluate(const T* state, double t, U* dx)
+
+  {
     this->interpreter.run(state, dx);
   }
 
@@ -160,7 +178,9 @@ public:
   /**
    * Evaluates the Jacobian of the ODEs at the given state.
    */
+
   inline void evaluateJacobian(const Eigen::VectorXd &state, double t, Eigen::MatrixXd &jacobian)
+
   {
     // ensures that the Jacobian was compiled
     if (! hasJacobian) {
@@ -175,8 +195,10 @@ public:
   /**
    * Evaluates the Jacobian of the ODEs at the given state.
    */
+
   template <typename T, typename U>
   inline void evaluateJacobian(const T* state, double t, U* jac)
+
   {
       // ensures that the Jacobian was compiled
       if (! hasJacobian) {
@@ -188,26 +210,23 @@ public:
   }
 
   /**
-   * Constructs the "full" state from the internal, reduced state.
-   */
-  void getFullState( const Eigen::VectorXd &state, Eigen::VectorXd &concentrations,
-                   Eigen::MatrixXd &covariance, Eigen::VectorXd &emre) {
-    this->sseModel.fullState(state,concentrations,covariance,emre);
-  }
-
-
-  /**
    * Evaluates the initial state.
    */
-  void getInitialState(Eigen::VectorXd &state) {
-    this->sseModel.getInitialState(state);
+
+  void getInitialState(Eigen::VectorXd &state)
+
+  {
+      sseModel.getInitialState(state);
   }
 
 
   /**
    * Returns the dimension of the system.
    */
-  size_t getDimension() {
+
+  size_t getDimension()
+
+  {
     return this->sseModel.getDimension();
   }
 

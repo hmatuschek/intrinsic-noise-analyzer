@@ -28,7 +28,7 @@ SSEBaseModel::SSEBaseModel(const Ast::Model &model)
   postConstructor();
 }
 
-GiNaC::exmap SSEBaseModel::translate(const ParameterSet & parameters)
+GiNaC::exmap SSEBaseModel::makeExclusionTable(const ParameterSet & parameters)
 {
     GiNaC::exmap result;
     for(ParameterSet::const_iterator it=parameters.begin(); it!=parameters.end(); it++)
@@ -39,7 +39,7 @@ GiNaC::exmap SSEBaseModel::translate(const ParameterSet & parameters)
 void
 SSEBaseModel::postConstructor()
 {
-  /* @todo conservationConstants should have a seperate class */
+  /* @todo remove conservationConstants */
 
 
     // get gradient/hessian of rates

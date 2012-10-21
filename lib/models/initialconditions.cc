@@ -1,5 +1,4 @@
 #include "initialconditions.hh"
-#include "trafo/constantfolder.hh"
 
 using namespace iNA;
 using namespace iNA::Models;
@@ -7,47 +6,52 @@ using namespace iNA::Models;
 /**
 * Constructs the initial conditions of a model.
 */
-InitialConditions::InitialConditions(SSEBaseModel &model)
+
+InitialConditions::InitialConditions(SSEBaseModel &model, Trafo::excludeType excludes)
     : model(model)
 {
 
+
+    ParameterFolder params(excludes);
+
     // Evaluate initial concentrations and evaluate volumes:
-    Trafo::InitialValueFolder evICs(model);
+    Trafo::InitialValueFolder evICs(model,Trafo::Filter::ALL,excludes);
     Eigen::VectorXd ICs(model.numSpecies());
     for(size_t i=0; i<model.numSpecies();i++)
-           ICs(i)=evICs.evaluate(model.getSpecies(i)->getSymbol());
+        ICs(i)=Eigen::ex2double(params.apply(evICs.apply(model.getSpecies(i)->getSymbol())));
+
 
     // Store in permutated base
     this->ICsPermuted = (model.getPermutationMatrix()*ICs).head(model.numIndSpecies());
 
-    Trafo::ConstantFolder constants(model);
-
+    Trafo::ConstantFolder constants(model, Trafo::Filter::ALL_CONST, excludes);
     // Evaluate the link matrices
-    Link0CMatrixNumeric = Eigen::ex2double(constants.apply(model.getLink0CMatrix()));
-    LinkCMatrixNumeric = Eigen::ex2double(constants.apply(model.getLinkCMatrix()));
+    Link0CMatrixNumeric = Eigen::ex2double( params.apply(constants.apply( model.getLink0CMatrix()) ) );
+    LinkCMatrixNumeric  = Eigen::ex2double( params.apply(constants.apply( model.getLinkCMatrix())  ) );
 
-    if(model.numDepSpecies()>0) this->conserved_cycles = Eigen::ex2double(constants.apply(model.getConservationMatrix()))*ICs;
+    if(model.numDepSpecies()>0) this->conserved_cycles = Eigen::ex2double(params.apply(constants.apply(model.getConservationMatrix()*ICs.cast<GiNaC::ex>())));
 
     // generate substitution table
     substitutions = model.getConservationConstants(conserved_cycles);
 
 }
 
-
 /**
-* Returns the initial state vector of the model.
+* Returns the deterministic initial state vector of the model.
 */
-void
-InitialConditions::getInitialState(Eigen::VectorXd &x)
+
+const Eigen::VectorXd &
+InitialConditions::getInitialState()
 {
   // deterministic initial conditions for state
-    x.head(ICsPermuted.size())=this->ICsPermuted;
+  return this->ICsPermuted;
 }
 
 
 /**
 * A method that folds conservation constants in an expression.
 */
+
 GiNaC::ex
 InitialConditions::apply(const GiNaC::ex &exIn)
 {
@@ -58,6 +62,7 @@ InitialConditions::apply(const GiNaC::ex &exIn)
 /**
 * A method that folds all constants in a vector or matrix.
 */
+
 Eigen::MatrixXex
 InitialConditions::apply(const Eigen::MatrixXex &vecIn)
 {
@@ -75,6 +80,7 @@ InitialConditions::apply(const Eigen::MatrixXex &vecIn)
 /**
 * Returns the conserved moieties of the model.
 */
+
 const Eigen::VectorXd &
 InitialConditions::getConservedCycles()
 {
