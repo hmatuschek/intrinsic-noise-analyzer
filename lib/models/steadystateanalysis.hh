@@ -162,7 +162,7 @@ public:
         }
 
 
-        x.segment(offset,lnaLength) = precisionSolve(B,A);
+        x.segment(offset,lnaLength) = solver.precisionSolve(B,-A);
 
 
         // substitute LNA
@@ -171,25 +171,6 @@ public:
             subs_table.insert( std::pair<GiNaC::ex,GiNaC::ex>( model.getSSEvar(i), x(offset+i) ) );
         for(int i=0; i<sseUpdate.size(); i++)
             sseUpdate(i)=sseUpdate(i).subs(subs_table);
-
-    }
-    /**
-     * Simple inline function that attempts to increase find a solution within the precision of the NLE solver (advantageous for stiff systems).
-     */
-
-    inline Eigen::VectorXd precisionSolve(Eigen::MatrixXd B, Eigen::VectorXd A)
-    {
-
-        // this is fast
-        Eigen::VectorXd x = B.lu().solve(-A);
-        if((B*x).isApprox(A,solver.parameters.epsilon))
-        {
-           // this is rather slow
-           Eigen::FullPivLU<Eigen::MatrixXd> LU(B);
-           x = LU.solve(-A);
-        }
-
-        return x;
 
     }
 
@@ -294,7 +275,7 @@ public:
             }
         }
 
-        x.tail(sseLength-lnaLength) = precisionSolve(B,A);
+        x.tail(sseLength-lnaLength) = solver.precisionSolve(B,-A);
 
         double relative_error = (B*x.tail(sseLength-lnaLength) + A).norm() / A.norm(); // norm() is L2 norm
         std::cout << "IOS, The relative error is:\n" << relative_error << std::endl;

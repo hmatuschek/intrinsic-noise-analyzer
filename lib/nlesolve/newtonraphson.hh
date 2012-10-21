@@ -304,10 +304,7 @@ public:
       fold = f;
 
       // solve JacobianM*dx=-REs
-      //dx = JacobianM.fullPivLu().solve(-REs);
-      Eigen::FullPivLU<Eigen::MatrixXd> dec(this->JacobianM);
-      //dx = this->JacobianM.lu().solve(-this->ODEs);
-      dx = dec.solve(-this->ODEs);
+      dx = precisionSolve(this->JacobianM, -this->ODEs);
 
       LineSearchStatus lcheck;
 
@@ -342,6 +339,26 @@ public:
       }
 
       return lcheck;
+
+  }
+
+  /**
+   * Simple inline function that attempts to increase find a solution within the precision of the NLE solver (advantageous for stiff systems).
+   */
+
+  inline Eigen::VectorXd precisionSolve(const Eigen::MatrixXd &B, const Eigen::VectorXd &A)
+  {
+
+      // this is fast
+      Eigen::VectorXd x = B.lu().solve(A);
+      if((B*x).isApprox(A,parameters.epsilon))
+      {
+         // this is rather slow
+         Eigen::FullPivLU<Eigen::MatrixXd> LU(B);
+         x = LU.solve(A);
+      }
+
+      return x;
 
   }
 
