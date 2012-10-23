@@ -329,7 +329,8 @@ ReactionEditorPage::_serializeReactionEquation()
     std::stringstream buffer;
     iNA::Parser::Expr::serializeExpression(reac->second, buffer, &_model);
     reactants.append(
-          QString("%1*%2").arg(buffer.str().c_str()).arg(reac->first->getIdentifier().c_str()));
+          reac->second!=1 ? QString("%1*%2").arg(buffer.str().c_str()).arg(reac->first->getIdentifier().c_str())
+                          : QString("%1").arg(reac->first->getIdentifier().c_str()));
   }
 
   // then, serialize products:
@@ -339,7 +340,9 @@ ReactionEditorPage::_serializeReactionEquation()
     std::stringstream buffer;
     iNA::Parser::Expr::serializeExpression(prod->second, buffer, &_model);
     products.append(
-          QString("%1*%2").arg(buffer.str().c_str()).arg(prod->first->getIdentifier().c_str()));
+          prod->second!=1 ? QString("%1*%2").arg(buffer.str().c_str()).arg(prod->first->getIdentifier().c_str())
+                          : QString("%1").arg(prod->first->getIdentifier().c_str()));
+
   }
 
   // finally, assemble equation:
