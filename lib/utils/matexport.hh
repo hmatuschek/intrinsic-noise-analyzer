@@ -3,6 +3,7 @@
 
 #include <string>
 #include <list>
+#include <stdint.h>
 #include <eigen3/Eigen/Eigen>
 
 
@@ -175,7 +176,7 @@ public:
 
 /**
  * This class implements the export of Eigen matices as Matlab 5 data files (MAT). These
- * files can be loaded by Matlab, Octave and Pyhton (with scipy).
+ * files can be loaded by Matlab, Octave and Python (with scipy).
  *
  * @code
  * Eigen::MatrixXd X(4,4);
