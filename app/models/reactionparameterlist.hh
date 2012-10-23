@@ -47,7 +47,8 @@ public:
   void addParameter();
   /** Removes the i-th parameter. */
   void remParameter(int idx);
-
+  /** Signals the view that the complete model may have changed. */
+  void updateCompleteTable();
 
 private:
   /** Retruns the identifier of the local paramter. */

@@ -167,6 +167,12 @@ ReactionParameterList::remParameter(int row)
 }
 
 
+void
+ReactionParameterList::updateCompleteTable() {
+  reset();
+}
+
+
 QVariant
 ReactionParameterList::_getIdentifier(iNA::Ast::Parameter *param, int role) const
 {
