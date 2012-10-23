@@ -324,7 +324,7 @@ Scope::getVariable(const GiNaC::symbol &symbol) const
       = this->symbol_table.find(symbol);
 
   if (this->symbol_table.end() == item) {
-    if (isClosed() || ! hasParentScope()) {
+    if (isClosed() || !hasParentScope()) {
       SymbolError err;
       err << "Symbol " << symbol << " does not name a variable.";
       throw err;

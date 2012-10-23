@@ -539,17 +539,20 @@ KineticLaw::remDefinition(Definition *def)
 void
 KineticLaw::cleanUpParameters()
 {
-
+  // Collect all local paramters that are not used within the kinetic law expression
+  std::list<Parameter *> _unused_paramters;
   for(std::vector<Parameter *>::iterator param=_parameters.begin(); param!=_parameters.end(); param++)
   {
-      if(!this->getRateLaw().has((*param)->getSymbol()))
-      {
-          _parameters.erase(param);
-          cleanUpParameters();
-          return;
-      }
+    if(! this->getRateLaw().has((*param)->getSymbol())) {
+      _unused_paramters.push_back(*param);
+    }
   }
 
+  // Remove them properly from the kinetic law:
+  for (std::list<Parameter *>::iterator param=_unused_paramters.begin(); param != _unused_paramters.end(); param++)
+  {
+    remDefinition(*param);
+  }
 }
 
 
