@@ -52,6 +52,8 @@ public:
 private:
   /** Retruns the identifier of the local paramter. */
   QVariant _getIdentifier(iNA::Ast::Parameter *param, int role) const;
+  /** Updates the identifier of the local parameter. */
+  bool _updateIdentifier(iNA::Ast::Parameter *param, const QVariant &value);
   /** Returns the name of the paramter. */
   QVariant _getName(iNA::Ast::Parameter *param, int role) const;
   /** Updates the name of the parameter. */

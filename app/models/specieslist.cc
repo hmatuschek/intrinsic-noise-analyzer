@@ -32,7 +32,7 @@ SpeciesList::flags(const QModelIndex &index) const
   if (! index.isValid() || columnCount() <= index.column()) { return Qt::NoItemFlags; }
   if (int(this->_model->numSpecies()) <= index.row()) { return Qt::NoItemFlags; }
 
-  if (1==index.column() || 2==index.column() || 5==index.column()) {
+  if (0==index.column() || 1==index.column() || 2==index.column() || 5==index.column()) {
     flags |= Qt::ItemIsEditable;
   }
 
@@ -79,31 +79,19 @@ SpeciesList::setData(const QModelIndex &index, const QVariant &value, int role)
   iNA::Ast::Species *species = _model->getSpecies(index.row());
 
   // Dispatch by column:
+  bool success=false;
   switch (index.column()) {
-  case 1:
-    if (_updateName(species, value)) { emit dataChanged(index, index); return true; }
-    break;
-
-  case 2:
-    if (_updateInitialValue(species, value)) { emit dataChanged(index, index); return true; }
-    break;
-
-  case 3:
-    if (_updateUnit(species, value)) { emit dataChanged(index, index); return true; }
-    break;
-
-  case 4:
-    if (_updateConstFlag(species, value)) { emit dataChanged(index, index); return true; }
-    break;
-
-  case 5:
-    if (_updateCompartment(species, value)) { emit dataChanged(index, index); return true; }
-    break;
-
+  case 0: success = _updateIdentifier(species, value); break;
+  case 1: success = _updateName(species, value); break;
+  case 2: success = _updateInitialValue(species, value); break;
+  case 3: success = _updateUnit(species, value); break;
+  case 4: success = _updateConstFlag(species, value); break;
+  case 5: success = _updateCompartment(species, value); break;
   default: break;
   }
 
-  return false;
+  if (success) { emit dataChanged(index, index); }
+  return success;
 }
 
 
@@ -139,6 +127,23 @@ QVariant
 SpeciesList::_getIdentifier(iNA::Ast::Species *species, int role) const {
   if (Qt::DisplayRole != role) { return QVariant(); }
   return QVariant(species->getIdentifier().c_str());
+}
+
+bool
+SpeciesList::_updateIdentifier(iNA::Ast::Species *species, const QVariant &value)
+{
+  // Get ID
+  QString qid = value.toString();
+  std::string id = qid.toStdString();
+  // If nothing changed -> done.
+  if (id == species->getIdentifier()) { return true; }
+  // Check ID format
+  if (! QRegExp("[a-zA-Z_][a-zA-Z0-9_]").exactMatch(qid)) { return false; }
+  // Check if id is not assigned allready:
+  if (_model->hasDefinition(id)) { return false; }
+  // Ok, assign identifier:
+  species->setIdentifier(id);
+  return true;
 }
 
 

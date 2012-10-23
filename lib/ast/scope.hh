@@ -120,29 +120,22 @@ public:
   /** (Re-) Sets the parent scope of this scope. */
   void setParent(Scope *parent);
 
-  /**
-   * Adds a definition to the scope. If there is a definition with the same identifier the 'old' one
+  /** Adds a definition to the scope. If there is a definition with the same identifier the 'old' one
    * will be silently replaced.
-   *
    * \note The ownership of the definition is taked by the scope.
    */
   virtual void addDefinition(Definition *def);
 
-  /**
-   * Removes a definition from the scope. The ownership of the definition is transferred to the
-   * callee.
-   */
+  /** Removes a definition from the scope. The ownership of the definition is transferred to the
+   * callee. */
   virtual void remDefinition(Definition *def);
 
-  /**
-   * Returns true if there is a definition of the given name in the scope.
-   *
-   * Is equivalent to call @c hasDefinition(getSymbol(const std::string &identifier)).
-   */
+  /** Returns true if there is a definition of the given name in the scope.
+   * Is equivalent to call @c hasDefinition(getSymbol(const std::string &identifier)). */
   bool hasDefinition(const std::string &name) const throw();
 
   /** Returns the definition given by the name. */
-  Definition *getDefinition(const std::string &name);
+  Definition *getDefinition(const std::string &name, bool local=false);
   /** Returns a const reference to the definition. */
   Definition * const getDefinition(const std::string &name) const;
 

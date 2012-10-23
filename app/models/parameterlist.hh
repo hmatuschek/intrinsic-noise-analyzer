@@ -46,6 +46,8 @@ public:
 private:
   /** Retunrs the identifier of the parameter. */
   QVariant _getIdentifier(iNA::Ast::Parameter *param, int role) const;
+  /** Updates the identifier of the paramter. */
+  bool _updateIdentifier(iNA::Ast::Parameter *param, const QVariant &value);
   /** Retuns the name of the paramter. */
   QVariant _getName(iNA::Ast::Parameter *param, int role) const;
   /** Retuns the name of the paramter. */

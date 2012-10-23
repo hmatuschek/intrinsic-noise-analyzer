@@ -215,14 +215,14 @@ Scope::hasDefinition(const std::string &name) const throw()
 
 
 Definition *
-Scope::getDefinition(const std::string &name)
+Scope::getDefinition(const std::string &name, bool local)
 {
   // Search in this scope:
   std::map<std::string, Definition *>::iterator item = this->definitions.find(name);
   if (definitions.end() != item) { return item->second; }
 
   // If not closed and has parent -> search in parent scope:
-  if (0 != _parent_scope && !is_closed)
+  if (0 != _parent_scope && !is_closed && !local)
     return _parent_scope->getDefinition(name);
 
   // Not found...
