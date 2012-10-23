@@ -80,8 +80,6 @@ protected:
   std::vector<Reaction *> reaction_vector;
 
 public:
-
-
   /** The compartment iterator. */
   typedef std::vector<Compartment *>::iterator CompartmentIterator;
 
@@ -237,91 +235,58 @@ public:
   /** Returns true, if the given symbol is associated with a species definition. */
   bool hasSpecies(const GiNaC::symbol &symbol) const;
 
-  /** Retunrs the species with the given identifer.
+  /** Returns the species with the given identifer.
    * Is equivalent to call @c getSpecies(getSymbol(const std::string &id)).
    * @throws SymbolError If there is no species associated with the identifier. To check if there
    *         is a species defined with the given identifier, use the @c hasSpecies method. */
   Species *getSpecies(const std::string &id);
 
-  /**
-   * Retunrs the species with the given identifer.
-   *
+  /** Returns the species with the given identifer.
    * Is equivalent to call @c getSpecies(getSymbol(const std::string &id)).
-   *
    * @throws SymbolError If there is no species associated with the identifier. To check if there
-   *         is a species defined with the given identifier, use the @c hasSpecies method.
-   */
+   *         is a species defined with the given identifier, use the @c hasSpecies method. */
   Species * const getSpecies(const std::string &id) const;
 
-  /**
-   * Retunrs the species with the given symbol.
-   *
+  /** Returns the species with the given symbol.
    * @throws SymbolError If there is no species associated with the symbol. To check if there
-   *         is a species defined with the given symbol, use the @c hasSpecies method.
-   */
+   *         is a species defined with the given symbol, use the @c hasSpecies method. */
   Species *getSpecies(const GiNaC::symbol &symbol);
 
-  /**
-   * Retunrs the species with the given symbol.
-   *
+  /** Returns the species with the given symbol.
    * @throws SymbolError If there is no species associated with the symbol. To check if there
-   *         is a species defined with the given symbol, use the @c hasSpecies method.
-   */
+   *         is a species defined with the given symbol, use the @c hasSpecies method. */
   Species * const getSpecies(const GiNaC::symbol &symbol) const;
 
-  /**
-   * Returns the i-th species in the model.
-   */
+  /** Returns the i-th species in the model. */
   Species *getSpecies(size_t idx);
 
-  /**
-   * Returns the i-th species in the model.
-   */
+  /** Returns the i-th species in the model. */
   Species * const getSpecies(size_t idx) const;
 
-  /**
-   * Returns the index of the given species.
-   *
+  /** Returns the index of the given species.
    * Is equivalent to call getSpceiesIdx(getSpecies(id));
-   *
-   * @throws SymbolError If the given identifier does not name a species.
-   */
+   * @throws SymbolError If the given identifier does not name a species. */
   size_t getSpeciesIdx(const std::string &id)  const;
 
-  /**
-   * Returns the index of the given species.
-   *
+  /** Returns the index of the given species.
    * Is equivalent to call getSpeciesIdx(getSpecies(symbol)).
-   *
-   * @throws SymbolError If the given symbol does not name a species.
-   */
+   * @throws SymbolError If the given symbol does not name a species. */
   size_t getSpeciesIdx(const GiNaC::symbol &symbol) const;
 
-  /**
-   * Returns the index of the given species.
-   */
+  /** Returns the index of the given species. */
   size_t getSpeciesIdx(Species *species) const;
 
-  /**
-   * Returns the number of compartments defined in the model.
-   */
+  /** Returns the number of compartments defined in the model. */
   size_t numCompartments() const;
 
-  /**
-   * Returns true, if the given identifier specifies a compartment.
-   */
+  /** Returns true, if the given identifier specifies a compartment. */
   bool hasCompartment(const std::string &id) const;
 
-  /**
-   * Returns true, if the given symbol specifies a compartment.
-   */
+  /** Returns true, if the given symbol specifies a compartment. */
   bool hasCompartment(const GiNaC::symbol &symbol) const;
 
-  /**
-   * Returns the specified compartment.
-   *
-   * @throws SymbolError If the compartment can not be found.
-   */
+  /** Returns the specified compartment.
+   * @throws SymbolError If the compartment can not be found. */
   Compartment *getCompartment(const std::string &id);
 
   /** Returns the specified compartment.
@@ -342,7 +307,7 @@ public:
   /** Returns the specifies compartment (by index). */
   Compartment * const getCompartment(size_t idx) const;
 
-  /** Retunrs the index of the specifies compartment, throws an exception if the compartment can
+  /** Returns the index of the specifies compartment, throws an exception if the compartment can
    * not be found. */
   size_t getCompartmentIdx(const std::string &id) const;
 
@@ -421,24 +386,19 @@ public:
   /** Returns the index for the given reaction. */
   size_t getReactionIdx(Reaction *reac) const;
 
-
   /** Returns the function definition by identifier.
    * Is equivalent to call @c getFunction(getSymbol(const std::string &identifier));
    * @throws SymbolError If the identifier is not associated with a function. */
   FunctionDefinition *getFunction(const std::string &identifier);
 
-
   /** Overrides the @c Scope::addDefinition method defined in @c Scope and ensures, that
    * the definition is stored in the corresponding vector. */
   virtual void addDefinition(Definition *def);
 
-  /**
-   * Insert element after other definition.
-   */
+  /** Insert element after other definition. */
   virtual void addDefinition(Definition *def, Definition *after);
 
-  /**
-   * Removes a definition (Species, Compartment, Reaction, ...) from the model. The user is
+  /** Removes a definition (Species, Compartment, Reaction, ...) from the model. The user is
    * responsible to ensure, that no other element refers to this definition on removal
    * (also its symbols). */
   virtual void remDefinition(Definition *def);

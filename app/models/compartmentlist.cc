@@ -28,8 +28,8 @@ CompartmentList::flags(const QModelIndex &index) const
   if (columnCount() <= index.column()) return Qt::NoItemFlags;
   if (rowCount() <= index.row()) return Qt::NoItemFlags;
 
-  // Mark only column 1 & 2 editable
-  if ( (1 == index.column()) || (2 == index.column()) || (3 == index.column()) )
+  // Mark only column 0, 1, 2 & 3 editable
+  if ( (0 == index.column()) || (1 == index.column()) || (2 == index.column()) || (3 == index.column()) )
     item_flags |= Qt::ItemIsEditable;
 
   return item_flags;
@@ -73,6 +73,7 @@ CompartmentList::setData(const QModelIndex &index, const QVariant &value, int ro
   // Dispatch
   bool success = false;
   switch(index.column()) {
+  case 0: success = _updateIndentifier(comp, value); break;
   case 1: success = _updateName(comp, value); break;
   case 2: success = _updateInitValue(comp, value); break;
   case 3: success = _updateUnit(comp, value); break;
@@ -126,6 +127,23 @@ CompartmentList::_getIdentifier(iNA::Ast::Compartment *compartment, int role) co
 {
   if (Qt::DisplayRole != role) { return QVariant(); }
   return QString(compartment->getIdentifier().c_str());
+}
+
+
+bool
+CompartmentList::_updateIndentifier(iNA::Ast::Compartment *compartment, const QVariant &value)
+{
+  // Get ID
+  QString qid = value.toString();
+  std::string id = qid.toStdString();
+  // If nothing changed -> done.
+  if (id == compartment->getIdentifier()) { return true; }
+  // Check ID format
+  if (! QRegExp("[a-zA-Z_][a-zA-Z0-9_]").exactMatch(sid)) { return false; }
+  // Check if id is not assigned allready:
+  if (_model->hasDefinition(id)) { return false; }
+  // Ok, assign identifier:
+  compartment->setIdentifier(id);
 }
 
 

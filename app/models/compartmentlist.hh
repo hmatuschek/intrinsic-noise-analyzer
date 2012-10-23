@@ -49,6 +49,8 @@ public slots:
 private:
   /** Returns the identifier. */
   QVariant _getIdentifier(iNA::Ast::Compartment *compartment, int role) const;
+  /** Updates the identifier of a compartment. */
+  bool _updateIndentifier(iNA::Ast::Compartment *compartment, const QVariant &value);
 
   /** Returns the name of the compartment. */
   QVariant _getName(iNA::Ast::Compartment *compartment, int role) const;

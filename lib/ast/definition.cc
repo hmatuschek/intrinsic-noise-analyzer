@@ -4,14 +4,14 @@ using namespace iNA::Ast;
 
 
 Definition::Definition(const std::string &id, Node::NodeType node_type)
-  : Node(node_type), identifier(id), name()
+  : Node(node_type), _identifier(id), _name()
 {
   // Done.
 }
 
 
 Definition::Definition(const std::string &id, const std::string &name, Node::NodeType node_type)
-  : Node(node_type), identifier(id), name(name)
+  : Node(node_type), _identifier(id), _name(name)
 {
   // Done.
 }
@@ -24,25 +24,29 @@ Definition::~Definition() {
 
 const std::string &
 Definition::getIdentifier() const {
-  return this->identifier;
+  return _identifier;
 }
 
+void
+Definition::setIdentifier(const std::string &id) {
+  _identifier = id;
+}
 
 bool
 Definition::hasName() const {
-  return 0 != this->name.size();
+  return 0 != this->_name.size();
 }
 
 
 const std::string &
 Definition::getName() const {
-  return this->name;
+  return this->_name;
 }
 
 
 void
 Definition::setName(const std::string &name) {
-  this->name = name;
+  this->_name = name;
 }
 
 

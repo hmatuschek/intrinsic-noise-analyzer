@@ -300,6 +300,7 @@ MatFileComplexElement::serialize(std::ostream &stream) const
 {
   // Serialize generic header:
   MatFileElement::serialize(stream);
+
   // now serialize all sub-elements:
   for (std::list<MatFileElement *>::const_iterator item=_subelements.begin(); item!=_subelements.end(); item++) {
     (*item)->serialize(stream);
@@ -334,7 +335,7 @@ MatFileMatrixElement::MatFileMatrixElement(const std::string &name, const Eigen:
   // Copy name:
   memcpy(array_name->dataUTF8(), name.c_str(), name.size());
 
-  // Copy data (column major or Fortran order):
+  // Copy data (column major / Fortran order):
   size_t idx=0;
   for (int j=0; j<values.cols(); j++) {
     for (int i=0; i<values.rows(); i++, idx++) {

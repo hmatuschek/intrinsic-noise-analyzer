@@ -37,7 +37,7 @@ public:
    * @param compartment Specifies the compartment, the species lives in.
    * @param is_const Specifies if the species amount
    */
-  Species(const std::string &id, Compartment *compartment, bool is_const=false);
+  Species(const std::string &id, Compartment *compartment, bool _is_const=false);
 
   /**
    * Full constructor for a species definition.
@@ -49,7 +49,7 @@ public:
    * @param is_const Specifies if the species amount
    */
   Species(const std::string &id, const GiNaC::ex &init_val,
-          Compartment *compartment, const std::string &name, bool is_const);
+          Compartment *compartment, const std::string &_name, bool _is_const);
 
   /** Returns the compartment, the species lives in. */
   Compartment *getCompartment();

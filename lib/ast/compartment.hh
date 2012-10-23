@@ -42,7 +42,7 @@ public:
    * @param dim Specifies the spacial dimension of the compartment.
    * @param is_const Specifies if the compartment size is constant or not.
    */
-  Compartment(const std::string &id, SpatialDimension dim, bool is_const=false);
+  Compartment(const std::string &id, SpatialDimension dim, bool _is_const=false);
 
   /**
    * Constructor for a compartment.
@@ -53,7 +53,7 @@ public:
    * @param is_const Specifies if the compartment size is constant or not.
    */
   Compartment(const std::string &id, const GiNaC::ex &init_val,
-              SpatialDimension dim, bool is_const=false);
+              SpatialDimension dim, bool _is_const=false);
 
   /** Returns the spacial dimension of the compartment. */
   SpatialDimension getDimension() const;

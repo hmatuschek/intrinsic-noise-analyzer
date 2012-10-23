@@ -270,10 +270,10 @@ protected:
 
 public:
   /** Constructs a unit definition from scaled base units. */
-  UnitDefinition(const std::string &identifier, std::list<ScaledBaseUnit> units);
+  UnitDefinition(const std::string &_identifier, std::list<ScaledBaseUnit> units);
 
   /** Constructs a unit definition from a unit. */
-  UnitDefinition(const std::string &identifier, const Unit &unit);
+  UnitDefinition(const std::string &_identifier, const Unit &unit);
 
   /** Returns true, if the unit is a linear scaled variant of the given base-unit. */
   bool isVariantOf(ScaledBaseUnit::BaseUnit baseUnit);
