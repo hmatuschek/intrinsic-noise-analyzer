@@ -35,7 +35,9 @@ protected:
 
 public:
   /** Returns the size of the element. */
-  virtual size_t getSize() const = 0;
+  virtual size_t dataSize() const = 0;
+  /** Returns the storage size of the element. */
+  virtual size_t storageSize() const;
   /** Serializes the element into the given stream. */
   virtual void serialize(std::ostream &stream) const;
 
@@ -63,7 +65,7 @@ public:
   /** Destructor. */
   virtual  ~MatFileValue();
   /** Returns the storage size of the element. */
-  virtual size_t getSize() const;
+  virtual size_t dataSize() const;
   /** Serializes the value element into the given stream. */
   virtual void serialize(std::ostream &stream) const;
 
@@ -130,7 +132,7 @@ protected:
   void add(MatFileElement *element);
 
 public:
-  size_t getSize() const;
+  size_t dataSize() const;
   void serialize(std::ostream &stream) const;
 
 protected:
@@ -148,9 +150,24 @@ public:
 
 
 /**
- * This class implements the export of Eigen matices as Matlab 4 data files. These
- * files can be loaded by Matlab and Octave.
+ * This class implements the export of Eigen matices as Matlab 5 data files (MAT). These
+ * files can be loaded by Matlab, Octave and Pyhton (with scipy).
  *
+ * @code
+ * Eigen::MatrixXd X(4,4);
+ * // Add some values to X
+ *
+ * // Create MAT file object and add data.
+ * MatFile mat;
+ * mat.add("X", X);
+ *
+ * // open file for writing:
+ * fstream output("PATH/TO/FILE"); output.open();
+ * // Serialize data into file:
+ * mat.serialize(output);
+ * // close file.
+ * output.close();
+ * @endcode
  * @ingroup utils
  */
 class MatFile

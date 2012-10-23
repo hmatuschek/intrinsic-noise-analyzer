@@ -25,11 +25,25 @@ MatFile::~MatFile()
 }
 
 
-void MatFile::add(int64_t value) { _elements.push_back(new MatFileValue(value)); }
-void MatFile::add(uint64_t value) { _elements.push_back(new MatFileValue(value)); }
-void MatFile::add(double value) { _elements.push_back(new MatFileValue(value)); }
-void MatFile::add(const std::string &value) { _elements.push_back(new MatFileValue(value)); }
+void MatFile::add(int64_t value) {
+  _elements.push_back(new MatFileValue(value));
+}
 
+void MatFile::add(uint64_t value) {
+  _elements.push_back(new MatFileValue(value));
+}
+
+void MatFile::add(double value) {
+  _elements.push_back(new MatFileValue(value));
+}
+
+void MatFile::add(const std::string &value) {
+  _elements.push_back(new MatFileValue(value));
+}
+
+void MatFile::add(const std::string &name, const Eigen::MatrixXd &value) {
+  _elements.push_back(new MatFileMatrixElement(name, value));
+}
 
 void
 MatFile::serialize(std::ostream &stream)
@@ -66,12 +80,18 @@ MatFileElement::MatFileElement(ElementType type)
   // Pass...
 }
 
+size_t
+MatFileElement::storageSize() const {
+  size_t s = this->dataSize()+8;
+  s += ((8 - (s%8))%8);
+  return s;
+}
 
 void
 MatFileElement::serialize(std::ostream &stream) const
 {
   uint32_t type_field = uint32_t(_type);
-  uint32_t length_field = uint32_t(getSize());
+  uint32_t length_field = uint32_t(dataSize());
   stream.write((char *)(&type_field), sizeof(uint32_t));
   stream.write((char *)(&length_field), sizeof(uint32_t));
 }
@@ -135,13 +155,13 @@ MatFileValue::~MatFileValue()
 
 
 size_t
-MatFileValue::getSize() const
+MatFileValue::dataSize() const
 {
   switch (_type) {
-  case miInt64:  return 8+_num_elements*sizeof(long);
-  case miUInt64: return 8+_num_elements*sizeof(unsigned long);
-  case miDouble: return 8+_num_elements*sizeof(double);
-  case miUTF8:   return 8+_num_elements*sizeof(char);
+  case miInt64:  return _num_elements*sizeof(long);
+  case miUInt64: return _num_elements*sizeof(unsigned long);
+  case miDouble: return _num_elements*sizeof(double);
+  case miUTF8:   return _num_elements*sizeof(char);
   default: break;
   }
 
@@ -173,7 +193,7 @@ MatFileValue::serialize(std::ostream &stream) const
   }
 
   // Add padding bytes to multiple of 64bit
-  size_t padd = (8 - getSize()) % 8;
+  size_t padd = (8 - dataSize()) % 8;
   for (size_t i=0; i<padd; i++) { stream.put(0x00); }
 }
 
@@ -266,13 +286,13 @@ MatFileComplexElement::add(MatFileElement *element) {
 }
 
 size_t
-MatFileComplexElement::getSize() const {
-  // 8 bytes header:
-  size_t size = 8;
+MatFileComplexElement::dataSize() const {
+  // Data size is sum of storafge sizes of all sub elements.
+  size_t s=0;
   for (std::list<MatFileElement *>::const_iterator item=_subelements.begin(); item!=_subelements.end(); item++) {
-    size += (*item)->getSize();
+    s += (*item)->storageSize();
   }
-  return size;
+  return s;
 }
 
 void
