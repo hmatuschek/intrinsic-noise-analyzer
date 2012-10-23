@@ -79,9 +79,11 @@ SET(libina_parser_HEADERS
     ${libina_unit_parser_HEADERS})
 
 SET(libina_utils_SOURCES
-    utils/exception.cc utils/unittest.cc utils/option_parser.cc utils/cputime.cc utils/logger.cc)
+    utils/exception.cc utils/unittest.cc utils/option_parser.cc utils/cputime.cc utils/logger.cc
+    utils/matexport.cc)
 SET(libina_utils_HEADERS
-    utils/exception.hh utils/unittest.hh utils/option_parser.hh utils/cputime.hh utils/logger.hh)
+    utils/exception.hh utils/unittest.hh utils/option_parser.hh utils/cputime.hh utils/logger.hh
+    utils/matexport.hh)
 
 # Add sources for BaseModel and derived classes.
 SET(libina_models_SOURCES
