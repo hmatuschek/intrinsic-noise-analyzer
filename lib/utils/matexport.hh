@@ -85,24 +85,31 @@ public:
   char *dataUTF8();
 
 public:
+  /** Allocates an empty int8_t data block. */
   static MatFileValue *allocInt8(size_t num);
+  /** Allocates an empty int32_t data block. */
   static MatFileValue *allocInt32(size_t num);
+  /** Allocates an empty uint32_t data block. */
   static MatFileValue *allocUInt32(size_t num);
+  /** Allocates an empty int64_t data block. */
   static MatFileValue *allocInt64(size_t num);
+  /** Allocates an empty uint64_t data block. */
   static MatFileValue *allocUInt64(size_t num);
+  /** Allocates an empty double data block. */
   static MatFileValue *allocDouble(size_t num);
+  /** Allocates an empty UTF8 (char) data block. */
   static MatFileValue *allocUTF8(size_t num);
 
 private:
   /** The union of values. */
   union {
-    int8_t *asInt8;
-    int32_t *asInt32;
-    uint32_t *asUInt32;
-    int64_t *asInt64;
-    uint64_t *asUInt64;
-    double *asDouble;
-    char *asString;
+    int8_t *asInt8;     ///< The data pointer as int8_t.
+    int32_t *asInt32;   ///< The data pointer as int32_t.
+    uint32_t *asUInt32; ///< The data pointer as uint32_t.
+    int64_t *asInt64;   ///< The data pointer as int64_t.
+    uint64_t *asUInt64; ///< The data pointer as uint64_t.
+    double *asDouble;   ///< The data pointer as double.
+    char *asString;     ///< The data pointer as char (UTF8).
   } _value;
 
   /** Holds the number of elements. */
@@ -119,24 +126,30 @@ class MatFileComplexElement : public MatFileElement
 public:
   /** List of supported array class types. */
   typedef enum {
-    mxStructClass = 2,
-    mxDoubleClass = 6,
-    mxInt64Class  = 14,
-    mxUInt64Class = 15
+    mxStructClass = 2,    ///< A structure.
+    mxDoubleClass = 6,    ///< A double matrix.
+    mxInt64Class  = 14,   ///< An integer matrix of int64_t.
+    mxUInt64Class = 15    ///< An integer matrix of uint64_t.
   } ArrayType;
 
 protected:
+  /** Constructor. */
   MatFileComplexElement(ArrayType type);
+  /** Destructor. */
   virtual ~MatFileComplexElement();
-
+  /** Adds a sub element to the complex type. */
   void add(MatFileElement *element);
 
 public:
+  /** Returns the data block size. */
   size_t dataSize() const;
+  /** Serializes the complex type into the given stream. */
   void serialize(std::ostream &stream) const;
 
 protected:
+  /** Holds the type of the complex element. */
   ArrayType _arrayType;
+  /** Holds the sub elements of the complex element. */
   std::list<MatFileElement *> _subelements;
 };
 
@@ -145,6 +158,7 @@ protected:
 class MatFileMatrixElement : public MatFileComplexElement
 {
 public:
+  /** Constructor. */
   MatFileMatrixElement(const std::string &name, const Eigen::MatrixXd &values);
 };
 
