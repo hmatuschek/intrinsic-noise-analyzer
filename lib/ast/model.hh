@@ -1,8 +1,6 @@
 #ifndef __FLUC_AST_MODEL_HH__
 #define __FLUC_AST_MODEL_HH__
 
-#include <sbml/SBMLTypes.h>
-
 #include "scope.hh"
 #include "species.hh"
 #include "compartment.hh"

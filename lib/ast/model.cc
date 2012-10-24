@@ -14,7 +14,7 @@ using namespace iNA;
 using namespace iNA::Ast;
 
 
-Model::Model(const std::string &identifier, const std::string &name)
+Ast::Model::Model(const std::string &identifier, const std::string &name)
   : Scope(), _identifier(identifier), _name(name), _species_have_substance_units(false),
     _predefined_units()
 {
@@ -61,7 +61,7 @@ Model::Model(const std::string &identifier, const std::string &name)
 }
 
 
-Model::Model(const Model &other)
+Ast::Model::Model(const Model &other)
   : Scope(), _species_have_substance_units(other._species_have_substance_units),
     _predefined_units(other._predefined_units)
 {
@@ -71,17 +71,17 @@ Model::Model(const Model &other)
 
 
 const std::string &
-Model::getIdentifier() const {
+Ast::Model::getIdentifier() const {
   return _identifier;
 }
 
 void
-Model::setIdentifier(const std::string &identifier) {
+Ast::Model::setIdentifier(const std::string &identifier) {
   _identifier = identifier;
 }
 
 bool
-Model::hasName() const {
+Ast::Model::hasName() const {
   return 0 != _name.size();
 }
 

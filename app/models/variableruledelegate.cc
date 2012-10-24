@@ -1,6 +1,7 @@
 #include "variableruledelegate.hh"
 #include "../views/variableruleeditor.hh"
 #include <QApplication>
+#include <sstream>
 
 
 using namespace iNA;
