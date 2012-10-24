@@ -633,7 +633,7 @@ INPUT = ../lib/parser ../lib/parser/sbml ../lib/parser/sbmlsh ../lib/parser/expr
         ../lib/ast \
         ../lib/trafo \
         ../lib/models \
-        ../lib/eval ../lib/eval/direct ../lib/eval/bci ../lib/eval/bcimp ../lib/evel/jit \
+        ../lib/eval ../lib/eval/direct ../lib/eval/bci ../lib/eval/bcimp ../lib/eval/jit \
         ../lib \
         ../lib/ode \
         ../lib/nlesolve \

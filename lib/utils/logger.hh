@@ -1,3 +1,10 @@
+/**
+ * @defgroup logger
+ * @ingroup utils
+ *
+ * This class collects some classes implementing a simple message logging interface. It allows to
+ * define a process wide default logger and to receive messages send to that logger.
+ */
 #ifndef __INA_UTILS_LOGGER_HH__
 #define __INA_UTILS_LOGGER_HH__
 
@@ -25,7 +32,7 @@ namespace Utils {
  *
  * With @c Logger::get() you obtain the global default logger instance, which is used to handle
  * the log message here.
- * @ingroup utils
+ * @ingroup logger
  */
 class Message : public std::stringstream
 {
@@ -82,7 +89,7 @@ public:
  * a defined log level as text messages and forward this text into a defined text stream. It is
  * easy to meet the MessageHandler interface as just one method must be implemented to receive
  * messages.
- * @ingroup utils
+ * @ingroup logger
  */
 class MessageHandler {
 public:
@@ -94,7 +101,7 @@ public:
 /**
  * This class implements a simple message logger.
  *
- * @ingroup utils
+ * @ingroup logger
  */
 class Logger
 {
@@ -135,7 +142,8 @@ private:
 
 
 
-/** Simple macro to create a log-message at source location. */
+/** Simple macro to create a log-message at source location.
+ * @ingroup logger */
 #define LOG_MESSAGE(level) iNA::Utils::Message(level, __FILE__, __LINE__)
 
 
@@ -146,7 +154,7 @@ private:
  * Logger::get().addHandler(new TextMessageHandler(std::cerr));
  * \endcode
  * to install the text message handler to the global default logger.
- * @ingroup utils
+ * @ingroup logger
  */
 class TextMessageHandler : public MessageHandler
 {

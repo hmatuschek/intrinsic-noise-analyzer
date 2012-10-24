@@ -283,7 +283,7 @@ void
 NoExplicitTimeDependenceAssertion::visit(const Ast::KineticLaw *law)
 {
   // First process local paramter definitions:
-  /// @bug Visitor does not traverse into local paramters of @c KineticLaw instance.
+  law->traverse(*this);
 
   // check if rate law is explicit time-dependent:
   if (law->getRateLaw().has(_time_symbol)) {

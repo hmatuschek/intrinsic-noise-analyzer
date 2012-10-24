@@ -22,7 +22,6 @@ Writer::processModel(Ast::Model &model, std::ostream &output) {
   processSpeciesList(model, output);
   processParameterList(model, output);
   processReactionList(model, output);
-  processEventList(model, output);
 }
 
 
@@ -469,10 +468,3 @@ Writer::processKineticLaw(Ast::KineticLaw *law, std::ostream &output)
   }
 }
 
-
-/* Serialize events... (haha!)*/
-void
-Writer::processEventList(Ast::Model &model, std::ostream &output)
-{
-  /// @todo Implement serialization of event, as soon as they are supported by the @c Ast::Model.
-}
