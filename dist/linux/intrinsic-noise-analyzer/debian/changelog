@@ -1,3 +1,11 @@
+intrinsic-noise-analyzer (0.4.0-1) unstable; urgency=low
+
+  * Added Parameter scan for steady state analysis (SSE).
+  * A lot of GUI improvements (better equation rendering, ...).
+  * Direct model editing.
+
+ -- Hannes Matuschek <hmatuschek@gmail.com>  Mon, 02 Jul 2012 00:00:00 +0000
+
 intrinsic-noise-analyzer (0.3.1-1) unstable; urgency=low
 
   * The bugfix release
