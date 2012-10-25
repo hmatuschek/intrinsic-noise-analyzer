@@ -193,7 +193,7 @@ ReactionParameterList::_updateIdentifier(iNA::Ast::Parameter *param, const QVari
   // Check if id is not assigned allready:
   if (_kinetic_law->hasDefinition(id)) { return false; }
   // Ok, assign identifier:
-  param->setIdentifier(id);
+  _kinetic_law->resetIdentifier(param->getIdentifier(), id);
   return true;
 }
 

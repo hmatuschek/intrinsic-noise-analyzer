@@ -184,7 +184,7 @@ ParameterList::_updateIdentifier(iNA::Ast::Parameter *param, const QVariant &val
   // Check if id is not assigned allready:
   if (_model->hasDefinition(id)) { return false; }
   // Ok, assign identifier:
-  param->setIdentifier(id);
+  _model->resetIdentifier(param->getIdentifier(), id);
   return true;
 }
 

@@ -143,7 +143,7 @@ CompartmentList::_updateIndentifier(iNA::Ast::Compartment *compartment, const QV
   // Check if id is not assigned allready:
   if (_model->hasDefinition(id)) { return false; }
   // Ok, assign identifier:
-  compartment->setIdentifier(id);
+  _model->resetIdentifier(compartment->getIdentifier(), id);
   return true;
 }
 

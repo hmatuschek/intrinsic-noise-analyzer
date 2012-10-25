@@ -142,7 +142,7 @@ SpeciesList::_updateIdentifier(iNA::Ast::Species *species, const QVariant &value
   // Check if id is not assigned allready:
   if (_model->hasDefinition(id)) { return false; }
   // Ok, assign identifier:
-  species->setIdentifier(id);
+  _model->resetIdentifier(species->getIdentifier(), id);
   return true;
 }
 
