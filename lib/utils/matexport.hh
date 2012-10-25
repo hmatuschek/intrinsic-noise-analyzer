@@ -35,6 +35,9 @@ protected:
   /** Hidden constructor. */
   MatFileElement(ElementType type);
 
+  /** Destructor. */
+  virtual ~MatFileElement();
+
 public:
   /** Returns the data size of the element. This does not include the header (tag) or padding
    * bytes. */
