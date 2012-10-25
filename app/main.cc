@@ -3,7 +3,7 @@
 #include "ssa/ssamodule.hh"
 #include "steadystate/steadystatemodule.hh"
 #include "sse/ssemodule.hh"
-#include "ssscan/ssscanmodule.hh"
+#include "paramscan/paramscanmodule.hh"
 #include "doctree/documentitem.hh"
 #include "utils/logger.hh"
 

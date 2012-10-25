@@ -1,10 +1,10 @@
-#ifndef __INA_APP_SSSCAN_MODULE_HH__
-#define __INA_APP_SSSCAN_MODULE_HH__
+#ifndef __INA_APP_PARAMSCAN_MODULE_HH__
+#define __INA_APP_PARAMSCAN_MODULE_HH__
 
 #include <QObject>
 
 #include "../module.hh"
-#include "ssscanwizard.hh"
+#include "paramscanwizard.hh"
 
 
 

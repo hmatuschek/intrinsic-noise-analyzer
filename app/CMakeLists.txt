@@ -55,12 +55,12 @@ SET(ina_app_ssa_HEADERS
     ssa/ssamodule.hh ssa/ssatask.hh ssa/ssawizard.hh ssa/ssataskwrapper.hh ssa/ssaplot.hh
     ssa/ssaview.hh)
 
-SET(ina_app_ssscan_SOURCES
-    ssscan/ssscantask.cc ssscan/ssscanwizard.cc ssscan/ssscanmodule.cc ssscan/ssscantaskview.cc
-    ssscan/ssscantaskwrapper.cc ssscan/ssscanplot.cc)
-SET(ina_app_ssscan_HEADERS
-    ssscan/ssscantask.hh ssscan/ssscanwizard.hh ssscan/ssscanmodule.hh ssscan/ssscantaskview.hh
-    ssscan/ssscantaskwrapper.hh ssscan/ssscanplot.hh)
+SET(ina_app_paramscan_SOURCES
+    paramscan/paramscantask.cc paramscan/paramscanwizard.cc paramscan/paramscanmodule.cc paramscan/paramscantaskview.cc
+    paramscan/paramscantaskwrapper.cc paramscan/paramscanplot.cc)
+SET(ina_app_paramscan_HEADERS
+    paramscan/paramscantask.hh paramscan/paramscanwizard.hh paramscan/paramscanmodule.hh paramscan/paramscantaskview.hh
+    paramscan/paramscantaskwrapper.hh paramscan/paramscanplot.hh)
 
 SET(ina_app_doctree_SOURCES doctree/documenttreeitem.cc doctree/treeitem.cc
     doctree/compartmentsitem.cc doctree/documenttree.cc doctree/speciesitem.cc
@@ -123,7 +123,7 @@ SET(ina_app_SOURCES
     ${ina_app_sse_SOURCES}
     ${ina_app_steadystate_SOURCES}
     ${ina_app_ssa_SOURCES}
-    ${ina_app_ssscan_SOURCES})
+    ${ina_app_paramscan_SOURCES})
 SET(ina_app_HEADERS
     ${ina_app_base_HEADERS}
     ${ina_app_doctree_HEADERS}
@@ -134,7 +134,7 @@ SET(ina_app_HEADERS
     ${ina_app_sse_HEADERS}
     ${ina_app_steadystate_HEADERS}
     ${ina_app_ssa_HEADERS}
-    ${ina_app_ssscan_HEADERS})
+    ${ina_app_paramscan_HEADERS})
 
 
 QT4_WRAP_CPP(ina_app_HEADERS_MOC ${ina_app_HEADERS})

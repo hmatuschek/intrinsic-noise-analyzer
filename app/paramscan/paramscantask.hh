@@ -1,5 +1,5 @@
-#ifndef __INA_APP_SSSCAN_TASK_HH__
-#define __INA_APP_SSSCAN_TASK_HH__
+#ifndef __INA_APP_PARAMSCAN_TASK_HH__
+#define __INA_APP_PARAMSCAN_TASK_HH__
 
 #include "../task.hh"
 #include "models/IOSmodel.hh"

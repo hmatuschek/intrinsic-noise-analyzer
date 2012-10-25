@@ -1,5 +1,5 @@
-#ifndef __INA_APP_SSSCAN_WIZARD_HH__
-#define __INA_APP_SSSCAN_WIZARD_HH__
+#ifndef __INA_APP_PARAMSCAN_WIZARD_HH__
+#define __INA_APP_PARAMSCAN_WIZARD_HH__
 
 #include <QWizard>
 #include <QComboBox>
@@ -7,7 +7,7 @@
 #include <QListWidget>
 #include <QRadioButton>
 
-#include "ssscantask.hh"
+#include "paramscantask.hh"
 #include "../doctree/documentitem.hh"
 #include "../views/generaltaskwizard.hh"
 
@@ -96,6 +96,7 @@ private:
   QLabel *param;
   QLabel *spectrum;
   QLabel *memory;
+  QLabel *method;
 };
 
 

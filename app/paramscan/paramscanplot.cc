@@ -1,4 +1,4 @@
-#include "ssscanplot.hh"
+#include "paramscanplot.hh"
 #include "../plot/plot.hh"
 #include "../plot/linegraph.hh"
 #include <QVector>
@@ -89,7 +89,7 @@ ParameterScanIOSPlot::ParameterScanIOSPlot(const QStringList &selected_species, 
 
 ParameterScanCovPlot::ParameterScanCovPlot(const QStringList &selected_species, ParamScanTask *task,
                                            QObject *parent)
-    : LinePlot("Coefficient of variation (EMRE & IOS var)", parent)
+    : LinePlot("Coefficient of variation (LNA)", parent)
 {
   // Get species units:
   QString parameter_unit("a.u.");
@@ -128,7 +128,7 @@ ParameterScanCovPlot::ParameterScanCovPlot(const QStringList &selected_species, 
 
 ParameterScanCovIOSPlot::ParameterScanCovIOSPlot(const QStringList &selected_species, ParamScanTask *task,
                                      QObject *parent)
-    : LinePlot("Coeff of variation (EMRE & IOS var)", parent)
+    : LinePlot("Coefficient of variation (IOS)", parent)
 {
   // Get species units:
   QString parameter_unit("a.u.");

@@ -1,4 +1,4 @@
-#include "ssscantaskview.hh"
+#include "paramscantaskview.hh"
 
 #include <QVBoxLayout>
 #include <QLabel>
@@ -9,7 +9,7 @@
 
 #include "../application.hh"
 #include "../doctree/plotitem.hh"
-#include "ssscanplot.hh"
+#include "paramscanplot.hh"
 #include "../views/speciesselectiondialog.hh"
 
 
@@ -17,7 +17,7 @@
 /* ********************************************************************************************* *
  * Implementation of TaskView, derived from TaskView:
  * ********************************************************************************************* */
-SSScanTaskView::SSScanTaskView(SSScanTaskWrapper *task_wrapper, QWidget *parent)
+ParamScanTaskView::ParamScanTaskView(ParamScanTaskWrapper *task_wrapper, QWidget *parent)
   : TaskView(task_wrapper, parent)
 {
   // Update main-widget:
@@ -26,9 +26,9 @@ SSScanTaskView::SSScanTaskView(SSScanTaskWrapper *task_wrapper, QWidget *parent)
 
 
 QWidget *
-SSScanTaskView::createResultWidget(TaskItem *task_item)
+ParamScanTaskView::createResultWidget(TaskItem *task_item)
 {
-  return new SSScanResultWidget(static_cast<SSScanTaskWrapper *>(task_item));
+  return new ParamScanResultWidget(static_cast<ParamScanTaskWrapper *>(task_item));
 }
 
 
@@ -36,8 +36,8 @@ SSScanTaskView::createResultWidget(TaskItem *task_item)
 /* ********************************************************************************************* *
  * Implementation of ResultWidget, show the result of a Parameter scan.
  * ********************************************************************************************* */
-SSScanResultWidget::SSScanResultWidget(SSScanTaskWrapper *task_wrapper, QWidget *parent):
-  QWidget(parent), ssscan_task_wrapper(task_wrapper)
+ParamScanResultWidget::ParamScanResultWidget(ParamScanTaskWrapper *task_wrapper, QWidget *parent):
+  QWidget(parent), paramscan_task_wrapper(task_wrapper)
 {
   this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
   this->setBackgroundRole(QPalette::Window);
@@ -45,7 +45,7 @@ SSScanResultWidget::SSScanResultWidget(SSScanTaskWrapper *task_wrapper, QWidget 
   this->dataTable = new QTableView();
   this->dataTable->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
 
-  this->tableWrapper = new TableWrapper(&(ssscan_task_wrapper->getSSScanTask()->getParameterScan()), this);
+  this->tableWrapper = new TableWrapper(&(paramscan_task_wrapper->getParamScanTask()->getParameterScan()), this);
   dataTable->setModel(this->tableWrapper);
 
   this->plotButton = new QPushButton(tr("Plot statistics"));
@@ -67,11 +67,11 @@ SSScanResultWidget::SSScanResultWidget(SSScanTaskWrapper *task_wrapper, QWidget 
 
 
 void
-SSScanResultWidget::plotButtonPressed()
+ParamScanResultWidget::plotButtonPressed()
 {
 
   // Get the task config
-  const ParamScanTask::Config &config = ssscan_task_wrapper->getSSScanTask()->getConfig();
+  const ParamScanTask::Config &config = paramscan_task_wrapper->getParamScanTask()->getConfig();
 
   // Ask user for species to plot.
   SpeciesSelectionDialog dialog(config.getModel());
@@ -85,38 +85,40 @@ SSScanResultWidget::plotButtonPressed()
   case ParamScanTask::Config::RE_ANALYSIS:
       // Add RE parameter vs concentration plot:
       Application::getApp()->docTree()->addPlot(
-            this->ssscan_task_wrapper,
+            this->paramscan_task_wrapper,
             new PlotItem(
-              new SimpleParameterScanPlot(selected_species,this->ssscan_task_wrapper->getSSScanTask())));
+              new SimpleParameterScanPlot(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
 
       break;
 
   case ParamScanTask::Config::LNA_ANALYSIS:
       // Add LNA parameter plot:
       Application::getApp()->docTree()->addPlot(
-            this->ssscan_task_wrapper,
+            this->paramscan_task_wrapper,
             new PlotItem(
-              new ParameterScanPlot(selected_species,this->ssscan_task_wrapper->getSSScanTask())));
+              new ParameterScanPlot(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
 
       // Add LNA COV plot
       Application::getApp()->docTree()->addPlot(
-            this->ssscan_task_wrapper,
+            this->paramscan_task_wrapper,
             new PlotItem(
-              new ParameterScanCovPlot(selected_species,this->ssscan_task_wrapper->getSSScanTask())));
+              new ParameterScanCovPlot(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
 
       break;
   case ParamScanTask::Config::IOS_ANALYSIS:
       // Add IOS parameter plot
       Application::getApp()->docTree()->addPlot(
-            this->ssscan_task_wrapper,
+            this->paramscan_task_wrapper,
             new PlotItem(
-              new ParameterScanIOSPlot(selected_species,this->ssscan_task_wrapper->getSSScanTask())));
+              new ParameterScanIOSPlot(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
 
       // Add IOS COV plot
       Application::getApp()->docTree()->addPlot(
-            this->ssscan_task_wrapper,
+            this->paramscan_task_wrapper,
             new PlotItem(
-              new ParameterScanCovIOSPlot(selected_species,this->ssscan_task_wrapper->getSSScanTask())));
+              new ParameterScanCovIOSPlot(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
+      break;
+  default:
       break;
   }
 
@@ -124,6 +126,28 @@ SSScanResultWidget::plotButtonPressed()
 
 
 void
-SSScanResultWidget::saveButtonPressed()
+ParamScanResultWidget::saveButtonPressed()
 {
+
+    QString filename = QFileDialog::getSaveFileName(
+          this, tr("Save as text..."), "", tr("Text Files (*.txt *.csv)"));
+
+    if ("" == filename)
+    {
+      return;
+    }
+
+    QFile file(filename);
+
+    if (!file.open(QIODevice::WriteOnly| QIODevice::Text))
+    {
+      QMessageBox box;
+      box.setWindowTitle(tr("Can not open file"));
+      box.setText(tr("Can not open file %1 for writing").arg(filename));
+      box.exec();
+    }
+
+    this->paramscan_task_wrapper->getParamScanTask()->getParameterScan().saveAsText(file);
+    file.close();
+
 }

@@ -1,4 +1,4 @@
-#include "ssscantask.hh"
+#include "paramscantask.hh"
 
 /* ******************************************************************************************* *
  * Implementation of ParamScanTask::Config, the task configuration.
@@ -14,11 +14,10 @@ ParamScanTask::Config::Config()
 
 ParamScanTask::Config::Config(const Config &other)
   : GeneralTaskConfig(), ModelSelectionTaskConfig(other),
-    _model(other._model), num_threads(other.num_threads), max_iterations(other.max_iterations), max_time_step(other.max_time_step),
-    re_model(other.re_model), lna_model(other.lna_model), ios_model(other.ios_model),
-    epsilon(other.epsilon), selected_method(other.selected_method),
-    parameter(other.parameter), start_value(other.start_value), end_value(other.end_value),
-    steps(other.steps)
+    _model(other._model), selected_method(other.selected_method), num_threads(other.num_threads), max_iterations(other.max_iterations), max_time_step(other.max_time_step),
+    epsilon(other.epsilon),
+    parameter(other.parameter), start_value(other.start_value), end_value(other.end_value),     steps(other.steps),
+    re_model(other.re_model), lna_model(other.lna_model), ios_model(other.ios_model)
 {
   // Pass...
 }
@@ -183,16 +182,15 @@ ParamScanTask::ParamScanTask(const Config &config, QObject *parent)
       this->parameterScan.setColumnName(column, QString("%1").arg(species_name[i]));
     }
 
-    if(config.getMethod()!=ParamScanTask::Config::RE_ANALYSIS)
-    {
+    if(config.getMethod()==Config::RE_ANALYSIS) return;
 
     for (size_t i=0; i<_Ns; i++)
       for (size_t j=i; j<_Ns; j++, column++)
         this->parameterScan.setColumnName(
               column,QString("LNA cov(%1,%2)").arg(species_name[i]).arg(species_name[j]));
 
-    if(config.getMethod()==ParamScanTask::Config::IOS_ANALYSIS)
-    {
+
+    if(config.getMethod()==Config::LNA_ANALYSIS) return;
 
         for (size_t i=0; i<_Ns; i++, column++)
           this->parameterScan.setColumnName(
@@ -202,8 +200,6 @@ ParamScanTask::ParamScanTask(const Config &config, QObject *parent)
           for (size_t j=i; j<_Ns; j++, column++)
             this->parameterScan.setColumnName(
                   column,QString("IOS cov(%1,%2)").arg(species_name[i]).arg(species_name[j]));
-    }
-    }
 
 }
 
@@ -226,20 +222,15 @@ ParamScanTask::process()
   // Allocate result matrix (of unified state vectors)
   std::vector<Eigen::VectorXd> scanResult(config.getSteps()+1);
 
-  std::cerr << config.getMethod() << " " << Config::RE_ANALYSIS << std::endl;
-
   // Do parameter scan
   if(config.getMethod()==Config::RE_ANALYSIS)
   {
-      //scanResult.resize(config.getModel()->getDimension());
       iNA::Models::ParameterScan<iNA::Models::REmodel> pscan(dynamic_cast<iNA::Models::REmodel &>(*config.getModel()),
                                                         config.getMaxIterations(), config.getEpsilon(), config.getMaxTimeStep());
       pscan.parameterScan(parameterSets,scanResult);
   }
   if(config.getMethod()==Config::LNA_ANALYSIS)
   {
-
-      //scanResult.resize(dynamic_cast<iNA::Models::LNAmodel *>(config.getModel())->getDimension());
       iNA::Models::ParameterScan<iNA::Models::LNAmodel> pscan(dynamic_cast<iNA::Models::LNAmodel &>(*config.getModel()),
                                                         config.getMaxIterations(), config.getEpsilon(), config.getMaxTimeStep());
       pscan.parameterScan(parameterSets,scanResult);
@@ -280,7 +271,7 @@ ParamScanTask::process()
       switch(config.getMethod())
       {
          case Config::RE_ANALYSIS:
-             dynamic_cast<iNA::Models::REmodel *>(config.getModel())->fullState(scanResult[pid], concentrations);
+             dynamic_cast<iNA::Models::REmodel *>(config.getModel())->fullState(ICs,scanResult[pid], concentrations);
              break;
          case Config::LNA_ANALYSIS:
              dynamic_cast<iNA::Models::LNAmodel *>(config.getModel())->fullState(ICs, scanResult[pid], concentrations, lna_covariances);
@@ -296,25 +287,25 @@ ParamScanTask::process()
 
       int col=1;
 
+      // output REs
+      for (size_t i=0; i<_Ns; i++)
+          parameterScan(pid,col++) = concentrations(i);
+
+      if(config.getMethod()==Config::RE_ANALYSIS) continue;
+
       // output LNA
-      for (size_t i=0; i<_Ns; i++){
-          parameterScan(pid,col++) = concentrations(i); std::cerr<<concentrations(i)<<std::endl;
-      }
-      if(config.getMethod()==Config::LNA_ANALYSIS || config.getMethod()==Config::IOS_ANALYSIS)
       for (size_t i=0; i<_Ns; i++)
         for (size_t j=i; j<_Ns; j++)
             parameterScan(pid,col++) = lna_covariances(i,j);
 
+      if(config.getMethod()==Config::LNA_ANALYSIS) continue;
 
-      if(config.getMethod()==Config::IOS_ANALYSIS)
-      {
       // output IOS
       for (size_t i=0; i<_Ns; i++)
         parameterScan(pid,col++) = concentrations(i)+emre_corrections(i);
       for (size_t i=0; i<_Ns; i++)
         for (size_t j=i; j<_Ns; j++)
             parameterScan(pid,col++) = lna_covariances(i,j)+ios_covariances(i,j);
-      }
   }
 
   // Done...
@@ -338,7 +329,17 @@ ParamScanTask::getConfig() const {
 QString
 ParamScanTask::getLabel()
 {
-  return "Parameter Scan (SSE)";
+  switch(config.getMethod())
+  {
+  case Config::RE_ANALYSIS:
+      return "Parameter Scan (RE)";
+  case Config::LNA_ANALYSIS:
+      return "Parameter Scan (LNA)";
+  case Config::IOS_ANALYSIS:
+      return "Parameter Scan (IOS)";
+  default:
+      return "";
+  }
 }
 
 

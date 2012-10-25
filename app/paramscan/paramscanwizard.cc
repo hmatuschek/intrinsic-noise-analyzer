@@ -1,4 +1,4 @@
-#include "ssscanwizard.hh"
+#include "paramscanwizard.hh"
 #include "../application.hh"
 #include "../models/scopeitemmodel.hh"
 #include "trafo/constantfolder.hh"
@@ -264,6 +264,7 @@ ParameterScanConfigPage::validatePage()
 ParamScanSummaryPage::ParamScanSummaryPage(QWidget *parent)
   : QWizardPage(parent)
 {
+
   this->setTitle("Parameter scan");
   this->setSubTitle("Summary");
 
@@ -277,11 +278,18 @@ ParamScanSummaryPage::ParamScanSummaryPage(QWidget *parent)
   this->memory = new QLabel();
   this->memory->setTextFormat(Qt::LogText);
 
+  this->method = new QLabel();
+  this->method->setTextFormat(Qt::LogText);
+
   QFormLayout *layout = new QFormLayout();
   layout->addRow("Model:", this->model_name);
+  layout->addRow("Method:", this->method);
   layout->addRow("Selected parameter:", this->param);
   layout->addRow("Approx. memory used:", this->memory);
   this->setLayout(layout);
+
+
+
 }
 
 
@@ -298,5 +306,19 @@ ParamScanSummaryPage::initializePage()
   QString mem_str("%1 MB");
   int N = config.getModel()->numSpecies();
   this->memory->setText(mem_str.arg(double(8*(2*N+N*(N-1)))/126976.));
+
+  switch(config.getMethod())
+  {
+      case ParamScanTask::Config::RE_ANALYSIS:
+          method->setText("RE"); break;
+      case ParamScanTask::Config::LNA_ANALYSIS:
+          method->setText("LNA"); break;
+      case ParamScanTask::Config::IOS_ANALYSIS:
+          method->setText("IOS"); break;
+      case ParamScanTask::Config::UNDEFINED_ANALYSIS:
+          method->setText("undefined"); break;
+  }
+
+
 }
 

@@ -1,6 +1,6 @@
-#include "ssscanmodule.hh"
-#include "ssscantask.hh"
-#include "ssscantaskwrapper.hh"
+#include "paramscanmodule.hh"
+#include "paramscantask.hh"
+#include "paramscantaskwrapper.hh"
 #include "../application.hh"
 #include <QMessageBox>
 
@@ -42,7 +42,7 @@ ParamScanModule::configTask()
   // Add task to application and run it:
   Application::getApp()->docTree()->addTask(
         this->wizard->getConfigCast<ParamScanTask::Config>().getModelDocument(),
-        new SSScanTaskWrapper(task));
+        new ParamScanTaskWrapper(task));
 
   task->start();
 }
