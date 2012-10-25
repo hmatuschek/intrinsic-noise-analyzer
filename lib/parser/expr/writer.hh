@@ -4,6 +4,7 @@
 #include <ginac/ginac.h>
 #include <ast/ast.hh>
 #include <iostream>
+#include "parser.hh"
 
 
 namespace iNA {
@@ -49,6 +50,7 @@ public:
   virtual void visit(const GiNaC::basic &node);
 
 public:
+  /** Simply serializes teh given expression using the given scope into the given stream .*/
   static void write(GiNaC::ex expression, const Ast::Scope &scope, std::ostream &stream);
 };
 

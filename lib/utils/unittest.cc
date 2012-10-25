@@ -299,6 +299,25 @@ TestSuite::end()
 
 
 /* ********************************************************************************************* *
+ * Implementation of TestCallerInterface
+ * ********************************************************************************************* */
+TestCallerInterface::TestCallerInterface(const std::string &desc)
+  : description(desc) {
+  // Pass...
+}
+
+TestCallerInterface::~TestCallerInterface() {
+  // Pass...
+}
+
+const std::string &
+TestCallerInterface::getDescription() const  {
+  return this->description;
+}
+
+
+
+/* ********************************************************************************************* *
  * Implementation of TestSuite
  * ********************************************************************************************* */
 TestRunner::TestRunner(std::ostream &stream)

@@ -17,8 +17,7 @@ class Parser;
 
 /**
  * Interface class for all option rules.
- *
- * @ingroup utils
+ * @ingroup optionparser
  */
 class RuleInterface
 {
@@ -36,51 +35,35 @@ public:
    */
   virtual bool operator()(const char *argv[], int argc, size_t &idx, Parser &parser) = 0;
 
-  /**
-   * This mehtod will be implemented to generate a string representation of the option
-   * rules.
-   */
+  /** This mehtod will be implemented to generate a string representation of the option
+   * rules. */
   virtual std::string dump() = 0;
 
-  /**
-   * Constructs a list of alternatives: @c OneOfRule.
-   */
+  /** Constructs a list of alternatives: @c OneOfRule. */
   RuleInterface &operator| (RuleInterface &other);
 
-  /**
-   * Constructs a @c ListRule option-rule.
-   */
+  /** Constructs a @c ListRule option-rule. */
   RuleInterface &operator, (RuleInterface &other);
 };
 
 
 
-/**
- * A rule representing an option or flag.
- *
- * @ingroup utils
+/** A rule representing an option or flag.
+ * @ingroup optionparser
  */
 class OptionRule: public RuleInterface
 {
 protected:
-  /**
-   * The short name (single charater) of the option.
-   */
+  /** The short name (single charater) of the option. */
   char short_name;
 
-  /**
-   * The long name for this option.
-   */
+  /** The long name for this option. */
   std::string long_name;
 
-  /**
-   * \todo Is this member needed? I thougth all values are stored in the Parser object?
-    */
+  /** \todo Is this member needed? I thougth all values are stored in the Parser object? */
   std::string value;
 
-  /**
-   * If this is true the option does not accept a value, it is a flag.
-   */
+  /** If this is true the option does not accept a value, it is a flag. */
   bool is_flag;
 
 
@@ -97,14 +80,10 @@ protected:
 
 
 public:
-  /**
-   * Performs the actual option parsing.
-   */
+  /** Performs the actual option parsing. */
   virtual bool operator()(const char *argv[], int argc, size_t &idx, Parser &prs);
 
-  /**
-   * Generates a string representation for the option rule.
-   */
+  /** Generates a string representation for the option rule. */
   virtual std::string dump();
 
   friend class Parser;
@@ -112,48 +91,38 @@ public:
 
 
 
-/**
- * Consumes exactly on option rule from the owned set of options.
+/** Consumes exactly on option rule from the owned set of options.
  * This class can be used to express conflicting options.
- *
- * @ingroup utils
+ * @ingroup optionparser
  */
 class OneOfRule: public RuleInterface
 {
 protected:
-  /**
-   * Holds a list of the options that one has to match.
-   */
+  /** Holds a list of the options that one has to match. */
   std::list<RuleInterface *> options;
 
 
 protected:
-  /**
-   * \todo Is this needed?
-   */
+  /** \todo Is this needed? */
   OneOfRule();
 
-  /**
-   * The constructor takes a list of option rules. The ownership of these rules is
-   * tranferred to this object and they are destroyed if this object is destroyed.
-   */
+  /** The constructor takes a list of option rules. The ownership of these rules is
+   * tranferred to this object and they are destroyed if this object is destroyed. */
   OneOfRule(std::list<RuleInterface *> &options);
 
-  /**
-   * The constructor takes the number of optional rules and a list of @c OptionRuleInterface
-   * instances.
-   */
+  /** The constructor takes the number of optional rules and a list of @c OptionRuleInterface
+   * instances. */
   OneOfRule(size_t n, ...);
 
 
 public:
-  /**
-   * Destructor. Destroies also the encapsulated option rules.
-   */
+  /** Destructor. Destroies also the encapsulated option rules. */
   virtual ~OneOfRule();
 
+  /** Tries to parse the option rule, returns true on success. */
   virtual bool operator()(const char *argv[], int argc, size_t &idx, Parser &parser);
 
+  /** Dumps the rule expression. */
   virtual std::string dump();
 
   friend class Parser;
@@ -164,29 +133,22 @@ public:
 
 /**
  * Consumes any number of the enclosed option rules to be applied.
- *
- * @ingroup utils
+ * @ingroup optionparser
  */
 class ZeroOrMoreRule: public RuleInterface
 {
 protected:
-  /**
-   * Holds the encapsulated option rule.
-   */
+  /** Holds the encapsulated option rule. */
   RuleInterface *rule;
 
 
 protected:
-  /**
-   * Constructor. The ownership of the given rule is transferred to this object and will be
-   * destroyed if this object gets destroyed.
-   */
+  /** Constructor. The ownership of the given rule is transferred to this object and will be
+   * destroyed if this object gets destroyed. */
   ZeroOrMoreRule(RuleInterface *rule);
 
 public:
-  /**
-   * Destructor. Also destroies the encapsulated option rule.
-   */
+  /** Destructor. Also destroies the encapsulated option rule. */
   virtual ~ZeroOrMoreRule();
 
   virtual bool operator()(const char *argv[], int argc, size_t &idx, Parser &parser);
@@ -200,8 +162,7 @@ public:
 
 /**
  * Represents a value of an option.
- *
- * @ingroup utils
+ * @ingroup optionparser
  */
 class ValueRule: public RuleInterface
 {
@@ -226,8 +187,7 @@ public:
 
 /**
  * Represents a list of option rules that all have to match the input in the given order.
- *
- * @ingroup utils
+ * @ingroup optionparser
  */
 class ListRule: public RuleInterface
 {
@@ -270,8 +230,7 @@ public:
 
 /**
  * An optional rule.
- *
- * @ingroup utils
+ * @ingroup optionparser
  */
 class OptionalRule: public RuleInterface
 {
@@ -333,7 +292,7 @@ public:
  *    (Parser::opt(Parser::Flag("help") | Parser::Flag("version")), Parser::Value()) );
  * \endcode
  *
- * @ingroup utils
+ * @ingroup optionparser
  */
 class Parser
 {

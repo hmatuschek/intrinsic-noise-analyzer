@@ -80,6 +80,11 @@ MatFileElement::MatFileElement(ElementType type)
   // Pass...
 }
 
+MatFileElement::~MatFileElement()
+{
+  // Pass...
+}
+
 size_t
 MatFileElement::storageSize() const {
   size_t s = this->dataSize()+8;

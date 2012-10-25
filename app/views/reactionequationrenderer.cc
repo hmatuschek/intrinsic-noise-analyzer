@@ -33,7 +33,7 @@ ReactionEquationRenderer::assembleReactionEquation(iNA::Ast::Reaction *reac)
   MathFormula *products  = new MathFormula();
 
   // Handle reactants:
-  if (0 == reac->numReactants()) { reactants->appendItem(new MathText(QChar(0x2205))); }
+  if (0 == reac->numReactants()) { reactants->appendItem(new MathText(QChar(0x00D8))); }
   for (Ast::Reaction::iterator item=reac->reactantsBegin(); item!=reac->reactantsEnd(); item++) {
     if (0 != reactants->size()) {
       reactants->appendItem(new MathSpace(MathSpace::MEDIUM_SPACE));

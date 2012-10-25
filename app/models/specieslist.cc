@@ -138,11 +138,11 @@ SpeciesList::_updateIdentifier(iNA::Ast::Species *species, const QVariant &value
   // If nothing changed -> done.
   if (id == species->getIdentifier()) { return true; }
   // Check ID format
-  if (! QRegExp("[a-zA-Z_][a-zA-Z0-9_]").exactMatch(qid)) { return false; }
+  if (! QRegExp("[a-zA-Z_][a-zA-Z0-9_]*").exactMatch(qid)) { return false; }
   // Check if id is not assigned allready:
   if (_model->hasDefinition(id)) { return false; }
   // Ok, assign identifier:
-  species->setIdentifier(id);
+  _model->resetIdentifier(species->getIdentifier(), id);
   return true;
 }
 
