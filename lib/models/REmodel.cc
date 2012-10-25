@@ -4,8 +4,8 @@
 using namespace iNA;
 using namespace iNA::Models;
 
-void
-REmodel::postConstructor()
+REmodel::REmodel(const Ast::Model &model)
+  : SSEBaseModel(model)
 {
     // set dimension
     dim = this->numIndSpecies();
@@ -16,16 +16,6 @@ REmodel::postConstructor()
 
     // and combine to update vector
     this->updateVector = this->REs;
-
-    //this->foldConservationConstants(this->updateVector);
-    //this->foldConservationConstants(this->JacobianM);
-
-}
-
-REmodel::REmodel(const Ast::Model &model)
-  : SSEBaseModel(model)
-{
-  postConstructor();
 }
 
 void

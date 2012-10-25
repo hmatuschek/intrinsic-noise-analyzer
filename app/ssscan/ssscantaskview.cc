@@ -69,36 +69,57 @@ SSScanResultWidget::SSScanResultWidget(SSScanTaskWrapper *task_wrapper, QWidget 
 void
 SSScanResultWidget::plotButtonPressed()
 {
+
+  // Get the task config
+  const ParamScanTask::Config &config = ssscan_task_wrapper->getSSScanTask()->getConfig();
+
   // Ask user for species to plot.
-  SpeciesSelectionDialog dialog(ssscan_task_wrapper->getSSScanTask()->getConfig().getModel());
+  SpeciesSelectionDialog dialog(config.getModel());
   dialog.setWindowTitle(tr("Parameter scan quick plot"));
   dialog.setTitle(tr("Select the species to plot."));
   if (QDialog::Accepted != dialog.exec()) { return; }
   QStringList selected_species = dialog.getSelectedSpecies();
 
-  // Add LNA parameter plot:
-  Application::getApp()->docTree()->addPlot(
-        this->ssscan_task_wrapper,
-        new PlotItem(
-          new ParameterScanPlot(selected_species,this->ssscan_task_wrapper->getSSScanTask())));
+  switch(config.getMethod())
+  {
+  case ParamScanTask::Config::RE_ANALYSIS:
+      // Add RE parameter vs concentration plot:
+      Application::getApp()->docTree()->addPlot(
+            this->ssscan_task_wrapper,
+            new PlotItem(
+              new SimpleParameterScanPlot(selected_species,this->ssscan_task_wrapper->getSSScanTask())));
 
-  // Add IOS parameter plot
-  Application::getApp()->docTree()->addPlot(
-        this->ssscan_task_wrapper,
-        new PlotItem(
-          new ParameterScanIOSPlot(selected_species,this->ssscan_task_wrapper->getSSScanTask())));
+      break;
 
-  // Add IOS COV plot
-  Application::getApp()->docTree()->addPlot(
-        this->ssscan_task_wrapper,
-        new PlotItem(
-          new ParameterScanCovPlot(selected_species,this->ssscan_task_wrapper->getSSScanTask())));
+  case ParamScanTask::Config::LNA_ANALYSIS:
+      // Add LNA parameter plot:
+      Application::getApp()->docTree()->addPlot(
+            this->ssscan_task_wrapper,
+            new PlotItem(
+              new ParameterScanPlot(selected_species,this->ssscan_task_wrapper->getSSScanTask())));
 
-  // Add IOS COV plot
-  Application::getApp()->docTree()->addPlot(
-        this->ssscan_task_wrapper,
-        new PlotItem(
-          new ParameterScanCovIOSPlot(selected_species,this->ssscan_task_wrapper->getSSScanTask())));
+      // Add LNA COV plot
+      Application::getApp()->docTree()->addPlot(
+            this->ssscan_task_wrapper,
+            new PlotItem(
+              new ParameterScanCovPlot(selected_species,this->ssscan_task_wrapper->getSSScanTask())));
+
+      break;
+  case ParamScanTask::Config::IOS_ANALYSIS:
+      // Add IOS parameter plot
+      Application::getApp()->docTree()->addPlot(
+            this->ssscan_task_wrapper,
+            new PlotItem(
+              new ParameterScanIOSPlot(selected_species,this->ssscan_task_wrapper->getSSScanTask())));
+
+      // Add IOS COV plot
+      Application::getApp()->docTree()->addPlot(
+            this->ssscan_task_wrapper,
+            new PlotItem(
+              new ParameterScanCovIOSPlot(selected_species,this->ssscan_task_wrapper->getSSScanTask())));
+      break;
+  }
+
 }
 
 

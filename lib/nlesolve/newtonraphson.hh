@@ -343,7 +343,7 @@ public:
   }
 
   /**
-   * Simple inline function that attempts to increase find a solution within the precision of the NLE solver (advantageous for stiff systems).
+   * Simple inline function that attempts to find a solution within the precision of the NLE solver (advantageous for stiff systems).
    */
 
   inline Eigen::VectorXd precisionSolve(const Eigen::MatrixXd &B, const Eigen::VectorXd &A)

@@ -233,6 +233,9 @@ public:
    */
   explicit Table(const Eigen::MatrixXd &data, QObject *parent=0);
 
+
+  void resize(size_t columns, size_t rows);
+
   /**
    * Returns the number of columns.
    */

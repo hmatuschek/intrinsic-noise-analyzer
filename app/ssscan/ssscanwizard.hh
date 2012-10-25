@@ -5,6 +5,7 @@
 #include <QComboBox>
 #include <QLabel>
 #include <QListWidget>
+#include <QRadioButton>
 
 #include "ssscantask.hh"
 #include "../doctree/documentitem.hh"
@@ -44,6 +45,11 @@ class ParamScanModelSelectionPage : public ModelSelectionWizardPage
 public:
   explicit ParamScanModelSelectionPage(GeneralTaskWizard *parent);
   virtual bool validatePage();
+
+private:
+  QRadioButton *_re_button;
+  QRadioButton *_lna_button;
+  QRadioButton *_ios_button;
 };
 
 

@@ -40,12 +40,47 @@ ParamScanModelSelectionPage::ParamScanModelSelectionPage(GeneralTaskWizard *pare
 {
   this->setTitle(tr("Parameter scan"));
   this->setSubTitle(tr("Select a model for parameter scan"));
+
+
+  // Append method selection radio buttons to the wizard page.
+  _re_button  = new QRadioButton("Rate Equations (REs)");
+  _lna_button = new QRadioButton("Linear Noise Approximation (LNA)");
+  _ios_button = new QRadioButton("Inverse Omega Squared Analysis (IOS)");
+
+  _re_button->setToolTip("Deterministic analysis using macroscopic rate equations.");
+  _lna_button->setToolTip("Analysis yielding the fluctuations about the macroscopic concentrations.");
+  _ios_button->setToolTip("Analysis yielding corrections beyond the RE and LNA analysis.");
+
+  QVBoxLayout *box =  new QVBoxLayout();
+  box->addWidget(_re_button);
+  box->addWidget(_lna_button);
+  box->addWidget(_ios_button);
+
+  QGroupBox *button_grp = new QGroupBox("Analysis method");
+  button_grp->setLayout(box);
+  dynamic_cast<QBoxLayout *>(layout())->addSpacing(20);
+  layout()->addWidget(button_grp);
+
+  _re_button->setChecked(true);
 }
 
 
 bool
 ParamScanModelSelectionPage::validatePage()
 {
+  // First set the analysis method, this determines which model will be instantiated:
+  GeneralTaskWizard *wizard = static_cast<GeneralTaskWizard *>(this->wizard());
+  ParamScanTask::Config &config = wizard->getConfigCast< ParamScanTask::Config >();
+  if (_re_button->isChecked())
+  {
+    config.setMethod(ParamScanTask::Config::RE_ANALYSIS);
+    std::cerr << "bla" << config.getMethod() << std::endl;
+  }
+  else if (_lna_button->isChecked())
+    config.setMethod(ParamScanTask::Config::LNA_ANALYSIS);
+  else
+    config.setMethod(ParamScanTask::Config::IOS_ANALYSIS);
+
   // Try to create LNA model from SBML document
   try {
     // Forward call to parent implementation:

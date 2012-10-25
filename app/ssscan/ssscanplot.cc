@@ -163,3 +163,40 @@ ParameterScanCovIOSPlot::ParameterScanCovIOSPlot(const QStringList &selected_spe
 
   this->updateAxes();
 }
+
+
+SimpleParameterScanPlot::SimpleParameterScanPlot(const QStringList &selected_species, ParamScanTask *task,
+                                     QObject *parent)
+    : LinePlot("Concentrations (REs)", parent)
+{
+  // Get species units:
+  QString parameter_unit("a.u.");
+
+  // Get parameter scan table:
+  Table &data = task->getParameterScan();
+  // Number of species in model
+  //size_t Ntot = task->getConfig().getModel()->numSpecies();
+  // Number of selected species
+  size_t Nsel = selected_species.size();
+
+  // Create a plot:
+  this->setXLabel(tr("%1").arg(data.getColumnName(0)));
+  this->setYLabel(tr("concentration"));
+
+  // Allocate a graph for each selected species
+  for (size_t i=0; i<Nsel; i++)
+  {
+    size_t species_idx = task->getConfig().getModel()->getSpeciesIdx(selected_species.at(i).toStdString());
+    size_t mean_idx = 1 + species_idx;
+    // Get column of RE concentrations
+    Eigen::VectorXd cov = data.getColumn(mean_idx);
+    this->addLineGraph(data.getColumn(0), cov, data.getColumnName(mean_idx));
+  }
+
+  // Force y plot-range to be [0, AUTO]:
+  this->getAxis()->setYRangePolicy(
+        Plot::RangePolicy(Plot::RangePolicy::FIXED, Plot::RangePolicy::AUTOMATIC));
+  this->getAxis()->setYRange(0, 1);
+
+  this->updateAxes();
+}

@@ -12,6 +12,19 @@
  * Collects data from a @c Table and updates the
  * @c VarianceLinesGraph instance.
  */
+class SimpleParameterScanPlot : public LinePlot
+{
+  Q_OBJECT
+
+public:
+  explicit SimpleParameterScanPlot(const QStringList &selected_species, ParamScanTask *task, QObject *parent=0);
+};
+
+
+/**
+ * Collects data from a @c Table and updates the
+ * @c VarianceLinesGraph instance.
+ */
 class ParameterScanPlot : public VariancePlot
 {
   Q_OBJECT
