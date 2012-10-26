@@ -273,14 +273,14 @@ ExportError::~ExportError() throw() {
 
 
 SBMLFeatureNotSupported::SBMLFeatureNotSupported()
-  : SBMLParserError("SBML featrue not supported: ")
+  : SBMLParserError("SBML feature not supported: ")
 {
   // Pass...
 }
 
 
 SBMLFeatureNotSupported::SBMLFeatureNotSupported(const std::string &message)
-  : SBMLParserError("SBML featrue not supported: ")
+  : SBMLParserError("SBML feature not supported: ")
 {
   (*this) << message;
 }

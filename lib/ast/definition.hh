@@ -5,11 +5,15 @@
 #include <ginac/symbol.h>
 
 #include "node.hh"
+#include "event.hh"
 
 
 namespace iNA {
 namespace Ast {
 
+
+// Forward declaration of Scope:
+class Scope;
 
 /**
  * Base class for all definitions, like function definitions etc.
@@ -20,39 +24,39 @@ class Definition : public Node
 {
 public:
   /** Visitor class for definitions. */
-  class Visitor { public: virtual void visit(const Definition *def) = 0; };
+  class Visitor {
+  public:
+    /** Visitor method for all definitions. */
+    virtual void visit(const Definition *def) = 0;
+  };
+
   /** Operator class for definitions. */
-  class Operator { public: virtual void act(Definition *def) = 0; };
+  class Operator {
+  public:
+    /** Operator method for all definitions. */
+    virtual void act(Definition *def) = 0;
+  };
 
 protected:
-  /**
-   * The identifier of the definiton.
-   */
-  std::string identifier;
+  /** The identifier of the definiton. */
+  std::string _identifier;
 
-  /**
-   * Optional display name.
-   */
-  std::string name;
-
+  /** Optional display name. @c hasName returns false if this string is empty. */
+  std::string _name;
 
 protected:
-  /**
-   * Protected constructor, avoids direct instantiation of the class.
-   */
+  /** Protected constructor, avoids direct instantiation of the class. */
   Definition(const std::string &id, Node::NodeType node_type);
 
-  /**
-   * Constructor with optional display name.
-   */
-  Definition(const std::string &id, const std::string &name, Node::NodeType node_type);
+  /** Constructor with optional display name. */
+  Definition(const std::string &id, const std::string &_name, Node::NodeType node_type);
 
 
 public:
   /** Destructor, does nothin (yet). */
   virtual ~Definition();
 
-  /** Returns the identifier/name of the definition. */
+  /** Returns the identifier of the definition. */
   const std::string &getIdentifier() const;
 
   /** Returns true if there is a display-name assigned to the definition. */
@@ -62,13 +66,20 @@ public:
   const std::string &getName() const;
 
   /** Resets the display-name of the definition. */
-  void setName(const std::string &name);
+  void setName(const std::string &_name);
 
   /** Handles a visitor for a definition. */
   virtual void accept(Ast::Visitor &visitor) const;
 
   /** Applies an operator on a definition. */
   virtual void apply(Ast::Operator &op);
+
+protected:
+  /** Resets the identifier of the definition. */
+  virtual void setIdentifier(const std::string &id);
+
+  /** This is needed as only scopes may change the identifier of a definition.*/
+  friend class Scope;
 };
 
 

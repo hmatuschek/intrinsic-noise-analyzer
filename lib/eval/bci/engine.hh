@@ -9,8 +9,8 @@
  * code can then be optimized to increase the execution speed.
  */
 
-#ifndef __INA_EVALUATE_BCI_ENGINE_HH__
-#define __INA_EVALUATE_BCI_ENGINE_HH__
+#ifndef __INA_EVAL_BCI_ENGINE_HH__
+#define __INA_EVAL_BCI_ENGINE_HH__
 
 #include "code.hh"
 #include "compiler.hh"
@@ -32,9 +32,12 @@ class Engine {
 public:
   /** The code class, an instance of this class holds the byte-code to be executed. */
   typedef bci::Code Code;
+  /** Specifies the compiler class for the execution engine. */
   typedef bci::Compiler<InType, OutType> Compiler;
+  /** Specifies the interpreter class fot the execution engine. */
   typedef bci::Interpreter<InType, OutType> Interpreter;
 };
+
 
 }
 }

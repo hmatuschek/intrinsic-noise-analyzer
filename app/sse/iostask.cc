@@ -9,18 +9,13 @@ using namespace iNA;
  * Implementation of IOSTask
  * ******************************************************************************************** */
 IOSTask::IOSTask(const SSETaskConfig &config, QObject *parent) :
-  Task(parent), config(config),
+  Task(parent), config(config), _Ns(config.getModel()->numSpecies()),
   interpreter(0),
   timeseries(
-    1 + 3*config.getNumSpecies() + config.getNumSpecies()*(config.getNumSpecies()+1),
+    1 + 3*_Ns + _Ns*(_Ns+1),
     1+config.getIntegrationRange().getSteps()/(1+config.getIntermediateSteps())),
-  species_names(config.getNumSpecies()),
-  re_index_table(config.getNumSpecies()),
-  lna_index_table(config.getNumSpecies(), config.getNumSpecies()),
-  emre_index_table(config.getNumSpecies()),
-  ios_index_table(config.getNumSpecies(), config.getNumSpecies()),
-  ios_emre_index_table(config.getNumSpecies()),
-  skewness_index_table(config.getNumSpecies()),
+  species_names(_Ns), re_index_table(_Ns), lna_index_table(_Ns, _Ns), emre_index_table(_Ns),
+  ios_index_table(_Ns, _Ns), ios_emre_index_table(_Ns),
   has_negative_variance(false)
 {
   // Assemble index tables and assign column names to time-series table:
@@ -30,23 +25,22 @@ IOSTask::IOSTask(const SSETaskConfig &config, QObject *parent) :
   this->timeseries.setColumnName(column, "t"); column++;
 
   // RE means and initialize vector of species names
-  for (int i=0; i<(int)config.getNumSpecies(); i++, column++)
-  {
-    QString species_id = config.getSelectedSpecies().value(i);
-    iNA::Ast::Species *species = config.getModel()->getSpecies(species_id.toStdString());
-
-    if (species->hasName())
-      species_names[i] = QString("%1").arg(species->getName().c_str());
-    else
+  for (int i=0; i<(int)_Ns; i++, column++) {
+    iNA::Ast::Species *species = config.getModel()->getSpecies(i);
+    QString species_id = species->getIdentifier().c_str();
+    if (species->hasName()) {
+      species_names[i] = species->getName().c_str();
+    } else {
       species_names[i] = species_id;
+    }
 
     this->timeseries.setColumnName(column, QString("RE %1").arg(species_names[i]));
     this->re_index_table(i) = column;
   }
 
   // LNA Covariance
-  for (int i=0; i<(int)config.getNumSpecies(); i++) {
-    for (int j=i; j<(int)config.getNumSpecies(); j++, column++) {
+  for (int i=0; i<(int)_Ns; i++) {
+    for (int j=i; j<(int)_Ns; j++, column++) {
       this->timeseries.setColumnName(
             column, QString("LNA cov(%1,%2)").arg(species_names[i]).arg(species_names[j]));
       this->lna_index_table(i,j) = column;
@@ -55,15 +49,15 @@ IOSTask::IOSTask(const SSETaskConfig &config, QObject *parent) :
   }
 
   // EMRE means
-  for (int i=0; i<(int)config.getNumSpecies(); i++, column++) {
+  for (int i=0; i<(int)_Ns; i++, column++) {
     this->timeseries.setColumnName(
           column, QString("EMRE %1").arg(species_names[i]));
     this->emre_index_table(i) = column;
   }
 
   // IOS Covariance
-  for (int i=0; i<(int)config.getNumSpecies(); i++) {
-    for (int j=i; j<(int)config.getNumSpecies(); j++, column++) {
+  for (int i=0; i<(int)_Ns; i++) {
+    for (int j=i; j<(int)_Ns; j++, column++) {
       this->timeseries.setColumnName(
             column, QString("IOS cov(%1,%2)").arg(species_names[i]).arg(species_names[j]));
       this->ios_index_table(i,j) = column;
@@ -72,18 +66,11 @@ IOSTask::IOSTask(const SSETaskConfig &config, QObject *parent) :
   }
 
   // IOS EMRE Mean corrections
-  for (int i=0; i<(int)config.getNumSpecies(); i++, column++) {
+  for (int i=0; i<(int)_Ns; i++, column++) {
     this->timeseries.setColumnName(
           column, QString("IOS %1").arg(species_names[i]));
     this->ios_emre_index_table(i) = column;
   }
-
-  // IOS Skewness
-  /*for (int i=0; i<(int)config.getNumSpecies(); i++, column++) {
-    this->timeseries.setColumnName(
-          column, QString("Skew %1").arg(species_names[i]));
-    this->skewness_index_table(i) = column;
-  }*/
 }
 
 
@@ -121,36 +108,21 @@ IOSTask::process()
 
   // Holds the current system state (reduced state)
   Eigen::VectorXd x(config.getModelAs<iNA::Models::IOSmodel>()->getDimension());
-
   // Holds the concentrations for each species (full state)
-  Eigen::VectorXd concentrations(config.getModel()->numSpecies());
-
+  Eigen::VectorXd concentrations(_Ns);
   // Holds the covariance matrix of species concentrations
-  Eigen::MatrixXd lna(config.getModel()->numSpecies(), config.getModel()->numSpecies());
-
+  Eigen::MatrixXd lna(_Ns, _Ns);
   // Holds EMRE correction for state:
-  Eigen::VectorXd emre(config.getModel()->numSpecies());
-
+  Eigen::VectorXd emre(_Ns);
   // Holds the covariance matrix of species concentrations
-  Eigen::MatrixXd ios(config.getModel()->numSpecies(), config.getModel()->numSpecies());
-
+  Eigen::MatrixXd ios(_Ns, _Ns);
   // Holds the 3rd moment for each species.
-  Eigen::VectorXd thirdMoment = Eigen::VectorXd::Zero(config.getModel()->numSpecies());
+  Eigen::VectorXd thirdMoment = Eigen::VectorXd::Zero(_Ns);
 
   // Holds the iosemre for each species.
-  Eigen::VectorXd iosemre(config.getModel()->numSpecies());
-
+  Eigen::VectorXd iosemre(_Ns);
   // Holds a row of the output-table:
   Eigen::VectorXd output_vector(timeseries.getNumColumns());
-
-  // Maps the i-th selected species to an index in the concentrations vector:
-  size_t N_sel_species = this->config.getNumSpecies();
-  std::vector<size_t> species_index(N_sel_species);
-  for (size_t i=0; i<N_sel_species; i++)
-  {
-    species_index[i] = this->config.getModel()->getSpeciesIdx(
-          this->config.getSelectedSpecies().value(i).toStdString());
-  }
 
   // initialize (reduced) state
   config.getModelAs<iNA::Models::IOSmodel>()->getInitialState(x);
@@ -169,14 +141,12 @@ IOSTask::process()
 
   // store initial state:
   output_vector(0) = t;
-  for (size_t i=0; i<N_sel_species; i++)
+  for (size_t i=0; i<_Ns; i++)
   {
-    size_t index_i = species_index[i];
-    output_vector(re_index_table(i)) = concentrations(index_i);
-    output_vector(emre_index_table(i)) = concentrations(index_i);
-    output_vector(ios_emre_index_table(i)) = concentrations(index_i);
-    //output_vector(skewness_index_table(i)) = 0.0;
-    for (size_t j=i; j<N_sel_species; j++){
+    output_vector(re_index_table(i)) = concentrations(i);
+    output_vector(emre_index_table(i)) = concentrations(i);
+    output_vector(ios_emre_index_table(i)) = concentrations(i);
+    for (size_t j=i; j<_Ns; j++){
       output_vector(lna_index_table(i,j)) = 0.0;
       output_vector(ios_index_table(i,j)) = 0.0;
     }
@@ -189,22 +159,20 @@ IOSTask::process()
   for (size_t s=0; s<N_steps; s++)
   {
     // Check if task shall terminate:
-    if (Task::TERMINATING == this->getState())
-    {
+    if (Task::TERMINATING == this->getState()) {
       this->setState(Task::ERROR, tr("Task was terminated by user."));
       return;
     }
 
     this->setProgress(double(s)/N_steps);
 
-    // Update state:
-    this->stepper->step(x, t);
-    // Update time
-    t += dt;
+    // Update state & time
+    this->stepper->step(x, t); t += dt;
 
     // Skip immediate steps
-    if(0 != N_intermediate && 0 != s%(1+N_intermediate))
+    if(0 != N_intermediate && 0 != s%(1+N_intermediate)) {
       continue;
+    }
 
     // Get full state:
     config.getModelAs<iNA::Models::IOSmodel>()->fullState(
@@ -212,26 +180,21 @@ IOSTask::process()
 
     // store state and time:
     output_vector(0) = t;
-    for (size_t i=0; i<N_sel_species; i++)
-    {
-      size_t index_i = species_index[i];
+    for (size_t i=0; i<_Ns; i++) {
       // Store means
-      output_vector(re_index_table(i)) = concentrations(index_i);
-      output_vector(emre_index_table(i)) = emre(index_i) + concentrations(index_i);
-      output_vector(ios_emre_index_table(i)) = emre(index_i) + concentrations(index_i) + iosemre(index_i);
+      output_vector(re_index_table(i)) = concentrations(i);
+      output_vector(emre_index_table(i)) = emre(i) + concentrations(i);
+      output_vector(ios_emre_index_table(i)) = emre(i) + concentrations(i) + iosemre(i);
       // Store covariances:
-      for (size_t j=i; j<N_sel_species; j++){
-        size_t index_j = species_index[j];
-        output_vector(lna_index_table(i,j)) = lna(index_i, index_j);
-        output_vector(ios_index_table(i,j)) = lna(index_i, index_j) + ios(index_i, index_j);
+      for (size_t j=i; j<_Ns; j++){
+        output_vector(lna_index_table(i,j)) = lna(i, j);
+        output_vector(ios_index_table(i,j)) = lna(i, j) + ios(i, j);
 
         // Check if one of the variance elements is negative:
         if ( (i == j) && (0.0 > output_vector(lna_index_table(i,i)) || (0.0 > ios_index_table(i,i)))) {
           this->has_negative_variance = true;
         }
       }
-      // Store skewness:
-      //output_vector(skewness_index_table(i)) = thirdMoment(index_i);
     }
     this->timeseries.append(output_vector);
   }
@@ -249,61 +212,48 @@ IOSTask::process()
 
 
 QString
-IOSTask::getLabel()
-{
+IOSTask::getLabel() {
   return "Time Course Analysis (IOS)";
 }
 
 
 Table *
-IOSTask::getTimeSeries()
-{
+IOSTask::getTimeSeries() {
   return &(this->timeseries);
 }
 
 
 const QString &
-IOSTask::getSpeciesName(size_t i) const
-{
+IOSTask::getSpeciesName(size_t i) const {
   return species_names[i];
 }
 
 const QVector<QString> &
-IOSTask::getSpeciesNames() const
-{
+IOSTask::getSpeciesNames() const {
   return species_names;
 }
 
 
-const QList<QString> &
-IOSTask::getSelectedSpecies() const
-{
-  return config.getSelectedSpecies();
+iNA::Ast::Unit
+IOSTask::getSpeciesUnit() const {
+  return this->config.getModelAs<iNA::Models::IOSmodel>()->getSpeciesUnit();
 }
 
 
 iNA::Ast::Unit
-IOSTask::getSpeciesUnit() const
-{
-  return this->config.getModelAs<iNA::Models::IOSmodel>()->getConcentrationUnit();
-}
-
-
-iNA::Ast::Unit
-IOSTask::getTimeUnit() const
-{
+IOSTask::getTimeUnit() const {
   return this->config.getModelAs<iNA::Models::IOSmodel>()->getTimeUnit();
 }
 
 bool
-IOSTask::hasNegativeVariance() const
-{
+IOSTask::hasNegativeVariance() const {
   return this->has_negative_variance;
 }
 
 
 void
-IOSTask::instantiateInterpreter() {
+IOSTask::instantiateInterpreter()
+{
   /*
    * First, construct interpreter and integerator by selected execution engine:
    */

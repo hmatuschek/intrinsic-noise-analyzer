@@ -17,21 +17,21 @@ namespace Expr {
  *
  * This class is also used by the SBML-SH parser to parse expressions.
  */
-class Assembler : public Context
+class Assembler
 {
 protected:
   /** Holds the lexer. */
   Parser::Lexer &_lexer;
+  /** Holds the parser context. */
+  Context &_context;
 
 public:
   /** Constructs the assembler for the given scope. */
-  Assembler(Ast::Scope *root, Parser::Lexer &lexer);
+  Assembler(Context &root, Parser::Lexer &lexer);
 
 public:
   /** Entry point to parse an expression in the given context. */
   GiNaC::ex processExpression(Parser::ConcreteSyntaxTree &expr);
-
-protected:
   /** Parses a product expression. */
   GiNaC::ex processProduct(Parser::ConcreteSyntaxTree &expr);
   /** Parses a power expression. */
@@ -43,9 +43,9 @@ protected:
   /** Parses the arguments of a function call. */
   void processFunctionCallArguments(Parser::ConcreteSyntaxTree &expr, std::vector<GiNaC::ex> &args);
   /** Parses a number. */
-  double processNumber(Parser::ConcreteSyntaxTree &expr);
+  GiNaC::numeric processNumber(Parser::ConcreteSyntaxTree &expr);
 
-protected:
+public:
   /** Tiny helper function to parse numbers from strings. */
   template <typename T>
   static T toNumber(const std::string &string)

@@ -14,10 +14,9 @@ using namespace iNA;
  * Implementation of RETask
  * ******************************************************************************************** */
 RETask::RETask(const SSETaskConfig &config, QObject *parent) :
-  Task(parent), config(config),
+  Task(parent), config(config), _Ns(config.getModel()->numSpecies()),
   interpreter(0), stepper(0),
-  timeseries(1 + config.getNumSpecies(),
-    1+config.getIntegrationRange().getSteps()/(1+config.getIntermediateSteps()))
+  timeseries(1 + _Ns, 1+config.getIntegrationRange().getSteps()/(1+config.getIntermediateSteps()))
 {
   // First, construct interpreter and integerator by selected execution engine:
   switch(config.getEngine()) {
@@ -318,17 +317,18 @@ RETask::RETask(const SSETaskConfig &config, QObject *parent) :
 
 
   size_t column = 0;
-  QVector<QString> species_names(config.getNumSpecies());
+  QVector<QString> species_names(_Ns);
   this->timeseries.setColumnName(column, "t"); column++;
-  for (int i=0; i<(int)config.getNumSpecies(); i++, column++)
+  for (int i=0; i<(int)_Ns; i++, column++)
   {
-    QString species_id = config.getSelectedSpecies().value(i);
-    iNA::Ast::Species *species = config.getModel()->getSpecies(species_id.toStdString());
+    iNA::Ast::Species *species = config.getModel()->getSpecies(i);
+    QString species_id = species->getIdentifier().c_str();
 
-    if (species->hasName())
-      species_names[i] = QString("%1").arg(species->getName().c_str());
-    else
+    if (species->hasName()) {
+      species_names[i] = species->getName().c_str();
+    } else {
       species_names[i] = species_id;
+    }
 
     this->timeseries.setColumnName(column, QString("%1").arg(species_names[i]));
   }
@@ -360,16 +360,7 @@ RETask::process()
   Eigen::VectorXd concentrations(config.getModel()->numSpecies());
 
   // Holds a row of the output-table:
-  Eigen::VectorXd output_vector(1 + config.getNumSpecies());
-
-  // Maps the i-th selected species to an index in the concentrations vector:
-  size_t N_sel_species = this->config.getNumSpecies();
-  std::vector<size_t> species_index(N_sel_species);
-  for (size_t i=0; i<N_sel_species; i++)
-  {
-    species_index[i] = this->config.getModel()->getSpeciesIdx(
-          this->config.getSelectedSpecies().value(i).toStdString());
-  }
+  Eigen::VectorXd output_vector(1 + config.getModel()->numSpecies());
 
   // initialize (reduced) state
   config.getModelAs<iNA::Models::REmodel>()->getInitialState(x);
@@ -386,10 +377,8 @@ RETask::process()
 
   // store initial state:
   output_vector(0) = t;
-  for (size_t j=0; j<N_sel_species; j++)
-  {
-    size_t index_i = species_index[j];
-    output_vector(1+j) = concentrations(index_i);
+  for (size_t j=0; j<_Ns; j++) {
+    output_vector(1+j) = concentrations(j);
   }
   this->timeseries.append(output_vector);
 
@@ -399,8 +388,7 @@ RETask::process()
   for (size_t i=0; i<N_steps; i++)
   {
     // Check if task shall terminate:
-    if (Task::TERMINATING == this->getState())
-    {
+    if (Task::TERMINATING == this->getState()) {
       this->setState(Task::ERROR, tr("Task was terminated by user."));
       return;
     }
@@ -409,10 +397,9 @@ RETask::process()
 
     // Determine update:
     this->stepper->step(x, t, dx);
-    // Update state:
-    x+=dx;
-    // Update time
-    t += dt;
+
+    // Update state & time
+    x+=dx; t += dt;
 
     // Skip immediate steps
     if(0 != N_intermediate && 0 != i%(1+N_intermediate))
@@ -423,12 +410,9 @@ RETask::process()
 
     // Store new time:
     output_vector(0) = t;
-
     // Store states of selected species:
-    for (size_t j=0; j<N_sel_species; j++)
-    {
-      size_t index_i = species_index[j];
-      output_vector(1+j) = concentrations(index_i);
+    for (size_t j=0; j<_Ns; j++) {
+      output_vector(1+j) = concentrations(j);
     }
 
     this->timeseries.append(output_vector);
@@ -441,9 +425,14 @@ RETask::process()
 
 
 QString
-RETask::getLabel()
-{
+RETask::getLabel() {
   return "Time Course Analysis (RE)";
+}
+
+
+const SSETaskConfig &
+RETask::getConfig() const {
+  return config;
 }
 
 
@@ -454,17 +443,10 @@ RETask::getTimeSeries()
 }
 
 
-const QList<QString> &
-RETask::getSelectedSpecies() const
-{
-  return config.getSelectedSpecies();
-}
-
-
 iNA::Ast::Unit
 RETask::getSpeciesUnit() const
 {
-  return this->config.getModelAs<iNA::Models::REmodel>()->getConcentrationUnit();
+  return this->config.getModelAs<iNA::Models::REmodel>()->getSpeciesUnit();
 }
 
 

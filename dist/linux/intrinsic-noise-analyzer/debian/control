@@ -1,7 +1,7 @@
 Source: intrinsic-noise-analyzer
 Priority: extra
 Maintainer: Hannes Matuschek <hmatuschek@gmail.com>
-Build-Depends: cdbs (>= 0.4.51), debhelper (>= 8.0.0), cmake, libsbml-cppnamespace-dev (= 5.0.0-1), libqt4-dev (>= 4.5), libqtcore4 (>= 4.5), libqtgui4 (>= 4.5), libginac-dev
+Build-Depends: cdbs (>= 0.4.51), debhelper (>= 8.0.0), cmake, libsbml-dev (>= 5.0), libqt4-dev (>= 4.5), libqtcore4 (>= 4.5), libqtgui4 (>= 4.5), libginac-dev
 Standards-Version: 3.9.2
 Section: science
 Homepage: http://www.googlecode.com/p/intrinsic-noise-analyzer
@@ -11,4 +11,12 @@ Section: science
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: The Intrinsic Noise Analyzer
- An application to analyze biological systems.
+ iNA is a computational tool for quantitative analysis of fluctuations in biochemical reaction
+ networks. Such fluctuations, also known as intrinsic noise, arise due to the stochastic nature of
+ chemical reactions and cannot be ignored when some molecules are present in very low copy numbers
+ only, as is the case in living cells. The SBML-based software computes statistical measures such
+ as means and standard deviations of concentrations within a given accuracy. This is carried out
+ automatically using the system size expansion whose leading order term is the popular Linear Noise
+ Approximation. The results of the analysis can be tested against the computationally much more
+ expensive stochastic simulation algorithm.
+

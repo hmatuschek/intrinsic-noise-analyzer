@@ -44,6 +44,8 @@ class SSAModelSelectionPage : public ModelSelectionWizardPage
 
 public:
   explicit SSAModelSelectionPage(GeneralTaskWizard *parent);
+
+  virtual bool validatePage();
 };
 
 
@@ -93,7 +95,6 @@ public:
 
 private:
   QLabel *document;
-  QLabel *selected_species;
   QLabel *ensemble_size;
   QLabel *final_time;
   QLabel *num_samples;

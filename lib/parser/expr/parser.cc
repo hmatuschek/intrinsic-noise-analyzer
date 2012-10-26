@@ -6,91 +6,158 @@
 #include "lexer.hh"
 #include "productions.hh"
 #include "assembler.hh"
-
+#include "ir.hh"
 
 using namespace iNA;
 using namespace iNA::Parser::Expr;
 
 
-Context::Context(Ast::Scope *model)
-  : _scope_stack()
+/* ******************************************************************************************** *
+ * Implementation of ScopeContext, a context for Ast::Scopes
+ * ******************************************************************************************** */
+ScopeContext::ScopeContext(const Ast::Scope *model)
+  : _scope(model)
 {
-  _scope_stack.push_back(model);
+  // Pass...
 }
-
-
-void
-Context::pushScope(Ast::Scope *scope) {
-  _scope_stack.push_back(scope);
-}
-
-void
-Context::popScope() {
-  _scope_stack.pop_back();
-}
-
 
 
 GiNaC::symbol
-Context::resolve(const std::string &name)
+ScopeContext::resolve(const std::string &name)
 {
-  return resolveVariable(name)->getSymbol();
+  return _scope->getVariable(name)->getSymbol();
 }
 
 
-Ast::VariableDefinition *
-Context::resolveVariable(const std::string &name)
+std::string
+ScopeContext::identifier(GiNaC::symbol symbol)
 {
-  std::vector<Ast::Scope *>::reverse_iterator scope=_scope_stack.rbegin();
-  for ( ; scope != _scope_stack.rend(); scope++) {
-    if ((*scope)->hasDefinition(name)) {
-      Ast::Definition *def = (*scope)->getDefinition(name);
-      Ast::VariableDefinition *var = 0;
-      if (0 == (var = dynamic_cast<Ast::VariableDefinition *>(def))) {
-        SymbolError err;
-        err << "Can not resolve symbol " << name << ": Identifier does not refer to a variable!";
-        throw err;
-      }
-      return var;
-    }
+  return _scope->getVariable(symbol)->getIdentifier();
+}
 
-    if ((*scope)->isClosed()) {
-      SymbolError err;
-      err << "Can not resolve symbol " << name << ": Identifier not found.";
-      throw err;
+
+
+/* ******************************************************************************************** *
+ * Implementation of TableContext, a context for unit tests:
+ * ******************************************************************************************** */
+TableContext::TableContext()
+  : _symbol_table()
+{
+  // pass...
+}
+
+void
+TableContext::addSymbol(const std::string &name, GiNaC::symbol symbol)
+{
+  _symbol_table[name] = symbol;
+}
+
+GiNaC::symbol
+TableContext::resolve(const std::string &identifier)
+{
+  if (0 == _symbol_table.count(identifier)) {
+    SymbolError err;
+    err << "Can not resolve identifier " << identifier << ": Unknown.";
+    throw err;
+  }
+  return _symbol_table[identifier];
+}
+
+std::string
+TableContext::identifier(GiNaC::symbol symbol)
+{
+  for (std::map<std::string, GiNaC::symbol>::iterator item=_symbol_table.begin();
+       item != _symbol_table.end(); item++)
+  {
+    if (item->second == symbol) {
+      return item->first;
     }
   }
 
   SymbolError err;
-  err << "Can not resolve symbol " << name << ": Identifier not found.";
+  err << "Can not resolve symbol " << symbol << ": Unknown.";
   throw err;
 }
 
 
 
+/* ******************************************************************************************** *
+ * Implementation of utility functions.
+ * ******************************************************************************************** */
 GiNaC::ex
-Parser::Expr::parseExpression(const std::string &text, Ast::Scope *scope)
+Parser::Expr::parseExpression(const std::string &text, Ast::Scope *scope) {
+  ScopeContext ctx(scope);
+  return parseExpression(text, ctx);
+}
+
+
+GiNaC::ex
+Parser::Expr::parseExpression(const std::string &text, Context &ctx)
 {
   std::stringstream stream(text);
 
   iNA::Parser::Lexer lexer(stream);
   lexer.addRule(new Parser::WhiteSpaceTokenRule(T_WHITESPACE));
   lexer.addRule(new Parser::IdentifierTokenRule(T_IDENTIFIER));
+  lexer.addTokenName(T_IDENTIFIER, "SYMBOL");
   lexer.addRule(new Parser::IntegerTokenRule(T_INTEGER));
+  lexer.addTokenName(T_INTEGER, "INTEGER");
   lexer.addRule(new Parser::FloatTokenRule(T_FLOAT));
+  lexer.addTokenName(T_FLOAT, "FLOAT");
   lexer.addRule(new Parser::KeyWordTokenRule(T_COMMA, ","));
+  lexer.addTokenName(T_COMMA, "','");
   lexer.addRule(new Parser::KeyWordTokenRule(T_PLUS, "+"));
+  lexer.addTokenName(T_PLUS, "'+'");
   lexer.addRule(new Parser::KeyWordTokenRule(T_MINUS, "-"));
+  lexer.addTokenName(T_MINUS, "'-'");
   lexer.addRule(new Parser::KeyWordTokenRule(T_TIMES, "*"));
+  lexer.addTokenName(T_TIMES, "'*'");
   lexer.addRule(new Parser::KeyWordTokenRule(T_POWER, "**"));
   lexer.addRule(new Parser::KeyWordTokenRule(T_POWER, "^"));
-  lexer.addRule(new Parser::KeyWordTokenRule(T_DIVIVE, "/"));
+  lexer.addTokenName(T_POWER, "'**'");
+  lexer.addRule(new Parser::KeyWordTokenRule(T_DIVIDE, "/"));
+  lexer.addTokenName(T_DIVIDE, "'/'");
   lexer.addRule(new Parser::KeyWordTokenRule(T_LPAR, "("));
+  lexer.addTokenName(T_LPAR, "'('");
   lexer.addRule(new Parser::KeyWordTokenRule(T_RPAR, ")"));
+  lexer.addTokenName(T_RPAR, "')'");
+
   lexer.addIgnoredToken(T_WHITESPACE);
 
   Parser::ConcreteSyntaxTree cst;
   ExpressionGrammar::get()->parse(lexer, cst);
 
-  return Expr::Assembler(scope, lexer).processExpression(cst[0]);
+  return Expr::Assembler(ctx, lexer).processExpression(cst[0]);
+}
+
+
+void
+Parser::Expr::serializeExpression(
+    GiNaC::ex expression, std::ostream &stream, const Ast::Scope *scope, SerializationType stategy)
+{
+  ScopeContext context(scope);
+  serializeExpression(expression, stream, context, stategy);
+}
+
+
+void
+Parser::Expr::serializeExpression(
+    GiNaC::ex expression, std::ostream &stream, Context &ctx, SerializationType stategy)
+{
+  // First, create IR from expression
+  SmartPtr<Node> node = Node::fromExpression(expression);
+
+  // Apply trafos on expression if needed:
+  switch (stategy) {
+  case SERIALIZE_PLAIN:
+    // No trafo
+    break;
+  case SERIALIZE_PRETTY:
+    // Make expression more readable:
+    PrettySerializationTrafo::apply(node);
+    break;
+  }
+
+  // Serialize IR into stream:
+  node->serialize(stream, ctx);
 }

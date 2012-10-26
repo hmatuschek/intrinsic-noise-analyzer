@@ -1,9 +1,9 @@
 #include "main.hh"
 
 #include "ssa/ssamodule.hh"
-#include "steadystate/lnasteadystatemodule.hh"
+#include "steadystate/steadystatemodule.hh"
 #include "sse/ssemodule.hh"
-#include "ssscan/ssscanmodule.hh"
+#include "paramscan/paramscanmodule.hh"
 #include "doctree/documentitem.hh"
 #include "utils/logger.hh"
 
@@ -21,7 +21,8 @@ public:
     try {
       return QApplication::notify(obj, event);
     } catch (std::exception &err) {
-      std::cerr << "Oops, there was an error: " << err.what() << std::endl;
+      std::cerr << __FILE__ << " @" << __LINE__
+                << ": Oops, there was an error: " << err.what() << std::endl;
       return false;
     }
   }
@@ -34,7 +35,7 @@ int main(int argc, char *argv[])
   //      new Fluc::Utils::TextMessageHandler(std::cerr, Fluc::Utils::Message::DEBUG));
 
   // Instantiate a QApplication
-  ExceptionApplication qapp(argc, argv);
+  QApplication qapp(argc, argv);
 
   // Instantiate our own application model, holds all the data of the running application
   Application *app = Application::getApp();
@@ -45,7 +46,7 @@ int main(int argc, char *argv[])
 
 
   // Load SteadyState module:
-  app->addModule(new LNASteadyStateModule(app));
+  app->addModule(new SteadyStateModule(app));
   // Load parameter scan module
   app->addModule(new ParamScanModule(app));
 

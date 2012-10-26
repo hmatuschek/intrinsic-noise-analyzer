@@ -26,71 +26,64 @@ class KineticLaw : public Node, public Scope
 {
 public:
   /** Visitor class for kinetic laws. */
-  class Visitor { public: virtual void visit(const KineticLaw *law) = 0; };
+  class Visitor {
+  public:
+    /** Implement this method for KineticLaw visitors. */
+    virtual void visit(const KineticLaw *law) = 0;
+  };
+
   /** Operator class for kinetic laws. */
-  class Operator { public: virtual void act(KineticLaw *law) = 0; };
+  class Operator {
+  public:
+    /** Implement this method for KineticLaw operators. */
+    virtual void act(KineticLaw *law) = 0;
+  };
+
 
 protected:
-  /**
-   * Holds the expression of the kinetic law.
-   */
-  GiNaC::ex expression;
+  /** Holds the expression of the kinetic law. */
+  GiNaC::ex _expression;
 
-  /**
-   * Holds weak references to all parameters defined in this scope.
-   */
-  std::vector<Parameter *> parameters;
+  /** Holds weak references to all parameters defined in this scope. */
+  std::vector<Parameter *> _parameters;
 
 
 public:
   /**
    * Constructor.
-   *
    * @param expr Specifies the kinetic law expression, the owner ship is taken by the instance.
    */
   KineticLaw(GiNaC::ex expr);
 
-  /**
-   * Destructor. Also destroies the expression passed to the constructor.
-   */
+  /** Destructor. Also destroies the expression passed to the constructor. */
   virtual ~KineticLaw();
 
-  /**
-   * Returns the expression of the kinetic law.
-   */
+  /** Returns the expression of the kinetic law. */
   GiNaC::ex getRateLaw() const;
 
-  /**
-   * Sets the rate law expression.
-   *
-   * \note The replaced expression is not destroied!
-   */
+  /** Sets the rate law expression. */
   void setRateLaw(GiNaC::ex node);
 
-  /**
-   * Adds a definition to the KineticLaw's scope, if something else than a @c Parameter definition
-   * is added to the scope an @c InternalError exception is thrown.
-   */
+  /** Adds a definition to the KineticLaw's scope, if something else than a @c Parameter definition
+   * is added to the scope an @c InternalError exception is thrown. */
   virtual void addDefinition(Definition *def);
 
-  /**
-   * Returns the number of parameters defined in this scope.
-   */
+  /** Removes the parameter from the list of local paramters. */
+  virtual void remDefinition(Definition *def);
+
+  /** Returns the number of parameters defined in this scope. */
   size_t numParameters() const;
 
-  /**
-   * Returns the paramter by index.
-   */
+  /** Returns the paramter by index. */
   Parameter *getParameter(size_t i);
 
-  /**
-   * Removes all redundant parameters, i.e., those which are not present in the rate law.
-   */
+  /** Returns the parameter by identifier. */
+  Parameter *getParameter(const std::string &identifier);
+
+  /** Removes all redundant parameters, i.e., those which are not present in the rate law. */
   void cleanUpParameters();
 
-  /**
-   * Dumps a string representation of the kinetic law into the given stream.
-   */
+  /** Dumps a string representation of the kinetic law into the given stream. */
   virtual void dump(std::ostream &str);
 
   /** Handles a visitor. */
@@ -129,42 +122,38 @@ public:
   typedef std::set<Species *>::const_iterator const_mod_iterator;
 
   /** Visitor class for reactions. */
-  class Visitor { public: virtual void visit(const Reaction *reac) = 0; };
+  class Visitor {
+  public:
+    /** Implement this method for Reaction visitors. */
+    virtual void visit(const Reaction *reac) = 0;
+  };
 
   /** Operator class for reactions. */
-  class Operator { public: virtual void act(Reaction *reac) = 0; };
+  class Operator {
+  public:
+    /** Implement this method for Reaction operators. */
+    virtual void act(Reaction *reac) = 0;
+  };
 
 
 protected:
-  /**
-   * Holds the stoichiometric expressions for all reactants of the reaction.
-   */
-  std::map<Species *, GiNaC::ex> reactants;
+  /** Holds the stoichiometric expressions for all reactants of the reaction. */
+  std::map<Species *, GiNaC::ex> _reactants;
 
-  /**
-   * Holds the stoichiometric expressions for all products of the reaction.
-   */
-  std::map<Species *, GiNaC::ex> products;
+  /** Holds the stoichiometric expressions for all products of the reaction. */
+  std::map<Species *, GiNaC::ex> _products;
 
-  /**
-   * Holds a set of species being modifier of the reaction.
-   */
-  std::set<Species *> modifiers;
+  /** Holds a set of species being modifier of the reaction. */
+  std::set<Species *> _modifiers;
 
-  /**
-   * Holds the kinetic law of the reaction.
-   */
-  KineticLaw *kinetic_law;
+  /** Holds the kinetic law of the reaction. */
+  KineticLaw *_kinetic_law;
 
-  /**
-   * Is true, if the reaction is declared to be reversible.
-   */
-  bool is_reversible;
+  /** Is true, if the reaction is declared to be reversible. */
+  bool _is_reversible;
 
-  /**
-   * Holds the optional display name of the reaction.
-   */
-  std::string name;
+  /** Holds the optional display name of the reaction. */
+  std::string _name;
 
 
 public:
@@ -190,142 +179,101 @@ public:
    *        passed to the reaction.
    * @param reversible Specifies if the reaction is reversible.
    */
-  Reaction(const std::string &id, const std::string &name, KineticLaw *law, bool reversible);
+  Reaction(const std::string &id, const std::string &_name, KineticLaw *law, bool reversible);
 
-  /**
-   * Destroies the reaction.
-   *
-   * The destructor also frees all stoichiometric expressions and the kinetic law.
-   */
+  /** Destroys the reaction. The destructor also frees all stoichiometric expressions and the
+   * kinetic law. */
   virtual ~Reaction();
 
-  /**
-   * Returns true if the given species specifies a reactant or product of the reaction.
-   */
+  /** Returns true if the given species specifies a reactant or product of the reaction. */
   bool hasSpecies(Species *species);
 
-  /**
-   * Returns true if the given symbol specifies a reactant or product of the reaction.
-   */
+  /** Returns true if the given symbol specifies a reactant or product of the reaction. */
   bool hasSpecies(GiNaC::symbol symbol);
 
-  /**
-   * Retunrs true if the given species specifies a reactant of the reaction.
-   */
+  /** Retunrs true if the given species specifies a reactant of the reaction. */
   bool hasReactant(Species *species);
 
-  /**
-   * Retunrs true if the given symbol specifies a reactant of the reaction.
-   */
+  /** Retunrs true if the given symbol specifies a reactant of the reaction. */
   bool hasReactant(GiNaC::symbol id);
 
   /** Returns the number of reactants for the reaction. */
   size_t numReactants() const;
 
-  /**
-   * Returns the stoichiometric expression of the given reactant.
-   */
+  /** Returns the stoichiometric expression of the given reactant. */
   GiNaC::ex getReactantStoichiometry(Species *species);
 
-  /**
-   * Returns the stoichiometric expression of the given reactant.
-   */
+  /** Returns the stoichiometric expression of the given reactant. */
   GiNaC::ex getReactantStoichiometry(GiNaC::symbol id);
 
-  /**
-   * (Re-) Sets the soichiometric expression for the given reactant.
-   */
+  /** (Re-) Sets the soichiometric expression for the given reactant. */
   void setReactantStoichiometry(Species *sepcies, GiNaC::ex expr);
 
-  /**
-   * Adds the given expression to the soichiometric expression of the specified reactant.
-   */
+  /** Adds the given expression to the soichiometric expression of the specified reactant. */
   void addReactantStoichiometry(Species *species, GiNaC::ex st);
 
-  /**
-   * Retunrs true if the given species specifies a product of the reaction.
-   */
+  /** Removes all reactants from the reaction. */
+  void clearReactants();
+
+  /** Retunrs true if the given species specifies a product of the reaction. */
   bool hasProduct(Species *species);
 
-  /**
-   * Retunrs true if the given symbol specifies a product of the reaction.
-   */
+  /** Retunrs true if the given symbol specifies a product of the reaction. */
   bool hasProduct(GiNaC::symbol symbol);
 
   /** Returns the number of products. */
   size_t numProducts() const;
 
-  /**
-   * Returns the stoichiometric expression for the given reaction product.
-   */
+  /** Returns the stoichiometric expression for the given reaction product. */
   GiNaC::ex getProductStoichiometry(Species *species);
 
-  /**
-   * Returns the stoichiometric expression for the given reaction product.
-   */
+  /** Returns the stoichiometric expression for the given reaction product. */
   GiNaC::ex getProductStoichiometry(GiNaC::symbol id);
 
-  /**
-   * (Re-) Sets the stoichiometric expression for the given reaction product.
-   */
+  /** (Re-) Sets the stoichiometric expression for the given reaction product. */
   void setProductStoichiometry(Species *species, GiNaC::ex st);
 
-  /**
-   * Adds the given expression to the stoichiometric expression of the specified product.
-   */
+  /** Adds the given expression to the stoichiometric expression of the specified product. */
   void addProductStoichiometry(Species *species, GiNaC::ex st);
 
-  /**
-   * Adds a species to be modifier of the reaction.
-   */
+  /** Removes all products from the reaction. */
+  void clearProducts();
+
+  /** Adds a species to be modifier of the reaction. */
   void addModifier(Species *species);
 
   /** Removes the given species as a modifier of this reaction. */
   void remModifier(Species *species);
 
-  /**
-   * Returns true, if the reaction has modifiers.
-   */
+  /** Returns true, if the reaction has modifiers. */
   bool hasModifier() const;
 
   /** Returns the number of modifier species for this reaction. */
   size_t numModifier() const;
 
-  /**
-   * Returns true if the given species is a modifier of the reaction.
-   */
+  /** Returns true if the given species is a modifier of the reaction. */
   bool isModifier(Species *species) const;
 
-  /**
-   * Returns true if the given species is a modifier of the reaction.
-   */
+  /** Returns true if the given species is a modifier of the reaction. */
   bool isModifier(const GiNaC::symbol &id) const;
 
-  /**
-   * Returns the kinetic law of the reaction.
-   */
+  /** Removes all modifiers from the reaction. */
+  void clearModifier();
+
+  /** Returns the kinetic law of the reaction. */
   KineticLaw *getKineticLaw();
 
-  /**
-   * (Re-) Sets the kinetic law of the reaction.
-   *
-   * @note The replaced law is not freed.
-   */
+  /** (Re-) Sets the kinetic law of the reaction.
+   * @note The replaced law is not destroyed. */
   void setKineticLaw(KineticLaw *law);
 
-  /**
-   * Returns true, if the reaction is defined to be reversible.
-   */
+  /** Returns true, if the reaction is defined to be reversible. */
   bool isReversible() const;
 
-  /**
-   * (Re-) Sets the reversible flag of the reaction.
-   */
+  /** (Re-) Sets the reversible flag of the reaction. */
   void setReversible(bool val);
 
-  /**
-   * Tells you wether the reaction can be considered as the reverse of another and vice versa.
-   */
+  /** Tells you wether the reaction can be considered as the reverse of another and vice versa. */
   bool isReverseOf(Reaction * other);
 
   /** Returns an iterator pointing on the first reactant of the reaction. */

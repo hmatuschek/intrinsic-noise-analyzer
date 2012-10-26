@@ -40,13 +40,13 @@ SET(ina_app_sse_HEADERS
     sse/retask.hh  sse/retaskwrapper.hh  sse/retaskview.hh  sse/replot.hh)
 
 SET(ina_app_steadystate_SOURCES
-    steadystate/lnasteadystatetask.cc steadystate/lnasteadystatetaskwrapper.cc
-    steadystate/lnasteadystatewizard.cc steadystate/lnasteadystateview.cc
-    steadystate/lnasteadystatemodule.cc steadystate/steadystatespectrumplot.cc)
+    steadystate/steadystatetask.cc steadystate/steadystatetaskwrapper.cc
+    steadystate/steadystatewizard.cc steadystate/steadystateview.cc
+    steadystate/steadystatemodule.cc steadystate/steadystatespectrumplot.cc)
 SET(ina_app_steadystate_HEADERS
-    steadystate/lnasteadystatetask.hh steadystate/lnasteadystatetaskwrapper.hh
-    steadystate/lnasteadystatewizard.hh steadystate/lnasteadystateview.hh
-    steadystate/lnasteadystatemodule.hh steadystate/steadystatespectrumplot.hh)
+    steadystate/steadystatetask.hh steadystate/steadystatetaskwrapper.hh
+    steadystate/steadystatewizard.hh steadystate/steadystateview.hh
+    steadystate/steadystatemodule.hh steadystate/steadystatespectrumplot.hh)
 
 SET(ina_app_ssa_SOURCES
     ssa/ssamodule.cc ssa/ssatask.cc ssa/ssawizard.cc ssa/ssataskwrapper.cc ssa/ssaplot.cc
@@ -55,12 +55,12 @@ SET(ina_app_ssa_HEADERS
     ssa/ssamodule.hh ssa/ssatask.hh ssa/ssawizard.hh ssa/ssataskwrapper.hh ssa/ssaplot.hh
     ssa/ssaview.hh)
 
-SET(ina_app_ssscan_SOURCES
-    ssscan/ssscantask.cc ssscan/ssscanwizard.cc ssscan/ssscanmodule.cc ssscan/ssscantaskview.cc
-    ssscan/ssscantaskwrapper.cc ssscan/ssscanplot.cc)
-SET(ina_app_ssscan_HEADERS
-    ssscan/ssscantask.hh ssscan/ssscanwizard.hh ssscan/ssscanmodule.hh ssscan/ssscantaskview.hh
-    ssscan/ssscantaskwrapper.hh ssscan/ssscanplot.hh)
+SET(ina_app_paramscan_SOURCES
+    paramscan/paramscantask.cc paramscan/paramscanwizard.cc paramscan/paramscanmodule.cc paramscan/paramscantaskview.cc
+    paramscan/paramscantaskwrapper.cc paramscan/paramscanplot.cc)
+SET(ina_app_paramscan_HEADERS
+    paramscan/paramscantask.hh paramscan/paramscanwizard.hh paramscan/paramscanmodule.hh paramscan/paramscantaskview.hh
+    paramscan/paramscantaskwrapper.hh paramscan/paramscanplot.hh)
 
 SET(ina_app_doctree_SOURCES doctree/documenttreeitem.cc doctree/treeitem.cc
     doctree/compartmentsitem.cc doctree/documenttree.cc doctree/speciesitem.cc
@@ -96,7 +96,8 @@ SET(ina_app_views_SOURCES
     views/fileselector.cc views/importmodeldialog.cc views/exportmodeldialog.cc
     views/variableruleeditor.cc views/expressioneditor.cc views/unitrenderer.cc
     views/sbmlsheditordialog.cc views/modelview.cc views/uniteditor.cc views/reactionlistview.cc
-    views/reactioneditor.cc views/timeseriesplotwizard.cc)
+    views/reactioneditor.cc views/genericplotdialog.cc views/speciesselectiondialog.cc
+    views/newmodeldialog.cc)
 SET(ina_app_views_HEADERS
     views/documentsview.hh views/parameterview.hh views/reactionview.hh
     views/reactionequationrenderer.hh views/compartmentview.hh views/speciesview.hh
@@ -105,7 +106,8 @@ SET(ina_app_views_HEADERS
     views/fileselector.hh views/importmodeldialog.hh views/exportmodeldialog.hh
     views/variableruleeditor.hh views/expressioneditor.hh views/unitrenderer.hh
     views/sbmlsheditordialog.hh views/modelview.hh views/uniteditor.hh views/reactionlistview.hh
-    views/reactioneditor.hh views/timeseriesplotwizard.hh)
+    views/reactioneditor.hh views/genericplotdialog.hh  views/speciesselectiondialog.hh
+    views/newmodeldialog.hh)
 
 SET(ina_app_tinytex_SOURCES
     tinytex/tinytex.cc tinytex/formula.cc tinytex/ginac2formula.cc)
@@ -121,7 +123,7 @@ SET(ina_app_SOURCES
     ${ina_app_sse_SOURCES}
     ${ina_app_steadystate_SOURCES}
     ${ina_app_ssa_SOURCES}
-    ${ina_app_ssscan_SOURCES})
+    ${ina_app_paramscan_SOURCES})
 SET(ina_app_HEADERS
     ${ina_app_base_HEADERS}
     ${ina_app_doctree_HEADERS}
@@ -132,7 +134,7 @@ SET(ina_app_HEADERS
     ${ina_app_sse_HEADERS}
     ${ina_app_steadystate_HEADERS}
     ${ina_app_ssa_HEADERS}
-    ${ina_app_ssscan_HEADERS})
+    ${ina_app_paramscan_HEADERS})
 
 
 QT4_WRAP_CPP(ina_app_HEADERS_MOC ${ina_app_HEADERS})

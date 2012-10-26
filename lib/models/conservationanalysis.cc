@@ -9,12 +9,11 @@ ConservationAnalysis::ConservationAnalysis(const Ast::Model &model)
     : BaseModel(model),
       propensityExpansion((BaseModel &)(*this)),
       ConservationAnalysisMixin((BaseModel &)(*this)),
+      ICs(species.size()),
       conservationConstants(this->numDepSpecies()),
       Link0CMatrix(this->numDepSpecies(),this->numIndSpecies()),
       LinkCMatrix(this->numSpecies(),this->numIndSpecies()),
-      Omega(this->numSpecies()),
-      Link0CMatrixNumeric(this->numDepSpecies(),this->numIndSpecies()),
-      LinkCMatrixNumeric(this->numSpecies(),this->numIndSpecies())
+      Omega(this->numSpecies())
 
 {
 
@@ -49,45 +48,35 @@ ConservationAnalysis::ConservationAnalysis(const Ast::Model &model)
         this->dependentSpecies.insert( std::pair<GiNaC::ex,GiNaC::ex>( dep_species(s), dependence(s) ) );
 
     /////////////////////////////
-    //plugin some constants
+    // resolve conservation laws
 
-    // Evaluate initial concentrations and evaluate volumes:
-    Trafo::InitialValueFolder evICs(*this);
-    Eigen::VectorXd ICs(species.size());
-    for(size_t i=0; i<species.size();i++){
-       ICs(i)=evICs.evaluate(this->species[i]);
-    }
+    for(size_t i=0; i<species.size();i++)
+        ICs(i) = GiNaC::symbol();
 
-    //store in permutated base
-    this->ICsPermuted = this->PermutationM*ICs;
-
-    Trafo::ConstantFolder constants(*this);
-
-    //evaluate the link matrices
-    Link0CMatrixNumeric = Eigen::ex2double(constants.apply(this->Link0CMatrix));
-    LinkCMatrixNumeric = Eigen::ex2double(constants.apply(this->LinkCMatrix));
-
-    if(numDepSpecies()>0) this->conserved_cycles = getConservedCycles(ICs);
+    Eigen::VectorXex conserved_cycles;
+    if(numDepSpecies()>0) conserved_cycles = getConservedCycles(ICs);
 
     // generate substitution table
     substitutions = getConservationConstants(conserved_cycles);
 
 }
 
-//Eigen::MatrixXex
-//ConservationAnalysis::getConservedCycles(const Eigen::VectorXd &ICs)
-//{
-
-//    Trafo::ConstantFolder constants(*this);
-//    return constants.apply(this->Omega_dep.asDiagonal().inverse()*(conservation_matrix.cast<GiNaC::ex>())*(this->Omega.asDiagonal())*(this->PermutationM.cast<GiNaC::ex>())*(ICs.cast<GiNaC::ex>()));
-
-//}
-
 Eigen::MatrixXex
 ConservationAnalysis::getConservedCycles(const Eigen::VectorXd &ICs)
+
 {
 
     return this->Omega_dep.asDiagonal().inverse()*(conservation_matrix.cast<GiNaC::ex>())*(this->Omega.asDiagonal())*(this->PermutationM.cast<GiNaC::ex>())*(ICs.cast<GiNaC::ex>());
+
+}
+
+
+Eigen::MatrixXex
+ConservationAnalysis::getConservedCycles(const Eigen::VectorXex &ICs)
+
+{
+
+    return this->Omega_dep.asDiagonal().inverse()*(conservation_matrix.cast<GiNaC::ex>())*(this->Omega.asDiagonal())*(this->PermutationM.cast<GiNaC::ex>())*ICs;
 
 }
 
@@ -107,11 +96,11 @@ ConservationAnalysis::getLink0CMatrix()
 
 }
 
-const Eigen::MatrixXex &
+const Eigen::MatrixXex
 ConservationAnalysis::getLinkCMatrix()
 {
 
-    return this->PermutationM.transpose().cast<GiNaC::ex>()*this->LinkCMatrix;
+    return (this->PermutationM.cast<GiNaC::ex>().transpose())*this->LinkCMatrix;
 
 }
 
@@ -141,3 +130,17 @@ ConservationAnalysis::getConservationConstants(const Eigen::VectorXd &conserved_
     return table;
 
 }
+
+GiNaC::exmap
+ConservationAnalysis::getICconstants(const Eigen::VectorXd &initialcondition)
+{
+
+    // generate substitution table
+    GiNaC::exmap table;
+    for (size_t s=0; s<this->numDepSpecies(); s++)
+        table.insert( std::pair<GiNaC::ex,GiNaC::ex>( this->ICs(s), initialcondition(s) ) );
+
+    return table;
+
+}
+

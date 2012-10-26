@@ -44,6 +44,8 @@ public slots:
 private:
   /** Returns the identifier. */
   QVariant _getIdentifier(iNA::Ast::Species *species, int role) const;
+  /** Updates the identifier of the species. */
+  bool _updateIdentifier(iNA::Ast::Species *species, const QVariant &value);
 
   /** Iternal function to get the species name. */
   QVariant _getName(iNA::Ast::Species *species, int role) const;

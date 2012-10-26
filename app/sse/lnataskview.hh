@@ -33,24 +33,23 @@ class LNAResultWidget : public QWidget
 {
   Q_OBJECT
 
-protected:
-  LNATaskWrapper *lna_task_wrapper;
-
-
 public:
-  explicit LNAResultWidget(LNATaskWrapper *lna_task_wrapper, QWidget *parent = 0);
+  explicit LNAResultWidget(LNATaskWrapper *_lna_task_wrapper, QWidget *parent = 0);
 
 
 private slots:
-  void plotButtonPressed();
-  void saveButtonPressed();
+  void _plotButtonPressed();
+  void _genericPlotButtonPressed();
+  void _saveButtonPressed();
 
 
 private:
-  TableWrapper *tableWrapper;
-  QTableView   *dataTable;
-  QPushButton  *plotButton;
-  QPushButton  *saveButton;
+  LNATaskWrapper *_lna_task_wrapper;
+  TableWrapper   *_tableWrapper;
+  QTableView     *_dataTable;
+  QPushButton    *_plotButton;
+  QPushButton    *_genericPlotButton;
+  QPushButton    *_saveButton;
 };
 
 #endif // LNATASKVIEW_HH

@@ -16,6 +16,7 @@
 class DocumentTreeItem : public TreeItem
 {
 public:
+  /** Constructor. */
   DocumentTreeItem();
 
   /**

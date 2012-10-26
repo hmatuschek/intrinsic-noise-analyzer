@@ -6,67 +6,41 @@
 
 namespace iNA {
 
+/** Simple test for the SBML-SH parser. */
 class SBMLSHParserTest : public UnitTest::TestCase
 {
 public:
-  /**
-   * Tests lexical analysis of identifier.
-   */
+  /** Tests lexical analysis of identifier. */
   void testLexerIdentifier();
-
-  /**
-   * Tests lexical analysis of strings.
-   */
+  /** Tests lexical analysis of strings. */
   void testLexerString();
-
-  /**
-   * Tests lexical analyis of integers.
-   */
+  /** Tests lexical analyis of integers. */
   void testLexerInteger();
-
-  /**
-   * Tests lexical analyis of floats.
-   */
+  /** Tests lexical analyis of floats. */
   void testLexerFloat();
-
-  /**
-   * Tests lexical analysis of floats.
-   */
+  /** Tests lexical analysis of floats. */
   void testLexerExpFloat();
-
-  /**
-   * Tests lexical analysis of some keywords.
-   */
+  /** Tests lexical analysis of some keywords. */
   void testLexerKeywords();
-
-  /**
-   * Tests parsing of model-definitions.
-   */
+  /** Tests parsing of model-definitions. */
   void testParserModelDefinition();
-
-  /**
-   * Tests parsing of unit-definitions.
-   */
+  /** Tests parsing of unit-definitions. */
   void testParserUnitDefinition();
-
-  /**
-   * Tests parsing of compartment-definitions.
-   */
+  /** Tests parsing of compartment-definitions. */
   void testParserCompartmentDefinition();
-
-  /**
-   * Tests parsing of species-definitions.
-   */
+  /** Tests parsing of species-definitions. */
   void testParserSpeciesDefinition();
-
-  /**
-   * Tests parsing of complete models.
-   */
+  /** Tests parsing of complete models. */
   void testParserModel();
+  /** Tests if definition order of variables is insigificant. */
+  void testVarDefOrder();
 
 
 public:
+  /** Creates test suite. */
   static UnitTest::TestSuite *suite();
+
+  virtual ~SBMLSHParserTest() {}
 };
 
 }

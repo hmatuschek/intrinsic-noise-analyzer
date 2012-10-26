@@ -148,6 +148,12 @@ Table::Table(const Eigen::MatrixXd &data, QObject *parent)
   // Pass...
 }
 
+void
+Table::resize(size_t columns,size_t rows)
+{
+  header.resize(columns);
+  matrix().resize(rows,columns);
+}
 
 size_t
 Table::getNumColumns() const

@@ -13,8 +13,8 @@ TaskItem::TaskItem(Task *task, QObject *parent)
 
   // Construct actions:
   this->context_menu = new QMenu();
-  this->removeAct = new QAction(tr("remove analysis"), this->context_menu);
-  this->stopAct = new QAction(tr("stop analysis"), this->context_menu);
+  this->removeAct = new QAction(tr("Remove analysis"), this->context_menu);
+  this->stopAct = new QAction(tr("Stop analysis"), this->context_menu);
 
   // Assemble menu:
   this->context_menu->addAction(this->stopAct);

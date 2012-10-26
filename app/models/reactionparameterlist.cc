@@ -32,8 +32,10 @@ ReactionParameterList::flags(const QModelIndex &index) const
   if (columnCount() <= index.column()) return Qt::NoItemFlags;
   if (rowCount() <= index.row()) return Qt::NoItemFlags;
 
-  // Mark only column 1 & 2 editable
-  if ( (1 == index.column()) || (2 == index.column()) ) item_flags |= Qt::ItemIsEditable;
+  // Mark only column 0, 1 & 2 editable
+  if ( (0 == index.column()) || (1 == index.column()) || (2 == index.column()) ) {
+    item_flags |= Qt::ItemIsEditable;
+  }
 
   return item_flags;
 }
@@ -75,6 +77,7 @@ ReactionParameterList::setData(const QModelIndex &index, const QVariant &value, 
   // Dispatch...
   bool success = false;
   switch (index.column()) {
+  case 0: success = _updateIdentifier(param, value); break;
   case 1: success = _updateName(param, value); break;
   case 2: success = _updateInitialValue(param, value); break;
   default: break;
@@ -164,12 +167,36 @@ ReactionParameterList::remParameter(int row)
 }
 
 
+void
+ReactionParameterList::updateCompleteTable() {
+  reset();
+}
+
+
 QVariant
 ReactionParameterList::_getIdentifier(iNA::Ast::Parameter *param, int role) const
 {
   if (Qt::DisplayRole != role) { return QVariant(); }
   return QString(param->getIdentifier().c_str());
 }
+
+bool
+ReactionParameterList::_updateIdentifier(iNA::Ast::Parameter *param, const QVariant &value)
+{
+  // Get ID
+  QString qid = value.toString();
+  std::string id = qid.toStdString();
+  // If nothing changed -> done.
+  if (id == param->getIdentifier()) { return true; }
+  // Check ID format
+  if (! QRegExp("[a-zA-Z_][a-zA-Z0-9_]*").exactMatch(qid)) { return false; }
+  // Check if id is not assigned allready:
+  if (_kinetic_law->hasDefinition(id)) { return false; }
+  // Ok, assign identifier:
+  _kinetic_law->resetIdentifier(param->getIdentifier(), id);
+  return true;
+}
+
 
 
 QVariant
@@ -212,9 +239,9 @@ ReactionParameterList::_getInitialValue(iNA::Ast::Parameter *param, int role) co
 
   if (Qt::EditRole == role) {
     // Export formula as string
-    std::stringstream str;
-    if (param->hasValue()) { str << param->getValue(); }
-    return QString(str.str().c_str());
+    std::stringstream buffer;
+    iNA::Parser::Expr::serializeExpression(param->getValue(), buffer, _kinetic_law);
+    return QString(buffer.str().c_str());
   }
 
   return QVariant();

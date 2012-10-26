@@ -1,5 +1,5 @@
-#ifndef __FLUC_EVALUATE_BCI_CODE_HH__
-#define __FLUC_EVALUATE_BCI_CODE_HH__
+#ifndef __INA_EVAL_BCI_CODE_HH__
+#define __INA_EVAL_BCI_CODE_HH__
 
 #include <vector>
 #include <cstdlib>
@@ -14,14 +14,12 @@ namespace bci {
 /**
  * Represents a single instance of a ByteCode instruction.
  *
- * @inrgoup bci
+ * @ingroup bci
  */
 class Instruction
 {
 public:
-  /**
-   * Defines all avaliable op-codes.
-   */
+  /** Defines all avaliable op-codes. */
   typedef enum {
     ADD,    ///< Pops rhs & lhs values from stack and pushes the back the sum.
     SUB,    ///< Pops rhs & lhs values from stack and pushes the back the difference.
@@ -37,9 +35,7 @@ public:
   } OpCode;
 
 
-  /**
-   * Defines the function-codes for all built-in functions.
-   */
+  /** Defines the function-codes for all built-in functions. */
   typedef enum {
     FUNCTION_ABS,  /// < Function code for the absolute value "abs()".
     FUNCTION_LOG,  /// < Function code for the natural logarithm "log()".
@@ -48,14 +44,11 @@ public:
 
 
 public:
-  /**
-   * Holds the op-code.
-   */
+  /** Holds the op-code. */
   OpCode opcode;
 
-  /**
-   * An immediate value:
-   */
+  /** An immediate value. An imediate value allows to store values as RHS operands
+   * together with the instruction. */
   union {
     struct {
       double real;       ///< Holds the real part of the complex value.
@@ -64,34 +57,26 @@ public:
     size_t asIndex;      ///< The immediate value as a integer index.
   } value;
 
-  /**
-   * Flag to indicate immediate value.
-   */
+  /** Flag to indicate immediate value. */
   bool valueImmediate;
 
 
 public:
-  /**
-   * Constructs a simple instruction without immediate values.
-   */
+  /** Constructs a simple instruction without immediate values. */
   Instruction(OpCode opcode)
     : opcode(opcode), valueImmediate(false)
   {
     // Pass...
   }
 
-  /**
-   * Constructs an instruction with index immediate value.
-   */
+  /** Constructs an instruction with index immediate value. */
   Instruction(OpCode opcode, size_t value)
     : opcode(opcode), valueImmediate(true)
   {
     this->value.asIndex = value;
   }
 
-  /**
-   * Constructs an instruction with a double immediate value.
-   */
+  /** Constructs an instruction with a double immediate value. */
   Instruction(OpCode opcode, double value)
     : opcode(opcode), valueImmediate(true)
   {
@@ -99,9 +84,7 @@ public:
     this->value.asComplex.imag = 0.0;
   }
 
-  /**
-   * Constructs an instruction with a complex immediate value.
-   */
+  /** Constructs an instruction with a complex immediate value. */
   Instruction(OpCode opcode, const std::complex<double> &value)
     : opcode(opcode), valueImmediate(true)
   {
@@ -109,10 +92,12 @@ public:
     this->value.asComplex.imag = value.imag();
   }
 
+  /** Unpacks a complex immediate value of an instruction. */
   std::complex<double> immediateComplex() const {
     return std::complex<double>(value.asComplex.real, value.asComplex.imag);
   }
 
+  /** Unpacks a real immediate value of an instruction. */
   double immediateReal() const {
     return value.asComplex.real;
   }
@@ -129,105 +114,70 @@ public:
 class Code
 {
 public:
-  /**
-   * Defines the iterator type over the instructions.
-   */
+  /** Defines the iterator type over the instructions. */
   typedef std::vector<Instruction>::iterator iterator;
 
-  /**
-   * Defines the iterator type over the instructions.
-   */
+  /** Defines the iterator type over the instructions. */
   typedef std::vector<Instruction>::const_iterator const_iterator;
 
 
 protected:
-  /**
-   * Holds the actual byte-code instructions.
-   */
+  /** Holds the actual byte-code instructions. */
   std::vector<Instruction> code;
 
-  /**
-   * Max stack size.
-   */
+  /** Max stack size. */
   size_t max_stack_size;
 
 
 public:
-  /**
-   * Constructs an empty byte-code container.
-   */
+  /** Constructs an empty byte-code container. */
   Code(size_t num_threads=1);
 
-  /**
-   * Copy constructor.
-   */
+  /** Copy constructor. */
   Code(const Code &other);
 
-  /**
-   * Appends the given byte-code to this byte-code.
-   */
+  /** Appends the given byte-code to this byte-code. */
   const Code &operator<< (const Code &other);
 
-  /**
-   * Appends a given instruction to the byte-code.
-   */
+  /** Appends a given instruction to the byte-code. */
   const Code &operator<< (const Instruction &instruction);
 
-  /**
-   * Checks the byte-code for constistency and determines the minimum stack-size needed to
+  /** Checks the byte-code for constistency and determines the minimum stack-size needed to
    * evaluate the code.
-   *
-   * @returns False if the byte-code is not balanced.
-   */
+   * @returns False if the byte-code is not balanced. */
   bool check();
 
-  /**
-   * Dumps the code into the given stream.
-   */
+  /** Dumps the code into the given stream. */
   void dump(std::ostream &str);
 
-  /**
-   * Returns the minimum stack-size required to execute this code.
-   *
+  /** Returns the minimum stack-size required to execute this code.
    * @note You need to call check() to update the minimum required stack size once, the bytecode
-   *       was modified.
-   */
+   *       was modified. */
   size_t getMinStackSize() const;
 
+  /** Returns the number of instructions of the byte code. */
   size_t getCodeSize() const;
 
+  /** Clears the bytecode. */
   void clear();
 
-  /**
-   * Returns an iterator to the first instruction of the bytecode.
-   */
-  inline iterator begin()
-  {
+  /** Returns an iterator to the first instruction of the bytecode. */
+  inline iterator begin() {
     return this->code.begin();
   }
 
-  /**
-   * Returns an iterator pointing right after the last instruction.
-   */
-  inline iterator end()
-  {
+  /** Returns an iterator pointing right after the last instruction. */
+  inline iterator end() {
     return this->code.end();
   }
 
-
-  /**
-   * Returns an iterator to the first instruction of the bytecode.
-   */
-  inline const_iterator begin() const
-  {
+  /** Returns an iterator to the first instruction of the bytecode. */
+  inline const_iterator begin() const {
     return this->code.begin();
   }
 
-  /**
-   * Returns an iterator pointing right after the last instruction.
-   */
-  inline const_iterator end() const
-  {
+  /** Returns an iterator pointing right after the last instruction. */
+  inline const_iterator end() const {
     return this->code.end();
   }
 };

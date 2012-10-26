@@ -1,6 +1,7 @@
 #include "parser.hh"
-#include "ast/model.hh"
 #include "assembler.hh"
+#include <ast/model.hh>
+#include <trafo/consistencycheck.hh>
 #include <fstream>
 
 using namespace iNA;
@@ -32,6 +33,9 @@ iNA::Parser::Sbmlsh::Parser::parse(Ast::Model &model)
   // Assemble model from CST
   Assembler assembler(model, _lexer);
   assembler.process(root);
+
+  // Check model for consistency:
+  Trafo::ConsistencyCheck::assertConsistent(&model);
 }
 
 

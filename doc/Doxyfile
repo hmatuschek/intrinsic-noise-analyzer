@@ -32,7 +32,7 @@ PROJECT_NAME           = IntrinsicNoiseAnalyzer
 # This could be handy for archiving the generated documentation or
 # if some version control system is used.
 
-PROJECT_NUMBER         = 0.3
+PROJECT_NUMBER         = 0.4
 
 # Using the PROJECT_BRIEF tag one can provide an optional one line description
 # for a project that appears at the top of each page and should give viewer
@@ -184,7 +184,7 @@ SEPARATE_MEMBER_PAGES  = NO
 # The TAB_SIZE tag can be used to set the number of spaces in a tab.
 # Doxygen uses this value to replace tabs by spaces in code fragments.
 
-TAB_SIZE               = 8
+TAB_SIZE               = 4
 
 # This tag can be used to specify a number of aliases that acts
 # as commands in the documentation. An alias has the form "name=value".
@@ -629,15 +629,15 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories
 # with spaces.
 
-INPUT = ../lib/parser ../lib/parser/sbml ../lib/parser/sbmlsh \ 
-        ../lib/ast ../lib/ast/trafo \
+INPUT = ../lib/parser ../lib/parser/sbml ../lib/parser/sbmlsh ../lib/parser/expr \
+        ../lib/ast \
         ../lib/trafo \
-        ../lib/models ../lib/models/unsupported \
-        ../lib/eval ../lib/eval/direct ../lib/eval/bci ../lib/eval/bcimp ../lib/evel/jit \
+        ../lib/models \
+        ../lib/eval ../lib/eval/direct ../lib/eval/bci ../lib/eval/bcimp ../lib/eval/jit \
         ../lib \
         ../lib/ode \
         ../lib/nlesolve \
-        ../lib/utils 
+        ../lib/utils
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding, which is
@@ -1194,7 +1194,7 @@ SERVER_BASED_SEARCH    = NO
 # If the GENERATE_LATEX tag is set to YES (the default) Doxygen will
 # generate Latex output.
 
-GENERATE_LATEX         = YES
+GENERATE_LATEX         = NO
 
 # The LATEX_OUTPUT tag is used to specify where the LaTeX docs will be put.
 # If a relative path is entered the value of OUTPUT_DIRECTORY will be

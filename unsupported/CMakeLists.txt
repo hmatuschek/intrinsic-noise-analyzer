@@ -13,7 +13,3 @@ SET(libina_unsupported_HEADERS
 ADD_LIBRARY(libunsupported SHARED ${libina_unsupported_SOURCES})
 SET_TARGET_PROPERTIES(libunsupported PROPERTIES OUTPUT_NAME "inaunsupported")
 TARGET_LINK_LIBRARIES(libunsupported ${LIBS})
-
-
-INSTALL(TARGETS libunsupported
-        DESTINATION ${CMAKE_INSTALL_LIBDIR})

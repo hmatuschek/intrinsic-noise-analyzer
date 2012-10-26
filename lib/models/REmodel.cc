@@ -4,8 +4,8 @@
 using namespace iNA;
 using namespace iNA::Models;
 
-void
-REmodel::postConstructor()
+REmodel::REmodel(const Ast::Model &model)
+  : SSEBaseModel(model)
 {
     // set dimension
     dim = this->numIndSpecies();
@@ -16,34 +16,28 @@ REmodel::postConstructor()
 
     // and combine to update vector
     this->updateVector = this->REs;
-
-    this->foldConservationConstants(this->updateVector);
-    this->foldConservationConstants(this->JacobianM);
-
-}
-
-REmodel::REmodel(const Ast::Model &model)
-  : SSEBaseModel(model)
-{
-  postConstructor();
 }
 
 void
 REmodel::fullState(const Eigen::VectorXd &state, Eigen::VectorXd &full_state)
 {
 
-  // make space
-  full_state.resize(this->numSpecies());
-  full_state.head(this->numIndSpecies()) = state.head(this->numIndSpecies());
+    InitialConditions context(*this);
 
-  if(this->numDepSpecies()>0){
-      full_state.tail(this->numDepSpecies()) =
-              Eigen::ex2double(this->conserved_cycles)
-              + this->Link0CMatrixNumeric*state.head(this->numIndSpecies());
-  }
+    fullState(context,state,full_state);
 
-  // restore original order and return
-  full_state = (this->PermutationM.transpose())*full_state;
+//  // make space
+//  full_state.resize(this->numSpecies());
+//  full_state.head(this->numIndSpecies()) = state.head(this->numIndSpecies());
+
+//  if(this->numDepSpecies()>0){
+//      full_state.tail(this->numDepSpecies()) =
+//              Eigen::ex2double(this->conserved_cycles)
+//              + this->Link0CMatrixNumeric*state.head(this->numIndSpecies());
+//  }
+
+//  // restore original order and return
+//  full_state = (this->PermutationM.transpose())*full_state;
 
 }
 
@@ -94,24 +88,27 @@ REmodel::getFlux(const Eigen::VectorXd &state, Eigen::VectorXd &flux)
 
 size_t
 REmodel::getDimension()
+
 {
   // this is enough for deterministic RE models
   return dim;
 }
 
 
-//void
-//REmodel::getOmega(Eigen::VectorXd &om)
-//{
-//  om = this->Omega;
-//}
-
 void
 REmodel::getInitialState(Eigen::VectorXd &x)
 {
-  // deterministic initial conditions for state
-  x<<(this->ICsPermuted).head(this->numIndSpecies());
 
+  InitialConditions ICs(*this);
+  getInitial(ICs, x);
+
+}
+
+void
+REmodel::getInitial(InitialConditions &ICs,Eigen::VectorXd &x)
+
+{
+  x = ICs.getInitialState();
 }
 
 const Eigen::VectorXex &

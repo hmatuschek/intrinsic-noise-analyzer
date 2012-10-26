@@ -15,6 +15,9 @@ protected:
   QList<TreeItem *> _children;
 
 public:
+  /** Constructor. */
+  TreeItem();
+
   virtual TreeItem *getTreeChild(int row) const;
 
   virtual void setTreeParent(TreeItem *parent);

@@ -47,6 +47,7 @@ public:
   static iNA::Parser::Production *get();
 
 protected:
+  /** Holds the singleton instance. */
   static FunctionCallArgumentsProduction *instance;
 };
 
@@ -106,6 +107,7 @@ public:
   static iNA::Parser::Production *get();
 
 protected:
+  /** Holds the singleton instance. */
   static PowerExpressionProduction *instance;
 };
 

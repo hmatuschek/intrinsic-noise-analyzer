@@ -19,17 +19,16 @@ int main(int argc, char *argv[])
   Ast::Model sbml_model; Parser::Sbml::importModel(sbml_model, argv[1]);
 
   // Do the work:
-  try
-  {
+
 
     size_t steps = 500;
 
-    double transientTime = 50;
+    double transientTime = 500;//goodwin 50;//brussel500;
     size_t realizations=4;
     // Construct SSA model from SBML model
 
-    const double fMax   = 10000;//20*0.75/(3.14);
-    const double deltaf = 1;
+    const double fMax   = 50*10/(2*3.14);//goodwin 10*50/(2*3.14); //brusselator20*0.75/(3.14);
+    const double deltaf = 0.00025;
 
     Models::SpectrumRecorder<Models::OptimizedSSA> specEval(sbml_model,realizations,fMax,deltaf,realizations);
 
@@ -75,10 +74,5 @@ int main(int argc, char *argv[])
 
     }
 
-  }
-  catch (Exception err)
-  {
-    std::cerr << "Can not perform SSA. " << std::endl;
-    return -1;
-  }
+
 }

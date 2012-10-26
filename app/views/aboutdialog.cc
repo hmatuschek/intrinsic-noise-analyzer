@@ -21,7 +21,7 @@ AboutDialog::AboutDialog(QWidget *parent)
   title->setFont(Application::getApp()->getH1Font());
   title->setAlignment(Qt::AlignCenter);
 
-  QLabel *version = new QLabel(tr("Version 0.3.1"));
+  QLabel *version = new QLabel(tr("Version 0.4.0"));
   version->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
   version->setTextFormat(Qt::LogText);
   version->setAlignment(Qt::AlignCenter);
@@ -103,7 +103,7 @@ QString AboutPage::content =
         "<LI>the Stochastic Simulation Algorithm - a widely used Monte Carlo method.</UL>"
         "iNA is based on the computer algebra system Ginac and the compiler framework LLVM. </p>"
 "  <h3>Copyright</h3>"
-"  <p>Intrinsic Noise Analyzer version 0.3.1, "
+"  <p>Intrinsic Noise Analyzer version 0.4, "
 "     Copyright (C) 2011,2012 Ramon Grima, Hannes Matuschek, Philipp Thomas</p>"
 "  <p>The Intrinsic Noise Analyzer comes with ABSOLUTELY NO WARRANTY;"
 "     This is free software, and you are welcome to redistribute it"
@@ -115,9 +115,9 @@ QString AboutPage::content =
 QString AuthorsPage::content =
 "<html><head></head>"
 " <body>"
-"  <p><b>Ramon Grima</b> <i>University of Edinburgh</i></p>"
-"  <p><b>Philipp Thomas</b> <i>University of Edinburgh</i></p>"
-"  <p><b>Hannes Matuschek</b> <i>University of Potsdam</i></p>"
+"  <p><b>Ramon Grima</b> <i>University of Edinburgh, UK</i></p>"
+"  <p><b>Philipp Thomas</b> <i>University of Edinburgh, UK</i> & <i>Humboldt University of Berlin, Germany</i></p>"
+"  <p><b>Hannes Matuschek</b> <i>University of Potsdam, Germany</i></p>"
 " </body>"
 "</html>";
 

@@ -4,140 +4,44 @@
 #include <QVector>
 
 
-LNATimeSeriesPlot::LNATimeSeriesPlot(size_t num_species, Table *series,
-                                     const QString &species_unit, const QString &time_unit,
-                                     QObject *parent)
-    : Plot::Figure("Mean concentrations (RE & LNA)", parent)
+LNATimeSeriesPlot::LNATimeSeriesPlot(QList<QString> &selected_species, LNATask *task, QObject *parent)
+  : LinePlot("Mean concentrations (RE & LNA)", parent)
 {
-  // Create a plot:
-  this->setXLabel(tr("time [%1]").arg(time_unit));
-  this->setYLabel(tr("concentrations [%1]").arg(species_unit));
-
-  QVector<Plot::VarianceLineGraph *> graphs(num_species);
-
-  // Allocate a graph for each colum in time-series:
-  for (size_t i=0; i<num_species; i++)
-  {
-    Plot::GraphStyle style = this->getStyle(i);
-    graphs[i] = new Plot::VarianceLineGraph(style);
-    this->axis->addGraph(graphs[i]);
-    this->addToLegend(series->getColumnName(i+1), graphs[i]);
+  // Get species unit
+  std::stringstream unit_str;
+  task->getSpeciesUnit().dump(unit_str, true);
+  QString species_unit(unit_str.str().c_str());
+  // Get time unit
+  unit_str.str("");
+  task->getTimeUnit().dump(unit_str, true);
+  QString time_unit(unit_str.str().c_str());
+  // Set axis labels with units:
+  setXLabel(tr("time [%1]").arg(time_unit));
+  if (task->getSpeciesUnit().isConcentrationUnit()) {
+    setYLabel(tr("concentrations [%1]").arg(species_unit));
+  } else {
+    setYLabel(tr("amount [%1]").arg(species_unit));
   }
 
-  // Do not plot all
-  int idx_incr = 0;
-  if (0 == (idx_incr = series->getNumRows()/100))
-  {
-    idx_incr = 1;
-  }
+  iNA::Ast::Model *model = task->getConfig().getModel();
+  Table *series = task->getTimeSeries();
+  size_t Ntot = model->numSpecies();
+  size_t Nsel = selected_species.size();
 
-  // Plot time-series:
-  for (size_t j=0; j<series->getNumRows(); j+=idx_incr)
-  {
-    size_t N = graphs.size();
-    size_t offset = N+1; size_t increment = N;
-    for (size_t i=0; i<num_species; i++)
-    {
-      graphs[i]->addPoint((*series)(j, 0), (*series)(j, 1+i), std::sqrt((*series)(j, offset)));
-      offset += increment; increment -= 1;
-    }
+  // Create a graph for each colum in time-series:
+  for (size_t i=0; i<Nsel; i++) {
+    size_t species_idx = model->getSpeciesIdx(selected_species.at(i).toStdString());
+    size_t mean_idx = 1+species_idx;
+    size_t var_idx  = 1+Ntot; // offset, first cov column
+    var_idx  += species_idx*(Ntot+1) - (species_idx*(species_idx+1))/2;
+    addVarianceGraph(series->getColumn(0), series->getColumn(mean_idx), series->getColumn(var_idx),
+                     series->getColumnName(mean_idx));
   }
 
   // Force y plot-range to be [0, AUTO]:
   this->getAxis()->setYRangePolicy(
         Plot::RangePolicy(Plot::RangePolicy::FIXED, Plot::RangePolicy::AUTOMATIC));
   this->getAxis()->setYRange(0, 1);
-
-  for (size_t i=0; i<num_species; i++)
-  {
-    graphs[i]->commit();
-  }
-
-  this->updateAxes();
-}
-
-
-
-
-/* ********************************************************************************************* *
- * Implementation of EMRE time-series plot.
- * ********************************************************************************************* */
-EMRETimeSeriesPlot::EMRETimeSeriesPlot(size_t num_species, Table *series,
-                                       const QString &species_unit, const QString &time_unit,
-                                       QObject *parent)
-  : Plot::Figure("Mean concentrations (EMRE & RE)", parent)
-{
-  // Create a plot:
-  this->setXLabel(tr("time [%1]").arg(time_unit));
-  this->setYLabel(tr("concentrations [%1]").arg(species_unit));
-
-  QVector<Plot::LineGraph *> lna_graphs(num_species);
-  QVector<Plot::LineGraph *> emre_graphs(num_species);
-
-  size_t lna_offset  = 1;
-  size_t emre_offset = 1+num_species+(num_species*(num_species+1))/2;
-
-  // Allocate a graph for each colum in time-series:
-  for (size_t i=0; i<num_species; i++)
-  {
-    Plot::GraphStyle style = this->getStyle(i);
-    emre_graphs[i] = new Plot::LineGraph(style);
-
-    QColor lcolor = style.getLineColor();
-    lcolor.setAlpha(128); style.setLineColor(lcolor);
-    lna_graphs[i] = new Plot::LineGraph(style);
-
-    this->axis->addGraph(lna_graphs[i]);
-    this->axis->addGraph(emre_graphs[i]);
-
-    this->addToLegend(series->getColumnName(lna_offset+i), lna_graphs[i]);
-    this->addToLegend(series->getColumnName(emre_offset+i), emre_graphs[i]);
-  }
-
-  // Do not plot all
-  int idx_incr ;
-  if (0 == (idx_incr = series->getNumRows()/100))
-  {
-    idx_incr = 1;
-  }
-
-  // Plot time-series:
-  Eigen::VectorXd  lna_vals(2);
-  for (size_t j=0; j<series->getNumRows(); j+=idx_incr)
-  {
-    size_t N = lna_graphs.size();
-    size_t offset = N+1; size_t increment = N;
-    for (size_t i=0; i<num_species; i++)
-    {
-      lna_vals(0) = (*series)(j, 0);
-      lna_vals(1) = (*series)(j, 1+i);
-      offset += increment; increment -= 1;
-      lna_graphs[i]->addPoint(lna_vals);
-    }
-  }
-
-  // Plot time-series:
-  Eigen::VectorXd  emre_vals(2);
-  for (size_t j=0; j<series->getNumRows(); j+=idx_incr)
-  {
-    for (size_t i=0; i<num_species; i++)
-    {
-      emre_vals(0) = (*series)(j, 0);
-      emre_vals(1) = (*series)(j, emre_offset+i);
-      emre_graphs[i]->addPoint(emre_vals);
-    }
-  }
-
-  // Force y plot-range to be [0, AUTO]:
-  this->getAxis()->setYRangePolicy(
-        Plot::RangePolicy(Plot::RangePolicy::FIXED, Plot::RangePolicy::AUTOMATIC));
-  this->getAxis()->setYRange(0, 1);
-
-  for (size_t i=0; i<num_species; i++)
-  {
-    lna_graphs[i]->commit();
-    emre_graphs[i]->commit();
-  }
 
   this->updateAxes();
 }
@@ -147,65 +51,44 @@ EMRETimeSeriesPlot::EMRETimeSeriesPlot(size_t num_species, Table *series,
 /* ********************************************************************************************* *
  * Implementation of correlation plot.
  * ********************************************************************************************* */
-LNACorrelationPlot::LNACorrelationPlot(LNATask *task,
-                                       const QString &time_unit,
-                                       QObject *parent)
-  : Figure("Correlation Coefficients (LNA)", parent)
+LNACorrelationPlot::LNACorrelationPlot(QList<QString> &selected_species, LNATask *task, QObject *parent)
+  : LinePlot("Correlation Coefficients (LNA)", parent)
 {
+  // Get time unit
+  std::stringstream unit_str;
+  task->getTimeUnit().dump(unit_str, true);
+  QString time_unit(unit_str.str().c_str());
   this->setXLabel(tr("time [%1]").arg(time_unit));
   this->setYLabel(tr("correlation coefficient"));
 
-  size_t num_species = task->getSelectedSpecies().size();
-  size_t N_cov = (num_species*(num_species-1))/2;
+  iNA::Ast::Model *model= task->getConfig().getModel();
   Table *data = task->getTimeSeries();
+  size_t Nsel = selected_species.size();
+  size_t Ntot = model->numSpecies();
+  size_t N_cov = (Nsel*(Nsel-1))/2;
   QVector<Plot::LineGraph *> graphs(N_cov);
 
   // Allocate a graph for each colum in time-series:
-  size_t graph_idx = 0;
-  size_t column_idx = 1+num_species;
-  Eigen::MatrixXi index_table(num_species, num_species);
-  for (size_t i=0; i<num_species; i++)
-  {
-    index_table(i,i) = column_idx; column_idx++;
-    for (size_t j=i+1; j<num_species; j++, graph_idx++, column_idx++)
+  size_t offset=1+Ntot;
+  for (size_t i=0; i<Nsel; i++) {
+    iNA::Ast::Species *species_i = model->getSpecies(selected_species.at(i).toStdString());
+    size_t species_idx_i = model->getSpeciesIdx(species_i);
+    QString species_name_i = data->getColumnName(1+species_idx_i);
+    size_t var_idx_i = offset + species_idx_i*(Ntot+1) - (species_idx_i*(species_idx_i+1))/2;
+    Eigen::VectorXd var_i = data->getColumn(var_idx_i);
+
+    for (size_t j=i+1; j<Nsel; j++)
     {
-      Plot::GraphStyle style = this->getStyle(graph_idx);
-      graphs[graph_idx] = new Plot::LineGraph(style);
-      this->axis->addGraph(graphs[graph_idx]);
-      this->addToLegend(
-            QString("corr(%1, %2)").arg(task->getSpeciesName(i)).arg(task->getSpeciesName(j)),
-            graphs[graph_idx]);
-      index_table(i,j) = index_table(j,i) = column_idx;
-    }
-  }
-
-  // Do not plot all
-  int idx_incr ;
-  if (0 == (idx_incr = data->getNumRows()/100))
-  {
-    idx_incr = 1;
-  }
-
-  // Plot time-series:
-  for (size_t k=0; k<data->getNumRows(); k+=idx_incr)
-  {
-    size_t idx = 0;
-    for (size_t i=0; i<num_species; i++)
-    {
-      for (size_t j=i+1; j<num_species; j++, idx++)
-      {
-        double x = (*data)(k, 0);
-        double y = 0.0;
-
-        if ((0.0 != (*data)(k, index_table(i,i))) && (0.0 != (*data)(k, index_table(j,j))))
-        {
-          y = (*data)(k, index_table(i,j)) /
-              (std::sqrt((*data)(k, index_table(i,i))) *
-               std::sqrt((*data)(k, index_table(j,j))));
-        }
-
-        graphs[idx]->addPoint(x, y);
-      }
+      iNA::Ast::Species *species_j = model->getSpecies(selected_species.at(i).toStdString());
+      size_t species_idx_j = model->getSpeciesIdx(species_j);
+      QString species_name_j = data->getColumnName(1+species_idx_j);
+      size_t var_idx_j = offset + species_idx_j*(Ntot+1) - (species_idx_j*(species_idx_j+1))/2;
+      size_t cov_idx_ij = var_idx_i + (std::max(species_idx_i, species_idx_j) - std::min(species_idx_i, species_idx_j));
+      Eigen::VectorXd var_j = data->getColumn(var_idx_j);
+      Eigen::VectorXd cov_ij = data->getColumn(cov_idx_ij);
+      Eigen::VectorXd corr = cov_ij.array() / (var_i.array()*var_j.array()).sqrt();
+      addLineGraph(data->getColumn(0), corr,
+                   QString("corr(%1, %2)").arg(species_name_i).arg(species_name_j));
     }
   }
 
@@ -214,49 +97,6 @@ LNACorrelationPlot::LNACorrelationPlot(LNATask *task,
         Plot::RangePolicy(Plot::RangePolicy::FIXED, Plot::RangePolicy::FIXED));
   this->getAxis()->setYRange(-1.1, 1.1);
 
-  // Finally commit changes:
-  for (size_t i=0; i<N_cov; i++)
-  {
-    graphs[i]->commit();
-  }
-
-  this->updateAxes();
-}
-
-
-
-/* ********************************************************************************************* *
- * Implementation of vadility plot:
- * ********************************************************************************************* */
-LNAVadilityPlot::LNAVadilityPlot(size_t num_species, Table *data, QObject *parent)
-  : Figure("Vadility Plot", parent)
-{
-  this->setXLabel("time");
-  this->setYLabel("probability of vadility");
-  this->getAxis()->showXZero(true);
-
-  size_t probIdx = 1+2*num_species+num_species*(num_species+1)/2;
-
-  // Allocate graph:
-  Plot::GraphStyle style = this->getStyle(0);
-  Plot::LineGraph *graph = new Plot::LineGraph(style);
-  this->axis->addGraph(graph);
-
-  // Plot time-series:
-  for (size_t k=0; k<data->getNumRows(); k++)
-  {
-    double x = (*data)(k, 0);
-    double y = (*data)(k, probIdx);
-    graph->addPoint(x, y);
-  }
-
-  // Force y plot-range to be [0, 1]
-  this->getAxis()->setYRangePolicy(
-        Plot::RangePolicy(Plot::RangePolicy::FIXED, Plot::RangePolicy::FIXED));
-  this->getAxis()->setYRange(0, 1);
-
-  // Commit changes:
-  graph->commit();
 
   this->updateAxes();
 }

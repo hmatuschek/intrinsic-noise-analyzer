@@ -5,8 +5,8 @@ using namespace iNA::Ast;
 
 VariableDefinition::VariableDefinition(Node::NodeType type, const std::string &id,
                                        bool is_const)
-  : Definition(id, type), has_value(false), is_const(is_const), symbol(id),
-    value(), rule(0)
+  : Definition(id, type), _has_value(false), _is_const(is_const), _symbol(id),
+    _value(), _rule(0)
 {
   // Done
 }
@@ -14,8 +14,8 @@ VariableDefinition::VariableDefinition(Node::NodeType type, const std::string &i
 
 VariableDefinition::VariableDefinition(Node::NodeType type, const std::string &id, GiNaC::ex value,
                                        const std::string &name, bool is_const)
-  : Definition(id, name, type), has_value(true), is_const(is_const), symbol(id),
-    value(value), rule(0)
+  : Definition(id, name, type), _has_value(true), _is_const(is_const), _symbol(id),
+    _value(value), _rule(0)
 {
   // Done.
 }
@@ -23,8 +23,8 @@ VariableDefinition::VariableDefinition(Node::NodeType type, const std::string &i
 
 VariableDefinition::VariableDefinition(Node::NodeType type, const std::string &id, GiNaC::ex value, Rule *rule,
                                        bool is_const)
-  : Definition(id, type), has_value(true), is_const(is_const), symbol(id),
-    value(value), rule(rule)
+  : Definition(id, type), _has_value(true), _is_const(is_const), _symbol(id),
+    _value(value), _rule(rule)
 {
   // Done.
 }
@@ -33,69 +33,76 @@ VariableDefinition::VariableDefinition(Node::NodeType type, const std::string &i
 VariableDefinition::~VariableDefinition()
 {
   // Free attached rule if there is one:
-  if (0 != this->rule) {
-    delete this->rule;
+  if (0 != this->_rule) {
+    delete this->_rule;
   }
 }
 
 
+void
+VariableDefinition::setIdentifier(const std::string &id) {
+  Definition::setIdentifier(id);
+  _symbol.set_name(id);
+}
+
+
 bool VariableDefinition::isConst() const {
-  return this->is_const;
+  return this->_is_const;
 }
 
 void VariableDefinition::setConst(bool is_const) {
-  this->is_const = is_const;
+  this->_is_const = is_const;
 }
 
 bool VariableDefinition::hasValue() const {
-  return this->has_value;
+  return this->_has_value;
 }
 
 GiNaC::ex VariableDefinition::getValue() const {
-  return this->value;
+  return this->_value;
 }
 
 void VariableDefinition::setValue(GiNaC::ex value) {
-  this->value = value;
-  this->has_value = true;
+  this->_value = value;
+  this->_has_value = true;
 }
 
 const GiNaC::symbol & VariableDefinition::getSymbol() const {
-  return this->symbol;
+  return this->_symbol;
 }
 
 bool VariableDefinition::hasRule() const {
-  return 0 != this->rule;
+  return 0 != this->_rule;
 }
 
 Rule * VariableDefinition::getRule() {
-  return this->rule;
+  return this->_rule;
 }
 
 const Rule * VariableDefinition::getRule() const {
-  return this->rule;
+  return this->_rule;
 }
 
 void VariableDefinition::setRule(Rule *rule) {
-  this->rule = rule;
+  this->_rule = rule;
 }
 
 
 void
 VariableDefinition::dump(std::ostream &str)
 {
-  if (this->is_const) {
+  if (this->_is_const) {
     str << "const " << this->getIdentifier();
   } else {
     str << "var " << this->getIdentifier();
   }
 
   if (this->hasValue()) {
-    str << " = " << this->value;
+    str << " = " << this->_value;
   }
 
   if (this->hasRule()) {
-    this->rule->dump(str);
+    this->_rule->dump(str);
   }
 }
 
@@ -126,11 +133,11 @@ VariableDefinition::apply(Ast::Operator &op)
 void
 VariableDefinition::traverse(Ast::Visitor &visitor) const
 {
-  if (hasRule()) { rule->accept(visitor); }
+  if (hasRule()) { _rule->accept(visitor); }
 }
 
 void
 VariableDefinition::traverse(Ast::Operator &op)
 {
-  if (hasRule()) { rule->apply(op); }
+  if (hasRule()) { _rule->apply(op); }
 }

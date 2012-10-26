@@ -4,6 +4,7 @@
 #include <ginac/ginac.h>
 #include <ast/ast.hh>
 #include <iostream>
+#include "parser.hh"
 
 
 namespace iNA {
@@ -13,6 +14,8 @@ namespace Expr {
 /** Serializes GiNaC::ex expressions into strings.
  * This uses a much nicer serialization than the one implemented by GiNaC. It also can only
  * serialize those expressions that can be parsed using the Fluc::Parser::Expr parsers.
+ *
+ * @deprecated Use @c iNA::Parser::Expr::serializeExpression instead.
  */
 class Writer :
     public GiNaC::visitor, public GiNaC::basic::visitor, public GiNaC::add::visitor,
@@ -47,6 +50,7 @@ public:
   virtual void visit(const GiNaC::basic &node);
 
 public:
+  /** Simply serializes teh given expression using the given scope into the given stream .*/
   static void write(GiNaC::ex expression, const Ast::Scope &scope, std::ostream &stream);
 };
 

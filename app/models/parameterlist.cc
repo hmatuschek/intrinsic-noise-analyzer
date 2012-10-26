@@ -50,6 +50,7 @@ ParameterList::setData(const QModelIndex &index, const QVariant &value, int role
   // Dispatch
   bool success = false;
   switch (index.column()) {
+  case 0: success = _updateIdentifier(param, value); break;
   case 1: success = _updateName(param, value); break;
   case 2: success = _updateInitialValue(param, value); break;
   case 4: success = _updateConstFlag(param, value); break;
@@ -170,6 +171,24 @@ ParameterList::_getIdentifier(iNA::Ast::Parameter *param, int role) const
   return param->getIdentifier().c_str();
 }
 
+bool
+ParameterList::_updateIdentifier(iNA::Ast::Parameter *param, const QVariant &value)
+{
+  // Get ID
+  QString qid = value.toString();
+  std::string id = qid.toStdString();
+  // If nothing changed -> done.
+  if (id == param->getIdentifier()) { return true; }
+  // Check ID format
+  if (! QRegExp("[a-zA-Z_][a-zA-Z0-9_]*").exactMatch(qid)) { return false; }
+  // Check if id is not assigned allready:
+  if (_model->hasDefinition(id)) { return false; }
+  // Ok, assign identifier:
+  _model->resetIdentifier(param->getIdentifier(), id);
+  return true;
+}
+
+
 QVariant
 ParameterList::_getName(iNA::Ast::Parameter *param, int role) const
 {
@@ -205,7 +224,8 @@ ParameterList::_getInitialValue(iNA::Ast::Parameter *param, int role) const
     return Ginac2Formula::toPixmap(param->getValue(), *_model);
   } else {
     // Serialize expression for editing:
-    std::stringstream buffer; buffer << param->getValue();
+    std::stringstream buffer;
+    iNA::Parser::Expr::serializeExpression(param->getValue(), buffer, _model);
     return QString(buffer.str().c_str());
   }
 }

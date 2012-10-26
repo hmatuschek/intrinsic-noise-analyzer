@@ -95,7 +95,7 @@ Scope::const_iterator::operator !=(const Scope::const_iterator &other)
  * Implementation of Scope.
  */
 Scope::Scope(Scope *parent, bool is_closed)
-  : definitions(), symbol_table(), is_closed(is_closed), _parent_scope(parent)
+  : _definitions(), _symbol_table(), _is_closed(is_closed), _parent_scope(parent)
 {
   // Done.
 }
@@ -104,8 +104,8 @@ Scope::Scope(Scope *parent, bool is_closed)
 Scope::~Scope()
 {
   // Iterate over all definitions and free them:
-  for(std::map<std::string, Definition *>::iterator iter = this->definitions.begin();
-      iter != this->definitions.end(); iter++)
+  for(std::map<std::string, Definition *>::iterator iter = this->_definitions.begin();
+      iter != this->_definitions.end(); iter++)
   {
     delete iter->second;
   }
@@ -119,6 +119,13 @@ Scope::hasParentScope() const {
 
 Scope *
 Scope::getRootScope() {
+  if (0 == _parent_scope) { return this; }
+
+  return _parent_scope->getRootScope();
+}
+
+const Scope *
+Scope::getRootScope() const {
   if (0 == _parent_scope) { return this; }
 
   return _parent_scope->getRootScope();
@@ -141,16 +148,37 @@ Scope::setParent(Scope *parent) {
 
 
 void
+Scope::resetIdentifier(const std::string &id, const std::string &new_id)
+{
+  // Get definition:
+  Definition *def = getDefinition(id, true);
+  // Check if new id is in use:
+  if (hasDefinition(new_id, true)) {
+    SymbolError err;
+    err << "Can not reset identifier of definition " << id << ": to " << new_id
+        << ": Identifier already in use.";
+    throw err;
+  }
+  // Remove old id from lookup table
+  _definitions.erase(id);
+  // Reset definition:
+  def->setIdentifier(new_id);
+  // add definition to lookup table
+  _definitions[new_id] = def;
+}
+
+
+void
 Scope::addDefinition(Definition *def)
 {
   // Check if the if there is a definition with the same identifier:
   std::map<std::string, Definition *>::iterator item;
-  if (this->definitions.end() != (item = this->definitions.find(def->getIdentifier()))) {
+  if (this->_definitions.end() != (item = this->_definitions.find(def->getIdentifier()))) {
     delete item->second;
     item->second = def;
   } else {
     // Store definition in table
-    this->definitions[def->getIdentifier()] = def;
+    this->_definitions[def->getIdentifier()] = def;
   }
 
   Scope *scope = 0;
@@ -168,7 +196,7 @@ Scope::addDefinition(Definition *def)
   VariableDefinition *var = 0;
   if (0 != (var = dynamic_cast<VariableDefinition *>(def))) {
     // If the definition is a variable definition -> store symbol of variable in symbol_table.
-    symbol_table[var->getSymbol()] = var;
+    _symbol_table[var->getSymbol()] = var;
   }
 }
 
@@ -177,8 +205,8 @@ void
 Scope::remDefinition(Definition *def)
 {
   // Check if the if there is a definition with the same identifier:
-  std::map<std::string, Definition *>::iterator item = this->definitions.find(def->getIdentifier());
-  if (this->definitions.end() == item)
+  std::map<std::string, Definition *>::iterator item = this->_definitions.find(def->getIdentifier());
+  if (this->_definitions.end() == item)
   {
     SymbolError err;
     err << "Can not remove definition " << def->getIdentifier()
@@ -186,36 +214,37 @@ Scope::remDefinition(Definition *def)
     throw err;
   }
 
-  this->definitions.erase(def->getIdentifier());
+  this->_definitions.erase(def->getIdentifier());
 
   if (Node::isVariableDefinition(def)) {
-    symbol_table.erase(static_cast<VariableDefinition *>(def)->getSymbol());
+    _symbol_table.erase(static_cast<VariableDefinition *>(def)->getSymbol());
   }
 }
 
 
 bool
-Scope::hasDefinition(const std::string &name) const throw()
+Scope::hasDefinition(const std::string &name, bool local) const throw()
 {
-  if (this->definitions.end() != this->definitions.find(name))
+  if (this->_definitions.end() != this->_definitions.find(name))
     return true;
 
-  if (0 != _parent_scope && !is_closed)
+  if ((0 != _parent_scope) && (!_is_closed) && (!local)) {
     return _parent_scope->hasDefinition(name);
+  }
 
   return false;
 }
 
 
 Definition *
-Scope::getDefinition(const std::string &name)
+Scope::getDefinition(const std::string &name, bool local)
 {
   // Search in this scope:
-  std::map<std::string, Definition *>::iterator item = this->definitions.find(name);
-  if (definitions.end() != item) { return item->second; }
+  std::map<std::string, Definition *>::iterator item = this->_definitions.find(name);
+  if (_definitions.end() != item) { return item->second; }
 
   // If not closed and has parent -> search in parent scope:
-  if (0 != _parent_scope && !is_closed)
+  if (0 != _parent_scope && !_is_closed && !local)
     return _parent_scope->getDefinition(name);
 
   // Not found...
@@ -229,11 +258,11 @@ Definition * const
 Scope::getDefinition(const std::string &name) const
 {
   // Search in this scope:
-  std::map<std::string, Definition *>::const_iterator item = this->definitions.find(name);
-  if (definitions.end() != item) { return item->second; }
+  std::map<std::string, Definition *>::const_iterator item = this->_definitions.find(name);
+  if (_definitions.end() != item) { return item->second; }
 
   // If not closed and has parent -> search in parent scope:
-  if (0 != _parent_scope && !is_closed)
+  if (0 != _parent_scope && !_is_closed)
     return _parent_scope->getDefinition(name);
 
   // Not found...
@@ -246,7 +275,7 @@ Scope::getDefinition(const std::string &name) const
 bool
 Scope::hasVariable(const GiNaC::symbol &symbol) const
 {
-  if (this->symbol_table.end() != this->symbol_table.find(symbol)) { return true; }
+  if (this->_symbol_table.end() != this->_symbol_table.find(symbol)) { return true; }
   if (! hasParentScope() || isClosed()) { return false; }
   return _parent_scope->hasVariable(symbol);
 }
@@ -294,9 +323,9 @@ VariableDefinition *
 Scope::getVariable(const GiNaC::symbol &symbol)
 {
   std::map<GiNaC::symbol, VariableDefinition *, GiNaC::ex_is_less>::iterator item
-      = this->symbol_table.find(symbol);
+      = this->_symbol_table.find(symbol);
 
-  if (this->symbol_table.end() == item) {
+  if (this->_symbol_table.end() == item) {
     if (isClosed() || ! hasParentScope()) {
       SymbolError err;
       err << "Symbol " << symbol << " does not name a variable.";
@@ -314,10 +343,10 @@ VariableDefinition * const
 Scope::getVariable(const GiNaC::symbol &symbol) const
 {
   std::map<GiNaC::symbol, VariableDefinition *, GiNaC::ex_is_less>::const_iterator item
-      = this->symbol_table.find(symbol);
+      = this->_symbol_table.find(symbol);
 
-  if (this->symbol_table.end() == item) {
-    if (isClosed() || ! hasParentScope()) {
+  if (this->_symbol_table.end() == item) {
+    if (isClosed() || !hasParentScope()) {
       SymbolError err;
       err << "Symbol " << symbol << " does not name a variable.";
       throw err;
@@ -330,7 +359,7 @@ Scope::getVariable(const GiNaC::symbol &symbol) const
 }
 
 
-bool Scope::isClosed() const { return is_closed; }
+bool Scope::isClosed() const { return _is_closed; }
 
 
 std::string
@@ -348,28 +377,28 @@ Scope::getNewIdentifier(const std::string &base_name)
 Scope::iterator
 Scope::begin()
 {
-  return Scope::iterator(this->definitions.begin());
+  return Scope::iterator(this->_definitions.begin());
 }
 
 
 Scope::const_iterator
 Scope::begin() const
 {
-  return Scope::const_iterator(this->definitions.begin());
+  return Scope::const_iterator(this->_definitions.begin());
 }
 
 
 Scope::iterator
 Scope::end()
 {
-  return Scope::iterator(this->definitions.end());
+  return Scope::iterator(this->_definitions.end());
 }
 
 
 Scope::const_iterator
 Scope::end() const
 {
-  return Scope::const_iterator(this->definitions.end());
+  return Scope::const_iterator(this->_definitions.end());
 }
 
 

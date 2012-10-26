@@ -27,7 +27,7 @@ ReactionList::headerData(int section, Qt::Orientation orientation, int role) con
   switch (section) {
   case 0: return QVariant("Name");
   case 1: return QVariant("Reaction");
-  case 2: return QVariant("Kinetic law");
+  case 2: return QVariant("Propensity");
   default: break;
   }
 
@@ -52,6 +52,14 @@ ReactionList::data(const QModelIndex &index, int role) const
   }
 
   return QVariant();
+}
+
+
+void
+ReactionList::updateTable() {
+  // Signal view that everything has changed
+  emit layoutAboutToBeChanged();
+  emit layoutChanged();
 }
 
 

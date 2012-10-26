@@ -289,7 +289,7 @@ Writer::processSpeciesList(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIER Mo
   for (size_t i=0; i<model.numSpecies(); i++) {
     Ast::Species *species = model.getSpecies(i);
     LIBSBML_CPP_NAMESPACE_QUALIFIER Species *sbml_species = sbml_model->createSpecies();
-    sbml_species->setHasOnlySubstanceUnits(model.speciesHasSubstanceUnits());
+    sbml_species->setHasOnlySubstanceUnits(model.speciesHaveSubstanceUnits());
     processSpecies(species, sbml_species);
 
     sbml_species->setCompartment(species->getCompartment()->getIdentifier());
@@ -325,6 +325,9 @@ Writer::processReaction(Ast::Reaction *reac, LIBSBML_CPP_NAMESPACE_QUALIFIER Rea
   sbml_reac->setId(reac->getIdentifier());
   if (reac->hasName()) { sbml_reac->setName(reac->getName()); }
 
+  // if reaction is reversible
+  sbml_reac->setReversible(reac->isReversible());
+
   // Process reactants:
   for (Ast::Reaction::iterator item = reac->reactantsBegin(); item != reac->reactantsEnd(); item++) {
     LIBSBML_CPP_NAMESPACE_QUALIFIER SpeciesReference *sbml_r = sbml_reac->createReactant();
@@ -332,6 +335,7 @@ Writer::processReaction(Ast::Reaction *reac, LIBSBML_CPP_NAMESPACE_QUALIFIER Rea
     LIBSBML_CPP_NAMESPACE_QUALIFIER StoichiometryMath *sbml_r_m = sbml_r->createStoichiometryMath();
     sbml_r_m->setMath(processExpression(item->second, model));
   }
+
   // Process products:
   for (Ast::Reaction::iterator item = reac->productsBegin(); item != reac->productsEnd(); item++) {
     LIBSBML_CPP_NAMESPACE_QUALIFIER SpeciesReference *sbml_p = sbml_reac->createProduct();
@@ -339,11 +343,13 @@ Writer::processReaction(Ast::Reaction *reac, LIBSBML_CPP_NAMESPACE_QUALIFIER Rea
     LIBSBML_CPP_NAMESPACE_QUALIFIER StoichiometryMath *sbml_p_m = sbml_p->createStoichiometryMath();
     sbml_p_m->setMath(processExpression(item->second, model));
   }
+
   // Process modifiers:
   for (Ast::Reaction::mod_iterator item = reac->modifiersBegin(); item != reac->modifiersEnd(); item++) {
     LIBSBML_CPP_NAMESPACE_QUALIFIER ModifierSpeciesReference *sbml_r = sbml_reac->createModifier();
     sbml_r->setSpecies((*item)->getIdentifier());
   }
+
   // process kinetic law:
   LIBSBML_CPP_NAMESPACE_QUALIFIER KineticLaw *sbml_law = sbml_reac->createKineticLaw();
   processKineticLaw(reac->getKineticLaw(), sbml_law, model);
@@ -371,8 +377,9 @@ Writer::processKineticLaw(Ast::KineticLaw *law, LIBSBML_CPP_NAMESPACE_QUALIFIER 
     if (param->hasValue()) {
       if (! GiNaC::is_a<GiNaC::numeric>(param->getValue()) ) {
         ExportError err;
-        err << "Can only set numeric value for intial value of local parameter "
-            << param->getIdentifier();
+        err << "Non-numeric intial value of local parameter "
+            << param->getIdentifier()
+            << "encountered. Feature is not supported by SBML.";
         throw err;
       }
       sbml_param->setValue(GiNaC::ex_to<GiNaC::numeric>(param->getValue()).to_double());

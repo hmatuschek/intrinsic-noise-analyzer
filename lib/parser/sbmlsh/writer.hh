@@ -51,8 +51,6 @@ protected:
   static void processReaction(Ast::Reaction *reac, std::ostream &output);
   /** Serializes the kinetic law of a reaction. */
   static void processKineticLaw(Ast::KineticLaw *law, std::ostream &output);
-  /** Serializes the list of events. */
-  static void processEventList(Ast::Model &model, std::ostream &output);
 };
 
 

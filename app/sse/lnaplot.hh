@@ -6,55 +6,27 @@
 #include "../plot/variancelinegraph.hh"
 #include "../timeseries.hh"
 #include "lnatask.hh"
+#include "../views/varianceplot.hh"
 
 
-/**
- * Collects data from a @c Table and updates the
- * @c VarianceLinesGraph instance.
- */
-class LNATimeSeriesPlot : public Plot::Figure
+/** Implements a simple quick plot for the RE mean and LAN var. */
+class LNATimeSeriesPlot : public LinePlot
 {
   Q_OBJECT
 
 public:
-  explicit LNATimeSeriesPlot(size_t num_species, Table *data,
-                             const QString &species_unit, const QString &time_unit,
-                             QObject *parent=0);
+  explicit LNATimeSeriesPlot(QList<QString> &selected_species, LNATask *task, QObject *parent=0);
 };
 
 
-
-class EMRETimeSeriesPlot : public Plot::Figure
+/** Implements a simple correlation plot for LNA covariances. */
+class LNACorrelationPlot : public LinePlot
 {
   Q_OBJECT
 
 public:
-  explicit EMRETimeSeriesPlot(size_t num_species, Table *data,
-                              const QString &species_unit, const QString &time_unit,
-                              QObject *parent=0);
+  explicit LNACorrelationPlot(QList<QString> &selected_species, LNATask *task, QObject *parent=0);
 };
 
-
-
-class LNACorrelationPlot : public Plot::Figure
-{
-  Q_OBJECT
-
-public:
-  explicit LNACorrelationPlot(LNATask *taks, const QString &time_unit,
-                              QObject *parent=0);
-};
-
-
-/**
- * @deprecated Unused.
- */
-class LNAVadilityPlot : public Plot::Figure
-{
-  Q_OBJECT
-
-public:
-  explicit LNAVadilityPlot(size_t num_species, Table *data, QObject *parent=0);
-};
 
 #endif // LINESGRAPHADAPTOR_HH

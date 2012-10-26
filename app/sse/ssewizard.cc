@@ -25,7 +25,6 @@ SSEWizard::SSEWizard(QWidget *parent) :
   this->setWindowTitle("Time Course Analysis (SSE)");
 
   this->setPage(SSEWizard::MODEL_SELECTION_PAGE, new SSEModelSelectionPage(this));
-  this->setPage(SSEWizard::SPECIES_SELECTION_PAGE, new SSESpeciesSelectionPage(this));
   this->setPage(SSEWizard::ENGINE_SELECTION_PAGE, new SSEEngineSelectionPage(this));
   this->setPage(SSEWizard::INTEGRATOR_CONFIG_PAGE, new SSEIntegratorPage(this));
   this->setPage(SSEWizard::SUMMARY_PAGE, new SSESummaryPage(this));
@@ -95,23 +94,11 @@ SSEModelSelectionPage::validatePage()
     }
   } catch (Exception err) {
     // Simply show a warning and done.
-    QMessageBox::warning(0, tr("Can not construct RE anlysis from model: "), err.what());
+    QMessageBox::warning(0, tr("Can not construct SSE anlysis from model: "), err.what());
     return false;
   }
 
   return true;
-}
-
-
-
-/* ********************************************************************************************* *
- * Implementation of the species selection page:
- * ********************************************************************************************* */
-SSESpeciesSelectionPage::SSESpeciesSelectionPage(GeneralTaskWizard *parent)
-  : SpeciesSelectionWizardPage(parent)
-{
-  this->setTitle(tr("Time Course Analysis (SSE)"));
-  this->setSubTitle(tr("Select some species for analysis."));
 }
 
 
@@ -152,10 +139,6 @@ SSESummaryPage::SSESummaryPage(GeneralTaskWizard *parent)
   this->model_name = new QLabel();
   this->model_name->setTextFormat(Qt::LogText);
 
-  this->selected_species = new QLabel();
-  this->selected_species->setTextFormat(Qt::LogText);
-  this->selected_species->setWordWrap(true);
-
   this->integration_range = new QLabel();
   this->integration_range->setTextFormat(Qt::LogText);
 
@@ -164,7 +147,6 @@ SSESummaryPage::SSESummaryPage(GeneralTaskWizard *parent)
 
   QFormLayout *layout = new QFormLayout();
   layout->addRow("Model:", this->model_name);
-  layout->addRow("Selected species:", this->selected_species);
   layout->addRow("Plot range:", this->integration_range);
   layout->addRow("Approx. memory used:", this->memory);
   this->setLayout(layout);
@@ -178,14 +160,13 @@ SSESummaryPage::initializePage()
   SSETaskConfig &config = wizard->getConfigCast<SSETaskConfig>();
 
   this->model_name->setText(config.getModelDocument()->getModel().getName().c_str());
-  this->selected_species->setText(config.getSelectedSpecies().join(", "));
 
   ODE::IntegrationRange range = config.getIntegrationRange();
   QString range_str("From %1 to %2 in %3 steps.");
   this->integration_range->setText(
         range_str.arg(range.getStartTime()).arg(range.getEndTime()).arg(range.getSteps()));
 
-  size_t N_species = config.getNumSpecies();
+  size_t N_species = config.getModel()->numSpecies();
   size_t N = 1 + 2*N_species + (N_species*(N_species+1));
   QString mem_str("%1 MB");
   this->memory->setText(mem_str.arg(double(8*N*range.getSteps())/126976));

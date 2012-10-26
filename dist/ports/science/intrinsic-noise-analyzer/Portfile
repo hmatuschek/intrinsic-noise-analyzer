@@ -4,17 +4,23 @@
 PortSystem 1.0
 
 name intrinsic-noise-analyzer
-version 0.3.1
+version 0.4.0
 categories science
 platforms darwin
 
-maintainers hmatuschek \
-            gmail.com:hmatuschek
+maintainers gmail.com:hmatuschek
 
-description The intrinsic noise analyzer for biochemical networks.
-long_description The intrinsic noise analyzer for biochemical networks.
+description The intrinsic noise analyzer for biochemical reaction networks.
+long_description iNA is a computational tool for quantitative analysis of fluctuations in \
+  biochemical reaction networks. Such fluctuations, also known as intrinsic noise, arise due to \
+  the stochastic nature of chemical reactions and cannot be ignored when some molecules are \
+  present in very low copy numbers only, as is the case in living cells. The SBML-based software \
+  computes statistical measures such as means and standard deviations of concentrations within a \
+  given accuracy. This is carried out automatically using the system size expansion whose leading \
+  order term is the popular Linear Noise Approximation. The results of the analysis can be tested \
+  against the computationally much more expensive stochastic simulation algorithm.
 
-license           GPL-2
+license GPL-2
 
 homepage http://code.google.com/p/intrinsic-noise-analyzer
 
@@ -24,8 +30,7 @@ checksums md5    7717cc18fafcf840d50494e8b0772b4c \
           sha1   9d985f104beea6b1346a325c4fc77fe6a542d50c \
           rmd160 666133cf07826e48617e3109c2ede69ff4391e9b
 
-# We depend on libsbml with cppnamespace
-depends_lib  port:libsbml-cppnamespace \
+depends_lib  port:libsbml \
              port:qt4-mac \
              port:GiNaC \
              port:llvm-3.1
@@ -49,7 +54,7 @@ if {${configure.compiler} == "clang"} {
 
 
 # Phase modifications
-# Move source into eigen_src; configure & build (out-of-source) in ${worksrcpath}
+# Move source into ina_src; configure & build (out-of-source) in ${workpath}
 post-extract {
   # Rename extracted directory
     move ${workpath}/${name}-${version} ${workpath}/ina_src

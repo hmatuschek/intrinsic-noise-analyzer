@@ -4,51 +4,40 @@
 #include <QVector>
 
 
-RETimeSeriesPlot::RETimeSeriesPlot(size_t num_species, Table *series,
-                                   const QString &species_unit, const QString &time_unit,
-                                   QObject *parent)
-  : Plot::Figure("Mean concentrations (RE)", parent)
+RETimeSeriesPlot::RETimeSeriesPlot(QList<QString> &selected_species, RETask *task, QObject *parent)
+  : LinePlot("Mean concentrations (RE)", parent)
 {
-  // Create a plot:
-  this->setXLabel(tr("time [%1]").arg(time_unit));
-  this->setYLabel(tr("concentrations [%1]").arg(species_unit));
+  // Get species unit
+  std::stringstream unit_str;
+  task->getSpeciesUnit().dump(unit_str, true);
+  QString species_unit(unit_str.str().c_str());
+  // Get time unit
+  unit_str.str("");
+  task->getTimeUnit().dump(unit_str, true);
+  QString time_unit(unit_str.str().c_str());
 
-  QVector<Plot::LineGraph *> graphs(num_species);
-
-  // Allocate a graph for each colum in time-series:
-  for (size_t i=0; i<num_species; i++)
-  {
-    Plot::GraphStyle style = this->getStyle(i);
-    graphs[i] = new Plot::LineGraph(style);
-    this->axis->addGraph(graphs[i]);
-    this->addToLegend(series->getColumnName(i+1), graphs[i]);
+  // Set axis labels with units:
+  setXLabel(tr("time [%1]").arg(time_unit));
+  if (task->getSpeciesUnit().isConcentrationUnit()) {
+    setYLabel(tr("concentrations [%1]").arg(species_unit));
+  } else {
+    setYLabel(tr("amount [%1]").arg(species_unit));
   }
 
-  // Do not plot all
-  int idx_incr = 0;
-  if (0 == (idx_incr = series->getNumRows()/100))
-  {
-    idx_incr = 1;
-  }
-
-  // Plot time-series:
-  for (size_t j=0; j<series->getNumRows(); j+=idx_incr)
-  {
-    for (size_t i=0; i<num_species; i++)
-    {
-      graphs[i]->addPoint((*series)(j, 0), (*series)(j, 1+i));
-    }
+  /* Assemble plot. */
+  Table *series = task->getTimeSeries();
+  for (int i=0; i<selected_species.size(); i++) {
+    iNA::Ast::Species *species =
+        task->getConfig().getModel()->getSpecies(selected_species.at(i).toStdString());
+    size_t species_idx = task->getConfig().getModel()->getSpeciesIdx(species);
+    addLineGraph(series->getColumn(0), series->getColumn(1+species_idx),
+                 series->getColumnName(1+species_idx));
   }
 
   // Force y plot-range to be [0, AUTO]:
   this->getAxis()->setYRangePolicy(
         Plot::RangePolicy(Plot::RangePolicy::FIXED, Plot::RangePolicy::AUTOMATIC));
   this->getAxis()->setYRange(0, 1);
-
-  for (size_t i=0; i<num_species; i++)
-  {
-    graphs[i]->commit();
-  }
 
   this->updateAxes();
 }

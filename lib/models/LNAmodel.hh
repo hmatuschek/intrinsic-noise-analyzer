@@ -46,9 +46,9 @@ public:
   explicit LNAmodel(const Ast::Model &model);
 
   /**
-   * Interface for the integrator: get initial state vector.
+   * Get initial state vector for specific initial conditions.
    */
-  virtual void getInitialState(Eigen::VectorXd &x);
+  virtual void getInitial(InitialConditions &ICs, Eigen::VectorXd &x);
 
   /**
    * Reconstruct concentration vector and covariance matrix from state vector.

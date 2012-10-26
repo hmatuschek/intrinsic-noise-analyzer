@@ -1,5 +1,5 @@
-#ifndef __FLUC_MODELS_SPECTRUMRECORDER_HH
-#define __FLUC_MODELS_SPECTRUMRECORDER_HH
+#ifndef __INA_MODELS_SPECTRUMRECORDER_HH
+#define __INA_MODELS_SPECTRUMRECORDER_HH
 
 #include "openmp.hh"
 #include <ast/ast.hh>

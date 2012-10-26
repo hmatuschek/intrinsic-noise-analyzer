@@ -84,23 +84,21 @@ public:
 
 protected:
   /** Holds the members of the scope. */
-  std::map<std::string, Definition *> definitions;
+  std::map<std::string, Definition *> _definitions;
   /** Holds map @c GiNaC::symbol -> @c VariableDefinition. */
-  std::map<GiNaC::symbol, VariableDefinition *, GiNaC::ex_is_less> symbol_table;
+  std::map<GiNaC::symbol, VariableDefinition *, GiNaC::ex_is_less> _symbol_table;
   /** If this flag is true, no reference within this scope can be resolved to a defintion outside of
    * this scope. */
-  bool is_closed;
+  bool _is_closed;
   /** Holds a weak reference to the parent scope. If there is a parent scope and this scope is not
    * closed, a symbol will be first resolved in this scope and then in the parent scope. */
   Scope *_parent_scope;
 
 
-protected:
+public:
   /** Constructs an empty scope. Is protected to avoid direct instantiation. */
   Scope(Scope *parent=0, bool is_close=false);
 
-
-public:
   /** Destroyes the scope and all members. */
   virtual ~Scope();
 
@@ -109,6 +107,9 @@ public:
 
   /** Returns the root scope (model). */
   Scope *getRootScope();
+
+  /** Returns the root scope (model). */
+  const Scope *getRootScope() const;
 
   /** Returns the parent scope. */
   Scope *getParentScope();
@@ -119,29 +120,25 @@ public:
   /** (Re-) Sets the parent scope of this scope. */
   void setParent(Scope *parent);
 
-  /**
-   * Adds a definition to the scope. If there is a definition with the same identifier the 'old' one
+  /** Updates the resolution table: Identifier -> @c Definition. */
+  virtual void resetIdentifier(const std::string &id, const std::string &new_id);
+
+  /** Adds a definition to the scope. If there is a definition with the same identifier the 'old' one
    * will be silently replaced.
-   *
    * \note The ownership of the definition is taked by the scope.
    */
   virtual void addDefinition(Definition *def);
 
-  /**
-   * Removes a definition from the scope. The ownership of the definition is transferred to the
-   * callee.
-   */
+  /** Removes a definition from the scope. The ownership of the definition is transferred to the
+   * callee. */
   virtual void remDefinition(Definition *def);
 
-  /**
-   * Returns true if there is a definition of the given name in the scope.
-   *
-   * Is equivalent to call @c hasDefinition(getSymbol(const std::string &identifier)).
-   */
-  bool hasDefinition(const std::string &name) const throw();
+  /** Returns true if there is a definition of the given name in the scope.
+   * Is equivalent to call @c hasDefinition(getSymbol(const std::string &identifier)). */
+  bool hasDefinition(const std::string &name, bool local=false) const throw();
 
   /** Returns the definition given by the name. */
-  Definition *getDefinition(const std::string &name);
+  Definition *getDefinition(const std::string &name, bool local=false);
   /** Returns a const reference to the definition. */
   Definition * const getDefinition(const std::string &name) const;
 

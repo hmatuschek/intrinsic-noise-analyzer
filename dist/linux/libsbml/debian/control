@@ -1,0 +1,21 @@
+Source: libsbml
+Priority: extra
+Maintainer: Hannes Matuschek <hmatuschek@gmail.com>
+Build-Depends: cdbs (>= 0.4.51), debhelper (>= 8.0.0), cmake, libxml2-dev, libbz2-dev, zlib1g-dev|libz-dev
+Standards-Version: 3.9.2
+Section: libs
+Homepage: http://sbml.org/
+
+Package: libsbml-dev
+Section: libdevel
+Architecture: any
+Depends: libsbml5 (= ${binary:Version}), libxml2-dev, libbz2-dev, zlib1g-dev|libz-dev
+Description: libSBML
+ Just libSBML.
+
+Package: libsbml5
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: libSBML
+ Just libSBML.

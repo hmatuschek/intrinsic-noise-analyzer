@@ -7,12 +7,14 @@
 #include <QGraphicsItem>
 #include <QTableView>
 
+
+#include "reactioneditor.hh"
+#include "../doctree/modelitem.hh"
 #include "reactionequationrenderer.hh"
 #include "../models/expressiondelegate.hh"
 
-
 ReactionView::ReactionView(ReactionItem *reaction, QWidget *parent) :
-  QWidget(parent), _reaction(reaction)
+    QWidget(parent), _reaction(reaction)
 {
   // Basic layout
   setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
@@ -24,16 +26,16 @@ ReactionView::ReactionView(ReactionItem *reaction, QWidget *parent) :
   label->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
 
   // Assemble reaction equation renderer:
-  QGraphicsView *equation_view = new QGraphicsView();
+  _equation_view = new ReactionGraphic();
   ReactionEquationRenderer *renderer = new ReactionEquationRenderer(_reaction->getReaction());
-  equation_view->setScene(renderer);
+  _equation_view->setScene(renderer);
 
   // Add buttons and label for parameter list
   _addParamButton = new QPushButton(tr("+"));
-  _addParamButton->setToolTip(tr("Add new parameter."));
+  _addParamButton->setToolTip(tr("Add new parameter"));
   _addParamButton->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
   _remParamButton = new QPushButton("-");
-  _remParamButton->setToolTip(tr("Delete parameter."));
+  _remParamButton->setToolTip(tr("Delete parameter"));
   _remParamButton->setEnabled(false);
   _remParamButton->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
   QLabel *param_label = new QLabel(tr("Local parameters"));
@@ -56,7 +58,7 @@ ReactionView::ReactionView(ReactionItem *reaction, QWidget *parent) :
 
   QVBoxLayout *layout = new QVBoxLayout();
   layout->addWidget(label, 0, Qt::AlignRight);
-  layout->addWidget(equation_view);
+  layout->addWidget(_equation_view);
   layout->addLayout(head_layout);
   layout->addWidget(_paramTable);
   setLayout(layout);
@@ -68,6 +70,8 @@ ReactionView::ReactionView(ReactionItem *reaction, QWidget *parent) :
   QObject::connect(
         _paramTable->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
         this, SLOT(onSelectionChanged(QItemSelection,QItemSelection)));
+  QObject::connect(_equation_view, SIGNAL(doubleClicked()), this, SLOT(onReactionEditing()));
+
 }
 
 
@@ -106,4 +110,20 @@ ReactionView::onSelectionChanged(const QItemSelection &selected, const QItemSele
   if (0 != index.column()) { _remParamButton->setEnabled(false); return; }
   // ok, allow removal of parameters:
   _remParamButton->setEnabled(true);
+}
+
+void
+ReactionView::onReactionEditing()
+{
+  // Show reaction editor wizard for this reaction:
+  ReactionEditor editor(((ModelItem *)(_reaction->parent()->parent()))->getModel(), _reaction->getReaction());
+  if (QDialog::Rejected == editor.exec()) { return; }
+
+  // Add new reaction and new species to the model
+  editor.commitReactionScope();
+
+  // Update complete view (reaction equation view and paramter list):
+  ReactionEquationRenderer *renderer = new ReactionEquationRenderer(_reaction->getReaction());
+  _equation_view->setScene(renderer);
+  _reaction->localParameters()->updateCompleteTable();
 }

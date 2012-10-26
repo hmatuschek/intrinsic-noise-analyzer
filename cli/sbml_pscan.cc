@@ -17,10 +17,10 @@ int main(int argc, char *argv[])
   Ast::Model sbml_model; Parser::Sbml::importModel(sbml_model, argv[1]);
 
     Models::LNAmodel model(sbml_model);
-    Models::SteadyStateAnalysis<Models::LNAmodel> steadyState(model);
+    Models::ParameterScan<Models::LNAmodel> steadyState(model);
 
     // choose parameter
-    Ast::Parameter* param = model.getReaction(0)->getKineticLaw()->getParameter(0);
+    Ast::Parameter* param = model.getParameter(0);
 
     // make list with values
     std::vector<iNA::Models::ParameterSet> parameters(10);

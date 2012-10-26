@@ -14,7 +14,6 @@ LNAmodel::LNAmodel(const Ast::Model &model)
 void
 LNAmodel::postConstructor()
 {
-
     Eigen::VectorXex REupdate =  updateVector;
 
     dimCOV = this->numIndSpecies()*(this->numIndSpecies()+1)/2;
@@ -96,8 +95,8 @@ LNAmodel::postConstructor()
     EMREUpdate = ((this->JacobianM*emreVariables)+Delta);
 
     // fold constants
-    this->foldConservationConstants(CovUpdate);
-    this->foldConservationConstants(EMREUpdate);
+    //this->foldConservationConstants(CovUpdate);
+    //this->foldConservationConstants(EMREUpdate);
 
     // and combine to update vector
     this->updateVector.head(this->numIndSpecies())=REupdate;
@@ -111,43 +110,47 @@ LNAmodel::fullState(const Eigen::VectorXd &state, Eigen::VectorXd &concentration
 
 {
 
-    // reconstruct full concentration vector in original permutation order
-    REmodel::fullState(state,concentrations);
+    InitialConditions context(*this);
+    fullState(context,state,concentrations,cov);
 
-    // ... then begin reconstruction of covariance matrix
+//    // reconstruct full concentration vector in original permutation order
+//    REmodel::fullState(state,concentrations);
 
-    // get reduced covariance vector
-    Eigen::VectorXd covvec = state.segment(this->numIndSpecies(),dimCOV);
+//    // ... then begin reconstruction of covariance matrix
 
-    // full cov permutated
-    Eigen::MatrixXd cov_all(this->numSpecies(),this->numSpecies());
-    // red cov permutated
-    Eigen::MatrixXd cov_ind(this->numIndSpecies(),this->numIndSpecies());
+//    // get reduced covariance vector
+//    Eigen::VectorXd covvec = state.segment(this->numIndSpecies(),dimCOV);
 
-   // fill upper triangular
-   size_t idx=0;
-   for(size_t i=0;i<this->numIndSpecies();i++)
-   {
-       for(size_t j=0;j<=i;j++)
-       {
-           cov_ind(i,j) = covvec(idx);
-           // fill rest by symmetry
-           cov_ind(j,i) = cov_ind(i,j);
-           idx++;
-       }
-   }
+//    // full cov permutated
+//    Eigen::MatrixXd cov_all(this->numSpecies(),this->numSpecies());
+//    // red cov permutated
+//    Eigen::MatrixXd cov_ind(this->numIndSpecies(),this->numIndSpecies());
 
-   // so here it is:
-   cov_all = this->LinkCMatrixNumeric*cov_ind*this->LinkCMatrixNumeric.transpose();
+//   // fill upper triangular
+//   size_t idx=0;
+//   for(size_t i=0;i<this->numIndSpecies();i++)
+//   {
+//       for(size_t j=0;j<=i;j++)
+//       {
+//           cov_ind(i,j) = covvec(idx);
+//           // fill rest by symmetry
+//           cov_ind(j,i) = cov_ind(i,j);
+//           idx++;
+//       }
+//   }
 
-   // restore native permutation of covariance
-   cov = (this->PermutationM.transpose()*cov_all)*this->PermutationM;
+//   // so here it is:
+//   cov_all = this->LinkCMatrixNumeric*cov_ind*this->LinkCMatrixNumeric.transpose();
+
+//   // restore native permutation of covariance
+//   cov = (this->PermutationM.transpose()*cov_all)*this->PermutationM;
 
 }
 
 
 void
-LNAmodel::fullState(InitialConditions &context, const Eigen::VectorXd &state, Eigen::VectorXd &concentrations, Eigen::MatrixXd &cov)
+LNAmodel::fullState(InitialConditions &context,
+                    const Eigen::VectorXd &state, Eigen::VectorXd &concentrations, Eigen::MatrixXd &cov)
 
 {
 
@@ -156,12 +159,10 @@ LNAmodel::fullState(InitialConditions &context, const Eigen::VectorXd &state, Ei
 
     // ... then begin reconstruction of covariance matrix
 
-    // get reduced covariance vector
+    // Get reduced covariance vector
     Eigen::VectorXd covvec = state.segment(this->numIndSpecies(),dimCOV);
 
-    // full cov permutated
-    Eigen::MatrixXd cov_all(this->numSpecies(),this->numSpecies());
-    // red cov permutated
+    // Reduced covariance matrix
     Eigen::MatrixXd cov_ind(this->numIndSpecies(),this->numIndSpecies());
 
    // fill upper triangular
@@ -178,7 +179,7 @@ LNAmodel::fullState(InitialConditions &context, const Eigen::VectorXd &state, Ei
    }
 
    // restore native permutation of covariance
-   cov = context.getLinkCMatrix().transpose()*cov_all*context.getLinkCMatrix();
+   cov = context.getLinkCMatrix()*cov_ind*(context.getLinkCMatrix().transpose());
 
 }
 
@@ -189,15 +190,18 @@ LNAmodel::fullState(const Eigen::VectorXd &state, Eigen::VectorXd &concentration
 
 {
 
-    // reconstruct full concentration vector and covariances in original permutation order
-    this->fullState(state,concentrations,cov);
+    InitialConditions context(*this);
+    fullState(context,state,concentrations,cov,emre);
 
-    // reconstruct emre
-    // get reduced emre vector (should better be a view rather then a copy)
-    Eigen::VectorXd tail = state.segment(this->numIndSpecies()+dimCOV,this->numIndSpecies());
+//    // reconstruct full concentration vector and covariances in original permutation order
+//    this->fullState(state,concentrations,cov);
 
-    // construct full emre vector, restore original order and return
-    emre = this->PermutationM.transpose()*this->LinkCMatrixNumeric*tail;
+//    // reconstruct emre
+//    // get reduced emre vector (should better be a view rather then a copy)
+//    Eigen::VectorXd tail = state.segment(this->numIndSpecies()+dimCOV,this->numIndSpecies());
+
+//    // construct full emre vector, restore original order and return
+//    emre = this->PermutationM.transpose()*this->LinkCMatrixNumeric*tail;
 
 }
 
@@ -273,11 +277,11 @@ LNAmodel::fluxAnalysis(const Eigen::VectorXd &state, Eigen::VectorXd &flux,
 }
 
 void
-LNAmodel::getInitialState(Eigen::VectorXd &x)
+LNAmodel::getInitial(InitialConditions &ICs, Eigen::VectorXd &x)
 {
 
   // deterministic initial conditions for state
-  x<<(this->ICsPermuted).head(this->numIndSpecies()),
+  x<<ICs.getInitialState(),
      // zero covariance
      Eigen::VectorXd::Zero(dimCOV),
      // zero EMRE

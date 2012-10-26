@@ -10,6 +10,8 @@
 #include "../application.hh"
 #include "../doctree/plotitem.hh"
 #include "lnaplot.hh"
+#include "../views/speciesselectiondialog.hh"
+#include "../views/genericplotdialog.hh"
 
 
 /* ********************************************************************************************* *
@@ -35,96 +37,101 @@ LNATaskView::createResultWidget(TaskItem *task_item)
  * Implementation of LNAResultWidget, show the result of a LNA (SSE) analysis.
  * ********************************************************************************************* */
 LNAResultWidget::LNAResultWidget(LNATaskWrapper *task_wrapper, QWidget *parent):
-  QWidget(parent), lna_task_wrapper(task_wrapper)
+  QWidget(parent), _lna_task_wrapper(task_wrapper)
 {
-  this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
-  this->setBackgroundRole(QPalette::Window);
+  setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
+  setBackgroundRole(QPalette::Window);
 
-  this->dataTable = new QTableView();
-  this->dataTable->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
+  _dataTable = new QTableView();
+  _dataTable->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
 
-  this->tableWrapper = new TableWrapper(lna_task_wrapper->getLNATask()->getTimeSeries(), this);
-  dataTable->setModel(this->tableWrapper);
+  _tableWrapper = new TableWrapper(_lna_task_wrapper->getLNATask()->getTimeSeries(), this);
+  _dataTable->setModel(this->_tableWrapper);
 
-  this->plotButton = new QPushButton(tr("Plot statistics"));
-  QObject::connect(this->plotButton, SIGNAL(clicked()), this, SLOT(plotButtonPressed()));
+  _plotButton = new QPushButton(tr("Plot statistics"));
+  QObject::connect(_plotButton, SIGNAL(clicked()), this, SLOT(_plotButtonPressed()));
 
-  this->saveButton = new QPushButton(tr("Save data to file"));
-  QObject::connect(this->saveButton, SIGNAL(clicked()), this, SLOT(saveButtonPressed()));
+  _genericPlotButton = new QPushButton(tr("Custom plot"));
+  QObject::connect(_genericPlotButton, SIGNAL(clicked()), this, SLOT(_genericPlotButtonPressed()));
 
+  _saveButton = new QPushButton(tr("Save data to file"));
+  QObject::connect(_saveButton, SIGNAL(clicked()), this, SLOT(_saveButtonPressed()));
 
   QHBoxLayout *button_box = new QHBoxLayout();
-  button_box->addWidget(this->plotButton);
-  button_box->addWidget(this->saveButton);
+  button_box->addWidget(_plotButton);
+  button_box->addWidget(_genericPlotButton);
+  button_box->addWidget(_saveButton);
 
   QVBoxLayout *layout = new QVBoxLayout();
-  layout->addWidget(this->dataTable);
   layout->addLayout(button_box);
-  this->setLayout(layout);
+  layout->addWidget(_dataTable);
+  setLayout(layout);
 }
 
 
 void
-LNAResultWidget::plotButtonPressed()
+LNAResultWidget::_plotButtonPressed()
 {
-  std::stringstream unit_str;
-  this->lna_task_wrapper->getLNATask()->getSpeciesUnit().dump(unit_str, true);
-  QString concentration_unit(unit_str.str().c_str());
+  SpeciesSelectionDialog dialog(_lna_task_wrapper->getLNATask()->getConfig().getModel());
+  dialog.setWindowTitle(tr("LNA quick plot"));
+  dialog.setTitle(tr("Select the species to plot."));
 
-  unit_str.str("");
-  this->lna_task_wrapper->getLNATask()->getTimeUnit().dump(unit_str, true);
-  QString time_unit(unit_str.str().c_str());
-
+  if (QDialog::Rejected == dialog.exec()) { return; }
+  QStringList selected_species = dialog.getSelectedSpecies();
 
   // Add timeseries plot:
   Application::getApp()->docTree()->addPlot(
-        this->lna_task_wrapper,
-        new PlotItem(
-          new LNATimeSeriesPlot(this->lna_task_wrapper->getLNATask()->getSelectedSpecies().size(),
-                                this->lna_task_wrapper->getLNATask()->getTimeSeries(),
-                                concentration_unit, time_unit)));
+        _lna_task_wrapper,
+        new PlotItem(new LNATimeSeriesPlot(selected_species, _lna_task_wrapper->getLNATask())));
 
   // Add correlation coefficient plot (if there are more than one species selected).
-  if (1 < this->lna_task_wrapper->getLNATask()->getSelectedSpecies().size()) {
+  if (1 < selected_species.size()) {
     Application::getApp()->docTree()->addPlot(
-          this->lna_task_wrapper,
+          _lna_task_wrapper,
           new PlotItem(
-            new LNACorrelationPlot(this->lna_task_wrapper->getLNATask(),
-                                   time_unit)));
+            new LNACorrelationPlot(selected_species, _lna_task_wrapper->getLNATask())));
   }
-
-
-  // Add EMRE plot:
-//  Application::getApp()->docTree()->addPlot(
-//        this->lna_task_wrapper,
-//        new PlotItem(
-//          new EMRETimeSeriesPlot(this->lna_task_wrapper->getLNATask()->getSelectedSpecies().size(),
-//                                 this->lna_task_wrapper->getLNATask()->getTimeSeries(),
-//                                 concentration_unit, time_unit)));
 }
 
 
 void
-LNAResultWidget::saveButtonPressed()
+LNAResultWidget::_genericPlotButtonPressed()
+{
+  // Show dialog
+  GenericPlotDialog dialog(_lna_task_wrapper->getLNATask()->getTimeSeries());
+  if (QDialog::Rejected == dialog.exec()) { return; }
+
+  // Create plot figure with labels.
+  Plot::Figure *figure = new Plot::Figure(dialog.figureTitle());
+  figure->getAxis()->setXLabel(dialog.xLabel());
+  figure->getAxis()->setYLabel(dialog.yLabel());
+
+  // Iterate over all graphs of the configured plot:
+  for (size_t i=0; i<dialog.numGraphs(); i++) {
+    figure->getAxis()->addGraph(dialog.graph(i).create(figure->getStyle(i)));
+  }
+
+  // Add timeseries plot:
+  Application::getApp()->docTree()->addPlot(_lna_task_wrapper, new PlotItem(figure));
+}
+
+
+void
+LNAResultWidget::_saveButtonPressed()
 {
   QString filename = QFileDialog::getSaveFileName(
         this, tr("Save as text..."), "", tr("Text Files (*.txt *.csv)"));
 
-  if ("" == filename)
-  {
-    return;
-  }
+  if ("" == filename) { return; }
 
   QFile file(filename);
-
-  if (!file.open(QIODevice::WriteOnly| QIODevice::Text))
-  {
+  if (!file.open(QIODevice::WriteOnly| QIODevice::Text)) {
     QMessageBox box;
     box.setWindowTitle(tr("Cannot open file"));
     box.setText(tr("Cannot open file %1 for writing").arg(filename));
     box.exec();
   }
 
-  this->lna_task_wrapper->getLNATask()->getTimeSeries()->saveAsText(file);
+  _lna_task_wrapper->getLNATask()->getTimeSeries()->saveAsText(file);
   file.close();
 }

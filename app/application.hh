@@ -53,6 +53,8 @@ public:
 
   /** Returns the document tree of the application. */
   DocumentTree *docTree();
+  /** Returns a weak reference to the "new model" menu action. */
+  QAction *newModelAction();
   /** Returns a weak reference to the "import model" menu action. */
   QAction *importModelAction();
   /** Returns a weak reference to the "export model" menu action. */
@@ -86,6 +88,9 @@ public:
 
 
 private slots:
+  /** Handler for the "new model" menu action. */
+  void onNewModel();
+
   /** Handler for the "import model" menu action. */
   void onImportModel();
 
@@ -119,6 +124,8 @@ private:
   /** Holds a weak reference to the currently selected item. */
   DocumentTreeItem *_selected_item;
 
+  /** The "new model" menu action. */
+  QAction *_newModel;
   /** The "import model" menu action. */
   QAction *_importModel;
   /** The "export model" menu action. */

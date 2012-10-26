@@ -28,8 +28,8 @@ CompartmentList::flags(const QModelIndex &index) const
   if (columnCount() <= index.column()) return Qt::NoItemFlags;
   if (rowCount() <= index.row()) return Qt::NoItemFlags;
 
-  // Mark only column 1 & 2 editable
-  if ( (1 == index.column()) || (2 == index.column()) || (3 == index.column()) )
+  // Mark only column 0, 1, 2 & 3 editable
+  if ( (0 == index.column()) || (1 == index.column()) || (2 == index.column()) || (3 == index.column()) )
     item_flags |= Qt::ItemIsEditable;
 
   return item_flags;
@@ -73,6 +73,7 @@ CompartmentList::setData(const QModelIndex &index, const QVariant &value, int ro
   // Dispatch
   bool success = false;
   switch(index.column()) {
+  case 0: success = _updateIndentifier(comp, value); break;
   case 1: success = _updateName(comp, value); break;
   case 2: success = _updateInitValue(comp, value); break;
   case 3: success = _updateUnit(comp, value); break;
@@ -129,6 +130,24 @@ CompartmentList::_getIdentifier(iNA::Ast::Compartment *compartment, int role) co
 }
 
 
+bool
+CompartmentList::_updateIndentifier(iNA::Ast::Compartment *compartment, const QVariant &value)
+{
+  // Get ID
+  QString qid = value.toString();
+  std::string id = qid.toStdString();
+  // If nothing changed -> done.
+  if (id == compartment->getIdentifier()) { return true; }
+  // Check ID format
+  if (! QRegExp("[a-zA-Z_][a-zA-Z0-9_]*").exactMatch(qid)) { return false; }
+  // Check if id is not assigned allready:
+  if (_model->hasDefinition(id)) { return false; }
+  // Ok, assign identifier:
+  _model->resetIdentifier(compartment->getIdentifier(), id);
+  return true;
+}
+
+
 QVariant
 CompartmentList::_getName(iNA::Ast::Compartment *compartment, int role) const
 {
@@ -164,7 +183,8 @@ CompartmentList::_getInitValue(iNA::Ast::Compartment *comp, int role) const
     return Ginac2Formula::toPixmap(comp->getValue(), *_model);
   } else if (Qt::EditRole == role) {
     // Serialize expression for editing:
-    std::stringstream buffer; buffer << comp->getValue();
+    std::stringstream buffer;
+    iNA::Parser::Expr::serializeExpression(comp->getValue(), buffer, _model);
     return QString(buffer.str().c_str());
   }
 

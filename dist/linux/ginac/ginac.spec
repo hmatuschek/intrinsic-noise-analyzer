@@ -9,7 +9,7 @@ Group: Development/Libraries/C and C++
 Source0: ftp://ftpthep.physik.uni-mainz.de/pub/GiNaC/%{name}-%{version}.tar.bz2
 Url: http://www.ginac.de/
 BuildRoot: %{_tmppath}/%{name}-%{version}-build
-BuildRequires: cln-devel gcc-c++ readline-devel gmp-devel pkgconfig
+BuildRequires: cln-devel gcc-c++ readline-devel gmp-devel pkgconfig libtool
 
 %description
 GiNaC (which stands for "GiNaC is Not a CAS (Computer Algebra System)") is an

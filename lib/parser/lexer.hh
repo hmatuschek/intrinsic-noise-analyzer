@@ -85,6 +85,9 @@ public:
   /** Adds a transition for anything but the given char. */
   void onNotChar(char c, State *A, State *B);
 
+  /** Adds a transition for anything but the given chars. */
+  void onNoneOf(const std::string &chars, State *A, State *B);
+
   /** Adds a transistion on white-space input. */
   void onWhiteSpace(State *A, State *B);
 

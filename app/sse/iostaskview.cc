@@ -10,6 +10,8 @@
 #include "../application.hh"
 #include "../doctree/plotitem.hh"
 #include "iosplot.hh"
+#include "../views/speciesselectiondialog.hh"
+#include "../views/genericplotdialog.hh"
 
 
 /* ********************************************************************************************* *
@@ -35,85 +37,91 @@ IOSTaskView::createResultWidget(TaskItem *task_item)
  * Implementation of REResultWidget, show the result of a RE analysis.
  * ********************************************************************************************* */
 IOSResultWidget::IOSResultWidget(IOSTaskWrapper *task_wrapper, QWidget *parent):
-  QWidget(parent), ios_task_wrapper(task_wrapper)
+  QWidget(parent), _ios_task_wrapper(task_wrapper)
 {
-  this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
-  this->setBackgroundRole(QPalette::Window);
+  setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
+  setBackgroundRole(QPalette::Window);
 
-  this->dataTable = new QTableView();
-  this->dataTable->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
+  _dataTable = new QTableView();
+  _dataTable->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
 
-  this->tableWrapper = new TableWrapper(ios_task_wrapper->getIOSTask()->getTimeSeries(), this);
-  dataTable->setModel(this->tableWrapper);
+  _tableWrapper = new TableWrapper(_ios_task_wrapper->getIOSTask()->getTimeSeries(), this);
+  _dataTable->setModel(_tableWrapper);
 
-  this->plotButton = new QPushButton(tr("Plot statistics"));
-  QObject::connect(this->plotButton, SIGNAL(clicked()), this, SLOT(plotButtonPressed()));
+  _plotButton = new QPushButton(tr("Plot statistics"));
+  QObject::connect(_plotButton, SIGNAL(clicked()), this, SLOT(_onPlotButtonPressed()));
 
-  this->saveButton = new QPushButton(tr("Save data to file"));
-  QObject::connect(this->saveButton, SIGNAL(clicked()), this, SLOT(saveButtonPressed()));
+  _genericPlotButton = new QPushButton(tr("Custom plot"));
+  QObject::connect(_genericPlotButton, SIGNAL(clicked()), this, SLOT(_onGenericPlotButtonPressed()));
+
+  this->_saveButton = new QPushButton(tr("Save data to file"));
+  QObject::connect(_saveButton, SIGNAL(clicked()), this, SLOT(_onSaveButtonPressed()));
 
 
   QHBoxLayout *button_box = new QHBoxLayout();
-  button_box->addWidget(this->plotButton);
-  button_box->addWidget(this->saveButton);
+  button_box->addWidget(_plotButton);
+  button_box->addWidget(_genericPlotButton);
+  button_box->addWidget(_saveButton);
 
   QVBoxLayout *layout = new QVBoxLayout();
-  layout->addWidget(this->dataTable);
   layout->addLayout(button_box);
+  layout->addWidget(_dataTable);
   this->setLayout(layout);
 }
 
 
 void
-IOSResultWidget::plotButtonPressed()
+IOSResultWidget::_onPlotButtonPressed()
 {
-  std::stringstream unit_str;
-  this->ios_task_wrapper->getIOSTask()->getSpeciesUnit().dump(unit_str, true);
-  QString concentration_unit(unit_str.str().c_str());
-
-  unit_str.str("");
-  this->ios_task_wrapper->getIOSTask()->getTimeUnit().dump(unit_str, true);
-  QString time_unit(unit_str.str().c_str());
-
-
-  // Add timeseries plot:
-//  Application::getApp()->docTree()->addPlot(
-//        this->ios_task_wrapper,
-//        new PlotItem(
-//          new IOSLNATimeSeriesPlot(this->ios_task_wrapper->getIOSTask()->getSelectedSpecies().size(),
-//                                this->ios_task_wrapper->getIOSTask()->getTimeSeries(),
-//                                concentration_unit, time_unit)));
-
-//  Application::getApp()->docTree()->addPlot(
-//        this->ios_task_wrapper,
-//        new PlotItem(
-//          new IOSLNACorrelationPlot(this->ios_task_wrapper->getIOSTask(), time_unit)));
+  SpeciesSelectionDialog dialog(_ios_task_wrapper->getIOSTask()->getConfig().getModel());
+  dialog.setWindowTitle(tr("IOS quick plot"));
+  dialog.setTitle(tr("Select the species to plot."));
+  if (QDialog::Rejected == dialog.exec()) { return; }
+  QStringList selected_species = dialog.getSelectedSpecies();
 
   Application::getApp()->docTree()->addPlot(
-        this->ios_task_wrapper,
+        this->_ios_task_wrapper,
         new PlotItem(
-          new IOSEMRETimeSeriesPlot(this->ios_task_wrapper->getIOSTask()->getSelectedSpecies().size(),
-                                    this->ios_task_wrapper->getIOSTask()->getTimeSeries(),
-                                    concentration_unit, time_unit)));
+          new IOSEMRETimeSeriesPlot(selected_species, _ios_task_wrapper->getIOSTask())));
 
+  if (0 < selected_species.size()) {
+    Application::getApp()->docTree()->addPlot(
+          this->_ios_task_wrapper,
+          new PlotItem(
+            new IOSEMRECorrelationPlot(selected_species, _ios_task_wrapper->getIOSTask())));
+  }
 
   Application::getApp()->docTree()->addPlot(
-        this->ios_task_wrapper,
+        this->_ios_task_wrapper,
         new PlotItem(
-          new IOSEMRECorrelationPlot(this->ios_task_wrapper->getIOSTask(), time_unit)));
-
-  Application::getApp()->docTree()->addPlot(
-        this->ios_task_wrapper,
-        new PlotItem(
-          new IOSEMREComparePlot(this->ios_task_wrapper->getIOSTask()->getSelectedSpecies().size(),
-                                 this->ios_task_wrapper->getIOSTask()->getTimeSeries(),
-                                 concentration_unit, time_unit)));
-
+          new IOSEMREComparePlot(selected_species,_ios_task_wrapper->getIOSTask())));
 }
 
 
 void
-IOSResultWidget::saveButtonPressed()
+IOSResultWidget::_onGenericPlotButtonPressed()
+{
+  // Show dialog
+  GenericPlotDialog dialog(_ios_task_wrapper->getIOSTask()->getTimeSeries());
+  if (QDialog::Rejected == dialog.exec()) { return; }
+
+  // Create plot figure with labels.
+  Plot::Figure *figure = new Plot::Figure(dialog.figureTitle());
+  figure->getAxis()->setXLabel(dialog.xLabel());
+  figure->getAxis()->setYLabel(dialog.yLabel());
+
+  // Iterate over all graphs of the configured plot:
+  for (size_t i=0; i<dialog.numGraphs(); i++) {
+    figure->getAxis()->addGraph(dialog.graph(i).create(figure->getStyle(i)));
+  }
+
+  // Add timeseries plot:
+  Application::getApp()->docTree()->addPlot(_ios_task_wrapper, new PlotItem(figure));
+}
+
+
+void
+IOSResultWidget::_onSaveButtonPressed()
 {
   QString filename = QFileDialog::getSaveFileName(
         this, tr("Save as text..."), "", tr("Text Files (*.txt *.csv)"));
@@ -133,6 +141,6 @@ IOSResultWidget::saveButtonPressed()
     box.exec();
   }
 
-  this->ios_task_wrapper->getIOSTask()->getTimeSeries()->saveAsText(file);
+  this->_ios_task_wrapper->getIOSTask()->getTimeSeries()->saveAsText(file);
   file.close();
 }

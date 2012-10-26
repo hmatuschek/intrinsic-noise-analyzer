@@ -23,6 +23,10 @@ UnitConverter::reduceToSI(ScaledBaseUnit::BaseUnit base_unit, int exponent)
     result = result * Unit::dimensionless(1, -3*exponent);
   }
 
+  // Mole -> Item
+  if (ScaledBaseUnit::MOLE == base_unit) {
+    result = ScaledBaseUnit(ScaledBaseUnit::ITEM, 6.02214129, 23, exponent);
+  }
   return result;
 }
 

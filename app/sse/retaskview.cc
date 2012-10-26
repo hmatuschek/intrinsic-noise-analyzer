@@ -10,7 +10,8 @@
 #include "../application.hh"
 #include "../doctree/plotitem.hh"
 #include "replot.hh"
-#include "../views/timeseriesplotwizard.hh"
+#include "../views/speciesselectiondialog.hh"
+#include "../views/genericplotdialog.hh"
 
 
 /* ********************************************************************************************* *
@@ -47,46 +48,56 @@ REResultWidget::REResultWidget(RETaskWrapper *task_wrapper, QWidget *parent):
   this->tableWrapper = new TableWrapper(re_task_wrapper->getRETask()->getTimeSeries(), this);
   dataTable->setModel(this->tableWrapper);
 
-  this->plotButton = new QPushButton(tr("Plot statistics"));
-  QObject::connect(this->plotButton, SIGNAL(clicked()), this, SLOT(plotButtonPressed()));
+  QPushButton *plotButton = new QPushButton(tr("Quick plot statistics"));
+  QPushButton *genericPlotButton = new QPushButton(tr("Custom plot"));
+  QPushButton *saveButton = new QPushButton(tr("Save data to file"));
 
-  this->saveButton = new QPushButton(tr("Save data to file"));
-  QObject::connect(this->saveButton, SIGNAL(clicked()), this, SLOT(saveButtonPressed()));
+  QObject::connect(plotButton, SIGNAL(clicked()), this, SLOT(quickPlotButtonPressed()));
+  QObject::connect(genericPlotButton, SIGNAL(clicked()), this, SLOT(genericPlotButtonPressed()));
+  QObject::connect(saveButton, SIGNAL(clicked()), this, SLOT(saveButtonPressed()));
 
 
   QHBoxLayout *button_box = new QHBoxLayout();
-  button_box->addWidget(this->plotButton);
-  button_box->addWidget(this->saveButton);
+  button_box->addWidget(plotButton);
+  button_box->addWidget(genericPlotButton);
+  button_box->addWidget(saveButton);
 
   QVBoxLayout *layout = new QVBoxLayout();
-  layout->addWidget(this->dataTable);
   layout->addLayout(button_box);
+  layout->addWidget(this->dataTable);
   this->setLayout(layout);
 }
 
 
 void
-REResultWidget::plotButtonPressed()
+REResultWidget::quickPlotButtonPressed()
+{
+  // Create SSE quick plot dialog
+  SpeciesSelectionDialog re_dialog(re_task_wrapper->getRETask()->getConfig().getModel());
+  re_dialog.setWindowTitle(tr("RE quick plot"));
+  re_dialog.setTitle(tr("Select the species to plot."));
+
+  // Exec & get selected species
+  if (QDialog::Rejected == re_dialog.exec()) { return; }
+  QList<QString> selected_species = re_dialog.getSelectedSpecies();
+
+  // Create and add timeseries plot:
+  Plot::Figure *figure = new RETimeSeriesPlot(selected_species, re_task_wrapper->getRETask());
+  Application::getApp()->docTree()->addPlot(this->re_task_wrapper, new PlotItem(figure));
+}
+
+
+void
+REResultWidget::genericPlotButtonPressed()
 {
   // Show dialog
-  TimeSeriesPlotDialog dialog(re_task_wrapper->getRETask()->getTimeSeries());
-  // on cancel -> return
+  GenericPlotDialog dialog(re_task_wrapper->getRETask()->getTimeSeries());
   if (QDialog::Rejected == dialog.exec()) { return; }
 
-  // Get species unit
-  std::stringstream unit_str;
-  this->re_task_wrapper->getRETask()->getSpeciesUnit().dump(unit_str, true);
-  QString species_unit(unit_str.str().c_str());
-
-  // Get time unit
-  unit_str.str("");
-  this->re_task_wrapper->getRETask()->getTimeUnit().dump(unit_str, true);
-  QString time_unit(unit_str.str().c_str());
-
-  // Create plot figure
-  Plot::Figure *figure = new Plot::Figure("Mean concentrations (RE)");
-  figure->getAxis()->setXLabel(tr("time [%1]").arg(time_unit));
-  figure->getAxis()->setYLabel(tr("concentrations [%1]").arg(species_unit));
+  // Create plot figure with labels.
+  Plot::Figure *figure = new Plot::Figure(dialog.figureTitle());
+  figure->getAxis()->setXLabel(dialog.xLabel());
+  figure->getAxis()->setYLabel(dialog.yLabel());
 
   // Iterate over all graphs of the configured plot:
   for (size_t i=0; i<dialog.numGraphs(); i++) {
@@ -94,7 +105,7 @@ REResultWidget::plotButtonPressed()
   }
 
   // Add timeseries plot:
-  Application::getApp()->docTree()->addPlot(this->re_task_wrapper, new PlotItem(figure));
+  Application::getApp()->docTree()->addPlot(re_task_wrapper, new PlotItem(figure));
 }
 
 

@@ -36,7 +36,7 @@ public:
    * @param unit Specifies the unit of the paramter.
    * @param is_const Specifies if the parameter is constant.
    */
-  Parameter(const std::string &id, const Unit &_unit, bool is_const=false);
+  Parameter(const std::string &id, const Unit &_unit, bool _is_const=false);
 
   /**
    * Constructor.
@@ -46,7 +46,7 @@ public:
    * @param unit Specifies the unit of the paramter.
    * @param is_const Specifies if the parameter is constant.
    */
-  Parameter(const std::string &id, const GiNaC::ex &init_val, const Unit &_unit, bool is_const=false);
+  Parameter(const std::string &id, const GiNaC::ex &init_val, const Unit &_unit, bool _is_const=false);
 
   /** Returns the unit of the paramter. */
   const Unit &getUnit() const;

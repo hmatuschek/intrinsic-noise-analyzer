@@ -9,14 +9,14 @@ using namespace iNA::Ast;
 
 
 Reaction::Reaction(const std::string &id, KineticLaw *law, bool reversible)
-  : Definition(id, Node::REACTION_DEFINITION), kinetic_law(law), is_reversible(reversible)
+  : Definition(id, Node::REACTION_DEFINITION), _kinetic_law(law), _is_reversible(reversible)
 {
   // Done.
 }
 
 
 Reaction::Reaction(const std::string &id, const std::string &name, KineticLaw *law, bool reversible)
-  : Definition(id, name, Node::REACTION_DEFINITION), kinetic_law(law), is_reversible(reversible)
+  : Definition(id, name, Node::REACTION_DEFINITION), _kinetic_law(law), _is_reversible(reversible)
 {
   // Done.
 }
@@ -25,18 +25,18 @@ Reaction::Reaction(const std::string &id, const std::string &name, KineticLaw *l
 Reaction::~Reaction()
 {
   // first, destroy kinetic law:
-  delete this->kinetic_law;
+  delete this->_kinetic_law;
 }
 
 
 bool
 Reaction::hasSpecies(Species *species)
 {
-  if (this->reactants.end() != this->reactants.find(species)) {
+  if (this->_reactants.end() != this->_reactants.find(species)) {
     return true;
   }
 
-  if (this->products.end() != this->products.find(species)) {
+  if (this->_products.end() != this->_products.find(species)) {
     return true;
   }
 
@@ -55,7 +55,7 @@ Reaction::hasSpecies(GiNaC::symbol id)
 bool
 Reaction::hasReactant(Species *species)
 {
-  return this->reactants.end() != this->reactants.find(species);
+  return this->_reactants.end() != this->_reactants.find(species);
 }
 
 
@@ -63,8 +63,8 @@ bool
 Reaction::hasReactant(GiNaC::symbol id)
 {
   // Check all reactants:
-  for (std::map<Species *, GiNaC::ex>::iterator iter=this->reactants.begin();
-       iter != this->reactants.end(); iter++)
+  for (std::map<Species *, GiNaC::ex>::iterator iter=this->_reactants.begin();
+       iter != this->_reactants.end(); iter++)
   {
     if (iter->first->getSymbol() == id) {
       return true;
@@ -77,15 +77,15 @@ Reaction::hasReactant(GiNaC::symbol id)
 
 size_t
 Reaction::numReactants() const {
-  return reactants.size();
+  return _reactants.size();
 }
 
 GiNaC::ex
 Reaction::getReactantStoichiometry(Species *species)
 {
-  std::map<Species *, GiNaC::ex>::iterator item = this->reactants.find(species);
+  std::map<Species *, GiNaC::ex>::iterator item = this->_reactants.find(species);
 
-  if (this->reactants.end() == item) {
+  if (this->_reactants.end() == item) {
     SymbolError err;
     err << "There is no reactant " << species->getIdentifier()
         << " defined in reaction " << this->getIdentifier();
@@ -100,8 +100,8 @@ GiNaC::ex
 Reaction::getReactantStoichiometry(GiNaC::symbol id)
 {
   // Search for item in reactants table:
-  for (std::map<Species *, GiNaC::ex>::iterator iter=this->reactants.begin();
-       iter != this->reactants.end(); iter++)
+  for (std::map<Species *, GiNaC::ex>::iterator iter=this->_reactants.begin();
+       iter != this->_reactants.end(); iter++)
   {
     if (iter->first->getSymbol() == id) {
       return iter->second;
@@ -117,7 +117,7 @@ Reaction::getReactantStoichiometry(GiNaC::symbol id)
 void
 Reaction::setReactantStoichiometry(Species *species, GiNaC::ex st)
 {
-  this->reactants[species] = st;
+  this->_reactants[species] = st;
 }
 
 
@@ -136,10 +136,16 @@ Reaction::addReactantStoichiometry(Species *species, GiNaC::ex st)
 }
 
 
+void
+Reaction::clearReactants() {
+  _reactants.clear();
+}
+
+
 bool
 Reaction::hasProduct(Species *species)
 {
-  return this->products.end() != this->products.find(species);
+  return this->_products.end() != this->_products.find(species);
 }
 
 
@@ -147,8 +153,8 @@ bool
 Reaction::hasProduct(GiNaC::symbol id)
 {
   // Iterate over all products:
-  for (std::map<Species *, GiNaC::ex>::iterator iter = this->products.begin();
-       iter != this->products.end(); iter++)
+  for (std::map<Species *, GiNaC::ex>::iterator iter = this->_products.begin();
+       iter != this->_products.end(); iter++)
   {
     if (iter->first->getSymbol() == id)
       return true;
@@ -160,16 +166,16 @@ Reaction::hasProduct(GiNaC::symbol id)
 
 size_t
 Reaction::numProducts() const {
-  return products.size();
+  return _products.size();
 }
 
 
 GiNaC::ex
 Reaction::getProductStoichiometry(Species *species)
 {
-  std::map<Species *, GiNaC::ex>::iterator item = this->products.find(species);
+  std::map<Species *, GiNaC::ex>::iterator item = this->_products.find(species);
 
-  if (this->products.end() != item) {
+  if (this->_products.end() != item) {
     SymbolError err;
     err << "No product " << species->getIdentifier()
         << " defined in reaction " << this->getIdentifier();
@@ -183,8 +189,8 @@ Reaction::getProductStoichiometry(Species *species)
 GiNaC::ex
 Reaction::getProductStoichiometry(GiNaC::symbol id)
 {
-  for (std::map<Species *, GiNaC::ex>::iterator iter=this->products.begin();
-       iter != this->products.end(); iter++)
+  for (std::map<Species *, GiNaC::ex>::iterator iter=this->_products.begin();
+       iter != this->_products.end(); iter++)
   {
     if (iter->first->getSymbol() == id) {
       return iter->second;
@@ -201,7 +207,7 @@ Reaction::getProductStoichiometry(GiNaC::symbol id)
 void
 Reaction::setProductStoichiometry(Species *species, GiNaC::ex st)
 {
-  this->products[species] = st;
+  this->_products[species] = st;
 }
 
 
@@ -221,36 +227,42 @@ Reaction::addProductStoichiometry(Species *species, GiNaC::ex st)
 
 
 void
+Reaction::clearProducts() {
+  _products.clear();
+}
+
+
+void
 Reaction::addModifier(Species *species)
 {
-  this->modifiers.insert(species);
+  this->_modifiers.insert(species);
 }
 
 
 void
 Reaction::remModifier(Species *species)
 {
-  modifiers.erase(species);
+  _modifiers.erase(species);
 }
 
 
 bool
 Reaction::hasModifier() const
 {
-  return 0 == this->modifiers.size();
+  return 0 == this->_modifiers.size();
 }
 
 
 size_t
 Reaction::numModifier() const {
-  return modifiers.size();
+  return _modifiers.size();
 }
 
 
 bool
 Reaction::isModifier(Species *species) const
 {
-  return this->modifiers.end() != this->modifiers.find(species);
+  return this->_modifiers.end() != this->_modifiers.find(species);
 }
 
 
@@ -258,8 +270,8 @@ bool
 Reaction::isModifier(const GiNaC::symbol &id) const
 {
   // Iterate over all modifiers:
-  for (std::set<Species *>::iterator iter = this->modifiers.begin();
-       iter != this->modifiers.end(); iter++)
+  for (std::set<Species *>::iterator iter = this->_modifiers.begin();
+       iter != this->_modifiers.end(); iter++)
   {
     if ((*iter)->getSymbol() == id)
       return true;
@@ -269,112 +281,117 @@ Reaction::isModifier(const GiNaC::symbol &id) const
 }
 
 
+void
+Reaction::clearModifier() {
+  _modifiers.clear();
+}
+
 KineticLaw *
 Reaction::getKineticLaw()
 {
-  return this->kinetic_law;
+  return this->_kinetic_law;
 }
 
 
 void
 Reaction::setKineticLaw(KineticLaw *law)
 {
-  this->kinetic_law = law;
+  this->_kinetic_law = law;
 }
 
 
 bool
 Reaction::isReversible() const
 {
-  return this->is_reversible;
+  return this->_is_reversible;
 }
 
 void
 Reaction::setReversible(bool val)
 {
-  this->is_reversible=val;
+  this->_is_reversible=val;
 }
 
 bool
 Reaction::isReverseOf(Reaction * other)
 {
-    return ( (this->reactants == other->products) && (this->products == other->reactants) );
+    return ( (this->_reactants == other->_products) && (this->_products == other->_reactants) );
 }
 
 Reaction::iterator
 Reaction::reactantsBegin()
 {
-  return this->reactants.begin();
+  return this->_reactants.begin();
 }
 
 Reaction::iterator
 Reaction::reactantsEnd()
 {
-  return this->reactants.end();
+  return this->_reactants.end();
 }
 
 Reaction::const_iterator
 Reaction::reactantsBegin() const
 {
-  return this->reactants.begin();
+  return this->_reactants.begin();
 }
 
 Reaction::const_iterator
 Reaction::reactantsEnd() const
 {
-  return this->reactants.end();
+  return this->_reactants.end();
 }
 
 
 Reaction::iterator
 Reaction::productsBegin()
 {
-  return this->products.begin();
+  return this->_products.begin();
 }
 
 Reaction::iterator
 Reaction::productsEnd()
 {
-  return this->products.end();
+  return this->_products.end();
 }
 
 Reaction::const_iterator
 Reaction::productsBegin() const
 {
-  return this->products.begin();
+  return this->_products.begin();
 }
 
 Reaction::const_iterator
 Reaction::productsEnd() const
 {
-  return this->products.end();
+  return this->_products.end();
 }
 
 
 Reaction::mod_iterator
 Reaction::modifiersBegin()
 {
-  return this->modifiers.begin();
+  return this->_modifiers.begin();
 }
 
 
 Reaction::mod_iterator
 Reaction::modifiersEnd()
 {
-  return this->modifiers.end();
+  return this->_modifiers.end();
 }
 
 Reaction::const_mod_iterator
 Reaction::modifiersBegin() const
 {
-  return this->modifiers.begin();
+  return this->_modifiers.begin();
 }
 
 
 Reaction::const_mod_iterator
 Reaction::modifiersEnd() const
 {
-  return this->modifiers.end();
+  return this->_modifiers.end();
 }
 
 
@@ -403,7 +420,7 @@ Reaction::dump(std::ostream &str)
     }
   }
   str << std::endl << " with rate ";
-  this->kinetic_law->dump(str);
+  this->_kinetic_law->dump(str);
 
   str << "}" << std::endl;
 }
@@ -436,13 +453,13 @@ Reaction::apply(Ast::Operator &op)
 void
 Reaction::traverse(Ast::Visitor &visitor) const
 {
-  kinetic_law->accept(visitor);
+  _kinetic_law->accept(visitor);
 }
 
 void
 Reaction::traverse(Ast::Operator &op)
 {
-  kinetic_law->apply(op);
+  _kinetic_law->apply(op);
 }
 
 
@@ -451,7 +468,7 @@ Reaction::traverse(Ast::Operator &op)
  * Implementation of kinetic law:
  * ********************************************************************************************* */
 KineticLaw::KineticLaw(GiNaC::ex expr)
-  : Node(Node::KINETIC_LAW), Scope(0, false), expression(expr)
+  : Node(Node::KINETIC_LAW), Scope(0, false), _expression(expr)
 {
   // Done.
 }
@@ -466,14 +483,14 @@ KineticLaw::~KineticLaw()
 GiNaC::ex
 KineticLaw::getRateLaw() const
 {
-  return this->expression;
+  return this->_expression;
 }
 
 
 void
 KineticLaw::setRateLaw(GiNaC::ex node)
 {
-  this->expression = node;
+  this->_expression = node;
 }
 
 
@@ -492,30 +509,57 @@ KineticLaw::addDefinition(Definition *def)
   Scope::addDefinition(def);
 
   // Also store reference in vector:
-  this->parameters.push_back(static_cast<Parameter *>(def));
+  _parameters.push_back(static_cast<Parameter *>(def));
 }
+
+
+void
+KineticLaw::remDefinition(Definition *def)
+{
+  // Search parameter in vector of paramters:
+  std::vector<Ast::Parameter *>::iterator item = _parameters.begin();
+  for (; item!=_parameters.end(); item++) {
+    if ((*item) == def) { break; }
+  }
+
+  if (item == _parameters.end()) {
+    InternalError err;
+    err << "Can not remove paramter: " << def->getIdentifier() << " is not defined in "
+        << "kinetic law.";
+    throw err;
+  }
+
+  // Otherwise reomve locally:
+  Scope::remDefinition(def);
+  // remove parameter from vector:
+  _parameters.erase(item);
+}
+
 
 void
 KineticLaw::cleanUpParameters()
 {
-
-  for(std::vector<Parameter *>::iterator param=parameters.begin(); param!=parameters.end(); param++)
+  // Collect all local paramters that are not used within the kinetic law expression
+  std::list<Parameter *> _unused_paramters;
+  for(std::vector<Parameter *>::iterator param=_parameters.begin(); param!=_parameters.end(); param++)
   {
-      if(!this->getRateLaw().has((*param)->getSymbol()))
-      {
-          parameters.erase(param);
-          cleanUpParameters();
-          return;
-      }
+    if(! this->getRateLaw().has((*param)->getSymbol())) {
+      _unused_paramters.push_back(*param);
+    }
   }
 
+  // Remove them properly from the kinetic law:
+  for (std::list<Parameter *>::iterator param=_unused_paramters.begin(); param != _unused_paramters.end(); param++)
+  {
+    remDefinition(*param);
+  }
 }
 
 
 size_t
 KineticLaw::numParameters() const
 {
-  return this->parameters.size();
+  return this->_parameters.size();
 }
 
 
@@ -523,14 +567,26 @@ Parameter *
 KineticLaw::getParameter(size_t i)
 {
   // Simply get paramter:
-  return this->parameters[i];
+  return this->_parameters[i];
+}
+
+Parameter *
+KineticLaw::getParameter(const std::string &identifier)
+{
+  VariableDefinition *var = this->getVariable(identifier);
+  if (! Node::isParameter(var)) {
+    SymbolError err;
+    err << "Can not resolve paramter " << identifier << ": Not defined.";
+    throw err;
+  }
+  return static_cast<Ast::Parameter *>(var);
 }
 
 
 void
 KineticLaw::dump(std::ostream &str)
 {
-  str << this->expression << " where ";
+  str << this->_expression << " where ";
   Scope::dump(str);
 }
 
