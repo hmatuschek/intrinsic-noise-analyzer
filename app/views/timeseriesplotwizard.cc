@@ -459,7 +459,7 @@ TimeSeriesGraphDialog::checkInputAndExit()
 
   // Get var formula if needed.
   if (TimeSeriesGraphConfig::VARIANCE_GRAPH == _config.plotType()) {
-    if (! _config.setVarColumn(_formula_mean->getFormula())) { return; }
+    if (! _config.setVarColumn(_formula_var->getFormula())) { return; }
   }
 
   accept();
