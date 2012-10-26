@@ -9,7 +9,7 @@ UnitRenderer::UnitRenderer(const iNA::Ast::Unit &unit, QObject *parent)
     _formula = new MathFormula();
 
     // Catch time units first which refer explictly to minutes, hours or days
-    if (unit.isVariantOf(iNA::Ast::ScaledBaseUnit::SECOND) && this->units.size()==1)
+    if (unit.isVariantOf(iNA::Ast::ScaledBaseUnit::SECOND) && unit.size()==1)
     {
         double fac = unit.getMultiplier()*std::pow(10.,unit.getScale());
 
