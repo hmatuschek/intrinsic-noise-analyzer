@@ -11,7 +11,7 @@
 #include "../doctree/plotitem.hh"
 #include "replot.hh"
 #include "../views/speciesselectiondialog.hh"
-#include "../views/timeseriesplotwizard.hh"
+#include "../views/genericplotdialog.hh"
 
 
 /* ********************************************************************************************* *
@@ -91,7 +91,7 @@ void
 REResultWidget::genericPlotButtonPressed()
 {
   // Show dialog
-  TimeSeriesPlotDialog dialog(re_task_wrapper->getRETask()->getTimeSeries());
+  GenericPlotDialog dialog(re_task_wrapper->getRETask()->getTimeSeries());
   if (QDialog::Rejected == dialog.exec()) { return; }
 
   // Create plot figure with labels.

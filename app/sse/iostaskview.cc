@@ -11,7 +11,7 @@
 #include "../doctree/plotitem.hh"
 #include "iosplot.hh"
 #include "../views/speciesselectiondialog.hh"
-#include "../views/timeseriesplotwizard.hh"
+#include "../views/genericplotdialog.hh"
 
 
 /* ********************************************************************************************* *
@@ -102,7 +102,7 @@ void
 IOSResultWidget::_onGenericPlotButtonPressed()
 {
   // Show dialog
-  TimeSeriesPlotDialog dialog(_ios_task_wrapper->getIOSTask()->getTimeSeries());
+  GenericPlotDialog dialog(_ios_task_wrapper->getIOSTask()->getTimeSeries());
   if (QDialog::Rejected == dialog.exec()) { return; }
 
   // Create plot figure with labels.

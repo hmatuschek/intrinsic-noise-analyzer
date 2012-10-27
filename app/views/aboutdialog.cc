@@ -115,9 +115,9 @@ QString AboutPage::content =
 QString AuthorsPage::content =
 "<html><head></head>"
 " <body>"
-"  <p><b>Ramon Grima</b> <i>University of Edinburgh</i></p>"
-"  <p><b>Philipp Thomas</b> <i>University of Edinburgh</i></p>"
-"  <p><b>Hannes Matuschek</b> <i>University of Potsdam</i></p>"
+"  <p><b>Ramon Grima</b> <i>University of Edinburgh, UK</i></p>"
+"  <p><b>Philipp Thomas</b> <i>University of Edinburgh, UK</i> & <i>Humboldt University of Berlin, Germany</i></p>"
+"  <p><b>Hannes Matuschek</b> <i>University of Potsdam, Germany</i></p>"
 " </body>"
 "</html>";
 

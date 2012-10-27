@@ -5,7 +5,31 @@
 UnitRenderer::UnitRenderer(const iNA::Ast::Unit &unit, QObject *parent)
   : QObject(parent), _formula(0), _pixmap(0)
 {
-  _formula = new MathFormula();
+
+    _formula = new MathFormula();
+
+    // Catch time units first which refer explictly to minutes, hours or days
+    if (unit.isVariantOf(iNA::Ast::ScaledBaseUnit::SECOND) && unit.size()==1)
+    {
+        double fac = unit.getMultiplier()*std::pow(10.,unit.getScale());
+
+        if( fac==86400 )
+        {
+            _formula->appendItem(new MathText(QString("d")));
+            return;
+        }
+        else if ( fac==3600 )
+        {
+            _formula->appendItem(new MathText(QString("h")));
+            return;
+        }
+        else if ( fac==60 )
+        {
+            _formula->appendItem(new MathText(QString("min")));
+            return;
+        }
+    }
+
   if (1 != unit.getMultiplier()) {
     _formula->appendItem(new MathText(QString("%2").arg(unit.getMultiplier())));
   }

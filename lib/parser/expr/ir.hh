@@ -149,6 +149,9 @@ private:
 /** Generic expression pass. */
 class Pass {
 public:
+  /** Destructor. Does nothing at all. */
+  virtual ~Pass();
+
   /** Implement this method to apply any modifications on that. */
   virtual bool apply(SmartPtr<Node> &node) = 0;    
   /** Virtual destructor. */

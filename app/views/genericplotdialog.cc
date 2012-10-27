@@ -1,4 +1,4 @@
-#include "timeseriesplotwizard.hh"
+#include "genericplotdialog.hh"
 #include "../plot/linegraph.hh"
 #include "../plot/variancelinegraph.hh"
 #include <QHBoxLayout>
@@ -16,109 +16,136 @@
 /* ******************************************************************************************** *
  * Implementation of TimeSeriesGraphConfig
  * ******************************************************************************************** */
-TimeSeriesGraphConfig::TimeSeriesGraphConfig(
+GenericGraphConfig::GenericGraphConfig(
     Table *table, PlotType type, const QString &label, size_t mean_column, size_t var_column)
-  : _table(table), _context(table), _type(type), _mean_expression(mean_column), _var_expression(var_column), _label(label)
+  : _table(table), _context(table), _type(type), _mean_y_expression(mean_column), _var_expression(var_column), _label(label)
 {
   // pass...
 }
 
-TimeSeriesGraphConfig::TimeSeriesGraphConfig(const TimeSeriesGraphConfig &other)
+GenericGraphConfig::GenericGraphConfig(const GenericGraphConfig &other)
   : _table(other._table), _context(other._context), _type(other._type),
-    _mean_expression(other._mean_expression), _var_expression(other._var_expression), _label(other._label)
+    _x_expression(other._x_expression), _mean_y_expression(other._mean_y_expression),
+    _var_expression(other._var_expression), _label(other._label)
 {
   // pass...
 }
 
 
-TimeSeriesGraphConfig::PlotType
-TimeSeriesGraphConfig::plotType() const {
+GenericGraphConfig::PlotType
+GenericGraphConfig::plotType() const {
   return _type;
 }
 
 void
-TimeSeriesGraphConfig::setPlotType(PlotType type) {
+GenericGraphConfig::setPlotType(PlotType type) {
   _type = type;
 }
 
+
 GiNaC::ex
-TimeSeriesGraphConfig::meanColumn() const {
-  return _mean_expression;
+GenericGraphConfig::xColumn() const {
+  return _x_expression;
 }
 
 QString
-TimeSeriesGraphConfig::meanColumnString() {
+GenericGraphConfig::xColumnString() {
   std::stringstream buffer;
-  PlotFormulaParser::serialize(_mean_expression, buffer, _context);
+  PlotFormulaParser::serialize(_x_expression, buffer, _context);
   return QString(buffer.str().c_str());
 }
 
 bool
-TimeSeriesGraphConfig::setMeanColumn(const QString &formula) {
+GenericGraphConfig::setXColumn(const QString &formula) {
   if (! PlotFormulaParser::check(formula, _context)) { return false; }
-  _mean_expression = PlotFormulaParser::parse(formula, _context);
+  _x_expression = PlotFormulaParser::parse(formula, _context);
+  return true;
+}
+
+
+GiNaC::ex
+GenericGraphConfig::meanYColumn() const {
+  return _mean_y_expression;
+}
+
+QString
+GenericGraphConfig::meanYColumnString() {
+  std::stringstream buffer;
+  PlotFormulaParser::serialize(_mean_y_expression, buffer, _context);
+  return QString(buffer.str().c_str());
+}
+
+bool
+GenericGraphConfig::setMeanYColumn(const QString &formula) {
+  if (! PlotFormulaParser::check(formula, _context)) { return false; }
+  _mean_y_expression = PlotFormulaParser::parse(formula, _context);
   return true;
 }
 
 GiNaC::ex
-TimeSeriesGraphConfig::varColumn() const {
+GenericGraphConfig::varYColumn() const {
   return _var_expression;
 }
 
 QString
-TimeSeriesGraphConfig::varColumnString() {
+GenericGraphConfig::varYColumnString() {
   std::stringstream buffer;
   PlotFormulaParser::serialize(_var_expression, buffer, _context);
   return QString(buffer.str().c_str());
 }
 
 bool
-TimeSeriesGraphConfig::setVarColumn(const QString &formula) {
+GenericGraphConfig::setVarYColumn(const QString &formula) {
   if (! PlotFormulaParser::check(formula, _context)) { return false; }
   _var_expression = PlotFormulaParser::parse(formula, _context);
   return true;
 }
 
 const QString &
-TimeSeriesGraphConfig::label() const {
+GenericGraphConfig::label() const {
   return _label;
 }
 
 void
-TimeSeriesGraphConfig::setLabel(const QString &label) {
+GenericGraphConfig::setLabel(const QString &label) {
   _label = label;
 }
 
 Table *
-TimeSeriesGraphConfig::table() {
+GenericGraphConfig::table() {
   return _table;
 }
 
 Plot::Graph *
-TimeSeriesGraphConfig::create(const Plot::GraphStyle &style)
+GenericGraphConfig::create(const Plot::GraphStyle &style)
 {
   if (LINE_GRAPH == _type) {
     Plot::LineGraph *graph = new Plot::LineGraph(style);
     for (size_t i=0; i<_table->getNumRows(); i++) {
-      graph->addPoint((*_table)(i, 0), evalMean(i));
+      graph->addPoint(evalX(i), evalYMean(i));
     }
     return graph;
   }
 
   Plot::VarianceLineGraph *graph = new Plot::VarianceLineGraph(style);
   for (size_t i=0; i<_table->getNumRows(); i++) {
-    graph->addPoint((*_table)(i, 0), evalMean(i), std::sqrt(evalVar(i)));
+    graph->addPoint(evalX(i), evalYMean(i), std::sqrt(evalYVar(i)));
   }
   return graph;
 }
 
 double
-TimeSeriesGraphConfig::evalMean(size_t row) {
-  return _context(row, _mean_expression);
+GenericGraphConfig::evalX(size_t row) {
+  return _context(row, _x_expression);
 }
 
 double
-TimeSeriesGraphConfig::evalVar(size_t row) {
+GenericGraphConfig::evalYMean(size_t row) {
+  return _context(row, _mean_y_expression);
+}
+
+double
+GenericGraphConfig::evalYVar(size_t row) {
   return _context(row, _var_expression);
 }
 
@@ -127,38 +154,38 @@ TimeSeriesGraphConfig::evalVar(size_t row) {
 /* ******************************************************************************************** *
  * Implementation of TimeSeriesGraphList
  * ******************************************************************************************** */
-TimeSeriesGraphList::TimeSeriesGraphList(QObject *parent)
+GenericGraphList::GenericGraphList(QObject *parent)
   : QAbstractListModel(parent), _graphs()
 {
   // pass..
 }
 
 int
-TimeSeriesGraphList::rowCount(const QModelIndex &parent) const {
+GenericGraphList::rowCount(const QModelIndex &parent) const {
   return _graphs.size();
 }
 
 QVariant
-TimeSeriesGraphList::data(const QModelIndex &index, int role) const {
+GenericGraphList::data(const QModelIndex &index, int role) const {
   if (Qt::DisplayRole != role) { return QVariant(); }
   if (index.row() >= _graphs.size()) { return QVariant(); }
   return _graphs.at(index.row()).label();
 }
 
 void
-TimeSeriesGraphList::addGraph(const TimeSeriesGraphConfig &graph) {
+GenericGraphList::addGraph(const GenericGraphConfig &graph) {
   beginInsertRows(QModelIndex(), _graphs.size(), _graphs.size());
   _graphs.append(graph);
   endInsertRows();
 }
 
-TimeSeriesGraphConfig &
-TimeSeriesGraphList::graph(int idx) {
+GenericGraphConfig &
+GenericGraphList::graph(int idx) {
   return _graphs[idx];
 }
 
 void
-TimeSeriesGraphList::removeGraph(int idx) {
+GenericGraphList::removeGraph(int idx) {
   if (idx < 0 || idx >= _graphs.size()) { return; }
   beginRemoveRows(QModelIndex(), idx, idx);
   _graphs.removeAt(idx);
@@ -166,7 +193,7 @@ TimeSeriesGraphList::removeGraph(int idx) {
 }
 
 void
-TimeSeriesGraphList::updateGraph(int idx, const TimeSeriesGraphConfig &graph) {
+GenericGraphList::updateGraph(int idx, const GenericGraphConfig &graph) {
   if (idx < 0 || idx >= _graphs.size()) { return; }
   _graphs.replace(idx, graph);
   emit dataChanged(index(idx), index(idx));
@@ -176,7 +203,7 @@ TimeSeriesGraphList::updateGraph(int idx, const TimeSeriesGraphConfig &graph) {
 /* ******************************************************************************************** *
  * Implementation of TimeSeriesPlotDialog
  * ******************************************************************************************** */
-TimeSeriesPlotDialog::TimeSeriesPlotDialog(Table *table, QWidget *parent)
+GenericPlotDialog::GenericPlotDialog(Table *table, QWidget *parent)
   : QDialog(parent), _data(table), _graphs(), _figure_title("New Plot"), _x_label(), _y_label()
 {
   setWindowTitle("Plot-o-mat");
@@ -231,34 +258,34 @@ TimeSeriesPlotDialog::TimeSeriesPlotDialog(Table *table, QWidget *parent)
 
 
 size_t
-TimeSeriesPlotDialog::numGraphs() const {
+GenericPlotDialog::numGraphs() const {
   return _graphs.rowCount(QModelIndex());
 }
 
-TimeSeriesGraphConfig &
-TimeSeriesPlotDialog::graph(size_t i) {
+GenericGraphConfig &
+GenericPlotDialog::graph(size_t i) {
   return _graphs.graph(i);
 }
 
 QString
-TimeSeriesPlotDialog::figureTitle() const {
+GenericPlotDialog::figureTitle() const {
   return _figure_title;
 }
 
 QString
-TimeSeriesPlotDialog::xLabel() const {
+GenericPlotDialog::xLabel() const {
   return _x_label;
 }
 
 QString
-TimeSeriesPlotDialog::yLabel() const {
+GenericPlotDialog::yLabel() const {
   return _y_label;
 }
 
 
 void
-TimeSeriesPlotDialog::onAddGraph() {
-  TimeSeriesGraphDialog add_graph_dialog(_data);
+GenericPlotDialog::onAddGraph() {
+  GenericGraphDialog add_graph_dialog(_data);
   if (QDialog::Rejected == add_graph_dialog.exec()) { return; }
   _graphs.addGraph(add_graph_dialog.getConfig());
   _stack->setCurrentIndex(0);
@@ -267,8 +294,8 @@ TimeSeriesPlotDialog::onAddGraph() {
 
 
 void
-TimeSeriesPlotDialog::onEditLabels() {
-  TimeSeriesLabelDialog label_dialog(_figure_title, _x_label, _y_label);
+GenericPlotDialog::onEditLabels() {
+  GenericPlotLabelDialog label_dialog(_figure_title, _x_label, _y_label);
   if (QDialog::Accepted != label_dialog.exec()) { return; }
   _figure_title = label_dialog.figureTitle();
   _x_label = label_dialog.xLabel();
@@ -278,16 +305,16 @@ TimeSeriesPlotDialog::onEditLabels() {
 
 
 void
-TimeSeriesPlotDialog::onEditGraph(const QModelIndex &index) {
+GenericPlotDialog::onEditGraph(const QModelIndex &index) {
   // get graph config and edit it:
-  TimeSeriesGraphDialog graph_dialog(_graphs.graph(index.row()));
+  GenericGraphDialog graph_dialog(_graphs.graph(index.row()));
   if (QDialog::Rejected == graph_dialog.exec()) { return; }
   _graphs.updateGraph(index.row(), graph_dialog.getConfig());
   onUpdatePlot();
 }
 
 void
-TimeSeriesPlotDialog::onRemoveGraph() {
+GenericPlotDialog::onRemoveGraph() {
   if (! _graph_list->selectionModel()->hasSelection()) { return; }
   QModelIndexList selected_items =_graph_list->selectionModel()->selectedIndexes();
   if (1 != selected_items.count()) { return; }
@@ -298,7 +325,7 @@ TimeSeriesPlotDialog::onRemoveGraph() {
 }
 
 void
-TimeSeriesPlotDialog::onUpdatePlot()
+GenericPlotDialog::onUpdatePlot()
 {
   // Free old plot
   if (0 != _plot) { delete _plot; }
@@ -323,7 +350,7 @@ TimeSeriesPlotDialog::onUpdatePlot()
 }
 
 void
-TimeSeriesPlotDialog::onAccepted() {
+GenericPlotDialog::onAccepted() {
   if (0 == _graphs.rowCount(QModelIndex())) { return; }
   accept();
 }
@@ -333,7 +360,7 @@ TimeSeriesPlotDialog::onAccepted() {
 /* ******************************************************************************************** *
  * Implementation of TimeSeriesFormulaEditor
  * ******************************************************************************************** */
-TimeSeriesFormulaEditor::TimeSeriesFormulaEditor(Table *table, QWidget *parent)
+GenericPlotFormulaEditor::GenericPlotFormulaEditor(Table *table, QWidget *parent)
   : QWidget(parent), _table(table)
 {
   _formula = new QLineEdit("");
@@ -356,7 +383,7 @@ TimeSeriesFormulaEditor::TimeSeriesFormulaEditor(Table *table, QWidget *parent)
 
 
 void
-TimeSeriesFormulaEditor::onColumnSelected(QModelIndex index) {
+GenericPlotFormulaEditor::onColumnSelected(QModelIndex index) {
   QAbstractProxyModel *proxy = static_cast<QAbstractProxyModel *>(_columns->completionModel());
   index = proxy->mapToSource(index);
   QString formula = _formula->text();
@@ -365,7 +392,7 @@ TimeSeriesFormulaEditor::onColumnSelected(QModelIndex index) {
 }
 
 void
-TimeSeriesFormulaEditor::showPopUp() {
+GenericPlotFormulaEditor::showPopUp() {
   _columns->setCompletionPrefix("");
   _columns->complete();
 }
@@ -375,14 +402,14 @@ TimeSeriesFormulaEditor::showPopUp() {
 /* ******************************************************************************************** *
  * Implementation of TimeSeriesGraphDialog
  * ******************************************************************************************** */
-TimeSeriesGraphDialog::TimeSeriesGraphDialog(Table *table, QWidget *parent)
-  : QDialog(parent), _data(table), _config(table, TimeSeriesGraphConfig::LINE_GRAPH, "graph", 0, 0)
+GenericGraphDialog::GenericGraphDialog(Table *table, QWidget *parent)
+  : QDialog(parent), _data(table), _config(table, GenericGraphConfig::LINE_GRAPH, "graph", 0, 0)
 {
   // Setup GUI
   __initGUI();
 }
 
-TimeSeriesGraphDialog::TimeSeriesGraphDialog(TimeSeriesGraphConfig &config, QWidget *parent)
+GenericGraphDialog::GenericGraphDialog(GenericGraphConfig &config, QWidget *parent)
   : QDialog(parent), _data(config.table()), _config(config)
 {
   // Setup GUI
@@ -391,28 +418,31 @@ TimeSeriesGraphDialog::TimeSeriesGraphDialog(TimeSeriesGraphConfig &config, QWid
 
 
 void
-TimeSeriesGraphDialog::__initGUI()
+GenericGraphDialog::__initGUI()
 {
   setWindowTitle("Graph-o-mat");
 
   _plot_type    = new QComboBox();
   _plot_type->addItem(tr("Line plot"));
   _plot_type->addItem(tr("Variance plot"));
-  if (TimeSeriesGraphConfig::LINE_GRAPH == _config.plotType()) {
+  if (GenericGraphConfig::LINE_GRAPH == _config.plotType()) {
     _plot_type->setCurrentIndex(0);
   } else {
     _plot_type->setCurrentIndex(1);
   }
 
   _label = new QLineEdit(_config.label());
-  _formula_mean = new TimeSeriesFormulaEditor(_data);
-  _formula_mean->setFormula(_config.meanColumnString());
-  _formula_var  = new TimeSeriesFormulaEditor(_data);
-  if (TimeSeriesGraphConfig::VARIANCE_GRAPH == _config.plotType()) {
-    _formula_var->setFormula(_config.varColumnString());
-    _formula_var->setEnabled(true);
+  _formula_x = new GenericPlotFormulaEditor(_data);
+  if ("0" == _config.xColumnString()) { _formula_x->setFormula("$0"); }
+  else { _formula_x->setFormula(_config.xColumnString()); }
+  _formula_y = new GenericPlotFormulaEditor(_data);
+  _formula_y->setFormula(_config.meanYColumnString());
+  _formula_var_y  = new GenericPlotFormulaEditor(_data);
+  if (GenericGraphConfig::VARIANCE_GRAPH == _config.plotType()) {
+    _formula_var_y->setFormula(_config.varYColumnString());
+    _formula_var_y->setEnabled(true);
   } else {
-    _formula_var->setEnabled(false);
+    _formula_var_y->setEnabled(false);
   }
 
   QDialogButtonBox *buttons = new QDialogButtonBox(QDialogButtonBox::Cancel|QDialogButtonBox::Ok);
@@ -420,8 +450,9 @@ TimeSeriesGraphDialog::__initGUI()
   QFormLayout *grid = new QFormLayout();
   grid->addRow(tr("Plot type"), _plot_type);
   grid->addRow(tr("Label"), _label);
-  grid->addRow(tr("x(t)="), _formula_mean);
-  grid->addRow(tr("var(x(t))="), _formula_var);
+  grid->addRow(tr("X="), _formula_x);
+  grid->addRow(tr("Y="), _formula_y);
+  grid->addRow(tr("var(Y)="), _formula_var_y);
 
   QVBoxLayout *layout = new QVBoxLayout();
   layout->addLayout(grid);
@@ -436,30 +467,33 @@ TimeSeriesGraphDialog::__initGUI()
 
 
 void
-TimeSeriesGraphDialog::onPlotTypeSelect(int index)
+GenericGraphDialog::onPlotTypeSelect(int index)
 {
   if (0 == index) {
-    _formula_var->setEnabled(false);
-    _config.setPlotType(TimeSeriesGraphConfig::LINE_GRAPH);
+    _formula_var_y->setEnabled(false);
+    _config.setPlotType(GenericGraphConfig::LINE_GRAPH);
   } else {
-    _formula_var->setEnabled(true);
-    _config.setPlotType(TimeSeriesGraphConfig::VARIANCE_GRAPH);
+    _formula_var_y->setEnabled(true);
+    _config.setPlotType(GenericGraphConfig::VARIANCE_GRAPH);
   }
 }
 
 
 void
-TimeSeriesGraphDialog::checkInputAndExit()
+GenericGraphDialog::checkInputAndExit()
 {
   // Configure plot label
   _config.setLabel(_label->text());
 
-  // Get mean formular
-  if (! _config.setMeanColumn(_formula_mean->getFormula())) { return; }
+  // Get X formula
+  if (! _config.setXColumn(_formula_x->getFormula())) { return; }
+
+  // Get Y formula
+  if (! _config.setMeanYColumn(_formula_y->getFormula())) { return; }
 
   // Get var formula if needed.
-  if (TimeSeriesGraphConfig::VARIANCE_GRAPH == _config.plotType()) {
-    if (! _config.setVarColumn(_formula_mean->getFormula())) { return; }
+  if (GenericGraphConfig::VARIANCE_GRAPH == _config.plotType()) {
+    if (! _config.setVarYColumn(_formula_var_y->getFormula())) { return; }
   }
 
   accept();
@@ -470,7 +504,7 @@ TimeSeriesGraphDialog::checkInputAndExit()
 /* ******************************************************************************************** *
  * Implementation of TimeSeriesLabelDialog
  * ******************************************************************************************** */
-TimeSeriesLabelDialog::TimeSeriesLabelDialog(
+GenericPlotLabelDialog::GenericPlotLabelDialog(
     const QString &title, const QString &x_label, const QString &y_label, QWidget *parent)
   : QDialog(parent)
 {
@@ -499,16 +533,16 @@ TimeSeriesLabelDialog::TimeSeriesLabelDialog(
 
 
 QString
-TimeSeriesLabelDialog::figureTitle() const  {
+GenericPlotLabelDialog::figureTitle() const  {
   return _figureTitle->text();
 }
 
 QString
-TimeSeriesLabelDialog::xLabel() const {
+GenericPlotLabelDialog::xLabel() const {
   return _xLabel->text();
 }
 
 QString
-TimeSeriesLabelDialog::yLabel() const {
+GenericPlotLabelDialog::yLabel() const {
   return _yLabel->text();
 }
