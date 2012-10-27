@@ -24,7 +24,7 @@ SSEModule::SSEModule(QObject *parent) :
 
   // Register menus
   this->sseAct = new QAction(tr("&Time Course Analysis (SSE)"), this);
-  this->sseAct->setShortcut(QKeySequence(Qt::CTRL+Qt::SHIFT+Qt::Key_E));
+  this->sseAct->setShortcut(QKeySequence(Qt::CTRL+Qt::SHIFT+Qt::Key_T));
   this->sseAct->setStatusTip(tr("Configure & Run the time course analysis (SSE)."));
   Application::getApp()->addToAnalysesMenu(this->sseAct);
   QObject::connect(this->sseAct, SIGNAL(triggered()), this, SLOT(configSSE()));

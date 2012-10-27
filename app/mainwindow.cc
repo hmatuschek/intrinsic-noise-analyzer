@@ -74,6 +74,7 @@ MainWindow::createActions()
   this->onlineHelp->setStatusTip(tr("Open the online-help"));
 
   this->showLogsAct = new QAction(tr("Show log"), this);
+  this->showLogsAct->setShortcut(QKeySequence(Qt::Key_F10));
   this->showLogsAct->setStatusTip(tr("Show the log window"));
 
   // Connect signals:
