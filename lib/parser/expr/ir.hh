@@ -153,7 +153,9 @@ public:
   virtual ~Pass();
 
   /** Implement this method to apply any modifications on that. */
-  virtual bool apply(SmartPtr<Node> &node) = 0;
+  virtual bool apply(SmartPtr<Node> &node) = 0;    
+  /** Virtual destructor. */
+  virtual ~Pass() { }
 };
 
 

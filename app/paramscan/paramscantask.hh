@@ -1,5 +1,5 @@
-#ifndef __INA_APP_SSSCAN_TASK_HH__
-#define __INA_APP_SSSCAN_TASK_HH__
+#ifndef __INA_APP_PARAMSCAN_TASK_HH__
+#define __INA_APP_PARAMSCAN_TASK_HH__
 
 #include "../task.hh"
 #include "models/IOSmodel.hh"
@@ -20,8 +20,16 @@ public:
       public GeneralTaskConfig,
       public ModelSelectionTaskConfig
   {
+
+  public:
+  typedef enum {
+    RE_ANALYSIS, LNA_ANALYSIS, IOS_ANALYSIS, UNDEFINED_ANALYSIS
+    } SSEMethod;
+
   protected:
     iNA::Models::IOSmodel *_model;
+
+    SSEMethod selected_method;
 
     size_t num_threads;
 
@@ -47,7 +55,13 @@ public:
     virtual void setModelDocument(DocumentItem *document);
 
     /** Implements the @c SpeciesSelectionTaskConfig interface, and returns the LNA model instance. */
-    virtual iNA::Ast::Model *getModel() const;
+    virtual iNA::Models::REmodel *getModel() const;
+
+    /** Sets the selected analysis method. This determines, which kind of analysis will be
+     * instantiated when @c setModelDocument is called. */
+    void setMethod(SSEMethod method);
+    /** Returns the selected method. */
+    SSEMethod getMethod() const;
 
     /** Sets the number of threads for OpenMP. */
     void setNumThreads(size_t num);
@@ -75,6 +89,14 @@ public:
     size_t getSteps() const { return steps; }
     void setSteps(size_t value) { steps = value; }
     double getInterval() const { return (end_value-start_value)/steps; }
+
+  public:
+    /** The model to be analyzed. */
+    iNA::Models::REmodel *re_model;
+    /** The model to be analyzed. */
+    iNA::Models::LNAmodel *lna_model;
+    /** The model to be analyzed. */
+    iNA::Models::IOSmodel *ios_model;
   };
 
 
@@ -83,8 +105,6 @@ protected:
   Config config;
   /** Holds the number of species defined in the selected model. */
   size_t _Ns;
-  /** Holds an instance of the analysis. */
-  iNA::Models::ParameterScan<iNA::Models::IOSmodel> steady_state;
   /** Will hold the results. */
   Table parameterScan;
 

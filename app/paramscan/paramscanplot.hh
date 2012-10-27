@@ -1,12 +1,25 @@
-#ifndef __INA_APP_SSSCAN_PLOT_HH__
-#define __INA_APP_SSSCAN_PLOT_HH__
+#ifndef __INA_APP_PARAMSCAN_PLOT_HH__
+#define __INA_APP_PARAMSCAN_PLOT_HH__
 
 #include "../plot/plot.hh"
 #include "../plot/graph.hh"
 #include "../plot/variancelinegraph.hh"
 #include "../timeseries.hh"
-#include "ssscantask.hh"
+#include "paramscantask.hh"
 #include "../views/varianceplot.hh"
+
+/**
+ * Collects data from a @c Table and updates the
+ * @c VarianceLinesGraph instance.
+ */
+class SimpleParameterScanPlot : public LinePlot
+{
+  Q_OBJECT
+
+public:
+  explicit SimpleParameterScanPlot(const QStringList &selected_species, ParamScanTask *task, QObject *parent=0);
+};
+
 
 /**
  * Collects data from a @c Table and updates the

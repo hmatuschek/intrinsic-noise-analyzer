@@ -5,11 +5,15 @@
 #include <ginac/symbol.h>
 
 #include "node.hh"
+#include "event.hh"
 
 
 namespace iNA {
 namespace Ast {
 
+
+// Forward declaration of Scope:
+class Scope;
 
 /**
  * Base class for all definitions, like function definitions etc.
@@ -40,7 +44,6 @@ protected:
   /** Optional display name. @c hasName returns false if this string is empty. */
   std::string _name;
 
-
 protected:
   /** Protected constructor, avoids direct instantiation of the class. */
   Definition(const std::string &id, Node::NodeType node_type);
@@ -56,9 +59,6 @@ public:
   /** Returns the identifier of the definition. */
   const std::string &getIdentifier() const;
 
-  /** Resets the identifier of the definition. */
-  virtual void setIdentifier(const std::string &id);
-
   /** Returns true if there is a display-name assigned to the definition. */
   bool hasName() const;
 
@@ -73,6 +73,13 @@ public:
 
   /** Applies an operator on a definition. */
   virtual void apply(Ast::Operator &op);
+
+protected:
+  /** Resets the identifier of the definition. */
+  virtual void setIdentifier(const std::string &id);
+
+  /** This is needed as only scopes may change the identifier of a definition.*/
+  friend class Scope;
 };
 
 

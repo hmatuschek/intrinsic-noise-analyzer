@@ -54,7 +54,7 @@ if {${configure.compiler} == "clang"} {
 
 
 # Phase modifications
-# Move source into eigen_src; configure & build (out-of-source) in ${worksrcpath}
+# Move source into ina_src; configure & build (out-of-source) in ${workpath}
 post-extract {
   # Rename extracted directory
     move ${workpath}/${name}-${version} ${workpath}/ina_src

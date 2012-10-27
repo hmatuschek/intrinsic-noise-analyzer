@@ -1,12 +1,13 @@
-#ifndef __INA_APP_SSSCAN_WIZARD_HH__
-#define __INA_APP_SSSCAN_WIZARD_HH__
+#ifndef __INA_APP_PARAMSCAN_WIZARD_HH__
+#define __INA_APP_PARAMSCAN_WIZARD_HH__
 
 #include <QWizard>
 #include <QComboBox>
 #include <QLabel>
 #include <QListWidget>
+#include <QRadioButton>
 
-#include "ssscantask.hh"
+#include "paramscantask.hh"
 #include "../doctree/documentitem.hh"
 #include "../views/generaltaskwizard.hh"
 
@@ -44,6 +45,11 @@ class ParamScanModelSelectionPage : public ModelSelectionWizardPage
 public:
   explicit ParamScanModelSelectionPage(GeneralTaskWizard *parent);
   virtual bool validatePage();
+
+private:
+  QRadioButton *_re_button;
+  QRadioButton *_lna_button;
+  QRadioButton *_ios_button;
 };
 
 
@@ -90,6 +96,7 @@ private:
   QLabel *param;
   QLabel *spectrum;
   QLabel *memory;
+  QLabel *method;
 };
 
 

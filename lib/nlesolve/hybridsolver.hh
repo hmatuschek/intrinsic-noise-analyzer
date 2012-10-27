@@ -153,7 +153,11 @@ public:
               Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
               message << "Use integration of duration "<< dt << ".";
               Utils::Logger::get().log(message);
+
+              // Do ODE step
               ODEStep(conc,0,dt);
+              // Refine with additional Newton step
+              NewtonRaphson<Sys>::solve(conc);
           }
 
           // test for convergence of derivatives
@@ -165,8 +169,7 @@ public:
           }
           if ( test < this->parameters.TOLF)
           {
-             NewtonRaphson<Sys>::solve(conc);
-             return Success;
+              return Success;
           }
 
           // test for convergence of dx
@@ -178,7 +181,6 @@ public:
           }
           if (test < this->parameters.TOLX)
           {
-              NewtonRaphson<Sys>::solve(conc);
               return Success;
           }
 

@@ -16,8 +16,8 @@
 #include "../models/plotformulaparser.hh"
 
 
-/** Implements the configuration of a time-series graph. */
-class TimeSeriesGraphConfig
+/** Implements the configuration of a generic graph. */
+class GenericGraphConfig
 {
 public:
   /** Specifies which plot types are supported. */
@@ -34,35 +34,44 @@ protected:
   /** Holds the type of the graph. */
   PlotType _type;
   /** The mean value expression. */
-  GiNaC::ex _mean_expression;
+  GiNaC::ex _x_expression;
+  /** The mean value expression. */
+  GiNaC::ex _mean_y_expression;
   /** The variance expression if needed. */
   GiNaC::ex _var_expression;
   /** Holds the graph label. */
   QString _label;
 
 public:
-  TimeSeriesGraphConfig(Table *table, PlotType type, const QString &label, size_t mean_column, size_t var_column=0);
-  TimeSeriesGraphConfig(const TimeSeriesGraphConfig &other);
+  GenericGraphConfig(Table *table, PlotType type, const QString &label, size_t mean_column, size_t var_column=0);
+  GenericGraphConfig(const GenericGraphConfig &other);
 
   /** Returns the current plot type. */
   PlotType plotType() const;
   /** Resets the current plot type. */
   void setPlotType(PlotType type);
 
-  /** Returns the current plot formula for the mean. */
-  GiNaC::ex meanColumn() const;
+  /** Returns the current X-axis formula for the mean. */
+  GiNaC::ex xColumn() const;
   /** Returns the current plot formula as a string. */
-  QString meanColumnString();
+  QString xColumnString();
+  /** Resets the plot formula for the X axis mean, returns false if the formula is not valid. */
+  bool setXColumn(const QString &formula);
+
+  /** Returns the current plot formula for the mean. */
+  GiNaC::ex meanYColumn() const;
+  /** Returns the current plot formula as a string. */
+  QString meanYColumnString();
   /** Resets the plot formula for the mean, returns false if the formula is not valid. */
-  bool setMeanColumn(const QString &formula);
+  bool setMeanYColumn(const QString &formula);
 
   /** Returns the current plot formula for the variance (if set). */
-  GiNaC::ex varColumn() const;
+  GiNaC::ex varYColumn() const;
   /** Returns the current plot formula as a string. */
-  QString varColumnString();
+  QString varYColumnString();
   /** Resets the current plot formula for the variance, returns false if the given formular
    * is not valid. */
-  bool setVarColumn(const QString &formula);
+  bool setVarYColumn(const QString &formula);
 
   /** Returns the graph label. */
   const QString &label() const;
@@ -76,55 +85,57 @@ public:
   Plot::Graph *create(const Plot::GraphStyle &style);
 
   /** Evaluates the mean expression for the given row of the table. */
-  double evalMean(size_t row);
+  double evalX(size_t row);
+  /** Evaluates the mean expression for the given row of the table. */
+  double evalYMean(size_t row);
   /** Evaluates the variance expression for the given row of the table. */
-  double evalVar(size_t row);
+  double evalYVar(size_t row);
 };
 
 
 
 /** Implements a simple list model of graphs of a plot figure. */
-class TimeSeriesGraphList : public QAbstractListModel
+class GenericGraphList : public QAbstractListModel
 {
   Q_OBJECT
 
 public:
   /** Constructor. */
-  TimeSeriesGraphList(QObject *parent=0);
+  GenericGraphList(QObject *parent=0);
 
   /** Returns the number of graphs. */
   virtual int rowCount(const QModelIndex &parent) const;
   /** Returns the graph label for the list index. */
   virtual QVariant data(const QModelIndex &index, int role) const;
   /** Returns the graph config for the given graph. */
-  TimeSeriesGraphConfig &graph(int idx);
+  GenericGraphConfig &graph(int idx);
   /** Adds a graph config to the list. */
-  void addGraph(const TimeSeriesGraphConfig &graph);
+  void addGraph(const GenericGraphConfig &graph);
   /** Removes a graph from the list. */
   void removeGraph(int idx);
   /** Update graph at index. */
-  void updateGraph(int idx, const TimeSeriesGraphConfig &graph);
+  void updateGraph(int idx, const GenericGraphConfig &graph);
 
 private:
   /** The list of graphs. */
-  QList<TimeSeriesGraphConfig> _graphs;
+  QList<GenericGraphConfig> _graphs;
 };
 
 
 
 /** A simple interactive plot-dialog to assemble new plots. */
-class TimeSeriesPlotDialog : public QDialog
+class GenericPlotDialog : public QDialog
 {
   Q_OBJECT
 
 public:
   /** Constructor, table species the data table to create graphs for. */
-  explicit TimeSeriesPlotDialog(Table *table, QWidget *parent = 0);
+  explicit GenericPlotDialog(Table *table, QWidget *parent = 0);
 
   /** Returns the number of currently configured graphs. */
   size_t numGraphs() const;
   /** Returns the i-th graph config. */
-  TimeSeriesGraphConfig &graph(size_t i);
+  GenericGraphConfig &graph(size_t i);
   /** Returns the figure title. */
   QString figureTitle() const;
   /** Returns the x-label. */
@@ -150,7 +161,7 @@ private:
   /** Holds the selected data-table for the plots. */
   Table *_data;
   /** Holds a ListModel of the graphs. */
-  TimeSeriesGraphList _graphs;
+  GenericGraphList _graphs;
   /** A stack widget that shows either the plot-preview or a label. */
   QStackedWidget *_stack;
   /** The preview plot view. */
@@ -178,13 +189,13 @@ private:
 
 /** A simple line editor widget to edit plot formulas, provides a button to select a certain
  * column of the table. */
-class TimeSeriesFormulaEditor : public QWidget
+class GenericPlotFormulaEditor : public QWidget
 {
   Q_OBJECT
 
 public:
   /** Constructor. */
-  explicit TimeSeriesFormulaEditor(Table *table, QWidget *parent=0);
+  explicit GenericPlotFormulaEditor(Table *table, QWidget *parent=0);
   /** Returns the formula as text. */
   inline QString getFormula() const { return _formula->text(); }
   /** Resets the formula. */
@@ -210,18 +221,18 @@ private:
 
 
 /** A simple dialog to create a new graph for a time series plot. */
-class TimeSeriesGraphDialog : public QDialog
+class GenericGraphDialog : public QDialog
 {
   Q_OBJECT
 
 public:
   /** Constructor for a new graph. */
-  explicit TimeSeriesGraphDialog(Table *table, QWidget *parent=0);
+  explicit GenericGraphDialog(Table *table, QWidget *parent=0);
   /** Constructor to edit an existing graph. */
-  explicit TimeSeriesGraphDialog(TimeSeriesGraphConfig &config, QWidget *parent=0);
+  explicit GenericGraphDialog(GenericGraphConfig &config, QWidget *parent=0);
 
   /** Returns the graph config. */
-  inline const TimeSeriesGraphConfig &getConfig() const { return _config; }
+  inline const GenericGraphConfig &getConfig() const { return _config; }
 
 private slots:
   /** Enables the variance formula editor if a variance plot type is selected. */
@@ -237,25 +248,26 @@ private:
   /** Holds the data table. */
   Table *_data;
   /** Holds the configuration of the graph. */
-  TimeSeriesGraphConfig _config;
+  GenericGraphConfig _config;
   /** plot type selector. */
   QComboBox *_plot_type;
   /** Holds the label editor. */
   QLineEdit *_label;
+  GenericPlotFormulaEditor *_formula_x;
   /** Holds the formula editor for the mean formula. */
-  TimeSeriesFormulaEditor *_formula_mean;
+  GenericPlotFormulaEditor *_formula_y;
   /** Holds the formula editor for the variance formula. */
-  TimeSeriesFormulaEditor *_formula_var;
+  GenericPlotFormulaEditor *_formula_var_y;
 };
 
 
 
-class TimeSeriesLabelDialog : public QDialog
+class GenericPlotLabelDialog : public QDialog
 {
   Q_OBJECT
 
 public:
-  explicit TimeSeriesLabelDialog(const QString &title, const QString &x_label, const QString &y_label, QWidget *parent=0);
+  explicit GenericPlotLabelDialog(const QString &title, const QString &x_label, const QString &y_label, QWidget *parent=0);
 
   QString figureTitle() const;
   QString xLabel() const;

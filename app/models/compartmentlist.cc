@@ -139,11 +139,11 @@ CompartmentList::_updateIndentifier(iNA::Ast::Compartment *compartment, const QV
   // If nothing changed -> done.
   if (id == compartment->getIdentifier()) { return true; }
   // Check ID format
-  if (! QRegExp("[a-zA-Z_][a-zA-Z0-9_]").exactMatch(qid)) { return false; }
+  if (! QRegExp("[a-zA-Z_][a-zA-Z0-9_]*").exactMatch(qid)) { return false; }
   // Check if id is not assigned allready:
   if (_model->hasDefinition(id)) { return false; }
   // Ok, assign identifier:
-  compartment->setIdentifier(id);
+  _model->resetIdentifier(compartment->getIdentifier(), id);
   return true;
 }
 
