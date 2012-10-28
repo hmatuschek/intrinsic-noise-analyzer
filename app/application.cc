@@ -74,7 +74,8 @@ Application::Application() :
   // Assemble menu actions:
   _newModel = new QAction(tr("New model..."), this);
   _newModel->setEnabled(true);
-  _newModel->setStatusTip(tr("Creates a new & empty model"));
+  _newModel->setStatusTip(tr("Creates an empty model"));
+  _newModel->setShortcut(QKeySequence(Qt::CTRL+ Qt::Key_N));
 
   _importModel = new QAction(tr("Open model..."), this);
   _importModel->setEnabled(true);
@@ -83,13 +84,15 @@ Application::Application() :
 
   _exportModel = new QAction(tr("Export model..."), this);
   _exportModel->setEnabled(false);
-  _exportModel->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_E));
+  _exportModel->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_S));
   _exportModel->setStatusTip(tr("Export a model to a file"));
 
   _closeModel = new QAction(tr("Close model"), this);
+  _closeModel->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_C));
   _closeModel->setEnabled(false);
 
   _editModel = new QAction(tr("Edit model"), this);
+  _editModel->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_E));
   _editModel->setEnabled(false);
 
   _expandRevReaction = new QAction(tr("Expand reversible reactions"), this);
@@ -223,11 +226,6 @@ QMenu   *Application::recentModelsMenu() { return _recentModelsMenu; }
  * ******************************************************************************************** */
 void Application::onNewModel()
 {
-  //NewModelDialog dialog;
-  //if (QDialog::Accepted != dialog.exec()) { return; }
-
-  //iNA::Ast::Model *new_model = new iNA::Ast::Model(
-  //      dialog.getModelIdentifier().toStdString(), dialog.getModelName().toStdString());
 
   iNA::Ast::Model *new_model = new iNA::Ast::Model(
               "New_model", "New model");

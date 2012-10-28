@@ -2,7 +2,6 @@
 #include <QPaintEngine>
 #include <cmath>
 
-
 UnitRenderer::UnitRenderer(const iNA::Ast::Unit &unit, QObject *parent)
   : QObject(parent), _formula(0), _pixmap(0)
 {
@@ -12,7 +11,7 @@ UnitRenderer::UnitRenderer(const iNA::Ast::Unit &unit, QObject *parent)
     // Catch time units first which refer explictly to minutes, hours or days
     if (unit.isVariantOf(iNA::Ast::ScaledBaseUnit::SECOND) && unit.size()==1)
     {
-        double fac = unit.getMultiplier()*std::pow(10.,unit.getScale());
+        double fac = unit.getMultiplier()*pow(10.,unit.getScale());
 
         if( fac==86400 )
         {
