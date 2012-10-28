@@ -67,7 +67,8 @@ public:
   QAction *expandRevReacAction();
   /** Returns a weak ref to the "combine irrev reaction" menu action. */
   QAction *combineIrrevReacAction();
-
+  /** Retunrs the recentModelsMenu */
+  QMenu *recentModelsMenu();
 
 public slots:
   /** Resets the currently selected document tree item. */
@@ -94,6 +95,9 @@ private slots:
   /** Handler for the "import model" menu action. */
   void onImportModel();
 
+  /** Slot to import a certain model. */
+  void onImportModel(const QString &path);
+
   /** Handler for "export model" action. */
   void onExportModel();
 
@@ -108,6 +112,12 @@ private slots:
 
   /** Handler for the "combine irreversible reactions" action. */
   void onCombineIrrevReactions();
+
+  /** Handler to open a recently opened model. */
+  void onOpenRecentModel(QAction *action);
+
+  /** Updates the recently imported models menu. */
+  void updateRecentModelsMenu();
 
 
 private:
@@ -138,6 +148,9 @@ private:
   QAction *_expandRevReaction;
   /** The "combine irreversible ractions" menu action. */
   QAction *_combineIrvReaction;
+
+  /** Holds the "recently opened" menu. */
+  QMenu *_recentModelsMenu;
 };
 
 
