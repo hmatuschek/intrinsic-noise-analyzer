@@ -7,6 +7,7 @@
 
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QFileInfo>
 
 #include <parser/parser.hh>
 #include <parser/exception.hh>
@@ -100,6 +101,9 @@ Application::Application() :
   _combineIrvReaction = new QAction(tr("Collapse irreversible reactions"), this);
   _combineIrvReaction->setEnabled(false);
 
+  _recentModelsMenu = new QMenu("recent Models");
+  updateRecentModelsMenu();
+
   // Connect signals
   QObject::connect(_newModel, SIGNAL(triggered()), this, SLOT(onNewModel()));
   QObject::connect(_importModel, SIGNAL(triggered()), this, SLOT(onImportModel()));
@@ -108,6 +112,7 @@ Application::Application() :
   QObject::connect(_editModel, SIGNAL(triggered()), this, SLOT(onEditModel()));
   QObject::connect(_expandRevReaction, SIGNAL(triggered()), this, SLOT(onExpandRevReactions()));
   QObject::connect(_combineIrvReaction, SIGNAL(triggered()), this, SLOT(onCombineIrrevReactions()));
+  QObject::connect(_recentModelsMenu, SIGNAL(triggered(QAction*)), this, SLOT(onOpenRecentModel(QAction*)));
 }
 
 
@@ -213,6 +218,7 @@ QAction *Application::closeModelAction()  { return _closeModel; }
 QAction *Application::editModelAction()   { return _editModel; }
 QAction *Application::expandRevReacAction() { return _expandRevReaction; }
 QAction *Application::combineIrrevReacAction() { return _combineIrvReaction; }
+QMenu   *Application::recentModelsMenu() { return _recentModelsMenu; }
 
 
 /* ******************************************************************************************** *
@@ -236,6 +242,12 @@ void Application::onImportModel()
         tr("All Models (*.xml *.sbml *.mod *.sbmlsh);;SBML Models (*.xml *.sbml);;SBML-SH Models (*.mod *.sbmlsh);;All Files (*.*"));
   if (0 == fileName.size()) { return; }
 
+  onImportModel(fileName);
+}
+
+
+void Application::onImportModel(const QString &fileName)
+{
   QFileInfo info(fileName);
   // Check if file is readable:
   if (! info.isReadable()) {
@@ -255,6 +267,8 @@ void Application::onImportModel()
     // Add new document to tree:
     if (0 != new_doc) {
       docTree()->addDocument(new_doc);
+      addRecentModel(fileName);
+      updateRecentModelsMenu();
       return;
     }
   } catch (iNA::Parser::ParserError &err) {
@@ -283,6 +297,8 @@ void Application::onImportModel()
     // Add new document to tree:
     if (0 != new_doc) {
       docTree()->addDocument(new_doc);
+      addRecentModel(fileName);
+      updateRecentModelsMenu();
       return;
     }
   } catch (iNA::Parser::ParserError &err) {
@@ -385,4 +401,27 @@ void Application::onCombineIrrevReactions()
 }
 
 
+void
+Application::onOpenRecentModel(QAction *action)
+{
+  onImportModel(action->data().toString());
+}
+
+
+void
+Application::updateRecentModelsMenu() {
+  // Remove all actions from the "recent models" sub-menu
+  _recentModelsMenu->clear();
+  QStringList recent_models; recentModels(recent_models);
+  for (int i=0; i<recent_models.size(); i++) {
+    // Get i-th path
+    QString path = recent_models.at(i);
+    // Skip unreadable files:
+    if (!QFileInfo(path).isReadable()) { continue; }
+    std::cerr << "Add to recent models: " << path.toStdString() << std::endl;
+    QAction *action = _recentModelsMenu->addAction(QFileInfo(path).fileName());
+    action->setData(path);
+    action->setToolTip(path);
+  }
+}
 

@@ -5,7 +5,6 @@
 #include <ginac/symbol.h>
 
 #include "node.hh"
-#include "event.hh"
 
 
 namespace iNA {
