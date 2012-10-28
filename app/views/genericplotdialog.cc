@@ -18,14 +18,14 @@
  * ******************************************************************************************** */
 GenericGraphConfig::GenericGraphConfig(
     Table *table, PlotType type, const QString &label, size_t mean_column, size_t var_column)
-  : _table(table), _context(table), _type(type), _mean_y_expression(mean_column), _var_expression(var_column), _label(label)
+  : _table(table), _context(table), _type(type), _y_expression(mean_column), _var_expression(var_column), _label(label)
 {
   // pass...
 }
 
 GenericGraphConfig::GenericGraphConfig(const GenericGraphConfig &other)
   : _table(other._table), _context(other._context), _type(other._type),
-    _x_expression(other._x_expression), _mean_y_expression(other._mean_y_expression),
+    _x_expression(other._x_expression), _y_expression(other._y_expression),
     _var_expression(other._var_expression), _label(other._label)
 {
   // pass...
@@ -65,20 +65,20 @@ GenericGraphConfig::setXColumn(const QString &formula) {
 
 GiNaC::ex
 GenericGraphConfig::meanYColumn() const {
-  return _mean_y_expression;
+  return _y_expression;
 }
 
 QString
 GenericGraphConfig::meanYColumnString() {
   std::stringstream buffer;
-  PlotFormulaParser::serialize(_mean_y_expression, buffer, _context);
+  PlotFormulaParser::serialize(_y_expression, buffer, _context);
   return QString(buffer.str().c_str());
 }
 
 bool
 GenericGraphConfig::setMeanYColumn(const QString &formula) {
   if (! PlotFormulaParser::check(formula, _context)) { return false; }
-  _mean_y_expression = PlotFormulaParser::parse(formula, _context);
+  _y_expression = PlotFormulaParser::parse(formula, _context);
   return true;
 }
 
@@ -122,26 +122,26 @@ GenericGraphConfig::create(const Plot::GraphStyle &style)
   if (LINE_GRAPH == _type) {
     Plot::LineGraph *graph = new Plot::LineGraph(style);
     for (size_t i=0; i<_table->getNumRows(); i++) {
-      graph->addPoint(evalX(i), evalYMean(i));
+      graph->addPoint(_evalX(i), _evalY(i));
     }
     return graph;
   }
 
   Plot::VarianceLineGraph *graph = new Plot::VarianceLineGraph(style);
   for (size_t i=0; i<_table->getNumRows(); i++) {
-    graph->addPoint(evalX(i), evalYMean(i), std::sqrt(evalYVar(i)));
+    graph->addPoint(_evalX(i), _evalY(i), std::sqrt(evalYVar(i)));
   }
   return graph;
 }
 
 double
-GenericGraphConfig::evalX(size_t row) {
+GenericGraphConfig::_evalX(size_t row) {
   return _context(row, _x_expression);
 }
 
 double
-GenericGraphConfig::evalYMean(size_t row) {
-  return _context(row, _mean_y_expression);
+GenericGraphConfig::_evalY(size_t row) {
+  return _context(row, _y_expression);
 }
 
 double

@@ -8,12 +8,12 @@
 
 # First, the base utils
 SET(libina_SOURCES
-    exception.cc event.cc
+    exception.cc
     erf.cc incompletegamma.cc
     ginacsupportforeigen.cc math.cc openmp.cc mersennetwister.cc)
 
 SET(libina_HEADERS ina.hh smartptr.hh linkedlist.hh
-    exception.hh event.hh
+    exception.hh
     erf.hh incompletegamma.hh
     ginacsupportforeigen.hh math.hh openmp.hh mersennetwister.hh)
 

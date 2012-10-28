@@ -1,5 +1,6 @@
 #include "unitrenderer.hh"
 #include <QPaintEngine>
+#include <cmath>
 
 
 UnitRenderer::UnitRenderer(const iNA::Ast::Unit &unit, QObject *parent)
