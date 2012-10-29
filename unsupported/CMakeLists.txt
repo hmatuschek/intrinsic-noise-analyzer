@@ -1,11 +1,13 @@
 # Add source for unsupported modules
 SET(libina_unsupported_SOURCES
    models/maximumentropy.cc
-   models/spectrumrecorder.cc)
+   models/spectrumrecorder.cc
+   models/gibsonbruckSSA.cc)
 
 SET(libina_unsupported_HEADERS
    models/maximumentropy.hh
-   models/spectrumrecorder.hh)
+   models/spectrumrecorder.hh
+   models/gibsonbruckSSA.hh)
 
 #
 # Compile library

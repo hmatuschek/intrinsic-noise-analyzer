@@ -104,7 +104,6 @@ SSAConfigPage::SSAConfigPage(SSAWizard *parent)
   method = new QComboBox();
   method->addItem(tr("Optimized SSA"), SSATaskConfig::OPTIMIZED_SSA);
   method->addItem(tr("Direct SSA"), SSATaskConfig::DIRECT_SSA);
-  method->addItem(tr("Next-Reaction SSA"), SSATaskConfig::GIBSONBRUCK_SSA);
   method->setCurrentIndex(0);
 
   QSpinBox *thread_count = new QSpinBox();
@@ -214,9 +213,6 @@ SSASummaryPage::initializePage()
     this->method->setText("Optimized SSA");
     break;
 
-  case SSATaskConfig::GIBSONBRUCK_SSA:
-    this->method->setText("Next-Reaction SSA");
-    break;
   }
   this->thread_count->setText(QString("%1").arg(config.getNumThreads()));
   size_t num_species = config.getModel()->numSpecies();
@@ -253,11 +249,6 @@ SSASummaryPage::validatePage()
               config.getOptLevel(), config.getNumEvalThreads());
         break;
 
-    case SSATaskConfig::GIBSONBRUCK_SSA:
-      simulator = new Models::GenericGibsonBruckSSA< Eval::direct::Engine<Eigen::VectorXd> >(
-            config.getModelDocument()->getModel(), config.getEnsembleSize(), time(0),
-            config.getOptLevel(), config.getNumEvalThreads());
-      break;
     } break;
 
 
@@ -276,12 +267,6 @@ SSASummaryPage::validatePage()
               config.getOptLevel(), config.getNumEvalThreads());
         break;
 
-      case SSATaskConfig::GIBSONBRUCK_SSA:
-        simulator = new Models::GenericGibsonBruckSSA< Eval::bci::Engine<Eigen::VectorXd> >(
-              config.getModelDocument()->getModel(), config.getEnsembleSize(), time(0),
-              config.getOptLevel(), config.getNumEvalThreads());
-        break;
-
       } break;
 
     case EngineTaskConfig::JIT_ENGINE:
@@ -294,12 +279,6 @@ SSASummaryPage::validatePage()
 
       case SSATaskConfig::OPTIMIZED_SSA:
         simulator = new Models::GenericOptimizedSSA< Eval::jit::Engine<Eigen::VectorXd> >(
-              config.getModelDocument()->getModel(), config.getEnsembleSize(), time(0),
-              config.getOptLevel(), config.getNumEvalThreads());
-        break;
-
-      case SSATaskConfig::GIBSONBRUCK_SSA:
-        simulator = new Models::GenericGibsonBruckSSA< Eval::jit::Engine<Eigen::VectorXd> >(
               config.getModelDocument()->getModel(), config.getEnsembleSize(), time(0),
               config.getOptLevel(), config.getNumEvalThreads());
         break;

@@ -19,7 +19,7 @@ AssertIrreversibleReactions::AssertIrreversibleReactions(BaseModel &model)
     {
       SBMLFeatureNotSupported err;
       err << "Reaction "
-          << (*iter)->getIdentifier() << " is defined reversible and could not be converted to irreversible.";
+          << (*iter)->getIdentifier() << " is defined reversible. Use 'Edit -> Expand reversible reactions' for automatic conversion.";
       throw err;
     }
   }

@@ -101,7 +101,6 @@ SET(libina_models_SOURCES
     models/histogram.cc
     models/gillespieSSA.cc
     models/optimizedSSA.cc
-    models/gibsonbruckSSA.cc
     models/assertnoconstantspeciesmixin.cc
     models/assertconstantparametermixin.cc
     models/assertnoassignmentrule.cc models/assertnoraterule.cc
@@ -129,7 +128,6 @@ SET(libina_models_HEADERS models/models.hh
     models/histogram.hh
     models/gillespieSSA.hh
     models/optimizedSSA.hh
-    models/gibsonbruckSSA.hh
     models/partialsumSSA.hh
     models/optimizedSSAginac.hh
     models/gillespieSSAginac.hh
