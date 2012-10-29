@@ -7,6 +7,7 @@
 #include "fileselector.hh"
 
 
+/// @deprecated Remove that class, unused.
 class ModelFormatQuestion : public QDialog
 {
   Q_OBJECT
