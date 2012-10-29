@@ -96,7 +96,7 @@ Application::Application() :
   _closeModel->setEnabled(false);
 
   _closeAll = new QAction(tr("Close all models"), this);
-  _closeAll->setEnabled(true);
+  _closeAll->setEnabled(docTree()->getTreeChildCount());
 
   _editModel = new QAction(tr("Edit model"), this);
   _editModel->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_E));
@@ -168,6 +168,8 @@ Application::resetSelectedItem() {
   _closeModel->setEnabled(false);
   _expandRevReaction->setEnabled(false);
   _combineIrvReaction->setEnabled(false);
+  _closeAll->setEnabled(docTree()->getTreeChildCount());
+
 }
 
 
@@ -254,7 +256,7 @@ void Application::onImportModel()
   // Show a file-dialog for files:
   QString fileName = QFileDialog::getOpenFileName(
         0, tr("Import model"), "",
-        tr("All Models (*.xml *.sbml *.mod *.sbmlsh);;SBML Models (*.xml *.sbml);;SBML-SH Models (*.mod *.sbmlsh);;All Files (*.*"));
+        tr("All Models (*.xml *.sbml *.mod *.sbmlsh);;SBML Models (*.xml *.sbml);;SBML-sh Models (*.mod *.sbmlsh);;All Files (*.*"));
   if (0 == fileName.size()) { return; }
 
   onImportModel(fileName);
@@ -334,7 +336,7 @@ void Application::onExportModel()
 
   // Ask for filename and type:
   QString selected_filter("");
-  QString filename = QFileDialog::getSaveFileName(0, tr("Export model"), "", tr("SBML (*.xml *.sbml);;SBML-SH (*.mod *.sbmlsh)"), &selected_filter);
+  QString filename = QFileDialog::getSaveFileName(0, tr("Export model"), "", tr("SBML (*.xml *.sbml);;SBML-sh (*.mod *.sbmlsh)"), &selected_filter);
   if ("" == filename) { return; }
 
   // Serialize model into file...
@@ -343,7 +345,7 @@ void Application::onExportModel()
       QFileInfo info(filename);
       if ( ("xml" != info.suffix()) && ("sbml" != info.suffix()) ) { filename.append(".xml"); }
       Parser::Sbml::exportModel(document->getModel(), filename.toStdString());
-    } else if ("SBML-SH (*.mod *.sbmlsh)" == selected_filter){
+    } else if ("SBML-sh (*.mod *.sbmlsh)" == selected_filter){
       QFileInfo info(filename);
       if ( ("mod" != info.suffix()) && ("sbmlsh" != info.suffix()) ) { filename.append(".sbmlsh"); }
       Parser::Sbmlsh::exportModel(document->getModel(), filename.toStdString());
@@ -479,5 +481,6 @@ Application::updateRecentModelsMenu() {
     action->setData(path);
     action->setToolTip(path);
   }
+
 }
 
