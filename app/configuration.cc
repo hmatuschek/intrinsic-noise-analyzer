@@ -86,6 +86,16 @@ Configuration::setNotifyNewVersionAvailable(bool enabled) {
   _settings.setValue("notifynewversion", enabled);
 }
 
+bool
+Configuration::checkNewVersionAvailable() {
+  return _settings.value("checknewversion", true).toBool();
+}
+
+void
+Configuration::setCheckNewVersionAvailable(bool enabled) {
+  _settings.setValue("checknewversion", enabled);
+}
+
 
 QDateTime
 Configuration::lastUpdateCheck()
@@ -97,16 +107,4 @@ void
 Configuration::checkedForUpdate()
 {
   _settings.setValue("lastupdatecheck", QDateTime::currentDateTime());
-}
-
-
-QString
-Configuration::uuid()
-{
-  // Genrate uuid if not set yet.
-  if (! _settings.value("uuid").isValid()) {
-    _settings.setValue("uuid", QUuid::createUuid().toString());
-  }
-  // get uuid:
-  return _settings.value("uuid").toString();
 }

@@ -18,12 +18,21 @@ VersionCheck::VersionCheck(QObject *parent)
 
 
 void
-VersionCheck::startCheck() {
+VersionCheck::startCheck()
+{
+  // Skip if periodic check is disabled by compiler flag;
+#ifdef INA_DISABLE_NEW_VERSION_CHECK
+  return;
+#endif
+
+  // Skip if periodic check is disabled by user config.
+  if (! Application::getApp()->checkNewVersionAvailable()) { return; }
+
   // Skip update if last update was less than 7 days ago:
   QDateTime last_check = Application::getApp()->lastUpdateCheck();
   if (last_check.addDays(7) < QDateTime::currentDateTime()) { return; }
 
-  // Assemnle user agent ID
+  // Assemble user agent ID
   QString version = INA_VERSION_STRING;
   QString system = "unkown";
 #ifdef Q_WS_X11
@@ -33,8 +42,7 @@ VersionCheck::startCheck() {
 #elif defined(Q_WS_WIN)
   system = "Windows";
 #endif
-  QString uuid = Application::getApp()->uuid();
-  QString user_agent = QString("iNA/%1 (%2;%3)").arg(version).arg(system).arg(uuid);
+  QString user_agent = QString("iNA/%1 (%2)").arg(version).arg(system);
 
   // Assemble and send request:
   QNetworkRequest request(QUrl("http://intrinsic_noise_analyzer.googlecode.com/files/currentVersion.txt"));

@@ -36,16 +36,14 @@ public slots:
 private slots:
   /** When triggered, quits the application. */
   void quit();
-
   /** Shows the about dialog. */
   void about();
-
   /** Opens a browser and shows the online-help. */
   void openTutorial();
-
   /** Shows the logging window. */
   void showLogs();
-
+  /** Toggels the "check for updates" */
+  void checkForUpdatesToggled();
 
 private:
   /** Helper method to construct all manu-actions. */
@@ -72,6 +70,8 @@ private:
   QAction *_onlineHelp;
   /** Shows the log window. */
   QAction *_showLogsAct;
+  /** Shows the "check for updates" menu item. */
+  QAction *_checkForUpdatesAct;
   /** Holds the splitter, that splits the main window into a left and right half. */
   QSplitter *_mainSplitter;
   /** Holds the QTreeView for the left pane, showing the all open models, and their structutre. */

@@ -78,6 +78,11 @@ MainWindow::_createActions()
   this->_showLogsAct->setShortcut(QKeySequence(Qt::Key_F10));
   this->_showLogsAct->setStatusTip(tr("Show the log window"));
 
+  this->_checkForUpdatesAct = new QAction(tr("Check for updates"), this);
+  this->_checkForUpdatesAct->setStatusTip(tr("Enables periodic check for new versions of iNA."));
+  this->_checkForUpdatesAct->setCheckable(true);
+  this->_checkForUpdatesAct->setChecked(Application::getApp()->checkNewVersionAvailable());
+
   // Connect signals:
   connect(this->_quitAct, SIGNAL(triggered()), this, SLOT(quit()));
   connect(this->_aboutAct, SIGNAL(triggered()), this, SLOT(about()));
@@ -117,6 +122,7 @@ MainWindow::_createMenus()
   this->_helpMenu->addAction(this->_onlineHelp);
   this->_helpMenu->addAction(this->_aboutAct);
   this->_helpMenu->addAction(this->_showLogsAct);
+  this->_helpMenu->addAction(this->_checkForUpdatesAct);
 }
 
 
@@ -135,3 +141,10 @@ MainWindow::openTutorial() {
 }
 
 void MainWindow::showLogs() { this->_logWindow->setVisible(true); }
+
+
+void
+MainWindow::checkForUpdatesToggled()
+{
+  Application::getApp()->setCheckNewVersionAvailable(_checkForUpdatesAct->isChecked());
+}
