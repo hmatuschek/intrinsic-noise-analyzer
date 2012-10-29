@@ -439,7 +439,6 @@ Application::updateRecentModelsMenu() {
     QString path = recent_models.at(i);
     // Skip unreadable files:
     if (!QFileInfo(path).isReadable()) { continue; }
-    std::cerr << "Add to recent models: " << path.toStdString() << std::endl;
     QAction *action = _recentModelsMenu->addAction(QFileInfo(path).fileName());
     action->setData(path);
     action->setToolTip(path);

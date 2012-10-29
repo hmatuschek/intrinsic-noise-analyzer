@@ -44,10 +44,8 @@ void
 Configuration::recentModels(QStringList &list)
 {
   int num = _settings.beginReadArray("recentmodels");
-  std::cerr << "Found " << num << " recent models." << std::endl;
   for (int i=0; i<num; i++) {
     _settings.setArrayIndex(i);
-    std::cerr << " ... " << _settings.value("path").toString().toStdString() << std::endl;
     list.append(_settings.value("path").toString());
   }
   _settings.endArray();
@@ -57,8 +55,6 @@ Configuration::recentModels(QStringList &list)
 void
 Configuration::addRecentModel(const QString &modelpath)
 {
-  std::cerr << "Add model " << modelpath.toStdString() << " to list of models." << std::endl;
-
   // Read recently opend models:
   QStringList recent_models; recentModels(recent_models);
   if ((recent_models.size() > 0) && (recent_models.at(0)==modelpath)) { return; }
