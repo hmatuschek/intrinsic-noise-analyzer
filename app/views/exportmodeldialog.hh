@@ -8,7 +8,7 @@
 
 
 /**
- * Simple QDialog to export a model (SBMl, SBML-SH, ...)
+ * Simple QDialog to export a model (SBMl, SBML-sh, ...)
  *
  * @deprecated Remove that class. Unused.
  */

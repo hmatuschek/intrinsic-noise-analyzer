@@ -10,13 +10,13 @@ ExportModelDialog::ExportModelDialog(QWidget *parent) :
 
   _file_selector = new FileSelector(
         FileSelector::SaveFile,
-        tr("SBML models (*.xml *.sbml);;SBML-SH models (*.mod *.sbmlsh)"));
+        tr("SBML models (*.xml *.sbml);;SBML-sh models (*.mod *.sbmlsh)"));
   _file_selector->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
 
   _format_selector = new QComboBox();
   _format_selector->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
   _format_selector->addItem(tr("SBML Model"), unsigned(SBML_MODEL));
-  _format_selector->addItem(tr("SBML-SH Model"), unsigned(SBMLSH_MODEL));
+  _format_selector->addItem(tr("SBML-sh Model"), unsigned(SBMLSH_MODEL));
   _format_selector->setCurrentIndex(0);
 
   _buttons = new QDialogButtonBox(QDialogButtonBox::Save|QDialogButtonBox::Cancel);

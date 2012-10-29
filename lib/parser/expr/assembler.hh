@@ -15,7 +15,7 @@ namespace Expr {
 /**
  * Internal used class to assemble @c GiNaC::ex expressions from CST.
  *
- * This class is also used by the SBML-SH parser to parse expressions.
+ * This class is also used by the SBML-sh parser to parse expressions.
  */
 class Assembler
 {

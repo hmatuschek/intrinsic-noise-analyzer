@@ -10,9 +10,9 @@ namespace Sbmlsh {
 
 
 /**
- * Defines all token types used by the SBML-SH parser
+ * Defines all token types used by the SBML-sh parser
  *
- * @todo Implement ignored "comment" token for SBML-SH lexer.
+ * @todo Implement ignored "comment" token for SBML-sh lexer.
  *
  * @ingroup sbmlsh
  */
@@ -31,7 +31,7 @@ typedef enum {
   T_LPAR = Expr::T_LPAR,              ///< '('
   T_RPAR = Expr::T_RPAR,              ///< ')'
 
-  /* New token ids for the SBML-SH parser. */
+  /* New token ids for the SBML-sh parser. */
   T_END_OF_LINE = Expr::T_FIRST_NON_EXPRESSION_TOKEN,  ///< Any combination of NEWLINE, LINEFEET
 
   T_MODEL_KW,         ///< '@model'
@@ -95,7 +95,7 @@ public:
 
 
 /**
- * A lexer for the SBML-SH grammar.
+ * A lexer for the SBML-sh grammar.
  *
  * @todo Turn this into a Production to get the actual version numbers.
  * @ingroup sbmlsh
