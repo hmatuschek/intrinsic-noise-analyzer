@@ -77,7 +77,7 @@ ParameterList::flags(const QModelIndex &index) const
   if (rowCount() <= index.row()) return Qt::NoItemFlags;
 
   // Mark only column 1 & 2 editable
-  if ( (1 == index.column()) || (2 == index.column()) ) item_flags |= Qt::ItemIsEditable;
+  if ( (0 == index.column()) || (1 == index.column()) || (2 == index.column()) ) item_flags |= Qt::ItemIsEditable;
 
   return item_flags;
 }
