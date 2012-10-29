@@ -3,6 +3,7 @@
 #include <QtNetwork/QNetworkRequest>
 #include <QRegExp>
 #include "../application.hh"
+#include <config.hh>
 
 
 VersionCheck::VersionCheck(QObject *parent)
@@ -18,17 +19,36 @@ VersionCheck::VersionCheck(QObject *parent)
 
 void
 VersionCheck::startCheck() {
+  // Skip update if last update was less than 7 days ago:
+  QDateTime last_check = Application::getApp()->lastUpdateCheck();
+  if (last_check.addDays(7) < QDateTime::currentDateTime()) { return; }
+
+  // Assemnle user agent ID
+  QString version = INA_VERSION_STRING;
+  QString system = "unkown";
+#ifdef Q_WS_X11
+  system = "X11";
+#elif Q_WS_MAC
+  system = "MacOS X";
+#elif Q_WS_WIN
+  system = "Windows";
+#endif
+  QString uuid = Application::getApp().uuid();
+  QString user_agent = QString("iNA/%1 (%2;%3)").arg(version).arg(system).arg(uuid);
+
   // Assemble and send request:
   QNetworkRequest request("http://intrinsic_noise_analyzer.googlecode.com/files/currentVersion.txt");
-  request.setRawHeader(
-        "User-Agent", QString("intrinsic Noise Analyzer (v%1 %2)").arg(
-          INA_VERSION_STRING, Application::getApp().uuid()));
+  request.setRawHeader("User-Agent", user_agent);
   _access->get(request);
 }
 
 
 void
 VersionCheck::onDataReceived(QNetworkReply *reply) {
+  // Update last update check date:
+  Application::getApp()->checkedForUpdate();
+
+  // Read current published version number:
   QString version = reply->readLine();
   QRegExp regexp("([0-9]+)\.([0-9]+)\.([0-9]+)");
   if (! regexp.exactMatch(version)) { return; }
@@ -36,6 +56,7 @@ VersionCheck::onDataReceived(QNetworkReply *reply) {
   uint minor = regexp.cap(2).toUInt();
   uint patch = regexp.cap(2).toUInt();
 
+  // Emit "newVersionAvailable" if this version number is smaller
   if (major > INA_VERSION_MAJOR) { emit newVersionAvailable(version); }
   if (major < INA_VERSION_MAJOR) { return; }
   if (minor > INA_VERSION_MINOR) { emit newVersionAvailable(version); }
