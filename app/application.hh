@@ -61,13 +61,15 @@ public:
   QAction *exportModelAction();
   /** Returns a weak reference to the "edit model" menu action. */
   QAction *editModelAction();
-  /** Retunrs a weak reference to the "close model" menu action. */
+  /** Returns a weak reference to the "close model" menu action. */
   QAction *closeModelAction();
+  /** Returns a weak reference to the "close all" menu action. */
+  QAction *closeAllAction();
   /** Returns a weak ref to the "expand rev reaction" menu action. */
   QAction *expandRevReacAction();
   /** Returns a weak ref to the "combine irrev reaction" menu action. */
   QAction *combineIrrevReacAction();
-  /** Retunrs the recentModelsMenu */
+  /** Returns the recentModelsMenu */
   QMenu *recentModelsMenu();
 
 public slots:
@@ -103,6 +105,9 @@ private slots:
 
   /** Handler for "remove model" action. */
   void onCloseModel();
+
+  /** Handler for "close all" action. */
+  void onCloseAll();
 
   /** Handler for the "edit model" action. */
   void onEditModel();
@@ -142,6 +147,8 @@ private:
   QAction *_exportModel;
   /** The "close model" menu action. */
   QAction *_closeModel;
+  /** The "close all" menu action. */
+  QAction *_closeAll;
   /** The "edit model" menu action. */
   QAction *_editModel;
   /** The "expand reversible ractions" menu action. */

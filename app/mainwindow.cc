@@ -93,7 +93,9 @@ MainWindow::createMenus()
   fileMenu->addAction(Application::getApp()->importModelAction());
   fileMenu->addMenu(Application::getApp()->recentModelsMenu());
   fileMenu->addAction(Application::getApp()->exportModelAction());
+  fileMenu->addSeparator();
   fileMenu->addAction(Application::getApp()->closeModelAction());
+  fileMenu->addAction(Application::getApp()->closeAllAction());
   fileMenu->addSeparator();
   fileMenu->addAction(quitAct);
 

@@ -91,6 +91,9 @@ Application::Application() :
   _closeModel->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_C));
   _closeModel->setEnabled(false);
 
+  _closeAll = new QAction(tr("Close all models"), this);
+  _closeAll->setEnabled(true);
+
   _editModel = new QAction(tr("Edit model"), this);
   _editModel->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_E));
   _editModel->setEnabled(false);
@@ -101,7 +104,7 @@ Application::Application() :
   _combineIrvReaction = new QAction(tr("Collapse irreversible reactions"), this);
   _combineIrvReaction->setEnabled(false);
 
-  _recentModelsMenu = new QMenu("recent Models");
+  _recentModelsMenu = new QMenu("Recent models");
   updateRecentModelsMenu();
 
   // Connect signals
@@ -109,6 +112,7 @@ Application::Application() :
   QObject::connect(_importModel, SIGNAL(triggered()), this, SLOT(onImportModel()));
   QObject::connect(_exportModel, SIGNAL(triggered()), this, SLOT(onExportModel()));
   QObject::connect(_closeModel, SIGNAL(triggered()), this, SLOT(onCloseModel()));
+  QObject::connect(_closeAll, SIGNAL(triggered()), this, SLOT(onCloseAll()));
   QObject::connect(_editModel, SIGNAL(triggered()), this, SLOT(onEditModel()));
   QObject::connect(_expandRevReaction, SIGNAL(triggered()), this, SLOT(onExpandRevReactions()));
   QObject::connect(_combineIrvReaction, SIGNAL(triggered()), this, SLOT(onCombineIrrevReactions()));
@@ -215,6 +219,7 @@ QAction *Application::newModelAction() { return _newModel; }
 QAction *Application::importModelAction() { return _importModel; }
 QAction *Application::exportModelAction() { return _exportModel; }
 QAction *Application::closeModelAction()  { return _closeModel; }
+QAction *Application::closeAllAction()  { return _closeAll; }
 QAction *Application::editModelAction()   { return _editModel; }
 QAction *Application::expandRevReacAction() { return _expandRevReaction; }
 QAction *Application::combineIrrevReacAction() { return _combineIrvReaction; }
@@ -351,6 +356,22 @@ void Application::onCloseModel()
   resetSelectedItem();
 }
 
+
+void Application::onCloseAll()
+{
+  DocumentItem *document = 0;
+
+  QObjectList::const_iterator it = docTree()->children().begin();
+
+  while(it!=docTree()->children().end())
+  {
+    document = dynamic_cast<DocumentItem *>(*it++);
+    document->closeDocument();
+  }
+
+  resetSelectedItem();
+
+}
 
 void Application::onEditModel()
 {
