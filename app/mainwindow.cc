@@ -107,6 +107,7 @@ MainWindow::createMenus()
   this->modelMenu->addAction(Application::getApp()->editModelAction());
 
   this->analysisMenu = this->menuBar()->addMenu(tr("&Analysis"));
+  //this->analysisMenu->addAction(Application::getApp()->configSteadyStateAction());
 
   this->helpMenu = this->menuBar()->addMenu(tr("&Help"));
   this->helpMenu->addAction(this->onlineHelp);

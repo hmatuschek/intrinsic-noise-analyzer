@@ -69,6 +69,8 @@ public:
   QAction *expandRevReacAction();
   /** Returns a weak ref to the "combine irrev reaction" menu action. */
   QAction *combineIrrevReacAction();
+  QAction *configSteadyStateAction();
+
   /** Returns the recentModelsMenu */
   QMenu *recentModelsMenu();
 
@@ -93,34 +95,26 @@ public:
 private slots:
   /** Handler for the "new model" menu action. */
   void onNewModel();
-
   /** Handler for the "import model" menu action. */
   void onImportModel();
-
   /** Slot to import a certain model. */
   void onImportModel(const QString &path);
-
   /** Handler for "export model" action. */
   void onExportModel();
-
   /** Handler for "remove model" action. */
   void onCloseModel();
-
   /** Handler for "close all" action. */
   void onCloseAll();
-
   /** Handler for the "edit model" action. */
   void onEditModel();
-
   /** Handler for the "expand reversible reactions" action. */
   void onExpandRevReactions();
-
   /** Handler for the "combine irreversible reactions" action. */
   void onCombineIrrevReactions();
-
   /** Handler to open a recently opened model. */
   void onOpenRecentModel(QAction *action);
-
+  /** handler to show Steady State Analysis Wizard. */
+  void configSteadyState();
   /** Updates the recently imported models menu. */
   void updateRecentModelsMenu();
 
@@ -155,7 +149,8 @@ private:
   QAction *_expandRevReaction;
   /** The "combine irreversible ractions" menu action. */
   QAction *_combineIrvReaction;
-
+  /** The "steady state analysis (SSE)" action. */
+  QAction *_steadyStateAction;
   /** Holds the "recently opened" menu. */
   QMenu *_recentModelsMenu;
 };

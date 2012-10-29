@@ -5,6 +5,10 @@
 #include "views/sbmlsheditordialog.hh"
 #include "views/newmodeldialog.hh"
 
+#include "steadystate/steadystatetask.hh"
+#include "steadystate/steadystatetaskwrapper.hh"
+#include "steadystate/steadystatewizard.hh"
+
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QFileInfo>
@@ -103,6 +107,11 @@ Application::Application() :
 
   _combineIrvReaction = new QAction(tr("Collapse irreversible reactions"), this);
   _combineIrvReaction->setEnabled(false);
+
+  _steadyStateAction = new QAction(tr("&Steady State Analysis (SSE)"), this);
+  _steadyStateAction->setShortcut(QKeySequence(Qt::CTRL+Qt::SHIFT+Qt::Key_S));
+  _steadyStateAction->setStatusTip(tr("Configure & Run the steady state analysis using the System Size Expansion."));
+  QObject::connect(_steadyStateAction, SIGNAL(triggered()), this, SLOT(configSteadyState()));
 
   _recentModelsMenu = new QMenu("Recent models");
   updateRecentModelsMenu();
@@ -223,6 +232,7 @@ QAction *Application::closeAllAction()  { return _closeAll; }
 QAction *Application::editModelAction()   { return _editModel; }
 QAction *Application::expandRevReacAction() { return _expandRevReaction; }
 QAction *Application::combineIrrevReacAction() { return _combineIrvReaction; }
+QAction *Application::configSteadyStateAction() { return _steadyStateAction; }
 QMenu   *Application::recentModelsMenu() { return _recentModelsMenu; }
 
 
@@ -319,28 +329,25 @@ void Application::onImportModel(const QString &fileName)
 
 void Application::onExportModel()
 {
-  DocumentItem *document = 0;
-// redundant:  if (0 == _selected_item) { return; }
-  if (0 == (document = dynamic_cast<DocumentItem *>(getParentDocumentItem(_selected_item)))) { return; }
+  DocumentItem *document = dynamic_cast<DocumentItem *>(getParentDocumentItem(_selected_item));
+  if (0 == document) { return; }
 
-  // Show export model dialog:
-  ExportModelDialog *dialog = new ExportModelDialog();
-  if (QDialog::Accepted != dialog->exec()) return;
-
-  // Get filename and description format
-  QString fileName = dialog->getFileName();
-  ExportModelDialog::Format format = dialog->getFormat();
-  delete dialog;
+  // Ask for filename and type:
+  QString selected_filter("");
+  QString filename = QFileDialog::getSaveFileName(0, tr("Export model"), "", tr("SBML (*.xml *.sbml);;SBML-SH (*.mod *.sbmlsh)"), &selected_filter);
+  if ("" == filename) { return; }
 
   // Serialize model into file...
   try {
-    if (ExportModelDialog::SBML_MODEL == format) {
-      Parser::Sbml::exportModel(document->getModel(), fileName.toStdString());
-    } else if (ExportModelDialog::SBMLSH_MODEL == format){
-      Parser::Sbmlsh::exportModel(document->getModel(), fileName.toStdString());
+    if ("SBML (*.xml *.sbml)" == selected_filter) {
+      Parser::Sbml::exportModel(document->getModel(), filename.toStdString());
+    } else if ("SBML-SH (*.mod *.sbmlsh)" == selected_filter){
+      Parser::Sbmlsh::exportModel(document->getModel(), filename.toStdString());
+    } else {
+      QMessageBox::critical(0, tr("Can not export model"), tr("Unkown file type: %1").arg(selected_filter));
     }
   } catch (Exception &err) {
-    QMessageBox::warning(0, "Can not export model...", err.what());
+    QMessageBox::warning(0, "Can not export model", err.what());
   }
 }
 
@@ -419,6 +426,31 @@ void Application::onCombineIrrevReactions()
 
   docTree()->resetCompleteTree();
 
+}
+
+void
+Application::configSteadyState()
+{
+  // Construct wizard:
+  SteadyStateWizard wizard; wizard.restart();
+  if (QDialog::Accepted != wizard.exec()) { return; }
+
+  // Construct a task from configuration:
+  SteadyStateTask *task = 0;
+
+  try {
+    task = new SteadyStateTask(wizard.getConfigCast<SteadyStateTask::Config>());
+  } catch (iNA::Exception &err) {
+    QMessageBox::warning(
+          0, tr("Can not construct stochastic simulation analysis from model: "), err.what());
+    return;
+  }
+
+  // Add task to application and run it:
+  docTree()->addTask(
+        wizard.getConfigCast<SteadyStateTask::Config>().getModelDocument(),
+        new SteadyStateTaskWrapper(task));
+  task->start();
 }
 
 

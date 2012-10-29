@@ -12,8 +12,6 @@ SteadyStateModule::SteadyStateModule(QObject *parent) :
   this->wizard = new SteadyStateWizard();
   this->wizard->setModal(true);
 
-  // Create Menu:
-  // Register menus
   this->steadyStateAction = new QAction(tr("&Steady State Analysis (SSE)"), this);
   this->steadyStateAction->setShortcut(QKeySequence(Qt::CTRL+Qt::SHIFT+Qt::Key_S));
   this->steadyStateAction->setStatusTip(tr("Configure & Run the steady state analysis using the System Size Expansion."));
