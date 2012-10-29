@@ -7,6 +7,17 @@ PROJECT(intrinsic-noise-analyzer)
 #
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 
+#
+# Define some options
+#
+OPTION(INA_DISABLE_NEW_VERSION_NOTIFY "Disables the periodic notification about a new version of iNA" OFF)
+OPTION(INA_DISABLE_NEW_VERSION_CHECK "Disables the periodic check about a new version of iNA" OFF)
+
+# Disable version check on debug builds:
+IF(CMAKE_BUILD_TYPE MATCHES DEBUG)
+SET(INA_DISABLE_NEW_VERSION_CHECK ON)
+ENDIF(CMAKE_BUILD_TYPE MATCHES DEBUG)
+
 
 #
 # Get default directories under Linux

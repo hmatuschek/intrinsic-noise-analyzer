@@ -4,6 +4,25 @@
 #include "views/exportmodeldialog.hh"
 #include "views/sbmlsheditordialog.hh"
 #include "views/newmodeldialog.hh"
+#include "views/newversiondialog.hh"
+
+#include "steadystate/steadystatetask.hh"
+#include "steadystate/steadystatetaskwrapper.hh"
+#include "steadystate/steadystatewizard.hh"
+
+#include "paramscan/paramscantask.hh"
+#include "paramscan/paramscantaskwrapper.hh"
+#include "paramscan/paramscanwizard.hh"
+
+#include "sse/ssewizard.hh"
+#include "sse/ssetaskconfig.hh"
+#include "sse/retaskwrapper.hh"
+#include "sse/lnataskwrapper.hh"
+#include "sse/iostaskwrapper.hh"
+
+#include "ssa/ssatask.hh"
+#include "ssa/ssataskwrapper.hh"
+#include "ssa/ssawizard.hh"
 
 #include <QMessageBox>
 #include <QFileDialog>
@@ -60,7 +79,7 @@ Application::getApp()
 
 
 Application::Application() :
-  QObject(0), Configuration(), mainWindow(0)
+  QObject(0), Configuration(), mainWindow(0), _versionCheck()
 {
   // First, store instance as singleton instance:
   Application::singleton_instance = this;
@@ -91,6 +110,9 @@ Application::Application() :
   _closeModel->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_C));
   _closeModel->setEnabled(false);
 
+  _closeAll = new QAction(tr("Close all models"), this);
+  _closeAll->setEnabled(docTree()->getTreeChildCount());
+
   _editModel = new QAction(tr("Edit model"), this);
   _editModel->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_E));
   _editModel->setEnabled(false);
@@ -101,7 +123,20 @@ Application::Application() :
   _combineIrvReaction = new QAction(tr("Collapse irreversible reactions"), this);
   _combineIrvReaction->setEnabled(false);
 
-  _recentModelsMenu = new QMenu("recent Models");
+  _steadyStateAction = new QAction(tr("&Steady State Analysis (SSE)"), this);
+  _steadyStateAction->setShortcut(QKeySequence(Qt::CTRL+Qt::SHIFT+Qt::Key_S));
+  _steadyStateAction->setStatusTip(tr("Configure & Run the steady state analysis using the System Size Expansion."));
+
+  _timeCourseAnalysisAction = new QAction(tr("&Time Course Analysis (SSE)"), this);
+  _timeCourseAnalysisAction->setShortcut(QKeySequence(Qt::CTRL+Qt::SHIFT+Qt::Key_T));
+  _timeCourseAnalysisAction->setStatusTip(tr("Configure & Run the time course analysis (SSE)."));
+
+  _parameterScanAction = new QAction(tr("&Steady State Parameter Scan (SSE)"), this);
+  _parameterScanAction->setShortcut(QKeySequence(Qt::CTRL+Qt::SHIFT+Qt::Key_P));
+
+  _ssaAnalysisAction = new QAction(tr("Stochastic Simulation Algorithm (SSA)"), this);
+
+  _recentModelsMenu = new QMenu("Recent models");
   updateRecentModelsMenu();
 
   // Connect signals
@@ -109,10 +144,16 @@ Application::Application() :
   QObject::connect(_importModel, SIGNAL(triggered()), this, SLOT(onImportModel()));
   QObject::connect(_exportModel, SIGNAL(triggered()), this, SLOT(onExportModel()));
   QObject::connect(_closeModel, SIGNAL(triggered()), this, SLOT(onCloseModel()));
+  QObject::connect(_closeAll, SIGNAL(triggered()), this, SLOT(onCloseAll()));
   QObject::connect(_editModel, SIGNAL(triggered()), this, SLOT(onEditModel()));
   QObject::connect(_expandRevReaction, SIGNAL(triggered()), this, SLOT(onExpandRevReactions()));
   QObject::connect(_combineIrvReaction, SIGNAL(triggered()), this, SLOT(onCombineIrrevReactions()));
+  QObject::connect(_steadyStateAction, SIGNAL(triggered()), this, SLOT(configSteadyState()));
+  QObject::connect(_parameterScanAction, SIGNAL(triggered()), this, SLOT(configParameterScan()));
+  QObject::connect(_timeCourseAnalysisAction, SIGNAL(triggered()), this, SLOT(configTimeCourseAnalysis()));
+  QObject::connect(_ssaAnalysisAction, SIGNAL(triggered()), this, SLOT(configSSAAnalysis()));
   QObject::connect(_recentModelsMenu, SIGNAL(triggered(QAction*)), this, SLOT(onOpenRecentModel(QAction*)));
+  QObject::connect(&_versionCheck, SIGNAL(newVersionAvailable(QString)), this, SLOT(onNewVersionAvailable(QString)));
 }
 
 
@@ -133,21 +174,6 @@ Application::setMainWindow(MainWindow *mainwindow)
 
 
 void
-Application::addModule(Module *module)
-{
-  this->modules.append(module);
-  module->setParent(this);
-}
-
-
-void
-Application::addToAnalysesMenu(QAction *action)
-{
-  this->mainWindow->getAnalysesMenu()->addAction(action);
-}
-
-
-void
 Application::resetSelectedItem() {
   _selected_item = 0;
   _exportModel->setEnabled(false);
@@ -155,6 +181,8 @@ Application::resetSelectedItem() {
   _closeModel->setEnabled(false);
   _expandRevReaction->setEnabled(false);
   _combineIrvReaction->setEnabled(false);
+  _closeAll->setEnabled(docTree()->getTreeChildCount());
+
 }
 
 
@@ -194,6 +222,19 @@ Application::itemSelected(const QModelIndex &index)
 
 
 void
+Application::checkForNewVersion()
+{
+  // Do not check if disabled by compiler flag
+#ifdef INA_DISABLE_NEW_VERSION_CHECK
+  return;
+#endif
+
+  // Otherwise start check.
+  _versionCheck.startCheck();
+}
+
+
+void
 Application::showContextMenuAt(const QModelIndex &index, const QPoint &global_pos)
 {
   TreeItem *item = static_cast<TreeItem *>(index.internalPointer());
@@ -215,9 +256,14 @@ QAction *Application::newModelAction() { return _newModel; }
 QAction *Application::importModelAction() { return _importModel; }
 QAction *Application::exportModelAction() { return _exportModel; }
 QAction *Application::closeModelAction()  { return _closeModel; }
+QAction *Application::closeAllAction()  { return _closeAll; }
 QAction *Application::editModelAction()   { return _editModel; }
 QAction *Application::expandRevReacAction() { return _expandRevReaction; }
 QAction *Application::combineIrrevReacAction() { return _combineIrvReaction; }
+QAction *Application::configSteadyStateAction() { return _steadyStateAction; }
+QAction *Application::configParameterScanAction() { return _parameterScanAction; }
+QAction *Application::configTimeCourseAction() { return _timeCourseAnalysisAction; }
+QAction *Application::configSSAAnalysisAction() { return _ssaAnalysisAction; }
 QMenu   *Application::recentModelsMenu() { return _recentModelsMenu; }
 
 
@@ -239,7 +285,7 @@ void Application::onImportModel()
   // Show a file-dialog for files:
   QString fileName = QFileDialog::getOpenFileName(
         0, tr("Import model"), "",
-        tr("All Models (*.xml *.sbml *.mod *.sbmlsh);;SBML Models (*.xml *.sbml);;SBML-SH Models (*.mod *.sbmlsh);;All Files (*.*"));
+        tr("All Models (*.xml *.sbml *.mod *.sbmlsh);;SBML Models (*.xml *.sbml);;SBML-sh Models (*.mod *.sbmlsh);;All Files (*.*"));
   if (0 == fileName.size()) { return; }
 
   onImportModel(fileName);
@@ -314,28 +360,29 @@ void Application::onImportModel(const QString &fileName)
 
 void Application::onExportModel()
 {
-  DocumentItem *document = 0;
-// redundant:  if (0 == _selected_item) { return; }
-  if (0 == (document = dynamic_cast<DocumentItem *>(getParentDocumentItem(_selected_item)))) { return; }
+  DocumentItem *document = dynamic_cast<DocumentItem *>(getParentDocumentItem(_selected_item));
+  if (0 == document) { return; }
 
-  // Show export model dialog:
-  ExportModelDialog *dialog = new ExportModelDialog();
-  if (QDialog::Accepted != dialog->exec()) return;
-
-  // Get filename and description format
-  QString fileName = dialog->getFileName();
-  ExportModelDialog::Format format = dialog->getFormat();
-  delete dialog;
+  // Ask for filename and type:
+  QString selected_filter("");
+  QString filename = QFileDialog::getSaveFileName(0, tr("Export model"), "", tr("SBML (*.xml *.sbml);;SBML-sh (*.mod *.sbmlsh)"), &selected_filter);
+  if ("" == filename) { return; }
 
   // Serialize model into file...
   try {
-    if (ExportModelDialog::SBML_MODEL == format) {
-      Parser::Sbml::exportModel(document->getModel(), fileName.toStdString());
-    } else if (ExportModelDialog::SBMLSH_MODEL == format){
-      Parser::Sbmlsh::exportModel(document->getModel(), fileName.toStdString());
+    if ("SBML (*.xml *.sbml)" == selected_filter) {
+      QFileInfo info(filename);
+      if ( ("xml" != info.suffix()) && ("sbml" != info.suffix()) ) { filename.append(".xml"); }
+      Parser::Sbml::exportModel(document->getModel(), filename.toStdString());
+    } else if ("SBML-sh (*.mod *.sbmlsh)" == selected_filter){
+      QFileInfo info(filename);
+      if ( ("mod" != info.suffix()) && ("sbmlsh" != info.suffix()) ) { filename.append(".sbmlsh"); }
+      Parser::Sbmlsh::exportModel(document->getModel(), filename.toStdString());
+    } else {
+      QMessageBox::critical(0, tr("Can not export model"), tr("Unkown file type: %1").arg(selected_filter));
     }
   } catch (Exception &err) {
-    QMessageBox::warning(0, "Can not export model...", err.what());
+    QMessageBox::warning(0, "Can not export model", err.what());
   }
 }
 
@@ -351,6 +398,22 @@ void Application::onCloseModel()
   resetSelectedItem();
 }
 
+
+void Application::onCloseAll()
+{
+  DocumentItem *document = 0;
+
+  QObjectList::const_iterator it = docTree()->children().begin();
+
+  while(it!=docTree()->children().end())
+  {
+    document = dynamic_cast<DocumentItem *>(*it++);
+    document->closeDocument();
+  }
+
+  resetSelectedItem();
+
+}
 
 void Application::onEditModel()
 {
@@ -400,6 +463,150 @@ void Application::onCombineIrrevReactions()
 
 }
 
+void
+Application::configSteadyState()
+{
+  // Construct wizard:
+  SteadyStateWizard wizard(0); wizard.restart();
+  if (QDialog::Accepted != wizard.exec()) { return; }
+
+  // Construct a task from configuration:
+  SteadyStateTask *task = 0;
+
+  try {
+    task = new SteadyStateTask(wizard.getConfigCast<SteadyStateTask::Config>());
+  } catch (iNA::Exception &err) {
+    QMessageBox::warning(
+          0, tr("Can not construct stochastic simulation analysis from model: "), err.what());
+    return;
+  }
+
+  // Add task to application and run it:
+  docTree()->addTask(
+        wizard.getConfigCast<SteadyStateTask::Config>().getModelDocument(),
+        new SteadyStateTaskWrapper(task));
+  task->start();
+}
+
+
+void
+Application::configParameterScan()
+{
+  ParamScanWizard wizard(0); wizard.restart();
+  if (QDialog::Accepted != wizard.exec()) { return; }
+
+  // Construct a task from configuration:
+  ParamScanTask *task = 0;
+  try {
+    task = new ParamScanTask(wizard.getConfigCast<ParamScanTask::Config>());
+  } catch (iNA::Exception &err) {
+    QMessageBox::warning(
+          0, tr("Cannot construct parameter scan from model: "), err.what());
+    return;
+  }
+
+  // Add task to application and run it:
+  docTree()->addTask(
+        wizard.getConfigCast<ParamScanTask::Config>().getModelDocument(),
+        new ParamScanTaskWrapper(task));
+
+  task->start();
+}
+
+void
+Application::configTimeCourseAnalysis() {
+  SSEWizard wizard(0); wizard.restart();
+  if (QDialog::Accepted != wizard.exec()) { return; }
+
+  // Construct a task from configuration:
+  Task *task = 0;
+
+  Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
+  message << "Created SSE analysis.";
+  Utils::Logger::get().log(message);
+
+  try {
+    // Decide which analysis task to create:
+    switch (wizard.getConfigCast<SSETaskConfig>().getMethod()) {
+
+    case SSETaskConfig::RE_ANALYSIS:
+      task = new RETask(wizard.getConfigCast<SSETaskConfig>());
+      break;
+
+    case SSETaskConfig::LNA_ANALYSIS:
+      task = new LNATask(wizard.getConfigCast<SSETaskConfig>());
+      break;
+
+    case SSETaskConfig::IOS_ANALYSIS:
+      task = new IOSTask(wizard.getConfigCast<SSETaskConfig>());
+      break;
+
+    default:
+      QMessageBox::warning(
+            0, tr("Can not construct time course analysis (SEE) from model: "),
+            "No method was selected.");
+      return;
+    }
+  } catch (iNA::Exception err) {
+    QMessageBox::warning(
+          0, tr("Can not construct time course analysis (SEE) from model: "), err.what());
+    return;
+  }
+
+  // Add task to application and run it:
+  switch(wizard.getConfigCast<SSETaskConfig>().getMethod()) {
+
+    case SSETaskConfig::RE_ANALYSIS:
+      docTree()->addTask(
+            wizard.getConfigCast<SSETaskConfig>().getModelDocument(),
+            new RETaskWrapper(dynamic_cast<RETask *>(task)));
+      break;
+
+    case SSETaskConfig::LNA_ANALYSIS:
+      docTree()->addTask(
+            wizard.getConfigCast<SSETaskConfig>().getModelDocument(),
+            new LNATaskWrapper(dynamic_cast<LNATask *>(task)));
+      break;
+
+    case SSETaskConfig::IOS_ANALYSIS:
+      docTree()->addTask(
+            wizard.getConfigCast<SSETaskConfig>().getModelDocument(),
+            new IOSTaskWrapper(dynamic_cast<IOSTask *>(task)));
+      break;
+
+  default:
+    return;
+  }
+
+  task->start();
+}
+
+
+void
+Application::configSSAAnalysis()
+{
+  SSAWizard wizard(0); wizard.restart();
+  if (QDialog::Accepted != wizard.exec()) { return; }
+
+  // Construct task from wizard:
+  SSATask *task = 0;
+  try {
+    task = new SSATask(wizard.getConfigCast<SSATaskConfig>());
+  } catch (iNA::Exception err) {
+    QMessageBox::warning(
+          0, tr("Can not construct steady state anlysis from model: "), err.what());
+    return;
+  }
+
+
+  // Add task to application and run it:
+  docTree()->addTask(
+        wizard.getConfigCast<SSATaskConfig>().getModelDocument(),
+        new SSATaskWrapper(task));
+
+  task->start();
+}
+
 
 void
 Application::onOpenRecentModel(QAction *action)
@@ -418,10 +625,25 @@ Application::updateRecentModelsMenu() {
     QString path = recent_models.at(i);
     // Skip unreadable files:
     if (!QFileInfo(path).isReadable()) { continue; }
-    std::cerr << "Add to recent models: " << path.toStdString() << std::endl;
     QAction *action = _recentModelsMenu->addAction(QFileInfo(path).fileName());
     action->setData(path);
     action->setToolTip(path);
   }
+
 }
 
+
+void
+Application::onNewVersionAvailable(QString version)
+{
+  // If notification about a new version is disabled:
+#ifdef INA_DISABLE_NEW_VERSION_NOTIFY
+  return;
+#endif
+
+  // If disabled by configuration -> skip.
+  if (! notifyNewVersionAvailable()) { return; }
+
+  // Show message;
+  NewVersionDialog(version).exec();
+}

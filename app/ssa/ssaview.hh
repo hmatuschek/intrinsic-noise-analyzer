@@ -41,11 +41,14 @@ public:
 private slots:
   void showPlot();
   void saveData();
+  void _genericPlotButtonPressed();
 
 private:
   QTableView   *data_view;
   QPushButton  *plot_button;
   QPushButton  *save_button;
+  QPushButton    *_genericPlotButton;
+
 };
 
 #endif // SSAVIEW_HH

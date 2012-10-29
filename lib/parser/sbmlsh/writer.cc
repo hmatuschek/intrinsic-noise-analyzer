@@ -346,7 +346,7 @@ Writer::processReaction(Ast::Reaction *reac, std::ostream &output)
     if (! GiNaC::is_a<GiNaC::numeric>(item->second))
     {
       ExportError err;
-      err << "Can not export reaction " << reac->getIdentifier() << " as SBML-SH: "
+      err << "Can not export reaction " << reac->getIdentifier() << " as SBML-sh: "
           << "Stoichiometry (" << GiNaC::ex_to<GiNaC::numeric>(item->second).to_double()
           << ") for reactant " << item->first->getIdentifier() << " is not an integer.";
       throw err;
@@ -364,7 +364,7 @@ Writer::processReaction(Ast::Reaction *reac, std::ostream &output)
     if (! GiNaC::is_a<GiNaC::numeric>(item->second))
     {
       ExportError err;
-      err << "Can not export reaction " << reac->getIdentifier() << " as SBML-SH: "
+      err << "Can not export reaction " << reac->getIdentifier() << " as SBML-sh: "
           << "Stoichiometry (" << item->second
           << ") for product " << item->first->getIdentifier() << " is not an integer.";
       throw err;
@@ -429,14 +429,14 @@ Writer::processKineticLaw(Ast::KineticLaw *law, std::ostream &output)
       param = law->getParameter(i);
       if (! param->isConst()) {
         ExportError err;
-        err << "Can not export kinetic-law to SBML-SH: The local parameter "
+        err << "Can not export kinetic-law to SBML-sh: The local parameter "
             << param->getIdentifier() << " is not constant.";
         throw err;
       }
 
       if (! param->hasValue()) {
         ExportError err;
-        err << "Can not export kinetic-law to SBML-SH: The local parameter "
+        err << "Can not export kinetic-law to SBML-sh: The local parameter "
             << param->getIdentifier() << " has no value.";
         throw err;
       }
@@ -450,14 +450,14 @@ Writer::processKineticLaw(Ast::KineticLaw *law, std::ostream &output)
     param = law->getParameter(i);
     if (! param->isConst()) {
       ExportError err;
-      err << "Can not export kinetic-law to SBML-SH: The local parameter "
+      err << "Can not export kinetic-law to SBML-sh: The local parameter "
           << param->getIdentifier() << " is not constant.";
       throw err;
     }
 
     if (! param->hasValue()) {
       ExportError err;
-      err << "Can not export kinetic-law to SBML-SH: The local parameter "
+      err << "Can not export kinetic-law to SBML-sh: The local parameter "
           << param->getIdentifier() << " has no value.";
       throw err;
     }

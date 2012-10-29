@@ -11,7 +11,7 @@ namespace Parser {
 namespace Sbmlsh {
 
 /**
- * Internal used class to serialize an @c Ast::Model instance into SBML-SH.
+ * Internal used class to serialize an @c Ast::Model instance into SBML-sh.
  */
 class Writer {
 public:

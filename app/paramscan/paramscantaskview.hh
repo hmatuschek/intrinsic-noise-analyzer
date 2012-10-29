@@ -43,7 +43,8 @@ public:
 
 private slots:
   void plotButtonPressed();
-  void saveButtonPressed();
+  void saveButtonPressed();  
+  void customPlotButtonPressed();
 
 
 private:
@@ -51,6 +52,7 @@ private:
   QTableView   *dataTable;
   QPushButton  *plotButton;
   QPushButton  *saveButton;
+  QPushButton  *customPlotButton;
 };
 
 #endif // LNATASKVIEW_HH

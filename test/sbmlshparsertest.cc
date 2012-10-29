@@ -284,7 +284,7 @@ SBMLSHParserTest::testVarDefOrder()
 UnitTest::TestSuite *
 SBMLSHParserTest::suite()
 {
-  UnitTest::TestSuite *s = new UnitTest::TestSuite("Tests for SBML-SH parser.");
+  UnitTest::TestSuite *s = new UnitTest::TestSuite("Tests for SBML-sh parser.");
 
   s->addTest(new UnitTest::TestCaller<SBMLSHParserTest>(
                "Lexer: Integer", &SBMLSHParserTest::testLexerInteger));

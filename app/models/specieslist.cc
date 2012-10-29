@@ -125,7 +125,7 @@ iNA::Ast::Model & SpeciesList::model() { return *_model; }
 
 QVariant
 SpeciesList::_getIdentifier(iNA::Ast::Species *species, int role) const {
-  if (Qt::DisplayRole != role) { return QVariant(); }
+  if (Qt::DisplayRole != role || Qt::EditRole != role) { return QVariant(); }
   return QVariant(species->getIdentifier().c_str());
 }
 
