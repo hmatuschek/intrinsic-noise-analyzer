@@ -29,7 +29,7 @@ ModelSelectionWizardPage::ModelSelectionWizardPage(GeneralTaskWizard *parent)
   this->modelSelection->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
   this->modelSelection->setFixedWidth(400);
   this->modelSelection->setModel(Application::getApp()->docTree());
-  this->registerField("Model*", this->modelSelection);
+  //this->registerField("Model*", this->modelSelection);
 
   layout->addWidget(this->modelSelection);
   this->setLayout(layout);

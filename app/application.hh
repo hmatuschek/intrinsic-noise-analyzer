@@ -8,7 +8,6 @@
 #include <QApplication>
 #include <QObject>
 
-#include "module.hh"
 #include "configuration.hh"
 #include "doctree/documenttree.hh"
 
@@ -42,12 +41,6 @@ public:
   /** Sets the main-window of the application. */
   void setMainWindow(MainWindow *mainwindow);
 
-  /** Adds a module to the application. */
-  void addModule(Module *module);
-
-  /** Adds some entry to the 'Analyses' menu. */
-  void addToAnalysesMenu(QAction *action);
-
   /** Checks if the item has a context-menu and displays it. */
   void showContextMenuAt(const QModelIndex &index, const QPoint &global_pos);
 
@@ -70,6 +63,9 @@ public:
   /** Returns a weak ref to the "combine irrev reaction" menu action. */
   QAction *combineIrrevReacAction();
   QAction *configSteadyStateAction();
+  QAction *configParameterScanAction();
+  QAction *configTimeCourseAction();
+  QAction *configSSAAnalysisAction();
 
   /** Returns the recentModelsMenu */
   QMenu *recentModelsMenu();
@@ -115,6 +111,11 @@ private slots:
   void onOpenRecentModel(QAction *action);
   /** handler to show Steady State Analysis Wizard. */
   void configSteadyState();
+  /** Handler to show Parameter Scan Wizard. */
+  void configParameterScan();
+  /** Handler to show Time Course Analysis Wizard. */
+  void configTimeCourseAnalysis();
+  void configSSAAnalysis();
   /** Updates the recently imported models menu. */
   void updateRecentModelsMenu();
 
@@ -127,8 +128,6 @@ private:
   MainWindow *mainWindow;
   /** Holds the complete document tree. */
   DocumentTree *document_tree;
-  /** Hold the list of loaded modules. */
-  QList<Module *> modules;
 
   /** Holds a weak reference to the currently selected item. */
   DocumentTreeItem *_selected_item;
@@ -151,6 +150,10 @@ private:
   QAction *_combineIrvReaction;
   /** The "steady state analysis (SSE)" action. */
   QAction *_steadyStateAction;
+  QAction *_parameterScanAction;
+  QAction *_timeCourseAnalysisAction;
+  QAction *_ssaAnalysisAction;
+
   /** Holds the "recently opened" menu. */
   QMenu *_recentModelsMenu;
 };
