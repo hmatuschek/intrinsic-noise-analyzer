@@ -39,10 +39,17 @@ public:
   void recentModels(QStringList &list);
   /** Adds a recently imported model. */
   void addRecentModel(const QString &modelpath);
+
+  /** Returns true if the periodic version check is enabled. */
+  bool notifyNewVersionAvailable();
+  /** Enables/Disables the periodic version check. */
+  void setNotifyNewVersionAvailable(bool enabled);
+
   /** Returns the time & date of the last update check. */
   QDateTime lastUpdateCheck();
   /** Sets the date-time of the last update check to now. */
   void checkedForUpdate();
+
   /** Returns the per user unique UUID. */
   QString uuid();
 };

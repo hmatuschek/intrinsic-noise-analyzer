@@ -7,7 +7,7 @@
 
 
 VersionCheck::VersionCheck(QObject *parent)
-  : QObject(parent), _access(0), _reply(0)
+  : QObject(parent), _access(0)
 {
   // Just allocate the network abstraction layer
   _access = new QNetworkAccessManager(this);
@@ -28,17 +28,17 @@ VersionCheck::startCheck() {
   QString system = "unkown";
 #ifdef Q_WS_X11
   system = "X11";
-#elif Q_WS_MAC
+#elif defined(Q_WS_MAC)
   system = "MacOS X";
-#elif Q_WS_WIN
+#elif defined(Q_WS_WIN)
   system = "Windows";
 #endif
-  QString uuid = Application::getApp().uuid();
+  QString uuid = Application::getApp()->uuid();
   QString user_agent = QString("iNA/%1 (%2;%3)").arg(version).arg(system).arg(uuid);
 
   // Assemble and send request:
-  QNetworkRequest request("http://intrinsic_noise_analyzer.googlecode.com/files/currentVersion.txt");
-  request.setRawHeader("User-Agent", user_agent);
+  QNetworkRequest request(QUrl("http://intrinsic_noise_analyzer.googlecode.com/files/currentVersion.txt"));
+  request.setRawHeader("User-Agent", user_agent.toAscii());
   _access->get(request);
 }
 
@@ -50,7 +50,7 @@ VersionCheck::onDataReceived(QNetworkReply *reply) {
 
   // Read current published version number:
   QString version = reply->readLine();
-  QRegExp regexp("([0-9]+)\.([0-9]+)\.([0-9]+)");
+  QRegExp regexp("([0-9]+)\\.([0-9]+)\\.([0-9]+)");
   if (! regexp.exactMatch(version)) { return; }
   uint major = regexp.cap(1).toUInt();
   uint minor = regexp.cap(2).toUInt();

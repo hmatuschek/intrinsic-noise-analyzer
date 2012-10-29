@@ -4,6 +4,7 @@
 #include "views/exportmodeldialog.hh"
 #include "views/sbmlsheditordialog.hh"
 #include "views/newmodeldialog.hh"
+#include "views/newversiondialog.hh"
 
 #include "steadystate/steadystatetask.hh"
 #include "steadystate/steadystatetaskwrapper.hh"
@@ -78,7 +79,7 @@ Application::getApp()
 
 
 Application::Application() :
-  QObject(0), Configuration(), mainWindow(0)
+  QObject(0), Configuration(), mainWindow(0), _versionCheck()
 {
   // First, store instance as singleton instance:
   Application::singleton_instance = this;
@@ -152,6 +153,7 @@ Application::Application() :
   QObject::connect(_timeCourseAnalysisAction, SIGNAL(triggered()), this, SLOT(configTimeCourseAnalysis()));
   QObject::connect(_ssaAnalysisAction, SIGNAL(triggered()), this, SLOT(configSSAAnalysis()));
   QObject::connect(_recentModelsMenu, SIGNAL(triggered(QAction*)), this, SLOT(onOpenRecentModel(QAction*)));
+  QObject::connect(&_versionCheck, SIGNAL(newVersionAvailable(QString)), this, SLOT(onNewVersionAvailable(QString)));
 }
 
 
@@ -216,6 +218,19 @@ Application::itemSelected(const QModelIndex &index)
     _combineIrvReaction->setEnabled(false);
   }
 
+}
+
+
+void
+Application::checkForNewVersion()
+{
+  // Do not check if disabled by compiler flag
+#ifdef INA_DISABLE_NEW_VERSION_CHECK
+  return;
+#endif
+
+  // Otherwise start check.
+  _versionCheck.startCheck();
 }
 
 
@@ -617,3 +632,18 @@ Application::updateRecentModelsMenu() {
 
 }
 
+
+void
+Application::onNewVersionAvailable(QString version)
+{
+  // If notification about a new version is disabled:
+#ifdef INA_DISABLE_NEW_VERSION_NOTIFY
+  return;
+#endif
+
+  // If disabled by configuration -> skip.
+  if (! notifyNewVersionAvailable()) { return; }
+
+  // Show message;
+  NewVersionDialog(version).exec();
+}

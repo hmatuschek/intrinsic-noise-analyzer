@@ -10,6 +10,7 @@
 
 #include "configuration.hh"
 #include "doctree/documenttree.hh"
+#include "models/versioncheck.hh"
 
 
 /*
@@ -79,6 +80,8 @@ public slots:
    * the main-panel using that view. It also sets the currently selected item. */
   void itemSelected(const QModelIndex &index);
 
+  /** Checks if a new version of iNA is available. */
+  void checkForNewVersion();
 
 public:
   /** Shuts the only running application instance down. */
@@ -118,7 +121,8 @@ private slots:
   void configSSAAnalysis();
   /** Updates the recently imported models menu. */
   void updateRecentModelsMenu();
-
+  /** Shows a message that there is a new version of iNA available if not disabled. */
+  void onNewVersionAvailable(QString version);
 
 private:
   /** Holds the only reference to the application running. */
@@ -128,7 +132,8 @@ private:
   MainWindow *mainWindow;
   /** Holds the complete document tree. */
   DocumentTree *document_tree;
-
+  /** Holds the version checker. */
+  VersionCheck _versionCheck;
   /** Holds a weak reference to the currently selected item. */
   DocumentTreeItem *_selected_item;
 

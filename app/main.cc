@@ -43,10 +43,12 @@ int main(int argc, char *argv[])
   window->show();
 
   // If there is a SBML file passed as CMD line argument:
-  if (2 <= argc)
-  {
+  if (2 <= argc) {
     app->docTree()->addDocument(new DocumentItem(argv[1]));
   }
+
+  // Check for new version of iNA:
+  app->checkForNewVersion();
 
   // run.
   qapp.exec();

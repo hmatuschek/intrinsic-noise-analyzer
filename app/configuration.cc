@@ -76,6 +76,17 @@ Configuration::addRecentModel(const QString &modelpath)
 }
 
 
+bool
+Configuration::notifyNewVersionAvailable() {
+  return _settings.value("notifynewversion", true).toBool();
+}
+
+void
+Configuration::setNotifyNewVersionAvailable(bool enabled) {
+  _settings.setValue("notifynewversion", enabled);
+}
+
+
 QDateTime
 Configuration::lastUpdateCheck()
 {

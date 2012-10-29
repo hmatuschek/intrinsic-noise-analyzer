@@ -6,7 +6,7 @@
 
 
 /** Trivial class that checks if the current version of iNA is still up to date. */
-class VersionCheck : QObject
+class VersionCheck : public QObject
 {
   Q_OBJECT
 
