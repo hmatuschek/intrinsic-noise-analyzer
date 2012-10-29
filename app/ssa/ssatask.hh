@@ -18,7 +18,6 @@ public:
   typedef enum {
     DIRECT_SSA,
     OPTIMIZED_SSA,
-    GIBSONBRUCK_SSA
   } SSAMethod;
 
 
