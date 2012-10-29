@@ -9,6 +9,20 @@
 #include "steadystate/steadystatetaskwrapper.hh"
 #include "steadystate/steadystatewizard.hh"
 
+#include "paramscan/paramscantask.hh"
+#include "paramscan/paramscantaskwrapper.hh"
+#include "paramscan/paramscanwizard.hh"
+
+#include "sse/ssewizard.hh"
+#include "sse/ssetaskconfig.hh"
+#include "sse/retaskwrapper.hh"
+#include "sse/lnataskwrapper.hh"
+#include "sse/iostaskwrapper.hh"
+
+#include "ssa/ssatask.hh"
+#include "ssa/ssataskwrapper.hh"
+#include "ssa/ssawizard.hh"
+
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QFileInfo>
@@ -111,7 +125,15 @@ Application::Application() :
   _steadyStateAction = new QAction(tr("&Steady State Analysis (SSE)"), this);
   _steadyStateAction->setShortcut(QKeySequence(Qt::CTRL+Qt::SHIFT+Qt::Key_S));
   _steadyStateAction->setStatusTip(tr("Configure & Run the steady state analysis using the System Size Expansion."));
-  QObject::connect(_steadyStateAction, SIGNAL(triggered()), this, SLOT(configSteadyState()));
+
+  _timeCourseAnalysisAction = new QAction(tr("&Time Course Analysis (SSE)"), this);
+  _timeCourseAnalysisAction->setShortcut(QKeySequence(Qt::CTRL+Qt::SHIFT+Qt::Key_T));
+  _timeCourseAnalysisAction->setStatusTip(tr("Configure & Run the time course analysis (SSE)."));
+
+  _parameterScanAction = new QAction(tr("&Steady State Parameter Scan (SSE)"), this);
+  _parameterScanAction->setShortcut(QKeySequence(Qt::CTRL+Qt::SHIFT+Qt::Key_P));
+
+  _ssaAnalysisAction = new QAction(tr("Stochastic Simulation Algorithm (SSA)"), this);
 
   _recentModelsMenu = new QMenu("Recent models");
   updateRecentModelsMenu();
@@ -125,6 +147,10 @@ Application::Application() :
   QObject::connect(_editModel, SIGNAL(triggered()), this, SLOT(onEditModel()));
   QObject::connect(_expandRevReaction, SIGNAL(triggered()), this, SLOT(onExpandRevReactions()));
   QObject::connect(_combineIrvReaction, SIGNAL(triggered()), this, SLOT(onCombineIrrevReactions()));
+  QObject::connect(_steadyStateAction, SIGNAL(triggered()), this, SLOT(configSteadyState()));
+  QObject::connect(_parameterScanAction, SIGNAL(triggered()), this, SLOT(configParameterScan()));
+  QObject::connect(_timeCourseAnalysisAction, SIGNAL(triggered()), this, SLOT(configTimeCourseAnalysis()));
+  QObject::connect(_ssaAnalysisAction, SIGNAL(triggered()), this, SLOT(configSSAAnalysis()));
   QObject::connect(_recentModelsMenu, SIGNAL(triggered(QAction*)), this, SLOT(onOpenRecentModel(QAction*)));
 }
 
@@ -142,21 +168,6 @@ void
 Application::setMainWindow(MainWindow *mainwindow)
 {
   this->mainWindow = mainwindow;
-}
-
-
-void
-Application::addModule(Module *module)
-{
-  this->modules.append(module);
-  module->setParent(this);
-}
-
-
-void
-Application::addToAnalysesMenu(QAction *action)
-{
-  this->mainWindow->getAnalysesMenu()->addAction(action);
 }
 
 
@@ -233,6 +244,9 @@ QAction *Application::editModelAction()   { return _editModel; }
 QAction *Application::expandRevReacAction() { return _expandRevReaction; }
 QAction *Application::combineIrrevReacAction() { return _combineIrvReaction; }
 QAction *Application::configSteadyStateAction() { return _steadyStateAction; }
+QAction *Application::configParameterScanAction() { return _parameterScanAction; }
+QAction *Application::configTimeCourseAction() { return _timeCourseAnalysisAction; }
+QAction *Application::configSSAAnalysisAction() { return _ssaAnalysisAction; }
 QMenu   *Application::recentModelsMenu() { return _recentModelsMenu; }
 
 
@@ -436,7 +450,7 @@ void
 Application::configSteadyState()
 {
   // Construct wizard:
-  SteadyStateWizard wizard; wizard.restart();
+  SteadyStateWizard wizard(0); wizard.restart();
   if (QDialog::Accepted != wizard.exec()) { return; }
 
   // Construct a task from configuration:
@@ -454,6 +468,125 @@ Application::configSteadyState()
   docTree()->addTask(
         wizard.getConfigCast<SteadyStateTask::Config>().getModelDocument(),
         new SteadyStateTaskWrapper(task));
+  task->start();
+}
+
+
+void
+Application::configParameterScan()
+{
+  ParamScanWizard wizard(0); wizard.restart();
+  if (QDialog::Accepted != wizard.exec()) { return; }
+
+  // Construct a task from configuration:
+  ParamScanTask *task = 0;
+  try {
+    task = new ParamScanTask(wizard.getConfigCast<ParamScanTask::Config>());
+  } catch (iNA::Exception &err) {
+    QMessageBox::warning(
+          0, tr("Cannot construct parameter scan from model: "), err.what());
+    return;
+  }
+
+  // Add task to application and run it:
+  docTree()->addTask(
+        wizard.getConfigCast<ParamScanTask::Config>().getModelDocument(),
+        new ParamScanTaskWrapper(task));
+
+  task->start();
+}
+
+void
+Application::configTimeCourseAnalysis() {
+  SSEWizard wizard(0); wizard.restart();
+  if (QDialog::Accepted != wizard.exec()) { return; }
+
+  // Construct a task from configuration:
+  Task *task = 0;
+
+  Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
+  message << "Created SSE analysis.";
+  Utils::Logger::get().log(message);
+
+  try {
+    // Decide which analysis task to create:
+    switch (wizard.getConfigCast<SSETaskConfig>().getMethod()) {
+
+    case SSETaskConfig::RE_ANALYSIS:
+      task = new RETask(wizard.getConfigCast<SSETaskConfig>());
+      break;
+
+    case SSETaskConfig::LNA_ANALYSIS:
+      task = new LNATask(wizard.getConfigCast<SSETaskConfig>());
+      break;
+
+    case SSETaskConfig::IOS_ANALYSIS:
+      task = new IOSTask(wizard.getConfigCast<SSETaskConfig>());
+      break;
+
+    default:
+      QMessageBox::warning(
+            0, tr("Can not construct time course analysis (SEE) from model: "),
+            "No method was selected.");
+      return;
+    }
+  } catch (iNA::Exception err) {
+    QMessageBox::warning(
+          0, tr("Can not construct time course analysis (SEE) from model: "), err.what());
+    return;
+  }
+
+  // Add task to application and run it:
+  switch(wizard.getConfigCast<SSETaskConfig>().getMethod()) {
+
+    case SSETaskConfig::RE_ANALYSIS:
+      docTree()->addTask(
+            wizard.getConfigCast<SSETaskConfig>().getModelDocument(),
+            new RETaskWrapper(dynamic_cast<RETask *>(task)));
+      break;
+
+    case SSETaskConfig::LNA_ANALYSIS:
+      docTree()->addTask(
+            wizard.getConfigCast<SSETaskConfig>().getModelDocument(),
+            new LNATaskWrapper(dynamic_cast<LNATask *>(task)));
+      break;
+
+    case SSETaskConfig::IOS_ANALYSIS:
+      docTree()->addTask(
+            wizard.getConfigCast<SSETaskConfig>().getModelDocument(),
+            new IOSTaskWrapper(dynamic_cast<IOSTask *>(task)));
+      break;
+
+  default:
+    return;
+  }
+
+  task->start();
+}
+
+
+void
+Application::configSSAAnalysis()
+{
+  SSAWizard wizard(0); wizard.restart();
+  if (QDialog::Accepted != wizard.exec()) { return; }
+
+  // Construct task from wizard:
+  SSATask *task = 0;
+  try {
+    task = new SSATask(wizard.getConfigCast<SSATaskConfig>());
+  } catch (iNA::Exception err) {
+    QMessageBox::warning(
+          0, tr("Can not construct steady state anlysis from model: "), err.what());
+    return;
+  }
+
+
+  // Add task to application and run it:
+  docTree()->addTask(
+        wizard.getConfigCast<SSATaskConfig>().getModelDocument(),
+        new SSATaskWrapper(task));
+
   task->start();
 }
 

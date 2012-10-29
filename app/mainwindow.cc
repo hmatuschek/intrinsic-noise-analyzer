@@ -107,7 +107,10 @@ MainWindow::createMenus()
   this->modelMenu->addAction(Application::getApp()->editModelAction());
 
   this->analysisMenu = this->menuBar()->addMenu(tr("&Analysis"));
-  //this->analysisMenu->addAction(Application::getApp()->configSteadyStateAction());
+  this->analysisMenu->addAction(Application::getApp()->configSteadyStateAction());
+  this->analysisMenu->addAction(Application::getApp()->configParameterScanAction());
+  this->analysisMenu->addAction(Application::getApp()->configTimeCourseAction());
+  this->analysisMenu->addAction(Application::getApp()->configSSAAnalysisAction());
 
   this->helpMenu = this->menuBar()->addMenu(tr("&Help"));
   this->helpMenu->addAction(this->onlineHelp);

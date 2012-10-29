@@ -1,9 +1,5 @@
 #include "main.hh"
 
-#include "ssa/ssamodule.hh"
-#include "steadystate/steadystatemodule.hh"
-#include "sse/ssemodule.hh"
-#include "paramscan/paramscanmodule.hh"
 #include "doctree/documentitem.hh"
 #include "utils/logger.hh"
 
@@ -43,17 +39,6 @@ int main(int argc, char *argv[])
   // Create new main-window, this initializes all the view-part
   MainWindow *window = new MainWindow();
   app->setMainWindow(window);
-
-
-  // Load SteadyState module:
-  app->addModule(new SteadyStateModule(app));
-  // Load parameter scan module
-  app->addModule(new ParamScanModule(app));
-
-  // Load SSE module
-  app->addModule(new SSEModule(app));
-  // Load SSA module:
-  app->addModule(new SSAModule(app));
 
   window->show();
 
