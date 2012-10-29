@@ -8,7 +8,6 @@
 #include <QApplication>
 #include <QObject>
 
-#include "module.hh"
 #include "configuration.hh"
 #include "doctree/documenttree.hh"
 
