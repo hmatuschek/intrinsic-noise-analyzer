@@ -83,6 +83,13 @@ MainWindow::_createActions()
   this->_checkForUpdatesAct->setCheckable(true);
   this->_checkForUpdatesAct->setChecked(Application::getApp()->checkNewVersionAvailable());
 
+  // If update check is disabled at compile time -> disable menu entry:
+#ifdef INA_DISABLE_UPDATE_CHECK
+  this->_checkForUpdatesAct->setEnabled(false);
+  this->_checkForUpdatesAct->setChecked(false);
+  this->_checkForUpdatesAct->setVisible(false);
+#endif
+
   // Connect signals:
   connect(this->_quitAct, SIGNAL(triggered()), this, SLOT(quit()));
   connect(this->_aboutAct, SIGNAL(triggered()), this, SLOT(about()));

@@ -636,11 +636,6 @@ Application::updateRecentModelsMenu() {
 void
 Application::onNewVersionAvailable(QString version)
 {
-  // If notification about a new version is disabled:
-#ifdef INA_DISABLE_NEW_VERSION_NOTIFY
-  return;
-#endif
-
   // If disabled by configuration -> skip.
   if (! notifyNewVersionAvailable()) { return; }
 
