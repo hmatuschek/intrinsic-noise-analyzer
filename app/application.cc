@@ -340,8 +340,12 @@ void Application::onExportModel()
   // Serialize model into file...
   try {
     if ("SBML (*.xml *.sbml)" == selected_filter) {
+      QFileInfo info(filename);
+      if ( ("xml" != info.suffix()) && ("sbml" != info.suffix()) ) { filename.append(".xml"); }
       Parser::Sbml::exportModel(document->getModel(), filename.toStdString());
     } else if ("SBML-SH (*.mod *.sbmlsh)" == selected_filter){
+      QFileInfo info(filename);
+      if ( ("mod" != info.suffix()) && ("sbmlsh" != info.suffix()) ) { filename.append(".sbmlsh"); }
       Parser::Sbmlsh::exportModel(document->getModel(), filename.toStdString());
     } else {
       QMessageBox::critical(0, tr("Can not export model"), tr("Unkown file type: %1").arg(selected_filter));
