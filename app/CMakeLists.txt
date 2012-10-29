@@ -16,18 +16,6 @@ SET(ina_app_plot_HEADERS
     plot/variancelinegraph.hh plot/mapping.hh plot/figure.hh plot/linegraph.hh plot/savedialog.hh
     plot/boxplot.hh plot/plotrangedialog.hh)
 
-#SET(ina_app_re_SOURCES
-#    re/remodule.cc re/retask.cc re/retaskwrapper.cc re/retaskview.cc re/rewizard.cc re/replot.cc)
-#SET(ina_app_re_HEADERS
-#    re/remodule.hh re/retask.hh re/retaskwrapper.hh re/retaskview.hh re/rewizard.hh re/replot.hh)
-
-#SET(ina_app_lna_SOURCES
-#    lna/lnawizard.cc lna/lnatask.cc lna/lnataskwrapper.cc lna/lnataskview.cc
-#    lna/lnaplot.cc lna/lnamodule.cc)
-#SET(ina_app_lna_HEADERS
-#    lna/lnawizard.hh lna/lnatask.hh lna/lnataskwrapper.hh lna/lnataskview.hh
-#    lna/lnaplot.hh lna/lnamodule.hh)
-
 SET(ina_app_sse_SOURCES sse/ssetaskconfig.cc
     sse/ssewizard.cc
     sse/iostask.cc sse/iostaskwrapper.cc sse/iostaskview.cc sse/iosplot.cc

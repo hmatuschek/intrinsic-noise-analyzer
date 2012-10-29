@@ -20,109 +20,103 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
 {
   // Most important feature: main-title:
-  this->setWindowTitle("Intrinsic Noise Analyzer");
+  setWindowTitle("Intrinsic Noise Analyzer");
 
   // Create actions and menus:
-  this->createActions();
-  this->createMenus();
+  _createActions();
+  _createMenus();
 
   // Create layout:
-  this->mainSplitter = new QSplitter(Qt::Horizontal, this);
+  _mainSplitter = new QSplitter(Qt::Horizontal, this);
 
-  this->modelView = new DocumentsView();
-  this->mainSplitter->addWidget(this->modelView);
+  _modelView = new DocumentsView();
+  _mainSplitter->addWidget(this->_modelView);
 
-  this->mainPane = new QScrollArea();
-  this->mainPane->setBackgroundRole(QPalette::Dark);
-  this->mainPane->setWidgetResizable(true);
-  this->mainSplitter->addWidget(this->mainPane);
+  _mainPane = new QScrollArea();
+  _mainPane->setBackgroundRole(QPalette::Dark);
+  _mainPane->setWidgetResizable(true);
+  _mainSplitter->addWidget(this->_mainPane);
 
   // approx golden ratio for splitter:
-  this->mainSplitter->setStretchFactor(0, 0);
-  this->mainSplitter->setStretchFactor(1, 2);
+  _mainSplitter->setStretchFactor(0, 0);
+  _mainSplitter->setStretchFactor(1, 2);
 
-  this->setCentralWidget(this->mainSplitter);
+  setCentralWidget(this->_mainSplitter);
 
   // Ensure window has minimum size:
-  this->setMinimumSize(810, 500);
+  setMinimumSize(810, 500);
 
-  this->logWindow = new LogWindow();
-  this->logWindow->setVisible(false);
+  // Create hidden log window.
+  _logWindow = new LogWindow();
+  _logWindow->setVisible(false);
 }
 
 
 void
 MainWindow::showPanel(QWidget *panel)
 {
-  this->mainPane->setWidget(panel);
+  this->_mainPane->setWidget(panel);
 }
 
 
 void
-MainWindow::createActions()
+MainWindow::_createActions()
 {
   // Define some actions for main menu:
-  this->quitAct = new QAction(tr("&Quit"), this);
-  this->quitAct->setShortcuts(QKeySequence::Quit);
-  this->quitAct->setStatusTip(tr("Quit the application"));
+  this->_quitAct = new QAction(tr("&Quit"), this);
+  this->_quitAct->setShortcuts(QKeySequence::Quit);
+  this->_quitAct->setStatusTip(tr("Quit the application"));
 
-  this->aboutAct = new QAction(tr("&About"), this);
-  this->aboutAct->setMenuRole(QAction::AboutRole);
+  this->_aboutAct = new QAction(tr("&About"), this);
+  this->_aboutAct->setMenuRole(QAction::AboutRole);
 
-  this->onlineHelp = new QAction(tr("&Help"), this);
-  this->onlineHelp->setShortcuts(QKeySequence::HelpContents);
-  this->onlineHelp->setStatusTip(tr("Open the online-help"));
+  this->_onlineHelp = new QAction(tr("&Help"), this);
+  this->_onlineHelp->setShortcuts(QKeySequence::HelpContents);
+  this->_onlineHelp->setStatusTip(tr("Open the online-help"));
 
-  this->showLogsAct = new QAction(tr("Show log"), this);
-  this->showLogsAct->setShortcut(QKeySequence(Qt::Key_F10));
-  this->showLogsAct->setStatusTip(tr("Show the log window"));
+  this->_showLogsAct = new QAction(tr("Show log"), this);
+  this->_showLogsAct->setShortcut(QKeySequence(Qt::Key_F10));
+  this->_showLogsAct->setStatusTip(tr("Show the log window"));
 
   // Connect signals:
-  connect(this->quitAct, SIGNAL(triggered()), this, SLOT(quit()));
-  connect(this->aboutAct, SIGNAL(triggered()), this, SLOT(about()));
-  connect(this->onlineHelp, SIGNAL(triggered()), this, SLOT(openTutorial()));
-  connect(this->showLogsAct, SIGNAL(triggered()), this, SLOT(showLogs()));
+  connect(this->_quitAct, SIGNAL(triggered()), this, SLOT(quit()));
+  connect(this->_aboutAct, SIGNAL(triggered()), this, SLOT(about()));
+  connect(this->_onlineHelp, SIGNAL(triggered()), this, SLOT(openTutorial()));
+  connect(this->_showLogsAct, SIGNAL(triggered()), this, SLOT(showLogs()));
 }
 
 
 void
-MainWindow::createMenus()
+MainWindow::_createMenus()
 {
-  fileMenu = menuBar()->addMenu(tr("&File"));
-  fileMenu->addAction(Application::getApp()->newModelAction());
-  fileMenu->addAction(Application::getApp()->importModelAction());
-  fileMenu->addMenu(Application::getApp()->recentModelsMenu());
-  fileMenu->addAction(Application::getApp()->exportModelAction());
-  fileMenu->addSeparator();
-  fileMenu->addAction(Application::getApp()->closeModelAction());
-  fileMenu->addAction(Application::getApp()->closeAllAction());
-  fileMenu->addSeparator();
-  fileMenu->addAction(quitAct);
+  _fileMenu = menuBar()->addMenu(tr("&File"));
+  _fileMenu->addAction(Application::getApp()->newModelAction());
+  _fileMenu->addAction(Application::getApp()->importModelAction());
+  _fileMenu->addMenu(Application::getApp()->recentModelsMenu());
+  _fileMenu->addAction(Application::getApp()->exportModelAction());
+  _fileMenu->addSeparator();
+  _fileMenu->addAction(Application::getApp()->closeModelAction());
+  _fileMenu->addAction(Application::getApp()->closeAllAction());
+  _fileMenu->addSeparator();
+  _fileMenu->addAction(_quitAct);
 
-  this->modelMenu = this->menuBar()->addMenu(tr("&Edit")); //< or name "Model"
+  this->_modelMenu = this->menuBar()->addMenu(tr("&Edit")); //< or name "Model"
 
-  this->modelMenu->addAction(Application::getApp()->expandRevReacAction());
-  this->modelMenu->addAction(Application::getApp()->combineIrrevReacAction());
-  this->modelMenu->addSeparator();
-  this->modelMenu->addAction(Application::getApp()->editModelAction());
+  this->_modelMenu->addAction(Application::getApp()->expandRevReacAction());
+  this->_modelMenu->addAction(Application::getApp()->combineIrrevReacAction());
+  this->_modelMenu->addSeparator();
+  this->_modelMenu->addAction(Application::getApp()->editModelAction());
 
-  this->analysisMenu = this->menuBar()->addMenu(tr("&Analysis"));
-  this->analysisMenu->addAction(Application::getApp()->configSteadyStateAction());
-  this->analysisMenu->addAction(Application::getApp()->configParameterScanAction());
-  this->analysisMenu->addAction(Application::getApp()->configTimeCourseAction());
-  this->analysisMenu->addAction(Application::getApp()->configSSAAnalysisAction());
+  this->_analysisMenu = this->menuBar()->addMenu(tr("&Analysis"));
+  this->_analysisMenu->addAction(Application::getApp()->configSteadyStateAction());
+  this->_analysisMenu->addAction(Application::getApp()->configParameterScanAction());
+  this->_analysisMenu->addAction(Application::getApp()->configTimeCourseAction());
+  this->_analysisMenu->addAction(Application::getApp()->configSSAAnalysisAction());
 
-  this->helpMenu = this->menuBar()->addMenu(tr("&Help"));
-  this->helpMenu->addAction(this->onlineHelp);
-  this->helpMenu->addAction(this->aboutAct);
-  this->helpMenu->addAction(this->showLogsAct);
-}
-
-
-QMenu *
-MainWindow::getAnalysesMenu()
-{
-  return this->analysisMenu;
+  this->_helpMenu = this->menuBar()->addMenu(tr("&Help"));
+  this->_helpMenu->addAction(this->_onlineHelp);
+  this->_helpMenu->addAction(this->_aboutAct);
+  this->_helpMenu->addAction(this->_showLogsAct);
 }
 
 
@@ -140,4 +134,4 @@ MainWindow::openTutorial() {
   QDesktopServices::openUrl(QUrl("http://code.google.com/p/intrinsic-noise-analyzer/wiki/Help"));
 }
 
-void MainWindow::showLogs() { this->logWindow->setVisible(true); }
+void MainWindow::showLogs() { this->_logWindow->setVisible(true); }
