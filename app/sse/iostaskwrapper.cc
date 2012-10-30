@@ -1,6 +1,6 @@
 #include "iostaskwrapper.hh"
-#include "../application.hh"
 #include "iostaskview.hh"
+#include "../models/application.hh"
 
 
 IOSTaskWrapper::IOSTaskWrapper(IOSTask *task, QObject *parent)

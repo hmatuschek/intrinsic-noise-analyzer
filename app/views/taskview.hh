@@ -1,5 +1,5 @@
-#ifndef TASKVIEW_HH
-#define TASKVIEW_HH
+#ifndef __INA_APP_VIEWS_TASKVIEW_HH__
+#define __INA_APP_VIEWS_TASKVIEW_HH__
 
 #include <QWidget>
 #include <QStackedWidget>
@@ -7,7 +7,7 @@
 #include <QProgressBar>
 #include <QTimer>
 
-#include "../task.hh"
+#include "../models/task.hh"
 #include "../doctree/taskitem.hh"
 #include "taskerrorwidget.hh"
 
@@ -184,4 +184,4 @@ private:
 
 
 
-#endif // TASKVIEW_HH
+#endif // __INA_APP_VIEWS_TASKVIEW_HH__

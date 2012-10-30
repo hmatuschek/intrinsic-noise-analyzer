@@ -2,39 +2,25 @@
 # Build script for the GUI application:
 #
 
-SET(ina_app_base_SOURCES main.cc configuration.cc
-    application.cc mainwindow.cc task.cc timeseries.cc module.cc)
-SET(ina_app_base_HEADERS
-    application.hh mainwindow.hh task.hh timeseries.hh module.hh)
+SET(ina_app_base_SOURCES main.cc)
+SET(ina_app_base_HEADERS )
 
-SET(ina_app_plot_SOURCES plot/axisticks.cc plot/extent.cc  plot/configuration.cc
-    plot/canvas.cc plot/axis.cc plot/graph.cc plot/legend.cc
+SET(ina_app_plot_SOURCES plot/axisticks.cc plot/extent.cc
+    plot/canvas.cc plot/axis.cc plot/graph.cc plot/legend.cc plot/configuration.cc
     plot/variancelinegraph.cc plot/mapping.cc plot/figure.cc plot/linegraph.cc plot/savedialog.cc
     plot/boxplot.cc plot/plotrangedialog.cc)
 SET(ina_app_plot_HEADERS
-    plot/canvas.hh plot/axis.hh plot/graph.hh plot/legend.hh
+    plot/canvas.hh plot/axis.hh plot/graph.hh plot/legend.hh plot/configuration.hh
     plot/variancelinegraph.hh plot/mapping.hh plot/figure.hh plot/linegraph.hh plot/savedialog.hh
     plot/boxplot.hh plot/plotrangedialog.hh)
 
-SET(ina_app_re_SOURCES
-    re/remodule.cc re/retask.cc re/retaskwrapper.cc re/retaskview.cc re/rewizard.cc re/replot.cc)
-SET(ina_app_re_HEADERS
-    re/remodule.hh re/retask.hh re/retaskwrapper.hh re/retaskview.hh re/rewizard.hh re/replot.hh)
-
-SET(ina_app_lna_SOURCES
-    lna/lnawizard.cc lna/lnatask.cc lna/lnataskwrapper.cc lna/lnataskview.cc
-    lna/lnaplot.cc lna/lnamodule.cc)
-SET(ina_app_lna_HEADERS
-    lna/lnawizard.hh lna/lnatask.hh lna/lnataskwrapper.hh lna/lnataskview.hh
-    lna/lnaplot.hh lna/lnamodule.hh)
-
 SET(ina_app_sse_SOURCES sse/ssetaskconfig.cc
-    sse/ssemodule.cc sse/ssewizard.cc
+    sse/ssewizard.cc
     sse/iostask.cc sse/iostaskwrapper.cc sse/iostaskview.cc sse/iosplot.cc
     sse/lnatask.cc sse/lnataskwrapper.cc sse/lnataskview.cc sse/lnaplot.cc
     sse/retask.cc  sse/retaskwrapper.cc  sse/retaskview.cc  sse/replot.cc)
 SET(ina_app_sse_HEADERS
-    sse/ssemodule.hh sse/ssewizard.hh
+    sse/ssewizard.hh
     sse/iostask.hh sse/iostaskwrapper.hh sse/iostaskview.hh sse/iosplot.hh
     sse/lnatask.hh sse/lnataskwrapper.hh sse/lnataskview.hh sse/lnaplot.hh
     sse/retask.hh  sse/retaskwrapper.hh  sse/retaskview.hh  sse/replot.hh)
@@ -42,24 +28,24 @@ SET(ina_app_sse_HEADERS
 SET(ina_app_steadystate_SOURCES
     steadystate/steadystatetask.cc steadystate/steadystatetaskwrapper.cc
     steadystate/steadystatewizard.cc steadystate/steadystateview.cc
-    steadystate/steadystatemodule.cc steadystate/steadystatespectrumplot.cc)
+    steadystate/steadystatespectrumplot.cc)
 SET(ina_app_steadystate_HEADERS
     steadystate/steadystatetask.hh steadystate/steadystatetaskwrapper.hh
     steadystate/steadystatewizard.hh steadystate/steadystateview.hh
-    steadystate/steadystatemodule.hh steadystate/steadystatespectrumplot.hh)
+    steadystate/steadystatespectrumplot.hh)
 
 SET(ina_app_ssa_SOURCES
-    ssa/ssamodule.cc ssa/ssatask.cc ssa/ssawizard.cc ssa/ssataskwrapper.cc ssa/ssaplot.cc
+    ssa/ssatask.cc ssa/ssawizard.cc ssa/ssataskwrapper.cc ssa/ssaplot.cc
     ssa/ssaview.cc)
 SET(ina_app_ssa_HEADERS
-    ssa/ssamodule.hh ssa/ssatask.hh ssa/ssawizard.hh ssa/ssataskwrapper.hh ssa/ssaplot.hh
+    ssa/ssatask.hh ssa/ssawizard.hh ssa/ssataskwrapper.hh ssa/ssaplot.hh
     ssa/ssaview.hh)
 
 SET(ina_app_paramscan_SOURCES
-    paramscan/paramscantask.cc paramscan/paramscanwizard.cc paramscan/paramscanmodule.cc paramscan/paramscantaskview.cc
+    paramscan/paramscantask.cc paramscan/paramscanwizard.cc paramscan/paramscantaskview.cc
     paramscan/paramscantaskwrapper.cc paramscan/paramscanplot.cc)
 SET(ina_app_paramscan_HEADERS
-    paramscan/paramscantask.hh paramscan/paramscanwizard.hh paramscan/paramscanmodule.hh paramscan/paramscantaskview.hh
+    paramscan/paramscantask.hh paramscan/paramscanwizard.hh paramscan/paramscantaskview.hh
     paramscan/paramscantaskwrapper.hh paramscan/paramscanplot.hh)
 
 SET(ina_app_doctree_SOURCES doctree/documenttreeitem.cc doctree/treeitem.cc
@@ -73,41 +59,43 @@ SET(ina_app_doctree_HEADERS
     doctree/modelitem.hh doctree/tableitem.hh doctree/plotitem.hh doctree/taskitem.hh
     doctree/analysesitem.hh doctree/documentitem.hh)
 
-SET(ina_app_models_SOURCES
+SET(ina_app_models_SOURCES models/configuration.cc
     models/parameterlist.cc models/specieslist.cc models/compartmentlist.cc
     models/reactionparameterlist.cc models/taskerror.cc models/tablewrapper.cc
     models/generaltaskconfig.cc models/compartmentdelegate.cc models/variableruledelegate.cc
     models/variableruledata.cc models/referencecounter.cc models/scopeitemmodel.cc
     models/expressiondelegate.cc models/sbmlshhighlighter.cc models/reactionlist.cc
-    models/pixmapdelegate.cc models/plotformulaparser.cc)
+    models/pixmapdelegate.cc models/plotformulaparser.cc models/versioncheck.cc models/task.cc
+    models/timeseries.cc models/application.cc)
 SET(ina_app_models_HEADERS
     models/parameterlist.hh models/specieslist.hh models/compartmentlist.hh
     models/reactionparameterlist.hh models/taskerror.hh models/tablewrapper.hh
     models/generaltaskconfig.hh models/compartmentdelegate.hh models/variableruledelegate.hh
     models/variableruledata.hh models/referencecounter.hh models/scopeitemmodel.hh
     models/expressiondelegate.hh models/sbmlshhighlighter.hh models/reactionlist.hh
-    models/pixmapdelegate.hh models/plotformulaparser.hh)
+    models/pixmapdelegate.hh models/plotformulaparser.hh models/versioncheck.hh models/task.hh
+    models/timeseries.hh models/application.hh)
 
 SET(ina_app_views_SOURCES
     views/documentsview.cc views/parameterview.cc views/reactionview.cc
     views/reactionequationrenderer.cc views/compartmentview.cc views/speciesview.cc
     views/plotview.cc views/taskerrorwidget.cc views/aboutdialog.cc
     views/taskview.cc views/generaltaskwizard.cc views/varianceplot.cc views/logwindow.cc
-    views/fileselector.cc views/importmodeldialog.cc views/exportmodeldialog.cc
+    views/importmodeldialog.cc
     views/variableruleeditor.cc views/expressioneditor.cc views/unitrenderer.cc
     views/sbmlsheditordialog.cc views/modelview.cc views/uniteditor.cc views/reactionlistview.cc
     views/reactioneditor.cc views/genericplotdialog.cc views/speciesselectiondialog.cc
-    views/newmodeldialog.cc)
+    views/newversiondialog.cc views/mainwindow.cc)
 SET(ina_app_views_HEADERS
     views/documentsview.hh views/parameterview.hh views/reactionview.hh
     views/reactionequationrenderer.hh views/compartmentview.hh views/speciesview.hh
     views/plotview.hh views/taskerrorwidget.hh views/aboutdialog.hh
     views/taskview.hh views/generaltaskwizard.hh views/varianceplot.hh views/logwindow.hh
-    views/fileselector.hh views/importmodeldialog.hh views/exportmodeldialog.hh
+    views/importmodeldialog.hh
     views/variableruleeditor.hh views/expressioneditor.hh views/unitrenderer.hh
     views/sbmlsheditordialog.hh views/modelview.hh views/uniteditor.hh views/reactionlistview.hh
     views/reactioneditor.hh views/genericplotdialog.hh  views/speciesselectiondialog.hh
-    views/newmodeldialog.hh)
+    views/newversiondialog.hh views/mainwindow.hh)
 
 SET(ina_app_tinytex_SOURCES
     tinytex/tinytex.cc tinytex/formula.cc tinytex/ginac2formula.cc)

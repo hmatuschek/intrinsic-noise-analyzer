@@ -4,7 +4,8 @@
 #include <QTableWidget>
 #include <QVBoxLayout>
 
-#include "../application.hh"
+#include "../models/application.hh"
+#include <config.hh>
 
 
 /* ******************************************************************************************** *
@@ -21,7 +22,7 @@ AboutDialog::AboutDialog(QWidget *parent)
   title->setFont(Application::getApp()->getH1Font());
   title->setAlignment(Qt::AlignCenter);
 
-  QLabel *version = new QLabel(tr("Version 0.4.0"));
+  QLabel *version = new QLabel(tr("Version %1").arg(INA_VERSION_STRING));
   version->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
   version->setTextFormat(Qt::LogText);
   version->setAlignment(Qt::AlignCenter);

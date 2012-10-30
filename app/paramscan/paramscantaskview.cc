@@ -7,8 +7,9 @@
 #include <QFile>
 #include <QMessageBox>
 
-#include "../application.hh"
+#include "../models/application.hh"
 #include "../doctree/plotitem.hh"
+#include "../views/genericplotdialog.hh"
 #include "paramscanplot.hh"
 #include "../views/speciesselectiondialog.hh"
 
@@ -51,12 +52,16 @@ ParamScanResultWidget::ParamScanResultWidget(ParamScanTaskWrapper *task_wrapper,
   this->plotButton = new QPushButton(tr("Plot statistics"));
   QObject::connect(this->plotButton, SIGNAL(clicked()), this, SLOT(plotButtonPressed()));
 
+  this->customPlotButton = new QPushButton(tr("Custom plot"));
+  QObject::connect(customPlotButton, SIGNAL(clicked()), this, SLOT(customPlotButtonPressed()));
+
   this->saveButton = new QPushButton(tr("Save data to file"));
   QObject::connect(this->saveButton, SIGNAL(clicked()), this, SLOT(saveButtonPressed()));
 
 
   QHBoxLayout *button_box = new QHBoxLayout();
   button_box->addWidget(this->plotButton);
+  button_box->addWidget(this->customPlotButton);
   button_box->addWidget(this->saveButton);
 
   QVBoxLayout *layout = new QVBoxLayout();
@@ -124,6 +129,26 @@ ParamScanResultWidget::plotButtonPressed()
 
 }
 
+void
+ParamScanResultWidget::customPlotButtonPressed()
+{
+  // Show dialog
+  GenericPlotDialog dialog(&this->paramscan_task_wrapper->getParamScanTask()->getParameterScan());
+  if (QDialog::Rejected == dialog.exec()) { return; }
+
+  // Create plot figure with labels.
+  Plot::Figure *figure = new Plot::Figure(dialog.figureTitle());
+  figure->getAxis()->setXLabel(dialog.xLabel());
+  figure->getAxis()->setYLabel(dialog.yLabel());
+
+  // Iterate over all graphs of the configured plot:
+  for (size_t i=0; i<dialog.numGraphs(); i++) {
+    figure->getAxis()->addGraph(dialog.graph(i).create(figure->getStyle(i)));
+  }
+
+  // Add timeseries plot:
+  Application::getApp()->docTree()->addPlot(this->paramscan_task_wrapper, new PlotItem(figure));
+}
 
 void
 ParamScanResultWidget::saveButtonPressed()

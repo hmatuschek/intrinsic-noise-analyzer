@@ -5,7 +5,7 @@
 #include <QMenu>
 
 #include "documenttreeitem.hh"
-#include "../task.hh"
+#include "../models/task.hh"
 #include "plotitem.hh"
 
 

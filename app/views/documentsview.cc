@@ -1,5 +1,5 @@
 #include "documentsview.hh"
-#include "../application.hh"
+#include "../models/application.hh"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QToolButton>

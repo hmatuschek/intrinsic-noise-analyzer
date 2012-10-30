@@ -1,5 +1,5 @@
 #include "parameterview.hh"
-#include "../application.hh"
+#include "../models/application.hh"
 #include <QLabel>
 #include <QHeaderView>
 #include <QVBoxLayout>

@@ -1,5 +1,5 @@
 #include "paramscanwizard.hh"
-#include "../application.hh"
+#include "../models/application.hh"
 #include "../models/scopeitemmodel.hh"
 #include "trafo/constantfolder.hh"
 #include <QMessageBox>

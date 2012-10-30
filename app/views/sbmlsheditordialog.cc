@@ -72,9 +72,9 @@ SbmlshEditorDialog::onReimport()
     selection.cursor.clearSelection();
     selections.append(selection); _editor->setExtraSelections(selections);
     has_error = true;
-    QMessageBox::critical(0, tr("Error while parsing SBML-SH."), err.what());
+    QMessageBox::critical(0, tr("Error while parsing SBML-sh."), err.what());
   } catch (iNA::Exception &err) {
-    QMessageBox::critical(0, tr("Error while parsing SBML-SH."), err.what());
+    QMessageBox::critical(0, tr("Error while parsing SBML-sh."), err.what());
     has_error = true;
   }
 

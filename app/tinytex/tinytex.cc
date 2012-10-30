@@ -204,7 +204,7 @@ TinyTex::TinyTex(Parser::Lexer &lexer)
   _symbol_table["\\Iota"] = QChar(0x0399); _symbol_table["\\Kappa"] = QChar(0x039A);
   _symbol_table["\\Lambda"] = QChar(0x039B); _symbol_table["\\Mu"] = QChar(0x039C);
   _symbol_table["\\Nu"] = QChar(0x039D); _symbol_table["\\Xi"] = QChar(0x039E);
-  _symbol_table["\\Omicron"] = QChar(0x039F); _symbol_table["\\Pi"] = QChar(0x03A0);
+  //_symbol_table["\\Omicron"] = QChar(0x039F); _symbol_table["\\Pi"] = QChar(0x03A0);
   _symbol_table["\\Rho"] = QChar(0x03A1); _symbol_table["\\Sigma"] = QChar(0x03A3);
   _symbol_table["\\Tau"] = QChar(0x03A4); _symbol_table["\\Upsilon"] = QChar(0x03A5);
   _symbol_table["\\Phi"] = QChar(0x03A6); _symbol_table["\\Chi"] = QChar(0x03A7);
@@ -218,7 +218,8 @@ TinyTex::TinyTex(Parser::Lexer &lexer)
   _symbol_table["\\iota"] = QChar(0x03B9); _symbol_table["\\kappa"] = QChar(0x03BA);
   _symbol_table["\\lambda"] = QChar(0x03BB); _symbol_table["\\mu"] = QChar(0x03BC);
   _symbol_table["\\nu"] = QChar(0x03BD); _symbol_table["\\xi"] = QChar(0x03BE);
-  _symbol_table["\\omicron"] = QChar(0x03BF); _symbol_table["\\pi"] = QChar(0x03C0);
+  //_symbol_table["\\omicron"] = QChar(0x03BF); this is not implemented in latex since it is just a latin o
+  _symbol_table["\\pi"] = QChar(0x03C0);
   _symbol_table["\\rho"] = QChar(0x03C1); _symbol_table["\\sigma"] = QChar(0x03C3);
   _symbol_table["\\tau"] = QChar(0x03C4); _symbol_table["\\upsilon"] = QChar(0x03C5);
   _symbol_table["\\phi"] = QChar(0x03C6); _symbol_table["\\chi"] = QChar(0x03C7);

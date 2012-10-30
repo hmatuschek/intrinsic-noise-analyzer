@@ -7,7 +7,7 @@
 #include <QFile>
 #include <QMessageBox>
 
-#include "../application.hh"
+#include "../models/application.hh"
 #include "../doctree/plotitem.hh"
 #include "replot.hh"
 #include "../views/speciesselectiondialog.hh"

@@ -1,5 +1,5 @@
-#ifndef __INA_APP_VIEWS_TIMESERIESPLOTWIZARD_HH__
-#define __INA_APP_VIEWS_TIMESERIESPLOTWIZARD_HH__
+#ifndef __INA_APP_VIEWS_GENERICPLOTDIALOG_HH__
+#define __INA_APP_VIEWS_GENERICPLOTDIALOG_HH__
 
 #include <QDialog>
 #include <QListView>
@@ -10,20 +10,21 @@
 #include <QLineEdit>
 #include <QStackedWidget>
 
-#include "../timeseries.hh"
+#include "../models/timeseries.hh"
 #include "../plot/canvas.hh"
 #include "../plot/figure.hh"
 #include "../models/plotformulaparser.hh"
 
 
-/** Implements the configuration of a generic graph. */
+/** Implements the configuration of a generic graph.
+ * @todo Implement graph style configuration. */
 class GenericGraphConfig
 {
 public:
   /** Specifies which plot types are supported. */
   typedef enum {
-    LINE_GRAPH,
-    VARIANCE_GRAPH
+    LINE_GRAPH,     ///< A simple line graph.
+    VARIANCE_GRAPH  ///< A line graph with confidence intervals.
   } PlotType;
 
 protected:
@@ -33,17 +34,19 @@ protected:
   PlotFormulaParser::Context _context;
   /** Holds the type of the graph. */
   PlotType _type;
-  /** The mean value expression. */
+  /** The X value expression. */
   GiNaC::ex _x_expression;
-  /** The mean value expression. */
-  GiNaC::ex _mean_y_expression;
-  /** The variance expression if needed. */
+  /** The Y value expression. */
+  GiNaC::ex _y_expression;
+  /** The variance expression of Y (if VARIANCE_GRAPH type). */
   GiNaC::ex _var_expression;
   /** Holds the graph label. */
   QString _label;
 
 public:
+  /** Assembles a graph config from data and expressions. */
   GenericGraphConfig(Table *table, PlotType type, const QString &label, size_t mean_column, size_t var_column=0);
+  /** Copy constructor. */
   GenericGraphConfig(const GenericGraphConfig &other);
 
   /** Returns the current plot type. */
@@ -84,10 +87,11 @@ public:
   /** Creates a new graph from this configuration. */
   Plot::Graph *create(const Plot::GraphStyle &style);
 
-  /** Evaluates the mean expression for the given row of the table. */
-  double evalX(size_t row);
-  /** Evaluates the mean expression for the given row of the table. */
-  double evalYMean(size_t row);
+protected:
+  /** Evaluates the X expression for the given row of the table. */
+  double _evalX(size_t row);
+  /** Evaluates the Y expression for the given row of the table. */
+  double _evalY(size_t row);
   /** Evaluates the variance expression for the given row of the table. */
   double evalYVar(size_t row);
 };
@@ -262,22 +266,29 @@ private:
 
 
 
+/** A trivial dialog to edit the labels of the plot (main, X & Y label. */
 class GenericPlotLabelDialog : public QDialog
 {
   Q_OBJECT
 
 public:
+  /** Constructor. */
   explicit GenericPlotLabelDialog(const QString &title, const QString &x_label, const QString &y_label, QWidget *parent=0);
-
+  /** Returns the main title. */
   QString figureTitle() const;
+  /** Retunrs the label of the X axis. */
   QString xLabel() const;
+  /** Returns the label of the Y axis. */
   QString yLabel() const;
 
 private:
+  /** Line editor for the main title. */
   QLineEdit *_figureTitle;
+  /** Line editor for the x axis label. */
   QLineEdit *_xLabel;
+  /** Line editor for the y axis label. */
   QLineEdit *_yLabel;
 };
 
 
-#endif // __INA_APP_VIEWS_TIMESERIESPLOTWIZARD_HH__
+#endif

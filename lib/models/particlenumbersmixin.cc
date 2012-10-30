@@ -19,12 +19,15 @@ ParticleNumbersMixin::ParticleNumbersMixin(BaseModel &base)
   }
 
   // If model is defined in items -> skip:
+  /// @bug Does not handle scaled version of item, do we require exact ITEM unit here?
   if (base.getSubstanceUnit().isVariantOf(Ast::ScaledBaseUnit::ITEM)) { return; }
 
   // Otherwise force species units to be items:
   double multiplier = constants::AVOGADRO * base.getSubstanceUnit().getMultiplier();
   multiplier *= std::pow(10., base.getSubstanceUnit().getScale());
-  base.setSubstanceUnit(Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::ITEM, 1, 0, 1));
+  // Set the substance unit to item and force the model to update itself:
+  //  this will scale all species and their initial values
+  base.setSubstanceUnit(Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::ITEM, 1, 0, 1), true);
 
   // Holds forward and back substitutions:
   GiNaC::exmap  forward_subst;

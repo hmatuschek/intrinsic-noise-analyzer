@@ -225,7 +225,7 @@ public:
       const double stpmax=this->parameters.STPMX*std::max(conc.norm(),double(dim));
 
 
-      for(this->iterations=1;this->iterations<this->parameters.maxIterations;this->iterations++)
+      for(this->iterations=1;this->iterations<parameters.maxIterations;this->iterations++)
       {
 
           // evaluate rate equations

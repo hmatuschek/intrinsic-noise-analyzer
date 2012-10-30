@@ -1,6 +1,6 @@
 #include "taskerrorwidget.hh"
 #include <QVBoxLayout>
-#include "../application.hh"
+#include "../models/application.hh"
 
 
 TaskErrorWidget::TaskErrorWidget(TaskItem *task, QWidget *parent) :
