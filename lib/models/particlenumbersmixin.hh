@@ -16,11 +16,16 @@ class ParticleNumbersMixin :
     public ConstCompartmentMixin,
     public ExtensiveSpeciesMixin
 {
+protected:
+
+  Ast::Unit concentrationUnit;
+
 public:
   /**
    * Constructor.
    */
   ParticleNumbersMixin(BaseModel &base);
+
 };
 
 }
