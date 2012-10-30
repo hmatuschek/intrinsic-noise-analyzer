@@ -3,7 +3,6 @@
 #include "../views/mainwindow.hh"
 #include "../views/importmodeldialog.hh"
 #include "../views/sbmlsheditordialog.hh"
-#include "../views/newmodeldialog.hh"
 #include "../views/newversiondialog.hh"
 
 #include "../steadystate/steadystatetask.hh"
