@@ -1,21 +1,21 @@
 #ifndef __INA_APP_STEADYSTATE_STEADYSTATETASK_HH__
 #define __INA_APP_STEADYSTATE_STEADYSTATETASK_HH__
 
-#include "../task.hh"
-#include "models/IOSmodel.hh"
-#include "models/steadystateanalysis.hh"
-#include "../timeseries.hh"
+#include "../models/task.hh"
 #include "../models/generaltaskconfig.hh"
+#include "../models/timeseries.hh"
+
+#include <models/IOSmodel.hh>
+#include <models/steadystateanalysis.hh>
 
 
+/** A task to perform the steady state analysis. */
 class SteadyStateTask : public Task
 {
   Q_OBJECT
 
 public:
-  /**
-   * This class assembles all parameters needed to configure a SteadyStateTask.
-   */
+  /** This class assembles all parameters needed to configure a SteadyStateTask. */
   class Config :
       public GeneralTaskConfig,
       public ModelSelectionTaskConfig

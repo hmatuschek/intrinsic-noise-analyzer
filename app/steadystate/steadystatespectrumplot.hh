@@ -2,7 +2,7 @@
 #define __INA_APP_STEADYSTATE_STEADYSTATESPECTRUMPLOT_HH__
 
 #include "../plot/plot.hh"
-#include "../timeseries.hh"
+#include "../models/timeseries.hh"
 #include "steadystatetask.hh"
 
 

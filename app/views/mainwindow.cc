@@ -7,10 +7,10 @@
 #include <QDesktopServices>
 #include <QUrl>
 
-#include "application.hh"
-#include "ina.hh"
-#include "views/aboutdialog.hh"
-#include "views/importmodeldialog.hh"
+#include "../models/application.hh"
+#include <ina.hh>
+#include "aboutdialog.hh"
+#include "importmodeldialog.hh"
 
 
 using namespace iNA;

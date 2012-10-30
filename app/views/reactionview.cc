@@ -1,5 +1,5 @@
 #include "reactionview.hh"
-#include "../application.hh"
+#include "../models/application.hh"
 #include <QLabel>
 #include <QVBoxLayout>
 #include <QHBoxLayout>

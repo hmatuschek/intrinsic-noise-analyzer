@@ -1,10 +1,11 @@
-#ifndef SSATASK_HH
-#define SSATASK_HH
+#ifndef __INA_APP_SSA_SSATASK_HH__
+#define __INA_APP_SSA_SSATASK_HH__
 
-#include "../task.hh"
-#include "models/models.hh"
-#include "../timeseries.hh"
+#include "../models/task.hh"
+#include "../models/timeseries.hh"
 #include "../models/generaltaskconfig.hh"
+
+#include <models/models.hh>
 #include <QStringList>
 
 
@@ -88,4 +89,4 @@ protected:
 };
 
 
-#endif // SSATASK_HH
+#endif // __INA_APP_SSA_SSATASK_HH__

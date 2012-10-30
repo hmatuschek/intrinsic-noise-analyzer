@@ -1,5 +1,5 @@
 #include "documenttreeitem.hh"
-#include "../application.hh"
+#include "../models/application.hh"
 
 DocumentTreeItem::DocumentTreeItem()
   : TreeItem()

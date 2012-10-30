@@ -1,28 +1,28 @@
 #include "application.hh"
-#include "mainwindow.hh"
-#include "views/importmodeldialog.hh"
-#include "views/exportmodeldialog.hh"
-#include "views/sbmlsheditordialog.hh"
-#include "views/newmodeldialog.hh"
-#include "views/newversiondialog.hh"
 
-#include "steadystate/steadystatetask.hh"
-#include "steadystate/steadystatetaskwrapper.hh"
-#include "steadystate/steadystatewizard.hh"
+#include "../views/mainwindow.hh"
+#include "../views/importmodeldialog.hh"
+#include "../views/sbmlsheditordialog.hh"
+#include "../views/newmodeldialog.hh"
+#include "../views/newversiondialog.hh"
 
-#include "paramscan/paramscantask.hh"
-#include "paramscan/paramscantaskwrapper.hh"
-#include "paramscan/paramscanwizard.hh"
+#include "../steadystate/steadystatetask.hh"
+#include "../steadystate/steadystatetaskwrapper.hh"
+#include "../steadystate/steadystatewizard.hh"
 
-#include "sse/ssewizard.hh"
-#include "sse/ssetaskconfig.hh"
-#include "sse/retaskwrapper.hh"
-#include "sse/lnataskwrapper.hh"
-#include "sse/iostaskwrapper.hh"
+#include "../paramscan/paramscantask.hh"
+#include "../paramscan/paramscantaskwrapper.hh"
+#include "../paramscan/paramscanwizard.hh"
 
-#include "ssa/ssatask.hh"
-#include "ssa/ssataskwrapper.hh"
-#include "ssa/ssawizard.hh"
+#include "../sse/ssewizard.hh"
+#include "../sse/ssetaskconfig.hh"
+#include "../sse/retaskwrapper.hh"
+#include "../sse/lnataskwrapper.hh"
+#include "../sse/iostaskwrapper.hh"
+
+#include "../ssa/ssatask.hh"
+#include "../ssa/ssataskwrapper.hh"
+#include "../ssa/ssawizard.hh"
 
 #include <QMessageBox>
 #include <QFileDialog>
@@ -30,7 +30,6 @@
 
 #include <parser/parser.hh>
 #include <parser/exception.hh>
-
 #include <trafo/reversiblereactionconverter.hh>
 
 
@@ -43,13 +42,13 @@ using namespace iNA;
 */
 DocumentItem * getParentDocumentItem(TreeItem * item)
 {
-    if (item==0) return 0;
+  if (item==0) return 0;
 
-    return (0 != dynamic_cast<DocumentItem *>(item)
-                  ? dynamic_cast<DocumentItem *>(item)
-                  : getParentDocumentItem(item->getTreeParent()));
-
+  return (0 != dynamic_cast<DocumentItem *>(item)
+      ? dynamic_cast<DocumentItem *>(item)
+      : getParentDocumentItem(item->getTreeParent()));
 }
+
 
 /*
  * Holds the singleton instance (or null if there is none).

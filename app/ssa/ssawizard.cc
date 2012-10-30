@@ -11,7 +11,7 @@
 #include <QSpinBox>
 
 
-#include "../application.hh"
+#include "../models/application.hh"
 
 using namespace iNA;
 

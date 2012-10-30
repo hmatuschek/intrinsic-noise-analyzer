@@ -4,14 +4,16 @@
 #include <QObject>
 #include <QStringList>
 
-#include "../task.hh"
+#include "../models/task.hh"
 #include "../models/generaltaskconfig.hh"
-#include "models/sseinterpreter.hh"
-#include "models/REmodel.hh"
-#include "ode/integrationrange.hh"
-#include "ode/stepper.hh"
-#include "../timeseries.hh"
+#include "../models/timeseries.hh"
+
 #include "ssetaskconfig.hh"
+
+#include <models/sseinterpreter.hh>
+#include <models/REmodel.hh>
+#include <ode/integrationrange.hh>
+#include <ode/stepper.hh>
 
 
 /**

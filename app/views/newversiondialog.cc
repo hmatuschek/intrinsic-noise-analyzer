@@ -3,7 +3,7 @@
 #include <QLabel>
 #include <QDialogButtonBox>
 #include <QVBoxLayout>
-#include "../application.hh"
+#include "../models/application.hh"
 
 
 NewVersionDialog::NewVersionDialog(const QString &version, QWidget *parent)

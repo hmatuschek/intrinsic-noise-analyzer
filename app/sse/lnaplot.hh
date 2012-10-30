@@ -4,7 +4,7 @@
 #include "../plot/plot.hh"
 #include "../plot/graph.hh"
 #include "../plot/variancelinegraph.hh"
-#include "../timeseries.hh"
+#include "../models/timeseries.hh"
 #include "lnatask.hh"
 #include "../views/varianceplot.hh"
 

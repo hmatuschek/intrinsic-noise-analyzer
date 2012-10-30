@@ -6,7 +6,7 @@
 #include <parser/lexer.hh>
 #include <parser/parser.hh>
 #include <parser/production.hh>
-#include "../timeseries.hh"
+#include "timeseries.hh"
 
 
 /** Implements a simple parser to parse formula expressions for data tables. */

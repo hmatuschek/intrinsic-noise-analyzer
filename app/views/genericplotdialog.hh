@@ -10,7 +10,7 @@
 #include <QLineEdit>
 #include <QStackedWidget>
 
-#include "../timeseries.hh"
+#include "../models/timeseries.hh"
 #include "../plot/canvas.hh"
 #include "../plot/figure.hh"
 #include "../models/plotformulaparser.hh"

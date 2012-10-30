@@ -2,10 +2,8 @@
 # Build script for the GUI application:
 #
 
-SET(ina_app_base_SOURCES main.cc configuration.cc
-    application.cc mainwindow.cc task.cc timeseries.cc)
-SET(ina_app_base_HEADERS
-    application.hh mainwindow.hh task.hh timeseries.hh)
+SET(ina_app_base_SOURCES main.cc)
+SET(ina_app_base_HEADERS )
 
 SET(ina_app_plot_SOURCES plot/axisticks.cc plot/extent.cc
     plot/canvas.cc plot/axis.cc plot/graph.cc plot/legend.cc plot/configuration.cc
@@ -61,41 +59,43 @@ SET(ina_app_doctree_HEADERS
     doctree/modelitem.hh doctree/tableitem.hh doctree/plotitem.hh doctree/taskitem.hh
     doctree/analysesitem.hh doctree/documentitem.hh)
 
-SET(ina_app_models_SOURCES
+SET(ina_app_models_SOURCES models/configuration.cc
     models/parameterlist.cc models/specieslist.cc models/compartmentlist.cc
     models/reactionparameterlist.cc models/taskerror.cc models/tablewrapper.cc
     models/generaltaskconfig.cc models/compartmentdelegate.cc models/variableruledelegate.cc
     models/variableruledata.cc models/referencecounter.cc models/scopeitemmodel.cc
     models/expressiondelegate.cc models/sbmlshhighlighter.cc models/reactionlist.cc
-    models/pixmapdelegate.cc models/plotformulaparser.cc models/versioncheck.cc)
+    models/pixmapdelegate.cc models/plotformulaparser.cc models/versioncheck.cc models/task.cc
+    models/timeseries.cc models/application.cc)
 SET(ina_app_models_HEADERS
     models/parameterlist.hh models/specieslist.hh models/compartmentlist.hh
     models/reactionparameterlist.hh models/taskerror.hh models/tablewrapper.hh
     models/generaltaskconfig.hh models/compartmentdelegate.hh models/variableruledelegate.hh
     models/variableruledata.hh models/referencecounter.hh models/scopeitemmodel.hh
     models/expressiondelegate.hh models/sbmlshhighlighter.hh models/reactionlist.hh
-    models/pixmapdelegate.hh models/plotformulaparser.hh models/versioncheck.hh)
+    models/pixmapdelegate.hh models/plotformulaparser.hh models/versioncheck.hh models/task.hh
+    models/timeseries.hh models/application.hh)
 
 SET(ina_app_views_SOURCES
     views/documentsview.cc views/parameterview.cc views/reactionview.cc
     views/reactionequationrenderer.cc views/compartmentview.cc views/speciesview.cc
     views/plotview.cc views/taskerrorwidget.cc views/aboutdialog.cc
     views/taskview.cc views/generaltaskwizard.cc views/varianceplot.cc views/logwindow.cc
-    views/fileselector.cc views/importmodeldialog.cc views/exportmodeldialog.cc
+    views/importmodeldialog.cc
     views/variableruleeditor.cc views/expressioneditor.cc views/unitrenderer.cc
     views/sbmlsheditordialog.cc views/modelview.cc views/uniteditor.cc views/reactionlistview.cc
     views/reactioneditor.cc views/genericplotdialog.cc views/speciesselectiondialog.cc
-    views/newmodeldialog.cc views/newversiondialog.cc)
+    views/newversiondialog.cc views/mainwindow.cc)
 SET(ina_app_views_HEADERS
     views/documentsview.hh views/parameterview.hh views/reactionview.hh
     views/reactionequationrenderer.hh views/compartmentview.hh views/speciesview.hh
     views/plotview.hh views/taskerrorwidget.hh views/aboutdialog.hh
     views/taskview.hh views/generaltaskwizard.hh views/varianceplot.hh views/logwindow.hh
-    views/fileselector.hh views/importmodeldialog.hh views/exportmodeldialog.hh
+    views/importmodeldialog.hh
     views/variableruleeditor.hh views/expressioneditor.hh views/unitrenderer.hh
     views/sbmlsheditordialog.hh views/modelview.hh views/uniteditor.hh views/reactionlistview.hh
     views/reactioneditor.hh views/genericplotdialog.hh  views/speciesselectiondialog.hh
-    views/newmodeldialog.hh views/newversiondialog.hh)
+    views/newversiondialog.hh views/mainwindow.hh)
 
 SET(ina_app_tinytex_SOURCES
     tinytex/tinytex.cc tinytex/formula.cc tinytex/ginac2formula.cc)

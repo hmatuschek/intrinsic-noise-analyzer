@@ -4,7 +4,7 @@
 #include <QTableWidget>
 #include <QVBoxLayout>
 
-#include "../application.hh"
+#include "../models/application.hh"
 #include <config.hh>
 
 

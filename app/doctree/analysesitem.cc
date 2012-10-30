@@ -1,6 +1,6 @@
 #include "analysesitem.hh"
 #include "exception.hh"
-#include "../application.hh"
+#include "../models/application.hh"
 
 using namespace iNA;
 
