@@ -7,10 +7,10 @@
 #include <QDesktopServices>
 #include <QUrl>
 
-#include "application.hh"
-#include "ina.hh"
-#include "views/aboutdialog.hh"
-#include "views/importmodeldialog.hh"
+#include "../models/application.hh"
+#include <ina.hh>
+#include "aboutdialog.hh"
+#include "importmodeldialog.hh"
 
 
 using namespace iNA;
@@ -82,6 +82,13 @@ MainWindow::_createActions()
   this->_checkForUpdatesAct->setStatusTip(tr("Enables periodic check for new versions of iNA."));
   this->_checkForUpdatesAct->setCheckable(true);
   this->_checkForUpdatesAct->setChecked(Application::getApp()->checkNewVersionAvailable());
+
+  // If update check is disabled at compile time -> disable menu entry:
+#ifdef INA_DISABLE_NEW_VERSION_CHECK
+  this->_checkForUpdatesAct->setEnabled(false);
+  this->_checkForUpdatesAct->setChecked(false);
+  this->_checkForUpdatesAct->setVisible(false);
+#endif
 
   // Connect signals:
   connect(this->_quitAct, SIGNAL(triggered()), this, SLOT(quit()));

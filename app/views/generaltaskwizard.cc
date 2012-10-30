@@ -1,5 +1,5 @@
 #include "generaltaskwizard.hh"
-#include "../application.hh"
+#include "../models/application.hh"
 #include "../models/generaltaskconfig.hh"
 #include "openmp.hh"
 

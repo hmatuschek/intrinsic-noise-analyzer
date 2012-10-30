@@ -1,5 +1,5 @@
-#ifndef MAINWINDOW_HH
-#define MAINWINDOW_HH
+#ifndef __INA_APP_VIEWS_MAINWINDOW_HH__
+#define __INA_APP_VIEWS_MAINWINDOW_HH__
 
 #include <QMainWindow>
 #include <QAction>
@@ -7,9 +7,9 @@
 #include <QSplitter>
 #include <QScrollArea>
 
-#include "application.hh"
-#include "views/documentsview.hh"
-#include "views/logwindow.hh"
+#include "../models/application.hh"
+#include "documentsview.hh"
+#include "logwindow.hh"
 
 
 
@@ -83,4 +83,4 @@ private:
 };
 
 
-#endif // MAINWINDOW_HH
+#endif // __INA_APP_VIEWS_MAINWINDOW_HH__

@@ -1,13 +1,15 @@
 #ifndef __INA_APP_PARAMSCAN_TASK_HH__
 #define __INA_APP_PARAMSCAN_TASK_HH__
 
-#include "../task.hh"
-#include "models/IOSmodel.hh"
-#include "models/steadystateanalysis.hh"
-#include "../timeseries.hh"
+#include "../models/task.hh"
 #include "../models/generaltaskconfig.hh"
+#include "../models/timeseries.hh"
+
+#include <models/IOSmodel.hh>
+#include <models/steadystateanalysis.hh>
 
 
+/** A task to perform a paramter scan. */
 class ParamScanTask : public Task
 {
   Q_OBJECT

@@ -1,5 +1,5 @@
 #include "taskview.hh"
-#include "../application.hh"
+#include "../models/application.hh"
 #include <QVBoxLayout>
 #include <QPushButton>
 

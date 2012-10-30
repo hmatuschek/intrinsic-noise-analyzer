@@ -9,8 +9,8 @@
 #include <QObject>
 
 #include "configuration.hh"
-#include "doctree/documenttree.hh"
-#include "models/versioncheck.hh"
+#include "../doctree/documenttree.hh"
+#include "versioncheck.hh"
 
 
 /*

@@ -60,7 +60,10 @@ ReactionEditorContext::undefinedSymbols() const {
 ReactionEditor::ReactionEditor(iNA::Ast::Model &model, iNA::Ast::Reaction *reaction, QWidget *parent)
   : QWizard(parent), _model(model), _current_reaction_scope(0), _current_reaction(reaction)
 {
-  setWindowTitle(tr("Create new reaction"));
+  if (0 == reaction)
+    setWindowTitle(tr("Create new reaction"));
+  else
+    setWindowTitle(tr("Edit reaction"));
 
   // Assemble wizard pages:
   addPage(new ReactionEditorPage(reaction, this));

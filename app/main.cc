@@ -7,23 +7,6 @@
 using namespace std;
 
 
-class ExceptionApplication : public QApplication
-{
-public:
-  ExceptionApplication(int argc, char *argv[]) : QApplication(argc, argv) { }
-
-  bool notify(QObject *obj, QEvent *event)
-  {
-    try {
-      return QApplication::notify(obj, event);
-    } catch (std::exception &err) {
-      std::cerr << __FILE__ << " @" << __LINE__
-                << ": Oops, there was an error: " << err.what() << std::endl;
-      return false;
-    }
-  }
-};
-
 int main(int argc, char *argv[])
 {
   // Instantiate Logger and handler:

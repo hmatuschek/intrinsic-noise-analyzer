@@ -10,7 +10,6 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 #
 # Define some options
 #
-OPTION(INA_DISABLE_NEW_VERSION_NOTIFY "Disables the periodic notification about a new version of iNA" OFF)
 OPTION(INA_DISABLE_NEW_VERSION_CHECK "Disables the periodic check about a new version of iNA" OFF)
 
 # Disable version check on debug builds:

@@ -3,7 +3,7 @@
 
 #include "../plot/plot.hh"
 #include "../plot/graph.hh"
-#include "../timeseries.hh"
+#include "../models/timeseries.hh"
 #include "../views/varianceplot.hh"
 #include "retask.hh"
 

@@ -2,7 +2,7 @@
 
 #include "unitrenderer.hh"
 #include "uniteditor.hh"
-#include "../application.hh"
+#include "../models/application.hh"
 #include <utils/logger.hh>
 
 #include <QLabel>

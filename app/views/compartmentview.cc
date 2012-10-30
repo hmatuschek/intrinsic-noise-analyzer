@@ -1,5 +1,5 @@
 #include "compartmentview.hh"
-#include "../application.hh"
+#include "../models/application.hh"
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QLabel>

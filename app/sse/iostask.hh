@@ -1,16 +1,16 @@
-#ifndef IOSTASK_HH
-#define IOSTASK_HH
+#ifndef __INA_APP_SSE_IOSTASK_HH__
+#define __INA_APP_SSE_IOSTASK_HH__
 
 #include <QObject>
 #include <QStringList>
 
-#include "../task.hh"
-#include "models/sseinterpreter.hh"
-#include "ode/integrationrange.hh"
-#include "ode/stepper.hh"
-#include "../timeseries.hh"
-
+#include "../models/task.hh"
+#include "../models/timeseries.hh"
 #include "ssetaskconfig.hh"
+
+#include <models/sseinterpreter.hh>
+#include <ode/integrationrange.hh>
+#include <ode/stepper.hh>
 
 
 /** Represents a task for the IOS (inverse omega square) time-course analysis.
@@ -111,4 +111,4 @@ private:
   void instantiateInterpreter();
 };
 
-#endif // RETASK_HH
+#endif // __INA_APP_SSE_IOSTASK_HH__

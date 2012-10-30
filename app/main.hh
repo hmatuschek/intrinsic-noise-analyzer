@@ -3,7 +3,7 @@
 
 #include <QApplication>
 
-#include "application.hh"
-#include "mainwindow.hh"
+#include "models/application.hh"
+#include "views/mainwindow.hh"
 
 #endif

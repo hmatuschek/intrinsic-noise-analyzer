@@ -2,7 +2,7 @@
 #include "exception.hh"
 #include "../doctree/modelitem.hh"
 #include "../doctree/analysesitem.hh"
-#include "../application.hh"
+#include "../models/application.hh"
 
 #include <QMessageBox>
 #include <QFileInfo>

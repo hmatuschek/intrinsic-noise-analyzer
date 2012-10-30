@@ -2,7 +2,7 @@
 #include <config.hh>
 #include <QtNetwork/QNetworkRequest>
 #include <QRegExp>
-#include "../application.hh"
+#include "../models/application.hh"
 #include <config.hh>
 
 

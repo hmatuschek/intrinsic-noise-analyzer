@@ -1,5 +1,5 @@
 #include "lnataskwrapper.hh"
-#include "../application.hh"
+#include "../models/application.hh"
 #include "lnataskview.hh"
 
 

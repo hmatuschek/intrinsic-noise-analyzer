@@ -1,5 +1,5 @@
 #include "steadystatewizard.hh"
-#include "../application.hh"
+#include "../models/application.hh"
 #include <QMessageBox>
 #include <QVBoxLayout>
 #include <QFormLayout>

@@ -1,6 +1,7 @@
 #include "importmodeldialog.hh"
 #include <QFormLayout>
 #include <QFileInfo>
+#include <QLabel>
 
 
 ModelFormatQuestion::ModelFormatQuestion(const QString &filename, QWidget *parent) :
