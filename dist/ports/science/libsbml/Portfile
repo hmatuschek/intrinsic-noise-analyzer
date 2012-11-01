@@ -23,9 +23,9 @@ master_sites        sourceforge:sbml
 distname            libsbml-${version}-src
 worksrcdir          libsbml-${version}
 
-checksums           md5     dd6937fb9ede3d3b916a8f8bbd5333a0 \
-                    sha1    867dbebba8d160db5f06454a143a5356ceff0acd \
-                    rmd160  68a22f92313268fa6a5139fba3f95ce8a7fa8312
+checksums           md5     1fdf26a38f4f984145b6b14f0972416f \
+                    sha1    4aa6c5e498edec822a9cc1ad0ef8ec5d508c6816 \
+                    rmd160  036f55a6cf10bdeff6a896ba3353869a6ef56e01
 
 depends_lib         port:libxml2 \
                     port:bzip2
