@@ -21,11 +21,7 @@ ParticleNumbersMixin::ParticleNumbersMixin(BaseModel &base)
   // Store concentration unit
   concentrationUnit = base.getSpeciesUnit()/base.getVolumeUnit();
 
-  // If model is defined in items -> skip:
-  /// @bug Does not handle scaled version of item, do we require exact ITEM unit here?
-  //if (base.getSubstanceUnit().isVariantOf(Ast::ScaledBaseUnit::ITEM)) { return; }
-
-  // Otherwise force species units to be items:
+  // Get multiplier of old unit
   double multiplier = base.getSubstanceUnit().getMultiplier()*std::pow(10., base.getSubstanceUnit().getScale());
 
   // Multiply by Avogadro's number if defined in mole
