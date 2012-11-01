@@ -176,7 +176,7 @@ ReactionParameterList::updateCompleteTable() {
 QVariant
 ReactionParameterList::_getIdentifier(iNA::Ast::Parameter *param, int role) const
 {
-  if (Qt::DisplayRole != role || Qt::EditRole != role) { return QVariant(); }
+  if (Qt::DisplayRole != role && Qt::EditRole != role) { return QVariant(); }
   return QString(param->getIdentifier().c_str());
 }
 

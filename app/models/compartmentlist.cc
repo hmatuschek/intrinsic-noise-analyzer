@@ -125,7 +125,7 @@ CompartmentList::model() {
 QVariant
 CompartmentList::_getIdentifier(iNA::Ast::Compartment *compartment, int role) const
 {
-  if (Qt::DisplayRole != role || Qt::EditRole != role) { return QVariant(); }
+  if (Qt::DisplayRole != role && Qt::EditRole != role) { return QVariant(); }
   return QString(compartment->getIdentifier().c_str());
 }
 

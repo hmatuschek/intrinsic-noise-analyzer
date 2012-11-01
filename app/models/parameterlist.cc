@@ -166,7 +166,7 @@ ParameterList::remParameter(int row)
 QVariant
 ParameterList::_getIdentifier(iNA::Ast::Parameter *param, int role) const
 {
-  if (Qt::DisplayRole != role || Qt::EditRole != role) { return QVariant(); }
+  if (Qt::DisplayRole != role && Qt::EditRole != role) { return QVariant(); }
 
   return param->getIdentifier().c_str();
 }
