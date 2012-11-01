@@ -29,7 +29,7 @@ ina-app: libina QtGui QtXml QtSvg QtCore QtNetwork libginac libcln libsbml libff
 	install_name_tool -change ${QTXML_FRAMEWORK} @executable_path/../Frameworks/QtXml ${APP_BINARY_DIR}/ina
 	install_name_tool -change ${QTSVG_FRAMEWORK} @executable_path/../Frameworks/QtSvg ${APP_BINARY_DIR}/ina
 	install_name_tool -change ${QTNET_FRAMEWORK} @executable_path/../Frameworks/QtNetwork ${APP_BINARY_DIR}/ina
-	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libginac-1.5.0.dylib @executable_path/../Frameworks/libginac-1.5.0.dylib ${APP_BINARY_DIR}/ina
+	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libginac.2.dylib @executable_path/../Frameworks/libginac.2.dylib ${APP_BINARY_DIR}/ina
 	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libcln.6.dylib @executable_path/../Frameworks/libcln.6.dylib ${APP_BINARY_DIR}/ina
 	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libsbml.5.dylib @executable_path/../Frameworks/libsbml.5.dylib ${APP_BINARY_DIR}/ina
 	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libffi.6.dylib @executable_path/../Frameworks/libffi.6.dylib ${APP_BINARY_DIR}/ina 
@@ -37,7 +37,7 @@ ina-app: libina QtGui QtXml QtSvg QtCore QtNetwork libginac libcln libsbml libff
 libina: libginac libcln libsbml
 	cp $(SYSTEM_LIBRARY_DIR)/libina.dylib ${APP_LIBRARY_DIR}
 	install_name_tool -id @executable_path/../Frameworks/libina.dylib ${APP_LIBRARY_DIR}/libina.dylib
-	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libginac-1.5.0.dylib @executable_path/../Frameworks/libginac-1.5.0.dylib ${APP_LIBRARY_DIR}/libina.dylib
+	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libginac.2.dylib @executable_path/../Frameworks/libginac.2.dylib ${APP_LIBRARY_DIR}/libina.dylib
 	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libcln.6.dylib @executable_path/../Frameworks/libcln.6.dylib ${APP_LIBRARY_DIR}/libina.dylib
 	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libsbml.5.dylib @executable_path/../Frameworks/libsbml.5.dylib ${APP_LIBRARY_DIR}/libina.dylib
 	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libffi.6.dylib @executable_path/../Frameworks/libffi.6.dylib ${APP_LIBRARY_DIR}/libina.dylib 
