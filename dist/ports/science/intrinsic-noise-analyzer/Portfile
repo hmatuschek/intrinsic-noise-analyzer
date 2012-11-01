@@ -24,11 +24,12 @@ license GPL-2
 
 homepage http://code.google.com/p/intrinsic-noise-analyzer
 
-master_sites http://intrinsic-noise-analyzer.googlecode.com/files/
+#master_sites http://intrinsic-noise-analyzer.googlecode.com/files/
+master_sites http://dl.dropbox.com/u/17326152/
 
-checksums md5    7717cc18fafcf840d50494e8b0772b4c \
-          sha1   9d985f104beea6b1346a325c4fc77fe6a542d50c \
-          rmd160 666133cf07826e48617e3109c2ede69ff4391e9b
+checksums md5    354adf4a1a0067adb54f80ba58c66b03 \
+          sha1   2f993d9d9cfd751d768f924d25459432df832c35 \
+          rmd160 bbbf3ea3e68d520e0284e823054b67241f634e43
 
 depends_lib  port:libsbml \
              port:qt4-mac \
