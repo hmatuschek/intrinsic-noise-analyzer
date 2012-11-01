@@ -75,10 +75,10 @@ QtNetwork: libz QtCore libssl libcrypto
 	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libssl.1.0.0.dylib @executable_path/../Frameworks/libssl.1.0.0.dylib ${APP_LIBRARY_DIR}/QtNetwork
 
 libginac: libcln libgmp
-	cp ${SYSTEM_LIBRARY_DIR}/libginac-1.5.0.dylib ${APP_LIBRARY_DIR}
-	install_name_tool -id @executable_path/../Frameworks/libginac-1.5.0.dylib ${APP_LIBRARY_DIR}/libginac-1.5.0.dylib
-	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libcln.6.dylib @executable_path/../Frameworks/libcln.6.dylib ${APP_LIBRARY_DIR}/libginac-1.5.0.dylib
-	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libgmp.10.dylib @executable_path/../Frameworks/libgmp.10.dylib ${APP_LIBRARY_DIR}/libginac-1.5.0.dylib
+	cp ${SYSTEM_LIBRARY_DIR}/libginac-2.dylib ${APP_LIBRARY_DIR}
+	install_name_tool -id @executable_path/../Frameworks/libginac.2.dylib ${APP_LIBRARY_DIR}/libginac.2.dylib
+	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libcln.6.dylib @executable_path/../Frameworks/libcln.6.dylib ${APP_LIBRARY_DIR}/libginac.2.dylib
+	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libgmp.10.dylib @executable_path/../Frameworks/libgmp.10.dylib ${APP_LIBRARY_DIR}/libginac.2.dylib
 
 libcln: libgmp
 	cp ${SYSTEM_LIBRARY_DIR}/libcln.6.dylib  ${APP_LIBRARY_DIR}
