@@ -2,7 +2,7 @@ SYSTEM_LIBRARY_DIR = /opt/local/lib
 SYSTEM_BINARY_DIR = /opt/local/bin
 APP_LIBRARY_DIR = IntrinsicNoiseAnalyzer.app/Contents/Frameworks
 APP_BINARY_DIR  = IntrinsicNoiseAnalyzer.app/Contents/MacOS
-VERSION = 0.3.0
+VERSION = 0.3.1
 
 app: dmg
 
