@@ -2,7 +2,7 @@
 #define __INA_APP_MODELS_TABLEWRAPPER_HH__
 
 #include <QAbstractTableModel>
-#include "../timeseries.hh"
+#include "timeseries.hh"
 
 
 /**

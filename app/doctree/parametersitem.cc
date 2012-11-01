@@ -1,5 +1,5 @@
 #include "parametersitem.hh"
-#include "../application.hh"
+#include "../models/application.hh"
 #include "../views/parameterview.hh"
 
 

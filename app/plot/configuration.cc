@@ -1,5 +1,5 @@
 #include "configuration.hh"
-#include "../application.hh"
+#include "../models/application.hh"
 
 using namespace Plot;
 

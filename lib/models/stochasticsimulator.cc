@@ -274,3 +274,9 @@ const size_t &StochasticSimulator::numThreads()
 {
     return this->num_threads;
 }
+
+
+Ast::Unit StochasticSimulator::getConcentrationUnit() const
+{
+    return concentrationUnit;
+}

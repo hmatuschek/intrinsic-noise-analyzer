@@ -7,11 +7,11 @@
 #include <QFile>
 #include <QMessageBox>
 
-#include "../application.hh"
+#include "../models/application.hh"
 #include "../doctree/plotitem.hh"
 #include "lnaplot.hh"
 #include "../views/speciesselectiondialog.hh"
-#include "../views/timeseriesplotwizard.hh"
+#include "../views/genericplotdialog.hh"
 
 
 /* ********************************************************************************************* *
@@ -98,7 +98,7 @@ void
 LNAResultWidget::_genericPlotButtonPressed()
 {
   // Show dialog
-  TimeSeriesPlotDialog dialog(_lna_task_wrapper->getLNATask()->getTimeSeries());
+  GenericPlotDialog dialog(_lna_task_wrapper->getLNATask()->getTimeSeries());
   if (QDialog::Rejected == dialog.exec()) { return; }
 
   // Create plot figure with labels.

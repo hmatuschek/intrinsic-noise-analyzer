@@ -4,7 +4,7 @@
 #include <QWidget>
 #include <QLabel>
 
-#include "../task.hh"
+#include "../models/task.hh"
 #include "../models/taskerror.hh"
 #include "../doctree/taskitem.hh"
 

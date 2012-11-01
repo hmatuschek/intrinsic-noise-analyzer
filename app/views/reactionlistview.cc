@@ -4,7 +4,7 @@
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QMessageBox>
-#include "../application.hh"
+#include "../models/application.hh"
 #include "reactioneditor.hh"
 
 

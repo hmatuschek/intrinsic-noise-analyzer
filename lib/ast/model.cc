@@ -1,7 +1,6 @@
 #include "model.hh"
 #include "exception.hh"
 #include "reaction.hh"
-#include "converter.hh"
 #include "modelcopyist.hh"
 #include <trafo/substitution.hh>
 #include <trafo/variablescaling.hh>

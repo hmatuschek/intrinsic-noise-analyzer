@@ -11,8 +11,8 @@ Source: intrinsic-noise-analyzer-%{version}.tar.gz
 URL: https://googlecode.com/p/intrinsic-noise-analyzer
 Version: %{version}
 Buildroot: /tmp/intrinsicnoiseanalyzerrpm
-BuildRequires: gcc-c++, cmake, libsbml-devel = 5.6.0
-Requires: libsbml = 5.6.0, libina = %{version}-%{release}
+BuildRequires: gcc-c++, cmake, libsbml-devel >= 5.0
+Requires: libsbml >= 5.0, libina = %{version}-%{release}
 %if 0%{?suse_version}
 BuildRequires: libqt4-devel >= 4.5, libginac-devel, llvm-devel >= 2.9
 Requires: libqt4 >= 4.5, libginac2, llvm >= 2.9
@@ -36,8 +36,8 @@ expensive stochastic simulation algorithm.
 %package -n libina
 Summary: Runtime library for the intrinsic Noise Analyzer
 Group: Science
-BuildRequires: gcc-c++, cmake, libsbml-devel = 5.6.0
-Requires: libsbml = 5.6.0
+BuildRequires: gcc-c++, cmake, libsbml-devel >= 5.0
+Requires: libsbml >= 5.0
 %if 0%{?suse_version}
 BuildRequires: libginac-devel
 Requires: libginac2

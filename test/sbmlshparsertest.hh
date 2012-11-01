@@ -6,7 +6,7 @@
 
 namespace iNA {
 
-/** Simple test for the SBML-SH parser. */
+/** Simple test for the SBML-sh parser. */
 class SBMLSHParserTest : public UnitTest::TestCase
 {
 public:

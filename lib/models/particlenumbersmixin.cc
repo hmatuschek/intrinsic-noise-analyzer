@@ -18,13 +18,18 @@ ParticleNumbersMixin::ParticleNumbersMixin(BaseModel &base)
     throw err;
   }
 
-  // If model is defined in items -> skip:
-  if (base.getSubstanceUnit().isVariantOf(Ast::ScaledBaseUnit::ITEM)) { return; }
+  // Store concentration unit
+  concentrationUnit = base.getSpeciesUnit()/base.getVolumeUnit();
 
-  // Otherwise force species units to be items:
-  double multiplier = constants::AVOGADRO * base.getSubstanceUnit().getMultiplier();
-  multiplier *= std::pow(10., base.getSubstanceUnit().getScale());
-  base.setSubstanceUnit(Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::ITEM, 1, 0, 1));
+  // Get multiplier of old unit
+  double multiplier = base.getSubstanceUnit().getMultiplier()*std::pow(10., base.getSubstanceUnit().getScale());
+
+  // Multiply by Avogadro's number if defined in mole
+  if (base.getSubstanceUnit().isVariantOf(Ast::ScaledBaseUnit::MOLE)) multiplier *= constants::AVOGADRO;
+
+  // Set the substance unit to item and force the model to update itself:
+  //  this will scale all species and their initial values
+  base.setSubstanceUnit(Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::ITEM, 1, 0, 1), true);
 
   // Holds forward and back substitutions:
   GiNaC::exmap  forward_subst;

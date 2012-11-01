@@ -38,22 +38,22 @@ public:
 
 
 
-class LNASteadyStateModelSelectionPage : public ModelSelectionWizardPage
+class SteadyStateModelSelectionPage : public ModelSelectionWizardPage
 {
   Q_OBJECT
 
 public:
-  explicit LNASteadyStateModelSelectionPage(GeneralTaskWizard *parent);
+  explicit SteadyStateModelSelectionPage(GeneralTaskWizard *parent);
   virtual bool validatePage();
 };
 
 
-class LNASteadyStateSpectrumConfigPage : public QWizardPage
+class SteadyStateSpectrumConfigPage : public QWizardPage
 {
   Q_OBJECT
 
 public:
-  explicit LNASteadyStateSpectrumConfigPage(GeneralTaskWizard *parent);
+  explicit SteadyStateSpectrumConfigPage(GeneralTaskWizard *parent);
 
   virtual bool validatePage();
 
@@ -71,12 +71,12 @@ private slots:
 
 
 
-class LNASteadyStateSummaryPage : public QWizardPage
+class SteadyStateSummaryPage : public QWizardPage
 {
   Q_OBJECT
 
 public:
-  explicit LNASteadyStateSummaryPage(QWidget *parent=0);
+  explicit SteadyStateSummaryPage(QWidget *parent=0);
 
   virtual void initializePage();
 

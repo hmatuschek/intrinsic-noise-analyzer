@@ -37,12 +37,6 @@ public:
 
   const GiNaC::symbol &getSSEvar(size_t index) const;
 
-private:
-  /**
-   * Performs the common construction part, shared between all constructors.
-   */
-  void postConstructor();
-
 public:
   /**
    * Constructor.

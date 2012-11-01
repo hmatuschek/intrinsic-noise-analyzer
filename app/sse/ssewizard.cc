@@ -1,5 +1,5 @@
 #include "ssewizard.hh"
-#include "../application.hh"
+#include "../models/application.hh"
 #include "exception.hh"
 
 #include <QMessageBox>

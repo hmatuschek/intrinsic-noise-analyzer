@@ -24,7 +24,8 @@ license GPL-2
 
 homepage http://code.google.com/p/intrinsic-noise-analyzer
 
-master_sites http://intrinsic-noise-analyzer.googlecode.com/files/
+#master_sites http://intrinsic-noise-analyzer.googlecode.com/files/
+master_sites http://dl.dropbox.com/u/17326152/
 
 checksums md5    7717cc18fafcf840d50494e8b0772b4c \
           sha1   9d985f104beea6b1346a325c4fc77fe6a542d50c \
@@ -54,7 +55,7 @@ if {${configure.compiler} == "clang"} {
 
 
 # Phase modifications
-# Move source into eigen_src; configure & build (out-of-source) in ${worksrcpath}
+# Move source into ina_src; configure & build (out-of-source) in ${workpath}
 post-extract {
   # Rename extracted directory
     move ${workpath}/${name}-${version} ${workpath}/ina_src

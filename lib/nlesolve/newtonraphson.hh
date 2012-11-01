@@ -225,7 +225,7 @@ public:
       const double stpmax=this->parameters.STPMX*std::max(conc.norm(),double(dim));
 
 
-      for(this->iterations=1;this->iterations<this->parameters.maxIterations;this->iterations++)
+      for(this->iterations=1;this->iterations<parameters.maxIterations;this->iterations++)
       {
 
           // evaluate rate equations
@@ -343,7 +343,7 @@ public:
   }
 
   /**
-   * Simple inline function that attempts to increase find a solution within the precision of the NLE solver (advantageous for stiff systems).
+   * Simple inline function that attempts to find a solution within the precision of the NLE solver (advantageous for stiff systems).
    */
 
   inline Eigen::VectorXd precisionSolve(const Eigen::MatrixXd &B, const Eigen::VectorXd &A)

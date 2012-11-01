@@ -4,7 +4,7 @@
 #include <QSyntaxHighlighter>
 
 
-/** Simple class to implement a syntax highlighting for SBML-SH. */
+/** Simple class to implement a syntax highlighting for SBML-sh. */
 class SbmlshHighlighter : public QSyntaxHighlighter
 {
   Q_OBJECT

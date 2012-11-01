@@ -1,5 +1,5 @@
 #include "compartmentsitem.hh"
-#include "../application.hh"
+#include "../models/application.hh"
 #include "../views/compartmentview.hh"
 
 

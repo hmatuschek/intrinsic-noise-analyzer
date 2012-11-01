@@ -18,9 +18,18 @@ class Constraint : public Node
 {
 public:
   /** Visitor class for constraints. */
-  class Visitor { public: virtual void visit(const Ast::Constraint *constraint) = 0; };
+  class Visitor {
+  public:
+    /** Implements the visitor. */
+    virtual void visit(const Ast::Constraint *constraint) = 0;
+  };
+
   /** Operator class for constaints. */
-  class Operator { public: virtual void act(Ast::Constraint *constraint) = 0; };
+  class Operator {
+  public:
+    /** Handles the operator. */
+    virtual void act(Ast::Constraint *constraint) = 0;
+  };
 
 protected:
   /** Protected constructor to avoid direct instantiation. */

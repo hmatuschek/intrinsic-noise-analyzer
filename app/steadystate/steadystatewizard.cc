@@ -1,5 +1,5 @@
 #include "steadystatewizard.hh"
-#include "../application.hh"
+#include "../models/application.hh"
 #include <QMessageBox>
 #include <QVBoxLayout>
 #include <QFormLayout>
@@ -19,9 +19,9 @@ SteadyStateWizard::SteadyStateWizard(QWidget *parent) :
 {
   this->setWindowTitle("System Size Expansion");
 
-  this->setPage(SteadyStateWizard::MODEL_SELECTION_PAGE, new LNASteadyStateModelSelectionPage(this));
-  this->setPage(SteadyStateWizard::FREQUENCY_RANGE_PAGE, new LNASteadyStateSpectrumConfigPage(this));
-  this->setPage(SteadyStateWizard::SUMMARY_PAGE, new LNASteadyStateSummaryPage(this));
+  this->setPage(SteadyStateWizard::MODEL_SELECTION_PAGE, new SteadyStateModelSelectionPage(this));
+  this->setPage(SteadyStateWizard::FREQUENCY_RANGE_PAGE, new SteadyStateSpectrumConfigPage(this));
+  this->setPage(SteadyStateWizard::SUMMARY_PAGE, new SteadyStateSummaryPage(this));
   this->page(SteadyStateWizard::SUMMARY_PAGE)->setFinalPage(true);
 }
 
@@ -36,7 +36,7 @@ SteadyStateWizard::getConfig()
 /* ********************************************************************************************* *
  * Implementation of model selection page:
  * ********************************************************************************************* */
-LNASteadyStateModelSelectionPage::LNASteadyStateModelSelectionPage(GeneralTaskWizard *parent)
+SteadyStateModelSelectionPage::SteadyStateModelSelectionPage(GeneralTaskWizard *parent)
   : ModelSelectionWizardPage(parent)
 {
   this->setTitle(tr("Steady State Analysis"));
@@ -45,7 +45,7 @@ LNASteadyStateModelSelectionPage::LNASteadyStateModelSelectionPage(GeneralTaskWi
 
 
 bool
-LNASteadyStateModelSelectionPage::validatePage()
+SteadyStateModelSelectionPage::validatePage()
 {
   // Try to create LNA model from SBML document
   try {
@@ -54,7 +54,7 @@ LNASteadyStateModelSelectionPage::validatePage()
       return false;
   } catch (Exception err) {
     // Simply show a warning and done.
-    QMessageBox::warning(0, tr("Cannot construct LNA anlysis from model: "), err.what());
+    QMessageBox::warning(0, tr("Cannot construct steady state anlysis from model: "), err.what());
     return false;
   }
 
@@ -66,7 +66,7 @@ LNASteadyStateModelSelectionPage::validatePage()
 /* ********************************************************************************************* *
  * Implementation of frequency range page:
  * ********************************************************************************************* */
-LNASteadyStateSpectrumConfigPage::LNASteadyStateSpectrumConfigPage(GeneralTaskWizard *parent)
+SteadyStateSpectrumConfigPage::SteadyStateSpectrumConfigPage(GeneralTaskWizard *parent)
   : QWizardPage(parent)
 {
   this->setTitle(tr("Steady State Analysis"));
@@ -136,7 +136,7 @@ LNASteadyStateSpectrumConfigPage::LNASteadyStateSpectrumConfigPage(GeneralTaskWi
 
 
 bool
-LNASteadyStateSpectrumConfigPage::validatePage()
+SteadyStateSpectrumConfigPage::validatePage()
 {
   // Get the wizard:
   SteadyStateWizard *wizard = static_cast<SteadyStateWizard *>(this->wizard());
@@ -156,7 +156,7 @@ LNASteadyStateSpectrumConfigPage::validatePage()
 
 
 void
-LNASteadyStateSpectrumConfigPage::fAutomaticToggled(bool value)
+SteadyStateSpectrumConfigPage::fAutomaticToggled(bool value)
 {
   this->f_min->setEnabled(! value);
   this->f_max->setEnabled(! value);
@@ -168,7 +168,7 @@ LNASteadyStateSpectrumConfigPage::fAutomaticToggled(bool value)
 /* ********************************************************************************************* *
  * Implementation of summary page:
  * ********************************************************************************************* */
-LNASteadyStateSummaryPage::LNASteadyStateSummaryPage(QWidget *parent)
+SteadyStateSummaryPage::SteadyStateSummaryPage(QWidget *parent)
   : QWizardPage(parent)
 {
   this->setTitle("Steady State Analysis");
@@ -192,7 +192,7 @@ LNASteadyStateSummaryPage::LNASteadyStateSummaryPage(QWidget *parent)
 
 
 void
-LNASteadyStateSummaryPage::initializePage()
+SteadyStateSummaryPage::initializePage()
 {
   SteadyStateWizard *wizard = static_cast<SteadyStateWizard *>(this->wizard());
   SteadyStateTask::Config &config = wizard->getConfigCast<SteadyStateTask::Config>();

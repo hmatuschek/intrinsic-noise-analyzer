@@ -2,7 +2,7 @@
 #define __INA_MODELS_STEADYSTATEANALYSIS_HH
 
 #include "nlesolve/nlesolve.hh"
-#include "LNAmodel.hh"
+#include "IOSmodel.hh"
 #include "math.hh"
 
 namespace iNA {
@@ -174,6 +174,14 @@ public:
 
     }
 
+    void calcLNA(REmodel &model,Eigen::VectorXd &x, Eigen::VectorXex &sseUpdate)
+
+    {
+
+           // Pass...nothing to do.
+
+    }
+
     void calcLNA(Eigen::VectorXd &x, Eigen::VectorXex &sseUpdate)
 
     {
@@ -205,13 +213,12 @@ public:
         conc=x.head(sseModel.numIndSpecies());
 
         size_t offset = sseModel.numIndSpecies();
-        size_t lnaLength = offset*(offset+1)/2;
+        //size_t lnaLength = offset*(offset+1)/2;
         size_t sseLength = updateVector.size()-sseModel.numIndSpecies();
 
         Eigen::VectorXex sseUpdate = updateVector.segment(offset,sseLength);
 
-
-        // calc
+        // Calc RE concentrations
         int iter = this->calcConcentrations(conc);
         // ... and substitute RE concentrations
         GiNaC::exmap subs_table;
@@ -220,38 +227,36 @@ public:
         for (size_t i=0; i<sseLength; i++)
             sseUpdate(i) = sseUpdate(i).subs(subs_table);
 
-        // calc LNA
+        // Calc LNA
         calcLNA(x,sseUpdate);
+        // Calc IOS
+        calcIOS(x,sseUpdate);
 
-        // calc coeff-matrices
-        Eigen::VectorXd A(sseLength-lnaLength);
-        Eigen::MatrixXd B(sseLength-lnaLength,sseLength-lnaLength);
-        subs_table.clear();
-        for (size_t i=lnaLength; i<sseLength; i++)
-            subs_table.insert( std::pair<GiNaC::ex,GiNaC::ex>( sseModel.getSSEvar(i), 0 ) );
-        for(size_t i=lnaLength; i<sseLength; i++)
-        {
-            A(i-lnaLength) = GiNaC::ex_to<GiNaC::numeric>( sseUpdate(i).subs(subs_table) ).to_double();
-            for(size_t j=lnaLength; j<sseLength; j++)
-            {
-               B(i-lnaLength,j-lnaLength) = GiNaC::ex_to<GiNaC::numeric>( sseUpdate(i).diff(sseModel.getSSEvar(j)) ).to_double();
-            }
-        }
+//        // calc coeff-matrices
+//        Eigen::VectorXd A(sseLength-lnaLength);
+//        Eigen::MatrixXd B(sseLength-lnaLength,sseLength-lnaLength);
+//        subs_table.clear();
+//        for (size_t i=lnaLength; i<sseLength; i++)
+//            subs_table.insert( std::pair<GiNaC::ex,GiNaC::ex>( sseModel.getSSEvar(i), 0 ) );
+//        for(size_t i=lnaLength; i<sseLength; i++)
+//        {
+//            A(i-lnaLength) = GiNaC::ex_to<GiNaC::numeric>( sseUpdate(i).subs(subs_table) ).to_double();
+//            for(size_t j=lnaLength; j<sseLength; j++)
+//            {
+//               B(i-lnaLength,j-lnaLength) = GiNaC::ex_to<GiNaC::numeric>( sseUpdate(i).diff(sseModel.getSSEvar(j)) ).to_double();
+//            }
+//        }
 
         x.head(offset) = conc;
-        x.tail(sseLength-lnaLength) = B.lu().solve(-A);
-
-        double relative_error = (B*x.tail(sseLength-lnaLength) + A).norm() / A.norm(); // norm() is L2 norm
-        std::cout << "The relative error is:\n" << relative_error << std::endl;
-
+//        x.tail(sseLength-lnaLength) = solver.precisionSolve(B,-A);
 
         return iter;
     }
 
 
-
     void
-    calcIOS(LNAmodel &model, Eigen::VectorXd &x, const Eigen::VectorXex &sseUpdate)
+    calcIOS(IOSmodel &model, Eigen::VectorXd &x, const Eigen::VectorXex &sseUpdate)
+
     {
 
         // Get the SSE vector
@@ -277,9 +282,18 @@ public:
 
         x.tail(sseLength-lnaLength) = solver.precisionSolve(B,-A);
 
-        double relative_error = (B*x.tail(sseLength-lnaLength) + A).norm() / A.norm(); // norm() is L2 norm
-        std::cout << "IOS, The relative error is:\n" << relative_error << std::endl;
+    }
 
+    void
+    calcIOS(REmodel &model, Eigen::VectorXd &x, const Eigen::VectorXex &sseUpdate)
+    {
+      // Pass...nothing to do for RE model.
+    }
+
+    void
+    calcIOS(LNAmodel &model, Eigen::VectorXd &x, const Eigen::VectorXex &sseUpdate)
+    {
+      // Pass...nothing to do for LNA model.
     }
 
     void

@@ -1,15 +1,16 @@
-#ifndef LNATASK_HH
-#define LNATASK_HH
+#ifndef __INA_APP_SSE_LNATASK_HH__
+#define __INA_APP_SSE_LNATASK_HH__
 
 #include <QObject>
 #include <QStringList>
 
-#include "../task.hh"
-#include "models/sseinterpreter.hh"
-#include "ode/integrationrange.hh"
-#include "ode/stepper.hh"
-#include "../timeseries.hh"
+#include "../models/task.hh"
+#include "../models/timeseries.hh"
 #include "ssetaskconfig.hh"
+
+#include <models/sseinterpreter.hh>
+#include <ode/integrationrange.hh>
+#include <ode/stepper.hh>
 
 
 /**
@@ -94,4 +95,4 @@ private:
   void instantiateInterpreter();
 };
 
-#endif // LNATASK_HH
+#endif // __INA_APP_SSE_LNATASK_HH__

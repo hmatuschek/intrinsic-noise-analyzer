@@ -9,7 +9,7 @@
 #include <QMessageBox>
 
 
-#include "../application.hh"
+#include "../models/application.hh"
 #include "../doctree/plotitem.hh"
 #include "steadystatespectrumplot.hh"
 #include "../views/speciesselectiondialog.hh"

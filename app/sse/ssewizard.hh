@@ -18,7 +18,7 @@
 
 
 /**
- * Simple wizard to configure the deterministic time-course analysis.
+ * Simple wizard to configure the time course analysis.
  */
 class SSEWizard : public GeneralTaskWizard
 {

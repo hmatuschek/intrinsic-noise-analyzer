@@ -20,6 +20,7 @@ protected:
   std::list< SmartPtr<Node> > _stack;
 
 public:
+  /** Handles sums. */
   void visit(const GiNaC::add &add) {
     // Skip empty sums:
     if (0 == add.nops()) { return; }
@@ -34,6 +35,7 @@ public:
     _stack.push_back(rhs);
   }
 
+  /** Handles products. */
   void visit(const GiNaC::mul &mul) {
     // Skip empty products:
     if (0 == mul.nops()) { return; }
@@ -48,6 +50,7 @@ public:
     _stack.push_back(rhs);
   }
 
+  /** Handles powers. */
   void visit(const GiNaC::power &power) {
     // Process base
     power.op(0).accept(*this);
@@ -59,10 +62,12 @@ public:
     _stack.push_back(Node::createPow(base, exponent));
   }
 
+  /** Handles symbols. */
   void visit(const GiNaC::symbol &symbol) {
     _stack.push_back(Node::createSymbol(symbol));
   }
 
+  /** Handles numeric values. */
   void visit(const GiNaC::numeric &value) {
     if (value.is_integer()) {
       _stack.push_back(Node::createValue(value.to_long()));
@@ -75,6 +80,7 @@ public:
     }
   }
 
+  /** Handles function calls. */
   void visit(const GiNaC::function &function) {
     // Process function arguments:
     std::vector< SmartPtr<Node> > arguments;
@@ -95,12 +101,14 @@ public:
     throw err;
   }
 
+  /** Handles all unhandled expressions. */
   void visit(const GiNaC::basic &node) {
     InternalError err;
     err << "Can not handle GiNaC expression " << node << ": Unknown expression type.";
     throw err;
   }
 
+  /** Removes and returns the top element of the stack. */
   SmartPtr<Node> popNode() {
     SmartPtr<Node> element = _stack.back(); _stack.pop_back();
     return element;
@@ -348,6 +356,14 @@ Node::createFuncLog(SmartPtr<Node> arg)
   return SmartPtr<Node>(node);
 }
 
+
+
+/* ********************************************************************************************* *
+ * Implementation of PassManager
+ * ********************************************************************************************* */
+Pass::~Pass() {
+  // pass...
+}
 
 
 /* ********************************************************************************************* *

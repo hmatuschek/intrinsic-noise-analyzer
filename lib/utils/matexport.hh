@@ -36,6 +36,9 @@ protected:
   MatFileElement(ElementType type);
 
 public:
+  /** Destructor. */
+  virtual ~MatFileElement();
+
   /** Returns the data size of the element. This does not include the header (tag) or padding
    * bytes. */
   virtual size_t dataSize() const = 0;

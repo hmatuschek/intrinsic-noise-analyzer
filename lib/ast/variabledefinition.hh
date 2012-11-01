@@ -93,9 +93,6 @@ public:
   /** Destructor. Also frees the initial value expression, if present. */
   virtual ~VariableDefinition();
 
-  /** Resets the identifier of the variable definition, also updates the symbol name. */
-  void setIdentifier(const std::string &id);
-
   /** Returns true, if the variable is constant. */
   bool isConst() const;
 
@@ -140,6 +137,10 @@ public:
 
   /** Applies the operator on the rule if present. */
   virtual void traverse(Ast::Operator &op);
+
+protected:
+  /** Resets the identifier of the variable definition, also updates the symbol name. */
+  void setIdentifier(const std::string &id);
 };
 
 

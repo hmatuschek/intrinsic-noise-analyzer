@@ -61,21 +61,26 @@ PlotView::PlotView(PlotItem *plot_wrapper, QWidget *parent) :
 void
 PlotView::onSavePlot()
 {
+  QString selected_filter("");
   QString fileName = QFileDialog::getSaveFileName(
-        this, tr("Save plot as ..."), "", tr("Image Files (*.png *.svg)"));
+        this, tr("Save plot as ..."), "", tr("Portable Network Graphics (*.png);;Scalable Vector Graphics (*.svg)"), &selected_filter);
 
   // on cancel:
   if (0 == fileName.size()) { return; }
 
-  // Determine file type by ending:
-  QFileInfo fileinfo(fileName);
+  // Determine file type by selected filter
   Plot::Figure::FileType type;
-
-  if ("png" == fileinfo.suffix()) { type=Plot::Figure::FILETYPE_PNG; }
-  else if ("svg" == fileinfo.suffix()) { type=Plot::Figure::FILETYPE_SVG; }
-  else {
+  if (tr("Portable Network Graphics (*.png)") == selected_filter) {
+    type=Plot::Figure::FILETYPE_PNG;
+    // check if file has proper suffix.
+    QFileInfo info(fileName); if ("png" != info.suffix()) { fileName.append(".png"); }
+  } else if (tr("Scalable Vector Graphics (*.svg)") == selected_filter) {
+    type=Plot::Figure::FILETYPE_SVG;
+    // check if file has proper suffix.
+    QFileInfo info(fileName); if ("svg" != info.suffix()) { fileName.append(".svg"); }
+  } else {
     QMessageBox::critical(0, tr("Can not save plot."),
-                          tr("Unknown file suffix: {0}").arg(fileinfo.suffix()));
+                          tr("Unknown file type: {0}").arg(selected_filter));
     return;
   }
 

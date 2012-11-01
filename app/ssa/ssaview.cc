@@ -6,8 +6,9 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
-#include "../application.hh"
+#include "../models/application.hh"
 #include "../doctree/plotitem.hh"
+#include "../views/genericplotdialog.hh"
 #include "../views/speciesselectiondialog.hh"
 #include "ssaplot.hh"
 
@@ -49,6 +50,10 @@ SSAResultWidget::SSAResultWidget(SSATaskWrapper *wrapper, QWidget *parent) :
   this->plot_button = new QPushButton(tr("Plot statistics"));
   QObject::connect(this->plot_button, SIGNAL(clicked()), this, SLOT(showPlot()));
 
+  // Custom plot button
+  _genericPlotButton = new QPushButton(tr("Custom plot"));
+  QObject::connect(_genericPlotButton, SIGNAL(clicked()), this, SLOT(_genericPlotButtonPressed()));
+
   // "Save as text..." button.
   this->save_button = new QPushButton(tr("Save data to file"));
   QObject::connect(this->save_button, SIGNAL(clicked()), this, SLOT(saveData()));
@@ -56,6 +61,7 @@ SSAResultWidget::SSAResultWidget(SSATaskWrapper *wrapper, QWidget *parent) :
   // Layout-box for buttons:
   QHBoxLayout *button_box = new QHBoxLayout();
   button_box->addWidget(plot_button);
+  button_box->addWidget(_genericPlotButton);
   button_box->addWidget(save_button);
 
   // Panel layout
@@ -85,6 +91,26 @@ SSAResultWidget::showPlot()
         new PlotItem(new SSACorrelationPlot(selected_species, this->ssa_task_wrapper->getSSATask())));
 }
 
+void
+SSAResultWidget::_genericPlotButtonPressed()
+{
+  // Show dialog
+  GenericPlotDialog dialog(&ssa_task_wrapper->getSSATask()->getTimeSeries());
+  if (QDialog::Rejected == dialog.exec()) { return; }
+
+  // Create plot figure with labels.
+  Plot::Figure *figure = new Plot::Figure(dialog.figureTitle());
+  figure->getAxis()->setXLabel(dialog.xLabel());
+  figure->getAxis()->setYLabel(dialog.yLabel());
+
+  // Iterate over all graphs of the configured plot:
+  for (size_t i=0; i<dialog.numGraphs(); i++) {
+    figure->getAxis()->addGraph(dialog.graph(i).create(figure->getStyle(i)));
+  }
+
+  // Add timeseries plot:
+  Application::getApp()->docTree()->addPlot(ssa_task_wrapper, new PlotItem(figure));
+}
 
 void
 SSAResultWidget::saveData()

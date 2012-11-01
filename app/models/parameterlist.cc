@@ -77,7 +77,7 @@ ParameterList::flags(const QModelIndex &index) const
   if (rowCount() <= index.row()) return Qt::NoItemFlags;
 
   // Mark only column 1 & 2 editable
-  if ( (1 == index.column()) || (2 == index.column()) ) item_flags |= Qt::ItemIsEditable;
+  if ( (0 == index.column()) || (1 == index.column()) || (2 == index.column()) ) item_flags |= Qt::ItemIsEditable;
 
   return item_flags;
 }
@@ -166,7 +166,7 @@ ParameterList::remParameter(int row)
 QVariant
 ParameterList::_getIdentifier(iNA::Ast::Parameter *param, int role) const
 {
-  if (Qt::DisplayRole != role) { return QVariant(); }
+  if (Qt::DisplayRole != role || Qt::EditRole != role) { return QVariant(); }
 
   return param->getIdentifier().c_str();
 }
@@ -180,11 +180,11 @@ ParameterList::_updateIdentifier(iNA::Ast::Parameter *param, const QVariant &val
   // If nothing changed -> done.
   if (id == param->getIdentifier()) { return true; }
   // Check ID format
-  if (! QRegExp("[a-zA-Z_][a-zA-Z0-9_]").exactMatch(qid)) { return false; }
+  if (! QRegExp("[a-zA-Z_][a-zA-Z0-9_]*").exactMatch(qid)) { return false; }
   // Check if id is not assigned allready:
   if (_model->hasDefinition(id)) { return false; }
   // Ok, assign identifier:
-  param->setIdentifier(id);
+  _model->resetIdentifier(param->getIdentifier(), id);
   return true;
 }
 
