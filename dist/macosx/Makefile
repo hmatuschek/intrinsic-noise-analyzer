@@ -20,9 +20,9 @@ dmg: ina-app
 	hdiutil create -srcfolder IntrinsicNoiseAnalyzer.app IntrinsicNoiseAnalyzer-${VERSION}.dmg
 
 
-#cp $(SYSTEM_BINARY_DIR)/ina IntrinsicNoiseAnalyzer.app/Contents/MacOS
-#cp ina.icns IntrinsicNoiseAnalyzer.app/Contents/Resources
 ina-app: libina QtGui QtXml QtSvg QtCore QtNetwork libginac libcln libsbml libffi
+	cp $(SYSTEM_BINARY_DIR)/ina IntrinsicNoiseAnalyzer.app/Contents/MacOS
+	cp ina.icns IntrinsicNoiseAnalyzer.app/Contents/Resources
 	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libina.dylib @executable_path/../Frameworks/libina.dylib ${APP_BINARY_DIR}/ina
 	install_name_tool -change ${QTCORE_FRAMEWORK} @executable_path/../Frameworks/QtCore ${APP_BINARY_DIR}/ina
 	install_name_tool -change ${QTGUI_FRAMEWORK} @executable_path/../Frameworks/QtGui ${APP_BINARY_DIR}/ina
