@@ -92,6 +92,7 @@ libsbml: libxml2 libz libiconv libbz2
 	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libz.1.dylib @executable_path/../Frameworks/libz.1.dylib ${APP_LIBRARY_DIR}/libsbml.5.dylib
 	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libiconv.2.dylib @executable_path/../Frameworks/libiconv.2.dylib ${APP_LIBRARY_DIR}/libsbml.5.dylib
 	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libbz2.1.0.dylib @executable_path/../Frameworks/libbz2.1.0.dylib ${APP_LIBRARY_DIR}/libsbml.5.dylib
+	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/liblzma.5.dylib @executable_path/../Frameworks/liblzma.5.dylib ${APP_LIBRARY_DIR}/libsbml.5.dylib
 
 libz:
 	cp ${SYSTEM_LIBRARY_DIR}/libz.1.dylib ${APP_LIBRARY_DIR}
