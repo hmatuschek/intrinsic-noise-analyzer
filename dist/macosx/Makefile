@@ -1,5 +1,10 @@
 SYSTEM_LIBRARY_DIR = /opt/local/lib
 SYSTEM_BINARY_DIR = /opt/local/bin
+QTCORE_FRAMEWORK = /opt/local/Library/Frameworks/QtCore.framework/Versions/4/QtCore
+QTGUI_FRAMEWORK = /opt/local/Library/Frameworks/QtGui.framework/Versions/4/QtGui
+QTXML_FRAMEWORK = /opt/local/Library/Frameworks/QtXml.framework/Versions/4/QtXml
+QTSVG_FRAMEWORK = /opt/local/Library/Frameworks/QtSvg.framework/Versions/4/QtSvg
+QTNET_FRAMEWORK = /opt/local/Library/Frameworks/QtNetwork.framework/Versions/4/QtNetwork
 APP_LIBRARY_DIR = IntrinsicNoiseAnalyzer.app/Contents/Frameworks
 APP_BINARY_DIR  = IntrinsicNoiseAnalyzer.app/Contents/MacOS
 VERSION = 0.4.0
@@ -14,16 +19,17 @@ clean:
 dmg: ina-app
 	hdiutil create -srcfolder IntrinsicNoiseAnalyzer.app IntrinsicNoiseAnalyzer-${VERSION}.dmg
 
-ina-app: libina libQtGui libQtXml libQtSvg libQtCore libQtNetwork libginac libcln libsbml libffi
-	cp $(SYSTEM_BINARY_DIR)/ina IntrinsicNoiseAnalyzer.app/Contents/MacOS
-	cp ina.icns IntrinsicNoiseAnalyzer.app/Contents/Resources
+
+#cp $(SYSTEM_BINARY_DIR)/ina IntrinsicNoiseAnalyzer.app/Contents/MacOS
+#cp ina.icns IntrinsicNoiseAnalyzer.app/Contents/Resources
+ina-app: libina QtGui QtXml QtSvg QtCore QtNetwork libginac libcln libsbml libffi
 	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libina.dylib @executable_path/../Frameworks/libina.dylib ${APP_BINARY_DIR}/ina
-	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libQtGui.4.dylib @executable_path/../Frameworks/libQtGui.4.dylib ${APP_BINARY_DIR}/ina
-	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libQtXml.4.dylib @executable_path/../Frameworks/libQtXml.4.dylib ${APP_BINARY_DIR}/ina
-	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libQtSvg.4.dylib @executable_path/../Frameworks/libQtSvg.4.dylib ${APP_BINARY_DIR}/ina
-	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libQtCore.4.dylib @executable_path/../Frameworks/libQtCore.4.dylib ${APP_BINARY_DIR}/ina
-  install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libQtNetwork.4.dylib @executable_path/../Frameworks/libQtNetwork.4.dylib ${APP_BINARY_DIR}/ina
-  install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libginac-1.5.0.dylib @executable_path/../Frameworks/libginac-1.5.0.dylib ${APP_BINARY_DIR}/ina
+	install_name_tool -change ${QTCORE_FRAMEWORK} @executable_path/../Frameworks/QtCore ${APP_BINARY_DIR}/ina
+	install_name_tool -change ${QTGUI_FRAMEWORK} @executable_path/../Frameworks/QtGui ${APP_BINARY_DIR}/ina
+	install_name_tool -change ${QTXML_FRAMEWORK} @executable_path/../Frameworks/QtXml ${APP_BINARY_DIR}/ina
+	install_name_tool -change ${QTSVG_FRAMEWORK} @executable_path/../Frameworks/QtSvg ${APP_BINARY_DIR}/ina
+	install_name_tool -change ${QTNET_FRAMEWORK} @executable_path/../Frameworks/QtNetwork ${APP_BINARY_DIR}/ina
+	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libginac-1.5.0.dylib @executable_path/../Frameworks/libginac-1.5.0.dylib ${APP_BINARY_DIR}/ina
 	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libcln.6.dylib @executable_path/../Frameworks/libcln.6.dylib ${APP_BINARY_DIR}/ina
 	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libsbml.5.dylib @executable_path/../Frameworks/libsbml.5.dylib ${APP_BINARY_DIR}/ina
 	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libffi.6.dylib @executable_path/../Frameworks/libffi.6.dylib ${APP_BINARY_DIR}/ina 
@@ -36,36 +42,37 @@ libina: libginac libcln libsbml
 	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libsbml.5.dylib @executable_path/../Frameworks/libsbml.5.dylib ${APP_LIBRARY_DIR}/libina.dylib
 	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libffi.6.dylib @executable_path/../Frameworks/libffi.6.dylib ${APP_LIBRARY_DIR}/libina.dylib 
 
-libQtGui: libQtCore libz libpng
-	cp ${SYSTEM_LIBRARY_DIR}/libQtGui.4.dylib ${APP_LIBRARY_DIR}
-	install_name_tool -id @executable_path/../Frameworks/libQtGui.4.dylib ${APP_LIBRARY_DIR}/libQtGui.4.dylib
-	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libQtCore.4.dylib @executable_path/../Frameworks/libQtCore.4.dylib ${APP_LIBRARY_DIR}/libQtGui.4.dylib
-	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libz.1.dylib @executable_path/../Frameworks/libz.1.dylib ${APP_LIBRARY_DIR}/libQtGui.4.dylib
-	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libpng14.14.dylib @executable_path/../Frameworks/libpng14.14.dylib ${APP_LIBRARY_DIR}/libQtGui.4.dylib
-	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libpng14.14.dylib @executable_path/../Frameworks/libpng14.14.dylib ${APP_LIBRARY_DIR}/libQtGui.4.dylib
+QtGui: QtCore libz libpng
+	cp ${QTGUI_FRAMEWORK} ${APP_LIBRARY_DIR}
+	install_name_tool -id @executable_path/../Frameworks/QtGui ${APP_LIBRARY_DIR}/QtGui
+	install_name_tool -change ${QTCORE_FRAMEWORK} @executable_path/../Frameworks/QtCore ${APP_LIBRARY_DIR}/QtGui
+	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libz.1.dylib @executable_path/../Frameworks/libz.1.dylib ${APP_LIBRARY_DIR}/QtGui
+	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libpng15.15.dylib @executable_path/../Frameworks/libpng15.15.dylib ${APP_LIBRARY_DIR}/QtGui
 
-libQtXml: libQtCore 
-	cp ${SYSTEM_LIBRARY_DIR}/libQtXml.4.dylib ${APP_LIBRARY_DIR}
-	install_name_tool -id @executable_path/../Frameworks/libQtXml.4.dylib ${APP_LIBRARY_DIR}/libQtXml.4.dylib
-	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libQtCore.4.dylib @executable_path/../Frameworks/libQtCore.4.dylib ${APP_LIBRARY_DIR}/libQtXml.4.dylib
-	
-libQtSvg: libQtCore libQtXml libz
-	cp ${SYSTEM_LIBRARY_DIR}/libQtSvg.4.dylib ${APP_LIBRARY_DIR}
-	install_name_tool -id @executable_path/../Frameworks/libQtSvg.4.dylib ${APP_LIBRARY_DIR}/libQtSvg.4.dylib
-	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libQtCore.4.dylib @executable_path/../Frameworks/libQtCore.4.dylib ${APP_LIBRARY_DIR}/libQtSvg.4.dylib
-	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libQtGui.4.dylib @executable_path/../Frameworks/libQtGui.4.dylib ${APP_LIBRARY_DIR}/libQtSvg.4.dylib
-	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libz.1.dylib @executable_path/../Frameworks/libz.1.dylib ${APP_LIBRARY_DIR}/libQtSvg.4.dylib
+QtXml: QtCore
+	cp ${QTXML_FRAMEWORK} ${APP_LIBRARY_DIR}
+	install_name_tool -id @executable_path/../Frameworks/QtXml ${APP_LIBRARY_DIR}/QtXml
+	install_name_tool -change ${QTCORE_FRAMEWORK} @executable_path/../Frameworks/QtCore ${APP_LIBRARY_DIR}/QtXml
 
-libQtCore: libz 
-	cp ${SYSTEM_LIBRARY_DIR}/libQtCore.4.dylib ${APP_LIBRARY_DIR}
-	install_name_tool -id @executable_path/../Frameworks/libQtCore.4.dylib ${APP_LIBRARY_DIR}/libQtCore.4.dylib
-	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libz.1.dylib @executable_path/../Frameworks/libz.1.dylib ${APP_LIBRARY_DIR}/libQtCore.4.dylib
+QtSvg: QtCore QtXml libz
+	cp ${QTSVG_FRAMEWORK} ${APP_LIBRARY_DIR}
+	install_name_tool -id @executable_path/../Frameworks/QtSvg ${APP_LIBRARY_DIR}/QtSvg
+	install_name_tool -change ${QTCORE_FRAMEWORK} @executable_path/../Frameworks/QtCore ${APP_LIBRARY_DIR}/QtSvg
+	install_name_tool -change ${QTGUI_FRAMEWORK} @executable_path/../Frameworks/QtGui ${APP_LIBRARY_DIR}/QtSvg
+	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libz.1.dylib @executable_path/../Frameworks/libz.1.dylib ${APP_LIBRARY_DIR}/QtSvg
 
-libQtNetwork: libz libQtCore libssl libcrypto
-  cp ${SYSTEM_LIBRARY_DIR}/libQtNetwork.4.dylib ${APP_LIBRARY_DIR}
-  install_name_tool -id @executable_path/../Frameworks/libQtNetwork.4.dylib ${APP_LIBRARY_DIR}/libQtNetwork.4.dylib
-  install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libQtCore.4.dylib @executable_path/../Frameworks/libQtCore.4.dylib ${APP_LIBRARY_DIR}/libQtNetwork.4.dylib
-  install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libz.1.dylib @executable_path/../Frameworks/libz.1.dylib ${APP_LIBRARY_DIR}/libQtCore.4.dylib
+QtCore: libz
+	cp ${QTCORE_FRAMEWORK} ${APP_LIBRARY_DIR}
+	install_name_tool -id @executable_path/../Frameworks/QtCore ${APP_LIBRARY_DIR}/QtCore
+	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libz.1.dylib @executable_path/../Frameworks/libz.1.dylib ${APP_LIBRARY_DIR}/QtCore
+
+QtNetwork: libz QtCore libssl libcrypto
+	cp ${QTNET_FRAMEWORK} ${APP_LIBRARY_DIR}
+	install_name_tool -id @executable_path/../Frameworks/QtNetwork ${APP_LIBRARY_DIR}/QtNetwork
+	install_name_tool -change ${QTCORE_FRAMEWORK} @executable_path/../Frameworks/QtCore ${APP_LIBRARY_DIR}/QtNetwork
+	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libz.1.dylib @executable_path/../Frameworks/libz.1.dylib ${APP_LIBRARY_DIR}/QtNetwork
+	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libcrypto.1.0.0.dylib @executable_path/../Frameworks/libcrypto.1.0.0.dylib ${APP_LIBRARY_DIR}/QtNetwork
+	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libssl.1.0.0.dylib @executable_path/../Frameworks/libssl.1.0.0.dylib ${APP_LIBRARY_DIR}/QtNetwork
 
 libginac: libcln libgmp
 	cp ${SYSTEM_LIBRARY_DIR}/libginac-1.5.0.dylib ${APP_LIBRARY_DIR}
@@ -91,19 +98,24 @@ libz:
 	install_name_tool -id @executable_path/../Frameworks/libz.1.dylib ${APP_LIBRARY_DIR}/libz.1.dylib
 
 libpng: libz
-	cp ${SYSTEM_LIBRARY_DIR}/libpng14.14.dylib ${APP_LIBRARY_DIR}
-	install_name_tool -id @executable_path/../Frameworks/libpng14.14.dylib ${APP_LIBRARY_DIR}/libpng14.14.dylib
-	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libz.1.dylib @executable_path/../Frameworks/libz.1.dylib ${APP_LIBRARY_DIR}/libpng14.14.dylib
+	cp ${SYSTEM_LIBRARY_DIR}/libpng15.15.dylib ${APP_LIBRARY_DIR}
+	install_name_tool -id @executable_path/../Frameworks/libpng15.15.dylib ${APP_LIBRARY_DIR}/libpng15.15.dylib
+	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libz.1.dylib @executable_path/../Frameworks/libz.1.dylib ${APP_LIBRARY_DIR}/libpng15.15.dylib
 
 libgmp: 
 	cp ${SYSTEM_LIBRARY_DIR}/libgmp.10.dylib ${APP_LIBRARY_DIR}
 	install_name_tool -id @executable_path/../Frameworks/libgmp.10.dylib ${APP_LIBRARY_DIR}/libgmp.10.dylib
 
-libxml2: libz libiconv
+libxml2: libz libiconv liblzma
 	cp ${SYSTEM_LIBRARY_DIR}/libxml2.2.dylib ${APP_LIBRARY_DIR}
 	install_name_tool -id @executable_path/../Frameworks/libxml2.2.dylib ${APP_LIBRARY_DIR}/libxml2.2.dylib
 	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libz.1.dylib @executable_path/../Frameworks/libz.1.dylib ${APP_LIBRARY_DIR}/libxml2.2.dylib
 	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libiconv.2.dylib @executable_path/../Frameworks/libiconv.2.dylib ${APP_LIBRARY_DIR}/libxml2.2.dylib
+	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/liblzma.5.dylib @executable_path/../Frameworks/liblzma.5.dylib ${APP_LIBRARY_DIR}/libxml2.2.dylib
+
+liblzma: 
+	cp ${SYSTEM_LIBRARY_DIR}/liblzma.5.dylib ${APP_LIBRARY_DIR}
+	install_name_tool -id @executable_path/../Frameworks/liblzma.5.dylib ${APP_LIBRARY_DIR}/liblzma.5.dylib
 
 libiconv: 
 	cp ${SYSTEM_LIBRARY_DIR}/libiconv.2.dylib ${APP_LIBRARY_DIR}
@@ -118,13 +130,15 @@ libffi:
 	install_name_tool -id @executable_path/../Frameworks/libffi.6.dylib ${APP_LIBRARY_DIR}/libffi.6.dylib
 
 libssl: libcrypto libz
-  cp ${SYSTEM_LIBRARY_DIR}/libssl.1.dylib ${APP_LIBRARY_DIR}
-  install_name_tool -id @executable_path/../Frameworks/libssl.1.dylib ${APP_LIBRARY_DIR}/libssl.1.dylib
-  install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libz.1.dylib @executable_path/../Frameworks/libz.1.dylib ${APP_LIBRARY_DIR}/libssl.1.dylib
-  install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libcrypto.1.dylib @executable_path/../Frameworks/libcrypto.1.dylib ${APP_LIBRARY_DIR}/libssl.1.dylib
+	cp ${SYSTEM_LIBRARY_DIR}/libssl.1.0.0.dylib ${APP_LIBRARY_DIR}
+	chmod u+w ${APP_LIBRARY_DIR}/libssl.1.0.0.dylib
+	install_name_tool -id @executable_path/../Frameworks/libssl.1.0.0.dylib ${APP_LIBRARY_DIR}/libssl.1.0.0.dylib
+	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libz.1.dylib @executable_path/../Frameworks/libz.1.dylib ${APP_LIBRARY_DIR}/libssl.1.0.0.dylib
+	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libcrypto.1.0.0.dylib @executable_path/../Frameworks/libcrypto.1.0.0.dylib ${APP_LIBRARY_DIR}/libssl.1.0.0.dylib
 
 libcrypto:
-  cp ${SYSTEM_LIBRARY_DIR}/libcrypto.1.dylib ${APP_LIBRARY_DIR}
-  install_name_tool -id @executable_path/../Frameworks/libcrypto.1.dylib ${APP_LIBRARY_DIR}/libcrypto.1.dylib
-  install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libz.1.dylib @executable_path/../Frameworks/libz.1.dylib ${APP_LIBRARY_DIR}/libcrypto.1.dylib
+	cp ${SYSTEM_LIBRARY_DIR}/libcrypto.1.0.0.dylib ${APP_LIBRARY_DIR}
+	chmod u+w ${APP_LIBRARY_DIR}/libcrypto.1.0.0.dylib
+	install_name_tool -id @executable_path/../Frameworks/libcrypto.1.0.0.dylib ${APP_LIBRARY_DIR}/libcrypto.1.0.0.dylib
+	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libz.1.dylib @executable_path/../Frameworks/libz.1.dylib ${APP_LIBRARY_DIR}/libcrypto.1.0.0.dylib
 
