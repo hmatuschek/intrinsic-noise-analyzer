@@ -713,13 +713,14 @@ ReactionEditorPage::_defineUnknownSpecies(QList<QPair<int, QString> > &reactants
 
     // Create a compartment if there is none.
     if (0 == _model.numCompartments()) {
-      iNA::Ast::Compartment * new_compartment = new iNA::Ast::Compartment("compartment", iNA::Ast::Compartment::VOLUME, true);
+      iNA::Ast::Compartment * new_compartment = new iNA::Ast::Compartment("compartment", 1, iNA::Ast::Compartment::VOLUME, true);
       _model.addDefinition(new_compartment);
     }
 
     // identifier not in use -> define species with this identifier.
     iNA::Ast::Species *new_species = new iNA::Ast::Species(
-          item->second.toStdString(), _model.getCompartment(0), false);
+          item->second.toStdString(),_model.getCompartment(0), false);
+    new_species->setValue(0);
     scope->addDefinition(new_species);
   }
 
@@ -739,16 +740,16 @@ ReactionEditorPage::_defineUnknownSpecies(QList<QPair<int, QString> > &reactants
       throw err;
     }
 
+    // Create a compartment if there is none.
     if (0 == _model.numCompartments()) {
-      iNA::InternalError err;
-      err << "Can not define species with identifier " << item->second.toStdString()
-          << ", no compartment defined.";
-      throw err;
+      iNA::Ast::Compartment * new_compartment = new iNA::Ast::Compartment("compartment", 1, iNA::Ast::Compartment::VOLUME, true);
+      _model.addDefinition(new_compartment);
     }
 
     // identifier not in use -> define species with this identifier.
     iNA::Ast::Species *new_species = new iNA::Ast::Species(
           item->second.toStdString(), _model.getCompartment(0), false);
+    new_species->setValue(0);
     scope->addDefinition(new_species);
   }
 }
