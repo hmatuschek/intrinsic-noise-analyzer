@@ -3,7 +3,9 @@
 #include <QtNetwork/QNetworkRequest>
 #include <QRegExp>
 #include "../models/application.hh"
+
 #include <config.hh>
+#include <utils/logger.hh>
 
 
 VersionCheck::VersionCheck(QObject *parent)
@@ -52,8 +54,17 @@ VersionCheck::startCheck()
 
 
 void
-VersionCheck::onDataReceived(QNetworkReply *reply) {
-  // Update last update check date:
+VersionCheck::onDataReceived(QNetworkReply *reply)
+{
+  // check if request was successfull
+  if (QNetworkReply::NoError != reply->error()) {
+    iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::ERROR);
+    message << "Can not check for updates: " << reply->errorString().toStdString();
+    iNA::Utils::Logger::get().log(message);
+    return;
+  }
+
+  // Update last check date
   Application::getApp()->checkedForUpdate();
 
   // Read current published version number:
@@ -70,6 +81,9 @@ VersionCheck::onDataReceived(QNetworkReply *reply) {
   if (minor > INA_VERSION_MINOR) { emit newVersionAvailable(version); }
   if (minor < INA_VERSION_MINOR) { return; }
   if (patch > INA_VERSION_PATCH) { emit newVersionAvailable(version); }
+
+  // cleanup later.
+  reply->deleteLater();
 }
 
 
