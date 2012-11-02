@@ -8,6 +8,17 @@
 #include <utils/logger.hh>
 
 
+
+int __version_compare(int major, int minor, int patch) {
+  if (major > INA_VERSION_MAJOR) { return 1; }
+  if (major < INA_VERSION_MAJOR) { return -1; }
+  if (minor > INA_VERSION_MINOR) { return 1; }
+  if (minor < INA_VERSION_MINOR) { return -1; }
+  if (patch > INA_VERSION_PATCH) { return 1; }
+  if (patch < INA_VERSION_PATCH) { return -1; }
+  return 0;
+}
+
 VersionCheck::VersionCheck(QObject *parent)
   : QObject(parent), _access(0)
 {
@@ -32,7 +43,7 @@ VersionCheck::startCheck()
 
   // Skip update if last update was less than 7 days ago:
   QDateTime last_check = Application::getApp()->lastUpdateCheck();
-  if (last_check.addDays(7) < QDateTime::currentDateTime()) { return; }
+  if (last_check.addDays(7) > QDateTime::currentDateTime()) { return; }
 
   // Assemble user agent ID
   QString version = INA_VERSION_STRING;
@@ -70,20 +81,30 @@ VersionCheck::onDataReceived(QNetworkReply *reply)
   // Read current published version number:
   QString version = reply->readLine();
   QRegExp regexp("([0-9]+)\\.([0-9]+)\\.([0-9]+)");
-  if (! regexp.exactMatch(version)) { return; }
-  uint major = regexp.cap(1).toUInt();
-  uint minor = regexp.cap(2).toUInt();
-  uint patch = regexp.cap(2).toUInt();
-
-  // Emit "newVersionAvailable" if this version number is smaller
-  if (major > INA_VERSION_MAJOR) { emit newVersionAvailable(version); }
-  if (major < INA_VERSION_MAJOR) { return; }
-  if (minor > INA_VERSION_MINOR) { emit newVersionAvailable(version); }
-  if (minor < INA_VERSION_MINOR) { return; }
-  if (patch > INA_VERSION_PATCH) { emit newVersionAvailable(version); }
+  if (0 > regexp.indexIn(version)) {
+    iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::ERROR);
+    message << "Can not check for updates: Invalid format of version number: " << version.toStdString();
+    iNA::Utils::Logger::get().log(message);
+    return;
+  }
 
   // cleanup later.
   reply->deleteLater();
+
+  emit newVersionAvailable(version);
+
+  // Emit "newVersionAvailable" if this version number is smaller
+  if (0 < __version_compare(regexp.cap(1).toUInt(), regexp.cap(2).toUInt(), regexp.cap(3).toUInt())) {
+    iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::INFO);
+    message << "There is a new version of iNA available for download. Version installed "
+            << INA_VERSION_STRING << ", version available " << version.toStdString();
+    iNA::Utils::Logger::get().log(message);
+  } else {
+    iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::INFO);
+    message << "Your iNA version is up-to-date. Version installed "
+            << INA_VERSION_STRING << ", version available " << version.toStdString();
+    iNA::Utils::Logger::get().log(message);
+  }
 }
 
 

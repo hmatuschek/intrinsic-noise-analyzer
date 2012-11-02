@@ -222,11 +222,6 @@ Application::itemSelected(const QModelIndex &index)
 void
 Application::checkForNewVersion()
 {
-  // Do not check if disabled by compiler flag
-#ifdef INA_DISABLE_NEW_VERSION_CHECK
-  return;
-#endif
-
   // Otherwise start check.
   _versionCheck.startCheck();
 }
