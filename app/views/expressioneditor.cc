@@ -66,6 +66,5 @@ ExpressionEditor::keyPressEvent(QKeyEvent *event)
   if (3 <= prefix.length()) {
     _completer->setCompletionPrefix(prefix);
     _completer->complete();
-    std::cerr << "complete with prefix " << prefix.toStdString() << std::endl;
   }
 }
