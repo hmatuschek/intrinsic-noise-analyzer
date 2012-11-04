@@ -30,8 +30,6 @@ checksums           md5     1fdf26a38f4f984145b6b14f0972416f \
 depends_lib         port:libxml2 \
                     port:bzip2
 
-conflicts           libsbml-cppnamespace
-
 configure.pre_args  --prefix=${prefix}
 
 
