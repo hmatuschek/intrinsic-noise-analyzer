@@ -7,6 +7,7 @@
 #include "reactionequationrenderer.hh"
 #include "../tinytex/tinytex.hh"
 #include "../models/scopeitemmodel.hh"
+#include "expressioneditor.hh"
 
 #include <ast/unitconverter.hh>
 #include <parser/exception.hh>
@@ -156,10 +157,10 @@ ReactionEditorPage::ReactionEditorPage(iNA::Ast::Reaction *reaction, ReactionEdi
   }
 
   // The reactants stoichiometry
-  _equation = new QLineEdit();
+  _equation = new ExpressionEditor(_model);
   _equation->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
-  QCompleter *completer = new QCompleter(ScopeItemModel::collectIdentifiers(_model, ScopeItemModel::SELECT_ALL));
-  _equation->setCompleter(completer);
+  /*QCompleter *completer = new QCompleter(ScopeItemModel::collectIdentifiers(_model, ScopeItemModel::SELECT_ALL));
+  _equation->setCompleter(completer); */
   if ((0 != _current_reaction)) {
     _equation->setText(_serializeReactionEquation());
   }
@@ -180,7 +181,7 @@ ReactionEditorPage::ReactionEditorPage(iNA::Ast::Reaction *reaction, ReactionEdi
   _kineticLaw = new QStackedWidget();
   _kineticLawFormula = new QLabel();
   _kineticLaw->addWidget(_kineticLawFormula);
-  _kineticLawEditor = new QLineEdit();
+  _kineticLawEditor = new ExpressionEditor(_model);
   _kineticLawEditor->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
   _kineticLawEditor->setEnabled(true);
   _kineticLaw->addWidget(_kineticLawEditor);
