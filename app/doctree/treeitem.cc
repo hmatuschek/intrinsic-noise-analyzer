@@ -1,5 +1,6 @@
 #include "treeitem.hh"
 #include <iostream>
+#include <utils/logger.hh>
 
 
 TreeItem::TreeItem()
@@ -65,9 +66,10 @@ TreeItem::addChild(TreeItem *node)
 void
 TreeItem::removeChild(TreeItem *node)
 {
-  if (! this->_children.removeOne(node))
-  {
-    std::cerr << "OOps can not remove tree-item " << node << " not in list?" << std::endl;
+  if (! this->_children.removeOne(node)) {
+    iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::ERROR);
+    message << "OOps can not remove tree-item " << node << " not in list?";
+    iNA::Utils::Logger::get().log(message);
   }
 }
 

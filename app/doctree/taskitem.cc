@@ -53,8 +53,6 @@ TaskItem::TaskItem(Task *task, QObject *parent)
 
 TaskItem::~TaskItem()
 {
-  //std::cerr << "In TaskWrapper::~TaskWrapper() ..." << std::endl;
-
   // Hide and clean menu, and mark it for deletion later on:
   this->context_menu->hide();
   this->context_menu->clear();

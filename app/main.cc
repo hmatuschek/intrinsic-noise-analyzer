@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
 {
   // Instantiate Logger and handler:
   iNA::Utils::Logger::get().addHandler(
-        new iNA::Utils::TextMessageHandler(std::cerr, iNA::Utils::Message::DEBUG));
+        new iNA::Utils::TextMessageHandler(std::cerr, iNA::Utils::Message::ERROR));
 
   // Instantiate a QApplication
   QApplication qapp(argc, argv);
