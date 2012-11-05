@@ -14,7 +14,7 @@ NewVersionDialog::NewVersionDialog(const QString &version, QWidget *parent)
   heading->setAlignment(Qt::AlignCenter);
 
   QLabel *details = new QLabel(
-        tr("You are currenlty using iNA version <b>%1</b>, but version <b>%2</b> is "
+        tr("You are currently using iNA version <b>%1</b>. The recent version <b>%2</b> is "
            "available for <a href=\"http://code.google.com/p/intrinsic-noise-analyzer/downloads/list\">download</a>.").arg(INA_VERSION_STRING).arg(version));
   details->setAlignment(Qt::AlignHCenter);
 
