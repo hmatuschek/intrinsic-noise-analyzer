@@ -10,7 +10,7 @@ TaskErrorWidget::TaskErrorWidget(TaskItem *task, QWidget *parent) :
   this->title = new QLabel();
   this->title->setFont(Application::getApp()->getH1Font());
   QPalette title_palette = this->title->palette();
-  title_palette.setColor(this->title->customegroundRole(), Qt::red);
+  title_palette.setColor(this->title->foregroundRole(), Qt::red);
   this->title->setPalette(title_palette);
   this->title->setAlignment(Qt::AlignHCenter);
   this->title->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);

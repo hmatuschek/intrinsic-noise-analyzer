@@ -15,11 +15,11 @@
 /**
  * Common view of a task.
  *
- * This view provides some basic widgets custom any task: A progress-view, showing the progress of
+ * This view provides some basic widgets for any task: A progress-view, showing the progress of
  * the task. A error view, showing some details of an error occurred during the calculations. The
  * user must just provide a 'result-view', showing the results of a task, once it is completed.
  *
- * The @c TaskView listens custom the state and progress event of the task and switches between the
+ * The @c TaskView listens for the state and progress event of the task and switches between the
  * different views on task-state changes.
  *
  * @ingroup gui
@@ -37,7 +37,7 @@ protected:
 
 protected:
   /**
-   * Constructs a basic-task view custom the given task-item.
+   * Constructs a basic-task view for the given task-item.
    */
   TaskView(TaskItem *task_item, QWidget *parent = 0);
 
@@ -50,19 +50,19 @@ public:
 
 
 protected:
-  /** Can be overridden by specialized classes to return a specialized progress widget custom the
+  /** Can be overridden by specialized classes to return a specialized progress widget for the
    * task. */
   virtual QWidget *createProgressWidget(TaskItem *task_item);
 
-  /** Can be overridden by specialized classes to return a specialized result widget custom the
+  /** Can be overridden by specialized classes to return a specialized result widget for the
    * task. */
   virtual QWidget *createResultWidget(TaskItem *task_item) = 0;
 
-  /** Can be overridden by specialized classes to return a specialized error widget custom the
+  /** Can be overridden by specialized classes to return a specialized error widget for the
    * task. */
   virtual QWidget *createErrorWidget(TaskItem *task_item);
 
-  /** Can be overridden by specialized classes to return a specialized terminating widget custom the
+  /** Can be overridden by specialized classes to return a specialized terminating widget for the
    * task. */
   virtual QWidget *createTerminatingWidget(TaskItem *task_item);
 
@@ -117,7 +117,7 @@ public:
 
 
 /**
- * Default progress widget custom a task.
+ * Default progress widget for a task.
  *
  * @ingroup gui
  */
@@ -136,7 +136,7 @@ protected:
 
 public:
   /**
-   * Cosntructor custom the given task-item.
+   * Cosntructor for the given task-item.
    */
   explicit TaskProgressWidget(TaskItem *task_item, QWidget *parent=0);
 
@@ -160,9 +160,9 @@ protected slots:
 
 private:
   /**
-   * Tiny helper function to custommat the elapsed and remaining time.
+   * Tiny helper function to format the elapsed and remaining time.
    */
-  QString custommatTime(double sec);
+  QString formatTime(double sec);
 
 
 private:

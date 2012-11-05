@@ -20,7 +20,7 @@ class PlotView : public QWidget
 
 public:
   /**
-   * Constructs a view custom the given plot-item.
+   * Constructs a view for the given plot-item.
    */
   explicit PlotView(PlotItem *plot_wrapper, QWidget *parent = 0);
 

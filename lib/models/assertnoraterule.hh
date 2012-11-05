@@ -17,7 +17,7 @@ class AssertNoRateRule
 {
 public:
   /**
-   * Constructor, percustomms the test.
+   * Constructor, performs the test.
    *
    * @throws SBMLFeatureNotSupported If the model has a rate-rule.
    */

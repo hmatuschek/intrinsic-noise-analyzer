@@ -30,7 +30,7 @@ public:
 
   virtual void removePlot(PlotItem *plot);
 
-  virtual void markcustomUpdate(TreeItem *item);
+  virtual void markForUpdate(TreeItem *item);
 
   /* ******************************************************************************************* *
    * Implementation of the TreeItem interface:

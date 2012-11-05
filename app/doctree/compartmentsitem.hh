@@ -34,7 +34,7 @@ protected:
 
 public:
   /**
-   * Constructs a new "Compartments" item custom the DocumentTree.
+   * Constructs a new "Compartments" item for the DocumentTree.
    */
   CompartmentsItem(iNA::Ast::Model *model, QObject *parent=0);
 

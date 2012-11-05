@@ -63,7 +63,7 @@ bool
 Reaction::hasReactant(GiNaC::symbol id)
 {
   // Check all reactants:
-  custom (std::map<Species *, GiNaC::ex>::iterator iter=this->_reactants.begin();
+  for (std::map<Species *, GiNaC::ex>::iterator iter=this->_reactants.begin();
        iter != this->_reactants.end(); iter++)
   {
     if (iter->first->getSymbol() == id) {
@@ -99,8 +99,8 @@ Reaction::getReactantStoichiometry(Species *species)
 GiNaC::ex
 Reaction::getReactantStoichiometry(GiNaC::symbol id)
 {
-  // Search custom item in reactants table:
-  custom (std::map<Species *, GiNaC::ex>::iterator iter=this->_reactants.begin();
+  // Search for item in reactants table:
+  for (std::map<Species *, GiNaC::ex>::iterator iter=this->_reactants.begin();
        iter != this->_reactants.end(); iter++)
   {
     if (iter->first->getSymbol() == id) {
@@ -153,7 +153,7 @@ bool
 Reaction::hasProduct(GiNaC::symbol id)
 {
   // Iterate over all products:
-  custom (std::map<Species *, GiNaC::ex>::iterator iter = this->_products.begin();
+  for (std::map<Species *, GiNaC::ex>::iterator iter = this->_products.begin();
        iter != this->_products.end(); iter++)
   {
     if (iter->first->getSymbol() == id)
@@ -189,7 +189,7 @@ Reaction::getProductStoichiometry(Species *species)
 GiNaC::ex
 Reaction::getProductStoichiometry(GiNaC::symbol id)
 {
-  custom (std::map<Species *, GiNaC::ex>::iterator iter=this->_products.begin();
+  for (std::map<Species *, GiNaC::ex>::iterator iter=this->_products.begin();
        iter != this->_products.end(); iter++)
   {
     if (iter->first->getSymbol() == id) {
@@ -270,7 +270,7 @@ bool
 Reaction::isModifier(const GiNaC::symbol &id) const
 {
   // Iterate over all modifiers:
-  custom (std::set<Species *>::iterator iter = this->_modifiers.begin();
+  for (std::set<Species *>::iterator iter = this->_modifiers.begin();
        iter != this->_modifiers.end(); iter++)
   {
     if ((*iter)->getSymbol() == id)
@@ -400,7 +400,7 @@ Reaction::dump(std::ostream &str)
 {
   str << "Reaction: " << this->getIdentifier() << " {" << std::endl;
   // First, dump ractants of reaction:
-  custom (Reaction::iterator iter = this->reactantsBegin(); iter != this->reactantsEnd(); iter++)
+  for (Reaction::iterator iter = this->reactantsBegin(); iter != this->reactantsEnd(); iter++)
   {
     if (1 == iter->second) {
       str << iter->first->getSymbol();
@@ -411,7 +411,7 @@ Reaction::dump(std::ostream &str)
   str << " => ";
 
   // Then dump products:
-  custom (Reaction::iterator iter = this->productsBegin(); iter != this->productsEnd(); iter++)
+  for (Reaction::iterator iter = this->productsBegin(); iter != this->productsEnd(); iter++)
   {
     if (1 == iter->second) {
       str << iter->first->getSymbol() << " + ";
@@ -476,7 +476,7 @@ KineticLaw::KineticLaw(GiNaC::ex expr)
 
 KineticLaw::~KineticLaw()
 {
-  // The variable-definitions custom the parameters are deleted by the destructor of Scope()
+  // The variable-definitions for the parameters are deleted by the destructor of Scope()
 }
 
 
@@ -518,7 +518,7 @@ KineticLaw::remDefinition(Definition *def)
 {
   // Search parameter in vector of paramters:
   std::vector<Ast::Parameter *>::iterator item = _parameters.begin();
-  custom (; item!=_parameters.end(); item++) {
+  for (; item!=_parameters.end(); item++) {
     if ((*item) == def) { break; }
   }
 
@@ -541,7 +541,7 @@ KineticLaw::cleanUpParameters()
 {
   // Collect all local paramters that are not used within the kinetic law expression
   std::list<Parameter *> _unused_paramters;
-  custom(std::vector<Parameter *>::iterator param=_parameters.begin(); param!=_parameters.end(); param++)
+  for(std::vector<Parameter *>::iterator param=_parameters.begin(); param!=_parameters.end(); param++)
   {
     if(! this->getRateLaw().has((*param)->getSymbol())) {
       _unused_paramters.push_back(*param);
@@ -549,7 +549,7 @@ KineticLaw::cleanUpParameters()
   }
 
   // Remove them properly from the kinetic law:
-  custom (std::list<Parameter *>::iterator param=_unused_paramters.begin(); param != _unused_paramters.end(); param++)
+  for (std::list<Parameter *>::iterator param=_unused_paramters.begin(); param != _unused_paramters.end(); param++)
   {
     remDefinition(*param);
   }

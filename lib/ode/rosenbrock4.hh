@@ -98,7 +98,7 @@ public:
 
 
   /**
-   * Percustomms the step.
+   * Performs the step.
    *
    * This method calculates y(t+dt), given y(t), on exit the difference (y(t+dt)-y(t)) is stored
    * in @c step.
@@ -117,7 +117,7 @@ protected:
   /**
    * Implements the step-size control.
    *
-   * @todo Think of an general stepper function, that returns some incustommation about the
+   * @todo Think of an general stepper function, that returns some information about the
    *       error made in a integration step. Then, implement a abstract adaptive step-size control.
    */
   inline void stepSizeControl(const Eigen::VectorXd &state, double t, Eigen::VectorXd &delta,
@@ -176,7 +176,7 @@ protected:
 
     // Return error estimate:
     double err = 0.0, sk;
-    custom (size_t i=0; i<system.getDimension(); i++) {
+    for (size_t i=0; i<system.getDimension(); i++) {
       if (Math::isNotValue(yerr[i])) {
         return std::numeric_limits<double>::infinity();
       }

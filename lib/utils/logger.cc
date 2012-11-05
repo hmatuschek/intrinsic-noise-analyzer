@@ -82,7 +82,7 @@ Logger::Logger()
 
 Logger::~Logger()
 {
-  custom(std::list<MessageHandler *>::iterator it = this->_handlers.begin();
+  for(std::list<MessageHandler *>::iterator it = this->_handlers.begin();
       it != this->_handlers.end(); it++)
   {
     //delete *it;
@@ -112,7 +112,7 @@ Logger::shutdown()
 void
 Logger::log(const Message &message)
 {
-  custom (std::list<MessageHandler *>::iterator it = this->_handlers.begin();
+  for (std::list<MessageHandler *>::iterator it = this->_handlers.begin();
        it != this->_handlers.end(); it++) {
     (*it)->handleMessage(message);
   }

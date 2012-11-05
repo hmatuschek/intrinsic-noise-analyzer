@@ -2,7 +2,7 @@
 # Try to find GiNaCs CLN library
 #
 
-# Search custom libraries
+# Search for libraries
 find_library(GINAC_CLN_LIBRARY
              NAMES cln)
 

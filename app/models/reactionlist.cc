@@ -18,7 +18,7 @@ int ReactionList::columnCount(const QModelIndex &parent) const { return 3; }
 
 QVariant
 ReactionList::headerData(int section, Qt::Orientation orientation, int role) const {
-  // Return default header custom rows:
+  // Return default header for rows:
   if (Qt::DisplayRole != role || orientation != Qt::Horizontal || columnCount() <= section) {
     return QAbstractTableModel::headerData(section, orientation, role);
   }

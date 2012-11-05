@@ -1,5 +1,5 @@
 #include "reactioneditor.hh"
-#include <QcustommLayout>
+#include <QFormLayout>
 #include <QHBoxLayout>
 #include <QCompleter>
 #include <QGroupBox>
@@ -87,7 +87,7 @@ ReactionEditor::reaction()
 
   // Otherwise get reaction from reaction scope:
   if (0 == _current_reaction_scope) { return 0; }
-  custom (iNA::Ast::Scope::iterator item = _current_reaction_scope->begin();
+  for (iNA::Ast::Scope::iterator item = _current_reaction_scope->begin();
        item != _current_reaction_scope->end(); item++)
   {
     if (iNA::Ast::Node::isReactionDefinition(*item)) {
@@ -121,14 +121,14 @@ ReactionEditor::commitReactionScope()
 {
   std::list<iNA::Ast::Definition *> definitions;
   // Add all definitions in the current reaction scope to the model:
-  custom (iNA::Ast::Scope::iterator item=_current_reaction_scope->begin();
+  for (iNA::Ast::Scope::iterator item=_current_reaction_scope->begin();
        item!=_current_reaction_scope->end(); item++) {
     _model.addDefinition(*item);
     definitions.push_back(*item);
   }
 
   // clear current reaction scope:
-  custom (std::list<iNA::Ast::Definition *>::iterator item = definitions.begin();
+  for (std::list<iNA::Ast::Definition *>::iterator item = definitions.begin();
        item != definitions.end(); item++) {
     _current_reaction_scope->remDefinition(*item);
   }
@@ -165,7 +165,7 @@ ReactionEditorPage::ReactionEditorPage(iNA::Ast::Reaction *reaction, ReactionEdi
     _equation->setText(_serializeReactionEquation());
   }
 
-  // Get default color and define error color custom equation editor:
+  // Get default color and define error color for equation editor:
   _default_background = _equation->palette().color(QPalette::Base);
   _error_background = QColor(Qt::red).lighter();
 
@@ -179,8 +179,8 @@ ReactionEditorPage::ReactionEditorPage(iNA::Ast::Reaction *reaction, ReactionEdi
   else { _kinetic_law_type->setCurrentIndex(2); }
 
   _kineticLaw = new QStackedWidget();
-  _kineticLawcustommula = new QLabel();
-  _kineticLaw->addWidget(_kineticLawcustommula);
+  _kineticLawFormula = new QLabel();
+  _kineticLaw->addWidget(_kineticLawFormula);
   _kineticLawEditor = new ExpressionEditor(_model);
   _kineticLawEditor->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
   _kineticLawEditor->setEnabled(true);
@@ -195,7 +195,7 @@ ReactionEditorPage::ReactionEditorPage(iNA::Ast::Reaction *reaction, ReactionEdi
   }
 
   // Layout
-  QcustommLayout *layout = new QcustommLayout();
+  QFormLayout *layout = new QFormLayout();
   layout->addRow(tr("Name"), _name);
   layout->addRow(tr("Chemical equation"), _equation);
   layout->addRow(tr("Type"), _kinetic_law_type);
@@ -271,10 +271,10 @@ ReactionEditorPage::_updateKineticLaw()
     setKineticLawType(MASSACTION_MULTI);
   }
 
-  // Assemble custommula
-  MathItem *custommula = _renderKineticLaw(is_reversible, reactants, products);
-  _kineticLawcustommula->setPixmap(custommula->renderItem());
-  delete custommula;
+  // Assemble formula
+  MathItem *formula = _renderKineticLaw(is_reversible, reactants, products);
+  _kineticLawFormula->setPixmap(formula->renderItem());
+  delete formula;
 }
 
 
@@ -306,12 +306,12 @@ ReactionEditorPage::_onKineticLawExpressionChanged()
     try {
       // Try to parse the expression
       iNA::Parser::Expr::parseExpression(_kineticLawEditor->text().toStdString(), ctx);
-      // On success, reset custommula background color
+      // On success, reset formula background color
       QPalette palette = _kineticLawEditor->palette();
       palette.setColor(QPalette::Base, _default_background);
       _kineticLawEditor->setPalette(palette);
     } catch (iNA::Exception &err) {
-      // On on, set custommula background color to red
+      // On on, set formula background color to red
       QPalette palette = _kineticLawEditor->palette();
       palette.setColor(QPalette::Base, _error_background);
       _kineticLawEditor->setPalette(palette);
@@ -327,7 +327,7 @@ ReactionEditorPage::_serializeReactionEquation()
   QStringList reactants, products;
 
   // First serialize reactants:
-  custom (iNA::Ast::Reaction::iterator reac=_current_reaction->reactantsBegin();
+  for (iNA::Ast::Reaction::iterator reac=_current_reaction->reactantsBegin();
        reac!=_current_reaction->reactantsEnd(); reac++)
   {
     std::stringstream buffer;
@@ -338,7 +338,7 @@ ReactionEditorPage::_serializeReactionEquation()
   }
 
   // then, serialize products:
-  custom (iNA::Ast::Reaction::iterator prod=_current_reaction->productsBegin();
+  for (iNA::Ast::Reaction::iterator prod=_current_reaction->productsBegin();
        prod!=_current_reaction->productsEnd(); prod++)
   {
     std::stringstream buffer;
@@ -406,11 +406,11 @@ ReactionEditorPage::_parseStoichiometry(
 {
   QStringList sums = text.split('+');
 
-  // Check custom empty stoichiometry:
+  // Check for empty stoichiometry:
   if (1==sums.size() && (0 == sums.at(0).size())) { return true; }
 
-  // custom each product in sum
-  custom (QStringList::iterator prod=sums.begin(); prod!=sums.end(); prod++) {
+  // For each product in sum
+  for (QStringList::iterator prod=sums.begin(); prod!=sums.end(); prod++) {
     QStringList factors = prod->split('*');
     int factor = 1; QString species_id;
 
@@ -458,7 +458,7 @@ ReactionEditorPage::_collectCompartments(QList<QPair<int, QString> > &reactants,
           (_model.numCompartments() ? _model.getCompartment(0) : new iNA::Ast::Compartment("compartment",iNA::Ast::Compartment::VOLUME,true) );
 
   // Handle list of reactants:
-  custom (QList< QPair<int, QString> >::iterator item=reactants.begin(); item!=reactants.end(); item++)
+  for (QList< QPair<int, QString> >::iterator item=reactants.begin(); item!=reactants.end(); item++)
   {
     if (! _model.hasSpecies(item->second.toStdString())) {
       compartments.insert(def_compartment);
@@ -467,7 +467,7 @@ ReactionEditorPage::_collectCompartments(QList<QPair<int, QString> > &reactants,
     }
   }
   // Handle list of products
-  custom (QList< QPair<int, QString> >::iterator item=products.begin(); item!=products.end(); item++)
+  for (QList< QPair<int, QString> >::iterator item=products.begin(); item!=products.end(); item++)
   {
     if (! _model.hasSpecies(item->second.toStdString())) {
       compartments.insert(def_compartment);
@@ -484,7 +484,7 @@ ReactionEditorPage::_collectStoichiometries(QList<QPair<int, QString> > &reactan
 {
     // Collect reactants and assemble stoichiometries
     std::map<QString,int> stoichiometries;
-    custom (QList< QPair<int, QString> >::iterator item=reactants.begin(); item != reactants.end(); item++)
+    for (QList< QPair<int, QString> >::iterator item=reactants.begin(); item != reactants.end(); item++)
     {
        std::map< QString, int >::iterator it= stoichiometries.find(item->second) ;
        if( it!=stoichiometries.end())
@@ -512,47 +512,47 @@ ReactionEditorPage::_renderKineticLaw(bool is_reversible, QList<QPair<int, QStri
 
   std::set<iNA::Ast::Compartment *> compartments = _collectCompartments(reactants, products);
 
-  Mathcustommula *custommula = new Mathcustommula();
+  MathFormula *formula = new MathFormula();
 
       // Handle reactants:
       if (is_reversible) {
-        custommula->appendItem(new MathSub(new MathText("k"), new MathText("fwd")));
+        formula->appendItem(new MathSub(new MathText("k"), new MathText("fwd")));
       } else {
-        custommula->appendItem(new MathText("k"));
+        formula->appendItem(new MathText("k"));
       }
 
       if (MASSACTION_SINGLE == kineticLawType()) {
         if(_model.speciesHaveSubstanceUnits())
         {
             int exponent = -1;
-            custom(std::map<QString,int>::iterator it=reactantsStoi.begin(); it!=reactantsStoi.end(); it++)
+            for(std::map<QString,int>::iterator it=reactantsStoi.begin(); it!=reactantsStoi.end(); it++)
                 exponent += it->second;
             switch(exponent)
             {
                case 0:
                 break;
                case -1:
-                custommula->appendItem(new MathText(QChar(0x00B7)));
-                custommula->appendItem(_renderCompartment(*(compartments.begin())));
+                formula->appendItem(new MathText(QChar(0x00B7)));
+                formula->appendItem(_renderCompartment(*(compartments.begin())));
                 break;
                default:
-                custommula->appendItem(new MathText(QChar(0x00B7)));
-                custommula->appendItem(new MathSup(_renderCompartment(*(compartments.begin())), new MathText(QString("-%1").arg(exponent))));
+                formula->appendItem(new MathText(QChar(0x00B7)));
+                formula->appendItem(new MathSup(_renderCompartment(*(compartments.begin())), new MathText(QString("-%1").arg(exponent))));
                 break;
             }
         }
         else
         {
-            custommula->appendItem(new MathText(QChar(0x00B7)));
-            custommula->appendItem(_renderCompartment(*(compartments.begin())));
+            formula->appendItem(new MathText(QChar(0x00B7)));
+            formula->appendItem(_renderCompartment(*(compartments.begin())));
         }
       }
 
 
-      custom (std::map< QString, int>::iterator item=reactantsStoi.begin(); item != reactantsStoi.end(); item++)
+      for (std::map< QString, int>::iterator item=reactantsStoi.begin(); item != reactantsStoi.end(); item++)
       {
-        custommula->appendItem(new MathText(QChar(0x00B7)));
-        custommula->appendItem(_renderFactor(item->first, int(item->second)));
+        formula->appendItem(new MathText(QChar(0x00B7)));
+        formula->appendItem(_renderFactor(item->first, int(item->second)));
       }
 
       // If reaction is reversible, include reverse rate
@@ -561,48 +561,48 @@ ReactionEditorPage::_renderKineticLaw(bool is_reversible, QList<QPair<int, QStri
         // Collect products and assemble stoichiometries
         std::map<QString,int> productsStoi = _collectStoichiometries(products);
 
-        custommula->appendItem(new MathSpace(MathSpace::MEDIUM_SPACE));
-        custommula->appendItem(new MathText("-"));
-        custommula->appendItem(new MathSpace(MathSpace::MEDIUM_SPACE));
+        formula->appendItem(new MathSpace(MathSpace::MEDIUM_SPACE));
+        formula->appendItem(new MathText("-"));
+        formula->appendItem(new MathSpace(MathSpace::MEDIUM_SPACE));
 
-        custommula->appendItem(new MathSub(new MathText("k"), new MathText("rev")));
+        formula->appendItem(new MathSub(new MathText("k"), new MathText("rev")));
 
         if (MASSACTION_SINGLE == kineticLawType()) {
             if(_model.speciesHaveSubstanceUnits())
             {
                 int exponent = -1;
-                custom(std::map<QString,int>::iterator it=productsStoi.begin(); it!=productsStoi.end(); it++)
+                for(std::map<QString,int>::iterator it=productsStoi.begin(); it!=productsStoi.end(); it++)
                     exponent += it->second;
                 switch(exponent)
                 {
                    case 0:
                     break;
                    case -1:
-                    custommula->appendItem(new MathText(QChar(0x00B7)));
-                    custommula->appendItem(_renderCompartment(*(compartments.begin())));
+                    formula->appendItem(new MathText(QChar(0x00B7)));
+                    formula->appendItem(_renderCompartment(*(compartments.begin())));
                     break;
                    default:
-                    custommula->appendItem(new MathText(QChar(0x00B7)));
-                    custommula->appendItem(new MathSup(_renderCompartment(*(compartments.begin())), new MathText(QString("-%1").arg(exponent))));
+                    formula->appendItem(new MathText(QChar(0x00B7)));
+                    formula->appendItem(new MathSup(_renderCompartment(*(compartments.begin())), new MathText(QString("-%1").arg(exponent))));
                     break;
                 }
             }
             else
             {
-                custommula->appendItem(new MathText(QChar(0x00B7)));
-                custommula->appendItem(_renderCompartment(*(compartments.begin())));
+                formula->appendItem(new MathText(QChar(0x00B7)));
+                formula->appendItem(_renderCompartment(*(compartments.begin())));
             }
         }
 
-        custom (std::map<QString,int>::iterator item=productsStoi.begin(); item != productsStoi.end(); item++)
+        for (std::map<QString,int>::iterator item=productsStoi.begin(); item != productsStoi.end(); item++)
         {
-          custommula->appendItem(new MathText(QChar(0x00B7)));
-          custommula->appendItem(_renderFactor(item->first, item->second));
+          formula->appendItem(new MathText(QChar(0x00B7)));
+          formula->appendItem(_renderFactor(item->first, item->second));
         }
 
       }
 
-  return custommula;
+  return formula;
 }
 
 
@@ -610,13 +610,13 @@ MathItem *
 ReactionEditorPage::_renderFactor(const QString &id, int exponent)
 {
 
-      Mathcustommula *name = new Mathcustommula();
+      MathFormula *name = new MathFormula();
 
       if(!_model.speciesHaveSubstanceUnits() || MASSACTION_MULTI == kineticLawType()) name->appendItem(new MathText("["));
       name->appendItem(_renderName(id));
       if(!_model.speciesHaveSubstanceUnits() || MASSACTION_MULTI == kineticLawType()) name->appendItem(new MathText("]"));
 
-      Mathcustommula *factor = new Mathcustommula();
+      MathFormula *factor = new MathFormula();
 
       if (MASSACTION_MULTI == kineticLawType()) {
         if (1 == exponent) {
@@ -626,8 +626,8 @@ ReactionEditorPage::_renderFactor(const QString &id, int exponent)
         }
       } else if (MASSACTION_SINGLE == kineticLawType()) {
         factor->appendItem(name->copy());
-        custom (int i=1; i<exponent; i++) {
-          Mathcustommula *term = new Mathcustommula();
+        for (int i=1; i<exponent; i++) {
+          MathFormula *term = new MathFormula();
           term->appendItem(name->copy());
           term->appendItem(new MathText("-"));
           if (i > 1) {
@@ -697,7 +697,7 @@ ReactionEditorPage::_defineUnknownSpecies(QList<QPair<int, QString> > &reactants
                                           iNA::Ast::Scope *scope)
 {
   // Process reactants...
-  custom (QList< QPair<int, QString> >::iterator item = reactants.begin(); item!=reactants.end(); item++) {
+  for (QList< QPair<int, QString> >::iterator item = reactants.begin(); item!=reactants.end(); item++) {
     // If identifier names a species -> skip
     if (scope->hasVariable(item->second.toStdString()) &&
         iNA::Ast::Node::isSpecies(scope->getVariable(item->second.toStdString()))) {
@@ -726,7 +726,7 @@ ReactionEditorPage::_defineUnknownSpecies(QList<QPair<int, QString> > &reactants
   }
 
   // Process products...
-  custom (QList< QPair<int, QString> >::iterator item = products.begin(); item!=products.end(); item++) {
+  for (QList< QPair<int, QString> >::iterator item = products.begin(); item!=products.end(); item++) {
     // If identifier names a species -> skip
     if (scope->hasVariable(item->second.toStdString()) &&
         iNA::Ast::Node::isSpecies(scope->getVariable(item->second.toStdString()))) {
@@ -761,7 +761,7 @@ ReactionEditorPage::_createReaction(const QString &name, QList<QPair<int, QStrin
                                     QList<QPair<int, QString> > &products, bool is_reversible,
                                     iNA::Ast::Scope *scope)
 {
-  // Create unique identifier custom reaction:
+  // Create unique identifier for reaction:
   std::string identifier = name.simplified().toStdString();
   if (0 == identifier.length()) { identifier = "reaction"; }
   identifier = scope->getRootScope()->getNewIdentifier(identifier);
@@ -772,7 +772,7 @@ ReactionEditorPage::_createReaction(const QString &name, QList<QPair<int, QStrin
   scope->addDefinition(new_reaction);
 
   // Create reactants:
-  custom (QList< QPair<int, QString> >::iterator item=reactants.begin(); item!=reactants.end(); item++) {
+  for (QList< QPair<int, QString> >::iterator item=reactants.begin(); item!=reactants.end(); item++) {
     iNA::Ast::Definition *def = scope->getDefinition(item->second.toStdString());
     if (! iNA::Ast::Node::isSpecies(def)) {
       iNA::InternalError err;
@@ -785,7 +785,7 @@ ReactionEditorPage::_createReaction(const QString &name, QList<QPair<int, QStrin
   }
 
   // Create products:
-  custom (QList< QPair<int, QString> >::iterator item=products.begin(); item!=products.end(); item++) {
+  for (QList< QPair<int, QString> >::iterator item=products.begin(); item!=products.end(); item++) {
     iNA::Ast::Definition *def = scope->getDefinition(item->second.toStdString());
     if (! iNA::Ast::Node::isSpecies(def)) {
       iNA::InternalError err;
@@ -848,10 +848,10 @@ ReactionEditorPage::_createMAKineticLaw(iNA::Ast::Reaction *reaction)
   if (MASSACTION_SINGLE == kineticLawType()) {
     iNA::Ast::Compartment *compartment=0;
     // Obtain compartment of reaction:
-    custom (iNA::Ast::Reaction::iterator reac=reaction->reactantsBegin(); reac != reaction->reactantsEnd(); reac++) {
+    for (iNA::Ast::Reaction::iterator reac=reaction->reactantsBegin(); reac != reaction->reactantsEnd(); reac++) {
       compartment = reac->first->getCompartment(); break;
     }
-    custom (iNA::Ast::Reaction::iterator prod=reaction->productsBegin(); prod != reaction->productsEnd(); prod++) {
+    for (iNA::Ast::Reaction::iterator prod=reaction->productsBegin(); prod != reaction->productsEnd(); prod++) {
       compartment = prod->first->getCompartment(); break;
     }
 
@@ -860,14 +860,14 @@ ReactionEditorPage::_createMAKineticLaw(iNA::Ast::Reaction *reaction)
   }
 
   // Iterate over reactants:
-  custom (iNA::Ast::Reaction::iterator reac=reaction->reactantsBegin(); reac!=reaction->reactantsEnd(); reac++) {
+  for (iNA::Ast::Reaction::iterator reac=reaction->reactantsBegin(); reac!=reaction->reactantsEnd(); reac++) {
     factor_fwd *= _createMAFactor(reac->first, reac->second);
   }
 
   // Iterate over products if reaction is reversible:
   if (reaction->isReversible()) {
     // Iterate over reactants:
-    custom (iNA::Ast::Reaction::iterator prod=reaction->productsBegin(); prod!=reaction->productsEnd(); prod++) {
+    for (iNA::Ast::Reaction::iterator prod=reaction->productsBegin(); prod!=reaction->productsEnd(); prod++) {
       factor_rev *= _createMAFactor(prod->first, prod->second);
     }
   }
@@ -883,7 +883,7 @@ ReactionEditorPage::_createMAFactor(iNA::Ast::Species *species, GiNaC::ex stoich
   // Check type of stoichiometry
   if (! GiNaC::is_a<GiNaC::numeric>(stoichiometry)) {
     iNA::InternalError err;
-    err << "Can not assemble kinetic law custom stoichiometry " << stoichiometry
+    err << "Can not assemble kinetic law for stoichiometry " << stoichiometry
         << ": is not an numeric value.";
     throw err;
   }
@@ -891,7 +891,7 @@ ReactionEditorPage::_createMAFactor(iNA::Ast::Species *species, GiNaC::ex stoich
   GiNaC::numeric value = GiNaC::ex_to<GiNaC::numeric>(stoichiometry);
   if (! value.is_pos_integer()) {
     iNA::InternalError err;
-    err << "Can not assemble kinetic law custom stoichiometry " << stoichiometry
+    err << "Can not assemble kinetic law for stoichiometry " << stoichiometry
         << ": is not a positive integer.";
     throw err;
   }
@@ -924,7 +924,7 @@ ReactionEditorPage::_createMASingleFactor(iNA::Ast::Species *species, int stoich
   //      _model.getSubstanceUnit());
 
   GiNaC::ex factor=species_expr;
-  custom (int i=1; i<stoichiometry; i++) {
+  for (int i=1; i<stoichiometry; i++) {
     factor *= (species_expr-i/species->getCompartment()->getSymbol());
   }
 
@@ -960,17 +960,17 @@ ReactionEditorPage::_parseAndCreateKineticLaw(iNA::Ast::Reaction *reaction)
   // get symbols of unresolved variables (parameters):
   GiNaC::exmap substitution;
   std::map<std::string, GiNaC::symbol> unresolved_symbols = ctx.undefinedSymbols();
-  custom (std::map<std::string, GiNaC::symbol>::iterator item=unresolved_symbols.begin();
+  for (std::map<std::string, GiNaC::symbol>::iterator item=unresolved_symbols.begin();
        item != unresolved_symbols.end(); item++)
   {
-    // Define a parameter custom the unresolved symbol:
+    // Define a parameter for the unresolved symbol:
     iNA::Ast::Parameter *param = new iNA::Ast::Parameter(item->first, iNA::Ast::Unit::dimensionless(), true);
     law->addDefinition(param);
     // Add subst:
     substitution[item->second] = param->getSymbol();
   }
 
-  // Percustomm parameter substitution and define kinetic law:
+  // Perform parameter substitution and define kinetic law:
   law->setRateLaw(rate_law.subs(substitution));
 }
 
@@ -992,7 +992,7 @@ ReactionEditorPage::_updateCurrentReaction(
   _current_reaction->clearModifier();
 
   // Create reactants:
-  custom (QList< QPair<int, QString> >::iterator item=reactants.begin(); item!=reactants.end(); item++) {
+  for (QList< QPair<int, QString> >::iterator item=reactants.begin(); item!=reactants.end(); item++) {
     iNA::Ast::Definition *def = scope->getDefinition(item->second.toStdString());
     if (! iNA::Ast::Node::isSpecies(def)) {
       iNA::InternalError err;
@@ -1005,7 +1005,7 @@ ReactionEditorPage::_updateCurrentReaction(
   }
 
   // Create products:
-  custom (QList< QPair<int, QString> >::iterator item=products.begin(); item!=products.end(); item++) {
+  for (QList< QPair<int, QString> >::iterator item=products.begin(); item!=products.end(); item++) {
     iNA::Ast::Definition *def = scope->getDefinition(item->second.toStdString());
     if (! iNA::Ast::Node::isSpecies(def)) {
       iNA::InternalError err;
@@ -1037,12 +1037,12 @@ ReactionEditorPage::validatePage()
     try {
       // Try to parse the expression
       iNA::Parser::Expr::parseExpression(_kineticLawEditor->text().toStdString(), ctx);
-      // On success, reset custommula background color
+      // On success, reset formula background color
       QPalette palette = _kineticLawEditor->palette();
       palette.setColor(QPalette::Base, _default_background);
       _kineticLawEditor->setPalette(palette);
     } catch (iNA::Exception &err) {
-      // On on, set custommula background color to red
+      // On on, set formula background color to red
       QPalette palette = _kineticLawEditor->palette();
       palette.setColor(QPalette::Base, _error_background);
       _kineticLawEditor->setPalette(palette);
@@ -1063,7 +1063,7 @@ ReactionEditorPage::validatePage()
   if (0 == _current_reaction) {
     // Create reaction with empty kinetic law:
     new_reaction = _createReaction(_name->text(), reactants, products, is_reversible, reaction_scope);
-    // Create kinetic law custom that reaction
+    // Create kinetic law for that reaction
     _createKineticLaw(new_reaction);
   } else {
     // Update current reaction and its kinetic law:
@@ -1097,7 +1097,7 @@ ReactionEditorSummaryPage::ReactionEditorSummaryPage(ReactionEditor *wizard)
   prev_box_layout->addWidget(_reaction_preview);
   prev_box->setLayout(prev_box_layout);
 
-  QcustommLayout *species_layout = new QcustommLayout();
+  QFormLayout *species_layout = new QFormLayout();
   _created_species = new QLabel();
   species_layout->addRow(tr("Created species"), _created_species);
 
@@ -1121,7 +1121,7 @@ ReactionEditorSummaryPage::initializePage()
   // Assemble list of created species:
   QStringList created_species;
   iNA::Ast::Scope *scope = editor->reactionScope();
-  custom (iNA::Ast::Scope::iterator item=scope->begin(); item!=scope->end(); item++) {
+  for (iNA::Ast::Scope::iterator item=scope->begin(); item!=scope->end(); item++) {
     if (! iNA::Ast::Node::isSpecies(*item)) { continue; }
     created_species.append((*item)->getIdentifier().c_str());
   }

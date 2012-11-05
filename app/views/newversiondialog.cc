@@ -15,7 +15,7 @@ NewVersionDialog::NewVersionDialog(const QString &version, QWidget *parent)
 
   QLabel *details = new QLabel(
         tr("You are currently using iNA version <b>%1</b>. The recent version <b>%2</b> is "
-           "available custom <a href=\"http://code.google.com/p/intrinsic-noise-analyzer/downloads/list\">download</a>.").arg(INA_VERSION_STRING).arg(version));
+           "available for <a href=\"http://code.google.com/p/intrinsic-noise-analyzer/downloads/list\">download</a>.").arg(INA_VERSION_STRING).arg(version));
   details->setAlignment(Qt::AlignHCenter);
 
   _checkEnabled = new QCheckBox("notify about new versions");

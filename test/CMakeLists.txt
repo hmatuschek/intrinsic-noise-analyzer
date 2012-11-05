@@ -1,19 +1,19 @@
 #
-# Central build-script custom unit tests
+# Central build-script for unit tests
 #
 
 #
-# All the sources custom the unit tests
+# All the sources for the unit tests
 #
 SET(ina_test_SOURCES
     main.cc unittest.cc lnatest.cc interpretertest.cc
-    ginaccustomeigentest.cc regression_test.cc mathtest.cc mersennetwistertest.cc
+    ginacforeigentest.cc regression_test.cc mathtest.cc mersennetwistertest.cc
     sbmlshparsertest.cc optionparsertest.cc odetest.cc modelcopytest.cc benchmark.cc
     constantfoldertest.cc conservationanalysistest.cc unitparsertest.cc expressionparsertest.cc)
 
 SET(ina_test_HEADERS
     main.hh unittest.hh lnatest.hh interpretertest.hh
-    ginaccustomeigentest.hh regression_test.hh mathtest.hh mersennewistertest.hh
+    ginacforeigentest.hh regression_test.hh mathtest.hh mersennewistertest.hh
     sbmlshparsertest.hh optionparsertest.hh odetest.hh modelcopytest.hh benchmark.hh
     constantfoldertest.hh conservationanalysistest.hh unitparsertest.hh expressionparsertext.hh)
 

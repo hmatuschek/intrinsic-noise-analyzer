@@ -4,7 +4,7 @@
 #include "trafo/constantfolder.hh"
 #include <QMessageBox>
 #include <QVBoxLayout>
-#include <QcustommLayout>
+#include <QFormLayout>
 #include <QLineEdit>
 #include <QDoubleValidator>
 #include <QIntValidator>
@@ -39,7 +39,7 @@ ParamScanModelSelectionPage::ParamScanModelSelectionPage(GeneralTaskWizard *pare
   : ModelSelectionWizardPage(parent)
 {
   this->setTitle(tr("Parameter scan"));
-  this->setSubTitle(tr("Select a model custom parameter scan"));
+  this->setSubTitle(tr("Select a model for parameter scan"));
 
 
   // Append method selection radio buttons to the wizard page.
@@ -80,7 +80,7 @@ ParamScanModelSelectionPage::validatePage()
 
   // Try to create LNA model from SBML document
   try {
-    // customward call to parent implementation:
+    // Forward call to parent implementation:
     if (! ModelSelectionWizardPage::validatePage())
       return false;
   } catch (Exception err) {
@@ -158,7 +158,7 @@ ParameterScanConfigPage::ParameterScanConfigPage(GeneralTaskWizard *parent)
 
 
   QGroupBox *param_box = new QGroupBox(tr("Parameter scan"));
-  QcustommLayout *param_layout = new QcustommLayout();
+  QFormLayout *param_layout = new QFormLayout();
   param_layout->addRow(tr("Parameter"), p_select);
   param_layout->addRow(tr("Min. value"), p_min);
   param_layout->addRow(tr("Max. value"), p_max);
@@ -166,12 +166,12 @@ ParameterScanConfigPage::ParameterScanConfigPage(GeneralTaskWizard *parent)
   param_box->setLayout(param_layout);
 
   QGroupBox *mp_box = new QGroupBox(tr("Parallel process"));
-  QcustommLayout *mp_layout = new QcustommLayout();
+  QFormLayout *mp_layout = new QFormLayout();
   mp_layout->addRow(tr("Thread count"), thread_count);
   mp_box->setLayout(mp_layout);
 
   QGroupBox *ss_box = new QGroupBox(tr("Steady state solver"));
-  QcustommLayout *ss_layout = new QcustommLayout();
+  QFormLayout *ss_layout = new QFormLayout();
   ss_layout->addRow(tr("Precision"), epsilon);
   ss_layout->addRow(tr("Max. iterations"), n_iter);
   ss_layout->addRow(tr("Max. integration time"), t_max);
@@ -266,19 +266,19 @@ ParamScanSummaryPage::ParamScanSummaryPage(QWidget *parent)
   this->setSubTitle("Summary");
 
   this->model_name = new QLabel();
-  this->model_name->setTextcustommat(Qt::LogText);
+  this->model_name->setTextFormat(Qt::LogText);
 
   this->param = new QLabel();
-  this->param->setTextcustommat(Qt::LogText);
+  this->param->setTextFormat(Qt::LogText);
   this->param->setWordWrap(true);
 
   this->memory = new QLabel();
-  this->memory->setTextcustommat(Qt::LogText);
+  this->memory->setTextFormat(Qt::LogText);
 
   this->method = new QLabel();
-  this->method->setTextcustommat(Qt::LogText);
+  this->method->setTextFormat(Qt::LogText);
 
-  QcustommLayout *layout = new QcustommLayout();
+  QFormLayout *layout = new QFormLayout();
   layout->addRow("Model:", this->model_name);
   layout->addRow("Method:", this->method);
   layout->addRow("Selected parameter:", this->param);

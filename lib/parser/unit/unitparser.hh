@@ -44,11 +44,11 @@ private:
 
 
 protected:
-  /** Lexer custom units. */
+  /** Lexer for units. */
   class Lexer : public iNA::Parser::Lexer {
   public:
     typedef enum {
-      UNIT_TOKEN = iNA::Parser::Token::FIRST_USER_DEFINED, ///< An identifier custom base units.
+      UNIT_TOKEN = iNA::Parser::Token::FIRST_USER_DEFINED, ///< An identifier for base units.
       FLOAT_TOKEN,   ///< A signed floating point number including exponent
       INTEGER_TOKEN, ///< A Signed integer token.
       TIMES_TOKEN,   ///< "*"

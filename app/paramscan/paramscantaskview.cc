@@ -49,10 +49,10 @@ ParamScanResultWidget::ParamScanResultWidget(ParamScanTaskWrapper *task_wrapper,
   this->tableWrapper = new TableWrapper(&(paramscan_task_wrapper->getParamScanTask()->getParameterScan()), this);
   dataTable->setModel(this->tableWrapper);
 
-  this->plotButton = new QPushButton(tr("Quick plot"));
+  this->plotButton = new QPushButton(tr("Plot statistics"));
   QObject::connect(this->plotButton, SIGNAL(clicked()), this, SLOT(plotButtonPressed()));
 
-  this->customPlotButton = new QPushButton(tr("Customized plot"));
+  this->customPlotButton = new QPushButton(tr("Custom plot"));
   QObject::connect(customPlotButton, SIGNAL(clicked()), this, SLOT(customPlotButtonPressed()));
 
   this->saveButton = new QPushButton(tr("Save data to file"));
@@ -78,7 +78,7 @@ ParamScanResultWidget::plotButtonPressed()
   // Get the task config
   const ParamScanTask::Config &config = paramscan_task_wrapper->getParamScanTask()->getConfig();
 
-  // Ask user custom species to plot.
+  // Ask user for species to plot.
   SpeciesSelectionDialog dialog(config.getModel());
   dialog.setWindowTitle(tr("Parameter scan quick plot"));
   dialog.setTitle(tr("Select the species to plot."));
@@ -142,7 +142,7 @@ ParamScanResultWidget::customPlotButtonPressed()
   figure->getAxis()->setYLabel(dialog.yLabel());
 
   // Iterate over all graphs of the configured plot:
-  custom (size_t i=0; i<dialog.numGraphs(); i++) {
+  for (size_t i=0; i<dialog.numGraphs(); i++) {
     figure->getAxis()->addGraph(dialog.graph(i).create(figure->getStyle(i)));
   }
 
@@ -168,7 +168,7 @@ ParamScanResultWidget::saveButtonPressed()
     {
       QMessageBox box;
       box.setWindowTitle(tr("Can not open file"));
-      box.setText(tr("Can not open file %1 custom writing").arg(filename));
+      box.setText(tr("Can not open file %1 for writing").arg(filename));
       box.exec();
     }
 

@@ -10,7 +10,7 @@ namespace Trafo {
 
 /** This @c Ast::Operator implements a simple substitution operation on all expressions.
  * This operator also allows to normalize the set of substitutions and detects circular
- * substitution rules. custom example the substitutions \f$a\rightarrow b\f$ and \f$b\rightarrow c\f$
+ * substitution rules. For example the substitutions \f$a\rightarrow b\f$ and \f$b\rightarrow c\f$
  * can be normalized to the substitutions \f$a\rightarrow c\f$ and \f$b\rightarrow c\f$.
  * @ingroup trafo */
 class Substitution:
@@ -40,17 +40,17 @@ public:
   const GiNaC::exmap &getTable() const;
 
 public:
-  /** Percustomms substitutions on the intial value of the variable, if defined.
+  /** Performs substitutions on the intial value of the variable, if defined.
    * Variables are @c Ast::Parameter, @c Ast::Compartment and @c Ast::Species definitions. */
   virtual void act(Ast::VariableDefinition *var);
 
-  /** Percustomms substitutions on the rule expression. */
+  /** Performs substitutions on the rule expression. */
   virtual void act(Ast::Rule *rule);
 
-  /** Percustomms substitutions on all stoichiometry expressions. */
+  /** Performs substitutions on all stoichiometry expressions. */
   virtual void act(Ast::Reaction *reac);
 
-  /** Percustomms substitutions on @c Ast::KineticLaw. */
+  /** Performs substitutions on @c Ast::KineticLaw. */
   virtual void act(Ast::KineticLaw *law);
 
 protected:

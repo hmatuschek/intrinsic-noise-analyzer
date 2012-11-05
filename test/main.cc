@@ -4,7 +4,7 @@
 #include "unittest.hh"
 #include "lnatest.hh"
 #include "interpretertest.hh"
-#include "ginaccustomeigentest.hh"
+#include "ginacforeigentest.hh"
 #include "regression_test.hh"
 #include "mathtest.hh"
 #include "mersennetwistertest.hh"
@@ -36,13 +36,13 @@ int main(int argc, char *argv[])
   // Parse flags.
   if (! parser.parse((const char **)argv, argc)) {
     std::cerr << "Invalid arguments." << std::endl;
-    std::cerr << parser.custommat_help(argv[0]) << std::endl;
+    std::cerr << parser.format_help(argv[0]) << std::endl;
     return 1;
   }
 
   // If --help is present:
   if (parser.has_flag("help")) {
-    std::cerr << parser.custommat_help(argv[0]) << std::endl;
+    std::cerr << parser.format_help(argv[0]) << std::endl;
     return 0;
   }
 
@@ -62,8 +62,8 @@ int main(int argc, char *argv[])
   TestRunner runner(std::cout);
 
   // Add test suites:
-  if (0 == skipped_tests.count("GinaccustomEigen"))
-    runner.addSuite(GinaccustomEigenTest::suite());
+  if (0 == skipped_tests.count("GinacForEigen"))
+    runner.addSuite(GinacForEigenTest::suite());
   if (0 == skipped_tests.count("Interpreter"))
     runner.addSuite(InterpreterTest::suite());
   if (0 == skipped_tests.count("Math"))

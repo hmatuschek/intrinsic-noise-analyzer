@@ -9,7 +9,7 @@
 #include <models/steadystateanalysis.hh>
 
 
-/** A task to percustomm a paramter scan. */
+/** A task to perform a paramter scan. */
 class ParamScanTask : public Task
 {
   Q_OBJECT
@@ -65,7 +65,7 @@ public:
     /** Returns the selected method. */
     SSEMethod getMethod() const;
 
-    /** Sets the number of threads custom OpenMP. */
+    /** Sets the number of threads for OpenMP. */
     void setNumThreads(size_t num);
 
     /** Returns the max number of iterations.*/

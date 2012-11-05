@@ -72,19 +72,19 @@ protected:
 
 public:
   /**
-   * Constructs an ODE model, percustomms analytic deviation of the system Jacobian.
+   * Constructs an ODE model, performs analytic deviation of the system Jacobian.
    *
    * @param symbols Specifies the state-vector as a vector of variable-symbols, must not match
    *        dimension of @c odes.
    * @param odes Specifies the vector of ODE expressions using symbols defined in @c symbols.
    * @param opt_level Passed to the execution-engine compiler to specify the optimization level to
-   *        percustomm on the compiled code.
+   *        perform on the compiled code.
    */
   TimeIndepODEModel(const std::vector<GiNaC::symbol> &symbols, Eigen::VectorXex &odes,
                     size_t opt_level=0);
 
   /**
-   * Constructs an ODE model, but does not percustomm an automatic deviation of the system Jacobian.
+   * Constructs an ODE model, but does not perform an automatic deviation of the system Jacobian.
    */
   TimeIndepODEModel(const std::vector<GiNaC::symbol> &symbols, Eigen::VectorXex &odes,
                     Eigen::MatrixXex &jacobian, size_t opt_level);

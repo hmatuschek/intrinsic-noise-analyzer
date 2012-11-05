@@ -254,7 +254,7 @@ SBMLSHParserTest::testParserModel()
 
 
 void
-SBMLSHParserTest::testVarDecustomder()
+SBMLSHParserTest::testVarDefOrder()
 {
   std::stringstream text;
   text << "@model:3.3.1 = enzymatic \"Enzymatic Reaction\"" << std::endl
@@ -284,7 +284,7 @@ SBMLSHParserTest::testVarDecustomder()
 UnitTest::TestSuite *
 SBMLSHParserTest::suite()
 {
-  UnitTest::TestSuite *s = new UnitTest::TestSuite("Tests custom SBML-sh parser.");
+  UnitTest::TestSuite *s = new UnitTest::TestSuite("Tests for SBML-sh parser.");
 
   s->addTest(new UnitTest::TestCaller<SBMLSHParserTest>(
                "Lexer: Integer", &SBMLSHParserTest::testLexerInteger));
@@ -309,7 +309,7 @@ SBMLSHParserTest::suite()
   s->addTest(new UnitTest::TestCaller<SBMLSHParserTest>(
                "Parser: Model", &SBMLSHParserTest::testParserModel));
   s->addTest(new UnitTest::TestCaller<SBMLSHParserTest>(
-               "Parser: Variable definition order.", &SBMLSHParserTest::testVarDecustomder));
+               "Parser: Variable definition order.", &SBMLSHParserTest::testVarDefOrder));
 
   return s;
 }

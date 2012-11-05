@@ -17,7 +17,7 @@ namespace Models {
  *
  * @todo Currently all mixin classes are defined as friend of this class, due to the fact, that
  *       BaseModel is now derived from @c Ast::Model, the may not be necessary anymore.
- *       @c Ast::Model provides add/get/set methods custom all its members.
+ *       @c Ast::Model provides add/get/set methods for all its members.
  *
  * @ingroup models
  */
@@ -40,7 +40,7 @@ protected:
   std::vector<Ast::Reaction *> reactions;
 
   /**
-   * Holds custom each reactions the propensity.
+   * Holds for each reactions the propensity.
    */
   GiNaC::exvector propensities;
 
@@ -54,7 +54,7 @@ public:
   /**
    * Constructor.
    *
-   * Assembles the @c Ast::Module and percustomms constant folding and assignement-rule inlineing.
+   * Assembles the @c Ast::Module and performs constant folding and assignement-rule inlineing.
    * It also constructs the species <-> index tables.
    *
    * Constructs a @c Model::BaseModel as copy of the given @c Ast::Model.
@@ -106,7 +106,7 @@ public:
 
 protected:
   /**
-   * Percustomms all constant and assignment rule substitutions.
+   * Performs all constant and assignment rule substitutions.
    */
   GiNaC::ex foldConstants(GiNaC::ex expression);
 };

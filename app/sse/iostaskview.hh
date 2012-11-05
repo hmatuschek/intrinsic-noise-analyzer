@@ -14,7 +14,7 @@
 
 
 /**
- * General view object custom @c IOSTask instances.
+ * General view object for @c IOSTask instances.
  */
 class IOSTaskView : public TaskView
 {

@@ -11,8 +11,8 @@ void ReversibleReactionConverter::apply(Ast::Model &model)
   size_t count=0;
 
   // Iterate over all reactions:
-  custom (Ast::Model::ReactionIterator it=model.reactionsBegin(); it!=model.reactionsEnd(); it++)
-  //custom (size_t i=0; i<model.numReactions(); i++)
+  for (Ast::Model::ReactionIterator it=model.reactionsBegin(); it!=model.reactionsEnd(); it++)
+  //for (size_t i=0; i<model.numReactions(); i++)
   {
       Ast::Reaction *reaction = (*it);
 
@@ -22,19 +22,19 @@ void ReversibleReactionConverter::apply(Ast::Model &model)
     GiNaC::ex numerator = reaction->getKineticLaw()->getRateLaw().numer().expand();
     GiNaC::ex denominator = reaction->getKineticLaw()->getRateLaw().denom();
 
-    GiNaC::ex customwardLaw = numerator;
+    GiNaC::ex forwardLaw = numerator;
     GiNaC::ex reverseLaw = numerator;
     GiNaC::ex constantFlux = numerator;
 
     // swap reactant and products in reverse reaction
-    custom(Ast::Reaction::iterator reactant = reaction->reactantsBegin(); reactant!=reaction->reactantsEnd(); reactant++)
+    for(Ast::Reaction::iterator reactant = reaction->reactantsBegin(); reactant!=reaction->reactantsEnd(); reactant++)
     {
       reverseLaw=reverseLaw.subs(reactant->first->getSymbol()==0);
       constantFlux=constantFlux.subs(reactant->first->getSymbol()==0);
     }
-    custom(Ast::Reaction::iterator product = reaction->productsBegin(); product!=reaction->productsEnd(); product++)
+    for(Ast::Reaction::iterator product = reaction->productsBegin(); product!=reaction->productsEnd(); product++)
     {
-      customwardLaw=customwardLaw.subs(product->first->getSymbol()==0);
+      forwardLaw=forwardLaw.subs(product->first->getSymbol()==0);
       constantFlux=constantFlux.subs(product->first->getSymbol()==0);
     }
 
@@ -44,22 +44,22 @@ void ReversibleReactionConverter::apply(Ast::Model &model)
       if(reaction->reactantsBegin()==reaction->reactantsEnd())
         reverseLaw-=constantFlux;
       else if(reaction->productsBegin()==reaction->productsEnd())
-        customwardLaw-=constantFlux;
+        forwardLaw-=constantFlux;
       else
         continue;
     }
 
     // Skip reaction if unsuccesful
-    if (!numerator.is_equal(customwardLaw+reverseLaw)) {
+    if (!numerator.is_equal(forwardLaw+reverseLaw)) {
       continue;
     }
 
-    customwardLaw=customwardLaw/denominator;
+    forwardLaw=forwardLaw/denominator;
     reverseLaw=-reverseLaw/denominator;
 
-    // Set customward rate law
+    // Set forward rate law
     reaction->setReversible(false);
-    reaction->getKineticLaw()->setRateLaw(GiNaC::collect_common_factors(customwardLaw));
+    reaction->getKineticLaw()->setRateLaw(GiNaC::collect_common_factors(forwardLaw));
 
     // Create a new irreversible backward reaction
     std::string id = reaction->getIdentifier();
@@ -77,12 +77,12 @@ void ReversibleReactionConverter::apply(Ast::Model &model)
     Ast::Reaction *reverseReaction = new Ast::Reaction(id, name, kineticLaw, false);
 
     // swap reactant and products in reverse reaction
-    custom(Ast::Reaction::iterator species = reaction->reactantsBegin(); species!=reaction->reactantsEnd(); species++)
+    for(Ast::Reaction::iterator species = reaction->reactantsBegin(); species!=reaction->reactantsEnd(); species++)
     {
       GiNaC::ex st = (reaction->getReactantStoichiometry(species->first->getSymbol()));
       reverseReaction->setProductStoichiometry( species->first,st );
     }
-    custom(Ast::Reaction::iterator species = reaction->productsBegin(); species!=reaction->productsEnd(); species++)
+    for(Ast::Reaction::iterator species = reaction->productsBegin(); species!=reaction->productsEnd(); species++)
     {
       GiNaC::ex st = ( reaction->getProductStoichiometry(species->first->getSymbol()) );
       reverseReaction->setReactantStoichiometry( species->first,st );
@@ -119,25 +119,25 @@ void IrreversibleReactionCollapser::apply(Ast::Model &model)
   size_t count=0;
 
   // Iterate over all reactions:
-  custom (Ast::Model::ReactionIterator it=model.reactionsBegin(); it!=model.reactionsEnd(); it++)
+  for (Ast::Model::ReactionIterator it=model.reactionsBegin(); it!=model.reactionsEnd(); it++)
   {
-      Ast::Reaction *customward = (*it);
+      Ast::Reaction *forward = (*it);
 
     // Skip if reaction is reversible:
-    if ( customward->isReversible()) { continue; }
+    if ( forward->isReversible()) { continue; }
 
-    custom (Ast::Model::ReactionIterator other=(it+1); other!=model.reactionsEnd(); other++)
+    for (Ast::Model::ReactionIterator other=(it+1); other!=model.reactionsEnd(); other++)
     {
 
         Ast::Reaction *reverse = (*other);
 
         // Do comparison
-        if(customward->isReverseOf(reverse))
+        if(forward->isReverseOf(reverse))
         {
 
             // Make reversible
-            customward->setReversible(true);
-            Ast::ModelCopyist::mergeReversibleKineticLaw(customward->getKineticLaw(),reverse->getKineticLaw());
+            forward->setReversible(true);
+            Ast::ModelCopyist::mergeReversibleKineticLaw(forward->getKineticLaw(),reverse->getKineticLaw());
 
             // and remove reverse reaction
             model.remDefinition(reverse);
@@ -145,7 +145,7 @@ void IrreversibleReactionCollapser::apply(Ast::Model &model)
             // Create a log message.
             {
               Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
-              message << "Collapsed reaction "<<customward->getName()<< " with " << reverse->getName() <<".";
+              message << "Collapsed reaction "<<forward->getName()<< " with " << reverse->getName() <<".";
               Utils::Logger::get().log(message);
             }
 

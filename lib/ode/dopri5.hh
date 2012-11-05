@@ -74,8 +74,8 @@ public:
    *
    * @param system Specifies the ODE system to integrate.
    * @param dt Specifies the default/maximum step-size.
-   * @param epsilon_abs Specifies the absolute error custom the step.
-   * @param epsilon_rel Specifies the relative error custom the step.
+   * @param epsilon_abs Specifies the absolute error for the step.
+   * @param epsilon_rel Specifies the relative error for the step.
    */
   Dopri5Stepper(Sys &system, double dt, double epsilon_abs, double epsilon_rel)
     : system(system), step_size(dt), err_abs(epsilon_abs), err_rel(epsilon_rel),
@@ -87,7 +87,7 @@ public:
   }
 
   /**
-   * Percustomms the step t -> t+dt.
+   * Performs the step t -> t+dt.
    */
   virtual void step(const Eigen::VectorXd &state, double t, Eigen::VectorXd &delta)
   {
@@ -110,7 +110,7 @@ protected:
       throw err;
     }
 
-    // Percustomm step:
+    // Perform step:
     double err = _step(state, t, delta, dt);
     if (Math::isNotValue<>(err) || 1. < err) {
       Eigen::VectorXd tmp_delta(this->system.getDimension());
@@ -148,7 +148,7 @@ protected:
 
     // Return error estimate:
     double err = 0.0, sk;
-    custom (size_t i=0; i<system.getDimension(); i++) {
+    for (size_t i=0; i<system.getDimension(); i++) {
       if (Math::isNotValue(yerr[i])) {
         return std::numeric_limits<double>::infinity();
       }

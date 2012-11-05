@@ -6,7 +6,7 @@
 
 namespace iNA {
 
-/** Simple test custom the SBML-sh parser. */
+/** Simple test for the SBML-sh parser. */
 class SBMLSHParserTest : public UnitTest::TestCase
 {
 public:
@@ -33,7 +33,7 @@ public:
   /** Tests parsing of complete models. */
   void testParserModel();
   /** Tests if definition order of variables is insigificant. */
-  void testVarDecustomder();
+  void testVarDefOrder();
 
 
 public:

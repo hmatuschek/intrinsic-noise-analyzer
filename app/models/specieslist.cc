@@ -8,7 +8,7 @@
 #include "variableruledata.hh"
 #include "../views/unitrenderer.hh"
 #include "../tinytex/tinytex.hh"
-#include "../tinytex/ginac2custommula.hh"
+#include "../tinytex/ginac2formula.hh"
 
 #include <QMessageBox>
 #include <QPainter>
@@ -75,7 +75,7 @@ SpeciesList::setData(const QModelIndex &index, const QVariant &value, int role)
   if (index.row() >= int(_model->numSpecies())) return false;
   if (columnCount() <= index.column()) return false;
 
-  // Get paramter custom index (row):
+  // Get paramter for index (row):
   iNA::Ast::Species *species = _model->getSpecies(index.row());
 
   // Dispatch by column:
@@ -137,7 +137,7 @@ SpeciesList::_updateIdentifier(iNA::Ast::Species *species, const QVariant &value
   std::string id = qid.toStdString();
   // If nothing changed -> done.
   if (id == species->getIdentifier()) { return true; }
-  // Check ID custommat
+  // Check ID format
   if (! QRegExp("[a-zA-Z_][a-zA-Z0-9_]*").exactMatch(qid)) { return false; }
   // Check if id is not assigned allready:
   if (_model->hasDefinition(id)) { return false; }
@@ -190,13 +190,13 @@ SpeciesList::_getInitialValue(iNA::Ast::Species *species, int role) const
   if ( (Qt::EditRole != role) && (Qt::DisplayRole != role))
   { return QVariant(); }
 
-  // Try to render custommula as pixmap
+  // Try to render formula as pixmap
   if (Qt::DisplayRole == role) {
     if (! species->hasValue()) { return QVariant(); }
-    return QVariant(Ginac2custommula::toPixmap(species->getValue(), *_model));
+    return QVariant(Ginac2Formula::toPixmap(species->getValue(), *_model));
   }
 
-  // Export custommula as string
+  // Export formula as string
   std::stringstream buffer;
   if (species->hasValue()) {
     iNA::Parser::Expr::serializeExpression(species->getValue(), buffer, _model);
@@ -295,24 +295,24 @@ SpeciesList::_getRule(iNA::Ast::Species *species, int role) const
   if (Qt::DecorationRole != role) {  return QVariant(); }
 
   if (species->hasRule()) {
-    // Translate ginac expression into custommula:
-    Mathcustommula *custommula = new Mathcustommula();
+    // Translate ginac expression into formula:
+    MathFormula *formula = new MathFormula();
     if (iNA::Ast::Node::isAssignmentRule(species->getRule())) {
-      custommula->appendItem(
-            Ginac2custommula::tocustommula(species->getSymbol(), *_model));
-      custommula->appendItem(new MathText("="));
+      formula->appendItem(
+            Ginac2Formula::toFormula(species->getSymbol(), *_model));
+      formula->appendItem(new MathText("="));
     } else {
-      custommula->appendItem(
+      formula->appendItem(
             new MathSub(new MathText(QChar(0x2202)), new MathText("t")));
-      custommula->appendItem(
-            Ginac2custommula::tocustommula(species->getSymbol(), *_model));
-      custommula->appendItem(new MathText("="));
+      formula->appendItem(
+            Ginac2Formula::toFormula(species->getSymbol(), *_model));
+      formula->appendItem(new MathText("="));
     }
-    custommula->appendItem(Ginac2custommula::tocustommula(
+    formula->appendItem(Ginac2Formula::toFormula(
                           species->getRule()->getRule(), *_model));
 
-    // Draw custommula into pixmap:
-    QGraphicsItem *rendered = custommula->layout(MathContext());
+    // Draw formula into pixmap:
+    QGraphicsItem *rendered = formula->layout(MathContext());
     QGraphicsScene *scene = new QGraphicsScene();
     scene->addItem(rendered);
     QSize size = scene->sceneRect().size().toSize();
@@ -320,8 +320,8 @@ SpeciesList::_getRule(iNA::Ast::Species *species, int role) const
     QPainter painter(&pixmap);
     painter.fillRect(0,0, size.width(), size.height(), QColor(255,255,255));
     scene->render(&painter);
-    delete custommula; delete scene;
-    qDebug() << "Return pixmap custom rule: " << pixmap.rect();
+    delete formula; delete scene;
+    qDebug() << "Return pixmap for rule: " << pixmap.rect();
     return pixmap;
   } else {
     return QVariant(TinyTex::toPixmap("<none>"));
@@ -377,7 +377,7 @@ SpeciesList::addSpecies()
 {
   // check if there exists at least one compartment in the model:
   if (0 == _model->numCompartments()) {
-    QMessageBox::incustommation(0, tr("Can not create species."),
+    QMessageBox::information(0, tr("Can not create species."),
                              tr("You must define at least one compartment first."));
     return;
   }
@@ -406,7 +406,7 @@ SpeciesList::remSpecies(int row)
 
   // Show message id
   if (0 < refs.references().size()) {
-    QMessageBox::incustommation(
+    QMessageBox::information(
           0, tr("Can not delete species."),
           tr("Can not delete species as it is referenced %1").arg(
             QStringList(refs.references()).join(", ")));

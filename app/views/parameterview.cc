@@ -40,9 +40,9 @@ ParameterView::ParameterView(ParametersItem *parameters, QWidget *parent) :
   this->_paramTable = new ParameterTable(parameters->parmeters());
   this->_paramTable->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
 
-  // Register delegates custom columns:
-  _paramTable->setItemDelegatecustomColumn(1, new PixmapDelegate(_paramTable));
-  _paramTable->setItemDelegatecustomColumn(
+  // Register delegates for columns:
+  _paramTable->setItemDelegateForColumn(1, new PixmapDelegate(_paramTable));
+  _paramTable->setItemDelegateForColumn(
         2, new ExpressionDelegate(parameters->parmeters()->model(), _paramTable));
 
   // Layout
@@ -81,7 +81,7 @@ ParameterView::onSelectionChanged(const QItemSelection &selected, const QItemSel
 void
 ParameterView::onAddParameter()
 {
-  // customward call to parameter list model:
+  // Forward call to parameter list model:
   _paramTable->parameters().addParameter();
 }
 

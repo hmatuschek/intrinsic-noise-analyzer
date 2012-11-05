@@ -9,11 +9,11 @@
 
 
 /**
- * Pure virtual class to percustomm calculations in separate threads.
+ * Pure virtual class to perform calculations in separate threads.
  *
  * This class provides some mechanisms to signal the appliction about the state and progress of
- * the task. Use the method @c setState to incustomm the application about state-changes of the task,
- * the method @c setProgress can be used to incustomm the application about the current progress
+ * the task. Use the method @c setState to inform the application about state-changes of the task,
+ * the method @c setProgress can be used to inform the application about the current progress
  * of the task.
  *
  * @ingroup gui
@@ -81,7 +81,7 @@ protected:
   /** Updates the state of the task/analysis and sets an error-message. */
   void setState(State state, const QString &message);
 
-  /** Needs to be implemented to percustomm the actual analysis task. */
+  /** Needs to be implemented to perform the actual analysis task. */
   virtual void process() = 0;
 
 signals:

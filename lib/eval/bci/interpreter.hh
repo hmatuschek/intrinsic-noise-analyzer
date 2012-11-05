@@ -65,14 +65,14 @@ template <typename InScalar, typename OutScalar>
 class InterpreterCore
 {
 public:
-  /** Prototype custom the evaluation function. */
+  /** Prototype for the evaluation function. */
   static inline void eval(const InScalar *input, OutScalar *output,
                           std::vector<InterpreterValue> &stack);
 };
 
 
 /**
- * Specialization of InterpreterCore custom real (double) values.
+ * Specialization of InterpreterCore for real (double) values.
  *
  * @ingroup bci
  */
@@ -137,7 +137,7 @@ public:
     case Instruction::IPOW:
     {
       double x = stack.back().asValue();
-      custom (size_t i=1; i<inst.value.asIndex; i++) {
+      for (size_t i=1; i<inst.value.asIndex; i++) {
         stack.back().asValue() *= x;
       }
     }
@@ -178,7 +178,7 @@ public:
 
 
 /**
- * Specialization of InterpreterCore custom complex (complex<double>) values
+ * Specialization of InterpreterCore for complex (complex<double>) values
  *
  * @ingroup bci
  */
@@ -248,7 +248,7 @@ public:
     case Instruction::IPOW:
     {
       std::complex<double> x = stack.back().asComplex();
-      custom (size_t i=1; i<inst.value.asIndex; i++) {
+      for (size_t i=1; i<inst.value.asIndex; i++) {
         stack.back().asComplex() *= x;
       }
     }
@@ -341,7 +341,7 @@ public:
   inline void run(const typename InType::Scalar *input, typename OutType::Scalar *output)
   {
       // Loop through code:
-      custom (std::vector<Instruction>::iterator inst=this->code->begin(); inst!=this->code->end(); inst++)
+      for (std::vector<Instruction>::iterator inst=this->code->begin(); inst!=this->code->end(); inst++)
       {
         // Evaluate instruction:
         this->eval(*inst, input, output, this->stack);

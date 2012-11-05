@@ -30,7 +30,7 @@ ReactionView::ReactionView(ReactionItem *reaction, QWidget *parent) :
   ReactionEquationRenderer *renderer = new ReactionEquationRenderer(_reaction->getReaction());
   _equation_view->setScene(renderer);
 
-  // Add buttons and label custom parameter list
+  // Add buttons and label for parameter list
   _addParamButton = new QPushButton(tr("+"));
   _addParamButton->setToolTip(tr("Add new parameter"));
   _addParamButton->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
@@ -46,8 +46,8 @@ ReactionView::ReactionView(ReactionItem *reaction, QWidget *parent) :
   // Assemble and configure parameter table view:
   _paramTable = new QTableView();
   _paramTable->setModel(_reaction->localParameters());
-  _paramTable->setItemDelegatecustomColumn(1, new PixmapDelegate(_paramTable));
-  _paramTable->setItemDelegatecustomColumn(
+  _paramTable->setItemDelegateForColumn(1, new PixmapDelegate(_paramTable));
+  _paramTable->setItemDelegateForColumn(
         2, new ExpressionDelegate(_reaction->localParameters()->kineticLaw(), _paramTable));
 
   // Do layout
@@ -78,7 +78,7 @@ ReactionView::ReactionView(ReactionItem *reaction, QWidget *parent) :
 void
 ReactionView::onAddParamClicked()
 {
-  // customward call to parameter list model:
+  // Forward call to parameter list model:
   _reaction->localParameters()->addParameter();
 }
 
@@ -115,7 +115,7 @@ ReactionView::onSelectionChanged(const QItemSelection &selected, const QItemSele
 void
 ReactionView::onReactionEditing()
 {
-  // Show reaction editor wizard custom this reaction:
+  // Show reaction editor wizard for this reaction:
   ReactionEditor editor(((ModelItem *)(_reaction->parent()->parent()))->getModel(), _reaction->getReaction());
   if (QDialog::Rejected == editor.exec()) { return; }
 

@@ -7,7 +7,7 @@
 #include <ast/scope.hh>
 
 
-/** Tiny helper widget custom editing expressions. */
+/** Tiny helper widget for editing expressions. */
 class ExpressionEditor : public QLineEdit
 {
   Q_OBJECT

@@ -51,7 +51,7 @@ private slots:
   /** Will be called if the selection of the parameterlist is changed, is used to enable/disable
    * the "rem param" button. */
   void onSelectionChanged(const QItemSelection &selected,const QItemSelection &unselected);
-  /** Will be called custom double click on kinetic law. */
+  /** Will be called for double click on kinetic law. */
   void onReactionEditing();
 
 private:

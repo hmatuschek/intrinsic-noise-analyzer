@@ -35,7 +35,7 @@ ModelCopyist::copy(const Ast::Model *src, Ast::Model *dest, GiNaC::exmap &transl
   // Sorry, iteration is quiet in-efficient, however:
 
   // Copy function definitions:
-  custom (Ast::Model::const_iterator iter = src->begin(); iter != src->end(); iter++) {
+  for (Ast::Model::const_iterator iter = src->begin(); iter != src->end(); iter++) {
     if (Ast::Node::isFunctionDefinition(*iter)) {
       dest->addDefinition(ModelCopyist::copyFunctionDefinition(
                             static_cast<Ast::FunctionDefinition *>(*iter), translation_table));
@@ -50,7 +50,7 @@ ModelCopyist::copy(const Ast::Model *src, Ast::Model *dest, GiNaC::exmap &transl
   dest->setTimeUnit(src->getTimeUnit().asScaledBaseUnit(), false);
 
   // Copy user defined "specialized" units:
-  custom (Ast::Model::const_iterator iter = src->begin(); iter != src->end(); iter++) {
+  for (Ast::Model::const_iterator iter = src->begin(); iter != src->end(); iter++) {
     if (Ast::Node::isUnitDefinition(*iter)) {
       dest->addDefinition(ModelCopyist::copyUnitDefinition(
                             static_cast<Ast::UnitDefinition *>(*iter)));
@@ -58,28 +58,28 @@ ModelCopyist::copy(const Ast::Model *src, Ast::Model *dest, GiNaC::exmap &transl
   }
 
   // Copy all parameter definitions:
-  custom (size_t i=0; i<src->numParameters(); i++) {
+  for (size_t i=0; i<src->numParameters(); i++) {
     dest->addDefinition(ModelCopyist::copyParameterDefinition(
                           static_cast<Ast::Parameter *>(src->getParameter(i)),
                           translation_table));
   }
 
   // Copy all compartments:
-  custom (size_t i=0; i<src->numCompartments(); i++) {
+  for (size_t i=0; i<src->numCompartments(); i++) {
     dest->addDefinition(ModelCopyist::copyCompartmentDefinition(
                           static_cast<Ast::Compartment *>(src->getCompartment(i)),
                           translation_table));
   }
 
   // Copy all species definition:
-  custom (size_t i=0; i<src->numSpecies(); i++) {
+  for (size_t i=0; i<src->numSpecies(); i++) {
     dest->addDefinition(ModelCopyist::copySpeciesDefinition(
                           static_cast<Ast::Species *>(src->getSpecies(i)),
                           translation_table, species_table, dest));
   }
 
   // Copy reactions:
-  custom (size_t i=0; i<src->numReactions(); i++) {
+  for (size_t i=0; i<src->numReactions(); i++) {
     dest->addDefinition(ModelCopyist::copyReaction(
                           static_cast<Ast::Reaction *>(src->getReaction(i)),
                           translation_table, species_table));
@@ -90,19 +90,19 @@ ModelCopyist::copy(const Ast::Model *src, Ast::Model *dest, GiNaC::exmap &transl
    */
 
   // Update all parameter definitions:
-  custom (size_t i=0; i<dest->numParameters(); i++) {
+  for (size_t i=0; i<dest->numParameters(); i++) {
     ModelCopyist::updateParameter(dest->getParameter(i), translation_table);
   }
   // Update all compartments:
-  custom (size_t i=0; i<dest->numCompartments(); i++) {
+  for (size_t i=0; i<dest->numCompartments(); i++) {
     ModelCopyist::updateCompartment(dest->getCompartment(i), translation_table);
   }
   // Update all species definition:
-  custom (size_t i=0; i<dest->numSpecies(); i++) {
+  for (size_t i=0; i<dest->numSpecies(); i++) {
     ModelCopyist::updateSpecies(dest->getSpecies(i), translation_table);
   }
   // Update all reactions:
-  custom (size_t i=0; i<dest->numReactions(); i++) {
+  for (size_t i=0; i<dest->numReactions(); i++) {
     ModelCopyist::updateReaction(dest->getReaction(i), translation_table);
   }
 }
@@ -124,7 +124,7 @@ ModelCopyist::dupReaction(Reaction *node, GiNaC::exmap &param_table)
   std::map<Ast::Species *, Ast::Species *> species_table;
   GiNaC::exmap translation_table;
 
-  // Percustomm copy:
+  // Perform copy:
   Ast::Reaction *reac_copy = ModelCopyist::copyReaction(node, translation_table, species_table);
   // Extend param_table with subst. "old param symbol" -> "copy of param symbol":
   param_table.insert(translation_table.begin(), translation_table.end());
@@ -140,7 +140,7 @@ ModelCopyist::dupKineticLaw(Ast::KineticLaw *law, GiNaC::exmap &param_table)
   // Create empty translation-tables:
   GiNaC::exmap translation_table;
 
-  // Percustomm copy:
+  // Perform copy:
   Ast::KineticLaw *law_copy = ModelCopyist::copyKineticLaw(law, translation_table);
   // Extend param_table with subst. "old param symbol" -> "copy of param symbol":
   param_table.insert(translation_table.begin(), translation_table.end());
@@ -158,7 +158,7 @@ Ast::FunctionDefinition *
 ModelCopyist::copyFunctionDefinition(Ast::FunctionDefinition *node, GiNaC::exmap &translation_table)
 {
   std::vector<Ast::VariableDefinition *> arguments(node->getNumArgs());
-  custom (size_t i=0; i<node->getNumArgs(); i++)
+  for (size_t i=0; i<node->getNumArgs(); i++)
   {
     arguments[i] = new Ast::FunctionArgument(node->getArgByIdx(i).get_name());
     translation_table[node->getArgByIdx(i)] = arguments[i]->getSymbol();
@@ -303,11 +303,11 @@ ModelCopyist::copyReaction(Ast::Reaction *node, GiNaC::exmap &translation_table,
   }
 
   // Copy reactants stoichiometry:
-  custom (Ast::Reaction::iterator iter = node->reactantsBegin(); iter != node->reactantsEnd(); iter++)
+  for (Ast::Reaction::iterator iter = node->reactantsBegin(); iter != node->reactantsEnd(); iter++)
   {
     // New species == old_species:
     Ast::Species *new_species = iter->first;
-    // Check if there is a replacement custom species in species_table:
+    // Check if there is a replacement for species in species_table:
     if (species_table.end() != species_table.find(iter->first)) {
       new_species = species_table[iter->first];
     }
@@ -316,11 +316,11 @@ ModelCopyist::copyReaction(Ast::Reaction *node, GiNaC::exmap &translation_table,
   }
 
   // Copy products stoichiometry:
-  custom (Ast::Reaction::iterator iter = node->productsBegin(); iter != node->productsEnd(); iter++)
+  for (Ast::Reaction::iterator iter = node->productsBegin(); iter != node->productsEnd(); iter++)
   {
     // New species == old_species:
     Ast::Species *new_species = iter->first;
-    // Check if there is a replacement custom species in species_table:
+    // Check if there is a replacement for species in species_table:
     if (species_table.end() != species_table.find(iter->first)) {
       new_species = species_table[iter->first];
     }
@@ -329,10 +329,10 @@ ModelCopyist::copyReaction(Ast::Reaction *node, GiNaC::exmap &translation_table,
   }
 
   // Copy reaction modifiers:
-  custom (Ast::Reaction::mod_iterator iter = node->modifiersBegin(); iter != node->modifiersEnd(); iter++) {
+  for (Ast::Reaction::mod_iterator iter = node->modifiersBegin(); iter != node->modifiersEnd(); iter++) {
     // New species == old_species:
     Ast::Species *new_species = *iter;
-    // Check if there is a replacement custom species in species_table:
+    // Check if there is a replacement for species in species_table:
     if (species_table.end() != species_table.find(*iter)) {
       new_species = species_table[*iter];
     }
@@ -348,12 +348,12 @@ void
 ModelCopyist::updateReaction(Ast::Reaction *node, GiNaC::exmap &translation_table)
 {
   // Update reactants stoichiometry:
-  custom (Ast::Reaction::iterator iter = node->reactantsBegin(); iter != node->reactantsEnd(); iter++) {
+  for (Ast::Reaction::iterator iter = node->reactantsBegin(); iter != node->reactantsEnd(); iter++) {
     iter->second = iter->second.subs(translation_table);
   }
 
   // Update reactants stoichiometry:
-  custom (Ast::Reaction::iterator iter = node->productsBegin(); iter != node->productsEnd(); iter++) {
+  for (Ast::Reaction::iterator iter = node->productsBegin(); iter != node->productsEnd(); iter++) {
     iter->second = iter->second.subs(translation_table);
   }
 
@@ -369,7 +369,7 @@ ModelCopyist::copyKineticLaw(Ast::KineticLaw *node, GiNaC::exmap &translation_ta
   Ast::KineticLaw *kinetic_law = new Ast::KineticLaw(GiNaC::ex());
 
   // First, copy all local parameters:
-  custom (Ast::KineticLaw::iterator iter = node->begin(); iter != node->end(); iter++)
+  for (Ast::KineticLaw::iterator iter = node->begin(); iter != node->end(); iter++)
   {
     if (! Ast::Node::isParameter(*iter))
     {
@@ -391,12 +391,12 @@ ModelCopyist::copyKineticLaw(Ast::KineticLaw *node, GiNaC::exmap &translation_ta
 
 
 void
-ModelCopyist::mergeReversibleKineticLaw(Ast::KineticLaw *customward, const Ast::KineticLaw *reverse)
+ModelCopyist::mergeReversibleKineticLaw(Ast::KineticLaw *forward, const Ast::KineticLaw *reverse)
 {
   GiNaC::exmap translation_table;
 
   // First, copy all local parameters of reverse reaction:
-  custom (Ast::KineticLaw::const_iterator iter = reverse->begin(); iter != reverse->end(); iter++)
+  for (Ast::KineticLaw::const_iterator iter = reverse->begin(); iter != reverse->end(); iter++)
   {
     if (! Ast::Node::isParameter(*iter))
     {
@@ -405,13 +405,13 @@ ModelCopyist::mergeReversibleKineticLaw(Ast::KineticLaw *customward, const Ast::
       throw err;
     }
 
-    customward->addDefinition(ModelCopyist::copyParameterDefinition(
+    forward->addDefinition(ModelCopyist::copyParameterDefinition(
                                  static_cast<Ast::Parameter *>(*iter), translation_table));
   }
 
   // Copy rate law with local and global variables substituted:
-  GiNaC::ex ratelaw = customward->getRateLaw()-reverse->getRateLaw();
-  customward->setRateLaw(GiNaC::collect_common_factors(ratelaw.subs(translation_table)));
+  GiNaC::ex ratelaw = forward->getRateLaw()-reverse->getRateLaw();
+  forward->setRateLaw(GiNaC::collect_common_factors(ratelaw.subs(translation_table)));
 
   // Done.
   return;
@@ -421,7 +421,7 @@ void
 ModelCopyist::updateKineticLaw(Ast::KineticLaw *node, GiNaC::exmap &translation_table)
 {
   // First, update paramter definitions:
-  custom (Ast::KineticLaw::iterator iter = node->begin(); iter != node->end(); iter++) {
+  for (Ast::KineticLaw::iterator iter = node->begin(); iter != node->end(); iter++) {
     if (! Ast::Node::isParameter(*iter)) {
       InternalError err;
       err << "Can not copy kinetic law: Law has local non-parameter variable defined!";

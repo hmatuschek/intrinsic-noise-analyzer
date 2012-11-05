@@ -15,7 +15,7 @@ namespace Expr {
 
 /** Generic node of expression intermediate representation.
  * This itermediate representation is generated from GiNaC expressions to apply several
- * transcustommations in order to allow a more readable representation of the expression. The user
+ * transformations in order to allow a more readable representation of the expression. The user
  * may not utilize this representation directly, use @c iNA::Parser::serializeExpression
  * to obtain a textual representation of an expression that can be parsed again by the expression
  * parser. */
@@ -183,7 +183,7 @@ protected:
 class PowerToDivisionPass : public Pass
 {
 public:
-  /** Percustomms the transcustommation. */
+  /** Performs the transformation. */
   bool apply(SmartPtr<Node> &node);
 };
 
@@ -191,21 +191,21 @@ public:
  * This includes 0+a, 1*a, a/1, a^1, a^0. */
 class RemoveUnitsPass : public Pass {
 public:
-  /** Percustomms the transcustommation. */
+  /** Performs the transformation. */
   bool apply(SmartPtr<Node> &node);
 
 private:
-  /** Percustomms the pass on sums. */
+  /** Performs the pass on sums. */
   bool _applyOnAdd(SmartPtr<Node> &node);
-  /** Percustomms the pass on differences. */
+  /** Performs the pass on differences. */
   bool _applyOnSub(SmartPtr<Node> &node);
-  /** Percustomms the pass on products. */
+  /** Performs the pass on products. */
   bool _applyOnMul(SmartPtr<Node> &node);
-  /** Percustomms the pass on quotients. */
+  /** Performs the pass on quotients. */
   bool _applyOnDiv(SmartPtr<Node> &node);
-  /** Percustomms the pass on powers. */
+  /** Performs the pass on powers. */
   bool _applyOnPow(SmartPtr<Node> &node);
-  /** Percustomms the pass on negations. */
+  /** Performs the pass on negations. */
   bool _applyOnNeg(SmartPtr<Node> &node);
 };
 
@@ -214,17 +214,17 @@ private:
 class NormalizeOperatorPass : public Pass
 {
 public:
-  /** Percustomms the pass on the given expression. */
+  /** Performs the pass on the given expression. */
   bool apply(SmartPtr<Node> &node);
 
 private:
-  /** Percustomms the pass on sums. */
+  /** Performs the pass on sums. */
   bool _applyOnAdd(SmartPtr<Node> &node);
-  /** Percustomms the pass on differences .*/
+  /** Performs the pass on differences .*/
   bool _applyOnSub(SmartPtr<Node> &node);
-  /** Percustomms the pass on products. */
+  /** Performs the pass on products. */
   bool _applyOnMul(SmartPtr<Node> &node);
-  /** Percustomms the pass on quotients. */
+  /** Performs the pass on quotients. */
   bool _applyOnDiv(SmartPtr<Node> &node);
 };
 
@@ -239,7 +239,7 @@ public:
 };
 
 
-/** Simply collects some passes to bring the expression into a customm custom pretty serialization. */
+/** Simply collects some passes to bring the expression into a form for pretty serialization. */
 class PrettySerializationTrafo
 {
 public:

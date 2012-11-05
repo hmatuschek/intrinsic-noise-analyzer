@@ -15,7 +15,7 @@ Parser::Sbml::importModel(Ast::Model &model, const std::string &filename)
   // Read SBML document from file:
   LIBSBML_CPP_NAMESPACE_QUALIFIER SBMLDocument *document = LIBSBML_CPP_NAMESPACE_QUALIFIER readSBMLFromFile(filename.c_str());
 
-  // Check custom errors:
+  // Check for errors:
   if (0 != document->getNumErrors()) {
     SBMLParserError err;
     err << "Can not parse SBML file " << filename << ": " << document->getError(0)->getMessage();

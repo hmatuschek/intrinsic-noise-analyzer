@@ -14,9 +14,9 @@ ConstantStoichiometryMixin::ConstantStoichiometryMixin(BaseModel &base)
   /*
    * Assemble stoichiometric matrices and check if the entries are constant:
    */
-  custom (size_t i=0; i<base.numSpecies(); i++)
+  for (size_t i=0; i<base.numSpecies(); i++)
   {
-    custom (size_t j=0; j<base.numReactions(); j++)
+    for (size_t j=0; j<base.numReactions(); j++)
     {
       Ast::Reaction *reac = base.reactions[j];
       GiNaC::symbol spec = base.species[i];
@@ -29,7 +29,7 @@ ConstantStoichiometryMixin::ConstantStoichiometryMixin(BaseModel &base)
         if (! GiNaC::is_a<GiNaC::numeric>(stoi))
         {
           SemanticError err;
-          err << "Stoichiometry expression custom product " << spec.get_name()
+          err << "Stoichiometry expression for product " << spec.get_name()
               << " in reaction " << reac->getIdentifier() << " is not a constant! "
               << "It is: " << stoi;
           throw err;
@@ -50,7 +50,7 @@ ConstantStoichiometryMixin::ConstantStoichiometryMixin(BaseModel &base)
         if (! GiNaC::is_a<GiNaC::numeric>(stoi))
         {
           SemanticError err;
-          err << "Stoichiometry expression custom reactant " << spec.get_name()
+          err << "Stoichiometry expression for reactant " << spec.get_name()
               << " in reaction " << reac->getIdentifier() << " is not a constant! "
               << "It is: " << stoi;
           throw err;

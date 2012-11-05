@@ -30,7 +30,7 @@ RETask::RETask(const SSETaskConfig &config, QObject *parent) :
           *config.getModelAs<iNA::Models::REmodel>(),
           config.getOptLevel(), config.getNumEvalThreads(), false);
 
-    // Instantiate integrator custom that engine:
+    // Instantiate integrator for that engine:
     switch (config.getIntegrator()) {
     case SSETaskConfig::RungeKutta4:
       stepper = new ODE::RungeKutta4< Models::GenericSSEinterpreter<
@@ -103,7 +103,7 @@ RETask::RETask(const SSETaskConfig &config, QObject *parent) :
             *config.getModelAs<iNA::Models::REmodel>(),
             config.getOptLevel(), config.getNumEvalThreads(), false);
 
-      // Instantiate integrator custom that engine:
+      // Instantiate integrator for that engine:
       switch (config.getIntegrator()) {
       case SSETaskConfig::RungeKutta4:
         stepper = new ODE::RungeKutta4< Models::GenericSSEinterpreter<
@@ -176,7 +176,7 @@ RETask::RETask(const SSETaskConfig &config, QObject *parent) :
           *config.getModelAs<iNA::Models::REmodel>(),
           config.getOptLevel(), config.getNumEvalThreads(), false);
 
-    // Instantiate integrator custom that engine:
+    // Instantiate integrator for that engine:
     switch (config.getIntegrator()) {
     case SSETaskConfig::RungeKutta4:
       stepper = new ODE::RungeKutta4< Models::GenericSSEinterpreter<
@@ -250,7 +250,7 @@ RETask::RETask(const SSETaskConfig &config, QObject *parent) :
           *config.getModelAs<iNA::Models::REmodel>(),
           config.getOptLevel(), config.getNumEvalThreads(), false);
 
-    // Instantiate integrator custom that engine:
+    // Instantiate integrator for that engine:
     switch (config.getIntegrator()) {
     case SSETaskConfig::RungeKutta4:
       stepper = new ODE::RungeKutta4< Models::GenericSSEinterpreter<
@@ -319,7 +319,7 @@ RETask::RETask(const SSETaskConfig &config, QObject *parent) :
   size_t column = 0;
   QVector<QString> species_names(_Ns);
   this->timeseries.setColumnName(column, "t"); column++;
-  custom (int i=0; i<(int)_Ns; i++, column++)
+  for (int i=0; i<(int)_Ns; i++, column++)
   {
     iNA::Ast::Species *species = config.getModel()->getSpecies(i);
     QString species_id = species->getIdentifier().c_str();
@@ -356,7 +356,7 @@ RETask::process()
   // Holds the update to the next state (reduced state)
   Eigen::VectorXd dx(config.getModelAs<iNA::Models::REmodel>()->getDimension());
 
-  // Holds the concentrations custom each species (full state)
+  // Holds the concentrations for each species (full state)
   Eigen::VectorXd concentrations(config.getModel()->numSpecies());
 
   // Holds a row of the output-table:
@@ -370,14 +370,14 @@ RETask::process()
   this->setState(Task::RUNNING);
 
   /*
-   * Percustomm integration
+   * Perform integration
    */
   double t  = config.getIntegrationRange().getStartTime();
   double dt = config.getIntegrationRange().getStepSize();
 
   // store initial state:
   output_vector(0) = t;
-  custom (size_t j=0; j<_Ns; j++) {
+  for (size_t j=0; j<_Ns; j++) {
     output_vector(1+j) = concentrations(j);
   }
   this->timeseries.append(output_vector);
@@ -385,7 +385,7 @@ RETask::process()
   // Integration loop:
   size_t N_steps = config.getIntegrationRange().getSteps();
   size_t N_intermediate = config.getIntermediateSteps();
-  custom (size_t i=0; i<N_steps; i++)
+  for (size_t i=0; i<N_steps; i++)
   {
     // Check if task shall terminate:
     if (Task::TERMINATING == this->getState()) {
@@ -411,7 +411,7 @@ RETask::process()
     // Store new time:
     output_vector(0) = t;
     // Store states of selected species:
-    custom (size_t j=0; j<_Ns; j++) {
+    for (size_t j=0; j<_Ns; j++) {
       output_vector(1+j) = concentrations(j);
     }
 

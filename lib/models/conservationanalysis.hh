@@ -16,12 +16,12 @@ class ConservationAnalysis:
 protected:
 
     /**
-    *  \f$ \Omega \f$-vector custom independent species
+    *  \f$ \Omega \f$-vector for independent species
     */
     Eigen::VectorXex Omega_ind;
 
     /**
-    *  \f$ \Omega \f$-vector custom dependent species
+    *  \f$ \Omega \f$-vector for dependent species
     */
     Eigen::VectorXex Omega_dep;
 
@@ -29,7 +29,7 @@ protected:
 protected:
 
     /**
-    * Holds symbols custom dependence on initial conditions.
+    * Holds symbols for dependence on initial conditions.
     */
     Eigen::VectorXex ICs;
 
@@ -39,12 +39,12 @@ protected:
     Eigen::VectorXex conservationConstants;
 
     /**
-    * Expression custom Link zero matrix linking independent and dependent concentrations.
+    * Expression for Link zero matrix linking independent and dependent concentrations.
     */
     Eigen::MatrixXex Link0CMatrix;
 
     /**
-    * Expression custom Link matrix linking concentrations.
+    * Expression for Link matrix linking concentrations.
     */
     Eigen::MatrixXex LinkCMatrix;
 
@@ -62,17 +62,17 @@ public:
     ConservationAnalysis(const Ast::Model &model);
 
     /**
-    * A method that generates a substitution table custom all conservation laws arising from the model
+    * A method that generates a substitution table for all conservation laws arising from the model
     */
     GiNaC::exmap getConservationConstants(const Eigen::VectorXex &conserved_cycles);
 
     /**
-    * A method that generates a substitution table custom all conservation laws arising from the model
+    * A method that generates a substitution table for all conservation laws arising from the model
     */
     GiNaC::exmap getConservationConstants(const Eigen::VectorXd &conserved_cycles);
 
     /**
-    * A method that generates a substitution table custom the initial conditions.
+    * A method that generates a substitution table for the initial conditions.
     */
     GiNaC::exmap getICconstants(const Eigen::VectorXd &initialcondition);
 
@@ -85,7 +85,7 @@ public:
     /** Yields the values of conserved cycles */
     Eigen::MatrixXex getConservedCycles(const Eigen::VectorXd &ICs);
 
-    /** Yields the expressions custom conserved cycles as functions of the initial conditions. */
+    /** Yields the expressions for conserved cycles as functions of the initial conditions. */
     Eigen::MatrixXex getConservedCycles(const Eigen::VectorXex &ICs);
 
     /** Yields the conservation matrix in concentration space */
@@ -106,8 +106,8 @@ public:
 
     {
         // ... and fold all constants due to conservation laws
-        custom (int i=0; i<vec.rows(); i++)
-        custom (int j=0; j<vec.cols(); j++)
+        for (int i=0; i<vec.rows(); i++)
+        for (int j=0; j<vec.cols(); j++)
                 vec(i,j) = vec(i,j).subs(this->substitutions);
     }
 

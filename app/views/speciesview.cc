@@ -37,11 +37,11 @@ SpeciesView::SpeciesView(SpeciesItem *species ,QWidget *parent) :
   _specTable->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
   _specTable->verticalHeader()->hide();
 
-  // Register delegates custom columns:
-  _specTable->setItemDelegatecustomColumn(1, new PixmapDelegate(_specTable));
-  _specTable->setItemDelegatecustomColumn(
+  // Register delegates for columns:
+  _specTable->setItemDelegateForColumn(1, new PixmapDelegate(_specTable));
+  _specTable->setItemDelegateForColumn(
         2, new ExpressionDelegate(_species->species()->model(), _specTable));
-  _specTable->setItemDelegatecustomColumn(
+  _specTable->setItemDelegateForColumn(
         5, new CompartmentDelegate(_species->species()->model(), _specTable));
 
   // Assemble widget layout
@@ -75,7 +75,7 @@ SpeciesView::speciesItemDestoyed()
 
 void
 SpeciesView::onAddSpecies() {
-  // customward call to species list model:
+  // Forward call to species list model:
   _species->species()->addSpecies();
 }
 

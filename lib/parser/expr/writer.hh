@@ -23,7 +23,7 @@ class Writer :
     public GiNaC::symbol::visitor, public GiNaC::numeric::visitor
 {
 protected:
-  /** Holds a constant weak reference to an @c Ast::Scope instance custom symbol resolution. */
+  /** Holds a constant weak reference to an @c Ast::Scope instance for symbol resolution. */
   const Ast::Scope &_scope;
   /** Holds a weak reference to the stream, the expression is serialized into. */
   std::ostream &_output;

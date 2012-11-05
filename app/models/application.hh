@@ -14,13 +14,13 @@
 
 
 /*
- * customward declarations...
+ * Forward declarations...
  */
 class MainWindow;
 
 
 /**
- * This class customms the model of the whole running application.
+ * This class forms the model of the whole running application.
  *
  * It implements also the TreeModel interface lising all open SBMLModel instances.
  *
@@ -31,7 +31,7 @@ class Application : public QObject, public Configuration
   Q_OBJECT
 
 protected:
-  /** Default constructor custom an Application. */
+  /** Default constructor for an Application. */
   explicit Application();
 
 
@@ -81,7 +81,7 @@ public slots:
   void itemSelected(const QModelIndex &index);
 
   /** Checks if a new version of iNA is available. */
-  void checkcustomNewVersion();
+  void checkForNewVersion();
 
 public:
   /** Shuts the only running application instance down. */
@@ -92,23 +92,23 @@ public:
 
 
 private slots:
-  /** Handler custom the "new model" menu action. */
+  /** Handler for the "new model" menu action. */
   void onNewModel();
-  /** Handler custom the "import model" menu action. */
+  /** Handler for the "import model" menu action. */
   void onImportModel();
   /** Slot to import a certain model. */
   void onImportModel(const QString &path);
-  /** Handler custom "export model" action. */
+  /** Handler for "export model" action. */
   void onExportModel();
-  /** Handler custom "remove model" action. */
+  /** Handler for "remove model" action. */
   void onCloseModel();
-  /** Handler custom "close all" action. */
+  /** Handler for "close all" action. */
   void onCloseAll();
-  /** Handler custom the "edit model" action. */
+  /** Handler for the "edit model" action. */
   void onEditModel();
-  /** Handler custom the "expand reversible reactions" action. */
+  /** Handler for the "expand reversible reactions" action. */
   void onExpandRevReactions();
-  /** Handler custom the "combine irreversible reactions" action. */
+  /** Handler for the "combine irreversible reactions" action. */
   void onCombineIrrevReactions();
   /** Handler to open a recently opened model. */
   void onOpenRecentModel(QAction *action);

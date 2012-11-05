@@ -13,14 +13,14 @@ MersenneTwisterTest::compareRNG()
   MersenneTwister      rng_a(1234);
   MersenneTwister      rng_b(1234);
 
-  custom (size_t i=0; i<1024; i++) {
+  for (size_t i=0; i<1024; i++) {
     // Compare random numbers:
     UT_ASSERT_EQUAL(rng_a.rand(), rng_b.rand());
   }
 
   rng_a.seed(1234);
   rng_b.seed(5678);
-  custom (size_t i=0; i<1024; i++) {
+  for (size_t i=0; i<1024; i++) {
     // Compare random numbers:
     UT_ASSERT(rng_a.rand() != rng_b.rand());
   }
@@ -40,12 +40,12 @@ MersenneTwisterTest::testCummulative()
   srand(1234);
   MersenneTwister   rng_b(1234);
 
-  // Percustomms Monte-Carlo integration of f(x)=x:
-  custom(size_t i=0; i<M; i++) {
+  // Performs Monte-Carlo integration of f(x)=x:
+  for(size_t i=0; i<M; i++) {
     double val_a = double(rand())/(RAND_MAX);
     double val_b = rng_b.rand();
 
-    custom (size_t j=0; j<N; j++) {
+    for (size_t j=0; j<N; j++) {
       if (val_a < double(j+1)/N) {
         counts_a[j]++;
       }
@@ -56,7 +56,7 @@ MersenneTwisterTest::testCummulative()
   }
 
   // Check:
-  custom (size_t j=0; j<N; j++) {
+  for (size_t j=0; j<N; j++) {
     UT_ASSERT(std::fabs((counts_a[j]/M)-(double(j+1)/N)) <= (double(N*N)/M));
     UT_ASSERT(std::fabs((counts_b[j]/M)-(double(j+1)/N)) <= (double(N*N)/M));
   }

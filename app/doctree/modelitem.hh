@@ -8,7 +8,7 @@
 
 
 /**
- * Represents a @c Ast::Model and associated analysis results custom the GUI. Its a containter custom
+ * Represents a @c Ast::Model and associated analysis results for the GUI. Its a containter for
  * everything, that is associated with a certain SBML model.
  *
  * A SBMLModel is also a TreeItem, that allows to browse through model items and results.
@@ -20,9 +20,9 @@ class ModelItem : public QObject, public DocumentTreeItem
   Q_OBJECT
 
 public:
-  /** Constructs a model custom the given SBML document. */
+  /** Constructs a model for the given SBML document. */
   explicit ModelItem(const QString &file_path, QObject *parent = 0);
-  /** Constructs a model custom the given SBML document. */
+  /** Constructs a model for the given SBML document. */
   explicit ModelItem(iNA::Ast::Model *_model, QObject *parent = 0);
   /** Destructor. Also frees the held SBML document. */
   ~ModelItem();
@@ -40,13 +40,13 @@ public:
   /** Create a new model view. */
   virtual QWidget *createView();
 
-  /** customces an update of the model. */
+  /** Forces an update of the model. */
   void updateItem();
 
 private:
   /** Holds the SBML document associated with the model. */
   iNA::Ast::Model *_model;
-  /** Holds the display label custom the item in the @c DocumentTree. */
+  /** Holds the display label for the item in the @c DocumentTree. */
   QString itemLabel;
 };
 

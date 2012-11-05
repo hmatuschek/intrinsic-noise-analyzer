@@ -7,7 +7,7 @@
 #include <ast/model.hh>
 
 
-/** Trivial editor dialog custom SBML-sh.
+/** Trivial editor dialog for SBML-sh.
  * Consists of an editor with SBML-sh syntax highlighting. */
 class SbmlshEditorDialog : public QDialog
 {

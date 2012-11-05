@@ -17,7 +17,7 @@ namespace ODE {
  * @cond 0
  * (exclude from docs)
  *
- * Defines the constants custom the @c Dopri853 stepper.
+ * Defines the constants for the @c Dopri853 stepper.
  */
 class Dopri853Constants
 {
@@ -72,8 +72,8 @@ protected:
   Eigen::VectorXd k8;  ///< Some temporary state.
   Eigen::VectorXd k9;  ///< Some temporary state.
   Eigen::VectorXd k10; ///< Some temporary state.
-  Eigen::VectorXd yerr5; ///< Holds the error estimate custom the 5th order step.
-  Eigen::VectorXd yerr3; ///< Holds the error estimate custom the 3rd order step.
+  Eigen::VectorXd yerr5; ///< Holds the error estimate for the 5th order step.
+  Eigen::VectorXd yerr3; ///< Holds the error estimate for the 3rd order step.
 
 
 public:
@@ -98,11 +98,11 @@ public:
   }
 
   /**
-   * Implements the @c Stepper interface, percustomms a integration step from t to t+dt
+   * Implements the @c Stepper interface, performs a integration step from t to t+dt
    * with adaptive step-size control.
    *
    * @param[in] state Specifies the current state.
-   * @param[in] t Specifies the current time (custom time-dependent systems).
+   * @param[in] t Specifies the current time (for time-dependent systems).
    * @param[out] delta Will hold the difference between the current state and the state at t+dt.
    */
   virtual void step(const Eigen::VectorXd &state, double t, Eigen::VectorXd &delta)
@@ -110,7 +110,7 @@ public:
     // New step, calculate first derivative k1:
     system.evaluate(state, t, k1);
 
-    // Now percustomm integration:
+    // Now perform integration:
     control(state, t, delta, step_size);
   }
 
@@ -169,7 +169,7 @@ protected:
     yerr5 = delta - dt*(bhh1*k1 + bhh2*k9 + bhh3*k3);
     yerr3 = dt*(er1*k1 + er6*k6 + er7*k7 + er8*k8 + er9*k9 + er10*k10 + er11*k2 + er12*k3);
 
-    custom (size_t i=0; i<system.getDimension(); i++)
+    for (size_t i=0; i<system.getDimension(); i++)
     {
       if (Math::isNotValue(yerr5[i]) || Math::isNotValue(yerr3[i])) {
         return std::numeric_limits<double>::infinity();

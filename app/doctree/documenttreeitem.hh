@@ -5,7 +5,7 @@
 
 
 /**
- * Basic interface custom all wrappers, holding some data organized in the tree-like structure of the
+ * Basic interface for all wrappers, holding some data organized in the tree-like structure of the
  * application.
  *
  * This class provides a much simpler interface as the @c TreeItem class, aderived class has only
@@ -20,14 +20,14 @@ public:
   DocumentTreeItem();
 
   /**
-   * This method can be overridden to signal, that there is a view custom the wrapper.
+   * This method can be overridden to signal, that there is a view for the wrapper.
    *
-   * By default this method returns false, indicateing that there is not view custom the wrapper.
+   * By default this method returns false, indicateing that there is not view for the wrapper.
    */
   virtual bool providesView() const;
 
   /**
-   * This method can be overridden to implement the instantiation of a view widget custom the wrapper.
+   * This method can be overridden to implement the instantiation of a view widget for the wrapper.
    *
    * By default this method returns 0.
    */
@@ -45,7 +45,7 @@ public:
   virtual void showContextMenu(const QPoint &global_pos);
 
   /**
-   * This method must be implemented by all @c Wrapper classes to return a label custom the wrapper
+   * This method must be implemented by all @c Wrapper classes to return a label for the wrapper
    * in the application tree view.
    */
   virtual const QString &getLabel() const = 0;

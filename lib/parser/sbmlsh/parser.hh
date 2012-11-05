@@ -7,7 +7,7 @@
 namespace iNA {
 
 namespace Ast {
-// customward declaration.
+// Forward declaration.
 class Model;
 }
 

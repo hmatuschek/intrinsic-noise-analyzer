@@ -48,8 +48,8 @@ REResultWidget::REResultWidget(RETaskWrapper *task_wrapper, QWidget *parent):
   this->tableWrapper = new TableWrapper(re_task_wrapper->getRETask()->getTimeSeries(), this);
   dataTable->setModel(this->tableWrapper);
 
-  QPushButton *plotButton = new QPushButton(tr("Quick plot"));
-  QPushButton *genericPlotButton = new QPushButton(tr("Customized plot"));
+  QPushButton *plotButton = new QPushButton(tr("Quick plot statistics"));
+  QPushButton *genericPlotButton = new QPushButton(tr("Custom plot"));
   QPushButton *saveButton = new QPushButton(tr("Save data to file"));
 
   QObject::connect(plotButton, SIGNAL(clicked()), this, SLOT(quickPlotButtonPressed()));
@@ -100,7 +100,7 @@ REResultWidget::genericPlotButtonPressed()
   figure->getAxis()->setYLabel(dialog.yLabel());
 
   // Iterate over all graphs of the configured plot:
-  custom (size_t i=0; i<dialog.numGraphs(); i++) {
+  for (size_t i=0; i<dialog.numGraphs(); i++) {
     figure->getAxis()->addGraph(dialog.graph(i).create(figure->getStyle(i)));
   }
 
@@ -126,7 +126,7 @@ REResultWidget::saveButtonPressed()
   {
     QMessageBox box;
     box.setWindowTitle(tr("Can not open file"));
-    box.setText(tr("Can not open file %1 custom writing").arg(filename));
+    box.setText(tr("Can not open file %1 for writing").arg(filename));
     box.exec();
   }
 

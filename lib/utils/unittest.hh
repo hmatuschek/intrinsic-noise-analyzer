@@ -41,7 +41,7 @@ public:
 class TestCase
 {
 public:
-  /** Will be called just becustome each test. */
+  /** Will be called just before each test. */
   virtual void setUp();
 
   /** Will be called just after each test. */
@@ -84,7 +84,7 @@ public:
 
 
 /**
- * Base interface custom tests, internal used.
+ * Base interface for tests, internal used.
  * @ingroup unittest
  */
 class TestCallerInterface
@@ -110,7 +110,7 @@ public:
 
 
 /**
- * Template custom test as methods of a @c TestCase.
+ * Template for test as methods of a @c TestCase.
  * @ingroup unittest
  */
 template <class T>

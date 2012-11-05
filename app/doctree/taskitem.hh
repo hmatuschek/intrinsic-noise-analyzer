@@ -50,7 +50,7 @@ protected:
 
 public:
   /**
-   * Constructs a task wrapper custom the given task.
+   * Constructs a task wrapper for the given task.
    */
   explicit TaskItem(Task *task, QObject *parent=0);
 

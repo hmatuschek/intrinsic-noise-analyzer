@@ -115,16 +115,16 @@ Parser::Sbml::__process_model(LIBSBML_CPP_NAMESPACE_QUALIFIER Model *model, Pars
     ctx.model().setName(model->getName());
   }
 
-  /* Process all function definitions in model by customwarding them to
+  /* Process all function definitions in model by forwarding them to
    * __process_function_definition. */
-  custom (size_t i=0; i<model->getNumFunctionDefinitions(); i++) {
+  for (size_t i=0; i<model->getNumFunctionDefinitions(); i++) {
     LIBSBML_CPP_NAMESPACE_QUALIFIER FunctionDefinition *func_def = model->getFunctionDefinition(i);
     Ast::FunctionDefinition *def = __process_function_definition(func_def, ctx);
     ctx.model().addDefinition(def);
   }
 
   /* First of all, process unit-definitions. */
-  custom (size_t i=0; i<model->getNumUnitDefinitions(); i++)
+  for (size_t i=0; i<model->getNumUnitDefinitions(); i++)
   {
     LIBSBML_CPP_NAMESPACE_QUALIFIER UnitDefinition *sbml_unit = model->getUnitDefinition(i);
 
@@ -139,8 +139,8 @@ Parser::Sbml::__process_model(LIBSBML_CPP_NAMESPACE_QUALIFIER Model *model, Pars
     ctx.model().addDefinition(unit);
   }
 
-  /* Process all parameters of the model by customwarding them to processParameterDefinition. */
-  custom (size_t i=0; i<model->getNumParameters(); i++)
+  /* Process all parameters of the model by forwarding them to processParameterDefinition. */
+  for (size_t i=0; i<model->getNumParameters(); i++)
   {
     // Get parameter
     LIBSBML_CPP_NAMESPACE_QUALIFIER Parameter *sbml_param = model->getParameter(i);
@@ -155,7 +155,7 @@ Parser::Sbml::__process_model(LIBSBML_CPP_NAMESPACE_QUALIFIER Model *model, Pars
   Trafo::VariableScaling scaling;
 
   /* Process all compartments defined in the SBML model. */
-  custom (size_t i=0; i<model->getNumCompartments(); i++)
+  for (size_t i=0; i<model->getNumCompartments(); i++)
   {
     // Get SBML compartment
     LIBSBML_CPP_NAMESPACE_QUALIFIER Compartment *comp = model->getCompartment(i);
@@ -166,7 +166,7 @@ Parser::Sbml::__process_model(LIBSBML_CPP_NAMESPACE_QUALIFIER Model *model, Pars
   }
 
   /* Process all species defined in the model. */
-  custom (size_t i=0; i<model->getNumSpecies(); i++)
+  for (size_t i=0; i<model->getNumSpecies(); i++)
   {
     // Get species:
     LIBSBML_CPP_NAMESPACE_QUALIFIER Species *sp = model->getSpecies(i);
@@ -177,12 +177,12 @@ Parser::Sbml::__process_model(LIBSBML_CPP_NAMESPACE_QUALIFIER Model *model, Pars
   }
 
   /* Process initial assignments. */
-  custom (size_t i=0; i<model->getNumInitialAssignments(); i++) {
+  for (size_t i=0; i<model->getNumInitialAssignments(); i++) {
     LIBSBML_CPP_NAMESPACE_QUALIFIER InitialAssignment *sbml_assignment = model->getInitialAssignment(i);
-    // Search custom variable
+    // Search for variable
     if (!ctx.model().hasVariable(sbml_assignment->getId())) {
       SymbolError err;
-      err << "Can not process initial assingment custom identifier "
+      err << "Can not process initial assingment for identifier "
           << sbml_assignment->getId() << "; Unknown variable.";
       throw err;
     }
@@ -207,8 +207,8 @@ Parser::Sbml::__process_model(LIBSBML_CPP_NAMESPACE_QUALIFIER Model *model, Pars
     }
   }
 
-  /* Process rules custom variables: */
-  custom (size_t i=0; i<model->getNumRules(); i++)
+  /* Process rules for variables: */
+  for (size_t i=0; i<model->getNumRules(); i++)
   {
     // Get SBML rule:
     LIBSBML_CPP_NAMESPACE_QUALIFIER Rule *sbml_rule = model->getRule(i);
@@ -248,7 +248,7 @@ Parser::Sbml::__process_model(LIBSBML_CPP_NAMESPACE_QUALIFIER Model *model, Pars
 
   /* Process all reactions, especially all the kinetic laws of them. The identifier of the kinetic
    * law is taken as the identifier of the reaction. */
-  custom (size_t i=0; i<model->getNumReactions(); i++)
+  for (size_t i=0; i<model->getNumReactions(); i++)
   {
     // Get SBML Reaction object from model
     LIBSBML_CPP_NAMESPACE_QUALIFIER Reaction *reac = model->getReaction(i);
@@ -275,7 +275,7 @@ Ast::VariableDefinition *
 Parser::Sbml::__process_species_definition(
   LIBSBML_CPP_NAMESPACE_QUALIFIER Species *node, ParserContext &ctx, Trafo::VariableScaling &subst)
 {
-  // Get compartment custom species:
+  // Get compartment for species:
   if (! ctx.model().hasCompartment(node->getCompartment())) {
       SymbolError err;
       err << "Can not assemble species definition " << node->getId()
@@ -346,8 +346,8 @@ Parser::Sbml::__process_function_definition(LIBSBML_CPP_NAMESPACE_QUALIFIER Func
 
   // Extract and assemble function-arguments
   std::vector<Ast::VariableDefinition *> args(funcdef->getNumArguments());
-  custom (size_t i=0; i<funcdef->getNumArguments(); i++) {
-    // Construct a new VariableDefinition custom the argument:
+  for (size_t i=0; i<funcdef->getNumArguments(); i++) {
+    // Construct a new VariableDefinition for the argument:
     args[i]= new Ast::FunctionArgument(funcdef->getArgument(i)->getName());
   }
 
@@ -374,13 +374,13 @@ Parser::Sbml::__process_function_definition(LIBSBML_CPP_NAMESPACE_QUALIFIER Func
 Ast::VariableDefinition *
 Parser::Sbml::__process_parameter_definition(LIBSBML_CPP_NAMESPACE_QUALIFIER Parameter *node, ParserContext &ctx)
 {
-  /* Handle initial value custom paramter. */
+  /* Handle initial value for paramter. */
   GiNaC::ex init_value;
   if (node->isSetValue()) {
     init_value = GiNaC::numeric(node->getValue());
   }
 
-  // Get units custom parameter (it there is one):
+  // Get units for parameter (it there is one):
   Ast::Unit unit(Ast::Unit::dimensionless());
   if (node->isSetUnits()) {
     unit = ctx.model().getUnit(node->getUnits());
@@ -525,7 +525,7 @@ Parser::Sbml::__process_unit_definition(LIBSBML_CPP_NAMESPACE_QUALIFIER UnitDefi
 {
   // Assemble ScaledUnits vector:
   std::list<Ast::ScaledBaseUnit> units;
-  custom (size_t i=0; i<node->getNumUnits(); i++) {
+  for (size_t i=0; i<node->getNumUnits(); i++) {
     units.push_back(__process_unit(node->getUnit(0), ctx));
   }
 
@@ -639,7 +639,7 @@ Parser::Sbml::__process_reaction(LIBSBML_CPP_NAMESPACE_QUALIFIER Reaction *node,
   }
 
   // Add reactants:
-  custom (size_t i=0; i<node->getNumReactants(); i++)
+  for (size_t i=0; i<node->getNumReactants(); i++)
   {
     LIBSBML_CPP_NAMESPACE_QUALIFIER SpeciesReference *r = node->getReactant(i);
     GiNaC::ex expr;
@@ -656,7 +656,7 @@ Parser::Sbml::__process_reaction(LIBSBML_CPP_NAMESPACE_QUALIFIER Reaction *node,
 
 
   // Add products:
-  custom (size_t i=0; i<node->getNumProducts(); i++)
+  for (size_t i=0; i<node->getNumProducts(); i++)
   {
     LIBSBML_CPP_NAMESPACE_QUALIFIER SpeciesReference *r = node->getProduct(i);
     GiNaC::ex expr;
@@ -671,7 +671,7 @@ Parser::Sbml::__process_reaction(LIBSBML_CPP_NAMESPACE_QUALIFIER Reaction *node,
     reaction->addProductStoichiometry(ctx.resolveSpecies(r->getSpecies()), expr);
   }
 
-  custom (size_t i=0; i<node->getNumModifiers(); i++) {
+  for (size_t i=0; i<node->getNumModifiers(); i++) {
     reaction->addModifier(ctx.resolveSpecies(node->getModifier(i)->getSpecies()));
   }
 
@@ -689,7 +689,7 @@ Parser::Sbml::__process_kinetic_law(LIBSBML_CPP_NAMESPACE_QUALIFIER KineticLaw *
   ctx.pushScope(law);
 
   // Now populate Scope of KineticLaw with its parameters:
-  custom (size_t i=0; i<node->getNumParameters(); i++) {
+  for (size_t i=0; i<node->getNumParameters(); i++) {
     // Add new (local) parameter to KineticLaw
     law->addDefinition(__process_parameter_definition(node->getParameter(i), ctx));
   }
@@ -711,7 +711,7 @@ GiNaC::ex
 Parser::Sbml::__process_expression(const LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *node, ParserContext &ctx)
 {
   /*
-   * Big dispatcher custom all expression types:
+   * Big dispatcher for all expression types:
    */
   switch (node->getType())
   {
@@ -985,7 +985,7 @@ Parser::Sbml::__process_function_call(const LIBSBML_CPP_NAMESPACE_QUALIFIER ASTN
 
   // Get function argument expressions:
   std::vector<GiNaC::ex> arguments(node->getNumChildren());
-  custom (size_t i=0; i<node->getNumChildren(); i++)
+  for (size_t i=0; i<node->getNumChildren(); i++)
   {
     // construct Expression from each argument
     arguments[i] = __process_expression(node->getChild(i), ctx);

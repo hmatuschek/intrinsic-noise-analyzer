@@ -1,7 +1,7 @@
-#ifndef GINACcustomEIGENTEST_HH
-#define GINACcustomEIGENTEST_HH
+#ifndef GINACFOREIGENTEST_HH
+#define GINACFOREIGENTEST_HH
 
-#include "ginacsupportcustomeigen.hh"
+#include "ginacsupportforeigen.hh"
 #include "unittest.hh"
 
 
@@ -11,11 +11,11 @@ namespace iNA {
 /**
  * Testing the use of Ginac expression with Eigen matrices.
  */
-class GinaccustomEigenTest :
+class GinacForEigenTest :
         public UnitTest::TestCase
 {
 public:
-  virtual ~GinaccustomEigenTest()
+  virtual ~GinacForEigenTest()
   {
 
   }
@@ -31,4 +31,4 @@ public:
 
 }
 
-#endif // GINACcustomEIGENTEST_HH
+#endif // GINACFOREIGENTEST_HH

@@ -44,8 +44,8 @@ public:
    *
    * @param system Specifies the ODE system to integrate.
    * @param dt Specifies the default/maximum step-size.
-   * @param epsilon_abs Specifies the absolute error custom the step.
-   * @param epsilon_rel Specifies the relative error custom the step.
+   * @param epsilon_abs Specifies the absolute error for the step.
+   * @param epsilon_rel Specifies the relative error for the step.
    */
   LsodaDriver(Sys &system, double dt, double epsilon_abs, double epsilon_rel)
       : system(system), step_size(dt), err_abs(epsilon_abs), err_rel(epsilon_rel)
@@ -57,7 +57,7 @@ public:
     rtolwork = atolwork + getDimension() + 1;
 
     /* @todo use to define staged errors using the system size */
-    custom (size_t i = 1; i <= getDimension(); ++i)
+    for (size_t i = 1; i <= getDimension(); ++i)
     {
         rtolwork[i] = err_rel;
         atolwork[i] = err_abs;
@@ -65,13 +65,13 @@ public:
  }
 
   /**
-   * Percustomms the step t -> t+dt.
+   * Performs the step t -> t+dt.
    */
   virtual void step(const Eigen::VectorXd &state, double t, Eigen::VectorXd &delta)
   {
-      custom (size_t i = 1; i <= getDimension(); ++i) ywork[i] = state[i-1];
+      for (size_t i = 1; i <= getDimension(); ++i) ywork[i] = state[i-1];
       lsoda(getDimension(), ywork, &t, t+step_size, 2, rtolwork, atolwork, 1, &istate, 0, 2);
-      custom (size_t i = 1; i <= getDimension(); ++i) delta[i-1] = ywork[i]-state[i-1];
+      for (size_t i = 1; i <= getDimension(); ++i) delta[i-1] = ywork[i]-state[i-1];
   }
 
   virtual void step(Eigen::VectorXd &state, double t)

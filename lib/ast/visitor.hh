@@ -9,7 +9,7 @@ namespace Ast {
 class Visitor
 {
 public:
-  /** Just there to ensure vtable generation custom visitor and a common base-class. */
+  /** Just there to ensure vtable generation for visitor and a common base-class. */
   virtual ~Visitor();
 };
 
@@ -19,7 +19,7 @@ public:
 class Operator
 {
 public:
-  /** Just there to ensure vtable generation custom operator and a common base-class. */
+  /** Just there to ensure vtable generation for operator and a common base-class. */
   virtual ~Operator();
 };
 

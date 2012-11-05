@@ -5,7 +5,7 @@
 
 namespace iNA {
 
-/** Simple test cases custom the expression parser and serialization. */
+/** Simple test cases for the expression parser and serialization. */
 class ExpressionParserTest : public UnitTest::TestCase
 {
 public:

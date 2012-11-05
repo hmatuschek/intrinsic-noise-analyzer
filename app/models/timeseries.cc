@@ -109,7 +109,7 @@ Table::saveAsText(QFile &file)
 
   // Write header:
   str << "# ";
-  custom (int i=0; i<this->data.cols(); i++)
+  for (int i=0; i<this->data.cols(); i++)
   {
     str << this->getColumnName(i).toStdString() << "\t";
   }
@@ -117,11 +117,11 @@ Table::saveAsText(QFile &file)
   file.write(str.str().c_str());
 
   // Write data:
-  custom (int i=0; i<this->data.rows(); i++)
+  for (int i=0; i<this->data.rows(); i++)
   {
     str.str("");
 
-    custom (int j=0; j<this->data.cols()-1; j++)
+    for (int j=0; j<this->data.cols()-1; j++)
     {
       str << this->data(i,j) << "\t";
     }

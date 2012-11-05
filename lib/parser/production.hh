@@ -31,7 +31,7 @@ public:
 
 
 protected:
-  /** Holds the type of the node, see @c Type custom the possible node types. */
+  /** Holds the type of the node, see @c Type for the possible node types. */
   Type   type;
 
   /** If the node is a token-production, this index is the token-index. If the node is an
@@ -102,7 +102,7 @@ public:
 
 
 /**
- * Baseclass custom all productions.
+ * Baseclass for all productions.
  *
  * By default this class implements a list production, where all child productions must match in
  * the given order.
@@ -131,7 +131,7 @@ public:
   /** Destructor. */
   virtual ~Production();
 
-  /** Percustomms parsing and assembles the CST. If the production is successful, it initializes
+  /** Performs parsing and assembles the CST. If the production is successful, it initializes
    * the given CST element. */
   virtual void parse(Lexer &lexer, ConcreteSyntaxTree &element);
 };

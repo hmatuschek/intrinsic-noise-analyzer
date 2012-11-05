@@ -24,22 +24,22 @@ StochasticSimulator::StochasticSimulator(const Ast::Model &model, int size, int 
   // seed random number generators with a single seed
   rand.resize(this->num_threads);
   rand[0].seed(seed);
-  custom(size_t i=1;i<rand.size();i++)
+  for(size_t i=1;i<rand.size();i++)
       rand[i].seed(rand[i-1].rand_int());
 
   // make index table
-  custom(size_t i=0; i<this->numSpecies(); i++)
+  for(size_t i=0; i<this->numSpecies(); i++)
      this->stateIndex.insert(std::make_pair(this->getSpecies(i)->getSymbol(),i));
 
   // fold all constants
   Trafo::ConstantFolder constants(*this);
-  custom(size_t i=0;i<this->propensities.size();i++)
+  for(size_t i=0;i<this->propensities.size();i++)
         this->propensities[i] = constants.apply(this->propensities[i]);
 
   // evaluate initial concentrations & get volumes
   Trafo::InitialValueFolder evICs(*this);
 
-  custom(size_t i=0; i<species.size();i++)
+  for(size_t i=0; i<species.size();i++)
   {
      ics(i)=evICs.evaluate(this->species[i]);
      if(ics(i)>0.)
@@ -71,7 +71,7 @@ StochasticSimulator::StochasticSimulator(const Ast::Model &model, int size, int 
 
   Utils::Message msg = LOG_MESSAGE(Utils::Message::DEBUG);
   msg << "SSA initial copy numbers: ";
-  custom(size_t i=0; i<numSpecies(); i++)
+  for(size_t i=0; i<numSpecies(); i++)
   {
       if(this->getSpecies(i)->hasName())
         msg<<this->getSpecies(i)->getName();
@@ -83,7 +83,7 @@ StochasticSimulator::StochasticSimulator(const Ast::Model &model, int size, int 
   Utils::Logger::get().log(msg);
 
   // initialize ensemble
-  custom(int i=0; i<this->ensembleSize;i++)
+  for(int i=0; i<this->ensembleSize;i++)
   {
      this->observationMatrix.row(i)=ics;
   }
@@ -103,12 +103,12 @@ StochasticSimulator::evaluate(const Eigen::VectorXd &populationVec, Eigen::Vecto
 {
   // Assemble substitutions
   GiNaC::exmap substitutions;
-  custom (size_t i=0; i<numSpecies(); i++) {
+  for (size_t i=0; i<numSpecies(); i++) {
     substitutions[getSpecies(i)->getSymbol()] = populationVec[i];
   }
 
   // then evaluate propensities
-  custom (size_t i=0; i<this->numReactions(); i++) {
+  for (size_t i=0; i<this->numReactions(); i++) {
     GiNaC::ex value = GiNaC::evalf(this->propensities[i].subs(substitutions));
     if (! GiNaC::is_a<GiNaC::numeric>(value)) {
       SymbolError err;
@@ -136,7 +136,7 @@ StochasticSimulator::getHistogram(size_t speciesId,std::map<double,double> &hist
 {
 
     //hist.clear();
-    custom(int sid=0; sid<observationMatrix.rows(); sid++)
+    for(int sid=0; sid<observationMatrix.rows(); sid++)
     {
         double val = observationMatrix(sid,speciesId);
         std::map<double,double>::iterator it = hist.find(val);
@@ -164,7 +164,7 @@ StochasticSimulator::stats(Eigen::VectorXd &mean, Eigen::MatrixXd &covariance, E
   skewness = Eigen::VectorXd::Zero(this->numSpecies());
 
   // calculate mean numbers
-  custom(int ids=0;ids<this->ensembleSize;ids++){
+  for(int ids=0;ids<this->ensembleSize;ids++){
     mean += this->observationMatrix.row(ids);
   }
 
@@ -173,12 +173,12 @@ StochasticSimulator::stats(Eigen::VectorXd &mean, Eigen::MatrixXd &covariance, E
 
   int idx=0;
 
-  custom(size_t i=0; i<this->numSpecies(); i++)
+  for(size_t i=0; i<this->numSpecies(); i++)
   {
-    custom(size_t j=0;j<=i;j++)
+    for(size_t j=0;j<=i;j++)
     {
 
-      custom(int ids=0;ids<this->ensembleSize;ids++){
+      for(int ids=0;ids<this->ensembleSize;ids++){
         covariance(i,j) += this->observationMatrix.row(ids)(i)*this->observationMatrix.row(ids)(j);
       }
 
@@ -205,10 +205,10 @@ StochasticSimulator::stats(Eigen::VectorXd &mean, Eigen::MatrixXd &covariance, E
   double skewEstFac = 0;
   if (this->ensembleSize>2) skewEstFac = std::sqrt(this->ensembleSize*(this->ensembleSize-1))/(this->ensembleSize-2)/this->ensembleSize;
 
-  custom(size_t i=0; i<this->numSpecies(); i++)
+  for(size_t i=0; i<this->numSpecies(); i++)
   {
     // third moment
-    custom(int ids=0;ids<this->ensembleSize;ids++)
+    for(int ids=0;ids<this->ensembleSize;ids++)
     {
         double t = this->observationMatrix.row(ids)(i)-mean(i);
         skewness(i) += t*t*t;
@@ -238,7 +238,7 @@ StochasticSimulator::fluxStatistics(Eigen::VectorXd &mean, Eigen::MatrixXd &cova
     covariance = Eigen::MatrixXd::Zero(this->numReactions(),this->numReactions());
 
     // calculate mean fluxes
-    custom(int ids=0;ids<this->ensembleSize;ids++){
+    for(int ids=0;ids<this->ensembleSize;ids++){
      this->evaluate(this->observationMatrix.row(ids), prop);
      mean += prop;
      covariance += prop*prop.transpose();
@@ -264,7 +264,7 @@ StochasticSimulator::size()
 
 
 double
-StochasticSimulator::unicustomm()
+StochasticSimulator::uniform()
 {
   return this->rand[0].rand();
 }

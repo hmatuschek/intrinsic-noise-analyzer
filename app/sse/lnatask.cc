@@ -18,7 +18,7 @@ LNATask::LNATask(const SSETaskConfig &config, QObject *parent) :
   size_t column = 0;
 
   _timeseries.setColumnName(column, "t"); column++;
-  custom (int i=0; i<(int)_Ns; i++, column++) {
+  for (int i=0; i<(int)_Ns; i++, column++) {
     iNA::Ast::Species *species = config.getModel()->getSpecies(i);
     QString species_id = species->getIdentifier().c_str();
 
@@ -31,14 +31,14 @@ LNATask::LNATask(const SSETaskConfig &config, QObject *parent) :
     this->_timeseries.setColumnName(column, QString("%1").arg(_species_names[i]));
   }
 
-  custom (int i=0; i<(int)_Ns; i++) {
-    custom (int j=i; j<(int)_Ns; j++, column++) {
+  for (int i=0; i<(int)_Ns; i++) {
+    for (int j=i; j<(int)_Ns; j++, column++) {
       this->_timeseries.setColumnName(
             column,QString("cov(%1,%2)").arg(_species_names[i]).arg(_species_names[j]));
     }
   }
 
-  custom (int i=0; i<(int)_Ns; i++, column++)
+  for (int i=0; i<(int)_Ns; i++, column++)
   {
     this->_timeseries.setColumnName(
           column, QString("EMRE(%1)").arg(_species_names[i]));
@@ -71,13 +71,13 @@ LNATask::process()
   // Holds the update to the next state (reduced state)
   Eigen::VectorXd dx(_config.getModelAs<iNA::Models::LNAmodel>()->getDimension());
 
-  // Holds the concentrations custom each species (full state)
+  // Holds the concentrations for each species (full state)
   Eigen::VectorXd concentrations(_Ns);
 
   // Holds the covariance matrix of species concentrations
   Eigen::MatrixXd cov(_Ns, _Ns);
 
-  // Holds EMRE correction custom state:
+  // Holds EMRE correction for state:
   Eigen::VectorXd emre(_Ns);
 
   // Allocate output vector
@@ -91,30 +91,30 @@ LNATask::process()
   setState(Task::RUNNING, "Run analysis...");
   setProgress(0.0);
 
-  /* Percustomm integration */
+  /* Perform integration */
   double t  = _config.getIntegrationRange().getStartTime();
   double dt = _config.getIntegrationRange().getStepSize();
 
   // store initial state RE
   output_vector(0) = t;
-  custom (size_t j=0; j<_Ns; j++) {
+  for (size_t j=0; j<_Ns; j++) {
     output_vector(1+j) = concentrations(j);
   }
   // store initial state LNA
   size_t idx = 1 + _Ns;
-  custom (size_t j=0; j<_Ns; j++) {
-    custom (size_t k=j; k<_Ns; k++, idx++) {
+  for (size_t j=0; j<_Ns; j++) {
+    for (size_t k=j; k<_Ns; k++, idx++) {
       output_vector(idx) = cov(j, k);
     }
   }
   // store initial state EMRE
-  custom (size_t j=0; j<_Ns; j++, idx++) {
+  for (size_t j=0; j<_Ns; j++, idx++) {
     output_vector(idx) = emre(j) + concentrations(j);
   }
   this->_timeseries.append(output_vector);
 
   // Integration loop:
-  custom (size_t i=0; i<_config.getIntegrationRange().getSteps(); i++)
+  for (size_t i=0; i<_config.getIntegrationRange().getSteps(); i++)
   {
     // Check if task shall terminate:
     if (Task::TERMINATING == this->getState()) {
@@ -141,20 +141,20 @@ LNATask::process()
     output_vector(0) = t;
 
     // Store states of selected species:
-    custom (size_t j=0; j<_Ns; j++) {
+    for (size_t j=0; j<_Ns; j++) {
       output_vector(1+j) = concentrations(j);
     }
 
     // Store cov() of species.
     size_t idx = 1 + _Ns;
-    custom (size_t j=0; j<_Ns; j++) {
-      custom (size_t k=j; k<_Ns; k++, idx++) {
+    for (size_t j=0; j<_Ns; j++) {
+      for (size_t k=j; k<_Ns; k++, idx++) {
         output_vector(idx) = cov(j, k);
       }
     }
 
     // Store EMRE correction + LNA state:
-    custom (size_t j=0; j<_Ns; j++, idx++) {
+    for (size_t j=0; j<_Ns; j++, idx++) {
       output_vector(idx) = emre(j) + concentrations(j);
     }
 
@@ -216,7 +216,7 @@ LNATask::instantiateInterpreter()
           *_config.getModelAs<iNA::Models::LNAmodel>(),
           _config.getOptLevel(), _config.getNumEvalThreads(), false);
 
-    // Instantiate integrator custom that engine:
+    // Instantiate integrator for that engine:
     switch (_config.getIntegrator()) {
     case SSETaskConfig::RungeKutta4:
       _stepper = new ODE::RungeKutta4< Models::GenericSSEinterpreter<
@@ -289,7 +289,7 @@ LNATask::instantiateInterpreter()
           *_config.getModelAs<iNA::Models::LNAmodel>(),
           _config.getOptLevel(), _config.getNumEvalThreads(), false);
 
-    // Instantiate integrator custom that engine:
+    // Instantiate integrator for that engine:
     switch (_config.getIntegrator()) {
       case SSETaskConfig::RungeKutta4:
         _stepper = new ODE::RungeKutta4< Models::GenericSSEinterpreter<
@@ -362,7 +362,7 @@ LNATask::instantiateInterpreter()
           *_config.getModelAs<iNA::Models::LNAmodel>(),
           _config.getOptLevel(), _config.getNumEvalThreads(), false);
 
-    // Instantiate integrator custom that engine:
+    // Instantiate integrator for that engine:
     switch (_config.getIntegrator()) {
     case SSETaskConfig::RungeKutta4:
       _stepper = new ODE::RungeKutta4< Models::GenericSSEinterpreter<
@@ -436,7 +436,7 @@ LNATask::instantiateInterpreter()
           *_config.getModelAs<iNA::Models::LNAmodel>(),
           _config.getOptLevel(), _config.getNumEvalThreads(), false);
 
-    // Instantiate integrator custom that engine:
+    // Instantiate integrator for that engine:
     switch (_config.getIntegrator()) {
     case SSETaskConfig::RungeKutta4:
       _stepper = new ODE::RungeKutta4< Models::GenericSSEinterpreter<

@@ -5,7 +5,7 @@
 #include "ssatask.hh"
 
 
-/** Simply plots the mean and std. dev custom the selected species. */
+/** Simply plots the mean and std. dev for the selected species. */
 class SSAPlot : public LinePlot
 {
   Q_OBJECT

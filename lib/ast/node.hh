@@ -11,7 +11,7 @@ namespace Ast {
 
 
 /**
- * Baseclass custom all AST nodes.
+ * Baseclass for all AST nodes.
  *
  * Does almost nothing, except holding the location in the sources and type of the node.
  *
@@ -35,9 +35,9 @@ public:
     RATE_RULE               ///< Node is a rate rule.
   } NodeType;
 
-  /** Visitor class custom all nodes. */
+  /** Visitor class for all nodes. */
   class Visitor { public: virtual void visit(const Node *node) = 0; };
-  /** Operator class custom all nodes. */
+  /** Operator class for all nodes. */
   class Operator { public: virtual void act(Node *node) = 0; };
 
 protected:
@@ -140,17 +140,17 @@ public:
   static bool isKineticLaw(const Node *node);
 
   /**
-   * Retunrs true, if the given node is a rule custom a variable.
+   * Retunrs true, if the given node is a rule for a variable.
    */
   static bool isRule(const Node *node);
 
   /**
-   * Returns true, if the given node is an assignment rule custom a variable.
+   * Returns true, if the given node is an assignment rule for a variable.
    */
   static bool isAssignmentRule(const Node *node);
 
   /**
-   * Returns true, if the given node is a rate rule custom a variable.
+   * Returns true, if the given node is a rate rule for a variable.
    */
   static bool isRateRule(const Node *node);
 };

@@ -30,8 +30,8 @@ int main(int argc, char *argv[])
     app->docTree()->addDocument(new DocumentItem(argv[1]));
   }
 
-  // Check custom new version of iNA:
-  app->checkcustomNewVersion();
+  // Check for new version of iNA:
+  app->checkForNewVersion();
 
   // run.
   qapp.exec();

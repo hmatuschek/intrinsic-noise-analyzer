@@ -48,10 +48,10 @@ IOSResultWidget::IOSResultWidget(IOSTaskWrapper *task_wrapper, QWidget *parent):
   _tableWrapper = new TableWrapper(_ios_task_wrapper->getIOSTask()->getTimeSeries(), this);
   _dataTable->setModel(_tableWrapper);
 
-  _plotButton = new QPushButton(tr("Quick plot"));
+  _plotButton = new QPushButton(tr("Plot statistics"));
   QObject::connect(_plotButton, SIGNAL(clicked()), this, SLOT(_onPlotButtonPressed()));
 
-  _genericPlotButton = new QPushButton(tr("Customized plot"));
+  _genericPlotButton = new QPushButton(tr("Custom plot"));
   QObject::connect(_genericPlotButton, SIGNAL(clicked()), this, SLOT(_onGenericPlotButtonPressed()));
 
   this->_saveButton = new QPushButton(tr("Save data to file"));
@@ -111,7 +111,7 @@ IOSResultWidget::_onGenericPlotButtonPressed()
   figure->getAxis()->setYLabel(dialog.yLabel());
 
   // Iterate over all graphs of the configured plot:
-  custom (size_t i=0; i<dialog.numGraphs(); i++) {
+  for (size_t i=0; i<dialog.numGraphs(); i++) {
     figure->getAxis()->addGraph(dialog.graph(i).create(figure->getStyle(i)));
   }
 
@@ -137,7 +137,7 @@ IOSResultWidget::_onSaveButtonPressed()
   {
     QMessageBox box;
     box.setWindowTitle(tr("Can not open file"));
-    box.setText(tr("Can not open file %1 custom writing").arg(filename));
+    box.setText(tr("Can not open file %1 for writing").arg(filename));
     box.exec();
   }
 

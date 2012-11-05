@@ -10,7 +10,7 @@ namespace Ast {
 
 
 /**
- * Elementary transcustommation (mostly scaling) of a base unit.
+ * Elementary transformation (mostly scaling) of a base unit.
  *
  * @ingroup ast
  */
@@ -85,7 +85,7 @@ public:
   /** Copy constructor. */
   ScaledBaseUnit(const ScaledBaseUnit &other);
 
-  /** Implements the assignment operator custom scaled units. */
+  /** Implements the assignment operator for scaled units. */
   const ScaledBaseUnit &operator =(const ScaledBaseUnit &other);
 
   /** Returns the multiplier of unit. */
@@ -103,27 +103,27 @@ public:
   /** Aka. is exponent == 1? Means if the unit is a linear scaling of a base unit. */
   bool isLinScaling() const;
 
-  /** Returns true, if the ScaledUnit is a proper unit custom substances.
+  /** Returns true, if the ScaledUnit is a proper unit for substances.
    * I.e., if the unit is a linear scaling of either: @c ScaledUnit::MOLE, @c ScaledUnit::ITEM,
    * @c ScaledUnit::GRAM, @c ScaledUnit::KILOGRAM or @c ScaledUnit::DIMENSIONLESS. */
   bool isSubstanceUnit() const;
 
-  /** Returns true, if the ScaledUnit is a proper unit custom volumes.
+  /** Returns true, if the ScaledUnit is a proper unit for volumes.
    * I.e. if the unit is a linear scaling of @c ScaledUnit::LITRE or @c ScaledUnit::DIMENSIONLESS
    * or if it is a qubic scaling of @c ScaledUnit::METRE. */
   bool isVolumeUnit() const;
 
-  /** Returns true, if the ScaledUnit is a proper unit custom areas.
+  /** Returns true, if the ScaledUnit is a proper unit for areas.
    * I.e., if the unit is a linear scaling of @c ScaledUnit::DIMENSIONLESS or a quadratic scaling
    * of @c ScaledUnit::METRE. */
   bool isAreaUnit() const;
 
-  /** Returns true, if the ScaledUnit is a proper unit custom length.
+  /** Returns true, if the ScaledUnit is a proper unit for length.
    * i.e. if the unit is a linear scaling of @c ScaledUnit::METRE or
    * @c ScaledUnit::DIMENSIONLESS. */
   bool isLengthUnit() const;
 
-  /** Returns true, if the ScaledUnit is a proper unit of custom time.
+  /** Returns true, if the ScaledUnit is a proper unit of for time.
    * I.e. if the unit is a linear scaling of @c ScaledUnit::TIME or @c ScaledUnit::DIMENSIONLESS. */
   bool isTimeUnit() const;
 
@@ -200,7 +200,7 @@ public:
   /** Returns the common scale of the unit. */
   double getScale() const;
 
-  /** Returns the number of scaled base units that customm this unit. Note, custom a dimensionless unit
+  /** Returns the number of scaled base units that form this unit. Note, for a dimensionless unit
    * this figure is 0. */
   size_t size() const;
 
@@ -259,9 +259,9 @@ public:
 class UnitDefinition : public Definition
 {
 public:
-  /** Visitor class custom unit definitions. */
+  /** Visitor class for unit definitions. */
   class Visitor { public: virtual void visit(const UnitDefinition *unit) = 0; };
-  /** Operator class custom unit definitions. */
+  /** Operator class for unit definitions. */
   class Operator { public: virtual void act(UnitDefinition *unit) = 0; };
 
 protected:
@@ -284,7 +284,7 @@ public:
   /** Simply dumps the unit-definition. */
   virtual void dump(std::ostream &str);
 
-  /** Handles a visitor custom the unit definition. */
+  /** Handles a visitor for the unit definition. */
   virtual void accept(Ast::Visitor &visitor) const;
 
   /** Applies an operator on the unit definition. */

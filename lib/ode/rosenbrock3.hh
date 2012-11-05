@@ -38,7 +38,7 @@ public:
 
 
 /**
- * Stepper custom the implicit Rosenbrock method of 3th order, custom stiff, not-explicit
+ * Stepper for the implicit Rosenbrock method of 3th order, for stiff, not-explicit
  * time-dependent ODE systems.
  *
  * Constants and implementation are taken from @cite shampine1982 as:
@@ -61,7 +61,7 @@ public:
  * \end{aligned}
  * @f]
  *
- * @todo May also have a look in "Modified Rosenbrock methods custom stiff systems."
+ * @todo May also have a look in "Modified Rosenbrock methods for stiff systems."
  * 1982 by H. Shintani in "Hiroschima Mathematical Journal".
  *
  * In contrast to the implementation shown in @cite press2007, this implementation uses the maximum
@@ -116,7 +116,7 @@ public:
 
 
   /**
-   * Percustomms the step, implements @c Stepper interface.
+   * Performs the step, implements @c Stepper interface.
    *
    * This method calculates y(t+dt), given y(t), on exit the difference (y(t+dt)-y(t)) is stored
    * in @c step.
@@ -135,7 +135,7 @@ protected:
   /**
    * Implements the step-size control.
    *
-   * @todo Think of an general stepper function, that returns some incustommation about the
+   * @todo Think of an general stepper function, that returns some information about the
    *       error made in a integration step. Then, implement a abstract adaptive step-size control.
    */
   inline void control(const Eigen::VectorXd &state, double t, Eigen::VectorXd &delta, double dt)
@@ -194,7 +194,7 @@ protected:
 
     // Return error estimate:
     double err = 0.0, sk;
-    custom (size_t i=0; i<system.getDimension(); i++) {
+    for (size_t i=0; i<system.getDimension(); i++) {
       if (Math::isNotValue(yerr[i])) {
         return std::numeric_limits<double>::infinity();
       }

@@ -66,12 +66,12 @@ protected:
      Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Interpreter jacobian_interpreter;
 
      /**
-      * The bytecode custom the ODE.
+      * The bytecode for the ODE.
       */
      Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Code ODEcode;
 
      /**
-      * The bytecode custom the Jacobian.
+      * The bytecode for the Jacobian.
       */
      Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Code jacobianCode;
 
@@ -126,7 +126,7 @@ public:
          //std::cerr << updateVector;
          compiler.finalize(0);
 
-         // Set bytecode custom interpreter
+         // Set bytecode for interpreter
          this->interpreter.setCode(&(this->ODEcode));
          this->jacobian_interpreter.setCode(&(this->jacobianCode));
 
@@ -225,7 +225,7 @@ public:
       const double stpmax=this->parameters.STPMX*std::max(conc.norm(),double(dim));
 
 
-      custom(this->iterations=1;this->iterations<parameters.maxIterations;this->iterations++)
+      for(this->iterations=1;this->iterations<parameters.maxIterations;this->iterations++)
       {
 
           // evaluate rate equations
@@ -241,7 +241,7 @@ public:
               return NegativeValues;
           }
 
-          // test custom convergence of REs
+          // test for convergence of REs
           if ( maxNorm(this->ODEs) < this->parameters.TOLF )
           {
              return Success;
@@ -258,9 +258,9 @@ public:
             default: break;
           }
 
-          // test custom convergence of dx
+          // test for convergence of dx
           test = 0.;
-          custom(size_t i=0;i<dim;i++)
+          for(size_t i=0;i<dim;i++)
           {
               temp = (std::abs(conc(i)-conc_old(i)))/std::max(conc(i),1.);
               if (temp > test) test = temp;
@@ -320,11 +320,11 @@ public:
       }
       //< returns new outState and f, also updates REs
 
-      // check custom spurious convergence of nablaf = 0
+      // check for spurious convergence of nablaf = 0
       if (lcheck==LineSearchFailed) {
          test = 0.0;
          den = std::max(f,0.5*double(dim));
-         custom(size_t i=0; i<dim;i++)
+         for(size_t i=0; i<dim;i++)
          {
              temp = std::abs(nablaf(i))*std::max(std::abs(outState(i)),1.)/den;
              if (temp > test) test = temp;
@@ -343,7 +343,7 @@ public:
   }
 
   /**
-   * Simple inline function that attempts to find a solution within the precision of the NLE solver (advantageous custom stiff systems).
+   * Simple inline function that attempts to find a solution within the precision of the NLE solver (advantageous for stiff systems).
    */
 
   inline Eigen::VectorXd precisionSolve(const Eigen::MatrixXd &B, const Eigen::VectorXd &A)
@@ -366,7 +366,7 @@ public:
   /**
    * Adaptive line search method.
    *
-   * The method uses a cubic interpolation custommula to find the optimal step size.
+   * The method uses a cubic interpolation formula to find the optimal step size.
    * \cite press2007
    *
    * @param xold : start function arguments
@@ -398,7 +398,7 @@ public:
 
       if (slope >= 0.) return RoundOffProblem;
       test = 0.0;
-      custom (size_t i=0;i<dim;i++)
+      for (size_t i=0;i<dim;i++)
       {
           temp=std::abs(dx(i))/std::max(abs(i),1);
           if (temp > test) test = temp;
@@ -408,7 +408,7 @@ public:
 
       // first do newton step
       lambda   = 1.0;
-      custom(;;){
+      for(;;){
 
           x = xold+lambda*dx;
 

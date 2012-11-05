@@ -3,7 +3,7 @@
  * @ingroup eval
  *
  * This module collects all classes needed to evaluate GiNaC expressions directly. This kind of
- * evaluation is just used custom testing the more efficient methods like @ref bci and @ref jit.
+ * evaluation is just used for testing the more efficient methods like @ref bci and @ref jit.
  */
 
 
@@ -19,9 +19,9 @@ namespace Eval {
 namespace direct {
 
 
-/** This template just collects the classes needed to percustomm the direct evaluation of GiNaC
+/** This template just collects the classes needed to perform the direct evaluation of GiNaC
  * expressions. This kind of evaluation is very slow, as GiNaC uses multiprecision arithmetic
- * to percustomm the evaluation. Therecustome this engine is just used to test the more efficient
+ * to perform the evaluation. Therefore this engine is just used to test the more efficient
  * engines like @ref bci or @ref jit.
  *
  * @ingroup direct

@@ -325,7 +325,7 @@ TestSuite::TestSuite(const std::string &desc)
 
 TestSuite::~TestSuite()
 {
-  custom(std::list<TestCallerInterface *>::iterator item = this->tests.begin();
+  for(std::list<TestCallerInterface *>::iterator item = this->tests.begin();
       item != this->tests.end(); item++) {
     delete *item;
   }
@@ -374,7 +374,7 @@ TestRunner::TestRunner(std::ostream &stream)
 
 TestRunner::~TestRunner()
 {
-  custom (std::list<TestSuite *>::iterator item = this->suites.begin();
+  for (std::list<TestSuite *>::iterator item = this->suites.begin();
        item != this->suites.end(); item++)
   {
     delete *item;
@@ -396,14 +396,14 @@ TestRunner::operator ()()
   size_t tests_failed = 0;
   size_t tests_error = 0;
 
-  custom (std::list<TestSuite *>::iterator suite = this->suites.begin();
+  for (std::list<TestSuite *>::iterator suite = this->suites.begin();
        suite != this->suites.end(); suite++)
   {
     // Dump Suite description
     this->stream << "Suite: " << (*suite)->getDescription() << std::endl;
 
-    // custom each test in suite:
-    custom (TestSuite::iterator test = (*suite)->begin(); test != (*suite)->end(); test++)
+    // For each test in suite:
+    for (TestSuite::iterator test = (*suite)->begin(); test != (*suite)->end(); test++)
     {
       this->stream << " test: " << (*test)->getDescription() << ": ";
 
@@ -456,7 +456,7 @@ TestRunner::printTraceBack()
   stack_strings = backtrace_symbols(stack_addrs, stack_depth);
 
   this->stream << "Traceback: " << std::endl;
-  custom (size_t i = 1; i < stack_depth; i++) {
+  for (size_t i = 1; i < stack_depth; i++) {
     this->stream << "   " << stack_strings[i] << std::endl;
   }
 

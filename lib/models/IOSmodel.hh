@@ -23,7 +23,7 @@ protected:
 
 private:
   /**
-   * Percustomms the common construction part, shared between all constructors.
+   * Performs the common construction part, shared between all constructors.
    */
   void postConstructor();
 
@@ -35,7 +35,7 @@ public:
   explicit IOSmodel(const Ast::Model &model);
 
   /**
-   * Get initial state vector custom specific initial conditions.
+   * Get initial state vector for specific initial conditions.
    */
   virtual void getInitial(InitialConditions &ICs, Eigen::VectorXd &x);
 

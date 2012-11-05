@@ -10,7 +10,7 @@
 /**
  * Wraps a @c Plot::Figure instance to be shown in the application side-panel.
  *
- * This wrapper will provide the construction of a view custom the plot (@c PlotView).
+ * This wrapper will provide the construction of a view for the plot (@c PlotView).
  *
  * @ingroup gui
  */

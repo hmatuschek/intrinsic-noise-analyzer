@@ -18,17 +18,17 @@ namespace Ast {
 class VariableDefinition : public Definition
 {
 public:
-  /** Visitor class custom variable definitions. */
+  /** Visitor class for variable definitions. */
   class Visitor {
   public:
-    /** Visitor method custom all variable definitions. */
+    /** Visitor method for all variable definitions. */
     virtual void visit(const VariableDefinition *var) = 0;
   };
 
   /** Operator class of variable definitions. */
   class Operator {
   public:
-    /** Operator method custom all variable definitions. */
+    /** Operator method for all variable definitions. */
     virtual void act(VariableDefinition *var) = 0;
   };
 
@@ -120,19 +120,19 @@ public:
   /** Returns a const reference to the rule attached to the variable. */
   const Rule *getRule() const;
 
-  /** (Re-) Sets the attached rule custom the variable. */
+  /** (Re-) Sets the attached rule for the variable. */
   void setRule(Rule *_rule);
 
   /** Just dumps a simple string representation of the variable definition into the given stream. */
   virtual void dump(std::ostream &str);
 
-  /** Handles a visitor custom the variable definition. */
+  /** Handles a visitor for the variable definition. */
   virtual void accept(Ast::Visitor &visitor) const;
 
   /** Applies an operator on the variable definition. */
   virtual void apply(Ast::Operator &op);
 
-  /** customwards the visitor to the rule if present. */
+  /** Forwards the visitor to the rule if present. */
   virtual void traverse(Ast::Visitor &visitor) const;
 
   /** Applies the operator on the rule if present. */

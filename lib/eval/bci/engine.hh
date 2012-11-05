@@ -5,7 +5,7 @@
  * This group collects all classes implementing the byte code interpreter. This kind of execution
  * engine compiles GiNaC expressions in a series of instructions, that are executed in a virtual
  * stack machine, the interpreter. This allows to evaluate GiNaC expressions in an efficient way,
- * while conserving the platcustomm independence of the direct GiNaC evaluation. The compiled byte
+ * while conserving the platform independence of the direct GiNaC evaluation. The compiled byte
  * code can then be optimized to increase the execution speed.
  */
 
@@ -32,7 +32,7 @@ class Engine {
 public:
   /** The code class, an instance of this class holds the byte-code to be executed. */
   typedef bci::Code Code;
-  /** Specifies the compiler class custom the execution engine. */
+  /** Specifies the compiler class for the execution engine. */
   typedef bci::Compiler<InType, OutType> Compiler;
   /** Specifies the interpreter class fot the execution engine. */
   typedef bci::Interpreter<InType, OutType> Interpreter;

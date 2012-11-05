@@ -14,7 +14,7 @@ namespace Models {
 
 /** This class defines the virtual base class of all interpreters. This is necessary to allow
  * the determination of the execution engine at runtime. This class does not define any methods
- * to be implemented by the @c GenericSSEinterpreter, it just customces a RTTI vtable custom all
+ * to be implemented by the @c GenericSSEinterpreter, it just forces a RTTI vtable for all
  * interpreters.
  */
 class SSEInterpreterInterface {
@@ -69,7 +69,7 @@ protected:
    bool hasJacobian;
 
    /**
-    * Holds the optimization level custom the generic compiler.
+    * Holds the optimization level for the generic compiler.
     */
    size_t opt_level;
 
@@ -103,7 +103,7 @@ public:
     Trafo::ConstantFolder constants(sseModel);
     updateVector = constants.apply(sseModel.getUpdateVector());
 
-    // Account custom conservation laws
+    // Account for conservation laws
     updateVector = ICs.apply(updateVector);
 
     // Compile expressions
@@ -112,7 +112,7 @@ public:
     compiler.compileVector(updateVector);
     compiler.finalize(opt_level);
 
-    // Set bytecode custom interpreter
+    // Set bytecode for interpreter
     this->interpreter.setCode(&(this->bytecode));
     this->jacobian_interpreter.setCode(&(this->jacobianCode));
 
@@ -135,9 +135,9 @@ public:
     Eigen::MatrixXex jacobian(sseModel.getDimension(), sseModel.getDimension());
     {
       std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less>::const_iterator it;
-      custom(it = sseModel.stateIndex.begin(); it != sseModel.stateIndex.end(); ++it)
+      for(it = sseModel.stateIndex.begin(); it != sseModel.stateIndex.end(); ++it)
       {
-        custom (size_t i=0; i<sseModel.getDimension(); i++)
+        for (size_t i=0; i<sseModel.getDimension(); i++)
           jacobian(i,(*it).second) = updateVector(i).diff((*it).first);
       }
     }

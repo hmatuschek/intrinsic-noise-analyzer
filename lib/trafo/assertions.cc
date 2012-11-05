@@ -20,7 +20,7 @@ NoRateRuleAssertion::apply(const Ast::VariableDefinition *var) throw (SBMLFeatur
 {
   if (var->hasRule() && Ast::Node::isRateRule(var->getRule())) {
     SBMLFeatureNotSupported err;
-    err << "Rate-rules custom variables not supported yet: "
+    err << "Rate-rules for variables not supported yet: "
         << " Variable " << var->getIdentifier() << " has a rate-rule.";
     throw err;
   }
@@ -84,7 +84,7 @@ NoAssignmentRuleAssertion::apply(const Ast::VariableDefinition *var)  throw (SBM
 {
   if ( var->hasRule() && Ast::Node::isAssignmentRule(var->getRule()) ) {
     SBMLFeatureNotSupported err;
-    err << "Assignment rules custom variables not supported yet: "
+    err << "Assignment rules for variables not supported yet: "
         << " Variable " << var->getIdentifier() << " has an assignment rule.";
     throw err;
   }
@@ -219,18 +219,18 @@ void
 ConstStoichiometryAssertion::apply(const Ast::Reaction *reac) throw (SBMLFeatureNotSupported)
 {
   // Check reactants:
-  custom (Ast::Reaction::const_iterator item=reac->reactantsBegin(); item!=reac->reactantsEnd(); item++) {
+  for (Ast::Reaction::const_iterator item=reac->reactantsBegin(); item!=reac->reactantsEnd(); item++) {
     SBMLFeatureNotSupported err;
-    err << "Stoichiometry expression custom reactant " << item->first->getIdentifier()
+    err << "Stoichiometry expression for reactant " << item->first->getIdentifier()
         << " in reaction " << reac->getIdentifier() << " is not a constant! "
         << "It is: " << item->second;
     throw err;
   }
 
   // Check products:
-  custom (Ast::Reaction::const_iterator item=reac->productsBegin(); item!=reac->productsEnd(); item++) {
+  for (Ast::Reaction::const_iterator item=reac->productsBegin(); item!=reac->productsEnd(); item++) {
     SBMLFeatureNotSupported err;
-    err << "Stoichiometry expression custom product " << item->first->getIdentifier()
+    err << "Stoichiometry expression for product " << item->first->getIdentifier()
         << " in reaction " << reac->getIdentifier() << " is not a constant! "
         << "It is: " << item->second;
     throw err;
@@ -361,7 +361,7 @@ LinearAssignmentRuleAssertion::LinearAssignmentRuleAssertion(const Ast::Model &m
   : _species_symbols(model.numSpecies(),1), _link_vector(model.numSpecies(),1)
 {
   // Collect list of species symbols:
-  custom (size_t i=0; i<model.numSpecies(); i++) {
+  for (size_t i=0; i<model.numSpecies(); i++) {
     _species_symbols(i,0) = model.getSpecies(i)->getSymbol();
   }
 }
@@ -371,8 +371,8 @@ LinearAssignmentRuleAssertion::visit(const Ast::AssignmentRule *rule)
 {
   GiNaC::ex remain = rule->getRule();
 
-  // Try to transcustomm the rule expression into a polynomial w.r.t. species variables:
-  custom (size_t i=0; i<_species_symbols.rows(); i++)
+  // Try to transform the rule expression into a polynomial w.r.t. species variables:
+  for (size_t i=0; i<_species_symbols.rows(); i++)
   {
     // Check degree of each variable, and
     if (1 < rule->getRule().degree(_species_symbols(i,0))) {
@@ -386,7 +386,7 @@ LinearAssignmentRuleAssertion::visit(const Ast::AssignmentRule *rule)
     GiNaC::ex c = rule->getRule().coeff(_species_symbols(i,0), 1);
 
     // check if coeff contains any symbols:
-    custom (size_t j=0; j<_species_symbols(i,0); j++) {
+    for (size_t j=0; j<_species_symbols(i,0); j++) {
       if (c.has(_species_symbols(j,0))) {
         SBMLFeatureNotSupported err;
         err << "Non-linear assignement rule: " << rule->getRule()

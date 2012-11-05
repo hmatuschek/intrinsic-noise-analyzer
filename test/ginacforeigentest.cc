@@ -1,9 +1,9 @@
-#include "ginaccustomeigentest.hh"
+#include "ginacforeigentest.hh"
 
 using namespace iNA;
 
 void
-GinaccustomEigenTest::testMatrixVectorMultiplication()
+GinacForEigenTest::testMatrixVectorMultiplication()
 {
 
     int dim=3;
@@ -29,8 +29,8 @@ GinaccustomEigenTest::testMatrixVectorMultiplication()
 
     // fill matrices
 
-    custom(int i=0;i<dim;i++){
-        custom(int j=0;j<dim;j++){
+    for(int i=0;i<dim;i++){
+        for(int j=0;j<dim;j++){
             mat(i,j)=v[i];
             matEigen(i,j)=v[i];
         }
@@ -38,8 +38,8 @@ GinaccustomEigenTest::testMatrixVectorMultiplication()
 
     // compute matrix-vector product explicitly
 
-    custom(int i=0;i<dim;i++){
-        custom(int j=0;j<dim;j++){
+    for(int i=0;i<dim;i++){
+        for(int j=0;j<dim;j++){
             vres[i]+=mat(i,j)*v[j];
         }
     }
@@ -50,7 +50,7 @@ GinaccustomEigenTest::testMatrixVectorMultiplication()
 
     // compare result
 
-    custom(int i=0;i<dim;i++)
+    for(int i=0;i<dim;i++)
     {
         GiNaC::ex x=vresEigen(i);
         GiNaC::ex y=vres[i];
@@ -62,7 +62,7 @@ GinaccustomEigenTest::testMatrixVectorMultiplication()
 }
 
 void
-GinaccustomEigenTest::testMatrixMatrixMultiplication()
+GinacForEigenTest::testMatrixMatrixMultiplication()
 {
 
     int dim=3;
@@ -85,8 +85,8 @@ GinaccustomEigenTest::testMatrixMatrixMultiplication()
 
     Eigen::MatrixXex mat2Eigen(dim,dim);
 
-    custom(int i=0;i<dim;i++){
-        custom(int j=0;j<dim;j++){
+    for(int i=0;i<dim;i++){
+        for(int j=0;j<dim;j++){
             mat1(i,j)=v[i];
             mat1Eigen(i,j)=v[i];
             mat2(i,j)=v[j]-1.;
@@ -95,9 +95,9 @@ GinaccustomEigenTest::testMatrixMatrixMultiplication()
     }
 
 
-    custom(int i=0;i<dim;i++){
-        custom(int j=0;j<dim;j++){
-            custom(int m=0;m<dim;m++){
+    for(int i=0;i<dim;i++){
+        for(int j=0;j<dim;j++){
+            for(int m=0;m<dim;m++){
                matres(i,j)+=mat1(i,m)*mat2(m,j);
             }
         }
@@ -112,9 +112,9 @@ GinaccustomEigenTest::testMatrixMatrixMultiplication()
     //std::cout<<"Matrix Eigen: "<<std::endl;
     //std::cout<<matresEigen<<std::endl<<std::endl;;
 
-    custom(int i=0;i<dim;i++)
+    for(int i=0;i<dim;i++)
     {
-        custom(int j=0;j<dim;j++)
+        for(int j=0;j<dim;j++)
         {
             GiNaC::ex x=matresEigen(i,j);
             GiNaC::ex y=matres(i,j);
@@ -126,15 +126,15 @@ GinaccustomEigenTest::testMatrixMatrixMultiplication()
 
 
 UnitTest::TestSuite *
-GinaccustomEigenTest::suite()
+GinacForEigenTest::suite()
 {
 
-  UnitTest::TestSuite *s = new UnitTest::TestSuite("Ginac custom Eigen Tests");
-  s->addTest(new UnitTest::TestCaller<GinaccustomEigenTest>("Matrix-Vector multiplication",
-                                               &GinaccustomEigenTest::testMatrixVectorMultiplication));
+  UnitTest::TestSuite *s = new UnitTest::TestSuite("Ginac for Eigen Tests");
+  s->addTest(new UnitTest::TestCaller<GinacForEigenTest>("Matrix-Vector multiplication",
+                                               &GinacForEigenTest::testMatrixVectorMultiplication));
 
-  s->addTest(new UnitTest::TestCaller<GinaccustomEigenTest>("Matrix-Matrix multiplication",
-                                               &GinaccustomEigenTest::testMatrixMatrixMultiplication));
+  s->addTest(new UnitTest::TestCaller<GinacForEigenTest>("Matrix-Matrix multiplication",
+                                               &GinacForEigenTest::testMatrixMatrixMultiplication));
 
   return s;
 }

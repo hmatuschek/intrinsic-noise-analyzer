@@ -30,7 +30,7 @@ IOSEMRETimeSeriesPlot::IOSEMRETimeSeriesPlot(const QStringList &selected_species
   Table *series = task->getTimeSeries();
 
   // Assemble plots
-  custom (size_t i=0; i<Nss; i++) {
+  for (size_t i=0; i<Nss; i++) {
     size_t species_idx = model->getSpeciesIdx(selected_species.at(i).toStdString());
     size_t mean_idx = offset + species_idx;
     size_t var_idx  = offset+Ns + species_idx*(Ns+1) - (species_idx*(species_idx+1))/2;
@@ -38,7 +38,7 @@ IOSEMRETimeSeriesPlot::IOSEMRETimeSeriesPlot(const QStringList &selected_species
                            series->getColumn(var_idx), series->getColumnName(mean_idx));
   }
 
-  // customce y plot-range to be [0, AUTO]:
+  // Force y plot-range to be [0, AUTO]:
   this->getAxis()->setYRangePolicy(
         Plot::RangePolicy(Plot::RangePolicy::FIXED, Plot::RangePolicy::AUTOMATIC));
   this->getAxis()->setYRange(0, 1);
@@ -77,8 +77,8 @@ IOSEMREComparePlot::IOSEMREComparePlot(const QStringList &selected_species, IOST
   QVector<Plot::LineGraph *> emre_graphs(Nsel);
   QVector<Plot::LineGraph *> ios_graphs(Nsel);
 
-  // Allocate a graph custom each colum in time-series:
-  custom (size_t i=0; i<Nsel; i++)
+  // Allocate a graph for each colum in time-series:
+  for (size_t i=0; i<Nsel; i++)
   {
     size_t species_idx = model->getSpeciesIdx(selected_species.at(i).toStdString());
 
@@ -109,8 +109,8 @@ IOSEMREComparePlot::IOSEMREComparePlot(const QStringList &selected_species, IOST
   }
 
   // Plot time-series:
-  custom (size_t j=0; j<series->getNumRows(); j+=idx_incr) {
-    custom (size_t i=0; i<Nsel; i++) {
+  for (size_t j=0; j<series->getNumRows(); j+=idx_incr) {
+    for (size_t i=0; i<Nsel; i++) {
       size_t species_idx = model->getSpeciesIdx(selected_species.at(i).toStdString());
       re_graphs[i]->addPoint((*series)(j,0), (*series)(j, species_idx+off_re));
       emre_graphs[i]->addPoint((*series)(j, 0), (*series)(j, species_idx+off_emre));
@@ -118,12 +118,12 @@ IOSEMREComparePlot::IOSEMREComparePlot(const QStringList &selected_species, IOST
     }
   }
 
-  // customce y plot-range to be [0, AUTO]:
+  // Force y plot-range to be [0, AUTO]:
   this->getAxis()->setYRangePolicy(
         Plot::RangePolicy(Plot::RangePolicy::FIXED, Plot::RangePolicy::AUTOMATIC));
   this->getAxis()->setYRange(0, 1);
 
-  custom (size_t i=0; i<Nsel; i++) {
+  for (size_t i=0; i<Nsel; i++) {
     re_graphs[i]->commit();
     emre_graphs[i]->commit();
     ios_graphs[i]->commit();
@@ -153,9 +153,9 @@ IOSEMRECorrelationPlot::IOSEMRECorrelationPlot(const QStringList &selected_speci
   size_t Ncov = (Nss*(Nss-1))/2;
   QVector<Plot::LineGraph *> graphs(Ncov);
 
-  // Allocate a graph custom each colum in time-series:
+  // Allocate a graph for each colum in time-series:
   Eigen::MatrixXi index_table(Nss, Nss); size_t graph_idx=0;
-  custom (size_t i=0; i<Nss; i++)
+  for (size_t i=0; i<Nss; i++)
   {
     iNA::Ast::Species *species_i = model->getSpecies(selected_species.at(i).toStdString());
     QString species_name_i = species_i->getIdentifier().c_str();
@@ -164,7 +164,7 @@ IOSEMRECorrelationPlot::IOSEMRECorrelationPlot(const QStringList &selected_speci
     size_t species_idx = model->getSpeciesIdx(species_i);
     index_table(i,i) = 1+2*Ns+(Ns*(Ns+1))/2; // offset to first cov column
     index_table(i,i) += species_idx*(model->numSpecies()+1) - (species_idx*(species_idx+1))/2;
-    custom (size_t j=i+1; j<Nss; j++, graph_idx++)
+    for (size_t j=i+1; j<Nss; j++, graph_idx++)
     {
       index_table(i,j) = index_table(j,i) = index_table(i,i)+j-i;
 
@@ -185,10 +185,10 @@ IOSEMRECorrelationPlot::IOSEMRECorrelationPlot(const QStringList &selected_speci
   if (0 == (idx_incr = series->getNumRows()/100)) { idx_incr = 1; }
 
   // Plot time-series:
-  custom (size_t k=0; k<series->getNumRows(); k+=idx_incr) {
+  for (size_t k=0; k<series->getNumRows(); k+=idx_incr) {
     size_t idx = 0;
-    custom (size_t i=0; i<Nss; i++) {
-      custom (size_t j=i+1; j<Nss; j++, idx++) {
+    for (size_t i=0; i<Nss; i++) {
+      for (size_t j=i+1; j<Nss; j++, idx++) {
         double x = (*series)(k, 0);
         double y = 0.0;
         if ((0.0 != (*series)(k, index_table(i,i))) && (0.0 != (*series)(k, index_table(j,j)))) {
@@ -201,13 +201,13 @@ IOSEMRECorrelationPlot::IOSEMRECorrelationPlot(const QStringList &selected_speci
     }
   }
 
-  // customce y plot-range to be [-1, 1]:
+  // Force y plot-range to be [-1, 1]:
   this->getAxis()->setYRangePolicy(
         Plot::RangePolicy(Plot::RangePolicy::FIXED, Plot::RangePolicy::FIXED));
   this->getAxis()->setYRange(-1.1, 1.1);
 
   // Finally commit changes:
-  custom (size_t i=0; i<Ncov; i++) {
+  for (size_t i=0; i<Ncov; i++) {
     graphs[i]->commit();
   }
   this->updateAxes();

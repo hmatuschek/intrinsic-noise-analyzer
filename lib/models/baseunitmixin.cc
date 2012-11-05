@@ -13,7 +13,7 @@ BaseUnitMixin::BaseUnitMixin(BaseModel &base)
   multiplier *= std::pow(10., base.getSubstanceUnit().getScale());
 
   // ensure unit of propensities is item/time:
-  custom (size_t i=0; i<base.propensities.size(); i++) {
+  for (size_t i=0; i<base.propensities.size(); i++) {
     if (base.getSubstanceUnit().hasVariantOf(Ast::ScaledBaseUnit::MOLE)) {
       base.propensities[i] *= multiplier*constants::AVOGADRO;
     } else if (base.getSubstanceUnit().hasVariantOf(Ast::ScaledBaseUnit::ITEM)) {

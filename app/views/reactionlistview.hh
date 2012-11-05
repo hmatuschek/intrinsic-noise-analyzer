@@ -20,13 +20,13 @@ public:
 
 
 private slots:
-  /** Callback custom the "new reaction" button. */
+  /** Callback for the "new reaction" button. */
   void onNewReaction();
   /** Callback to remove the selected reaction. */
   void onRemReaction();
   /** Enables or disabled the "delete reaction" button. */
   void onSelectionChanged(const QItemSelection &selected, const QItemSelection &deseleced);
-  /** Callback custom double click on a reaction. */
+  /** Callback for double click on a reaction. */
   void onReactionEditing(const QModelIndex &index);
 
 

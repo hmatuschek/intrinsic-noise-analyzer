@@ -16,7 +16,7 @@ SpeciesSelectionDialog::SpeciesSelectionDialog(Ast::Model *model, QWidget *paren
   _head_label->setVisible(false);
 
   _species_list = new QListWidget();
-  custom(size_t i=0; i<_model->numSpecies(); i++)
+  for(size_t i=0; i<_model->numSpecies(); i++)
   {
     // Determine name of species:
     QString name = _model->getSpecies(i)->getIdentifier().c_str();
@@ -25,7 +25,7 @@ SpeciesSelectionDialog::SpeciesSelectionDialog(Ast::Model *model, QWidget *paren
       name = _model->getSpecies(i)->getName().c_str();
     }
 
-    // Create list item custom species
+    // Create list item for species
     QListWidgetItem *item = new QListWidgetItem(name, _species_list);
     item->setData(Qt::UserRole, id);
     item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
@@ -62,7 +62,7 @@ QList<QString>
 SpeciesSelectionDialog::getSelectedSpecies() const {
   // Assemble list of enabled species:
   QList<QString> selected_species;
-  custom(size_t i=0; i<_model->numSpecies(); i++) {
+  for(size_t i=0; i<_model->numSpecies(); i++) {
     if (Qt::Checked == _species_list->item(i)->checkState()) {
       selected_species.append(
             _species_list->item(i)->data(Qt::UserRole).toString());
@@ -88,7 +88,7 @@ SpeciesSelectionDialog::_onAccepted() {
 void
 SpeciesSelectionDialog::_onSelectAllSpecies()
 {
-  custom (int i=0; i<_species_list->count(); i++) {
+  for (int i=0; i<_species_list->count(); i++) {
     _species_list->item(i)->setCheckState(Qt::Checked);
   }
 }
@@ -96,7 +96,7 @@ SpeciesSelectionDialog::_onSelectAllSpecies()
 void
 SpeciesSelectionDialog::_onSelectNoSpecies()
 {
-  custom (int i=0; i<_species_list->count(); i++) {
+  for (int i=0; i<_species_list->count(); i++) {
     _species_list->item(i)->setCheckState(Qt::Unchecked);
   }
 }
@@ -104,7 +104,7 @@ SpeciesSelectionDialog::_onSelectNoSpecies()
 void
 SpeciesSelectionDialog::_onInvertSelection()
 {
-  custom (int i=0; i<_species_list->count(); i++) {
+  for (int i=0; i<_species_list->count(); i++) {
     if (Qt::Checked == _species_list->item(i)->checkState()) {
       _species_list->item(i)->setCheckState(Qt::Unchecked);
     } else {

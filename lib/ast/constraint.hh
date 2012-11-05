@@ -10,21 +10,21 @@ namespace Ast {
 
 
 /**
- * Base class custom all constraints.
+ * Base class for all constraints.
  *
  * @ingroup ast
  */
 class Constraint : public Node
 {
 public:
-  /** Visitor class custom constraints. */
+  /** Visitor class for constraints. */
   class Visitor {
   public:
     /** Implements the visitor. */
     virtual void visit(const Ast::Constraint *constraint) = 0;
   };
 
-  /** Operator class custom constaints. */
+  /** Operator class for constaints. */
   class Operator {
   public:
     /** Handles the operator. */
@@ -36,7 +36,7 @@ protected:
   Constraint(Node::NodeType type);
 
 public:
-  /** Accepts a visitor custom the constraint. */
+  /** Accepts a visitor for the constraint. */
   virtual void accept(Ast::Visitor &visitor) const;
   /** Applies an operator on the constaints. */
   virtual void apply(Ast::Operator &op);

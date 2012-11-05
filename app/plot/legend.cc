@@ -135,7 +135,7 @@ Legend::boundingRect() const
 void
 Legend::setScheme(Configuration::Scheme scheme)
 {
-  custom(QList<LegendItem *>::iterator item = this->items.begin();
+  for(QList<LegendItem *>::iterator item = this->items.begin();
       item != this->items.end(); item++)
   {
     (*item)->setScheme(scheme);
@@ -148,7 +148,7 @@ Legend::updateBB()
 {
   QRectF box(0,0,0,0);
 
-  custom (QList<LegendItem *>::iterator item = this->items.begin();
+  for (QList<LegendItem *>::iterator item = this->items.begin();
        item != this->items.end(); item++)
   {
     (*item)->updateLayout();

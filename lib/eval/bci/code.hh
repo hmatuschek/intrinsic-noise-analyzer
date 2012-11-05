@@ -35,11 +35,11 @@ public:
   } OpCode;
 
 
-  /** Defines the function-codes custom all built-in functions. */
+  /** Defines the function-codes for all built-in functions. */
   typedef enum {
-    FUNCTION_ABS,  /// < Function code custom the absolute value "abs()".
-    FUNCTION_LOG,  /// < Function code custom the natural logarithm "log()".
-    FUNCTION_EXP   /// < Function code custom the exponential function "exp()".
+    FUNCTION_ABS,  /// < Function code for the absolute value "abs()".
+    FUNCTION_LOG,  /// < Function code for the natural logarithm "log()".
+    FUNCTION_EXP   /// < Function code for the exponential function "exp()".
   } FunctionCode;
 
 
@@ -142,7 +142,7 @@ public:
   /** Appends a given instruction to the byte-code. */
   const Code &operator<< (const Instruction &instruction);
 
-  /** Checks the byte-code custom constistency and determines the minimum stack-size needed to
+  /** Checks the byte-code for constistency and determines the minimum stack-size needed to
    * evaluate the code.
    * @returns False if the byte-code is not balanced. */
   bool check();

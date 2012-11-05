@@ -35,7 +35,7 @@ protected:
 
 public:
   /**
-   * Constructs a new parameter list item custom the given model.
+   * Constructs a new parameter list item for the given model.
    */
   ParametersItem(iNA::Ast::Model *model, QObject *parent=0);
 

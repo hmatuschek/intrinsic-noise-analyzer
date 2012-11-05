@@ -72,7 +72,7 @@ ExpressionParserTest::testParenthesis() {
 UnitTest::TestSuite *
 ExpressionParserTest::suite()
 {
-  UnitTest::TestSuite *s = new UnitTest::TestSuite("Tests custom expresion parser.");
+  UnitTest::TestSuite *s = new UnitTest::TestSuite("Tests for expresion parser.");
 
   s->addTest(new UnitTest::TestCaller<ExpressionParserTest>(
                "simple parser", &ExpressionParserTest::testParser));

@@ -72,13 +72,13 @@ PlotItem::removePlot()
   // Remove item from document tree:
   Application::getApp()->docTree()->removePlot(this);
 
-  // Mark object custom deletion:
+  // Mark object for deletion:
   this->deleteLater();
 }
 
 PlotItem::~PlotItem()
 {
-  // Hide and clean menu, and mark it custom deletion later on:
+  // Hide and clean menu, and mark it for deletion later on:
   this->context_menu->hide();
   this->context_menu->clear();
   this->context_menu->deleteLater();

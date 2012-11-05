@@ -25,13 +25,13 @@ public:
   /** Signals if the given item is editable. */
   Qt::ItemFlags flags(const QModelIndex &index) const;
 
-  /** Implementation custom the QAbstractTableModel. Returns the requested data. */
+  /** Implementation for the QAbstractTableModel. Returns the requested data. */
   QVariant data(const QModelIndex &index, int role) const;
 
   /** Implements resetting the name or value. */
   bool setData(const QModelIndex &index, const QVariant &value, int role);
 
-  /** Implementation of QAbstractItemMode, returns the headers custom columns. */
+  /** Implementation of QAbstractItemMode, returns the headers for columns. */
   QVariant headerData(int section, Qt::Orientation orientation, int role) const;
 
   /** Returns the number of parameters. */

@@ -138,7 +138,7 @@ Production::Production(size_t num_prod, ...)
   : elements()
 {
   va_list args; va_start(args, num_prod);
-  custom (size_t i=0; i<num_prod; i++)
+  for (size_t i=0; i<num_prod; i++)
   {
     this->elements.push_back(va_arg(args, Production *));
   }
@@ -162,11 +162,11 @@ Production::~Production()
 void
 Production::parse(Lexer &lexer, ConcreteSyntaxTree &element)
 {
-  // Allocate space custom all child-productions:
+  // Allocate space for all child-productions:
   ConcreteSyntaxTree::asProdNode(element, this->elements.size());
 
   std::list<Production *>::iterator iter=this->elements.begin();
-  custom (size_t i=0; i<this->elements.size(); i++, iter++)
+  for (size_t i=0; i<this->elements.size(); i++, iter++)
   {
     // Try to parse production
     (*iter)->parse(lexer, element[i]);
@@ -230,7 +230,7 @@ AltProduction::AltProduction(size_t num_prod, ...)
   : alternatives(num_prod)
 {
   va_list args; va_start(args, num_prod);
-  custom (size_t i=0; i<num_prod; i++)
+  for (size_t i=0; i<num_prod; i++)
   {
     alternatives[i] = va_arg(args, Production *);
   }
@@ -253,7 +253,7 @@ AltProduction::parse(Lexer &lexer, ConcreteSyntaxTree &element)
   SyntaxError coll_err(lexer.current().getLine());
   coll_err << "Unexpected token " << lexer.getTokenName(lexer.current().getId()) << ".";
 
-  custom (size_t i=0; i<this->alternatives.size(); i++)
+  for (size_t i=0; i<this->alternatives.size(); i++)
   {
     try
     {
@@ -269,7 +269,7 @@ AltProduction::parse(Lexer &lexer, ConcreteSyntaxTree &element)
     catch (SyntaxError &err) {
       coll_err.addExpectedTokens(err.getExpectedTokens());
 
-      // If the lexer state is terminal, customward error
+      // If the lexer state is terminal, forward error
       if (lexer.isTerminal()) {
         throw err;
       }
@@ -280,7 +280,7 @@ AltProduction::parse(Lexer &lexer, ConcreteSyntaxTree &element)
       // If this was the last try -> abort no alternative matched
       if ((i+1) == this->alternatives.size()) {
         coll_err << "expected one of: ";
-        custom (std::set<std::string>::const_iterator iter=coll_err.getExpectedTokens().begin();
+        for (std::set<std::string>::const_iterator iter=coll_err.getExpectedTokens().begin();
              iter != coll_err.getExpectedTokens().end(); iter++) {
           err << *iter << ", ";
         }
@@ -332,7 +332,7 @@ OptionalProduction::parse(Lexer &lexer, ConcreteSyntaxTree &element)
     lexer.drop_state();
     element.setMatched(true);
   } catch (SyntaxError &err) {
-    // If lexer is in terminal state -> customward error
+    // If lexer is in terminal state -> forward error
     if (lexer.isTerminal()) {
       throw err;
     }

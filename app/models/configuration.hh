@@ -14,11 +14,11 @@ protected:
   QSettings _settings;
   /** The default (system) text-font. */
   QFont _text_font;
-  /** The default font custom headings level 3. */
+  /** The default font for headings level 3. */
   QFont _h3_font;
-  /** The default font custom headings level 2. */
+  /** The default font for headings level 2. */
   QFont _h2_font;
-  /** The default font custom headings level 1. */
+  /** The default font for headings level 1. */
   QFont _h1_font;
 
 
@@ -53,7 +53,7 @@ public:
   /** Returns the time & date of the last update check. */
   QDateTime lastUpdateCheck();
   /** Sets the date-time of the last update check to now. */
-  void checkedcustomUpdate();
+  void checkedForUpdate();
 };
 
 #endif

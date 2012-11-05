@@ -3,7 +3,7 @@
 #include "../plot/variancelinegraph.hh"
 #include <QHBoxLayout>
 #include <QVBoxLayout>
-#include <QcustommLayout>
+#include <QFormLayout>
 #include <QLineEdit>
 #include <QLabel>
 #include <QDialogButtonBox>
@@ -51,14 +51,14 @@ GenericGraphConfig::xColumn() const {
 QString
 GenericGraphConfig::xColumnString() {
   std::stringstream buffer;
-  PlotcustommulaParser::serialize(_x_expression, buffer, _context);
+  PlotFormulaParser::serialize(_x_expression, buffer, _context);
   return QString(buffer.str().c_str());
 }
 
 bool
-GenericGraphConfig::setXColumn(const QString &custommula) {
-  if (! PlotcustommulaParser::check(custommula, _context)) { return false; }
-  _x_expression = PlotcustommulaParser::parse(custommula, _context);
+GenericGraphConfig::setXColumn(const QString &formula) {
+  if (! PlotFormulaParser::check(formula, _context)) { return false; }
+  _x_expression = PlotFormulaParser::parse(formula, _context);
   return true;
 }
 
@@ -71,14 +71,14 @@ GenericGraphConfig::meanYColumn() const {
 QString
 GenericGraphConfig::meanYColumnString() {
   std::stringstream buffer;
-  PlotcustommulaParser::serialize(_y_expression, buffer, _context);
+  PlotFormulaParser::serialize(_y_expression, buffer, _context);
   return QString(buffer.str().c_str());
 }
 
 bool
-GenericGraphConfig::setMeanYColumn(const QString &custommula) {
-  if (! PlotcustommulaParser::check(custommula, _context)) { return false; }
-  _y_expression = PlotcustommulaParser::parse(custommula, _context);
+GenericGraphConfig::setMeanYColumn(const QString &formula) {
+  if (! PlotFormulaParser::check(formula, _context)) { return false; }
+  _y_expression = PlotFormulaParser::parse(formula, _context);
   return true;
 }
 
@@ -90,14 +90,14 @@ GenericGraphConfig::varYColumn() const {
 QString
 GenericGraphConfig::varYColumnString() {
   std::stringstream buffer;
-  PlotcustommulaParser::serialize(_var_expression, buffer, _context);
+  PlotFormulaParser::serialize(_var_expression, buffer, _context);
   return QString(buffer.str().c_str());
 }
 
 bool
-GenericGraphConfig::setVarYColumn(const QString &custommula) {
-  if (! PlotcustommulaParser::check(custommula, _context)) { return false; }
-  _var_expression = PlotcustommulaParser::parse(custommula, _context);
+GenericGraphConfig::setVarYColumn(const QString &formula) {
+  if (! PlotFormulaParser::check(formula, _context)) { return false; }
+  _var_expression = PlotFormulaParser::parse(formula, _context);
   return true;
 }
 
@@ -121,14 +121,14 @@ GenericGraphConfig::create(const Plot::GraphStyle &style)
 {
   if (LINE_GRAPH == _type) {
     Plot::LineGraph *graph = new Plot::LineGraph(style);
-    custom (size_t i=0; i<_table->getNumRows(); i++) {
+    for (size_t i=0; i<_table->getNumRows(); i++) {
       graph->addPoint(_evalX(i), _evalY(i));
     }
     return graph;
   }
 
   Plot::VarianceLineGraph *graph = new Plot::VarianceLineGraph(style);
-  custom (size_t i=0; i<_table->getNumRows(); i++) {
+  for (size_t i=0; i<_table->getNumRows(); i++) {
     graph->addPoint(_evalX(i), _evalY(i), std::sqrt(evalYVar(i)));
   }
   return graph;
@@ -332,7 +332,7 @@ GenericPlotDialog::onUpdatePlot()
 
   // Assemble new plot
   _plot = new Plot::Figure();
-  custom (int i=0; i<_graphs.rowCount(QModelIndex()); i++) {
+  for (int i=0; i<_graphs.rowCount(QModelIndex()); i++) {
     Plot::Graph *graph = _graphs.graph(i).create(_plot->getStyle(i));
     _plot->getAxis()->addGraph(graph);
     _plot->addToLegend(_graphs.graph(i).label(), graph);
@@ -358,22 +358,22 @@ GenericPlotDialog::onAccepted() {
 
 
 /* ******************************************************************************************** *
- * Implementation of TimeSeriescustommulaEditor
+ * Implementation of TimeSeriesFormulaEditor
  * ******************************************************************************************** */
-GenericPlotcustommulaEditor::GenericPlotcustommulaEditor(Table *table, QWidget *parent)
+GenericPlotFormulaEditor::GenericPlotFormulaEditor(Table *table, QWidget *parent)
   : QWidget(parent), _table(table)
 {
-  _custommula = new QLineEdit("");
+  _formula = new QLineEdit("");
   QStringList columns;
-  custom (size_t i=0; i<_table->getNumColumns(); i++) { columns.append(_table->getColumnName(i)); }
+  for (size_t i=0; i<_table->getNumColumns(); i++) { columns.append(_table->getColumnName(i)); }
   _columns = new QCompleter(columns);
-  _columns->setWidget(_custommula);
+  _columns->setWidget(_formula);
   _columns->setCompletionMode(QCompleter::PopupCompletion);
   _select_column = new QPushButton("+");
 
   QHBoxLayout *layout = new QHBoxLayout();
   layout->setMargin(0); layout->setSpacing(0);
-  layout->addWidget(_custommula);
+  layout->addWidget(_formula);
   layout->addWidget(_select_column);
   setLayout(layout);
 
@@ -383,17 +383,17 @@ GenericPlotcustommulaEditor::GenericPlotcustommulaEditor(Table *table, QWidget *
 
 
 void
-GenericPlotcustommulaEditor::onColumnSelected(QModelIndex index) {
+GenericPlotFormulaEditor::onColumnSelected(QModelIndex index) {
   QAbstractProxyModel *proxy = static_cast<QAbstractProxyModel *>(_columns->completionModel());
   index = proxy->mapToSource(index);
-  QString custommula = _custommula->text();
-  int pos = _custommula->cursorPosition();
-  custommula.insert(pos, QString("$%1").arg(index.row()));
-  _custommula->setText(custommula);
+  QString formula = _formula->text();
+  int pos = _formula->cursorPosition();
+  formula.insert(pos, QString("$%1").arg(index.row()));
+  _formula->setText(formula);
 }
 
 void
-GenericPlotcustommulaEditor::showPopUp() {
+GenericPlotFormulaEditor::showPopUp() {
   _columns->setCompletionPrefix("");
   _columns->complete();
 }
@@ -433,27 +433,27 @@ GenericGraphDialog::__initGUI()
   }
 
   _label = new QLineEdit(_config.label());
-  _custommula_x = new GenericPlotcustommulaEditor(_data);
-  if ("0" == _config.xColumnString()) { _custommula_x->setcustommula("$0"); }
-  else { _custommula_x->setcustommula(_config.xColumnString()); }
-  _custommula_y = new GenericPlotcustommulaEditor(_data);
-  _custommula_y->setcustommula(_config.meanYColumnString());
-  _custommula_var_y  = new GenericPlotcustommulaEditor(_data);
+  _formula_x = new GenericPlotFormulaEditor(_data);
+  if ("0" == _config.xColumnString()) { _formula_x->setFormula("$0"); }
+  else { _formula_x->setFormula(_config.xColumnString()); }
+  _formula_y = new GenericPlotFormulaEditor(_data);
+  _formula_y->setFormula(_config.meanYColumnString());
+  _formula_var_y  = new GenericPlotFormulaEditor(_data);
   if (GenericGraphConfig::VARIANCE_GRAPH == _config.plotType()) {
-    _custommula_var_y->setcustommula(_config.varYColumnString());
-    _custommula_var_y->setEnabled(true);
+    _formula_var_y->setFormula(_config.varYColumnString());
+    _formula_var_y->setEnabled(true);
   } else {
-    _custommula_var_y->setEnabled(false);
+    _formula_var_y->setEnabled(false);
   }
 
   QDialogButtonBox *buttons = new QDialogButtonBox(QDialogButtonBox::Cancel|QDialogButtonBox::Ok);
 
-  QcustommLayout *grid = new QcustommLayout();
+  QFormLayout *grid = new QFormLayout();
   grid->addRow(tr("Plot type"), _plot_type);
   grid->addRow(tr("Label"), _label);
-  grid->addRow(tr("X="), _custommula_x);
-  grid->addRow(tr("Y="), _custommula_y);
-  grid->addRow(tr("var(Y)="), _custommula_var_y);
+  grid->addRow(tr("X="), _formula_x);
+  grid->addRow(tr("Y="), _formula_y);
+  grid->addRow(tr("var(Y)="), _formula_var_y);
 
   QVBoxLayout *layout = new QVBoxLayout();
   layout->addLayout(grid);
@@ -471,10 +471,10 @@ void
 GenericGraphDialog::onPlotTypeSelect(int index)
 {
   if (0 == index) {
-    _custommula_var_y->setEnabled(false);
+    _formula_var_y->setEnabled(false);
     _config.setPlotType(GenericGraphConfig::LINE_GRAPH);
   } else {
-    _custommula_var_y->setEnabled(true);
+    _formula_var_y->setEnabled(true);
     _config.setPlotType(GenericGraphConfig::VARIANCE_GRAPH);
   }
 }
@@ -486,15 +486,15 @@ GenericGraphDialog::checkInputAndExit()
   // Configure plot label
   _config.setLabel(_label->text());
 
-  // Get X custommula
-  if (! _config.setXColumn(_custommula_x->getcustommula())) { return; }
+  // Get X formula
+  if (! _config.setXColumn(_formula_x->getFormula())) { return; }
 
-  // Get Y custommula
-  if (! _config.setMeanYColumn(_custommula_y->getcustommula())) { return; }
+  // Get Y formula
+  if (! _config.setMeanYColumn(_formula_y->getFormula())) { return; }
 
-  // Get var custommula if needed.
+  // Get var formula if needed.
   if (GenericGraphConfig::VARIANCE_GRAPH == _config.plotType()) {
-    if (! _config.setVarYColumn(_custommula_var_y->getcustommula())) { return; }
+    if (! _config.setVarYColumn(_formula_var_y->getFormula())) { return; }
   }
 
   accept();
@@ -515,7 +515,7 @@ GenericPlotLabelDialog::GenericPlotLabelDialog(
   _xLabel = new QLineEdit(x_label);
   _yLabel = new QLineEdit(y_label);
 
-  QcustommLayout *label_layout = new QcustommLayout();
+  QFormLayout *label_layout = new QFormLayout();
   label_layout->addRow(tr("Title"), _figureTitle);
   label_layout->addRow(tr("X Label"), _xLabel);
   label_layout->addRow(tr("Y Label"), _yLabel);

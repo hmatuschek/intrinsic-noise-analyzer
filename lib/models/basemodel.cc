@@ -11,18 +11,18 @@ BaseModel::BaseModel(const Ast::Model &model)
     propensities(numReactions())
 {
   // Collect all constants and assignment rules, that are needed to be substituted
-  // becustome evaluation:
+  // before evaluation:
   Trafo::SubstitutionCollector collector(this->constant_substitution_table);
   this->accept(collector); this->constant_substitution_table.normalize();
 
   // Iterate over all species in SBML model:
-  custom (size_t i=0; i<this->numSpecies(); i++)
+  for (size_t i=0; i<this->numSpecies(); i++)
   {
     this->species[i] = this->getSpecies(i)->getSymbol();
   }
 
   // Iterate over all reactions in SBML model:
-  custom (size_t i=0; i<this->numReactions(); i++)
+  for (size_t i=0; i<this->numReactions(); i++)
   {
     Ast::Reaction *reac   = this->getReaction(i);
     this->reactions[i]    = reac;

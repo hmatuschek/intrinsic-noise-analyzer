@@ -7,7 +7,7 @@ using namespace iNA::Models;
 
 AssertNoConstantSpeciesMixin::AssertNoConstantSpeciesMixin(BaseModel &model)
 {
-  custom (size_t i=0; i<model.numSpecies(); i++)
+  for (size_t i=0; i<model.numSpecies(); i++)
   {
     Ast::Species *species = model.getSpecies(i);
 

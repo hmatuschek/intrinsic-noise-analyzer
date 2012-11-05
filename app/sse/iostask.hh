@@ -13,21 +13,21 @@
 #include <ode/stepper.hh>
 
 
-/** Represents a task custom the IOS (inverse omega square) time-course analysis.
+/** Represents a task for the IOS (inverse omega square) time-course analysis.
  * @ingroup gui */
 class IOSTask : public Task
 {
   Q_OBJECT
 
 protected:
-  /** Holds the configuration custom the task. */
+  /** Holds the configuration for the task. */
   SSETaskConfig config;
 
   /** Holds the number of species in the selected model. */
   size_t _Ns;
 
-  /** Holds an instance of the bytecode interpreter custom the LNA model, this object also implements
-   * the @c System interface custom the integrators. */
+  /** Holds an instance of the bytecode interpreter for the LNA model, this object also implements
+   * the @c System interface for the integrators. */
   iNA::Models::SSEInterpreterInterface *interpreter;
 
   /** Holds a weak reference to the stepper being used. */
@@ -36,7 +36,7 @@ protected:
   /** This table will hold the results of the integration as a time-series.
    * Lets assume there are N species, then this table will have
    * 1 + 3*N + (N*(N+1)) columns. The first column holds the integration time,
-   * the next N columns hold the mean custom the N selected species (RE) custom each time-step. The next
+   * the next N columns hold the mean for the N selected species (RE) for each time-step. The next
    * N*(N+1)/2 columns hold the vectorized upper-triangular part of the LNA covariance matrix.
    * The triangular covariance matrix is vectorized row-by-row. The next N columns hold the EMRE
    * corrections + RE means and the next N*(N+1)/2 column holds the LNA+IOS covariance. Finally,
@@ -46,23 +46,23 @@ protected:
   /** Holds the list of the names of the selected species. */
   QVector<QString> species_names;
 
-  /** Index table custom RE means. Maps the i-th selected species to the corresponding
+  /** Index table for RE means. Maps the i-th selected species to the corresponding
    * column in the timeseries table. */
   Eigen::VectorXi re_index_table;
 
-  /** Index table custom the LNA covariance matrix. Maps the i,j-th entry to the corresponding
+  /** Index table for the LNA covariance matrix. Maps the i,j-th entry to the corresponding
    * column in the timeseries table. */
   Eigen::MatrixXi lna_index_table;
 
-  /** Index table custom the RE+EMRE means. Maps the i-th selected species to the corresponding
+  /** Index table for the RE+EMRE means. Maps the i-th selected species to the corresponding
    * column in the timeseries table. */
   Eigen::VectorXi emre_index_table;
 
-  /** Index table custom the IOS covariance matrix. Maps the i,j-th entry to the corresponding
+  /** Index table for the IOS covariance matrix. Maps the i,j-th entry to the corresponding
    * column in the timeseries table. */
   Eigen::MatrixXi ios_index_table;
 
-  /** Index table custom the IOS-EMRE mean corrections. Maps the i-th selected species to the
+  /** Index table for the IOS-EMRE mean corrections. Maps the i-th selected species to the
    *  corresponding index in the timeseries table. */
   Eigen::VectorXi ios_emre_index_table;
 
@@ -98,12 +98,12 @@ public:
   /** Returns true, if there was at least one variance element negative. */
   bool hasNegativeVariance() const;
 
-  /** Returns the SSE configuration custom of the task. */
+  /** Returns the SSE configuration for of the task. */
   inline const SSETaskConfig &getConfig() const { return config; }
 
 
 protected:
-  /** Percustomms the analysis, will be run in a separate thread. */
+  /** Performs the analysis, will be run in a separate thread. */
   virtual void process();
 
 private:

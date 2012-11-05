@@ -16,7 +16,7 @@ class SpeciesView : public QWidget
   Q_OBJECT
 
 public:
-  /** Constructs a new view custom the given species item. */
+  /** Constructs a new view for the given species item. */
   explicit SpeciesView(SpeciesItem *species, QWidget *parent = 0);
 
 private slots:

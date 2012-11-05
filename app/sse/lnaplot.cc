@@ -28,8 +28,8 @@ LNATimeSeriesPlot::LNATimeSeriesPlot(QList<QString> &selected_species, LNATask *
   size_t Ntot = model->numSpecies();
   size_t Nsel = selected_species.size();
 
-  // Create a graph custom each colum in time-series:
-  custom (size_t i=0; i<Nsel; i++) {
+  // Create a graph for each colum in time-series:
+  for (size_t i=0; i<Nsel; i++) {
     size_t species_idx = model->getSpeciesIdx(selected_species.at(i).toStdString());
     size_t mean_idx = 1+species_idx;
     size_t var_idx  = 1+Ntot; // offset, first cov column
@@ -38,7 +38,7 @@ LNATimeSeriesPlot::LNATimeSeriesPlot(QList<QString> &selected_species, LNATask *
                      series->getColumnName(mean_idx));
   }
 
-  // customce y plot-range to be [0, AUTO]:
+  // Force y plot-range to be [0, AUTO]:
   this->getAxis()->setYRangePolicy(
         Plot::RangePolicy(Plot::RangePolicy::FIXED, Plot::RangePolicy::AUTOMATIC));
   this->getAxis()->setYRange(0, 1);
@@ -68,16 +68,16 @@ LNACorrelationPlot::LNACorrelationPlot(QList<QString> &selected_species, LNATask
   size_t N_cov = (Nsel*(Nsel-1))/2;
   QVector<Plot::LineGraph *> graphs(N_cov);
 
-  // Allocate a graph custom each colum in time-series:
+  // Allocate a graph for each colum in time-series:
   size_t offset=1+Ntot;
-  custom (size_t i=0; i<Nsel; i++) {
+  for (size_t i=0; i<Nsel; i++) {
     iNA::Ast::Species *species_i = model->getSpecies(selected_species.at(i).toStdString());
     size_t species_idx_i = model->getSpeciesIdx(species_i);
     QString species_name_i = data->getColumnName(1+species_idx_i);
     size_t var_idx_i = offset + species_idx_i*(Ntot+1) - (species_idx_i*(species_idx_i+1))/2;
     Eigen::VectorXd var_i = data->getColumn(var_idx_i);
 
-    custom (size_t j=i+1; j<Nsel; j++)
+    for (size_t j=i+1; j<Nsel; j++)
     {
       iNA::Ast::Species *species_j = model->getSpecies(selected_species.at(j).toStdString());
       size_t species_idx_j = model->getSpeciesIdx(species_j);
@@ -92,7 +92,7 @@ LNACorrelationPlot::LNACorrelationPlot(QList<QString> &selected_species, LNATask
     }
   }
 
-  // customce y plot-range to be [-1, 1]:
+  // Force y plot-range to be [-1, 1]:
   this->getAxis()->setYRangePolicy(
         Plot::RangePolicy(Plot::RangePolicy::FIXED, Plot::RangePolicy::FIXED));
   this->getAxis()->setYRange(-1.1, 1.1);

@@ -7,7 +7,7 @@
 #include "../models/variableruledata.hh"
 
 
-/** Trivial editor widget custom variable rules. */
+/** Trivial editor widget for variable rules. */
 class VariableRuleEditor : public QWidget
 {
   Q_OBJECT

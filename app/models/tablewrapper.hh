@@ -6,7 +6,7 @@
 
 
 /**
- * Implements the QAbstractTableModel custom a @c Table instance. Allows to show the table (timeseries)
+ * Implements the QAbstractTableModel for a @c Table instance. Allows to show the table (timeseries)
  * in a QTable view.
  *
  * @ingroup gui

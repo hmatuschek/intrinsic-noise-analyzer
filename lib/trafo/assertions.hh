@@ -2,7 +2,7 @@
 #define __FLUC_TRAFO_ASSERTIONS_HH__
 
 #include "ast/ast.hh"
-#include "ginacsupportcustomeigen.hh"
+#include "ginacsupportforeigen.hh"
 
 
 namespace iNA {
@@ -24,7 +24,7 @@ public:
   static void apply(const Ast::VariableDefinition *var) throw (SBMLFeatureNotSupported);
 
   /** Applies the assertion on the given model.
-   * @throws SBMLFeatureNotSupported If there is a rate-rule custom any variable. */
+   * @throws SBMLFeatureNotSupported If there is a rate-rule for any variable. */
   static void apply(const Ast::Model &model);
 };
 
@@ -69,13 +69,13 @@ public:
 };
 
 
-/** This class checks if there is an @c Ast::AssignmentRule defined custom any variable.
+/** This class checks if there is an @c Ast::AssignmentRule defined for any variable.
  * @ingroup trafo */
 class NoAssignmentRuleAssertion :
     public Ast::Visitor, public Ast::VariableDefinition::Visitor
 {
 public:
-  /** Checks if there is an @c AssignmentRule custom the variable. */
+  /** Checks if there is an @c AssignmentRule for the variable. */
   virtual void visit(const Ast::VariableDefinition *var);
 
 public:
@@ -94,7 +94,7 @@ class NoAssignmentRuleMixin
 {
 public:
   /** Constructor, throws a @ SBMLFeatureNotSupported exception if there is an @c AssginmentRule
-   * defined custom any variable. */
+   * defined for any variable. */
   NoAssignmentRuleMixin(const Ast::Model &model);
 };
 
@@ -228,7 +228,7 @@ public:
 };
 
 
-/** This class unifies some assertions that are required custom a "reasonable" model.
+/** This class unifies some assertions that are required for a "reasonable" model.
  * @ingroup trafo */
 class ReasonableModelAssertion
     : public NoExplicitTimeDependenceAssertion,

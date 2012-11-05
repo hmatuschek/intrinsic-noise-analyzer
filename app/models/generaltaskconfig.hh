@@ -9,9 +9,9 @@
 /**
  * Abstract @c Task config class.
  *
- * This class implements nothing, but defines the virtual base type custom all configuration
- * mixins, that implments secialized configurations custom specific tasks. custom each configuration
- * mixin, there is a corresponding wizard page class, that percustomms the actual UI part of the
+ * This class implements nothing, but defines the virtual base type for all configuration
+ * mixins, that implments secialized configurations for specific tasks. For each configuration
+ * mixin, there is a corresponding wizard page class, that performs the actual UI part of the
  * configuration.
  */
 class GeneralTaskConfig : public QObject
@@ -27,7 +27,7 @@ public:
 
 
 /**
- * Virtual configuration interface custom task-configs to deal with model selections.
+ * Virtual configuration interface for task-configs to deal with model selections.
  */
 class ModelSelectionTaskConfig
 {
@@ -44,7 +44,7 @@ public:
   ModelSelectionTaskConfig(const ModelSelectionTaskConfig &other);
   /** Destructor. */
   virtual ~ModelSelectionTaskConfig();
-  /** (Re-) Sets the document item of the model being selected custom analysis. */
+  /** (Re-) Sets the document item of the model being selected for analysis. */
   virtual void setModelDocument(DocumentItem *document);
   /** Returns the currently selected document item of the model to be analyzed. */
   virtual DocumentItem *getModelDocument();
@@ -52,7 +52,7 @@ public:
 
 
 /**
- * Virtual configuration interface custom task-configs that selects species from a @c Ast::Model.
+ * Virtual configuration interface for task-configs that selects species from a @c Ast::Model.
  */
 class SpeciesSelectionTaskConfig
 {
@@ -80,7 +80,7 @@ public:
 
 
 
-/** Virtual configuration interface custom the execution engine to use. */
+/** Virtual configuration interface for the execution engine to use. */
 class EngineTaskConfig
 {
 public:
@@ -100,7 +100,7 @@ protected:
   /** Holds the optimization level of code. */
   size_t _optLevel;
 
-  /** Holds the number of threads to use custom evaluation. */
+  /** Holds the number of threads to use for evaluation. */
   size_t _numEvalThreads;
 
 
@@ -124,7 +124,7 @@ public:
   /** Sets the code optimization level. */
   virtual void setOptLevel(size_t level);
 
-  /** Returns the number of threads to use custom expression evaluation. */
+  /** Returns the number of threads to use for expression evaluation. */
   virtual size_t getNumEvalThreads() const;
   virtual void setNumEvalThreads(size_t num);
 };
@@ -132,7 +132,7 @@ public:
 
 
 /**
- * Virtual configuration interface custom ODE integrator tasks.
+ * Virtual configuration interface for ODE integrator tasks.
  */
 class ODEIntTaskConfig
 {
@@ -143,7 +143,7 @@ public:
     RungeKuttaFehlberg45,  ///< The adaptive RKF45 integrator.
     LSODA,                 ///< Lsoda integrator.
     DormandPrince5,        ///< Precise Dopri integrator.
-    Rosenbrock4            ///< Implicit integrator custom stiff systems.
+    Rosenbrock4            ///< Implicit integrator for stiff systems.
   } Integrator;
 
 
@@ -152,11 +152,11 @@ protected:
   Integrator integrator;
   /** Holds the selected integration range. */
   iNA::ODE::IntegrationRange integration_range;
-  /** Optional, holds the itermediate steps (custom RK4). */
+  /** Optional, holds the itermediate steps (for RK4). */
   size_t intermediate_steps;
-  /** Holds the absolut error custom adaptive integrators. */
+  /** Holds the absolut error for adaptive integrators. */
   double epsilon_abs;
-  /** Holds the relative error custom adaptive integrators. */
+  /** Holds the relative error for adaptive integrators. */
   double epsilon_rel;
 
 public:

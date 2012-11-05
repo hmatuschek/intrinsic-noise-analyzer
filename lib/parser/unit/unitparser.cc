@@ -116,7 +116,7 @@ UnitParser::write(const Ast::Unit &unit, std::ostream &output)
     buffer.str(""); buffer << "1e" << unit.getScale(); factors.push_back(buffer.str());
   }
 
-  custom (Ast::Unit::iterator iter=unit.begin(); iter!=unit.end(); iter++) {
+  for (Ast::Unit::iterator iter=unit.begin(); iter!=unit.end(); iter++) {
     Ast::ScaledBaseUnit::BaseUnit bunit = iter->first; int exp = iter->second;
     buffer.str(""); buffer << Ast::ScaledBaseUnit::baseUnitName(bunit);
     if (1 != exp) { buffer << "^" << exp; }
@@ -127,7 +127,7 @@ UnitParser::write(const Ast::Unit &unit, std::ostream &output)
   if (factors.size() > 0) {
     std::list<std::string>::iterator factor = factors.begin();
     output << *factor; factor++;
-    custom(;factors.end() != factor; factor++) {
+    for(;factors.end() != factor; factor++) {
       output << "*" << *factor;
     }
   }

@@ -37,7 +37,7 @@ private:
   iNA::Ast::Model *_model;
   /** A label placed over the species list. */
   QLabel *_head_label;
-  /** The list widget custom species selection. */
+  /** The list widget for species selection. */
   QListWidget *_species_list;
 };
 

@@ -6,9 +6,9 @@
 #include "../models/reactionparameterlist.hh"
 
 /**
- * Represents a single @c Ast::Reaction custom the display in the application side-panel.
+ * Represents a single @c Ast::Reaction for the display in the application side-panel.
  *
- * This wrapper also provides the construction of a @c ReactionView instance custom the reaction.
+ * This wrapper also provides the construction of a @c ReactionView instance for the reaction.
  *
  * @ingroup gui
  */

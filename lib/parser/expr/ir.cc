@@ -25,10 +25,10 @@ public:
     // Skip empty sums:
     if (0 == add.nops()) { return; }
     // Process each summand
-    custom (size_t i=0; i<add.nops(); i++) { add.op(i).accept(*this); }
+    for (size_t i=0; i<add.nops(); i++) { add.op(i).accept(*this); }
     // Assemble sum
     SmartPtr<Node> rhs = _stack.back(); _stack.pop_back();
-    custom (size_t i=1; i<add.nops(); i++) {
+    for (size_t i=1; i<add.nops(); i++) {
       SmartPtr<Node> lhs = _stack.back(); _stack.pop_back();
       rhs = Node::createAdd(lhs, rhs);
     }
@@ -40,10 +40,10 @@ public:
     // Skip empty products:
     if (0 == mul.nops()) { return; }
     // Process each factor
-    custom (size_t i=0; i<mul.nops(); i++) { mul.op(i).accept(*this); }
+    for (size_t i=0; i<mul.nops(); i++) { mul.op(i).accept(*this); }
     // Assemble product
     SmartPtr<Node> rhs = _stack.back(); _stack.pop_back();
-    custom (size_t i=1; i<mul.nops(); i++) {
+    for (size_t i=1; i<mul.nops(); i++) {
       SmartPtr<Node> lhs = _stack.back(); _stack.pop_back();
       rhs = Node::createMul(lhs, rhs);
     }
@@ -84,7 +84,7 @@ public:
   void visit(const GiNaC::function &function) {
     // Process function arguments:
     std::vector< SmartPtr<Node> > arguments;
-    custom (size_t i=0; i<function.nops(); i++) {
+    for (size_t i=0; i<function.nops(); i++) {
       function.op(i).accept(*this);
       arguments[i] = _stack.back(); _stack.pop_back();
     }
@@ -371,7 +371,7 @@ Pass::~Pass() {
  * ********************************************************************************************* */
 PassManager::~PassManager()
 {
-  custom (std::list<Pass *>::iterator pass=_passes.begin(); pass!=_passes.end(); pass++) {
+  for (std::list<Pass *>::iterator pass=_passes.begin(); pass!=_passes.end(); pass++) {
     delete *pass;
   }
 }
@@ -390,7 +390,7 @@ PassManager::apply(SmartPtr<Node> &node) {
 rerun:
   child_matched = false;
   // then, traverse into child-nodes:
-  custom (size_t i=0; i<node->numArguments(); i++) {
+  for (size_t i=0; i<node->numArguments(); i++) {
     child_matched = (child_matched || apply(node->argument(i)));
   }
   matched = applyOnNode(node);
@@ -410,7 +410,7 @@ PassManager::applyOnNode(SmartPtr<Node> &value)
   bool matched = false;
 
 rerun:
-  custom (std::list<Pass *>::iterator pass=_passes.begin(); pass!=_passes.end(); pass++)
+  for (std::list<Pass *>::iterator pass=_passes.begin(); pass!=_passes.end(); pass++)
   {
     if ((*pass)->apply(value)) {
       matched = true; goto rerun;

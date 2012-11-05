@@ -13,7 +13,7 @@ iNA::MathTest::testErf()
   double x = x_min;
 
   // Sample intervall:
-  custom (size_t i=0; i<N; i++)
+  for (size_t i=0; i<N; i++)
   {
     UT_ASSERT_NEAR(erf(x), iNA::erf(x)); x += dx;
   }
@@ -23,7 +23,7 @@ iNA::MathTest::testErf()
 iNA::UnitTest::TestSuite *
 iNA::MathTest::suite()
 {
-  UnitTest::TestSuite *s = new UnitTest::TestSuite("Tests custom mathematical utilities.");
+  UnitTest::TestSuite *s = new UnitTest::TestSuite("Tests for mathematical utilities.");
   s->addTest(new UnitTest::TestCaller<MathTest>("erf()",
                                                 &MathTest::testErf));
 

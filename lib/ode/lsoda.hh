@@ -11,7 +11,7 @@ namespace ODE {
  * @cond 0
  * (exclude from docs)
  *
- * Defines the constants custom @c LSODA.
+ * Defines the constants for @c LSODA.
  */
 class LsodaConstants
 {
@@ -36,7 +36,7 @@ public:
   b) misuse of lsoda() in the example.
 
   The original source code came with no license or copyright
-  incustommation. I now release this file under the MIT/X11 license. All
+  information. I now release this file under the MIT/X11 license. All
   authors' notes are kept in this file.
 
   - Heng Li <lh3lh3@gmail.com>
@@ -59,16 +59,16 @@ public:
 
    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
    EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-   MERCHANTABILITY, FITNESS custom A PARTICULAR PURPOSE AND
+   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
-   BE LIABLE custom ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+   BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
    ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
    SOFTWARE.
 */
 
 /**
-* Repack of LSODA c from customtran tanslation
+* Repack of LSODA c from fortran tanslation
 * @todo convert all printf to exceptions
 * @todo incoorporate analytical Jacobian
 */
@@ -127,7 +127,7 @@ private:
  int      ml, mu, imxer;
  double   sqrteta, *yp1, *yp2;
 
-/* static variables custom lsoda() */
+/* static variables for lsoda() */
 
  double   ccmax, el0, h, hmin, hmxi, hu, rc, tn;
  int      illin, init, mxstep, mxhnil, nhnil, ntrep, nslast, nyh, ierpj, iersl,
@@ -140,15 +140,15 @@ private:
  int      mxstp0, mxhnl0; // maxstep and ?
 
 
-/* no static variable custom prja(), solsy() */
-/* static variables custom stoda() */
+/* no static variable for prja(), solsy() */
+/* static variables for stoda() */
 
  double   conit, crate, el[14], elco[13][14], hold, rmax, tesco[13][4];
  int      ialth, ipup, lmax, nslp;
  double   pdest, pdlast, ratio, cm1[13], cm2[6];
  int      icount, irflag;
 
-/* static variables custom various vectors and the Jacobian. */
+/* static variables for various vectors and the Jacobian. */
 
  double  **yh, **wm, *ewt, *savf, *acor;
  int     *ipvt;

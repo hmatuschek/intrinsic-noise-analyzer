@@ -4,7 +4,7 @@
 #include "openmp.hh"
 
 #include <QVBoxLayout>
-#include <QcustommLayout>
+#include <QFormLayout>
 
 
 /* ******************************************************************************************* *
@@ -89,7 +89,7 @@ SpeciesSelectionWizardPage::initializePage()
   iNA::Ast::Model *model = config.getModel();
 
   // Construct list of species
-  custom (size_t i=0; i<model->numSpecies(); i++)
+  for (size_t i=0; i<model->numSpecies(); i++)
   {
     QString species_name;
     QString species_id;
@@ -121,7 +121,7 @@ SpeciesSelectionWizardPage::validatePage()
   GeneralTaskWizard *wizard = static_cast<GeneralTaskWizard *>(this->wizard());
 
   QList<QString> list_of_species;
-  custom (int i=0; i<this->speciesList->count(); i++)
+  for (int i=0; i<this->speciesList->count(); i++)
   {
     if (Qt::Checked == this->speciesList->item(i)->checkState()) {
       list_of_species.append(this->speciesList->item(i)->data(Qt::UserRole).toString());
@@ -162,7 +162,7 @@ EngineWizardPage::EngineWizardPage(GeneralTaskWizard *parent, bool show_parallel
 
   // Construct code opt
   codeOpt = new QCheckBox();
-  codeOpt->setToolTip("Code optimization can be advantageous custom computational expensive calculations.");
+  codeOpt->setToolTip("Code optimization can be advantageous for computational expensive calculations.");
   codeOpt->setChecked(false);
 
   // Construct thread count
@@ -181,7 +181,7 @@ EngineWizardPage::EngineWizardPage(GeneralTaskWizard *parent, bool show_parallel
   QObject::connect(engineList, SIGNAL(currentIndexChanged(int)), this, SLOT(engineSelected(int)));
 
   // Assemble layout
-  QcustommLayout *layout = new QcustommLayout();
+  QFormLayout *layout = new QFormLayout();
   layout->addRow(tr("Execution engine"), engineList);
   layout->addRow(tr("Optimize code"), codeOpt);
   if (_show_parallel_engine)
@@ -280,7 +280,7 @@ IntegratorWizardPage::IntegratorWizardPage(QWidget *parent)
   ep_abs_val->setBottom(0); ep_rel->setValidator(ep_rel_val);
   this->registerField("epsilon_rel", ep_rel);
 
-  QcustommLayout *layout = new QcustommLayout();
+  QFormLayout *layout = new QFormLayout();
   layout->addRow(tr("Final time"), t);
   layout->addRow(tr("Plot points"), n);
   layout->addRow(tr("Number of intermediate steps"), intermediateSteps);
@@ -289,10 +289,10 @@ IntegratorWizardPage::IntegratorWizardPage(QWidget *parent)
   layout->addRow(tr("Max. relative error"), ep_rel);
 
   t->setToolTip("Final time of integration.");
-  n->setToolTip("Number of individual time points custom output.");
+  n->setToolTip("Number of individual time points for output.");
   intermediateSteps->setToolTip("Number of additional steps to be taken. \n"
                                 "Increasing this number can improve the accuracy of the computation at the cost of slower runtime.");
-  integrator->setToolTip("Sets the numerical algorithm custom ODE integration. \n LSODA is a good general-purpose choice.");
+  integrator->setToolTip("Sets the numerical algorithm for ODE integration. \n LSODA is a good general-purpose choice.");
 
   this->setLayout(layout);
 }

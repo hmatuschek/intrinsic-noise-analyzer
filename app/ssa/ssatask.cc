@@ -133,21 +133,21 @@ SSATask::SSATask(const SSATaskConfig &config, QObject *parent)
 
   // Assemble table header
   QVector<QString> species_names(_Ns);
-  custom (size_t i=0; i<_Ns; i++, column++)
+  for (size_t i=0; i<_Ns; i++, column++)
   {
     species_names[i] = simulator->getSpecies(i)->getIdentifier().c_str();
     if (simulator->getSpecies(i)->hasName()) {
       species_names[i] = simulator->getSpecies(i)->getName().c_str();
     }
 
-    // Assign column name custom species:
+    // Assign column name for species:
     this->time_series.setColumnName(column, species_names[i]);
   }
 
   // Assign names to covariances:
-  custom (size_t i=0; i<_Ns; i++)
+  for (size_t i=0; i<_Ns; i++)
   {
-    custom (size_t j=i; j<_Ns; j++, column++)
+    for (size_t j=i; j<_Ns; j++, column++)
     {
       QString name_a = species_names[i];
       QString name_b = species_names[j];
@@ -156,7 +156,7 @@ SSATask::SSATask(const SSATaskConfig &config, QObject *parent)
   }
 
   // Assign names to skewness:
-  custom (size_t i=0; i<_Ns; i++, column++) {
+  for (size_t i=0; i<_Ns; i++, column++) {
     this->time_series.setColumnName(column, QString("Skewness %1").arg(species_names[i]));
   }
 }
@@ -175,7 +175,7 @@ SSATask::process()
   this->setState(Task::RUNNING);
   this->setProgress(0.0);
 
-  custom (size_t i=0; i<this->time_series.getNumRows(); i++)
+  for (size_t i=0; i<this->time_series.getNumRows(); i++)
   {
     // Check if task shall terminate:
     if (Task::TERMINATING == this->getState())
@@ -190,10 +190,10 @@ SSATask::process()
     // Assemble timeseries row:
     Eigen::VectorXd row(this->time_series.getNumColumns());
     row(0) = i*dt;
-    custom (size_t j=0; j<_Ns; j++) {
+    for (size_t j=0; j<_Ns; j++) {
       row(1+j) = mean(j);
       row(1+_Ns+(_Ns*(_Ns+1))/2+j) = skewness(j);
-      custom (size_t k=j; k<_Ns; k++) {
+      for (size_t k=j; k<_Ns; k++) {
         size_t cov_jk = 1+_Ns+j*(_Ns+1)-(j*(j+1))/2 + (k-j);
         row(cov_jk) = cov(j, k);
       }

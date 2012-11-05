@@ -315,7 +315,7 @@ Axis::updatePlotRange()
     iter++;
   }
 
-  custom (; iter != this->graphs.end(); iter++) {
+  for (; iter != this->graphs.end(); iter++) {
     extent = extent.united((*iter)->getExtent());
   }
 
@@ -327,7 +327,7 @@ Axis::updatePlotRange()
 
 
 void
-Axis::customceRedraw()
+Axis::forceRedraw()
 {
   // Update position of x-zero line:
   QPointF a = (*(this->mapping))(QPointF(this->mapping->plotRange().minX(),0));
@@ -344,7 +344,7 @@ Axis::customceRedraw()
   /// \todo Redraw of AxisTicks needed?
 
   // Signal all graphs to redraw:
-  custom (QList<Graph *>::iterator iter = this->graphs.begin(); iter != this->graphs.end(); iter++)
+  for (QList<Graph *>::iterator iter = this->graphs.begin(); iter != this->graphs.end(); iter++)
   {
     (*iter)->updateGraph(*(this->mapping));
   }
@@ -358,7 +358,7 @@ Axis::customceRedraw()
 void
 Axis::setScheme(Configuration::Scheme scheme)
 {
-  // First, reset scheme custom ticks:
+  // First, reset scheme for ticks:
   this->xticks->setScheme(scheme);
   this->yticks->setScheme(scheme);
 
@@ -369,7 +369,7 @@ Axis::setScheme(Configuration::Scheme scheme)
   this->y_zero->setPen(zero_pen);
 
   // Apply scheme on graphs:
-  custom(QList<Graph *>::iterator iter=this->graphs.begin(); iter!=this->graphs.end(); iter++) {
+  for(QList<Graph *>::iterator iter=this->graphs.begin(); iter!=this->graphs.end(); iter++) {
     (*iter)->setScheme(scheme);
   }
 }

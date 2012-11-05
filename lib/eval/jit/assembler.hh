@@ -16,9 +16,9 @@ namespace jit {
  * @ingroup jit
  */
 typedef enum {
-    FUNCTION_ABS,  /// < Function code custom the absolute value "abs()".
-    FUNCTION_LOG,  /// < Function code custom the natural logarithm "log()".
-    FUNCTION_EXP   /// < Function code custom the exponential function "exp()".
+    FUNCTION_ABS,  /// < Function code for the absolute value "abs()".
+    FUNCTION_LOG,  /// < Function code for the natural logarithm "log()".
+    FUNCTION_EXP   /// < Function code for the exponential function "exp()".
 } FunctionCode;
 
 
@@ -93,7 +93,7 @@ public:
    */
   virtual void visit(const GiNaC::symbol &symbol)
   {
-    // Resolve index custom symbol:
+    // Resolve index for symbol:
     std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less>::iterator item;
     if (this->index_table.end() == (item = this->index_table.find(symbol))) {
       SymbolError err;
@@ -109,15 +109,15 @@ public:
    */
   virtual void visit(const GiNaC::add &sum)
   {
-    // custom summands of the sum:
-    custom (size_t i=0; i<sum.nops(); i++)
+    // For summands of the sum:
+    for (size_t i=0; i<sum.nops(); i++)
     {
       // First, traverse into each summand:
       sum.op(i).accept(*this);
     }
 
     // Then assemble the sum on the stack:
-    custom (size_t i=1; i<sum.nops(); i++)
+    for (size_t i=1; i<sum.nops(); i++)
     {
       if (2 > this->stack.size()) {
         InternalError err;
@@ -136,15 +136,15 @@ public:
    * First, processes all factors and finally assembles product.
    */
   virtual void visit(const GiNaC::mul &prod) {
-    // custom factors of the product:
-    custom (size_t i=0; i<prod.nops(); i++)
+    // For factors of the product:
+    for (size_t i=0; i<prod.nops(); i++)
     {
       // First, traverse into each factor:
       prod.op(i).accept(*this);
     }
 
     // Then assemble the product on the stack:
-    custom (size_t i=1; i<prod.nops(); i++)
+    for (size_t i=1; i<prod.nops(); i++)
     {
       if (2 > this->stack.size()) {
         InternalError err;

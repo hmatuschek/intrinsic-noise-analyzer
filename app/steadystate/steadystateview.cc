@@ -47,7 +47,7 @@ SteadyStateResultWidget::SteadyStateResultWidget(SteadyStateTaskWrapper *task_wr
 
   // Headers
   QStringList headers;
-  custom (int i=0; i<this->ss_task_wrapper->getSteadyStateTask()->getConcentrations().rows(); i++)
+  for (int i=0; i<this->ss_task_wrapper->getSteadyStateTask()->getConcentrations().rows(); i++)
   {
     headers.append(this->ss_task_wrapper->getSteadyStateTask()->getSpeciesName(i));
   }
@@ -173,7 +173,7 @@ SteadyStateResultWidget::saveSpectrum()
   {
     QMessageBox box;
     box.setWindowTitle(tr("Cannot open file"));
-    box.setText(tr("Cannot open file %1 custom writing").arg(filename));
+    box.setText(tr("Cannot open file %1 for writing").arg(filename));
     box.exec();
   }
 
@@ -200,7 +200,7 @@ SteadyStateResultWidget::saveData()
   {
     QMessageBox box;
     box.setWindowTitle(tr("Cannot open file"));
-    box.setText(tr("Cannot open file %1 custom writing").arg(filename));
+    box.setText(tr("Cannot open file %1 for writing").arg(filename));
     box.exec();
   }
 
@@ -221,36 +221,36 @@ SteadyStateResultWidget::saveData()
 
   // Dump Species names/IDs:
   out << "# ";
-  custom (int i=0; i<conc.size(); i++)
+  for (int i=0; i<conc.size(); i++)
   {
     out << task->getSpeciesName(i) << "\t";
   }
   out << "\n";
 
   // Dump concentrations:
-  custom(int i=0; i<conc.size(); i++)
+  for(int i=0; i<conc.size(); i++)
   {
     out << conc(i) << "\t";
   }
   out << "\n";
 
   // Dump EMRE:
-  custom (int i=0; i<emre.size(); i++)
+  for (int i=0; i<emre.size(); i++)
   {
     out << emre(i) + conc(i) << "\t";
   }
   out << "\n";
 
   // Dump IOS:
-  custom (int i=0; i<emre.size(); i++)
+  for (int i=0; i<emre.size(); i++)
   {
     out << emre(i) + conc(i)  + ios(i) << "\t";
   }
   out << "\n";
 
   // Dump covariance:
-  custom(int i=0; i<lna_cov.rows(); i++) {
-    custom (int j=0; j<lna_cov.cols(); j++) {
+  for(int i=0; i<lna_cov.rows(); i++) {
+    for (int j=0; j<lna_cov.cols(); j++) {
       out << lna_cov(i,j) + ios_cov(i,j)<< "\t";
     }
     out << "\n";
@@ -271,7 +271,7 @@ SteadyStateResultWidget::setValues()
   Eigen::MatrixXd lna_cov  = task->getLNACovariances();
   Eigen::MatrixXd ios_cov  = task->getIOSCovariances();
   // Update state table:
-  custom (int i=0; i<conc.size(); i++)
+  for (int i=0; i<conc.size(); i++)
   {
     QTableWidgetItem *item;
 
@@ -287,7 +287,7 @@ SteadyStateResultWidget::setValues()
     item->setFlags(Qt::ItemIsSelectable);
     this->state_view->setItem(2, i, item);
 
-    custom (int j=0; j<conc.size(); j++)
+    for (int j=0; j<conc.size(); j++)
     {
       item = new QTableWidgetItem(QString("%1").arg(lna_cov(j,i)));
       item->setFlags(Qt::ItemIsSelectable);

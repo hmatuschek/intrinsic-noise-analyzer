@@ -64,8 +64,8 @@ SbmlshEditorDialog::onReimport()
   } catch (iNA::Parser::ParserError &err) {
     QList<QTextEdit::ExtraSelection> selections;
     QTextEdit::ExtraSelection selection;
-    selection.custommat.setBackground(QColor(Qt::red).lighter(160));
-    selection.custommat.setProperty(QTextcustommat::FullWidthSelection, true);
+    selection.format.setBackground(QColor(Qt::red).lighter(160));
+    selection.format.setProperty(QTextFormat::FullWidthSelection, true);
     selection.cursor = _editor->textCursor();
     selection.cursor.movePosition(QTextCursor::Start);
     selection.cursor.movePosition(QTextCursor::Down, QTextCursor::MoveAnchor, err.line()-1);

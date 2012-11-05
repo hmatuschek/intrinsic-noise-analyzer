@@ -17,7 +17,7 @@ PassManager::apply(Code &code)
 {
   DependenceTree module(code);
 
-  custom (size_t i=0; i<module.numArguments(); i++)
+  for (size_t i=0; i<module.numArguments(); i++)
   {
     // Apply rules on expression until they do not apply anymore
     this->handleValue(module.argument(i));
@@ -39,7 +39,7 @@ PassManager::handleValue(SmartPtr<Value> &value)
 
   // then, traverse into child-nodes:
   bool child_matched = false;
-  custom (size_t i=0; i<value->numArguments(); i++)
+  for (size_t i=0; i<value->numArguments(); i++)
   {
     child_matched = (child_matched || this->handleValue(value->argument(i)));
   }
@@ -58,7 +58,7 @@ PassManager::applyOnValue(SmartPtr<Value> &value)
   bool matched = false;
 
 rerun:
-  custom (std::list<Pass *>::iterator pass = this->_passes.begin(); pass != this->_passes.end(); pass++)
+  for (std::list<Pass *>::iterator pass = this->_passes.begin(); pass != this->_passes.end(); pass++)
   {
     if ((*pass)->handleValue(value)) {
       matched = true; goto rerun;
@@ -272,7 +272,7 @@ ConstantPropagation::handleValue(SmartPtr<Value> &value)
   SmartPtr<Value> lhs = value->argument(0);
   SmartPtr<Value> rhs = value->argument(1);
 
-  // Check if customm is ((x * c) * rhs)
+  // Check if form is ((x * c) * rhs)
   if (Instruction::MUL == lhs->opCode() && lhs->hasImmediateValue()) {
     SmartPtr<Value> x = lhs->argument(0);
     std::complex<double> c = lhs->immediateValue();
@@ -283,7 +283,7 @@ ConstantPropagation::handleValue(SmartPtr<Value> &value)
     return true;
   }
 
-  // or if customm is (lhs * (x * c))
+  // or if form is (lhs * (x * c))
   if (Instruction::MUL == rhs->opCode() && rhs->hasImmediateValue()) {
     SmartPtr<Value> x = rhs->argument(0);
     std::complex<double> c = rhs->immediateValue();

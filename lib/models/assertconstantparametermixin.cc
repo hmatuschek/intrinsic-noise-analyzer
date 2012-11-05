@@ -7,7 +7,7 @@ using namespace iNA::Models;
 
 AssertConstantParameterMixin::AssertConstantParameterMixin(BaseModel &model)
 {
-  custom (BaseModel::iterator iter = model.begin(); iter != model.end(); iter++)
+  for (BaseModel::iterator iter = model.begin(); iter != model.end(); iter++)
   {
     if (Ast::Node::isParameter(*iter))
     {
@@ -19,7 +19,7 @@ AssertConstantParameterMixin::AssertConstantParameterMixin(BaseModel &model)
       Ast::Reaction *reaction = static_cast<Ast::Reaction *>(*iter);
 
       // Check local parameters:
-      custom (Ast::KineticLaw::iterator liter = reaction->getKineticLaw()->begin();
+      for (Ast::KineticLaw::iterator liter = reaction->getKineticLaw()->begin();
            liter != reaction->getKineticLaw()->end(); liter++)
       {
         if (Ast::Node::isParameter(*liter))

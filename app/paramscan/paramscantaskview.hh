@@ -14,7 +14,7 @@
 
 
 /**
- * General view object custom @c LNATask instances.
+ * General view object for @c LNATask instances.
  */
 class ParamScanTaskView : public TaskView
 {

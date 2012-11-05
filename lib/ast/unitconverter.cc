@@ -15,7 +15,7 @@ UnitConverter::reduceToSI(ScaledBaseUnit::BaseUnit base_unit, int exponent)
   // Default if it is already a base unit:
   Unit result = ScaledBaseUnit(base_unit, 1, 0, exponent);
 
-  /// @todo Percustomm much more conversion here!!!
+  /// @todo Perform much more conversion here!!!
 
   // Litre -> 10-3 m^3
   if (ScaledBaseUnit::LITRE == base_unit) {
@@ -35,7 +35,7 @@ Unit
 UnitConverter::reduceToSI(const Unit &unit) {
   Unit result;
 
-  custom (Unit::iterator item=unit.begin(); item!=unit.end(); item++) {
+  for (Unit::iterator item=unit.begin(); item!=unit.end(); item++) {
     result = result * reduceToSI(item->first, item->second);
   }
 

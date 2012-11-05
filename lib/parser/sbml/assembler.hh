@@ -37,7 +37,7 @@ protected:
 
 public:
   /**
-   * Constructs a new AST assembler custom the given module.
+   * Constructs a new AST assembler for the given module.
    */
   ParserContext(Ast::Model &_model);
 

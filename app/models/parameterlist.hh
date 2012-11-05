@@ -6,7 +6,7 @@
 
 
 /**
- * This class implements the @c QAbstractTableModel, providing an model custom a @c QTableView
+ * This class implements the @c QAbstractTableModel, providing an model for a @c QTableView
  * widget. The table model lists all paramters of a @c Ast::Model.
  */
 class ParameterList : public QAbstractTableModel
@@ -17,7 +17,7 @@ public:
   /** Constructs a parameter list from the given SBML model. */
   explicit ParameterList(iNA::Ast::Model *_model, QObject *parent = 0);
 
-  /** Implementation custom the QAbstractTableModel. Returns the requested data. */
+  /** Implementation for the QAbstractTableModel. Returns the requested data. */
   QVariant data(const QModelIndex &index, int role) const;
 
   /** Implements setting the parameter initial value or name. */
@@ -26,7 +26,7 @@ public:
   /** Returns a flag, that indicates if a cell is editable. */
   Qt::ItemFlags flags(const QModelIndex &index) const;
 
-  /** Implementation of QAbstractItemMode, returns the headers custom columns. */
+  /** Implementation of QAbstractItemMode, returns the headers for columns. */
   QVariant headerData(int section, Qt::Orientation orientation, int role) const;
 
   /** Returns the number of parameters. */

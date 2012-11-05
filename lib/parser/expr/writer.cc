@@ -21,7 +21,7 @@ Writer::visit(const GiNaC::add &node)
   if (old_precedence > _current_precedence) { _output << "("; }
   if (0 < node.nops()) {
     node.op(0).accept(*this);
-    custom (size_t i=1; i<node.nops(); i++) {
+    for (size_t i=1; i<node.nops(); i++) {
       _output << "+";
       node.op(i).accept(*this);
     }
@@ -40,7 +40,7 @@ Writer::visit(const GiNaC::mul &node)
 
   if (0 < node.nops()) {
     node.op(0).accept(*this);
-    custom (size_t i=1; i<node.nops(); i++) {
+    for (size_t i=1; i<node.nops(); i++) {
       _output << "*";
       node.op(i).accept(*this);
     }

@@ -7,7 +7,7 @@
 #include <QDoubleValidator>
 #include <QLabel>
 #include <QVBoxLayout>
-#include <QcustommLayout>
+#include <QFormLayout>
 #include <QGroupBox>
 
 
@@ -110,7 +110,7 @@ SSEEngineSelectionPage::SSEEngineSelectionPage(GeneralTaskWizard *parent)
   : EngineWizardPage(parent, true)
 {
   setTitle("Time Course Analysis (SSE)");
-  setSubTitle("Select engine custom ODE evaluation");
+  setSubTitle("Select engine for ODE evaluation");
 }
 
 
@@ -137,15 +137,15 @@ SSESummaryPage::SSESummaryPage(GeneralTaskWizard *parent)
   this->setSubTitle("Summary");
 
   this->model_name = new QLabel();
-  this->model_name->setTextcustommat(Qt::LogText);
+  this->model_name->setTextFormat(Qt::LogText);
 
   this->integration_range = new QLabel();
-  this->integration_range->setTextcustommat(Qt::LogText);
+  this->integration_range->setTextFormat(Qt::LogText);
 
   this->memory = new QLabel();
-  this->memory->setTextcustommat(Qt::LogText);
+  this->memory->setTextFormat(Qt::LogText);
 
-  QcustommLayout *layout = new QcustommLayout();
+  QFormLayout *layout = new QFormLayout();
   layout->addRow("Model:", this->model_name);
   layout->addRow("Plot range:", this->integration_range);
   layout->addRow("Approx. memory used:", this->memory);

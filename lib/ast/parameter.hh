@@ -16,10 +16,10 @@ namespace Ast {
 class Parameter : public VariableDefinition
 {
 public:
-  /** Visitor class custom paramters. */
+  /** Visitor class for paramters. */
   class Visitor { public: virtual void visit(const Parameter *param) = 0; };
 
-  /** Operator class custom paramters. */
+  /** Operator class for paramters. */
   class Operator { public: virtual void act(Parameter *param) = 0; };
 
 
@@ -54,7 +54,7 @@ public:
   /** Resets the unit of the parameter. */
   void setUnit(const Unit &unit);
 
-  /** Handles a visitor custom the paramter. */
+  /** Handles a visitor for the paramter. */
   virtual void accept(Ast::Visitor &visitor) const;
 
   /** Applies an operator on the parameter. */

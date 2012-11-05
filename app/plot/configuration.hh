@@ -12,7 +12,7 @@ namespace Plot {
  * Represents a plot-scheme.
  *
  * A plot-scheme is a collection of settings that can be applied at once to some @c Figure.
- * Currently there are two schemes, one optimizing the plot custom display and one custom print.
+ * Currently there are two schemes, one optimizing the plot for display and one for print.
  *
  * @ingroup plot
  */
@@ -20,22 +20,22 @@ class ConfigScheme
 {
 protected:
   /**
-   * Specifies the font custom the figure-title.
+   * Specifies the font for the figure-title.
    */
   QFont title_font;
 
   /**
-   * Specifies the font custom the axis labels.
+   * Specifies the font for the axis labels.
    */
   QFont axis_label_font;
 
   /**
-   * Specifies the font custom the axis-ticks labels.
+   * Specifies the font for the axis-ticks labels.
    */
   QFont ticks_font;
 
   /**
-   * Specifies the font custom the legend-labels.
+   * Specifies the font for the legend-labels.
    */
   QFont legent_font;
 
@@ -97,8 +97,8 @@ public:
    * Defines the available plot-schemes.
    */
   typedef enum {
-    DISPLAY_SCHEME = 0,   ///< Optimized custom the display.
-    PRINT_SCHEME          ///< Optimized custom print.
+    DISPLAY_SCHEME = 0,   ///< Optimized for the display.
+    PRINT_SCHEME          ///< Optimized for print.
   } Scheme;
 
 
@@ -125,7 +125,7 @@ public:
 
 public:
   /**
-   * Factory method custom application global config.
+   * Factory method for application global config.
    */
   static Configuration *getConfig();
 

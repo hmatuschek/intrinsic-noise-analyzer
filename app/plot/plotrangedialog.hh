@@ -64,7 +64,7 @@ private:
   RangePolicy xpolicy;
 
   /**
-   * Editor custom the x-range-min.
+   * Editor for the x-range-min.
    */
   QLineEdit *xmin_edit;
 
@@ -74,7 +74,7 @@ private:
   QCheckBox *xmin_fixed;
 
   /**
-   * Editor custom the x-range-max.
+   * Editor for the x-range-max.
    */
   QLineEdit *xmax_edit;
 
@@ -94,22 +94,22 @@ private:
   RangePolicy ypolicy;
 
   /**
-   * Editor custom the y-range-min.
+   * Editor for the y-range-min.
    */
   QLineEdit *ymin_edit;
 
   /**
-   * Checkbox custom the y-range-min-policy.
+   * Checkbox for the y-range-min-policy.
    */
   QCheckBox *ymin_fixed;
 
   /**
-   * Editor custom the y-range-max.
+   * Editor for the y-range-max.
    */
   QLineEdit *ymax_edit;
 
   /**
-   * Checkbox custom the y-range-max-policy.
+   * Checkbox for the y-range-max-policy.
    */
   QCheckBox *ymax_fixed;
 

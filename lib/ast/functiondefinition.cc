@@ -10,8 +10,8 @@ FunctionDefinition::FunctionDefinition(const std::string &id, std::vector<Variab
   : Definition(id, Node::FUNCTION_DEFINITION), Scope(0, true),
     arguments(argdef.size()), function_body(body)
 {
-  // get symbol custom args and add argument definition to function scope:
-  custom (size_t i=0; i<this->arguments.size(); i++)
+  // get symbol for args and add argument definition to function scope:
+  for (size_t i=0; i<this->arguments.size(); i++)
   {
     // First, store argument in scope:
     this->addDefinition(argdef[i]);
@@ -81,7 +81,7 @@ FunctionDefinition::inlineFunction(GiNaC::exvector &args)
 
   // Assemble substitutions:
   GiNaC::exmap subst;
-  custom (size_t i=0; i<this->getNumArgs(); i++)
+  for (size_t i=0; i<this->getNumArgs(); i++)
   {
     subst[this->getArgByIdx(i)] = args[i];
   }

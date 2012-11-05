@@ -8,7 +8,7 @@ using namespace iNA::Eval::bci;
 
 
 /* ********************************************************************************************* *
- * Implementation of Node, base class custom dependence graph:
+ * Implementation of Node, base class for dependence graph:
  * ********************************************************************************************* */
 Node::Node(const std::vector< SmartPtr<Value> > arguments)
   : arguments(arguments)
@@ -54,7 +54,7 @@ Node::end()
 void
 Node::serialize(Code &code)
 {
-  custom(size_t i=0; i<this->numArguments(); i++)
+  for(size_t i=0; i<this->numArguments(); i++)
   {
     this->argument(i)->serialize(code);
   }
@@ -258,7 +258,7 @@ DependenceTree::DependenceTree(const Code &code)
 {
   std::list< SmartPtr<Value> > stack; SmartPtr<Value> lhs, rhs;
 
-  custom (Code::const_iterator item=code.begin(); item!=code.end(); item++)
+  for (Code::const_iterator item=code.begin(); item!=code.end(); item++)
   {
     switch (item->opcode)
     {

@@ -9,7 +9,7 @@
 
 
 /**
- * Holds the complete configuration custom the SSE task.
+ * Holds the complete configuration for the SSE task.
  */
 class SSETaskConfig :
     public GeneralTaskConfig,

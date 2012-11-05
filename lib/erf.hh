@@ -11,7 +11,7 @@ namespace iNA
  *
  * \f[ erf(x) = \int_0^x{e^{-t^2}dt} \f]
  *
- * using the approximation as described in \cite abramowitz64 in custommula 7.1.26 as:
+ * using the approximation as described in \cite abramowitz64 in formula 7.1.26 as:
  *
  * \f[ erf(x) = 1-\left(a_1t+a_2t^2+a_3t^3+a_4t^4+a_5t^5\right)e^{-x^2}+\epsilon(x)\f]
  *

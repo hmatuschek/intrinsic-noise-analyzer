@@ -60,7 +60,7 @@ DocumentItem::DocumentItem(iNA::Ast::Model *model, const QString &path, QObject 
 
 
 DocumentItem::~DocumentItem() {
-  // mark Context menu custom deletion:
+  // mark Context menu for deletion:
   _contextMenu->deleteLater();
 }
 
@@ -119,7 +119,7 @@ DocumentItem::updateItemData() {
   }
 
   // signal doctree to update the data.
-  Application::getApp()->docTree()->markcustomUpdate(this);
+  Application::getApp()->docTree()->markForUpdate(this);
 }
 
 
@@ -141,6 +141,6 @@ DocumentItem::closeDocument()
   // Reset selected item:
   Application::getApp()->resetSelectedItem();
 
-  // Mark document custom deletion:
+  // Mark document for deletion:
   this->deleteLater();
 }

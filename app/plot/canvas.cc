@@ -87,7 +87,7 @@ Canvas::paintEvent(QPaintEvent *event)
 
   QPainter painter(this);
   // make it look good:
-  painter.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTranscustomm |
+  painter.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform |
                          QPainter::TextAntialiasing);
   painter.fillRect(0,0, this->size().width(), this->size().height(), Qt::white);
 

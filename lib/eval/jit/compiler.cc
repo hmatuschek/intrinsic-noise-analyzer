@@ -4,8 +4,8 @@
 #include <llvm/Analysis/AliasAnalysis.h>
 #include <llvm/Analysis/Passes.h>
 #include <llvm/Analysis/Verifier.h>
-#include <llvm/Transcustomms/Scalar.h>
-#include <llvm/Transcustomms/Utils/PromoteMemToReg.h>
+#include <llvm/Transforms/Scalar.h>
+#include <llvm/Transforms/Utils/PromoteMemToReg.h>
 #include <llvm/Analysis/InstructionSimplify.h>
 #include <llvm/Analysis/Dominators.h>
 
@@ -68,12 +68,12 @@ CompilerCore::finalize(size_t level)
     code->setEngine(engine);
   }
 
-  // Percustomm some optimizations:
+  // Perform some optimizations:
   llvm::FunctionPassManager fpm(code->getModule());
   // Set up the optimizer pipeline.  Start with registering info about how the
   // target lays out data structures.
   fpm.add(new llvm::TargetData(*engine->getTargetData()));
-  // Provide basic AliasAnalysis support custom GVN.
+  // Provide basic AliasAnalysis support for GVN.
   fpm.add(llvm::createBasicAliasAnalysisPass());
   if (0 < level) {
     // Promote allocas to registers.

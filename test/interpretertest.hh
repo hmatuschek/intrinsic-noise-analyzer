@@ -10,7 +10,7 @@ namespace iNA {
 
 
 /**
- * Implements some simple tests custom the byte-code interpreter.
+ * Implements some simple tests for the byte-code interpreter.
  */
 class InterpreterTest : public UnitTest::TestCase
 {

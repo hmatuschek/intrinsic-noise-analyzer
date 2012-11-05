@@ -82,19 +82,19 @@ public:
 
 protected:
   /**
-   * Holds the policy custom the range-minimum.
+   * Holds the policy for the range-minimum.
    */
   Policy min_policy;
 
   /**
-   * Holds the policy custom the range-maximum.
+   * Holds the policy for the range-maximum.
    */
   Policy max_policy;
 
 
 public:
   /**
-   * Constructs a range-policy, using the same (given) policy custom the minimum and the maximum.
+   * Constructs a range-policy, using the same (given) policy for the minimum and the maximum.
    */
   RangePolicy(Policy policy);
 
@@ -104,22 +104,22 @@ public:
   RangePolicy(Policy min_policy, Policy max_policy);
 
   /**
-   * Returns the policy custom the range-minimum.
+   * Returns the policy for the range-minimum.
    */
   Policy getMinPolicy() const;
 
   /**
-   * Returns the policy custom the range-maximum.
+   * Returns the policy for the range-maximum.
    */
   Policy getMaxPolicy() const;
 
   /**
-   * (Re-) Sets the policy custom the range-minimum.
+   * (Re-) Sets the policy for the range-minimum.
    */
   void setMinPolicy(Policy policy);
 
   /**
-   * (Re-) Sets the policy custom the range-maximum.
+   * (Re-) Sets the policy for the range-maximum.
    */
   void setMaxPolicy(Policy policy);
 };
@@ -127,7 +127,7 @@ public:
 
 
 /**
- * Simple base class custom an unary map-function used by @c Plot::Mapping.
+ * Simple base class for an unary map-function used by @c Plot::Mapping.
  *
  * Maps an interval specified by range into the interval [0, 1].
  *
@@ -144,7 +144,7 @@ protected:
   Range _range;
 
   /**
-   * Holds the range-policy custom the mapping.
+   * Holds the range-policy for the mapping.
    *
    * The map-function uses this policies to update the plot-range if needed.
    */
@@ -189,11 +189,11 @@ public:
 
   /**
    * Needs to be overridden to implement a sampling from the _range interval, so that the mapping
-   * of the sampled values is unicustomm.
+   * of the sampled values is uniform.
    */
   virtual void sample(Eigen::VectorXd &samples) const = 0;
 
-  /** Percustomms the inverse mapping from [0,1] into the plot range. */
+  /** Performs the inverse mapping from [0,1] into the plot range. */
   virtual double inverseMap(const double &value) const = 0;
 };
 
@@ -229,7 +229,7 @@ public:
   /** Samples equally from the source interval. */
   virtual void sample(Eigen::VectorXd &samples) const;
 
-  /** Percustomms the inverse mapping. */
+  /** Performs the inverse mapping. */
   virtual double inverseMap(const double &value) const;
 };
 
@@ -246,7 +246,7 @@ class LogMapFunction : public MapFunction
 
 public:
   /**
-   * Constructs the logarithmic mapping custom the given range.
+   * Constructs the logarithmic mapping for the given range.
    */
   explicit LogMapFunction(const Range &range, const RangePolicy &policy,  QObject *parent=0);
 
@@ -258,7 +258,7 @@ public:
   virtual void updateRange(const Range &range);
 
   /**
-   * Percustomms the mapping.
+   * Performs the mapping.
    */
   virtual double operator() (double x) const;
 
@@ -267,7 +267,7 @@ public:
    */
   virtual void sample(Eigen::VectorXd &samples) const;
 
-  /** Percustomms the inverse mapping. */
+  /** Performs the inverse mapping. */
   virtual double inverseMap(const double &value) const;
 };
 
@@ -289,12 +289,12 @@ protected:
   QSizeF plot_size;
 
   /**
-   * Holds the mapping custom the x-axis.
+   * Holds the mapping for the x-axis.
    */
   MapFunction *x_map;
 
   /**
-   * Holds the mapping custom the y-axis.
+   * Holds the mapping for the y-axis.
    */
   MapFunction *y_map;
 
@@ -331,32 +331,32 @@ public:
   void updatePlotRange(const Extent &range);
 
   /**
-   * (Re-) Sets the current plot-range-policies custom the x-axis.
+   * (Re-) Sets the current plot-range-policies for the x-axis.
    */
   void setXRangePolicy(const RangePolicy &policy);
 
   /**
-   * Returns the current plot-range-policies custom the x-axis.
+   * Returns the current plot-range-policies for the x-axis.
    */
   RangePolicy getXRangePolicy();
 
   /**
-   * (Re-) Sets the current plot-range-policies custom the y-axis.
+   * (Re-) Sets the current plot-range-policies for the y-axis.
    */
   void setYRangePolicy(const RangePolicy &policy);
 
   /**
-   * Returns the current plot-range-policies custom the y-axis.
+   * Returns the current plot-range-policies for the y-axis.
    */
   RangePolicy getYRangePolicy();
 
   /**
-   * Resets the map function custom the X axis.
+   * Resets the map function for the X axis.
    */
   void setXMapFunction(MapFunction *func);
 
   /**
-   * Resets the map function custom the Y axis.
+   * Resets the map function for the Y axis.
    */
   void setYMapFunction(MapFunction *func);
 

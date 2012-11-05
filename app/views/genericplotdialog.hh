@@ -13,7 +13,7 @@
 #include "../models/timeseries.hh"
 #include "../plot/canvas.hh"
 #include "../plot/figure.hh"
-#include "../models/plotcustommulaparser.hh"
+#include "../models/plotformulaparser.hh"
 
 
 /** Implements the configuration of a generic graph.
@@ -31,7 +31,7 @@ protected:
   /** Holds the data table. */
   Table *_table;
   /** Holds the symbol -> column translation, also implements expression evaluation. */
-  PlotcustommulaParser::Context _context;
+  PlotFormulaParser::Context _context;
   /** Holds the type of the graph. */
   PlotType _type;
   /** The X value expression. */
@@ -54,27 +54,27 @@ public:
   /** Resets the current plot type. */
   void setPlotType(PlotType type);
 
-  /** Returns the current X-axis custommula custom the mean. */
+  /** Returns the current X-axis formula for the mean. */
   GiNaC::ex xColumn() const;
-  /** Returns the current plot custommula as a string. */
+  /** Returns the current plot formula as a string. */
   QString xColumnString();
-  /** Resets the plot custommula custom the X axis mean, returns false if the custommula is not valid. */
-  bool setXColumn(const QString &custommula);
+  /** Resets the plot formula for the X axis mean, returns false if the formula is not valid. */
+  bool setXColumn(const QString &formula);
 
-  /** Returns the current plot custommula custom the mean. */
+  /** Returns the current plot formula for the mean. */
   GiNaC::ex meanYColumn() const;
-  /** Returns the current plot custommula as a string. */
+  /** Returns the current plot formula as a string. */
   QString meanYColumnString();
-  /** Resets the plot custommula custom the mean, returns false if the custommula is not valid. */
-  bool setMeanYColumn(const QString &custommula);
+  /** Resets the plot formula for the mean, returns false if the formula is not valid. */
+  bool setMeanYColumn(const QString &formula);
 
-  /** Returns the current plot custommula custom the variance (if set). */
+  /** Returns the current plot formula for the variance (if set). */
   GiNaC::ex varYColumn() const;
-  /** Returns the current plot custommula as a string. */
+  /** Returns the current plot formula as a string. */
   QString varYColumnString();
-  /** Resets the current plot custommula custom the variance, returns false if the given custommular
+  /** Resets the current plot formula for the variance, returns false if the given formular
    * is not valid. */
-  bool setVarYColumn(const QString &custommula);
+  bool setVarYColumn(const QString &formula);
 
   /** Returns the graph label. */
   const QString &label() const;
@@ -88,11 +88,11 @@ public:
   Plot::Graph *create(const Plot::GraphStyle &style);
 
 protected:
-  /** Evaluates the X expression custom the given row of the table. */
+  /** Evaluates the X expression for the given row of the table. */
   double _evalX(size_t row);
-  /** Evaluates the Y expression custom the given row of the table. */
+  /** Evaluates the Y expression for the given row of the table. */
   double _evalY(size_t row);
-  /** Evaluates the variance expression custom the given row of the table. */
+  /** Evaluates the variance expression for the given row of the table. */
   double evalYVar(size_t row);
 };
 
@@ -109,9 +109,9 @@ public:
 
   /** Returns the number of graphs. */
   virtual int rowCount(const QModelIndex &parent) const;
-  /** Returns the graph label custom the list index. */
+  /** Returns the graph label for the list index. */
   virtual QVariant data(const QModelIndex &index, int role) const;
-  /** Returns the graph config custom the given graph. */
+  /** Returns the graph config for the given graph. */
   GenericGraphConfig &graph(int idx);
   /** Adds a graph config to the list. */
   void addGraph(const GenericGraphConfig &graph);
@@ -133,7 +133,7 @@ class GenericPlotDialog : public QDialog
   Q_OBJECT
 
 public:
-  /** Constructor, table species the data table to create graphs custom. */
+  /** Constructor, table species the data table to create graphs for. */
   explicit GenericPlotDialog(Table *table, QWidget *parent = 0);
 
   /** Returns the number of currently configured graphs. */
@@ -162,7 +162,7 @@ private slots:
   void onAccepted();
 
 private:
-  /** Holds the selected data-table custom the plots. */
+  /** Holds the selected data-table for the plots. */
   Table *_data;
   /** Holds a ListModel of the graphs. */
   GenericGraphList _graphs;
@@ -172,7 +172,7 @@ private:
   Plot::Canvas *_plotview;
   /** The plot current instance. */
   Plot::Figure *_plot;
-  /** List view custom the graph list. */
+  /** List view for the graph list. */
   QListView *_graph_list;
   /** Add graph button. */
   QPushButton *_add_graph;
@@ -191,31 +191,31 @@ private:
 
 
 
-/** A simple line editor widget to edit plot custommulas, provides a button to select a certain
+/** A simple line editor widget to edit plot formulas, provides a button to select a certain
  * column of the table. */
-class GenericPlotcustommulaEditor : public QWidget
+class GenericPlotFormulaEditor : public QWidget
 {
   Q_OBJECT
 
 public:
   /** Constructor. */
-  explicit GenericPlotcustommulaEditor(Table *table, QWidget *parent=0);
-  /** Returns the custommula as text. */
-  inline QString getcustommula() const { return _custommula->text(); }
-  /** Resets the custommula. */
-  inline void setcustommula(const QString &custommula) const { return _custommula->setText(custommula); }
+  explicit GenericPlotFormulaEditor(Table *table, QWidget *parent=0);
+  /** Returns the formula as text. */
+  inline QString getFormula() const { return _formula->text(); }
+  /** Resets the formula. */
+  inline void setFormula(const QString &formula) const { return _formula->setText(formula); }
 
 private slots:
   /** Assembles a list of column names ad shows them as a completer. */
   void showPopUp();
-  /** Callback custom "select column" button. */
+  /** Callback for "select column" button. */
   void onColumnSelected(QModelIndex index);
 
 private:
   /** Holds the data table. */
   Table *_table;
-  /** The line edit custom the custommula. */
-  QLineEdit *_custommula;
+  /** The line edit for the formula. */
+  QLineEdit *_formula;
   /** The column-id completer. */
   QCompleter *_columns;
   /** The "select column" button, starts the completer. */
@@ -224,13 +224,13 @@ private:
 
 
 
-/** A simple dialog to create a new graph custom a time series plot. */
+/** A simple dialog to create a new graph for a time series plot. */
 class GenericGraphDialog : public QDialog
 {
   Q_OBJECT
 
 public:
-  /** Constructor custom a new graph. */
+  /** Constructor for a new graph. */
   explicit GenericGraphDialog(Table *table, QWidget *parent=0);
   /** Constructor to edit an existing graph. */
   explicit GenericGraphDialog(GenericGraphConfig &config, QWidget *parent=0);
@@ -239,9 +239,9 @@ public:
   inline const GenericGraphConfig &getConfig() const { return _config; }
 
 private slots:
-  /** Enables the variance custommula editor if a variance plot type is selected. */
+  /** Enables the variance formula editor if a variance plot type is selected. */
   void onPlotTypeSelect(int index);
-  /** Validates the plot custommulas and calls accepted() if they are valid. */
+  /** Validates the plot formulas and calls accepted() if they are valid. */
   void checkInputAndExit();
 
 private:
@@ -257,11 +257,11 @@ private:
   QComboBox *_plot_type;
   /** Holds the label editor. */
   QLineEdit *_label;
-  GenericPlotcustommulaEditor *_custommula_x;
-  /** Holds the custommula editor custom the mean custommula. */
-  GenericPlotcustommulaEditor *_custommula_y;
-  /** Holds the custommula editor custom the variance custommula. */
-  GenericPlotcustommulaEditor *_custommula_var_y;
+  GenericPlotFormulaEditor *_formula_x;
+  /** Holds the formula editor for the mean formula. */
+  GenericPlotFormulaEditor *_formula_y;
+  /** Holds the formula editor for the variance formula. */
+  GenericPlotFormulaEditor *_formula_var_y;
 };
 
 
@@ -282,11 +282,11 @@ public:
   QString yLabel() const;
 
 private:
-  /** Line editor custom the main title. */
+  /** Line editor for the main title. */
   QLineEdit *_figureTitle;
-  /** Line editor custom the x axis label. */
+  /** Line editor for the x axis label. */
   QLineEdit *_xLabel;
-  /** Line editor custom the y axis label. */
+  /** Line editor for the y axis label. */
   QLineEdit *_yLabel;
 };
 

@@ -16,7 +16,7 @@ PartialModel::PartialModel(Ast::Model &model)
   size_t idx_dep = model.numSpecies()-1;
 
   // Iterate over all species and assemble permutationVector
-  custom (size_t i=0;i<model.numSpecies(); i++) {
+  for (size_t i=0;i<model.numSpecies(); i++) {
     // if species has a rule attached -> it is dependent
     if (model.getSpecies(i)->hasRule()) {
       permutationVector[i] = idx_dep; idx_dep--;
@@ -29,14 +29,14 @@ PartialModel::PartialModel(Ast::Model &model)
   // Create permutation matrix from vector:
   permutationM = Eigen::PermutationWrapper<Eigen::VectorXi>(permutationVector);
 
-  // allocate some space custom the link matrix:
+  // allocate some space for the link matrix:
   linkMatrixSource.resize(model.numSpecies(), numInd);
   linkMatrixSource.setZero(model.numSpecies(), numInd);
   linkMatrix.resize(model.numSpecies(), numInd);
   linkMatrix.setZero(model.numSpecies(), numInd);
 
   // now, assemble link-matrix:
-  custom (size_t i=0; i<model.numSpecies(); i++) {
+  for (size_t i=0; i<model.numSpecies(); i++) {
     if (model.getSpecies(i)->hasRule()) {
       linkMatrixSource.row(i).noalias() = _createLinkVector(model, model.getSpecies(i)->getRule());
     } else {
@@ -64,7 +64,7 @@ PartialModel::_createLinkVector(Ast::Model &model, const Ast::Rule *rule)
   rule_poly = rule_poly.normal();
 
   // Assemble vector
-  custom (size_t i=0; i<model.numSpecies(); i++) {
+  for (size_t i=0; i<model.numSpecies(); i++) {
     // get species symbol
     GiNaC::symbol sym = model.getSpecies(i)->getSymbol();
 
@@ -98,8 +98,8 @@ PartialModel::_createLinkVector(Ast::Model &model, const Ast::Rule *rule)
 void
 PartialModel::evaluateLinkMatrix(Substitution &subs)
 {
-  custom (int i=0; i<linkMatrixSource.rows(); i++) {
-    custom (int j=0; j<linkMatrixSource.cols(); j++) {
+  for (int i=0; i<linkMatrixSource.rows(); i++) {
+    for (int j=0; j<linkMatrixSource.cols(); j++) {
       // Get coefficient and apply substitutions:
       GiNaC::ex coeff = linkMatrixSource.coeff(i,j).subs(subs.getTable()).evalf();
 

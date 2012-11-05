@@ -27,7 +27,7 @@ SSAPlot::SSAPlot(const QStringList &selected_species, SSATask *task, QObject *pa
   this->setYLabel(tr("concentrations [%1]").arg(concentration_unit));
 
   size_t offset = 1;
-  custom (size_t i=0; i<Nsel; i++)
+  for (size_t i=0; i<Nsel; i++)
   {
     size_t species_idx = task->getModel()->getSpeciesIdx(selected_species.at(i).toStdString());
     size_t mean_idx = offset + species_idx;
@@ -38,7 +38,7 @@ SSAPlot::SSAPlot(const QStringList &selected_species, SSATask *task, QObject *pa
                      task->getTimeSeries().getColumnName(mean_idx));
   }
 
-  // customce y plot-range to be [0, AUTO]:
+  // Force y plot-range to be [0, AUTO]:
   this->getAxis()->setYRangePolicy(
         Plot::RangePolicy(Plot::RangePolicy::FIXED, Plot::RangePolicy::AUTOMATIC));
   this->getAxis()->setYRange(0, 1);
@@ -69,10 +69,10 @@ SSACorrelationPlot::SSACorrelationPlot(const QStringList &selected_species, SSAT
   size_t Ntot = task->getModel()->numSpecies();
   size_t Nsel = selected_species.size();
 
-  // Allocate a graph custom each colum in time-series:
+  // Allocate a graph for each colum in time-series:
   size_t offset = 1;
-  custom (size_t i=0; i<Nsel; i++) {
-    // Get species index custom i-th selected species
+  for (size_t i=0; i<Nsel; i++) {
+    // Get species index for i-th selected species
     size_t species_idx_i = task->getModel()->getSpeciesIdx(selected_species.at(i).toStdString());
     // Get its variance columne
     size_t var_idx_i = offset+Ntot+species_idx_i*(Ntot+1)-(species_idx_i*(species_idx_i+1))/2;
@@ -82,8 +82,8 @@ SSACorrelationPlot::SSACorrelationPlot(const QStringList &selected_species, SSAT
       species_name_i = task->getModel()->getSpecies(species_idx_i)->getName().c_str();
     }
 
-    custom (size_t j=i+1; j<Nsel; j++) {
-      // Get species index custom the j-th selected species
+    for (size_t j=i+1; j<Nsel; j++) {
+      // Get species index for the j-th selected species
       size_t species_idx_j = task->getModel()->getSpeciesIdx(selected_species.at(j).toStdString());
       // Its variance index
       size_t var_idx_j = offset+Ntot+species_idx_j*(Ntot+1)-(species_idx_j*(species_idx_j+1))/2;
@@ -92,7 +92,7 @@ SSACorrelationPlot::SSACorrelationPlot(const QStringList &selected_species, SSAT
       if (task->getModel()->getSpecies(species_idx_j)->hasName()) {
         species_name_j = task->getModel()->getSpecies(species_idx_j)->getName().c_str();
       }
-      // The index custom the covariance of i & j:
+      // The index for the covariance of i & j:
       size_t cov_index_ij = std::min(var_idx_i, var_idx_j) +
           (std::max(species_idx_i, species_idx_j) - std::min(species_idx_i, species_idx_j));
       // Calc correlation coefficients

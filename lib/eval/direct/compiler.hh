@@ -4,7 +4,7 @@
 #include "code.hh"
 #include "ast/model.hh"
 #include "eigen3/Eigen/Eigen"
-#include "ginacsupportcustomeigen.hh"
+#include "ginacsupportforeigen.hh"
 #include "eval/compilercommon.hh"
 
 
@@ -13,7 +13,7 @@ namespace Eval {
 namespace direct {
 
 /**
- * This class implements the "compiler" custom the direct evaluation engine.
+ * This class implements the "compiler" for the direct evaluation engine.
  *
  * @ingroup direct
  */
@@ -59,7 +59,7 @@ public:
   Compiler(const Ast::Model &model)
   {
     // Associate species symbol with its index in model:
-    custom (size_t i=0; i<model.numSpecies(); i++) {
+    for (size_t i=0; i<model.numSpecies(); i++) {
       this->code.getSymbolTable()[model.getSpecies(i)->getSymbol()] = i;
     }
   }

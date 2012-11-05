@@ -39,7 +39,7 @@ LNATest::compareIntegrators(const std::string &file, double final_time)
   double err_abs = 1e-5;
   double err_rel = 1e-6;
 
-  // Read doc and check custom errors:
+  // Read doc and check for errors:
   Ast::Model sbml_model; Parser::Sbml::importModel(sbml_model, file);
 
   // Construct LNA model to integrate
@@ -71,7 +71,7 @@ LNATest::integrateViaByteCode(Models::LNAmodel &model,
   Eigen::VectorXd dx(integrator.getDimension());
 
   double t = 0.0;
-  custom(size_t i=0; i<N; i++,t+=dt)
+  for(size_t i=0; i<N; i++,t+=dt)
   {
     integrator.step(x,t,dx);
     x += dx; t += dt;

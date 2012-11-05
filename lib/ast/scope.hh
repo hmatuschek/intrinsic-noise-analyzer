@@ -13,16 +13,16 @@ namespace iNA {
 namespace Ast {
 
 
-// customward declaration:
+// Forward declaration:
 class Reaction;
 class FunctionDefinition;
 
 
 /**
- * Base class custom all containers holding definitions
+ * Base class for all containers holding definitions
  *
  * A @c Scope is a mapping from string names to @c Definition instances. A module is a scope because
- * it contains custom exampe species, function, parameter and compartment definitions. A
+ * it contains for exampe species, function, parameter and compartment definitions. A
  * @c KineticLawDefinition is also a scope since it can hold its own parameters. The members held
  * by a scope are owned by the scope, that means they are desroyed when the scope is destroyed;
  *
@@ -33,7 +33,7 @@ class Scope
 public:
   /**
    * Iterator class over all definititions in the scope. The order of definition is not conserved,
-   * @c Ast::Model custom the order of species and paramter definition.
+   * @c Ast::Model for the order of species and paramter definition.
    */
   class iterator
   {
@@ -58,7 +58,7 @@ public:
 
   /**
    * Iterator class over all definititions in the scope. The order of definition is not conserved,
-   * @c Ast::Model custom the order of species and paramter definition.
+   * @c Ast::Model for the order of species and paramter definition.
    */
   class const_iterator
   {
@@ -180,13 +180,13 @@ public:
   /** Dumps a simple string representation of the scope into the given stream. */
   virtual void dump(std::ostream &str);
 
-  /** Handles a visitor custom the scope (customward custom all definitions) .*/
+  /** Handles a visitor for the scope (forward for all definitions) .*/
   virtual void accept(Ast::Visitor &visitor) const ;
 
   /** Applies an operator on all definitinos of the scope. */
   virtual void apply(Ast::Operator &op);
 
-  /** customwards the visitor to all definitions within this scope. */
+  /** Forwards the visitor to all definitions within this scope. */
   virtual void traverse(Ast::Visitor &visitor) const;
 
   /** Applies the operator on all definitions within this scope. */

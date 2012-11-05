@@ -3,7 +3,7 @@
 
 #include "basemodel.hh"
 #include "eigen3/Eigen/Eigen"
-#include "ginacsupportcustomeigen.hh"
+#include "ginacsupportforeigen.hh"
 
 
 namespace iNA {
@@ -12,7 +12,7 @@ namespace Models {
 
 /**
  * Asserts that the stoichiometry of the BaseModel (given to the constructor) is constant
- * and assembles the stoichiometry matrices custom the model.
+ * and assembles the stoichiometry matrices for the model.
  *
  * @ingroup models
  */
@@ -42,7 +42,7 @@ protected:
 
 public:
   /**
-   * Percustomms the checks on the given base model.
+   * Performs the checks on the given base model.
    */
   ConstantStoichiometryMixin(BaseModel &base);
 

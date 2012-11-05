@@ -24,14 +24,14 @@ public:
     VOLUME         /// < dimension 3
   } SpatialDimension;
 
-  /** Visitor class custom compartments. */
+  /** Visitor class for compartments. */
   class Visitor {
   public:
     /** Implements the actual visitor operation. */
     virtual void visit(const Compartment *comp) = 0;
   };
 
-  /** Operator class custom compartments. */
+  /** Operator class for compartments. */
   class Operator {
   public:
     /** Implements the operator. */
@@ -44,7 +44,7 @@ protected:
 
 public:
   /**
-   * Minimal constructor custom a compartment.
+   * Minimal constructor for a compartment.
    *
    * @param id Specifies the unique identifier of the compartment.
    * @param dim Specifies the spacial dimension of the compartment.
@@ -53,7 +53,7 @@ public:
   Compartment(const std::string &id, SpatialDimension dim, bool is_const=false);
 
   /**
-   * Constructor custom a compartment.
+   * Constructor for a compartment.
    *
    * @param id Specifies the unique identifier of the compartment.
    * @param init_val Specifies the initial volume of the compartment.
@@ -66,7 +66,7 @@ public:
   /** Returns the spacial dimension of the compartment. */
   SpatialDimension getDimension() const;
 
-  /** Handles a visitor custom the compartment. */
+  /** Handles a visitor for the compartment. */
   virtual void accept(Ast::Visitor &visitor) const;
 
   /** Applies an operator on the compartment. */

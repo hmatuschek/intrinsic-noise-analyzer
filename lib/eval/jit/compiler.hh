@@ -8,7 +8,7 @@
 
 #include <ginac/ginac.h>
 #include <eigen3/Eigen/Eigen>
-#include "ginacsupportcustomeigen.hh"
+#include "ginacsupportforeigen.hh"
 
 
 namespace iNA {
@@ -35,7 +35,7 @@ public:
   void setCode(Code *code);
 
   /**
-   * Percustomms some optimizations on the LLVM IR.
+   * Performs some optimizations on the LLVM IR.
    */
   void finalize(size_t level);
 };

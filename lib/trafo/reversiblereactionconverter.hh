@@ -15,7 +15,7 @@ namespace Trafo {
 class ReversibleReactionConverter
 {
 public:
-  /** Percustomms the conversion on the given model. */
+  /** Performs the conversion on the given model. */
   static void apply(Ast::Model &model);
 };
 
@@ -27,7 +27,7 @@ public:
 class IrreversibleReactionCollapser
 {
 public:
-  /** Percustomms the conversion on the given model. */
+  /** Performs the conversion on the given model. */
   static void apply(Ast::Model &model);
 };
 

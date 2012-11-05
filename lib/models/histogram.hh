@@ -48,7 +48,7 @@ public:
     void insert(const Eigen::Matrix<T, Eigen::Dynamic, 1> &observation)
 
     {
-        custom(int sid=0; sid < observation.rows(); sid++)
+        for(int sid=0; sid < observation.rows(); sid++)
         {
             T val = observation(sid,0);
             typename histType::iterator it = histogram.find(val);
@@ -67,7 +67,7 @@ public:
 
     {
         U norm = 0.;
-        custom(typename histType::iterator it=histogram.begin(); it!=histogram.end(); it++)
+        for(typename histType::iterator it=histogram.begin(); it!=histogram.end(); it++)
             norm += it->second;
         return norm;
     }
@@ -116,7 +116,7 @@ public:
         U norm = getNorm();
 
         histType nHist(histogram);
-        custom(typename histType::iterator it=nHist.begin(); it != nHist.end(); it++)
+        for(typename histType::iterator it=nHist.begin(); it != nHist.end(); it++)
             it->second/=norm;
 
         return nHist;
@@ -150,7 +150,7 @@ public:
         density.erase(--density.end());
 
         // Apply norm
-        custom(typename histType::iterator it=density.begin(); it!=density.end(); it++)
+        for(typename histType::iterator it=density.begin(); it!=density.end(); it++)
             it->second/=norm;
 
         return density;

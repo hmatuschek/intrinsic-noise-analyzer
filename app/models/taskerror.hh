@@ -4,7 +4,7 @@
 #include <QObject>
 
 /**
- * This class collects some incustommation about an error occurred during an analysis task.
+ * This class collects some information about an error occurred during an analysis task.
  *
  * Use @c TaskErrorWidget to display such an error message.
  *

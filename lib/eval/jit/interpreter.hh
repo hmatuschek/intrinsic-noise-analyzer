@@ -12,7 +12,7 @@ namespace jit {
 
 
 /**
- * "Interpreter" custom the compiled LLVM IR. This class executes the compiled LLVM IR
+ * "Interpreter" for the compiled LLVM IR. This class executes the compiled LLVM IR
  * stored in the associated @c Code instance.
  *
  * @ingroup jit
@@ -80,7 +80,7 @@ public:
     // Unpack pointers
     const typename InType::Scalar *inptr = (const typename InType::Scalar *)input.data();
     typename OutType::Scalar *outptr = (typename OutType::Scalar *)output.data();
-    // customward call:
+    // Forward call:
     this->run(inptr, outptr);
   }
 };

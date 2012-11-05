@@ -10,7 +10,7 @@ ConstCompartmentMixin::ConstCompartmentMixin(BaseModel &base)
   : BaseUnitMixin(base), volumes(base.numSpecies())
 {
   // First, check if all compartments are constant:
-  custom (size_t i=0; i<base.numCompartments(); i++)
+  for (size_t i=0; i<base.numCompartments(); i++)
   {
     Ast::Compartment *comp = base.getCompartment(i);
 
@@ -22,7 +22,7 @@ ConstCompartmentMixin::ConstCompartmentMixin(BaseModel &base)
     }
   }
 
-  // define the compartment volumes custom all species
+  // define the compartment volumes for all species
   GiNaC::numeric fac=1.;
   if(base.getSubstanceUnit().hasVariantOf(Ast::ScaledBaseUnit::MOLE)) {
     double multiplier = base.getSubstanceUnit().getMultiplier();
@@ -30,8 +30,8 @@ ConstCompartmentMixin::ConstCompartmentMixin(BaseModel &base)
     fac = multiplier*constants::AVOGADRO;
   }
 
-  // Get compartment volumes custom all species in SBML model:
-  custom (size_t i=0; i<base.numSpecies(); i++)
+  // Get compartment volumes for all species in SBML model:
+  for (size_t i=0; i<base.numSpecies(); i++)
   {
 
     this->volumes(i) = fac * base.getSpecies(i)->getCompartment()->getSymbol();

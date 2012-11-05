@@ -18,7 +18,7 @@ MatFile::MatFile()
 
 MatFile::~MatFile()
 {
-  custom (std::list<MatFileElement *>::iterator element = _elements.begin(); element != _elements.end(); element++)
+  for (std::list<MatFileElement *>::iterator element = _elements.begin(); element != _elements.end(); element++)
   {
     delete *element;
   }
@@ -52,7 +52,7 @@ MatFile::serialize(std::ostream &stream)
   std::string header_text = "Matlab 5.0 MAT-file, created with iNA " INA_VERSION_STRING;
   if (124 < header_text.size()) { header_text = header_text.substr(0, 124); }
   stream << header_text;
-  custom (size_t i=header_text.size(); i<124; i++) { stream.put(0x00); }
+  for (size_t i=header_text.size(); i<124; i++) { stream.put(0x00); }
   // serialize header version:
   stream.put(0x01); stream.put(0x00);
   // serialize endian indicator:
@@ -60,7 +60,7 @@ MatFile::serialize(std::ostream &stream)
   stream.write((char *)(&endian), 2);
 
   // Serialize elements:
-  custom (std::list<MatFileElement *>::iterator element = _elements.begin();
+  for (std::list<MatFileElement *>::iterator element = _elements.begin();
        element != _elements.end(); element++)
   {
     // Serialize element:
@@ -104,7 +104,7 @@ MatFileElement::serialize(std::ostream &stream) const
 
 
 /* ******************************************************************************************** *
- * Implementation of the MAT file element custom values
+ * Implementation of the MAT file element for values
  * ******************************************************************************************** */
 MatFileValue::MatFileValue(MatFileElement::ElementType type)
   : MatFileElement(type)
@@ -199,7 +199,7 @@ MatFileValue::serialize(std::ostream &stream) const
 
   // Add padding bytes to multiple of 64bit
   size_t padd = (8 - dataSize()) % 8;
-  custom (size_t i=0; i<padd; i++) { stream.put(0x00); }
+  for (size_t i=0; i<padd; i++) { stream.put(0x00); }
 }
 
 
@@ -280,7 +280,7 @@ MatFileComplexElement::MatFileComplexElement(ArrayType type)
 
 MatFileComplexElement::~MatFileComplexElement()
 {
-  custom (std::list<MatFileElement*>::iterator item=_subelements.begin(); item!=_subelements.end(); item++) {
+  for (std::list<MatFileElement*>::iterator item=_subelements.begin(); item!=_subelements.end(); item++) {
     delete *item;
   }
 }
@@ -294,7 +294,7 @@ size_t
 MatFileComplexElement::dataSize() const {
   // Data size is sum of storafge sizes of all sub elements.
   size_t s=0;
-  custom (std::list<MatFileElement *>::const_iterator item=_subelements.begin(); item!=_subelements.end(); item++) {
+  for (std::list<MatFileElement *>::const_iterator item=_subelements.begin(); item!=_subelements.end(); item++) {
     s += (*item)->storageSize();
   }
   return s;
@@ -307,7 +307,7 @@ MatFileComplexElement::serialize(std::ostream &stream) const
   MatFileElement::serialize(stream);
 
   // now serialize all sub-elements:
-  custom (std::list<MatFileElement *>::const_iterator item=_subelements.begin(); item!=_subelements.end(); item++) {
+  for (std::list<MatFileElement *>::const_iterator item=_subelements.begin(); item!=_subelements.end(); item++) {
     (*item)->serialize(stream);
   }
 }
@@ -340,10 +340,10 @@ MatFileMatrixElement::MatFileMatrixElement(const std::string &name, const Eigen:
   // Copy name:
   memcpy(array_name->dataUTF8(), name.c_str(), name.size());
 
-  // Copy data (column major / customtran order):
+  // Copy data (column major / Fortran order):
   size_t idx=0;
-  custom (int j=0; j<values.cols(); j++) {
-    custom (int i=0; i<values.rows(); i++, idx++) {
+  for (int j=0; j<values.cols(); j++) {
+    for (int i=0; i<values.rows(); i++, idx++) {
       array_data->dataDouble()[idx] = values(i,j);
     }
   }

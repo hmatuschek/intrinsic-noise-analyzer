@@ -11,7 +11,7 @@ namespace bci {
 
 
 /**
- * Implements the assembler custom the ByteCode from GiNaC expressions.
+ * Implements the assembler for the ByteCode from GiNaC expressions.
  *
  * This class is used by the @c Compiler class to assemble the byte-code from GiNaC expressions.
  *

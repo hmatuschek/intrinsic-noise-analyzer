@@ -9,7 +9,7 @@ namespace Parser {
 
 
 /**
- * Base class custom all parser exceptions.
+ * Base class for all parser exceptions.
  *
  * @ingroup parser
  */

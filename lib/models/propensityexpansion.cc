@@ -9,13 +9,13 @@ propensityExpansion::propensityExpansion(BaseModel &base):
 {
 
   // Iterate over all reactions
-  custom (size_t i=0; i<base.numReactions(); i++)
+  for (size_t i=0; i<base.numReactions(); i++)
   {
 
     this->rates[i]  = base.propensities[i];
     this->rates1[i] = 0;
 
-    custom(size_t j=0; j<base.numCompartments(); j++)
+    for(size_t j=0; j<base.numCompartments(); j++)
     {
 
      if( base.propensities[i].has(base.getCompartment(j)->getSymbol()))
@@ -25,7 +25,7 @@ propensityExpansion::propensityExpansion(BaseModel &base):
         * ... if symbol is present attempt a taylor expansion
         */
 
-        // define variable custom inverse volume
+        // define variable for inverse volume
         GiNaC::symbol inverseVolume;
         GiNaC::ex volume = base.getCompartment(j)->getSymbol();
 

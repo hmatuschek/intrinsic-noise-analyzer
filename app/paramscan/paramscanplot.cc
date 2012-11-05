@@ -26,9 +26,9 @@ ParameterScanPlot::ParameterScanPlot(const QStringList &selected_species, ParamS
   this->setXLabel(tr("%1").arg(data.getColumnName(0)));
   this->setYLabel(tr("concentrations [%1]").arg(species_unit));
 
-  // Allocate a graph custom each selected species
+  // Allocate a graph for each selected species
   size_t offset = 1; // skip parameter column
-  custom (size_t i=0; i<Nsel; i++)
+  for (size_t i=0; i<Nsel; i++)
   {
     size_t species_idx = task->getConfig().getModel()->getSpeciesIdx(selected_species.at(i).toStdString());
     size_t mean_idx = offset + species_idx;
@@ -37,7 +37,7 @@ ParameterScanPlot::ParameterScanPlot(const QStringList &selected_species, ParamS
                            data.getColumnName(mean_idx));
   }
 
-  // customce y plot-range to be [0, AUTO]:
+  // Force y plot-range to be [0, AUTO]:
   this->getAxis()->setYRangePolicy(
         Plot::RangePolicy(Plot::RangePolicy::FIXED, Plot::RangePolicy::AUTOMATIC));
   this->getAxis()->setYRange(0, 1);
@@ -67,9 +67,9 @@ ParameterScanIOSPlot::ParameterScanIOSPlot(const QStringList &selected_species, 
   this->setXLabel(tr("%1").arg(data.getColumnName(0)));
   this->setYLabel(tr("concentrations [%1]").arg(species_unit));
 
-  // Allocate a graph custom each selected species
+  // Allocate a graph for each selected species
   size_t offset = 1+Ntot+((Ntot+1)*Ntot)/2; // skip parameter+EMRE+LNA columns
-  custom (size_t i=0; i<Nsel; i++)
+  for (size_t i=0; i<Nsel; i++)
   {
     size_t species_idx = task->getConfig().getModel()->getSpeciesIdx(selected_species.at(i).toStdString());
     size_t mean_idx = offset + species_idx;
@@ -78,7 +78,7 @@ ParameterScanIOSPlot::ParameterScanIOSPlot(const QStringList &selected_species, 
                            data.getColumnName(mean_idx));
   }
 
-  // customce y plot-range to be [0, AUTO]:
+  // Force y plot-range to be [0, AUTO]:
   this->getAxis()->setYRangePolicy(
         Plot::RangePolicy(Plot::RangePolicy::FIXED, Plot::RangePolicy::AUTOMATIC));
   this->getAxis()->setYRange(0, 1);
@@ -105,9 +105,9 @@ ParameterScanCovPlot::ParameterScanCovPlot(const QStringList &selected_species, 
   this->setXLabel(tr("%1").arg(data.getColumnName(0)));
   this->setYLabel(tr("coefficient of variation"));
 
-  // Allocate a graph custom each selected species
+  // Allocate a graph for each selected species
   size_t offset = 1; // skip parameter column
-  custom (size_t i=0; i<Nsel; i++)
+  for (size_t i=0; i<Nsel; i++)
   {
     size_t species_idx = task->getConfig().getModel()->getSpeciesIdx(selected_species.at(i).toStdString());
     size_t mean_idx = offset + species_idx;
@@ -117,7 +117,7 @@ ParameterScanCovPlot::ParameterScanCovPlot(const QStringList &selected_species, 
     this->addLineGraph(data.getColumn(0), cov, data.getColumnName(mean_idx));
   }
 
-  // customce y plot-range to be [0, AUTO]:
+  // Force y plot-range to be [0, AUTO]:
   this->getAxis()->setYRangePolicy(
         Plot::RangePolicy(Plot::RangePolicy::FIXED, Plot::RangePolicy::AUTOMATIC));
   this->getAxis()->setYRange(0, 1);
@@ -144,9 +144,9 @@ ParameterScanCovIOSPlot::ParameterScanCovIOSPlot(const QStringList &selected_spe
   this->setXLabel(tr("%1").arg(data.getColumnName(0)));
   this->setYLabel(tr("coefficient of variation"));
 
-  // Allocate a graph custom each selected species
+  // Allocate a graph for each selected species
   size_t offset = 1+Ntot+((Ntot+1)*Ntot)/2;
-  custom (size_t i=0; i<Nsel; i++)
+  for (size_t i=0; i<Nsel; i++)
   {
     size_t species_idx = task->getConfig().getModel()->getSpeciesIdx(selected_species.at(i).toStdString());
     size_t mean_idx = offset + species_idx;
@@ -156,7 +156,7 @@ ParameterScanCovIOSPlot::ParameterScanCovIOSPlot(const QStringList &selected_spe
     this->addLineGraph(data.getColumn(0), cov, data.getColumnName(mean_idx));
   }
 
-  // customce y plot-range to be [0, AUTO]:
+  // Force y plot-range to be [0, AUTO]:
   this->getAxis()->setYRangePolicy(
         Plot::RangePolicy(Plot::RangePolicy::FIXED, Plot::RangePolicy::AUTOMATIC));
   this->getAxis()->setYRange(0, 1);
@@ -183,8 +183,8 @@ SimpleParameterScanPlot::SimpleParameterScanPlot(const QStringList &selected_spe
   this->setXLabel(tr("%1").arg(data.getColumnName(0)));
   this->setYLabel(tr("concentration"));
 
-  // Allocate a graph custom each selected species
-  custom (size_t i=0; i<Nsel; i++)
+  // Allocate a graph for each selected species
+  for (size_t i=0; i<Nsel; i++)
   {
     size_t species_idx = task->getConfig().getModel()->getSpeciesIdx(selected_species.at(i).toStdString());
     size_t mean_idx = 1 + species_idx;
@@ -193,7 +193,7 @@ SimpleParameterScanPlot::SimpleParameterScanPlot(const QStringList &selected_spe
     this->addLineGraph(data.getColumn(0), cov, data.getColumnName(mean_idx));
   }
 
-  // customce y plot-range to be [0, AUTO]:
+  // Force y plot-range to be [0, AUTO]:
   this->getAxis()->setYRangePolicy(
         Plot::RangePolicy(Plot::RangePolicy::FIXED, Plot::RangePolicy::AUTOMATIC));
   this->getAxis()->setYRange(0, 1);
