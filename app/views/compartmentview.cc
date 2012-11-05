@@ -69,7 +69,6 @@ CompartmentView::CompartmentView(CompartmentsItem *compartments, QWidget *parent
 void
 CompartmentView::onCompartmentsDestroyed()
 {
-  //std::cerr << "CompartmentsWrapper destroyed -> delete CompartmentView." << std::endl;
   this->deleteLater();
 }
 

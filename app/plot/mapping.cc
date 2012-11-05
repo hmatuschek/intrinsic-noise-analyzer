@@ -153,9 +153,6 @@ LinearMapFunction::updateRange(const Range &range)
   double rmin = floorRange(range.min(),2);
   double rmax = ceilRange(range.max(),2);
 
-  //std::cerr << range.max() << std::endl;
-  //std::cerr << rmax<< std::endl;
-
   if (RangePolicy::FIXED == this->_policy.getMinPolicy())
   {
     // Keep old value:

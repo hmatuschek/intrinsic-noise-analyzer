@@ -1,6 +1,8 @@
 #include "linegraph.hh"
 #include <iostream>
 #include <limits>
+#include <utils/logger.hh>
+
 
 using namespace Plot;
 
@@ -40,21 +42,18 @@ LineGraph::addPoint(Eigen::VectorXd &point)
 void
 LineGraph::addPoint(double x, double y)
 {
-  if (x != x || y != y)
-  {
-    std::cerr << __FILE__ << ": " << __LINE__
-              << ": NaN occured during plot: Ignore." << std::endl;
+  if (x != x || y != y) {
+    iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::INFO);
+    message <<  __FILE__ << ": " << __LINE__ << ": NaN occured during plot: Ignore.";
+    iNA::Utils::Logger::get().log(message);
     return;
   }
 
-  if (0 == this->path.elementCount())
-  {
+  if (0 == this->path.elementCount()) {
     // Add first point to path:
     this->path.moveTo(x,y);
     this->extent = Extent(x,x, y,y);
-  }
-  else
-  {
+  } else {
     // Extend path:
     this->path.lineTo(x,y);
     this->extent = this->extent.united(Extent(x,x,y,y));
@@ -63,8 +62,7 @@ LineGraph::addPoint(double x, double y)
 
 
 void
-LineGraph::commit()
-{
+LineGraph::commit() {
   emit this->graphModified();
 }
 

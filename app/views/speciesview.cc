@@ -68,7 +68,6 @@ SpeciesView::SpeciesView(SpeciesItem *species ,QWidget *parent) :
 void
 SpeciesView::speciesItemDestoyed()
 {
-  //std::cerr << "SpeciesItem destroyed -> close view... " << std::endl;
   this->deleteLater();
 }
 
