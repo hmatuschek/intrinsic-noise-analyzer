@@ -8,7 +8,7 @@
 #include <utils/logger.hh>
 
 
-
+// Tiny helper to compare versions
 int __version_compare(int major, int minor, int patch) {
   if (major > INA_VERSION_MAJOR) { return 1; }
   if (major < INA_VERSION_MAJOR) { return -1; }
@@ -18,6 +18,8 @@ int __version_compare(int major, int minor, int patch) {
   if (patch < INA_VERSION_PATCH) { return -1; }
   return 0;
 }
+
+
 
 VersionCheck::VersionCheck(QObject *parent)
   : QObject(parent), _access(0)
@@ -90,6 +92,7 @@ VersionCheck::onDataReceived(QNetworkReply *reply)
 
   // cleanup later.
   reply->deleteLater();
+
   // Emit "newVersionAvailable" if this version number is smaller
   if (0 < __version_compare(regexp.cap(1).toUInt(), regexp.cap(2).toUInt(), regexp.cap(3).toUInt())) {
     iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::INFO);
