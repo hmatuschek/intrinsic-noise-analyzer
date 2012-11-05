@@ -346,65 +346,51 @@ Unit::dump(std::ostream &str, bool html) const
   // return standard dump
   if(!html)
   {
+    if (1 != this->common_multiplier || 0 != this->common_scale)
+    {
+      str << this->common_multiplier << "e" << this->common_scale;
+    }
+
+    if (0 < this->units.size())
+    {
       if (1 != this->common_multiplier || 0 != this->common_scale)
+        str << "(";
+
+      std::map<ScaledBaseUnit::BaseUnit, int>::const_iterator iter = this->units.begin();
+      for (size_t i=0; i<this->units.size()-1; i++, iter++)
       {
-          str << this->common_multiplier << "e" << this->common_scale;
+        str << ScaledBaseUnit::baseUnitRepr(iter->first);
+        if (1 != iter->second)
+          str << "^"<<iter->second;
+        str << " * ";
       }
 
-      if (0 < this->units.size())
-      {
-          if (1 != this->common_multiplier || 0 != this->common_scale)
-            str << "(";
-
-          std::map<ScaledBaseUnit::BaseUnit, int>::const_iterator iter = this->units.begin();
-          for (size_t i=0; i<this->units.size()-1; i++, iter++)
-          {
-            str << ScaledBaseUnit::baseUnitRepr(iter->first);
-            if (1 != iter->second)
-              str << "^"<<iter->second;
-            str << " * ";
-          }
-
-          str << ScaledBaseUnit::baseUnitRepr(iter->first);
-          if (1 != iter->second)
-              str << "^"<<iter->second;
-      }
+      str << ScaledBaseUnit::baseUnitRepr(iter->first);
+      if (1 != iter->second)
+        str << "^"<<iter->second;
+    }
 
 
-      if (1 != this->common_multiplier || 0 != this->common_scale)
-          str << ")";
+    if (1 != this->common_multiplier || 0 != this->common_scale)
+      str << ")";
 
-      return;
-
+    return;
   }
-
 
   // otherwise dump html
 
   // catch arbitrary units
-  if(this->units.size()==0) str<<"a.u.";
+  if(isDimensionless()) str << "a.u.";
 
   // catch times which refer explictly to units of minutes, hours or days
-  if (this->isVariantOf(ScaledBaseUnit::SECOND) && this->units.size()==1)
+  if (isVariantOf(ScaledBaseUnit::SECOND))
   {
-      double fac = this->common_multiplier*std::pow(10.,this->common_scale);
+    float fac = common_multiplier;
+    fac *= (0 != common_scale) ? std::pow(10.,common_scale) : 1;
 
-      if( fac==86400 )
-      {
-          str << "d";
-          return;
-      }
-      else if ( fac==3600 )
-      {
-          str << "h";
-          return;
-      }
-      else if ( fac==60 )
-      {
-          str << "min";
-          return;
-      }
-
+    if( fac==86400 ) { str << "d"; return; }
+    else if ( fac==3600 ) { str << "h"; return; }
+    else if ( fac==60 ) { str << "min"; return; }
   }
 
   // first dump the scale
