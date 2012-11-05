@@ -49,10 +49,10 @@ ParamScanResultWidget::ParamScanResultWidget(ParamScanTaskWrapper *task_wrapper,
   this->tableWrapper = new TableWrapper(&(paramscan_task_wrapper->getParamScanTask()->getParameterScan()), this);
   dataTable->setModel(this->tableWrapper);
 
-  this->plotButton = new QPushButton(tr("Plot statistics"));
+  this->plotButton = new QPushButton(tr("Quick plot"));
   QObject::connect(this->plotButton, SIGNAL(clicked()), this, SLOT(plotButtonPressed()));
 
-  this->customPlotButton = new QPushButton(tr("Custom plot"));
+  this->customPlotButton = new QPushButton(tr("Customized plot"));
   QObject::connect(customPlotButton, SIGNAL(clicked()), this, SLOT(customPlotButtonPressed()));
 
   this->saveButton = new QPushButton(tr("Save data to file"));

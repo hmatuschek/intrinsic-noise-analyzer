@@ -48,10 +48,10 @@ LNAResultWidget::LNAResultWidget(LNATaskWrapper *task_wrapper, QWidget *parent):
   _tableWrapper = new TableWrapper(_lna_task_wrapper->getLNATask()->getTimeSeries(), this);
   _dataTable->setModel(this->_tableWrapper);
 
-  _plotButton = new QPushButton(tr("Plot statistics"));
+  _plotButton = new QPushButton(tr("Quick plot"));
   QObject::connect(_plotButton, SIGNAL(clicked()), this, SLOT(_plotButtonPressed()));
 
-  _genericPlotButton = new QPushButton(tr("Custom plot"));
+  _genericPlotButton = new QPushButton(tr("Customized plot"));
   QObject::connect(_genericPlotButton, SIGNAL(clicked()), this, SLOT(_genericPlotButtonPressed()));
 
   _saveButton = new QPushButton(tr("Save data to file"));

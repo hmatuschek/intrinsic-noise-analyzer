@@ -48,10 +48,10 @@ IOSResultWidget::IOSResultWidget(IOSTaskWrapper *task_wrapper, QWidget *parent):
   _tableWrapper = new TableWrapper(_ios_task_wrapper->getIOSTask()->getTimeSeries(), this);
   _dataTable->setModel(_tableWrapper);
 
-  _plotButton = new QPushButton(tr("Plot statistics"));
+  _plotButton = new QPushButton(tr("Quick plot"));
   QObject::connect(_plotButton, SIGNAL(clicked()), this, SLOT(_onPlotButtonPressed()));
 
-  _genericPlotButton = new QPushButton(tr("Custom plot"));
+  _genericPlotButton = new QPushButton(tr("Customized plot"));
   QObject::connect(_genericPlotButton, SIGNAL(clicked()), this, SLOT(_onGenericPlotButtonPressed()));
 
   this->_saveButton = new QPushButton(tr("Save data to file"));
