@@ -45,7 +45,7 @@ ParamScanModelSelectionPage::ParamScanModelSelectionPage(GeneralTaskWizard *pare
   // Append method selection radio buttons to the wizard page.
   _re_button  = new QRadioButton("Rate Equations (REs)");
   _lna_button = new QRadioButton("Linear Noise Approximation (LNA)");
-  _ios_button = new QRadioButton("Inverse Omega Squared Analysis (IOS)");
+  _ios_button = new QRadioButton("Higher Order Approximations (EMREs && IOS)");
 
   _re_button->setToolTip("Deterministic analysis using macroscopic rate equations.");
   _lna_button->setToolTip("Analysis yielding the fluctuations about the macroscopic concentrations.");
