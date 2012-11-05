@@ -224,7 +224,7 @@ Writer::processFunctionDefinition(
   }
 
   // Assemble function body:
-  ast_func->addChild(processExpression(func->getBody(), model));
+  ast_func->addChild(processExpression(func->getBody(), model, model));
   sbml_func->setMath(ast_func);
 }
 
@@ -333,7 +333,7 @@ Writer::processReaction(Ast::Reaction *reac, LIBSBML_CPP_NAMESPACE_QUALIFIER Rea
     LIBSBML_CPP_NAMESPACE_QUALIFIER SpeciesReference *sbml_r = sbml_reac->createReactant();
     sbml_r->setSpecies(item->first->getIdentifier());
     LIBSBML_CPP_NAMESPACE_QUALIFIER StoichiometryMath *sbml_r_m = sbml_r->createStoichiometryMath();
-    sbml_r_m->setMath(processExpression(item->second, model));
+    sbml_r_m->setMath(processExpression(item->second, model, model));
   }
 
   // Process products:
@@ -341,7 +341,7 @@ Writer::processReaction(Ast::Reaction *reac, LIBSBML_CPP_NAMESPACE_QUALIFIER Rea
     LIBSBML_CPP_NAMESPACE_QUALIFIER SpeciesReference *sbml_p = sbml_reac->createProduct();
     sbml_p->setSpecies(item->first->getIdentifier());
     LIBSBML_CPP_NAMESPACE_QUALIFIER StoichiometryMath *sbml_p_m = sbml_p->createStoichiometryMath();
-    sbml_p_m->setMath(processExpression(item->second, model));
+    sbml_p_m->setMath(processExpression(item->second, model, model));
   }
 
   // Process modifiers:
@@ -393,7 +393,7 @@ Writer::processKineticLaw(Ast::KineticLaw *law, LIBSBML_CPP_NAMESPACE_QUALIFIER 
   }
 
   // process law:
-  sbml_law->setMath(processExpression(law->getRateLaw(), model));
+  sbml_law->setMath(processExpression(law->getRateLaw(), model, *law));
 }
 
 
@@ -403,7 +403,7 @@ Writer::processInitialValue(
 {
   LIBSBML_CPP_NAMESPACE_QUALIFIER InitialAssignment *init = sbml_model->createInitialAssignment();
   init->setSymbol(var->getIdentifier());
-  init->setMath(processExpression(var->getValue(), model));
+  init->setMath(processExpression(var->getValue(), model, model));
 }
 
 
@@ -414,12 +414,12 @@ Writer::processRule(Ast::VariableDefinition *var, LIBSBML_CPP_NAMESPACE_QUALIFIE
     Ast::AssignmentRule *rule = static_cast<Ast::AssignmentRule *>(var->getRule());
     LIBSBML_CPP_NAMESPACE_QUALIFIER AssignmentRule *sbml_rule = sbml_model->createAssignmentRule();
     sbml_rule->setVariable(var->getIdentifier());
-    sbml_rule->setMath(processExpression(rule->getRule(), model));
+    sbml_rule->setMath(processExpression(rule->getRule(), model, model));
   } else if (Ast::Node::isRateRule(var->getRule())) {
     Ast::RateRule * rule = static_cast<Ast::RateRule *>(var->getRule());
     LIBSBML_CPP_NAMESPACE_QUALIFIER RateRule *sbml_rule = sbml_model->createRateRule();
     sbml_rule->setVariable(var->getIdentifier());
-    sbml_rule->setMath(processExpression(rule->getRule(), model));
+    sbml_rule->setMath(processExpression(rule->getRule(), model, model));
   } else {
     ExportError err;
     err << "Can not export model " << sbml_model->getName()
@@ -448,9 +448,9 @@ Writer::getUnitIdentifier(Ast::Parameter *var, Ast::Model &model)
 
 
 LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *
-Writer::processExpression(GiNaC::ex expression, Ast::Model &model)
+Writer::processExpression(GiNaC::ex expression, Ast::Model &model, Ast::Scope &scope)
 {
-  return SBMLExpressionAssembler::process(expression, model);
+  return SBMLExpressionAssembler::process(expression, model, scope);
 }
 
 
@@ -458,7 +458,10 @@ Writer::processExpression(GiNaC::ex expression, Ast::Model &model)
 /* ******************************************************************************************** *
  * Implementation of expression assembler:
  * ******************************************************************************************** */
-SBMLExpressionAssembler::SBMLExpressionAssembler(Ast::Model &model) : _stack(), _model(model) { }
+SBMLExpressionAssembler::SBMLExpressionAssembler(Ast::Model &model, Ast::Scope &scope)
+  : _stack(), _model(model), _scope(scope)
+{
+}
 
 void
 SBMLExpressionAssembler::visit(const GiNaC::numeric &value)
@@ -473,8 +476,15 @@ SBMLExpressionAssembler::visit(const GiNaC::symbol &symbol)
   if (_model.getTime() == symbol) {
     _stack.push_back(new LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode(LIBSBML_CPP_NAMESPACE_QUALIFIER AST_NAME_TIME));
   } else {
+    // Search identifier for the scope:
+    if (! _scope.hasVariable(symbol)) {
+      SymbolError err;
+      err << "Can not find variable identifier for the GiNaC symbol " << symbol;
+      throw err;
+    }
+
     _stack.push_back(new LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode(LIBSBML_CPP_NAMESPACE_QUALIFIER AST_NAME));
-    _stack.back()->setName(symbol.get_name().c_str());
+    _stack.back()->setName(_scope.getVariable(symbol)->getIdentifier().c_str());
   }
 }
 
@@ -561,8 +571,8 @@ SBMLExpressionAssembler::visit(const GiNaC::basic &basic)
 
 
 LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *
-SBMLExpressionAssembler::process(GiNaC::ex expression, Ast::Model &model) {
-  SBMLExpressionAssembler ass(model); expression.accept(ass);
+SBMLExpressionAssembler::process(GiNaC::ex expression, Ast::Model &model, Ast::Scope &scope) {
+  SBMLExpressionAssembler ass(model, scope); expression.accept(ass);
 
   LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *res = ass._stack.back(); ass._stack.pop_back();
   if (! res->isWellFormedASTNode()) {

@@ -57,7 +57,7 @@ protected:
   /** Returns the identifier of the unit definition of a variable. */
   static std::string getUnitIdentifier(Ast::Parameter *var, Ast::Model &model);
   /** Translates a GiNaC expression. */
-  static LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *processExpression(GiNaC::ex, Ast::Model &model);
+  static LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *processExpression(GiNaC::ex, Ast::Model &model, Ast::Scope &scope);
 };
 
 
@@ -72,10 +72,13 @@ protected:
   std::list<LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *> _stack;
   /** The Ast::Model, used to identify special symbols. */
   Ast::Model &_model;
+  Ast::Scope &_scope;
 
 protected:
   /** Hidden constructor, use factory method below. */
-  SBMLExpressionAssembler(Ast::Model &model);
+  SBMLExpressionAssembler(Ast::Model &model,Ast::Scope &scope);
+
+  void setScope(Ast::Scope &scope);
 
 public:
   /** Handles a constant numeric value. */
@@ -95,7 +98,7 @@ public:
 
 public:
   /** Translates a GiNaC expression into an SBML expression. */
-  static LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *process(GiNaC::ex expression, Ast::Model &model);
+  static LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *process(GiNaC::ex expression, Ast::Model &model, Ast::Scope &scope);
 };
 
 
