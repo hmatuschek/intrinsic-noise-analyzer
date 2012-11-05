@@ -72,10 +72,7 @@ ParamScanModelSelectionPage::validatePage()
   GeneralTaskWizard *wizard = static_cast<GeneralTaskWizard *>(this->wizard());
   ParamScanTask::Config &config = wizard->getConfigCast< ParamScanTask::Config >();
   if (_re_button->isChecked())
-  {
     config.setMethod(ParamScanTask::Config::RE_ANALYSIS);
-    std::cerr << "bla" << config.getMethod() << std::endl;
-  }
   else if (_lna_button->isChecked())
     config.setMethod(ParamScanTask::Config::LNA_ANALYSIS);
   else
