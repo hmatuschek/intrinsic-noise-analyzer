@@ -18,7 +18,7 @@ NewVersionDialog::NewVersionDialog(const QString &version, QWidget *parent)
            "available for <a href=\"http://code.google.com/p/intrinsic-noise-analyzer/downloads/list\">download</a>.").arg(INA_VERSION_STRING).arg(version));
   details->setAlignment(Qt::AlignHCenter);
 
-  _checkEnabled = new QCheckBox("notify about new versions");
+  _checkEnabled = new QCheckBox("Notify about new versions");
   _checkEnabled->setChecked(true);
 
   QDialogButtonBox *buttons = new QDialogButtonBox(QDialogButtonBox::Ok);
