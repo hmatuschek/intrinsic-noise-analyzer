@@ -8,10 +8,6 @@
 
 /**
  * A simple QTreeView widget, that opens a new view for a selected item.
-<<<<<<< HEAD
- *
-=======
->>>>>>> b748e58d505124f995150818659f6af97f8c47f4
  * @ingroup gui
  */
 class DocumentsView : public QTreeView
