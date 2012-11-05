@@ -117,12 +117,10 @@ public:
       Eigen::VectorXd nablaf;
       Eigen::VectorXd dx;
 
-      // dimension
+      // Dimension
       size_t dim = conc.size();
 
       if(maxTime<dt) maxTime=dt;
-
-
 
       for(double t=0.;t<maxTime; t+=dt, dt*=10)
       {
@@ -157,7 +155,11 @@ public:
               // Do ODE step
               ODEStep(conc,0,dt);
               // Refine with additional Newton step
-              NewtonRaphson<Sys>::solve(conc);
+              //NewtonRaphson<Sys>::solve(conc);
+
+              // construct Jacobian matrix
+              this->interpreter.run(conc,this->ODEs);
+              this->jacobian_interpreter.run(conc,this->JacobianM);
           }
 
           // test for convergence of derivatives
@@ -169,6 +171,7 @@ public:
           }
           if ( test < this->parameters.TOLF)
           {
+              NewtonRaphson<Sys>::solve(conc);
               return Success;
           }
 
@@ -181,6 +184,7 @@ public:
           }
           if (test < this->parameters.TOLX)
           {
+              NewtonRaphson<Sys>::solve(conc);
               return Success;
           }
 
