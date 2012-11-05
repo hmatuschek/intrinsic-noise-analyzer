@@ -743,11 +743,7 @@ ReactionEditorPage::_defineUnknownSpecies(QList<QPair<int, QString> > &reactants
 
     // Create a compartment if there is none.
     if (0 == _model.numCompartments()) {
-<<<<<<< HEAD
-      iNA::Ast::Compartment * new_compartment = new iNA::Ast::Compartment("compartment", iNA::Ast::Compartment::VOLUME, true);
-=======
       iNA::Ast::Compartment * new_compartment = new iNA::Ast::Compartment("compartment", 1, iNA::Ast::Compartment::VOLUME, true);
->>>>>>> 19e87159cb89920b4e17d7ad67279ca7bd625acd
       _model.addDefinition(new_compartment);
     }
 
