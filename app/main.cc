@@ -10,8 +10,8 @@ using namespace std;
 int main(int argc, char *argv[])
 {
   // Instantiate Logger and handler:
-  //Fluc::Utils::Logger::get().addHandler(
-  //      new Fluc::Utils::TextMessageHandler(std::cerr, Fluc::Utils::Message::DEBUG));
+  iNA::Utils::Logger::get().addHandler(
+        new iNA::Utils::TextMessageHandler(std::cerr, iNA::Utils::Message::DEBUG));
 
   // Instantiate a QApplication
   QApplication qapp(argc, argv);

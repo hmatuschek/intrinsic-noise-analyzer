@@ -90,6 +90,11 @@ DocumentTree::removeItem(TreeItem *item)
   this->reset();
 }
 
+void
+DocumentTree::removePlot(PlotItem *plot)
+{
+  this->removeItem(plot);
+}
 
 void
 DocumentTree::markForUpdate(TreeItem *item)

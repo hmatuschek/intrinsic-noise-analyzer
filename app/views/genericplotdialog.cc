@@ -387,7 +387,8 @@ GenericPlotFormulaEditor::onColumnSelected(QModelIndex index) {
   QAbstractProxyModel *proxy = static_cast<QAbstractProxyModel *>(_columns->completionModel());
   index = proxy->mapToSource(index);
   QString formula = _formula->text();
-  formula.append(QString("$%1").arg(index.row()));
+  int pos = _formula->cursorPosition();
+  formula.insert(pos, QString("$%1").arg(index.row()));
   _formula->setText(formula);
 }
 

@@ -89,17 +89,17 @@ Application::Application() :
   _selected_item = 0;
 
   // Assemble menu actions:
-  _newModel = new QAction(tr("New model..."), this);
+  _newModel = new QAction(tr("New model"), this);
   _newModel->setEnabled(true);
   _newModel->setStatusTip(tr("Creates an empty model"));
   _newModel->setShortcut(QKeySequence(Qt::CTRL+ Qt::Key_N));
 
-  _importModel = new QAction(tr("Open model..."), this);
+  _importModel = new QAction(tr("Open model"), this);
   _importModel->setEnabled(true);
   _importModel->setStatusTip(tr("Open a model description file"));
   _importModel->setShortcut(QKeySequence::Open);
 
-  _exportModel = new QAction(tr("Export model..."), this);
+  _exportModel = new QAction(tr("Export model"), this);
   _exportModel->setEnabled(false);
   _exportModel->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_S));
   _exportModel->setStatusTip(tr("Export a model to a file"));
@@ -107,32 +107,39 @@ Application::Application() :
   _closeModel = new QAction(tr("Close model"), this);
   _closeModel->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_C));
   _closeModel->setEnabled(false);
+  _closeModel->setStatusTip(tr("Close the selected model"));
 
   _closeAll = new QAction(tr("Close all models"), this);
-  _closeAll->setEnabled(docTree()->getTreeChildCount());
+  _closeAll->setEnabled(docTree()->getTreeChildCount()); 
+  _closeAll->setStatusTip(tr("Close all models"));
 
   _editModel = new QAction(tr("Edit model"), this);
   _editModel->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_E));
-  _editModel->setEnabled(false);
+  _editModel->setEnabled(false);  
+  _editModel->setStatusTip(tr("Open the model in the SBML shorthand editor"));
 
   _expandRevReaction = new QAction(tr("Expand reversible reactions"), this);
   _expandRevReaction->setEnabled(false);
+  _expandRevReaction->setStatusTip(tr("Convert all reversible reactions to irreversible ones"));
 
   _combineIrvReaction = new QAction(tr("Collapse irreversible reactions"), this);
   _combineIrvReaction->setEnabled(false);
+  _combineIrvReaction->setStatusTip(tr("Combine irreversible reactions to reversible ones when possible"));
 
   _steadyStateAction = new QAction(tr("&Steady State Analysis (SSE)"), this);
   _steadyStateAction->setShortcut(QKeySequence(Qt::CTRL+Qt::SHIFT+Qt::Key_S));
-  _steadyStateAction->setStatusTip(tr("Configure & Run the steady state analysis using the System Size Expansion."));
+  _steadyStateAction->setStatusTip(tr("Run a steady state analysis using the System Size Expansion (SSE)."));
 
   _timeCourseAnalysisAction = new QAction(tr("&Time Course Analysis (SSE)"), this);
   _timeCourseAnalysisAction->setShortcut(QKeySequence(Qt::CTRL+Qt::SHIFT+Qt::Key_T));
-  _timeCourseAnalysisAction->setStatusTip(tr("Configure & Run the time course analysis (SSE)."));
+  _timeCourseAnalysisAction->setStatusTip(tr("Run a time course analysis using the System Size Expansion (SSE)."));
 
   _parameterScanAction = new QAction(tr("&Steady State Parameter Scan (SSE)"), this);
   _parameterScanAction->setShortcut(QKeySequence(Qt::CTRL+Qt::SHIFT+Qt::Key_P));
+  _parameterScanAction->setStatusTip(tr("Run a parameter scan in steady state using the System Size Expansion (SSE)."));
 
   _ssaAnalysisAction = new QAction(tr("Stochastic Simulation Algorithm (SSA)"), this);
+  _parameterScanAction->setStatusTip(tr("Run a time course analysis using the Stochastic Simulation Algorithm (SSA)."));
 
   _recentModelsMenu = new QMenu("Recent models");
   updateRecentModelsMenu();
@@ -222,11 +229,6 @@ Application::itemSelected(const QModelIndex &index)
 void
 Application::checkForNewVersion()
 {
-  // Do not check if disabled by compiler flag
-#ifdef INA_DISABLE_NEW_VERSION_CHECK
-  return;
-#endif
-
   // Otherwise start check.
   _versionCheck.startCheck();
 }
