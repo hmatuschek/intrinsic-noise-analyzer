@@ -47,11 +47,11 @@ SSAResultWidget::SSAResultWidget(SSATaskWrapper *wrapper, QWidget *parent) :
   this->data_view->setModel(ssa_task_wrapper->getTimeSeries());
 
   // Plot button
-  this->plot_button = new QPushButton(tr("Plot statistics"));
+  this->plot_button = new QPushButton(tr("Quick plot"));
   QObject::connect(this->plot_button, SIGNAL(clicked()), this, SLOT(showPlot()));
 
   // Custom plot button
-  _genericPlotButton = new QPushButton(tr("Custom plot"));
+  _genericPlotButton = new QPushButton(tr("Customized plot"));
   QObject::connect(_genericPlotButton, SIGNAL(clicked()), this, SLOT(_genericPlotButtonPressed()));
 
   // "Save as text..." button.
