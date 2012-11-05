@@ -22,13 +22,16 @@ public:
 protected:
   /** Handles iteration through possible completions. */
   void keyPressEvent(QKeyEvent *event);
+  /** Returns the ID or parts of it under the cursor. */
   void idUnderCursor(QString &word);
 
 private slots:
+  /** Callback that inserts the completion at the current cursor position. */
   void insertCompletion(const QString &completion);
 
 private:
+  /** Holds the auto-completion. */
   QCompleter *_completer;
 };
 
-#endif // EXPRESSIONEDITOR_HH
+#endif
