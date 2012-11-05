@@ -1,0 +1,7 @@
+[intrinsicNoiseAnalyzer]
+name=Intrinsic Noise Analyzer
+type=rpm-md
+baseurl=http://download.opensuse.org/repositories/home:/hannesmatuschek:/IntrinsicNoiseAnalyzer/Fedora_$releasever/
+gpgcheck=1
+gpgkey=http://download.opensuse.org/repositories/home:/hannesmatuschek:/IntrinsicNoiseAnalyzer/Fedora_$releasever/repodata/repomd.xml.key
+enabled=1
