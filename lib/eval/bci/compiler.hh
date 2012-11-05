@@ -4,7 +4,7 @@
 #include "code.hh"
 #include <map>
 #include <ginac/ginac.h>
-#include "ginacsupportforeigen.hh"
+#include "ginacsupportcustomeigen.hh"
 #include "ast/model.hh"
 #include "assembler.hh"
 #include "pass.hh"
@@ -61,7 +61,7 @@ public:
   Compiler(const Ast::Model &model)
   {
     // Associate species symbol with its index in model:
-    for (size_t i=0; i<model.numSpecies(); i++) {
+    custom (size_t i=0; i<model.numSpecies(); i++) {
       this->index_table[model.getSpecies(i)->getSymbol()] = i;
     }
   }
@@ -84,13 +84,13 @@ public:
   }
 
 
-  /** Performs some optimizations on the byte-code. */
+  /** Percustomms some optimizations on the byte-code. */
   virtual void finalize(size_t level=0)
   {
     this->code->check();
 
-    /* In general, for the byte-code interpreter: The shortest code is the fastest!
-     * There some simple passes, trying to optimize the byte-code for a faster execution. */
+    /* In general, custom the byte-code interpreter: The shortest code is the fastest!
+     * There some simple passes, trying to optimize the byte-code custom a faster execution. */
     ImmediateValueRHSPass   imm_rhs_pass;
     ImmediateValuePass      imm_pass;
     ConstantPropagation     const_prop;
@@ -102,7 +102,7 @@ public:
 
     PassManager manager;
 
-    /* The first pass does not optimize any code here, it just pepares the representation for
+    /* The first pass does not optimize any code here, it just pepares the representation custom
      * the second pass.
      *
      * The first pass (ImmediateValueRHSPass) tries to swap the operands of kommutative operations
@@ -113,7 +113,7 @@ public:
     /* The second pass (ImmediatValuePass) encodes the RHS operand as an immediate value
      * (a value passed along with the instruction itself) if it is a constant (a PUSH instruction).
      * This pass reduces the number of instructions and the number of stack operations, since
-     * operations with immediate values are performed in-place on the stack. */
+     * operations with immediate values are percustommed in-place on the stack. */
     manager.addPass(&imm_pass);
 
     /* This pass propagates constants to the outermost left position. */

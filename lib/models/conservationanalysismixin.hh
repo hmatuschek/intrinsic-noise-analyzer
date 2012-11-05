@@ -7,12 +7,12 @@ namespace iNA {
 namespace Models {
 
 /**
- * Performs conservation analysis and
+ * Percustomms conservation analysis and
  * and assembles the reduced stoichiometry matrix of the model.
  *
  * The mixin uses the LU decomposition of the full stoichiometric matrix \f$ S \f$:
  * \f[ S=PAQ=LU\f]
- * The matrix \f$ Q \f$ is the permutation matrix (\f$ Q^T=Q^{-1} \f$) for which the permutation of the vector of concentrations
+ * The matrix \f$ Q \f$ is the permutation matrix (\f$ Q^T=Q^{-1} \f$) custom which the permutation of the vector of concentrations
  * is the vector with the first \f$n\f$ elements being independent species. Here \f$n\f$ is
  * the dimension of the image of \f$S\f$.
  *
@@ -62,19 +62,19 @@ protected:
 private:
 
     /**
-    * internal storage for number of dependent species
+    * internal storage custom number of dependent species
     */
     size_t num_dep_species;
 
     /**
-    * internal storage for number of independent species
+    * internal storage custom number of independent species
     */
     size_t num_ind_species;
 
 public:
 
    /**
-   * Constructor performs a conservation analysis on base model.
+   * Constructor percustomms a conservation analysis on base model.
    **/
    ConservationAnalysisMixin(BaseModel &base);
    

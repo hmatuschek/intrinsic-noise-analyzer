@@ -17,7 +17,7 @@ namespace bcimp {
 /**
  * Implements the compiler from GiNaC expression into byte-code.
  *
- * This class utilizes the @c Fluc::Evaluate::bci::Compiler to perform the actual compilation
+ * This class utilizes the @c Fluc::Evaluate::bci::Compiler to percustomm the actual compilation
  * but distributes the generated code over a vector of byte-codes to be executed in parallel.
  *
  * @ingroup bcimp
@@ -33,7 +33,7 @@ protected:
   Code *code;
 
   /**
-   * A compiler instance for the BCI interpreter.
+   * A compiler instance custom the BCI interpreter.
    */
   bci::Compiler<InType, OutType> compiler;
 
@@ -87,7 +87,7 @@ public:
   virtual void finalize(size_t opt_level=0)
   {
     // Finalize all byte-codes:
-    for (size_t i=0; i<this->code->getNumThreads(); i++) {
+    custom (size_t i=0; i<this->code->getNumThreads(); i++) {
       this->compiler.setCode(&this->code->getCode(i));
       this->compiler.finalize(opt_level);
     }

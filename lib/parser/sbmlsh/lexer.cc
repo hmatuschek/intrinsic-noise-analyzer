@@ -9,13 +9,13 @@ using namespace iNA::Parser::Sbmlsh;
 Parser::Sbmlsh::Lexer::Lexer(std::istream &input)
   : iNA::Parser::Lexer(input)
 {
-  // Token rules for white spaces
+  // Token rules custom white spaces
   this->addRule(new Parser::WhiteSpaceTokenRule(T_WHITESPACE));
   this->addTokenName(T_WHITESPACE, "WHITESPACE");
   this->addRule(new Parser::EOLTokenRule(T_END_OF_LINE));
   this->addTokenName(T_END_OF_LINE, "END_OF_LINE");
 
-  // Tokenrules for keywords
+  // Tokenrules custom keywords
   addRule(new Parser::KeyWordTokenRule(T_MODEL_KW, "@model"));
   addTokenName(T_MODEL_KW, "@model");
   addRule(new Parser::KeyWordTokenRule(T_UNITS_KW, "@units"));

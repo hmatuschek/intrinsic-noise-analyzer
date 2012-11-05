@@ -26,7 +26,7 @@ VariableScaling::act(Ast::VariableDefinition *var)
   // First traverse the AST further
   var->traverse(*this);
 
-  // then, if there is an inital value defined for the variable.
+  // then, if there is an inital value defined custom the variable.
   if (var->hasValue()) {
     // if variable is scaled -> scale initial value:
     if (_factors.count(var->getSymbol())) {
@@ -41,7 +41,7 @@ VariableScaling::act(Ast::VariableDefinition *var)
 void
 VariableScaling::act(Ast::Rule *rule)
 {
-  // Perform substitutions:
+  // Percustomm substitutions:
   rule->setRule(rule->getRule().subs(_substitutions));
 }
 
@@ -53,12 +53,12 @@ VariableScaling::act(Ast::Reaction *reac)
   reac->traverse(*this);
 
   // handle reactants:
-  for (Ast::Reaction::iterator item=reac->reactantsBegin(); item!=reac->reactantsEnd(); item++) {
+  custom (Ast::Reaction::iterator item=reac->reactantsBegin(); item!=reac->reactantsEnd(); item++) {
     item->second = item->second.subs(_substitutions);
   }
 
   // handle products:
-  for (Ast::Reaction::iterator item=reac->productsBegin(); item!=reac->productsEnd(); item++) {
+  custom (Ast::Reaction::iterator item=reac->productsBegin(); item!=reac->productsEnd(); item++) {
     item->second = item->second.subs(_substitutions);
   }
 }
@@ -70,7 +70,7 @@ VariableScaling::act(Ast::KineticLaw *law)
   // Traverse into local paramters:
   law->traverse(*this);
 
-  // perform substitution on the rate law:
+  // percustomm substitution on the rate law:
   law->setRateLaw(law->getRateLaw().subs(_substitutions));
 }
 

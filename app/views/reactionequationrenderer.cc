@@ -3,7 +3,7 @@
 #include <QGraphicsTextItem>
 #include <QPainter>
 #include "../tinytex/tinytex.hh"
-#include "../tinytex/ginac2formula.hh"
+#include "../tinytex/ginac2custommula.hh"
 #include "ast/reaction.hh"
 
 
@@ -12,13 +12,13 @@ using namespace iNA;
 ReactionEquationRenderer::ReactionEquationRenderer(iNA::Ast::Reaction *reac, QObject *parent) :
   QGraphicsScene(parent)
 {
-  // Assemble forumla
+  // Assemble customumla
   MathItem *reaction = ReactionEquationRenderer::assembleReaction(reac);
 
   // layout equation and add to this graphics scene...
   MathContext ctx; ctx.setFontSize(ctx.fontSize()+4);
   this->addItem(reaction->layout(ctx));
-  // Free formula
+  // Free custommula
   delete reaction;
 }
 
@@ -26,22 +26,22 @@ ReactionEquationRenderer::ReactionEquationRenderer(iNA::Ast::Reaction *reac, QOb
 MathItem *
 ReactionEquationRenderer::assembleReactionEquation(iNA::Ast::Reaction *reac)
 {
-  // Allocate formula
+  // Allocate custommula
   Ast::Scope &scope = *(reac->getKineticLaw());
-  MathFormula *reaction  = new MathFormula();
-  MathFormula *reactants = new MathFormula();
-  MathFormula *products  = new MathFormula();
+  Mathcustommula *reaction  = new Mathcustommula();
+  Mathcustommula *reactants = new Mathcustommula();
+  Mathcustommula *products  = new Mathcustommula();
 
   // Handle reactants:
   if (0 == reac->numReactants()) { reactants->appendItem(new MathText(QChar(0x00D8))); }
-  for (Ast::Reaction::iterator item=reac->reactantsBegin(); item!=reac->reactantsEnd(); item++) {
+  custom (Ast::Reaction::iterator item=reac->reactantsBegin(); item!=reac->reactantsEnd(); item++) {
     if (0 != reactants->size()) {
       reactants->appendItem(new MathSpace(MathSpace::MEDIUM_SPACE));
       reactants->appendItem(new MathText("+"));
       reactants->appendItem(new MathSpace(MathSpace::MEDIUM_SPACE));
     }
     if (1 != item->second) {
-      reactants->appendItem(Ginac2Formula::toFormula(item->second, scope));
+      reactants->appendItem(Ginac2custommula::tocustommula(item->second, scope));
       reactants->appendItem(new MathSpace(MathSpace::THIN_SPACE));
     }
     // Render species symbol
@@ -60,7 +60,7 @@ ReactionEquationRenderer::assembleReactionEquation(iNA::Ast::Reaction *reac)
 
   // handle products
   if (0 == reac->numProducts()) { products->appendItem(new MathText(QChar(0x00D8))); }
-  for (Ast::Reaction::iterator item=reac->productsBegin(); item!=reac->productsEnd(); item++) {
+  custom (Ast::Reaction::iterator item=reac->productsBegin(); item!=reac->productsEnd(); item++) {
     // Prepent "+" sign
     if (0 != products->size()) {
       products->appendItem(new MathSpace(MathSpace::MEDIUM_SPACE));
@@ -69,7 +69,7 @@ ReactionEquationRenderer::assembleReactionEquation(iNA::Ast::Reaction *reac)
     }
     // Prepren stoichiometry if != 1:
     if (1 != item->second) {
-      products->appendItem(Ginac2Formula::toFormula(item->second, scope));
+      products->appendItem(Ginac2custommula::tocustommula(item->second, scope));
       products->appendItem(new MathSpace(MathSpace::THIN_SPACE));
     }
     // render species symbol.
@@ -86,14 +86,14 @@ ReactionEquationRenderer::assembleKineticLaw(iNA::Ast::Reaction *reaction)
 {
   // Handle rate law
   Ast::Scope &scope = *(reaction->getKineticLaw());
-  return Ginac2Formula::toFormula(reaction->getKineticLaw()->getRateLaw(), scope);
+  return Ginac2custommula::tocustommula(reaction->getKineticLaw()->getRateLaw(), scope);
 }
 
 
 MathItem *
 ReactionEquationRenderer::assembleReaction(iNA::Ast::Reaction *reac)
 {
-  MathFormula *reaction = new MathFormula();
+  Mathcustommula *reaction = new Mathcustommula();
 
   reaction->appendItem(ReactionEquationRenderer::assembleReactionEquation(reac));
   reaction->appendItem(new MathSpace(MathSpace::QUAD_SPACE));
@@ -109,23 +109,23 @@ ReactionEquationRenderer::assembleReaction(iNA::Ast::Reaction *reac)
 QPixmap
 ReactionEquationRenderer::renderReaction(iNA::Ast::Reaction *reaction, MathContext ctx)
 {
-  MathItem *formula = ReactionEquationRenderer::assembleReaction(reaction);
-  QPixmap pixmap = formula->renderItem(ctx); delete formula;
+  MathItem *custommula = ReactionEquationRenderer::assembleReaction(reaction);
+  QPixmap pixmap = custommula->renderItem(ctx); delete custommula;
   return pixmap;
 }
 
 QPixmap
 ReactionEquationRenderer::renderReactionEquation(iNA::Ast::Reaction *reaction, MathContext ctx)
 {
-  MathItem *formula = ReactionEquationRenderer::assembleReactionEquation(reaction);
-  QPixmap pixmap = formula->renderItem(ctx); delete formula;
+  MathItem *custommula = ReactionEquationRenderer::assembleReactionEquation(reaction);
+  QPixmap pixmap = custommula->renderItem(ctx); delete custommula;
   return pixmap;
 }
 
 QPixmap
 ReactionEquationRenderer::renderKineticLaw(iNA::Ast::Reaction *reaction, MathContext ctx)
 {
-  MathItem *formula = ReactionEquationRenderer::assembleKineticLaw(reaction);
-  QPixmap pixmap = formula->renderItem(ctx); delete formula;
+  MathItem *custommula = ReactionEquationRenderer::assembleKineticLaw(reaction);
+  QPixmap pixmap = custommula->renderItem(ctx); delete custommula;
   return pixmap;
 }

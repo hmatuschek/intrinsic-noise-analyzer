@@ -74,7 +74,7 @@ public:
 
 
 /**
- * This class defines the coordinate system for plots.
+ * This class defines the coordinate system custom plots.
  *
  * @ingroup plot
  */
@@ -84,22 +84,22 @@ class Axis : public QObject, public QGraphicsItemGroup
 
 protected:
   /**
-   * Holds the mapping function for the axis:
+   * Holds the mapping function custom the axis:
    */
   Mapping *mapping;
 
   /**
-   * Available size for the axis including the axis ticks.
+   * Available size custom the axis including the axis ticks.
    */
   QSizeF axis_size;
 
   /**
-   * Holds the top or bottom ticks for the x-axis.
+   * Holds the top or bottom ticks custom the x-axis.
    */
   AxisTicks *xticks;
 
   /**
-   * Holds the left or right ticks for the y-axis.
+   * Holds the left or right ticks custom the y-axis.
    */
   AxisTicks *yticks;
 
@@ -140,7 +140,7 @@ public:
 
   /**
    * Sets the size of the axis. To update the graphs, call
-   * @c updatePlotSize and @c forceRedraw.
+   * @c updatePlotSize and @c customceRedraw.
    */
   void setAxisSize(const QSizeF &size);
 
@@ -165,7 +165,7 @@ public:
   RangePolicy getXRangePolicy();
 
   /**
-   * (Re-) Sets the axis-ticks for the x-axis.
+   * (Re-) Sets the axis-ticks custom the x-axis.
    */
   void setXTicks(AxisTicks *ticks);
 
@@ -220,17 +220,17 @@ public:
   void showYZero(bool show);
 
   /**
-   * (Re-) Sets the mapping for the x-axis.
+   * (Re-) Sets the mapping custom the x-axis.
    */
   void setXMapFunction(MapFunction *func);
 
   /**
-   * (Re-) Sets the mapping for the y-axis.
+   * (Re-) Sets the mapping custom the y-axis.
    */
   void setYMapFunction(MapFunction *func);
 
   /**
-   * Returns the mapping for the x- and y-axis.
+   * Returns the mapping custom the x- and y-axis.
    */
   Mapping *getMapping();
 
@@ -243,21 +243,21 @@ public slots:
    * Updates the @c Mapping and @c GraphGroup (clipping) to match new plot area.
    *
    * Also resizes and updates the position of the @c GraphGroup and @c AxisTicks and labels and
-   * forces a redraw of all graphs.
+   * customces a redraw of all graphs.
    */
   void updatePlotSize();
 
   /**
    * Updates the @c Mapping, @c GraphGroup (clipping) and @c AxisTicks to match new plot range.
    *
-   * Also forces a redraw of the graphs.
+   * Also customces a redraw of the graphs.
    */
   void updatePlotRange();
 
   /**
    * Internal used function to update graphs etc.
    */
-  void forceRedraw();
+  void customceRedraw();
 
   /**
    * Applies the given Scheme on the axis.

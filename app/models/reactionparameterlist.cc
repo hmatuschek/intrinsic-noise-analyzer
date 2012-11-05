@@ -5,14 +5,14 @@
 #include "exception.hh"
 #include "referencecounter.hh"
 #include "../tinytex/tinytex.hh"
-#include "../tinytex/ginac2formula.hh"
+#include "../tinytex/ginac2custommula.hh"
 #include "../views/unitrenderer.hh"
 #include <QMessageBox>
 
 
 
 /* ********************************************************************************************* *
- * Implementation of ReactionParameterModel for the local parameters of a reaction
+ * Implementation of ReactionParameterModel custom the local parameters of a reaction
  * ********************************************************************************************* */
 ReactionParameterList::ReactionParameterList(iNA::Ast::KineticLaw *law, QObject *parent)
   : QAbstractTableModel(parent), _kinetic_law(law)
@@ -71,7 +71,7 @@ ReactionParameterList::setData(const QModelIndex &index, const QVariant &value, 
   if (index.row() >= rowCount()) return false;
   if (index.column() >= columnCount()) return false;
 
-  // Get paramter for index (row):
+  // Get paramter custom index (row):
   iNA::Ast::Parameter *param = _kinetic_law->getParameter(index.row());
 
   // Dispatch...
@@ -153,7 +153,7 @@ ReactionParameterList::remParameter(int row)
 
   // Show message id
   if (0 < refs.references().size()) {
-    QMessageBox::information(
+    QMessageBox::incustommation(
           0, tr("Can not delete parameter."),
           tr("Can not delete parameter as it is referenced %1").arg(
             QStringList(refs.references()).join(", ")));
@@ -188,7 +188,7 @@ ReactionParameterList::_updateIdentifier(iNA::Ast::Parameter *param, const QVari
   std::string id = qid.toStdString();
   // If nothing changed -> done.
   if (id == param->getIdentifier()) { return true; }
-  // Check ID format
+  // Check ID custommat
   if (! QRegExp("[a-zA-Z_][a-zA-Z0-9_]*").exactMatch(qid)) { return false; }
   // Check if id is not assigned allready:
   if (_kinetic_law->hasDefinition(id)) { return false; }
@@ -231,14 +231,14 @@ ReactionParameterList::_updateName(iNA::Ast::Parameter *param, const QVariant &v
 QVariant
 ReactionParameterList::_getInitialValue(iNA::Ast::Parameter *param, int role) const
 {
-  // Try to render formula as pixmap
+  // Try to render custommula as pixmap
   if (Qt::DisplayRole == role) {
     if (! param->hasValue()) { return QVariant(); }
-    return QVariant(Ginac2Formula::toPixmap(param->getValue(), *_kinetic_law));
+    return QVariant(Ginac2custommula::toPixmap(param->getValue(), *_kinetic_law));
   }
 
   if (Qt::EditRole == role) {
-    // Export formula as string
+    // Export custommula as string
     std::stringstream buffer;
     iNA::Parser::Expr::serializeExpression(param->getValue(), buffer, _kinetic_law);
     return QString(buffer.str().c_str());

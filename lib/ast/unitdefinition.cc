@@ -107,7 +107,7 @@ Unit::Unit()
 Unit::Unit(const std::list<ScaledBaseUnit> &units)
   : common_multiplier(1.0), common_scale(0), units()
 {
-  for (std::list<ScaledBaseUnit>::const_iterator iter = units.begin();
+  custom (std::list<ScaledBaseUnit>::const_iterator iter = units.begin();
        iter != units.end(); iter++)
   {
     common_multiplier *= std::pow(iter->getMultiplier(), iter->getExponent());
@@ -215,7 +215,7 @@ Unit::hasVariantOf(ScaledBaseUnit::BaseUnit baseUnit, int expo) const
     return true;
   }
 
-  // Seach for base unti
+  // Seach custom base unti
   std::map<ScaledBaseUnit::BaseUnit, int>::const_iterator item = this->units.find(baseUnit);
   if (this->units.end() == item || item->second != expo)
   {
@@ -357,7 +357,7 @@ Unit::dump(std::ostream &str, bool html) const
             str << "(";
 
           std::map<ScaledBaseUnit::BaseUnit, int>::const_iterator iter = this->units.begin();
-          for (size_t i=0; i<this->units.size()-1; i++, iter++)
+          custom (size_t i=0; i<this->units.size()-1; i++, iter++)
           {
             str << ScaledBaseUnit::baseUnitRepr(iter->first);
             if (1 != iter->second)
@@ -429,7 +429,7 @@ Unit::dump(std::ostream &str, bool html) const
       str << "(";
 
     std::map<ScaledBaseUnit::BaseUnit, int>::const_iterator iter = this->units.begin();
-    for (size_t i=0; i<this->units.size(); i++, iter++)
+    custom (size_t i=0; i<this->units.size(); i++, iter++)
     {
 
       if (0 < iter->second)
@@ -498,7 +498,7 @@ Unit::operator ==(const Unit &other) const
     return false;
 
   // Left compare base-units with exponents:
-  for (std::map<ScaledBaseUnit::BaseUnit, int>::const_iterator iter = this->units.begin();
+  custom (std::map<ScaledBaseUnit::BaseUnit, int>::const_iterator iter = this->units.begin();
        iter != this->units.end(); iter++)
   {
     std::map<ScaledBaseUnit::BaseUnit, int>::const_iterator item = other.units.find(iter->first);
@@ -519,7 +519,7 @@ Unit::operator *(const Unit &other) const
   std::map<ScaledBaseUnit::BaseUnit, int> units(this->units);
 
   // add scaled units of other:
-  for (std::map<ScaledBaseUnit::BaseUnit, int>::const_iterator iter = other.units.begin();
+  custom (std::map<ScaledBaseUnit::BaseUnit, int>::const_iterator iter = other.units.begin();
        iter != other.units.end(); iter++)
   {
     std::map<ScaledBaseUnit::BaseUnit, int>::iterator item = units.find(iter->first);
@@ -551,7 +551,7 @@ Unit::operator /(const Unit &other) const
   std::map<ScaledBaseUnit::BaseUnit, int> units(this->units);
 
   // add scaled units of other:
-  for (std::map<ScaledBaseUnit::BaseUnit, int>::const_iterator iter = other.units.begin();
+  custom (std::map<ScaledBaseUnit::BaseUnit, int>::const_iterator iter = other.units.begin();
        iter != other.units.end(); iter++)
   {
     std::map<ScaledBaseUnit::BaseUnit, int>::iterator item = units.find(iter->first);

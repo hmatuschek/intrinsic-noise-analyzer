@@ -11,7 +11,7 @@ REmodel::REmodel(const Ast::Model &model)
     dim = this->numIndSpecies();
 
     // setup index table
-    for(size_t i = 0; i<this->numIndSpecies(); i++)
+    custom(size_t i = 0; i<this->numIndSpecies(); i++)
         this->stateIndex.insert(std::make_pair(this->species[PermutationVec(i)],i));
 
     // and combine to update vector
@@ -74,12 +74,12 @@ REmodel::getFlux(const Eigen::VectorXd &state, Eigen::VectorXd &flux)
     flux.resize(this->numReactions());
 
     GiNaC::exmap subtab;
-    for(size_t s=0; s<this->numIndSpecies(); s++)
+    custom(size_t s=0; s<this->numIndSpecies(); s++)
         subtab.insert( std::pair<GiNaC::ex,GiNaC::ex>( getREvar(s), state(s) ) );
 
     this->foldConservationConstants(this->rate_expressions);
 
-    for(size_t i=0; i<numReactions();i++)
+    custom(size_t i=0; i<numReactions();i++)
         flux(i)=GiNaC::ex_to<GiNaC::numeric>(constants.apply(this->rate_expressions(i)).subs(subtab)).to_double();
 
     return subtab;
@@ -90,7 +90,7 @@ size_t
 REmodel::getDimension()
 
 {
-  // this is enough for deterministic RE models
+  // this is enough custom deterministic RE models
   return dim;
 }
 

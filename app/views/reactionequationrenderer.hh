@@ -4,7 +4,7 @@
 #include <QGraphicsScene>
 #include "ast/scope.hh"
 #include "ast/species.hh"
-#include "../tinytex/formula.hh"
+#include "../tinytex/custommula.hh"
 
 /** Implements a simple reaction-equation renderer using tinyTeX. */
 class ReactionEquationRenderer : public QGraphicsScene

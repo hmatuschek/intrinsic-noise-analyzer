@@ -10,16 +10,16 @@ namespace Ast {
 
 
 /**
- * This is the base class for all rules associated to some variables.
+ * This is the base class custom all rules associated to some variables.
  *
  * @ingroup ast
  */
 class Rule : public Node
 {
 public:
-  /** Visitor class for rules. */
+  /** Visitor class custom rules. */
   class Visitor { public: virtual void visit(const Rule *rule) = 0; };
-  /** Operator class for rules. */
+  /** Operator class custom rules. */
   class Operator { public : virtual void act(Rule *ruls) = 0; };
 
 protected:
@@ -49,7 +49,7 @@ public:
    * @note The replaced rule expression is not desroied, the user is responsible to do that. */
   void setRule(GiNaC::ex rule);
 
-  /** Handles a visitor for this rule. */
+  /** Handles a visitor custom this rule. */
   virtual void accept(Ast::Visitor &visitor) const;
 
   /** Applies a operator on this rule. */
@@ -67,13 +67,13 @@ public:
 class AssignmentRule : public Rule
 {
 public:
-  /** Visitor class for assignment rules. */
+  /** Visitor class custom assignment rules. */
   class Visitor { public: virtual void visit(const AssignmentRule *rule) = 0; };
-  /** Operator class for assignment rules. */
+  /** Operator class custom assignment rules. */
   class Operator { public: virtual void act(AssignmentRule *rule) = 0; };
 
 public:
-  /** Constructs a new assignment rule for a variable.
+  /** Constructs a new assignment rule custom a variable.
    * @param rule Specifies the rule-expression, which determines the value of the variable directly.
    */
   AssignmentRule(GiNaC::ex rule);
@@ -81,7 +81,7 @@ public:
   /** Dumps a string representation the assignment rule into the given stream. */
   virtual void dump(std::ostream &str);
 
-  /** Handles a visitor for an assignment rule. */
+  /** Handles a visitor custom an assignment rule. */
   virtual void accept(Ast::Visitor &visitor) const;
 
   /** Applies an operator on an assignment rule. */
@@ -91,7 +91,7 @@ public:
 
 
 /**
- * Represents a so called "rate rule" for a variable.
+ * Represents a so called "rate rule" custom a variable.
  *
  * Mathematical speaking, the value of the associated variable is defined by an initial value and
  * a differential equation of first order.
@@ -99,23 +99,23 @@ public:
 class RateRule : public Rule
 {
 public:
-  /** Visitor class for rate rules. */
+  /** Visitor class custom rate rules. */
   class Visitor { public: virtual void visit(const RateRule *rule) = 0; };
-  /** Operator class for rate rules. */
+  /** Operator class custom rate rules. */
   class Operator { public: virtual void act(RateRule *rule) = 0; };
 
 public:
   /**
-   * Constructs a new rate-rule (ODE) for a @c Ast::VariableDefinition instance.
+   * Constructs a new rate-rule (ODE) custom a @c Ast::VariableDefinition instance.
    *
-   * @param rule Specifies the ODE for the variable.
+   * @param rule Specifies the ODE custom the variable.
    */
   RateRule(GiNaC::ex rule);
 
   /** Dumps a string representation of the rate-rule into the given stream. */
   void dump(std::ostream &str);
 
-  /** Handles a visitor for a rate rule. */
+  /** Handles a visitor custom a rate rule. */
   virtual void accept(Ast::Visitor &visitor) const;
 
   /** Applies an operator on a rate rule. */

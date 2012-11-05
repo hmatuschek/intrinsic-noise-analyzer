@@ -59,48 +59,48 @@ protected:
     Eigen::MatrixXex Hessian;
 
     /**
-    * Expressions for Diffusion matrix \f$ \underline{D} \f$ in unconstrained base.
+    * Expressions custom Diffusion matrix \f$ \underline{D} \f$ in unconstrained base.
     */
     Eigen::MatrixXex DiffusionMatrix;
 
     /**
-    * Expressions for Diffusion matrix \f$ \underline{D}^{(1)} \f$ in unconstrained base.
+    * Expressions custom Diffusion matrix \f$ \underline{D}^{(1)} \f$ in unconstrained base.
     */
     Eigen::MatrixXex DiffusionMatrixO1;
 
     /**
-    * Expressions for Diffusion matrix in vectorized form \f$ \text{vec}(\underline{D}) \f$ and unconstrained base.
+    * Expressions custom Diffusion matrix in vectorized customm \f$ \text{vec}(\underline{D}) \f$ and unconstrained base.
     */
     Eigen::VectorXex DiffusionVec;
 
     /**
-    * Expressions for 3-tensor matrix \f$ D_{i}^{jk} \f$ in unconstrained base.
+    * Expressions custom 3-tensor matrix \f$ D_{i}^{jk} \f$ in unconstrained base.
     */
     Eigen::MatrixXex DiffusionJacM;  
 
     /**
-    * Expressions for 3-tensor matrix \f$ D_{i}^{(1)jk} \f$ in unconstrained base.
+    * Expressions custom 3-tensor matrix \f$ D_{i}^{(1)jk} \f$ in unconstrained base.
     */
     Eigen::MatrixXex DiffusionJacMO1;
 
     /**
-    * Expressions for 3-tensor matrix \f$ D_{ijk} \f$ in unconstrained base.
+    * Expressions custom 3-tensor matrix \f$ D_{ijk} \f$ in unconstrained base.
     */
     Eigen::VectorXex Diffusion3Tensor;
 
     /**
-    * Expressions for 4-tensor matrix \f$ D_{ij}^{kl} \f$ in unconstrained base.
+    * Expressions custom 4-tensor matrix \f$ D_{ij}^{kl} \f$ in unconstrained base.
     */
     Eigen::MatrixXex DiffusionHessianM;
 
     /**
-    * Expressions for 4-tensor matrix \f$ D_{i}^{jkl} \f$ in unconstrained base.
+    * Expressions custom 4-tensor matrix \f$ D_{i}^{jkl} \f$ in unconstrained base.
     */
     Eigen::MatrixXex PhilippianM;
 
 
     /**
-    * Expressions of Hessian of objective function for optimization.
+    * Expressions of Hessian of objective function custom optimization.
     */
     Eigen::MatrixXex fHessian;
 
@@ -113,7 +113,7 @@ protected:
 
 private:
     /**
-     * Performs a common construction part, shared between all constructors.
+     * Percustomms a common construction part, shared between all constructors.
      */
     void postConstructor();
 

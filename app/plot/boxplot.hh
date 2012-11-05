@@ -22,7 +22,7 @@ protected:
   QList<double> values;
 
   /**
-   * Holds the (optional) std. deviation for the box.
+   * Holds the (optional) std. deviation custom the box.
    */
   QList<double> stddevs;
 

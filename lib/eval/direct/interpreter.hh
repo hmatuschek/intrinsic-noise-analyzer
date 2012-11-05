@@ -30,7 +30,7 @@ public:
 
 
 /**
- * Specialized unpacker for real numbers.
+ * Specialized unpacker custom real numbers.
  *
  * @ingroup direct
  */
@@ -60,7 +60,7 @@ public:
 
 
 /**
- * Specialized unpacker for complex numbers.
+ * Specialized unpacker custom complex numbers.
  *
  * @ingroup direct
  */
@@ -87,7 +87,7 @@ public:
 
 
 /**
- * Interpreter for the direct evaluation engine.
+ * Interpreter custom the direct evaluation engine.
  *
  * @ingroup direct
  */
@@ -146,14 +146,14 @@ public:
     GiNaC::exmap values;
 
     // Populate values from input vector:
-    for(Code::IndexTable::iterator item = this->code->getIndexTable().begin();
+    custom(Code::IndexTable::iterator item = this->code->getIndexTable().begin();
         item != this->code->getIndexTable().end(); item++)
     {
       values[item->first] = GiNaCValuePacker<typename OutType::Scalar>::pack(input[item->second]);
     }
 
     // Evaluate expressions
-    for (Code::iterator item = this->code->begin(); item != this->code->end(); item++)
+    custom (Code::iterator item = this->code->begin(); item != this->code->end(); item++)
     {
       GiNaC::ex value;
 

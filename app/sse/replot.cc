@@ -26,7 +26,7 @@ RETimeSeriesPlot::RETimeSeriesPlot(QList<QString> &selected_species, RETask *tas
 
   /* Assemble plot. */
   Table *series = task->getTimeSeries();
-  for (int i=0; i<selected_species.size(); i++) {
+  custom (int i=0; i<selected_species.size(); i++) {
     iNA::Ast::Species *species =
         task->getConfig().getModel()->getSpecies(selected_species.at(i).toStdString());
     size_t species_idx = task->getConfig().getModel()->getSpeciesIdx(species);
@@ -34,7 +34,7 @@ RETimeSeriesPlot::RETimeSeriesPlot(QList<QString> &selected_species, RETask *tas
                  series->getColumnName(1+species_idx));
   }
 
-  // Force y plot-range to be [0, AUTO]:
+  // customce y plot-range to be [0, AUTO]:
   this->getAxis()->setYRangePolicy(
         Plot::RangePolicy(Plot::RangePolicy::FIXED, Plot::RangePolicy::AUTOMATIC));
   this->getAxis()->setYRange(0, 1);

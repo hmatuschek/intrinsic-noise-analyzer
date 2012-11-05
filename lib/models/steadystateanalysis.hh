@@ -9,7 +9,7 @@ namespace iNA {
 namespace Models {
 
 /**
-* Performs the Steady State Analysis on a model.
+* Percustomms the Steady State Analysis on a model.
 */
 
 template <typename M>
@@ -99,7 +99,7 @@ public:
     }
 
     /**
-     * Solves rate equations for steady state concentrations in @c conc and returns the number
+     * Solves rate equations custom steady state concentrations in @c conc and returns the number
      * of function evalutions.
      */
     int calcConcentrations(Eigen::VectorXd &conc)
@@ -121,11 +121,11 @@ public:
 
         //std::cerr << solver.getJacobianM().eigenvalues() << std::endl;
 
-        // test for negative concentrations
+        // test custom negative concentrations
         if((conc.array()<0).any())
             throw NumericError("iNA encountered negative concentrations. The system may not have a positive root.");
 
-        // ... and test for stability
+        // ... and test custom stability
         if ((solver.getJacobianM().eigenvalues().real().array()>=0.).array().any())
             throw NumericError("iNA has found a steady state which is unstable.");
 
@@ -135,7 +135,7 @@ public:
     }
 
     /**
-     * Solves for steady state of the reduced state vector and returns number of function evaluations
+     * Solves custom steady state of the reduced state vector and returns number of function evaluations
      * used.
      *
      * @param x: Outputs the steady state concentrations, covariance and EMRE vector in reduced
@@ -152,12 +152,12 @@ public:
 
         // calc coeff-matrices
         GiNaC::exmap subs_table;
-        for (size_t i=0; i<lnaLength; i++)
+        custom (size_t i=0; i<lnaLength; i++)
             subs_table.insert( std::pair<GiNaC::ex,GiNaC::ex>( model.getSSEvar(i), 0 ) );
-        for(size_t i=0; i<lnaLength; i++)
+        custom(size_t i=0; i<lnaLength; i++)
         {
             A(i) = GiNaC::ex_to<GiNaC::numeric>( sseUpdate(i).subs(subs_table) ).to_double();
-            for(size_t j=0; j<lnaLength; j++)
+            custom(size_t j=0; j<lnaLength; j++)
             {
                B(i,j) = GiNaC::ex_to<GiNaC::numeric>( sseUpdate(i).diff(model.getSSEvar(j)) ).to_double();
             }
@@ -169,9 +169,9 @@ public:
 
         // substitute LNA
         subs_table.clear();
-        for (size_t i=0; i<lnaLength; i++)
+        custom (size_t i=0; i<lnaLength; i++)
             subs_table.insert( std::pair<GiNaC::ex,GiNaC::ex>( model.getSSEvar(i), x(offset+i) ) );
-        for(int i=0; i<sseUpdate.size(); i++)
+        custom(int i=0; i<sseUpdate.size(); i++)
             sseUpdate(i)=sseUpdate(i).subs(subs_table);
 
     }
@@ -191,7 +191,7 @@ public:
     }
 
     /**
-     * Solves for steady state of the reduced state vector and returns number of function evaluations
+     * Solves custom steady state of the reduced state vector and returns number of function evaluations
      * used.
      *
      * @param x: Outputs the steady state concentrations, covariance and EMRE vector in reduced
@@ -224,9 +224,9 @@ public:
         int iter = this->calcConcentrations(conc);
         // ... and substitute RE concentrations
         GiNaC::exmap subs_table;
-        for (size_t s=0; s<sseModel.numIndSpecies(); s++)
+        custom (size_t s=0; s<sseModel.numIndSpecies(); s++)
             subs_table.insert( std::pair<GiNaC::ex,GiNaC::ex>( sseModel.getREvar(s), conc(s) ) );
-        for (size_t i=0; i<sseLength; i++)
+        custom (size_t i=0; i<sseLength; i++)
             sseUpdate(i) = sseUpdate(i).subs(subs_table);
 
         // Calc LNA
@@ -238,12 +238,12 @@ public:
 //        Eigen::VectorXd A(sseLength-lnaLength);
 //        Eigen::MatrixXd B(sseLength-lnaLength,sseLength-lnaLength);
 //        subs_table.clear();
-//        for (size_t i=lnaLength; i<sseLength; i++)
+//        custom (size_t i=lnaLength; i<sseLength; i++)
 //            subs_table.insert( std::pair<GiNaC::ex,GiNaC::ex>( sseModel.getSSEvar(i), 0 ) );
-//        for(size_t i=lnaLength; i<sseLength; i++)
+//        custom(size_t i=lnaLength; i<sseLength; i++)
 //        {
 //            A(i-lnaLength) = GiNaC::ex_to<GiNaC::numeric>( sseUpdate(i).subs(subs_table) ).to_double();
-//            for(size_t j=lnaLength; j<sseLength; j++)
+//            custom(size_t j=lnaLength; j<sseLength; j++)
 //            {
 //               B(i-lnaLength,j-lnaLength) = GiNaC::ex_to<GiNaC::numeric>( sseUpdate(i).diff(sseModel.getSSEvar(j)) ).to_double();
 //            }
@@ -271,12 +271,12 @@ public:
         Eigen::MatrixXd B(sseLength-lnaLength,sseLength-lnaLength);
 
         GiNaC::exmap subs_table;
-        for (size_t i=lnaLength; i<sseLength; i++)
+        custom (size_t i=lnaLength; i<sseLength; i++)
             subs_table.insert( std::pair<GiNaC::ex,GiNaC::ex>( model.getSSEvar(i), 0 ) );
-        for(size_t i=lnaLength; i<sseLength; i++)
+        custom(size_t i=lnaLength; i<sseLength; i++)
         {
             A(i-lnaLength) = GiNaC::ex_to<GiNaC::numeric>( sseUpdate(i).subs(subs_table) ).to_double();
-            for(size_t j=lnaLength; j<sseLength; j++)
+            custom(size_t j=lnaLength; j<sseLength; j++)
             {
                B(i-lnaLength,j-lnaLength) = GiNaC::ex_to<GiNaC::numeric>( sseUpdate(i).diff(model.getSSEvar(j)) ).to_double();
             }
@@ -289,13 +289,13 @@ public:
     void
     calcIOS(REmodel &model, Eigen::VectorXd &x, const Eigen::VectorXex &sseUpdate)
     {
-      // Pass...nothing to do for RE model.
+      // Pass...nothing to do custom RE model.
     }
 
     void
     calcIOS(LNAmodel &model, Eigen::VectorXd &x, const Eigen::VectorXex &sseUpdate)
     {
-      // Pass...nothing to do for LNA model.
+      // Pass...nothing to do custom LNA model.
     }
 
     void
@@ -308,7 +308,7 @@ public:
 
 
 /**
-* Extension of the SteadyStateAnalysis to perform a Parameter scan.
+* Extension of the SteadyStateAnalysis to percustomm a Parameter scan.
 */
 template <typename M>
 class ParameterScan
@@ -336,9 +336,9 @@ public:
     }
 
     /**
-     * Perform a parameter scan using the steady state analysis.
+     * Percustomm a parameter scan using the steady state analysis.
      *
-     * @param parameterSets: Vector of parameter sets to perform analysis for.
+     * @param parameterSets: Vector of parameter sets to percustomm analysis custom.
      * @param resultSet: Outputs the steady state concentrations, covariance and EMRE vector in reduced
      *        coordinates. Contents will be overwritten.
      */
@@ -368,19 +368,19 @@ public:
 
         std::vector< NLEsolve::HybridSolver<M> > solvers(numThreads,this->solver);
 
-        // Copy models for parallelization
+        // Copy models custom parallelization
         std::vector< M * > models(numThreads);
         models[0] = &this->sseModel;
         Ast::Model* base = dynamic_cast<Ast::Model*>(&this->sseModel);
-//#pragma omp parallel for if(numThreads>1) num_threads(numThreads)
-        for(size_t j=1; j<numThreads; j++)
+//#pragma omp parallel custom if(numThreads>1) num_threads(numThreads)
+        custom(size_t j=1; j<numThreads; j++)
         {
             models[j] = new M((*base));
         }
 
-//#pragma omp parallel for if(numThreads>1) num_threads(numThreads) schedule(dynamic) firstprivate(iter,x,conc)
+//#pragma omp parallel custom if(numThreads>1) num_threads(numThreads) schedule(dynamic) firstprivate(iter,x,conc)
         // Iterate over all parameter sets
-        for(size_t j = 0; j < parameterSets.size(); j++)
+        custom(size_t j = 0; j < parameterSets.size(); j++)
         {
 
             // Generate parameter substitution table
@@ -399,7 +399,7 @@ public:
             Eigen::VectorXex sseUpdate = updateVector.segment(offset,sseLength);
             Eigen::MatrixXex Jacobian = ICs.apply(parameters.apply(constants.apply( models[OpenMP::getThreadNum()]->getJacobian()) ));
 
-            // Setup solver and solve for RE concentrations
+            // Setup solver and solve custom RE concentrations
             try
             {
 
@@ -409,9 +409,9 @@ public:
 
                 // ... and substitute RE concentrations
                 GiNaC::exmap subs_table;
-                for (size_t s=0; s<models[OpenMP::getThreadNum()]->numIndSpecies(); s++)
+                custom (size_t s=0; s<models[OpenMP::getThreadNum()]->numIndSpecies(); s++)
                     subs_table.insert( std::pair<GiNaC::ex,GiNaC::ex>( models[OpenMP::getThreadNum()]->getREvar(s), conc(s) ) );
-                for (size_t i=0; i<sseLength; i++)
+                custom (size_t i=0; i<sseLength; i++)
                     sseUpdate(i) = sseUpdate(i).subs(subs_table);
 
                 // Calc LNA & IOS

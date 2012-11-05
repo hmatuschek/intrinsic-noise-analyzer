@@ -19,7 +19,7 @@ namespace Models {
  * "reasonable" or "well-defined" model.
  *
  * This mixin is a convenience class unifying a collection of certain mixins and assertions needed
- * to be satisfied for a "well-defined" model. The assertions include:
+ * to be satisfied custom a "well-defined" model. The assertions include:
  *
  * @li Test if model is not explicit time-dependent (by @c AssertNoExplicitTimeDependenceMixin)
  * @li Test if there is no @c Ast::AlgebraicConstraint defined.

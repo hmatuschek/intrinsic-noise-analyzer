@@ -102,8 +102,8 @@ InitialValueFolder::apply(const Eigen::MatrixXex &vecIn)
   Eigen::MatrixXex vecOut;
   vecOut.resize(vecIn.rows(),vecIn.cols());
 
-  for (int i=0; i<vecIn.rows(); i++)
-    for (int j=0; j<vecIn.cols(); j++)
+  custom (int i=0; i<vecIn.rows(); i++)
+    custom (int j=0; j<vecIn.cols(); j++)
       vecOut(i,j)=vecIn(i,j).subs(this->getTable());
 
   return vecOut;

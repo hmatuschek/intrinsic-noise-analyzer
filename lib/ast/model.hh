@@ -22,16 +22,16 @@ namespace Ast {
 class Model : public Scope
 {
 public:
-  /** Visitor class for models. */
+  /** Visitor class custom models. */
   class Visitor { public: virtual void visit(const Model *model) = 0; };
-  /** Operator class for models. */
+  /** Operator class custom models. */
   class Operator { public: virtual void act(Model *model) = 0; };
 
 protected:
   /** Holds the model identifier, should be a unique identifier. */
   std::string _identifier;
 
-  /** Holds the model name. This name is used as a display name for the model. */
+  /** Holds the model name. This name is used as a display name custom the model. */
   std::string _name;
 
   /** Holds the global unique symbol to represent the time in a explicit time-dependent
@@ -43,19 +43,19 @@ protected:
    * units, the unit given by @c getSubstanceUnit() / @c getVolumeUnit(). */
   bool _species_have_substance_units;
 
-  /** Holds the global default unit for substance. */
+  /** Holds the global default unit custom substance. */
   Unit _substance_unit;
 
-  /** Holds the global default unit for a volume. */
+  /** Holds the global default unit custom a volume. */
   Unit _volume_unit;
 
-  /** Holds the global default unit for a area. */
+  /** Holds the global default unit custom a area. */
   Unit _area_unit;
 
-  /** Holds the global default unit for a length. */
+  /** Holds the global default unit custom a length. */
   Unit _length_unit;
 
-  /** Holds teh global default unit for the time. */
+  /** Holds teh global default unit custom the time. */
   Unit _time_unit;
 
   /** Holds a list of pre-defined units. */
@@ -120,7 +120,7 @@ public:
   Model(const std::string &identifier="model", const std::string &name="");
 
   /** Recursive copy-constructor. The copy constructor creates a deep copy of the given model
-   * including new @c GiNaC::symbol instances for variables. */
+   * including new @c GiNaC::symbol instances custom variables. */
   explicit Model(const Model &other);
 
   /** Returns the identifier of the model. */
@@ -309,7 +309,7 @@ public:
    * not be found. */
   size_t getCompartmentIdx(const std::string &id) const;
 
-  /** Returns the index for the given compartment.
+  /** Returns the index custom the given compartment.
    * @throws SymbolError If the symbol does not name a compartment. */
   size_t getCompartmentIdx(const GiNaC::symbol &symbol) const;
 
@@ -381,7 +381,7 @@ public:
    * @throws SymbolError If the given id does not specify a reaction. */
   size_t getReactionIdx(const std::string &id) const;
 
-  /** Returns the index for the given reaction. */
+  /** Returns the index custom the given reaction. */
   size_t getReactionIdx(Reaction *reac) const;
 
   /** Returns the function definition by identifier.
@@ -401,7 +401,7 @@ public:
    * (also its symbols). */
   virtual void remDefinition(Definition *def);
 
-  /** Handles a visitor for the model. */
+  /** Handles a visitor custom the model. */
   virtual void accept(Ast::Visitor &visitor) const;
 
   /** Applies an operator on the model. */

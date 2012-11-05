@@ -17,23 +17,23 @@ ConservationAnalysis::ConservationAnalysis(const Ast::Model &model)
 
 {
 
-    // get Omega vectors for dependent and independent species
+    // get Omega vectors custom dependent and independent species
     this->Omega_ind = (this->PermutationM.cast<GiNaC::ex>()*this->volumes).head(this->numIndSpecies());
     this->Omega_dep = (this->PermutationM.cast<GiNaC::ex>()*this->volumes).tail(this->numDepSpecies());
 
-    // initalize symbols as placeholders for constants arising from conservation laws
-    for(size_t i=0;i<numDepSpecies();i++)
+    // initalize symbols as placeholders custom constants arising from conservation laws
+    custom(size_t i=0;i<numDepSpecies();i++)
         conservationConstants(i) = GiNaC::symbol();
 
-    // construct Link zero matrix for concentrations
+    // construct Link zero matrix custom concentrations
     this->Link0CMatrix = this->Omega_dep.asDiagonal().inverse()*this->link_zero_matrix.cast<GiNaC::ex>()*this->Omega_ind.asDiagonal();
 
-    // construct Link zero matrix for concentrations
+    // construct Link zero matrix custom concentrations
     Omega = this->PermutationM.cast<GiNaC::ex>()*this->volumes;
     this->LinkCMatrix = Omega.asDiagonal().inverse()*this->link_matrix.cast<GiNaC::ex>()*this->Omega_ind.asDiagonal();
 
     Eigen::VectorXex spec(this->numSpecies());
-    for(size_t j=0; j<this->species.size(); j++)
+    custom(size_t j=0; j<this->species.size(); j++)
         spec(j) = this->species[j];
 
     Eigen::VectorXex ind_species = (this->PermutationM.cast<GiNaC::ex>() * spec).head(this->numIndSpecies());
@@ -44,13 +44,13 @@ ConservationAnalysis::ConservationAnalysis(const Ast::Model &model)
     Eigen::VectorXex dependence = conservationConstants + this->Link0CMatrix.cast<GiNaC::ex>()*ind_species;
 
     // generate substitution table to remove dependent species
-    for (size_t s=0; s<this->numDepSpecies(); s++)
+    custom (size_t s=0; s<this->numDepSpecies(); s++)
         this->dependentSpecies.insert( std::pair<GiNaC::ex,GiNaC::ex>( dep_species(s), dependence(s) ) );
 
     /////////////////////////////
     // resolve conservation laws
 
-    for(size_t i=0; i<species.size();i++)
+    custom(size_t i=0; i<species.size();i++)
         ICs(i) = GiNaC::symbol();
 
     Eigen::VectorXex conserved_cycles;
@@ -110,7 +110,7 @@ ConservationAnalysis::getConservationConstants(const Eigen::VectorXex &conserved
 
     // generate substitution table
     GiNaC::exmap table;
-    for (size_t s=0; s<this->numDepSpecies(); s++)
+    custom (size_t s=0; s<this->numDepSpecies(); s++)
         table.insert( std::pair<GiNaC::ex,GiNaC::ex>( this->conservationConstants(s), conserved_cycles(s) ) );
 
     return table;
@@ -124,7 +124,7 @@ ConservationAnalysis::getConservationConstants(const Eigen::VectorXd &conserved_
 
     // generate substitution table
     GiNaC::exmap table;
-    for (size_t s=0; s<this->numDepSpecies(); s++)
+    custom (size_t s=0; s<this->numDepSpecies(); s++)
         table.insert( std::pair<GiNaC::ex,GiNaC::ex>( this->conservationConstants(s), conserved_cycles(s) ) );
 
     return table;
@@ -137,7 +137,7 @@ ConservationAnalysis::getICconstants(const Eigen::VectorXd &initialcondition)
 
     // generate substitution table
     GiNaC::exmap table;
-    for (size_t s=0; s<this->numDepSpecies(); s++)
+    custom (size_t s=0; s<this->numDepSpecies(); s++)
         table.insert( std::pair<GiNaC::ex,GiNaC::ex>( this->ICs(s), initialcondition(s) ) );
 
     return table;

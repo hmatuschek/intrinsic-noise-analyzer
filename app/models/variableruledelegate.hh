@@ -7,7 +7,7 @@
 #include "ast/model.hh"
 
 
-/** Simple editor delegate for species rules. */
+/** Simple editor delegate custom species rules. */
 class SpeciesRuleDelegate : public QItemDelegate
 {
   Q_OBJECT

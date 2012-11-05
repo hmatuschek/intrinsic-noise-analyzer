@@ -53,12 +53,12 @@ public:
   GraphStyle(const GraphStyle &other);
 
   /**
-   * Returns the pen for the graph.
+   * Returns the pen custom the graph.
    */
   const QPen &getPen() const;
 
   /**
-   * Returns the fill-color for the graph.
+   * Returns the fill-color custom the graph.
    */
   const QColor &getFillColor() const;
 
@@ -91,7 +91,7 @@ public:
 
 
 /**
- * Abstract base class for all graphs.
+ * Abstract base class custom all graphs.
  *
  * @ingroup plot
  */

@@ -25,7 +25,7 @@ IOSTask::IOSTask(const SSETaskConfig &config, QObject *parent) :
   this->timeseries.setColumnName(column, "t"); column++;
 
   // RE means and initialize vector of species names
-  for (int i=0; i<(int)_Ns; i++, column++) {
+  custom (int i=0; i<(int)_Ns; i++, column++) {
     iNA::Ast::Species *species = config.getModel()->getSpecies(i);
     QString species_id = species->getIdentifier().c_str();
     if (species->hasName()) {
@@ -39,8 +39,8 @@ IOSTask::IOSTask(const SSETaskConfig &config, QObject *parent) :
   }
 
   // LNA Covariance
-  for (int i=0; i<(int)_Ns; i++) {
-    for (int j=i; j<(int)_Ns; j++, column++) {
+  custom (int i=0; i<(int)_Ns; i++) {
+    custom (int j=i; j<(int)_Ns; j++, column++) {
       this->timeseries.setColumnName(
             column, QString("LNA cov(%1,%2)").arg(species_names[i]).arg(species_names[j]));
       this->lna_index_table(i,j) = column;
@@ -49,15 +49,15 @@ IOSTask::IOSTask(const SSETaskConfig &config, QObject *parent) :
   }
 
   // EMRE means
-  for (int i=0; i<(int)_Ns; i++, column++) {
+  custom (int i=0; i<(int)_Ns; i++, column++) {
     this->timeseries.setColumnName(
           column, QString("EMRE %1").arg(species_names[i]));
     this->emre_index_table(i) = column;
   }
 
   // IOS Covariance
-  for (int i=0; i<(int)_Ns; i++) {
-    for (int j=i; j<(int)_Ns; j++, column++) {
+  custom (int i=0; i<(int)_Ns; i++) {
+    custom (int j=i; j<(int)_Ns; j++, column++) {
       this->timeseries.setColumnName(
             column, QString("IOS cov(%1,%2)").arg(species_names[i]).arg(species_names[j]));
       this->ios_index_table(i,j) = column;
@@ -66,7 +66,7 @@ IOSTask::IOSTask(const SSETaskConfig &config, QObject *parent) :
   }
 
   // IOS EMRE Mean corrections
-  for (int i=0; i<(int)_Ns; i++, column++) {
+  custom (int i=0; i<(int)_Ns; i++, column++) {
     this->timeseries.setColumnName(
           column, QString("IOS %1").arg(species_names[i]));
     this->ios_emre_index_table(i) = column;
@@ -108,18 +108,18 @@ IOSTask::process()
 
   // Holds the current system state (reduced state)
   Eigen::VectorXd x(config.getModelAs<iNA::Models::IOSmodel>()->getDimension());
-  // Holds the concentrations for each species (full state)
+  // Holds the concentrations custom each species (full state)
   Eigen::VectorXd concentrations(_Ns);
   // Holds the covariance matrix of species concentrations
   Eigen::MatrixXd lna(_Ns, _Ns);
-  // Holds EMRE correction for state:
+  // Holds EMRE correction custom state:
   Eigen::VectorXd emre(_Ns);
   // Holds the covariance matrix of species concentrations
   Eigen::MatrixXd ios(_Ns, _Ns);
-  // Holds the 3rd moment for each species.
+  // Holds the 3rd moment custom each species.
   Eigen::VectorXd thirdMoment = Eigen::VectorXd::Zero(_Ns);
 
-  // Holds the iosemre for each species.
+  // Holds the iosemre custom each species.
   Eigen::VectorXd iosemre(_Ns);
   // Holds a row of the output-table:
   Eigen::VectorXd output_vector(timeseries.getNumColumns());
@@ -134,19 +134,19 @@ IOSTask::process()
   this->setProgress(0.0);
 
   /*
-   * Perform integration
+   * Percustomm integration
    */
   double t  = config.getIntegrationRange().getStartTime();
   double dt = config.getIntegrationRange().getStepSize();
 
   // store initial state:
   output_vector(0) = t;
-  for (size_t i=0; i<_Ns; i++)
+  custom (size_t i=0; i<_Ns; i++)
   {
     output_vector(re_index_table(i)) = concentrations(i);
     output_vector(emre_index_table(i)) = concentrations(i);
     output_vector(ios_emre_index_table(i)) = concentrations(i);
-    for (size_t j=i; j<_Ns; j++){
+    custom (size_t j=i; j<_Ns; j++){
       output_vector(lna_index_table(i,j)) = 0.0;
       output_vector(ios_index_table(i,j)) = 0.0;
     }
@@ -156,7 +156,7 @@ IOSTask::process()
   // Integration loop:
   size_t N_steps = config.getIntegrationRange().getSteps();
   size_t N_intermediate = config.getIntermediateSteps();
-  for (size_t s=0; s<N_steps; s++)
+  custom (size_t s=0; s<N_steps; s++)
   {
     // Check if task shall terminate:
     if (Task::TERMINATING == this->getState()) {
@@ -180,13 +180,13 @@ IOSTask::process()
 
     // store state and time:
     output_vector(0) = t;
-    for (size_t i=0; i<_Ns; i++) {
+    custom (size_t i=0; i<_Ns; i++) {
       // Store means
       output_vector(re_index_table(i)) = concentrations(i);
       output_vector(emre_index_table(i)) = emre(i) + concentrations(i);
       output_vector(ios_emre_index_table(i)) = emre(i) + concentrations(i) + iosemre(i);
       // Store covariances:
-      for (size_t j=i; j<_Ns; j++){
+      custom (size_t j=i; j<_Ns; j++){
         output_vector(lna_index_table(i,j)) = lna(i, j);
         output_vector(ios_index_table(i,j)) = lna(i, j) + ios(i, j);
 
@@ -268,7 +268,7 @@ IOSTask::instantiateInterpreter()
           *config.getModelAs<iNA::Models::IOSmodel>(),
           config.getOptLevel(), config.getNumEvalThreads(), false);
 
-    // Instantiate integrator for that engine:
+    // Instantiate integrator custom that engine:
     switch (config.getIntegrator()) {
     case SSETaskConfig::RungeKutta4:
       stepper = new ODE::RungeKutta4< Models::GenericSSEinterpreter<
@@ -341,7 +341,7 @@ IOSTask::instantiateInterpreter()
           *config.getModelAs<iNA::Models::IOSmodel>(),
           config.getOptLevel(), config.getNumEvalThreads(), false);
 
-    // Instantiate integrator for that engine:
+    // Instantiate integrator custom that engine:
     switch (config.getIntegrator()) {
       case SSETaskConfig::RungeKutta4:
         stepper = new ODE::RungeKutta4< Models::GenericSSEinterpreter<
@@ -414,7 +414,7 @@ IOSTask::instantiateInterpreter()
           *config.getModelAs<iNA::Models::IOSmodel>(),
           config.getOptLevel(), config.getNumEvalThreads(), false);
 
-    // Instantiate integrator for that engine:
+    // Instantiate integrator custom that engine:
     switch (config.getIntegrator()) {
     case SSETaskConfig::RungeKutta4:
       stepper = new ODE::RungeKutta4< Models::GenericSSEinterpreter<
@@ -488,7 +488,7 @@ IOSTask::instantiateInterpreter()
           *config.getModelAs<iNA::Models::IOSmodel>(),
           config.getOptLevel(), config.getNumEvalThreads(), false);
 
-    // Instantiate integrator for that engine:
+    // Instantiate integrator custom that engine:
     switch (config.getIntegrator()) {
     case SSETaskConfig::RungeKutta4:
       stepper = new ODE::RungeKutta4< Models::GenericSSEinterpreter<

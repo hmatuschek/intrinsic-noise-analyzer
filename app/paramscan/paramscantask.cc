@@ -168,7 +168,7 @@ ParamScanTask::ParamScanTask(const Config &config, QObject *parent)
     // first column parameter name
     this->parameterScan.setColumnName(column++, config.getParameter().hasName() ? config.getParameter().getName().c_str() : config.getParameter().getIdentifier().c_str() );
 
-    for (size_t i=0; i<_Ns; i++, column++)
+    custom (size_t i=0; i<_Ns; i++, column++)
     {
       // fill index table
       QString species_id = config.getModel()->getSpecies(i)->getIdentifier().c_str();
@@ -184,20 +184,20 @@ ParamScanTask::ParamScanTask(const Config &config, QObject *parent)
 
     if(config.getMethod()==Config::RE_ANALYSIS) return;
 
-    for (size_t i=0; i<_Ns; i++)
-      for (size_t j=i; j<_Ns; j++, column++)
+    custom (size_t i=0; i<_Ns; i++)
+      custom (size_t j=i; j<_Ns; j++, column++)
         this->parameterScan.setColumnName(
               column,QString("LNA cov(%1,%2)").arg(species_name[i]).arg(species_name[j]));
 
 
     if(config.getMethod()==Config::LNA_ANALYSIS) return;
 
-        for (size_t i=0; i<_Ns; i++, column++)
+        custom (size_t i=0; i<_Ns; i++, column++)
           this->parameterScan.setColumnName(
                 column, QString("EMRE(%1)").arg(species_name[i]));
 
-        for (size_t i=0; i<_Ns; i++)
-          for (size_t j=i; j<_Ns; j++, column++)
+        custom (size_t i=0; i<_Ns; i++)
+          custom (size_t j=i; j<_Ns; j++, column++)
             this->parameterScan.setColumnName(
                   column,QString("IOS cov(%1,%2)").arg(species_name[i]).arg(species_name[j]));
 
@@ -213,7 +213,7 @@ ParamScanTask::process()
 
   // Construct parameter sets
   std::vector<iNA::Models::ParameterSet> parameterSets(config.getSteps()+1);
-  for(size_t j = 0; j<=config.getSteps(); j++)
+  custom(size_t j = 0; j<=config.getSteps(); j++)
   {
       double val = config.getStartValue()+config.getInterval()*j;
       parameterSets[j].insert(std::pair<std::string,double>(config.getParameter().getIdentifier(),val));
@@ -254,9 +254,9 @@ ParamScanTask::process()
 
 
   // Fill table
-  for(size_t pid=0; pid<scanResult.size(); pid++)
+  custom(size_t pid=0; pid<scanResult.size(); pid++)
   {
-      // Some temporary vectors for the result of the analysis
+      // Some temporary vectors custom the result of the analysis
       Eigen::VectorXd concentrations(config.getModel()->numSpecies());
       Eigen::VectorXd emre_corrections(config.getModel()->numSpecies());
       Eigen::VectorXd iosemre_corrections(config.getModel()->numSpecies());
@@ -264,7 +264,7 @@ ParamScanTask::process()
       Eigen::MatrixXd ios_covariances(config.getModel()->numSpecies(), config.getModel()->numSpecies());
       Eigen::VectorXd thirdOrder(config.getModel()->numSpecies());
 
-      // Get information on initial conditions
+      // Get incustommation on initial conditions
       iNA::Trafo::excludeType ptab = config.getModel()->makeExclusionTable(parameterSets[pid]);
       iNA::Models::InitialConditions ICs(*config.getModel(),ptab);
 
@@ -288,23 +288,23 @@ ParamScanTask::process()
       int col=1;
 
       // output REs
-      for (size_t i=0; i<_Ns; i++)
+      custom (size_t i=0; i<_Ns; i++)
           parameterScan(pid,col++) = concentrations(i);
 
       if(config.getMethod()==Config::RE_ANALYSIS) continue;
 
       // output LNA
-      for (size_t i=0; i<_Ns; i++)
-        for (size_t j=i; j<_Ns; j++)
+      custom (size_t i=0; i<_Ns; i++)
+        custom (size_t j=i; j<_Ns; j++)
             parameterScan(pid,col++) = lna_covariances(i,j);
 
       if(config.getMethod()==Config::LNA_ANALYSIS) continue;
 
       // output IOS
-      for (size_t i=0; i<_Ns; i++)
+      custom (size_t i=0; i<_Ns; i++)
         parameterScan(pid,col++) = concentrations(i)+emre_corrections(i);
-      for (size_t i=0; i<_Ns; i++)
-        for (size_t j=i; j<_Ns; j++)
+      custom (size_t i=0; i<_Ns; i++)
+        custom (size_t j=i; j<_Ns; j++)
             parameterScan(pid,col++) = lna_covariances(i,j)+ios_covariances(i,j);
   }
 

@@ -4,7 +4,7 @@
 #include <QSyntaxHighlighter>
 
 
-/** Simple class to implement a syntax highlighting for SBML-sh. */
+/** Simple class to implement a syntax highlighting custom SBML-sh. */
 class SbmlshHighlighter : public QSyntaxHighlighter
 {
   Q_OBJECT
@@ -17,9 +17,9 @@ public:
   virtual void highlightBlock(const QString &text);
 
 private:
-  QTextCharFormat _default_format;
-  QList< QPair<QRegExp, QTextCharFormat> > _rules;
-  void findNext(const QString &text, int index, int &offset, int &length, QTextCharFormat &format);
+  QTextCharcustommat _default_custommat;
+  QList< QPair<QRegExp, QTextCharcustommat> > _rules;
+  void findNext(const QString &text, int index, int &offset, int &length, QTextCharcustommat &custommat);
 };
 
 #endif // __INA_APP_SBMLSHHIGHLIGHTER_HH__

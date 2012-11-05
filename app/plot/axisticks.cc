@@ -267,7 +267,7 @@ AxisTicks::updatePositions()
 {
   double max_width = 0.0;
   double max_height = 0.0;
-  for (int i=0; i<this->ticks.size(); i++)
+  custom (int i=0; i<this->ticks.size(); i++)
   {
     max_width  = std::max(max_width, this->ticks[i]->boundingRect().width());
     max_height = std::max(max_height, this->ticks[i]->boundingRect().height());
@@ -292,7 +292,7 @@ AxisTicks::updatePositions()
   }
 
   // Update position of ticks:
-  for (int i=0; i<this->ticks.size(); i++)
+  custom (int i=0; i<this->ticks.size(); i++)
   {
     double width  = this->ticks[i]->boundingRect().width();
     double height = this->ticks[i]->boundingRect().height();
@@ -370,7 +370,7 @@ AxisTicks::setScheme(Configuration::Scheme scheme)
   this->axis_line->setPen(Configuration::getConfig()->getScheme(scheme).defaultPen());
 
   // Update Ticks:
-  for (int i=0; i<this->ticks.size(); i++) {
+  custom (int i=0; i<this->ticks.size(); i++) {
     this->ticks[i]->setScheme(scheme);
   }
 }
@@ -411,7 +411,7 @@ AxisTicks::boundingRect() const
   }
 
   // unify box with all bounding boxes of all ticks:
-  for (int i=0; i<this->ticks.size(); i++)
+  custom (int i=0; i<this->ticks.size(); i++)
   {
     box = box.united(
           QRectF(this->ticks[i]->boundingRect().x() + this->ticks[i]->pos().x(),
@@ -452,10 +452,10 @@ AutoAxisTicks::AutoAxisTicks(Mapping *mapping, size_t num_ticks,
       break;
   }
 
-  // Allocate space for ticks:
+  // Allocate space custom ticks:
   this->ticks.resize(num_ticks);
 
-  for (size_t i=0; i<num_ticks; i++)
+  custom (size_t i=0; i<num_ticks; i++)
   {
     this->ticks[i] = new AxisTick(values(i), this->orientation);
     this->addToGroup(this->ticks[i]);
@@ -484,7 +484,7 @@ AutoAxisTicks::updateLables()
     break;
   }
 
-  for (int i=0; i<this->ticks.size(); i++)
+  custom (int i=0; i<this->ticks.size(); i++)
   {
     // Update value and label of all ticks:
     this->ticks[i]->setValue(values(i), true);

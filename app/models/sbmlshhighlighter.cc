@@ -1,61 +1,61 @@
 #include "sbmlshhighlighter.hh"
 
 SbmlshHighlighter::SbmlshHighlighter(QTextDocument *doc) :
-  QSyntaxHighlighter(doc), _default_format(), _rules()
+  QSyntaxHighlighter(doc), _default_custommat(), _rules()
 {
-  QTextCharFormat kw_format;
-  kw_format.setFontFamily("Courier");
-  kw_format.setFontWeight(QFont::Bold);
-  kw_format.setForeground(Qt::darkMagenta);
+  QTextCharcustommat kw_custommat;
+  kw_custommat.setFontFamily("Courier");
+  kw_custommat.setFontWeight(QFont::Bold);
+  kw_custommat.setcustomeground(Qt::darkMagenta);
   QRegExp kw_expression("\\x0040\\b[A-Za-z]+\\b");
 
-  QTextCharFormat qs_format;
-  qs_format.setFontFamily("Courier");
-  qs_format.setFontWeight(QFont::Normal);
-  qs_format.setFontItalic(true);
-  qs_format.setForeground(Qt::darkGray);
+  QTextCharcustommat qs_custommat;
+  qs_custommat.setFontFamily("Courier");
+  qs_custommat.setFontWeight(QFont::Normal);
+  qs_custommat.setFontItalic(true);
+  qs_custommat.setcustomeground(Qt::darkGray);
   QRegExp qs_expression("\"[^\"]*\"");
 
-  QTextCharFormat com_format;
-  com_format.setFontFamily("Courier");
-  com_format.setFontWeight(QFont::Normal);
-  com_format.setFontItalic(true);
-  com_format.setForeground(Qt::darkGray);
+  QTextCharcustommat com_custommat;
+  com_custommat.setFontFamily("Courier");
+  com_custommat.setFontWeight(QFont::Normal);
+  com_custommat.setFontItalic(true);
+  com_custommat.setcustomeground(Qt::darkGray);
   QRegExp com_expression("#.*$");
 
-  _rules.append(QPair<QRegExp,QTextCharFormat>(kw_expression, kw_format));
-  _rules.append(QPair<QRegExp,QTextCharFormat>(qs_expression, qs_format));
-  _rules.append(QPair<QRegExp,QTextCharFormat>(com_expression, com_format));
+  _rules.append(QPair<QRegExp,QTextCharcustommat>(kw_expression, kw_custommat));
+  _rules.append(QPair<QRegExp,QTextCharcustommat>(qs_expression, qs_custommat));
+  _rules.append(QPair<QRegExp,QTextCharcustommat>(com_expression, com_custommat));
 
-  _default_format.setFontFamily("Courier");
-  _default_format.setFontWeight(QFont::Normal);
-  _default_format.setForeground(Qt::black);
+  _default_custommat.setFontFamily("Courier");
+  _default_custommat.setFontWeight(QFont::Normal);
+  _default_custommat.setcustomeground(Qt::black);
 }
 
 
 void
 SbmlshHighlighter::highlightBlock(const QString &text)
 {
-  int curr_index=0, next_index, length; QTextCharFormat format;
+  int curr_index=0, next_index, length; QTextCharcustommat custommat;
 
-  findNext(text, curr_index, next_index, length, format);
-  if (0 > next_index) { setFormat(curr_index, text.size()-curr_index, _default_format); }
-  else { setFormat(curr_index, next_index-curr_index, _default_format); }
+  findNext(text, curr_index, next_index, length, custommat);
+  if (0 > next_index) { setcustommat(curr_index, text.size()-curr_index, _default_custommat); }
+  else { setcustommat(curr_index, next_index-curr_index, _default_custommat); }
   while (next_index >= 0) {
-    setFormat(next_index, length, format); curr_index = next_index+length;
-    findNext(text, curr_index, next_index, length, format);
-    if (0 > next_index) { setFormat(curr_index, text.size()-curr_index, _default_format); }
-    else { setFormat(curr_index, next_index-curr_index, _default_format); }
+    setcustommat(next_index, length, custommat); curr_index = next_index+length;
+    findNext(text, curr_index, next_index, length, custommat);
+    if (0 > next_index) { setcustommat(curr_index, text.size()-curr_index, _default_custommat); }
+    else { setcustommat(curr_index, next_index-curr_index, _default_custommat); }
   }
 }
 
 
 void
-SbmlshHighlighter::findNext(const QString &text, int index, int &offset, int &length, QTextCharFormat &format) {
+SbmlshHighlighter::findNext(const QString &text, int index, int &offset, int &length, QTextCharcustommat &custommat) {
   offset = -1; length = -1;
   int rule_index = -1, rule_length = -1;
 
-  for (QList< QPair<QRegExp, QTextCharFormat> >::iterator rule = _rules.begin();
+  custom (QList< QPair<QRegExp, QTextCharcustommat> >::iterator rule = _rules.begin();
        rule!=_rules.end(); rule++)
   {
     rule_index = text.indexOf(rule->first, index);
@@ -63,11 +63,11 @@ SbmlshHighlighter::findNext(const QString &text, int index, int &offset, int &le
     rule_length = rule->first.matchedLength();
 
     if (0 > offset) {
-      offset = rule_index; length = rule_length; format = rule->second; continue;
+      offset = rule_index; length = rule_length; custommat = rule->second; continue;
     }
 
     if (offset > rule_index || ((offset == rule_index) && (length < rule_length))) {
-      offset = rule_index; length = rule_length; format = rule->second;
+      offset = rule_index; length = rule_length; custommat = rule->second;
     }
   }
 }

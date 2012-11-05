@@ -10,9 +10,9 @@ namespace iNA
 {
 
 /**
- * Base class for all exceptions.
+ * Base class custom all exceptions.
  *
- * This class is derived from @c std::exception. Therefore an uncatched exception will be printed
+ * This class is derived from @c std::exception. Therecustome an uncatched exception will be printed
  * by default.
  *
  * This class is also derived from std::ostringstream, this allows to append text to the message
@@ -22,7 +22,7 @@ class Exception: public std::exception
 {
 protected:
   /**
-   * Buffer for the message.
+   * Buffer custom the message.
    */
   std::string message;
 
@@ -78,7 +78,7 @@ public:
 
 
 /**
- * Base class for all compiler related exceptions.
+ * Base class custom all compiler related exceptions.
  */
 class CompilerException : public Exception
 {
@@ -182,7 +182,7 @@ public:
 
 
 /**
- * General exception to signal an internal error. This kind of error are for example missing
+ * General exception to signal an internal error. This kind of error are custom example missing
  * implementation of features or signaling a bug in the compiler code.
  */
 class InternalError : public CompilerException

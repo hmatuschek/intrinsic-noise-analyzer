@@ -5,7 +5,7 @@
 #include "ast/scope.hh"
 
 
-/** This class implements a delegate for expressions to provide a specialized editor. */
+/** This class implements a delegate custom expressions to provide a specialized editor. */
 class ExpressionDelegate : public PixmapDelegate
 {
   Q_OBJECT

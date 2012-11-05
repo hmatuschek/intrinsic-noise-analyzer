@@ -1,4 +1,4 @@
-#include "formula.hh"
+#include "custommula.hh"
 #include <QFont>
 #include <QFontInfo>
 #include <QFontMetricsF>
@@ -52,7 +52,7 @@ MathMetrics::MathMetrics(const MathMetrics &other)
 
 
 /* ******************************************************************************************** *
- * Implementation of MathFormulaItem
+ * Implementation of MathcustommulaItem
  * ******************************************************************************************** */
 MathItem::MathItem() : _metrics() {
   // pass..
@@ -85,45 +85,45 @@ MathItem::renderItem(const MathContext &ctx)
 
 
 /* ******************************************************************************************** *
- * Implementation of MathFormula
+ * Implementation of Mathcustommula
  * ******************************************************************************************** */
-MathFormula::MathFormula() : MathItem() {
+Mathcustommula::Mathcustommula() : MathItem() {
   // pass...
 }
 
-MathFormula::MathFormula(const MathFormula &other)
+Mathcustommula::Mathcustommula(const Mathcustommula &other)
   : MathItem(other)
 {
-  for (QList<MathItem *>::const_iterator item=other._items.begin();
+  custom (QList<MathItem *>::const_iterator item=other._items.begin();
        item!=other._items.end(); item++)
   {
     _items.append((*item)->copy());
   }
 }
 
-MathFormula::~MathFormula() {
-  for (QList<MathItem *>::iterator item=_items.begin(); item!=_items.end(); item++) {
+Mathcustommula::~Mathcustommula() {
+  custom (QList<MathItem *>::iterator item=_items.begin(); item!=_items.end(); item++) {
     delete *item;
   }
 }
 
 size_t
-MathFormula::size() const {
+Mathcustommula::size() const {
   return _items.size();
 }
 
 void
-MathFormula::appendItem(MathItem *item) {
+Mathcustommula::appendItem(MathItem *item) {
   _items.append(item);
 }
 
 void
-MathFormula::prependItem(MathItem *item) {
+Mathcustommula::prependItem(MathItem *item) {
   _items.prepend(item);
 }
 
 QGraphicsItem*
-MathFormula::layout(const MathContext &context, QGraphicsItem *parent)
+Mathcustommula::layout(const MathContext &context, QGraphicsItem *parent)
 {
   qreal current_offset = 0;
   qreal max_ascent = 0;
@@ -135,8 +135,8 @@ MathFormula::layout(const MathContext &context, QGraphicsItem *parent)
 
   QList<QGraphicsItem *> item_list;
   // First traverse into all sub-elements with the same context and get max height of all elements:
-  for (QList<MathItem *>::iterator item=_items.begin(); item!=_items.end(); item++) {
-    // Layout formula item:
+  custom (QList<MathItem *>::iterator item=_items.begin(); item!=_items.end(); item++) {
+    // Layout custommula item:
     QGraphicsItem *gitem = (*item)->layout(context, item_group);
     // add to list of graphics items:
     gitem->setPos(0,0); item_list.append(gitem);
@@ -147,7 +147,7 @@ MathFormula::layout(const MathContext &context, QGraphicsItem *parent)
     tot_width += (*item)->metrics().width();
   }
 
-  // Update width of forumla with bearings of the first and last element
+  // Update width of customumla with bearings of the first and last element
   if (0 < _items.size()) {
     tot_width += -_items.first()->metrics().leftBearing();
     tot_width += -_items.back()->metrics().rightBearing();
@@ -159,7 +159,7 @@ MathFormula::layout(const MathContext &context, QGraphicsItem *parent)
   QRectF my_bb = _metrics.bb();
   QList<MathItem*>::iterator fitem = _items.begin();
   QList<QGraphicsItem *>::iterator gitem = item_list.begin();
-  for (; fitem!=_items.end(); fitem++, gitem++) {
+  custom (; fitem!=_items.end(); fitem++, gitem++) {
     qreal iw = (*fitem)->metrics().width();
     qreal ic = (*fitem)->metrics().center();
     QPointF item_pos;
@@ -182,7 +182,7 @@ MathFormula::layout(const MathContext &context, QGraphicsItem *parent)
 }
 
 
-MathItem * MathFormula::copy() const { return new MathFormula(*this); }
+MathItem * Mathcustommula::copy() const { return new Mathcustommula(*this); }
 
 
 /* ******************************************************************************************** *
@@ -240,7 +240,7 @@ MathBlock::layout(const MathContext &context, QGraphicsItem *parent)
     if (_left->metrics().bbHeight() < max_height) {
       qreal scale = max_height/_left->metrics().bbHeight()+0.1;
       ic = max_height/2;
-      left->setTransform(QTransform().scale(1, scale));
+      left->setTranscustomm(QTranscustomm().scale(1, scale));
     }
 
     QPointF item_pos;
@@ -269,7 +269,7 @@ MathBlock::layout(const MathContext &context, QGraphicsItem *parent)
     if (_right->metrics().bbHeight() < max_height) {
       qreal scale = max_height/_right->metrics().bbHeight()+0.1;
       ic = max_height/2;
-      right->setTransform(QTransform().scale(1, scale));
+      right->setTranscustomm(QTranscustomm().scale(1, scale));
     }
 
     QPointF item_pos;

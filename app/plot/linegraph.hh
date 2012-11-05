@@ -23,7 +23,7 @@ class LineGraph : public Graph
 
 protected:
   /**
-   * Holds the path for the graph.
+   * Holds the path custom the graph.
    */
   QPainterPath      path;
 

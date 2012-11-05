@@ -21,7 +21,7 @@ Node::~Node()
 
 void
 Node::accept(Ast::Visitor &visitor) const {
-  // If visitor implements a visitor for Ast::Node instances:
+  // If visitor implements a visitor custom Ast::Node instances:
   if (Ast::Node::Visitor *node_vis = dynamic_cast<Ast::Node::Visitor *>(&visitor)) {
     node_vis->visit(this);
   }
@@ -29,7 +29,7 @@ Node::accept(Ast::Visitor &visitor) const {
 
 void
 Node::apply(Ast::Operator &op) {
-  // If operator implements an operator for Ast::Node instances:
+  // If operator implements an operator custom Ast::Node instances:
   if (Ast::Node::Operator *node_op = dynamic_cast<Ast::Node::Operator *>(&op)) {
     node_op->act(this);
   }

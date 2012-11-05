@@ -63,14 +63,14 @@ ODETest::testStiffRKF45()
   ODE::RKF45<ODE::TimeIndepODEModel> stepper(*this->stiff, dt, eps_abs, eps_rel);
 
   Eigen::VectorXd delta(2);
-  for (size_t i=0; i<10; i++) {
+  custom (size_t i=0; i<10; i++) {
     double x = 2*std::exp(-(i*dt)) - std::exp(-1000*(i*dt));
     double y = -std::exp(-(i*dt)) + std::exp(-1000*(i*dt));
 
     assertNear(state(0), x, (eps_abs + std::abs(x*eps_rel)), __FILE__, __LINE__);
     assertNear(state(1), y, (eps_abs + std::abs(y*eps_rel)), __FILE__, __LINE__);
 
-    // Perform step and update state:
+    // Percustomm step and update state:
     stepper.step(state, i*dt, delta); state += delta;
   }
 }
@@ -89,14 +89,14 @@ ODETest::testStiffDopri5()
   ODE::Dopri5Stepper<ODE::TimeIndepODEModel> stepper(*this->stiff, dt, eps_abs, eps_rel);
 
   Eigen::VectorXd delta(2);
-  for (size_t i=0; i<10; i++) {
+  custom (size_t i=0; i<10; i++) {
     double x = 2*std::exp(-(i*dt)) - std::exp(-1000*(i*dt));
     double y = -std::exp(-(i*dt)) + std::exp(-1000*(i*dt));
 
     assertNear(state(0), x, (eps_abs + std::abs(x*eps_rel)), __FILE__, __LINE__);
     assertNear(state(1), y, (eps_abs + std::abs(y*eps_rel)), __FILE__, __LINE__);
 
-    // Perform step and update state:
+    // Percustomm step and update state:
     stepper.step(state, i*dt, delta); state += delta;
   }
 }
@@ -115,14 +115,14 @@ ODETest::testStiffDopri853()
   ODE::Dopri853Stepper<ODE::TimeIndepODEModel> stepper(*this->stiff, dt, eps_abs, eps_rel);
 
   Eigen::VectorXd delta(2);
-  for (size_t i=0; i<10; i++) {
+  custom (size_t i=0; i<10; i++) {
     double x = 2*std::exp(-(i*dt)) - std::exp(-1000*(i*dt));
     double y = -std::exp(-(i*dt)) + std::exp(-1000*(i*dt));
 
     assertNear(state(0), x, (eps_abs + std::abs(x*eps_rel)), __FILE__, __LINE__);
     assertNear(state(1), y, (eps_abs + std::abs(y*eps_rel)), __FILE__, __LINE__);
 
-    // Perform step and update state:
+    // Percustomm step and update state:
     stepper.step(state, i*dt, delta); state += delta;
   }
 }
@@ -141,14 +141,14 @@ ODETest::testStiffRosenbrock34()
   ODE::Rosenbrock3TimeInd<ODE::TimeIndepODEModel> stepper(*this->stiff, dt, eps_abs, eps_rel);
 
   Eigen::VectorXd delta(2);
-  for (size_t i=0; i<100; i++) {
+  custom (size_t i=0; i<100; i++) {
     double x = 2*std::exp(-(i*dt)) - std::exp(-1000*(i*dt));
     double y = -std::exp(-(i*dt)) + std::exp(-1000*(i*dt));
 
     assertNear(state(0), x, (eps_abs + std::abs(x*eps_rel)), __FILE__, __LINE__);
     assertNear(state(1), y, (eps_abs + std::abs(y*eps_rel)), __FILE__, __LINE__);
 
-    // Perform step and update state:
+    // Percustomm step and update state:
     stepper.step(state, i*dt, delta); state += delta;
   }
 }
@@ -167,14 +167,14 @@ ODETest::testStiffRosenbrock45()
   ODE::Rosenbrock4TimeInd<ODE::TimeIndepODEModel> stepper(*this->stiff, dt, eps_abs, eps_rel);
 
   Eigen::VectorXd delta(2);
-  for (size_t i=0; i<100; i++) {
+  custom (size_t i=0; i<100; i++) {
     double x = 2*std::exp(-(i*dt)) - std::exp(-1000*(i*dt));
     double y = -std::exp(-(i*dt)) + std::exp(-1000*(i*dt));
 
     assertNear(state(0), x, (eps_abs + std::abs(x*eps_rel)), __FILE__, __LINE__);
     assertNear(state(1), y, (eps_abs + std::abs(y*eps_rel)), __FILE__, __LINE__);
 
-    // Perform step and update state:
+    // Percustomm step and update state:
     stepper.step(state, i*dt, delta); state += delta;
   }
 }
@@ -193,14 +193,14 @@ ODETest::testHarmonicRKF45()
   ODE::RKF45<ODE::TimeIndepODEModel> stepper(*this->harm, dt, eps_abs, eps_rel);
 
   Eigen::VectorXd delta(2);
-  for (size_t i=0; i<100; i++) {
+  custom (size_t i=0; i<100; i++) {
     double x = cos(i*dt);
     double y = -sin(i*dt);
 
     assertNear(state(0), x, (i)*(eps_abs + std::max(std::abs(x), std::abs(state(0)))*eps_rel), __FILE__, __LINE__);
     assertNear(state(1), y, (i)*(eps_abs + std::max(std::abs(y), std::abs(state(1)))*eps_rel), __FILE__, __LINE__);
 
-    // Perform step and update state:
+    // Percustomm step and update state:
     stepper.step(state, i*dt, delta); state += delta;
   }
 }
@@ -219,14 +219,14 @@ ODETest::testHarmonicDopri5()
   ODE::Dopri5Stepper<ODE::TimeIndepODEModel> stepper(*this->harm, dt, eps_abs, eps_rel);
 
   Eigen::VectorXd delta(2);
-  for (size_t i=0; i<100; i++) {
+  custom (size_t i=0; i<100; i++) {
     double x = cos(i*dt);
     double y = -sin(i*dt);
 
     assertNear(state(0), x, (eps_abs + std::abs(x*eps_rel)), __FILE__, __LINE__);
     assertNear(state(1), y, (eps_abs + std::abs(y*eps_rel)), __FILE__, __LINE__);
 
-    // Perform step and update state:
+    // Percustomm step and update state:
     stepper.step(state, i*dt, delta); state += delta;
   }
 }
@@ -245,14 +245,14 @@ ODETest::testHarmonicDopri853()
   ODE::Dopri853Stepper<ODE::TimeIndepODEModel> stepper(*this->harm, dt, eps_abs, eps_rel);
 
   Eigen::VectorXd delta(2);
-  for (size_t i=0; i<100; i++) {
+  custom (size_t i=0; i<100; i++) {
     double x = cos(i*dt);
     double y = -sin(i*dt);
 
     assertNear(state(0), x, (eps_abs + std::abs(x*eps_rel)), __FILE__, __LINE__);
     assertNear(state(1), y, (eps_abs + std::abs(y*eps_rel)), __FILE__, __LINE__);
 
-    // Perform step and update state:
+    // Percustomm step and update state:
     stepper.step(state, i*dt, delta); state += delta;
   }
 }
@@ -271,14 +271,14 @@ ODETest::testHarmonicRosenbrock34()
   ODE::Rosenbrock3TimeInd<ODE::TimeIndepODEModel> stepper(*this->harm, dt, eps_abs, eps_rel);
 
   Eigen::VectorXd delta(2);
-  for (size_t i=0; i<100; i++) {
+  custom (size_t i=0; i<100; i++) {
     double x = cos(i*dt);
     double y = -sin(i*dt);
 
     assertNear(state(0), x, (eps_abs + std::abs(x*eps_rel)), __FILE__, __LINE__);
     assertNear(state(1), y, (eps_abs + std::abs(y*eps_rel)), __FILE__, __LINE__);
 
-    // Perform step and update state:
+    // Percustomm step and update state:
     stepper.step(state, i*dt, delta); state += delta;
   }
 }
@@ -297,14 +297,14 @@ ODETest::testHarmonicRosenbrock45()
   ODE::Rosenbrock4TimeInd<ODE::TimeIndepODEModel> stepper(*this->harm, dt, eps_abs, eps_rel);
 
   Eigen::VectorXd delta(2);
-  for (size_t i=0; i<100; i++) {
+  custom (size_t i=0; i<100; i++) {
     double x = cos(i*dt);
     double y = -sin(i*dt);
 
     assertNear(state(0), x, (eps_abs + std::abs(x*eps_rel)), __FILE__, __LINE__);
     assertNear(state(1), y, (eps_abs + std::abs(y*eps_rel)), __FILE__, __LINE__);
 
-    // Perform step and update state:
+    // Percustomm step and update state:
     stepper.step(state, i*dt, delta); state += delta;
   }
 }
@@ -323,8 +323,8 @@ ODETest::testVanDerPolRKF45()
   ODE::RKF45<ODE::TimeIndepODEModel> stepper(*this->vanDerPol, dt, eps_abs, eps_rel);
 
   Eigen::VectorXd delta(2);
-  for (size_t i=0; i<100; i++) {
-    // Perform step and update state:
+  custom (size_t i=0; i<100; i++) {
+    // Percustomm step and update state:
     stepper.step(state, i*dt, delta); state += delta;
   }
 }
@@ -343,8 +343,8 @@ ODETest::testVanDerPolDopri5()
   ODE::Dopri5Stepper<ODE::TimeIndepODEModel> stepper(*this->vanDerPol, dt, eps_abs, eps_rel);
 
   Eigen::VectorXd delta(2);
-  for (size_t i=0; i<100; i++) {
-    // Perform step and update state:
+  custom (size_t i=0; i<100; i++) {
+    // Percustomm step and update state:
     stepper.step(state, i*dt, delta); state += delta;
   }
 }
@@ -363,8 +363,8 @@ ODETest::testVanDerPolDopri853()
   ODE::Dopri853Stepper<ODE::TimeIndepODEModel> stepper(*this->vanDerPol, dt, eps_abs, eps_rel);
 
   Eigen::VectorXd delta(2);
-  for (size_t i=0; i<100; i++) {
-    // Perform step and update state:
+  custom (size_t i=0; i<100; i++) {
+    // Percustomm step and update state:
     stepper.step(state, i*dt, delta); state += delta;
   }
 }
@@ -383,8 +383,8 @@ ODETest::testVanDerPolRosenbrock3()
   ODE::Rosenbrock3TimeInd<ODE::TimeIndepODEModel> stepper(*this->vanDerPol, dt, eps_abs, eps_rel);
 
   Eigen::VectorXd delta(2);
-  for (size_t i=0; i<100; i++) {
-    // Perform step and update state:
+  custom (size_t i=0; i<100; i++) {
+    // Percustomm step and update state:
     stepper.step(state, i*dt, delta); state += delta;
   }
 }
@@ -403,8 +403,8 @@ ODETest::testVanDerPolRosenbrock4()
   ODE::Rosenbrock4TimeInd<ODE::TimeIndepODEModel> stepper(*this->vanDerPol, dt, eps_abs, eps_rel);
 
   Eigen::VectorXd delta(2);
-  for (size_t i=0; i<100; i++) {
-    // Perform step and update state:
+  custom (size_t i=0; i<100; i++) {
+    // Percustomm step and update state:
     stepper.step(state, i*dt, delta); state += delta;
   }
 }

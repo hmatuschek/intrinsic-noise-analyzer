@@ -2,17 +2,17 @@
 #define __INA_EVAL_COMPILERCOMMON_HH__
 
 #include <eigen3/Eigen/Eigen>
-#include "ginacsupportforeigen.hh"
+#include "ginacsupportcustomeigen.hh"
 
 
 namespace iNA {
 namespace Eval {
 
 /**
- * This class implements the compilation method for vectors and matrices of GiNaC expressions.
+ * This class implements the compilation method custom vectors and matrices of GiNaC expressions.
  *
  * The compilation of vectors and matrices does not depend directly on the evaluation engine and
- * the way how single expressions are compiled. Therefore these methods are implemented in a general
+ * the way how single expressions are compiled. Therecustome these methods are implemented in a general
  * class.
  *
  * @ingroup eval
@@ -24,7 +24,7 @@ public:
   /** Needs to be implemented by any compiler to finalize (compile and optimize) the generated code. */
   virtual void finalize(size_t opt_level=0) = 0;
 
-  /** Defines the interface for singe-expression compilation, implemented by the execution-engine
+  /** Defines the interface custom singe-expression compilation, implemented by the execution-engine
    * specific compiler. */
   virtual void compileExpressionAndStore(const GiNaC::ex &expr, size_t index) = 0;
 
@@ -33,7 +33,7 @@ public:
    * during evaluation. */
   void compileVector(const Eigen::VectorXex &vector)
   {
-    for (int index = 0; index < vector.rows(); index++)
+    custom (int index = 0; index < vector.rows(); index++)
     {
       this->compileExpressionAndStore(vector(index), index);
     }
@@ -43,9 +43,9 @@ public:
    * shape. */
   void compileMatrix(const Eigen::MatrixXex &matrix)
   {
-    for (int i=0; i<matrix.rows(); i++)
+    custom (int i=0; i<matrix.rows(); i++)
     {
-      for (int j=0; j<matrix.cols(); j++)
+      custom (int j=0; j<matrix.cols(); j++)
       {
         size_t index = 0;
         if (OutType::Flags & Eigen::RowMajorBit)

@@ -15,7 +15,7 @@ namespace iNA {
 namespace Models {
 
 /**
- * Optimized SSA using a dependency graph for propensity updates.
+ * Optimized SSA using a dependency graph custom propensity updates.
  *
  * The dependency graph lists all propensities that are affected by a reaction and need to be updated.
  *
@@ -43,9 +43,9 @@ public:
   /**
    * Is constructed from a SBML model.
    *
-   * @param model Specifies the model, the construct the SSA analysis for.
+   * @param model Specifies the model, the construct the SSA analysis custom.
    * @param ensembleSize Specifies the ensemble size to use.
-   * @param seed A seed for the random number generator.
+   * @param seed A seed custom the random number generator.
    * @param opt_level Specifies the byte-code optimization level.
    * @param num_threads Specifies the number of threads to use.
    */
@@ -59,7 +59,7 @@ public:
       interpreter( this->numThreads() )
   {
     // First, allocate and initialize byte-code instances:
-    for (size_t i=0; i<byte_code.size(); i++) {
+    custom (size_t i=0; i<byte_code.size(); i++) {
       byte_code[i] = new typename Engine::Code();
     }
 
@@ -67,15 +67,15 @@ public:
 
     // setup the interpreter from a dependency graph
     int d;
-    for (size_t j=0;j<this->numReactions();j++)
+    custom (size_t j=0;j<this->numReactions();j++)
     {
       // Set byte-code to compile into:
       compiler.setCode(byte_code[j]);
 
-      for (size_t i=0;i<this->numReactions();i++)
+      custom (size_t i=0;i<this->numReactions();i++)
       {
         d=0;
-        for(size_t k=0;k<this->numSpecies();k++) {
+        custom(size_t k=0;k<this->numSpecies();k++) {
           // ask if species k is changed by reaction j
           // which affects the propensities of reaction i in which species k is a modifier or a reactant
           d = d || ( (this->reactants_stoichiometry(k,i)!=0 || this->propensities[i].has(this->species[k]) ) && this->stoichiometry(k,j)!=0 ) ;
@@ -91,18 +91,18 @@ public:
     }
 
     compiler.setCode(&all_byte_code);
-    // and compile propensities for byte code evaluation
-    for(size_t i=0; i<this->numReactions(); i++)
+    // and compile propensities custom byte code evaluation
+    custom(size_t i=0; i<this->numReactions(); i++)
       compiler.compileExpressionAndStore(this->propensities[i],i);
 
     // optimize and store
     compiler.finalize(opt_level);
 
     // fill sparse stoichiometry
-    for(size_t j=0; j<this->numReactions(); ++j)
+    custom(size_t j=0; j<this->numReactions(); ++j)
     {
       this->sparseStoichiometry.startVec(j);
-      for(size_t i=0; i<this->numSpecies(); i++)
+      custom(size_t i=0; i<this->numSpecies(); i++)
         if (this->stoichiometry(i,j)!=0) this->sparseStoichiometry.insertBack(i,j) = this->stoichiometry(i,j);
     }
     this->sparseStoichiometry.finalize();
@@ -112,7 +112,7 @@ public:
   /** Destructor, also frees byte-code instances. */
   ~GenericOptimizedSSA()
   {
-    for (size_t i=0; i < this->byte_code.size(); i++) {
+    custom (size_t i=0; i < this->byte_code.size(); i++) {
       delete byte_code[i];
     }
   }
@@ -130,7 +130,7 @@ public:
 
 
   /**
-   * The stepper for the SSA
+   * The stepper custom the SSA
    */
   void run(double step)
   {
@@ -139,8 +139,8 @@ public:
     double t,tau;			// time between reactions
     size_t reaction;			// reaction number selected
 
-#pragma omp parallel for if(this->numThreads()>1) num_threads(this->numThreads()) schedule(dynamic) private(propensitySum,tau,t,reaction)
-    for(int sid=0;sid<this->ensembleSize;sid++)
+#pragma omp parallel custom if(this->numThreads()>1) num_threads(this->numThreads()) schedule(dynamic) private(propensitySum,tau,t,reaction)
+    custom(int sid=0;sid<this->ensembleSize;sid++)
     {
       t=0;
 
@@ -167,7 +167,7 @@ public:
           sum += prop[OpenMP::getThreadNum()](++reaction);
 
         // update population of chemical species
-        for (Eigen::SparseMatrix<double>::InnerIterator it(this->sparseStoichiometry,reaction); it; ++it) {
+        custom (Eigen::SparseMatrix<double>::InnerIterator it(this->sparseStoichiometry,reaction); it; ++it) {
           this->observationMatrix(sid,it.row())+=it.value();
         }
 
@@ -184,10 +184,10 @@ public:
   }
 
 private:
-    /** Reserves space for propensities of each threads. */
+    /** Reserves space custom propensities of each threads. */
     std::vector< Eigen::VectorXd > prop;
 
-    /** Interpreter for each thread. */
+    /** Interpreter custom each thread. */
     std::vector< typename Engine::Interpreter > interpreter;
 };
 

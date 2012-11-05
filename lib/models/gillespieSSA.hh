@@ -29,16 +29,16 @@ class GenericGillespieSSA :
 {
 private:
 
-    /** Byte code for propensity evaluation. */
+    /** Byte code custom propensity evaluation. */
     typename Engine::Code bytecode;
 
     /**
-     * Interpreter for each thread.
+     * Interpreter custom each thread.
      */
     std::vector< typename Engine::Interpreter > interpreter;
 
     /**
-     * Reserves space for propensities of each threads.
+     * Reserves space custom propensities of each threads.
      */
     std::vector< Eigen::VectorXd > prop;
 
@@ -51,20 +51,20 @@ public:
       typename Engine::Compiler compiler(this->stateIndex);
       compiler.setCode(&bytecode);
 
-      // and compile propensities for byte code evaluation
-      for(size_t i=0; i<this->numReactions(); i++)
+      // and compile propensities custom byte code evaluation
+      custom(size_t i=0; i<this->numReactions(); i++)
           compiler.compileExpressionAndStore(this->propensities[i],i);
 
       // optimize and store
       compiler.finalize(opt_level);
-      for(size_t i=0; i<this->numThreads(); i++) {
+      custom(size_t i=0; i<this->numThreads(); i++) {
           this->interpreter[i].setCode(&bytecode);
       }
     }
 
 
     /**
-     *  the stepper for the SSA
+     *  the stepper custom the SSA
      */
     void run(double step)
     {
@@ -73,8 +73,8 @@ public:
       double t,tau;			// time between reactions
       size_t reaction;		// reaction number selected
 
-#pragma omp parallel for if(this->numThreads()>1) num_threads(this->numThreads()) schedule(dynamic) private(propensitySum,tau,t,reaction)
-      for(int sid=0;sid<this->ensembleSize;sid++)
+#pragma omp parallel custom if(this->numThreads()>1) num_threads(this->numThreads()) schedule(dynamic) private(propensitySum,tau,t,reaction)
+      custom(int sid=0;sid<this->ensembleSize;sid++)
       {
         t=0;
         while(t < step)

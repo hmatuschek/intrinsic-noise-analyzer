@@ -19,7 +19,7 @@ class Code
 {
 protected:
   /**
-   * Holds a vector of BCI Code instances for each thread.
+   * Holds a vector of BCI Code instances custom each thread.
    */
   std::vector<bci::Code> codes;
 
@@ -37,7 +37,7 @@ public:
   size_t getNumThreads();
 
   /**
-   * Retruns the code for the i-th thread.
+   * Retruns the code custom the i-th thread.
    */
   bci::Code &getCode(size_t i);
 };

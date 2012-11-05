@@ -26,7 +26,7 @@ protected:
 
 public:
   /**
-   * Constructs a new Canvas for a plot.
+   * Constructs a new Canvas custom a plot.
    */
   explicit Canvas(QWidget *parent=0);
 

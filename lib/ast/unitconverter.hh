@@ -24,7 +24,7 @@ public:
   };
 
 public:
-  /** This function tries to calculate the conversion factor for a value given in Unit A into the
+  /** This function tries to calculate the conversion factor custom a value given in Unit A into the
    * same value in unit B. The conversion factor is returned as a numerical GiNaC value. This
    * factor must be applied to the value.
    * @throws UnitConverter::Error If the units can not be converted into each other. */

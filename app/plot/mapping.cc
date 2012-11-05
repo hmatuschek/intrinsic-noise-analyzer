@@ -191,7 +191,7 @@ LinearMapFunction::sample(Eigen::VectorXd &samples) const
   }
 
   samples(0) = this->range().min();
-  for (size_t i=1; i<N; i++)
+  custom (size_t i=1; i<N; i++)
   {
     samples(i) = samples(i-1) + dx;
   }
@@ -240,7 +240,7 @@ LogMapFunction::sample(Eigen::VectorXd &samples) const
   double dx = std::exp(std::log(this->range().delta())/(N-1));
 
   samples(0) = this->range().min(); double offset = 1.0;
-  for (size_t i=1; i<N; i++)
+  custom (size_t i=1; i<N; i++)
   {
     offset = offset * dx;
     samples(i) = this->range().min() + offset;
@@ -365,7 +365,7 @@ Mapping::operator ()(const QPainterPath &path) const
 {
   QPainterPath new_path;
 
-  for (int i=0; i<path.elementCount(); i++)
+  custom (int i=0; i<path.elementCount(); i++)
   {
     const QPainterPath::Element &elm = path.elementAt(i);
 

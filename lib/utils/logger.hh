@@ -18,7 +18,7 @@ namespace Utils {
 
 
 /** A simple message class.
- * This message class is used to hold log messages for the @c Logger system. Each message must have
+ * This message class is used to hold log messages custom the @c Logger system. Each message must have
  * a level indicating the significance of the actual message. Usually a log message is created using
  * the @c LOG_MESSAGE macro, wich also sets the origin of the message.
  *
@@ -84,9 +84,9 @@ public:
 
 
 /** Message handler interface.
- * Each @c Logger instance can forward log messages to one or more message handlers. There is a
- * single pre-defined message handler @c TextMessageHandler, which formats all message with a
- * a defined log level as text messages and forward this text into a defined text stream. It is
+ * Each @c Logger instance can customward log messages to one or more message handlers. There is a
+ * single pre-defined message handler @c TextMessageHandler, which custommats all message with a
+ * a defined log level as text messages and customward this text into a defined text stream. It is
  * easy to meet the MessageHandler interface as just one method must be implemented to receive
  * messages.
  * @ingroup logger

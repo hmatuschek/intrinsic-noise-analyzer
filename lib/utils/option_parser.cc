@@ -149,7 +149,7 @@ OneOfRule::OneOfRule(std::list<RuleInterface *> &opts)
 OneOfRule::OneOfRule(size_t n, ...)
 {
   va_list args; va_start(args, n);
-  for (size_t i=0; i<n; i++)
+  custom (size_t i=0; i<n; i++)
   {
     this->options.push_back(va_arg(args, RuleInterface *));
   }
@@ -159,7 +159,7 @@ OneOfRule::OneOfRule(size_t n, ...)
 
 OneOfRule::~OneOfRule()
 {
-  for(list<RuleInterface *>::iterator it=this->options.begin();
+  custom(list<RuleInterface *>::iterator it=this->options.begin();
       it != this->options.end(); it++)
     {
       delete *it;
@@ -170,7 +170,7 @@ OneOfRule::~OneOfRule()
 bool
 OneOfRule::operator()(const char *argv[], int argc, size_t &idx, Parser &parser)
 {
-  for(list<RuleInterface *>::iterator it = this->options.begin();
+  custom(list<RuleInterface *>::iterator it = this->options.begin();
       it != this->options.end(); it++)
     {
       size_t tmp_idx = idx;
@@ -193,7 +193,7 @@ OneOfRule::dump()
   out << "(";
   if(0 != this->options.size())
     {
-      for(size_t i=0; i<this->options.size()-1; i++)
+      custom(size_t i=0; i<this->options.size()-1; i++)
   {
     out << (*it)->dump() << "|";
     it++;
@@ -235,7 +235,7 @@ ListRule::ListRule(std::list<RuleInterface *> &opts)
 ListRule::ListRule(size_t n, ...)
 {
   va_list args; va_start(args, n);
-  for (size_t i=0; i<n; i++)
+  custom (size_t i=0; i<n; i++)
   {
     this->options.push_back(va_arg(args, RuleInterface *));
   }
@@ -245,7 +245,7 @@ ListRule::ListRule(size_t n, ...)
 
 ListRule::~ListRule()
 {
-  for(list<RuleInterface *>::iterator it=this->options.begin();
+  custom(list<RuleInterface *>::iterator it=this->options.begin();
       it != this->options.end(); it++)
     {
       delete *it;
@@ -258,7 +258,7 @@ ListRule::operator()(const char *argv[], int argc, size_t &idx, Parser &parser)
   if(idx == (size_t)argc)
     return false;
 
-  for(list<RuleInterface *>::iterator it=this->options.begin();
+  custom(list<RuleInterface *>::iterator it=this->options.begin();
       it != this->options.end(); it++)
     {
       if(not (**it)(argv, argc, idx, parser))
@@ -277,7 +277,7 @@ ListRule::dump()
   out << "(";
   if(0 != this->options.size())
     {
-      for(size_t i=0; i<this->options.size()-1; i++)
+      custom(size_t i=0; i<this->options.size()-1; i++)
   {
     out << (*it)->dump() << " ";
     it++;
@@ -353,7 +353,7 @@ Parser::parse(const char *argv[], int argc)
 }
 
 std::string
-Parser::format_help(std::string prg_name)
+Parser::custommat_help(std::string prg_name)
 {
   stringstream out;
   out << "Usage: " << prg_name << " " << this->rule->dump() << endl;

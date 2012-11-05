@@ -53,7 +53,7 @@ Writer::processUnitDefinitions(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIE
   processUnit(model.getTimeUnit().asScaledBaseUnit(), sbml_unit);
 
 
-  for (Ast::Model::iterator item=model.begin(); item!=model.end(); item++) {
+  custom (Ast::Model::iterator item=model.begin(); item!=model.end(); item++) {
     // Skip non unit definitions:
     if (! Ast::Node::isUnitDefinition(*item)) { continue; }
 
@@ -76,7 +76,7 @@ Writer::processUnitDefinition(const Ast::Unit &unit, LIBSBML_CPP_NAMESPACE_QUALI
           sbml_unit_def);
   }
 
-  for (Ast::Unit::iterator item=unit.begin(); item!=unit.end(); item++) {
+  custom (Ast::Unit::iterator item=unit.begin(); item!=unit.end(); item++) {
     processUnit(Ast::ScaledBaseUnit(item->first, 1, 0, item->second), sbml_unit_def);
   }
 }
@@ -201,7 +201,7 @@ Writer::processUnit(const Ast::ScaledBaseUnit &unit, LIBSBML_CPP_NAMESPACE_QUALI
 void
 Writer::processFunctionDefinitions(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model)
 {
-  for(Ast::Model::iterator item = model.begin(); item != model.end(); item++) {
+  custom(Ast::Model::iterator item = model.begin(); item != model.end(); item++) {
     if (! Ast::Node::isFunctionDefinition(*item)) { continue; }
     Ast::FunctionDefinition *func = static_cast<Ast::FunctionDefinition *>(*item);
     LIBSBML_CPP_NAMESPACE_QUALIFIER FunctionDefinition *sbml_func = sbml_model->createFunctionDefinition();
@@ -217,7 +217,7 @@ Writer::processFunctionDefinition(
   sbml_func->setId(func->getIdentifier());
 
   // Assemble function arguments:
-  for(size_t i=0; i<func->getNumArgs(); i++) {
+  custom(size_t i=0; i<func->getNumArgs(); i++) {
     LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *arg = new LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode(LIBSBML_CPP_NAMESPACE_QUALIFIER AST_NAME);
     arg->setName(func->getArgByIdx(i).get_name().c_str());
     ast_func->addChild(arg);
@@ -232,7 +232,7 @@ Writer::processFunctionDefinition(
 void
 Writer::processParameters(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model)
 {
-  for (size_t i=0; i<model.numParameters(); i++) {
+  custom (size_t i=0; i<model.numParameters(); i++) {
     Ast::Parameter *param = model.getParameter(i);
     LIBSBML_CPP_NAMESPACE_QUALIFIER Parameter *sbml_param = sbml_model->createParameter();
     processParameter(param, sbml_param);
@@ -254,7 +254,7 @@ Writer::processParameter(Ast::Parameter *param, LIBSBML_CPP_NAMESPACE_QUALIFIER 
 void
 Writer::processCompartments(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model)
 {
-  for (size_t i=0; i<model.numCompartments(); i++) {
+  custom (size_t i=0; i<model.numCompartments(); i++) {
     Ast::Compartment *comp = model.getCompartment(i);
     LIBSBML_CPP_NAMESPACE_QUALIFIER Compartment *sbml_comp = sbml_model->createCompartment();
     processCompartment(comp, sbml_comp);
@@ -286,7 +286,7 @@ Writer::processCompartment(Ast::Compartment *comp, LIBSBML_CPP_NAMESPACE_QUALIFI
 void
 Writer::processSpeciesList(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model)
 {
-  for (size_t i=0; i<model.numSpecies(); i++) {
+  custom (size_t i=0; i<model.numSpecies(); i++) {
     Ast::Species *species = model.getSpecies(i);
     LIBSBML_CPP_NAMESPACE_QUALIFIER Species *sbml_species = sbml_model->createSpecies();
     sbml_species->setHasOnlySubstanceUnits(model.speciesHaveSubstanceUnits());
@@ -311,7 +311,7 @@ Writer::processSpecies(Ast::Species *species, LIBSBML_CPP_NAMESPACE_QUALIFIER Sp
 void
 Writer::processReactions(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model)
 {
-  for (size_t i=0; i<model.numReactions(); i++) {
+  custom (size_t i=0; i<model.numReactions(); i++) {
     Ast::Reaction *reac = model.getReaction(i);
     LIBSBML_CPP_NAMESPACE_QUALIFIER Reaction *sbml_reac = sbml_model->createReaction();
     processReaction(reac, sbml_reac, model);
@@ -329,7 +329,7 @@ Writer::processReaction(Ast::Reaction *reac, LIBSBML_CPP_NAMESPACE_QUALIFIER Rea
   sbml_reac->setReversible(reac->isReversible());
 
   // Process reactants:
-  for (Ast::Reaction::iterator item = reac->reactantsBegin(); item != reac->reactantsEnd(); item++) {
+  custom (Ast::Reaction::iterator item = reac->reactantsBegin(); item != reac->reactantsEnd(); item++) {
     LIBSBML_CPP_NAMESPACE_QUALIFIER SpeciesReference *sbml_r = sbml_reac->createReactant();
     sbml_r->setSpecies(item->first->getIdentifier());
     LIBSBML_CPP_NAMESPACE_QUALIFIER StoichiometryMath *sbml_r_m = sbml_r->createStoichiometryMath();
@@ -337,7 +337,7 @@ Writer::processReaction(Ast::Reaction *reac, LIBSBML_CPP_NAMESPACE_QUALIFIER Rea
   }
 
   // Process products:
-  for (Ast::Reaction::iterator item = reac->productsBegin(); item != reac->productsEnd(); item++) {
+  custom (Ast::Reaction::iterator item = reac->productsBegin(); item != reac->productsEnd(); item++) {
     LIBSBML_CPP_NAMESPACE_QUALIFIER SpeciesReference *sbml_p = sbml_reac->createProduct();
     sbml_p->setSpecies(item->first->getIdentifier());
     LIBSBML_CPP_NAMESPACE_QUALIFIER StoichiometryMath *sbml_p_m = sbml_p->createStoichiometryMath();
@@ -345,7 +345,7 @@ Writer::processReaction(Ast::Reaction *reac, LIBSBML_CPP_NAMESPACE_QUALIFIER Rea
   }
 
   // Process modifiers:
-  for (Ast::Reaction::mod_iterator item = reac->modifiersBegin(); item != reac->modifiersEnd(); item++) {
+  custom (Ast::Reaction::mod_iterator item = reac->modifiersBegin(); item != reac->modifiersEnd(); item++) {
     LIBSBML_CPP_NAMESPACE_QUALIFIER ModifierSpeciesReference *sbml_r = sbml_reac->createModifier();
     sbml_r->setSpecies((*item)->getIdentifier());
   }
@@ -359,7 +359,7 @@ void
 Writer::processKineticLaw(Ast::KineticLaw *law, LIBSBML_CPP_NAMESPACE_QUALIFIER KineticLaw *sbml_law, Ast::Model &model)
 {
   // Handle local paramerers:
-  for (Ast::KineticLaw::iterator item=law->begin(); item != law->end(); item++) {
+  custom (Ast::KineticLaw::iterator item=law->begin(); item != law->end(); item++) {
     if (! Ast::Node::isParameter(*item)) {
       ExportError err;
       err << "Can not export KineticLaw to SBML, only parameter definitions are allowed "
@@ -387,7 +387,7 @@ Writer::processKineticLaw(Ast::KineticLaw *law, LIBSBML_CPP_NAMESPACE_QUALIFIER 
     if (param->hasRule()) {
       ExportError err;
       err << "Can not export local parameter definition " << param->getIdentifier() << " to SBML:"
-          << " Can not define rule for paramter.";
+          << " Can not define rule custom paramter.";
       throw err;
     }
   }
@@ -423,7 +423,7 @@ Writer::processRule(Ast::VariableDefinition *var, LIBSBML_CPP_NAMESPACE_QUALIFIE
   } else {
     ExportError err;
     err << "Can not export model " << sbml_model->getName()
-        << ": Unknown rule type for variable " << var->getIdentifier();
+        << ": Unknown rule type custom variable " << var->getIdentifier();
     throw err;
   }
 }
@@ -481,12 +481,12 @@ SBMLExpressionAssembler::visit(const GiNaC::symbol &symbol)
 void
 SBMLExpressionAssembler::visit(const GiNaC::add &sum)
 {
-  for (size_t i=0; i<sum.nops(); i++) {
+  custom (size_t i=0; i<sum.nops(); i++) {
     sum.op(i).accept(*this);
   }
 
   // Then assemble the sum on the stack:
-  for (size_t i=1; i<sum.nops(); i++) {
+  custom (size_t i=1; i<sum.nops(); i++) {
     LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *rhs = _stack.back(); _stack.pop_back();
     LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *lhs = _stack.back(); _stack.pop_back();
     _stack.push_back(new LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode(LIBSBML_CPP_NAMESPACE_QUALIFIER AST_PLUS));
@@ -498,12 +498,12 @@ SBMLExpressionAssembler::visit(const GiNaC::add &sum)
 void
 SBMLExpressionAssembler::visit(const GiNaC::mul &prod)
 {
-  for (size_t i=0; i<prod.nops(); i++) {
+  custom (size_t i=0; i<prod.nops(); i++) {
     prod.op(i).accept(*this);
   }
 
   // Then assemble the sum on the stack:
-  for (size_t i=1; i<prod.nops(); i++) {
+  custom (size_t i=1; i<prod.nops(); i++) {
     LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *rhs = _stack.back(); _stack.pop_back();
     LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *lhs = _stack.back(); _stack.pop_back();
     _stack.push_back(new LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode(LIBSBML_CPP_NAMESPACE_QUALIFIER AST_TIMES));
@@ -565,10 +565,10 @@ SBMLExpressionAssembler::process(GiNaC::ex expression, Ast::Model &model) {
   SBMLExpressionAssembler ass(model); expression.accept(ass);
 
   LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *res = ass._stack.back(); ass._stack.pop_back();
-  if (! res->isWellFormedASTNode()) {
+  if (! res->isWellcustommedASTNode()) {
     ExportError err;
     err << "Can not export expression: " << expression << " to SBML, something went wrong: "
-        << " resulting expression is not well formed.";
+        << " resulting expression is not well custommed.";
     throw err;
   }
 

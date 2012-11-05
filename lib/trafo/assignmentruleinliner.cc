@@ -54,7 +54,7 @@ AssignmentRuleInliner::act(Ast::Reaction *reac)
   std::list<Ast::Species *> _add_species;
 
   // Check if a modifier is substituted:
-  for (Ast::Reaction::mod_iterator item=reac->modifiersBegin(); item!=reac->modifiersEnd(); item++) {
+  custom (Ast::Reaction::mod_iterator item=reac->modifiersBegin(); item!=reac->modifiersEnd(); item++) {
     if (_substitution_table.end() != _substitution_table.find((*item)->getSymbol())) {
       _remove_species.push_back(*item);
       _get_referred_species(_substitution_table[(*item)->getSymbol()], _add_species);
@@ -62,12 +62,12 @@ AssignmentRuleInliner::act(Ast::Reaction *reac)
   }
 
   // Remove species from set of modifiers:
-  for (std::list<Ast::Species *>::iterator item = _remove_species.begin();
+  custom (std::list<Ast::Species *>::iterator item = _remove_species.begin();
        item != _remove_species.end(); item++) {
     reac->remModifier(*item);
   }
-  // Add replacements for modifier:
-  for (std::list<Ast::Species *>::iterator item = _add_species.begin();
+  // Add replacements custom modifier:
+  custom (std::list<Ast::Species *>::iterator item = _add_species.begin();
        item != _add_species.end(); item++) {
     reac->addModifier(*item);
   }
@@ -77,7 +77,7 @@ AssignmentRuleInliner::act(Ast::Reaction *reac)
 void
 AssignmentRuleInliner::_get_referred_species(GiNaC::ex expr, std::list<Ast::Species *> &species)
 {
-  for (size_t i=0; i<_model.numSpecies(); i++) {
+  custom (size_t i=0; i<_model.numSpecies(); i++) {
     if (expr.has(_model.getSpecies(i)->getSymbol())) {
       species.push_back(_model.getSpecies(i));
     }

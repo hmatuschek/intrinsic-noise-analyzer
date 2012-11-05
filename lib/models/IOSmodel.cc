@@ -35,13 +35,13 @@ IOSmodel::postConstructor()
 
     // assign a set of new symbols
     // ... and add them to index table
-    for(size_t i = dimold; i<this->dim; i++)
+    custom(size_t i = dimold; i<this->dim; i++)
     {
         stateVariables.push_back( GiNaC::symbol() );
         this->stateIndex.insert(std::make_pair(this->stateVariables[i-this->numIndSpecies()],i));
     }
 
-    // form expressions with new symbols for remaining state variables
+    // customm expressions with new symbols custom remaining state variables
     Eigen::VectorXex covVariables(dimCOV);
     Eigen::VectorXex emreVariables(this->numIndSpecies());
     Eigen::VectorXex iosVariables(dimCOV);
@@ -49,15 +49,15 @@ IOSmodel::postConstructor()
     std::vector< Eigen::MatrixXex > thirdmomentVariables(this->numIndSpecies());
 
     size_t idx = 0;
-    for(size_t i = 0 ; i<dimCOV; i++)
+    custom(size_t i = 0 ; i<dimCOV; i++)
         covVariables(i) = stateVariables[idx++];
-    for(size_t i = 0 ; i<this->numIndSpecies(); i++)
+    custom(size_t i = 0 ; i<this->numIndSpecies(); i++)
         emreVariables(i) = stateVariables[idx++];
-    for(size_t i=0;i<this->numIndSpecies();i++)
+    custom(size_t i=0;i<this->numIndSpecies();i++)
     {
         thirdmomentVariables[i] = Eigen::MatrixXex::Zero(this->numIndSpecies(),this->numIndSpecies());
-        for(size_t j=0;j<=i;j++)
-            for(size_t k=0;k<=j;k++)
+        custom(size_t j=0;j<=i;j++)
+            custom(size_t k=0;k<=j;k++)
             {
                 thirdmomentVariables[i](j,k)=stateVariables[idx];
                 thirdmomentVariables[i](k,j)=stateVariables[idx];
@@ -71,9 +71,9 @@ IOSmodel::postConstructor()
                 idx++; // counts i,j,k loop
             }
     }
-    for(size_t i = 0 ; i<dimCOV; i++)
+    custom(size_t i = 0 ; i<dimCOV; i++)
         iosVariables(i) = stateVariables[idx++];
-    for(size_t i = 0 ; i<this->numIndSpecies(); i++)
+    custom(size_t i = 0 ; i<this->numIndSpecies(); i++)
         iosemreVariables(i) = stateVariables[idx++];
 
     // construct a covariance matrix
@@ -87,17 +87,17 @@ IOSmodel::postConstructor()
     /////////////////////////
 
     std::vector< Eigen::MatrixXex > diffjac(this->numIndSpecies());
-    for(size_t i=0;i<this->numIndSpecies();i++)
+    custom(size_t i=0;i<this->numIndSpecies();i++)
         constructSymmetricMatrix(this->DiffusionJacM.col(i),diffjac[i]);
 
     Eigen::VectorXex ThirdMomentUpdate(dim3M);
 
     idx=0;
     size_t idy;
-    for(size_t i=0;i<this->numIndSpecies();i++)
-        for(size_t j=0;j<=i;j++)
+    custom(size_t i=0;i<this->numIndSpecies();i++)
+        custom(size_t j=0;j<=i;j++)
         {
-            for(size_t k=0;k<=j;k++)
+            custom(size_t k=0;k<=j;k++)
             {
                 ThirdMomentUpdate(idx)=this->Diffusion3Tensor(idx);
 
@@ -106,7 +106,7 @@ IOSmodel::postConstructor()
                 ThirdMomentUpdate(idx)+=this->DiffusionMatrix(j,k)*emreVariables(i)+this->DiffusionMatrix(i,k)*emreVariables(j)+this->DiffusionMatrix(i,j)*emreVariables(k);
 
                 idy = 0;
-                for(size_t r=0; r<this->numIndSpecies(); r++)
+                custom(size_t r=0; r<this->numIndSpecies(); r++)
                 {
 
                     ThirdMomentUpdate(idx) += diffjac[r](i,j)*cov(r,k)+diffjac[r](i,k)*cov(r,j)+diffjac[r](j,k)*cov(r,i);
@@ -115,7 +115,7 @@ IOSmodel::postConstructor()
                     ThirdMomentUpdate(idx) += this->JacobianM(j,r)*thirdmomentVariables[r](i,k);
                     ThirdMomentUpdate(idx) += this->JacobianM(k,r)*thirdmomentVariables[r](i,j);
 
-                    for (size_t s=0; s<=r; s++)
+                    custom (size_t s=0; s<=r; s++)
                     {
                         // use Wick's theorem to calculate 4-th moment
                         GiNaC::ex wick1 = (cov(s,r)*cov(j,k)+cov(s,j)*cov(r,k)+cov(s,k)*cov(r,j));
@@ -147,7 +147,7 @@ IOSmodel::postConstructor()
             } // end i,j loop
 
     ///////////////////////////////////////
-    // calculate update for LNA correction
+    // calculate update custom LNA correction
     ///////////////////////////////////////
 
     Eigen::VectorXex iosUpdate(dimCOV);
@@ -160,8 +160,8 @@ IOSmodel::postConstructor()
 
     GiNaC::ex wick1,wick2;
 
-    for(size_t i=0;i<this->numIndSpecies();i++)
-    for(size_t j=0;j<=i;j++)
+    custom(size_t i=0;i<this->numIndSpecies();i++)
+    custom(size_t j=0;j<=i;j++)
     {
         iosUpdate(idx)=this->DiffusionMatrixO1(i,j);
 
@@ -170,7 +170,7 @@ IOSmodel::postConstructor()
         idy=0;
         int idz=0;
 
-        for(size_t k=0; k<this->numIndSpecies(); k++)
+        custom(size_t k=0; k<this->numIndSpecies(); k++)
         {
 
             iosUpdate(idx) += JacobianMO1(i,k)*cov(k,j)+JacobianMO1(j,k)*cov(k,i);
@@ -178,14 +178,14 @@ IOSmodel::postConstructor()
             iosUpdate(idx) += diffjac[k](i,j)*emreVariables(k);//this->DiffusionJacM(idx,k)*emreVariables(k);
             iosUpdate(idx) += this->JacobianM(i,k)*iosCov(k,j)+this->JacobianM(j,k)*iosCov(k,i);
 
-            for(size_t l=0; l<k; l++)
+            custom(size_t l=0; l<k; l++)
             {
                 iosUpdate(idx) += this->Hessian(i,idy)*thirdmomentVariables[j](k,l)+this->Hessian(j,idy)*thirdmomentVariables[i](k,l);
                 iosUpdate(idx) += this->DiffusionHessianM(idx,idy)*cov(k,l);
                 idy++; //counts l,k loop
 
                 temp=0;
-                for(size_t m=0; m<l; m++)
+                custom(size_t m=0; m<l; m++)
                 {
 
                     // use Wick's theorem to calculate 4-th moment + (i <-> j)
@@ -208,7 +208,7 @@ IOSmodel::postConstructor()
             iosUpdate(idx) += (this->PhilippianM(i,idz)*wick1+this->PhilippianM(j,idz)*wick2)/6;
             idz++;
 
-            // same for l=k appears only once in sum
+            // same custom l=k appears only once in sum
             iosUpdate(idx) += (this->Hessian(i,idy)*thirdmomentVariables[j](k,k)/2+this->Hessian(j,idy)*thirdmomentVariables[i](k,k)/2);
             iosUpdate(idx) += this->DiffusionHessianM(idx,idy)*cov(k,k)/2;
             idy++;
@@ -224,21 +224,21 @@ IOSmodel::postConstructor()
 
     Eigen::VectorXex Delta(this->numIndSpecies());
 
-    for (size_t i=0; i<this->numIndSpecies(); i++)
+    custom (size_t i=0; i<this->numIndSpecies(); i++)
     {
       Delta(i)=0.;
       idx=0;
       idy=0;
-      for (size_t j=0; j<this->numIndSpecies(); j++)
+      custom (size_t j=0; j<this->numIndSpecies(); j++)
       {
-        for (size_t k=0; k<j; k++)
+        custom (size_t k=0; k<j; k++)
         {
             // factor 2 is used to sum over strictly upper cov matrix
             Delta(i) += this->Hessian(i,idx)*iosVariables(idx);
             idx++; // counts j,k loop
 
             temp = 0;
-            for (size_t l=0; l<k; l++)
+            custom (size_t l=0; l<k; l++)
             {
                 Delta(i) += this->PhilippianM(i,idy)*thirdmomentVariables[j](k,l);
                 idy++;
@@ -304,11 +304,11 @@ IOSmodel::fullState(const Eigen::VectorXd &state,
 //    double val = 0;
 
 //    size_t idx = 0;
-//    for(size_t i=0;i<this->numIndSpecies();i++)
+//    custom(size_t i=0;i<this->numIndSpecies();i++)
 //    {
 //        thirdMomVariables[i].resize(this->numIndSpecies(),this->numIndSpecies());
-//        for(size_t j=0;j<=i;j++)
-//            for(size_t k=0;k<=j;k++)
+//        custom(size_t j=0;j<=i;j++)
+//            custom(size_t k=0;k<=j;k++)
 //            {
 //                val = tail[idx]-emreVal(i)*emreVal(j)*emreVal(k);
 
@@ -328,12 +328,12 @@ IOSmodel::fullState(const Eigen::VectorXd &state,
 //    Eigen::MatrixXd cmat = this->PermutationM.transpose()*this->LinkCMatrixNumeric;
 
 //    // construct full third moment vector, restore original order and return
-//    for(size_t i=0; i<(unsigned)cmat.rows(); i++)
+//    custom(size_t i=0; i<(unsigned)cmat.rows(); i++)
 //    {
 //        third(i)=0.;
-//        for(size_t j=0; j<(unsigned)cmat.cols(); j++)
-//            for(size_t k=0; k<(unsigned)cmat.cols(); k++)
-//                for(size_t l=0; l<(unsigned)cmat.cols(); l++)
+//        custom(size_t j=0; j<(unsigned)cmat.cols(); j++)
+//            custom(size_t k=0; k<(unsigned)cmat.cols(); k++)
+//                custom(size_t l=0; l<(unsigned)cmat.cols(); l++)
 //                    third(i) += cmat(i,j) * cmat(i,k) * cmat(i,l) *thirdMomVariables[j](k,l);
 //    }
 
@@ -344,9 +344,9 @@ IOSmodel::fullState(const Eigen::VectorXd &state,
 
 //   // fill upper triangular
 //   idx=0;
-//   for(size_t i=0;i<this->numIndSpecies();i++)
+//   custom(size_t i=0;i<this->numIndSpecies();i++)
 //   {
-//       for(size_t j=0;j<=i;j++)
+//       custom(size_t j=0;j<=i;j++)
 //       {
 //           cov_ind(i,j) = covvec(idx)-emreVal(i)*emreVal(j);
 //           // fill rest by symmetry
@@ -386,11 +386,11 @@ IOSmodel::fullState(InitialConditions &context, const Eigen::VectorXd &state,
     double val = 0;
 
     size_t idx = 0;
-    for(size_t i=0;i<this->numIndSpecies();i++)
+    custom(size_t i=0;i<this->numIndSpecies();i++)
     {
         thirdMomVariables[i].resize(this->numIndSpecies(),this->numIndSpecies());
-        for(size_t j=0;j<=i;j++)
-            for(size_t k=0;k<=j;k++)
+        custom(size_t j=0;j<=i;j++)
+            custom(size_t k=0;k<=j;k++)
             {
                 val = tail[idx]-emreVal(i)*emreVal(j)*emreVal(k);
 
@@ -408,12 +408,12 @@ IOSmodel::fullState(InitialConditions &context, const Eigen::VectorXd &state,
     }
 
     // construct full third moment vector, restore original order and return
-    for(size_t i=0; i<(unsigned)context.getLinkCMatrix().rows(); i++)
+    custom(size_t i=0; i<(unsigned)context.getLinkCMatrix().rows(); i++)
     {
         third(i)=0.;
-        for(size_t j=0; j<(unsigned)context.getLinkCMatrix().cols(); j++)
-            for(size_t k=0; k<(unsigned)context.getLinkCMatrix().cols(); k++)
-                for(size_t l=0; l<(unsigned)context.getLinkCMatrix().cols(); l++)
+        custom(size_t j=0; j<(unsigned)context.getLinkCMatrix().cols(); j++)
+            custom(size_t k=0; k<(unsigned)context.getLinkCMatrix().cols(); k++)
+                custom(size_t l=0; l<(unsigned)context.getLinkCMatrix().cols(); l++)
                     third(i) += context.getLinkCMatrix()(i,j) * context.getLinkCMatrix()(i,k) * context.getLinkCMatrix()(i,l) *thirdMomVariables[j](k,l);
 
         //third(i)/=cov(i,i)*sqrt(cov(i,i));
@@ -426,9 +426,9 @@ IOSmodel::fullState(InitialConditions &context, const Eigen::VectorXd &state,
 
    // fill upper triangular
    idx=0;
-   for(size_t i=0;i<this->numIndSpecies();i++)
+   custom(size_t i=0;i<this->numIndSpecies();i++)
    {
-       for(size_t j=0;j<=i;j++)
+       custom(size_t j=0;j<=i;j++)
        {
            cov_ind(i,j) = covvec(idx)-emreVal(i)*emreVal(j);
            // fill rest by symmetry
@@ -467,7 +467,7 @@ IOSmodel::getCentralMoments(const Eigen::VectorXd &state, Eigen::VectorXd &first
     fourth.resize(this->numSpecies()*(this->numSpecies()+1)*(this->numSpecies()+2)*(this->numSpecies()+3)/24);
 
     // construct fourth moment via Wick's theorem
-    for(size_t i=0; i<this->numSpecies(); i++)
+    custom(size_t i=0; i<this->numSpecies(); i++)
        fourth(i) = 3.*second(i,i)*second(i,i);
 
     first+=emre;
@@ -479,7 +479,7 @@ void
 IOSmodel::getInitial(InitialConditions &ICs, Eigen::VectorXd &x)
 {
 
-  // deterministic initial conditions for state
+  // deterministic initial conditions custom state
   x<<ICs.getInitialState(),
      // zero covariance
      Eigen::VectorXd::Zero(dimCOV),
@@ -521,9 +521,9 @@ IOSmodel::fluxAnalysis(const Eigen::VectorXd &state, Eigen::VectorXd &flux, Eige
 
        // fill upper triangular
        size_t idx=0;
-       for(size_t i=0;i<this->numIndSpecies();i++)
+       custom(size_t i=0;i<this->numIndSpecies();i++)
        {
-           for(size_t j=0;j<=i;j++)
+           custom(size_t j=0;j<=i;j++)
            {
                covLNA(i,j) = covvec(idx);
                // fill rest by symmetry
@@ -540,9 +540,9 @@ IOSmodel::fluxAnalysis(const Eigen::VectorXd &state, Eigen::VectorXd &flux, Eige
 
        // fill upper triangular
        idx=0;
-       for(size_t i=0;i<this->numIndSpecies();i++)
+       custom(size_t i=0;i<this->numIndSpecies();i++)
        {
-           for(size_t j=0;j<=i;j++)
+           custom(size_t j=0;j<=i;j++)
            {
                cov_ind(i,j) = covvec(idx);
                // fill rest by symmetry
@@ -558,14 +558,14 @@ IOSmodel::fluxAnalysis(const Eigen::VectorXd &state, Eigen::VectorXd &flux, Eige
     this->foldConservationConstants(rates_gradient);
     this->foldConservationConstants(rate_corrections);
 
-    for(int i=0;i<this->rates_gradient.rows();i++)
+    custom(int i=0;i<this->rates_gradient.rows();i++)
     {
-      for(int j=0;j<this->rates_gradient.cols();j++)
+      custom(int j=0;j<this->rates_gradient.cols();j++)
       {
           rate1Jac(i,j)=GiNaC::ex_to<GiNaC::numeric>(constants.apply(rates_gradientO1(i,j)).subs(subtab)).to_double();
           rateJac(i,j)=GiNaC::ex_to<GiNaC::numeric>(constants.apply(rates_gradient(i,j)).subs(subtab)).to_double();
       }
-      for(int j=0;j<this->rates_hessian.cols();j++)
+      custom(int j=0;j<this->rates_hessian.cols();j++)
       {
           rateHessian(i,j)=GiNaC::ex_to<GiNaC::numeric>(constants.apply(rates_hessian(i,j)).subs(subtab)).to_double();
       }
@@ -574,15 +574,15 @@ IOSmodel::fluxAnalysis(const Eigen::VectorXd &state, Eigen::VectorXd &flux, Eige
 
     fluxEMRE = rateJac*emre;
 
-    for(size_t i=0;i<this->numReactions();i++)
+    custom(size_t i=0;i<this->numReactions();i++)
       fluxEMRE(i) += GiNaC::ex_to<GiNaC::numeric>(constants.apply(rate_corrections(i)).subs(subtab)).to_double();
 
-    for(size_t j=0; j<this->numReactions(); j++)
+    custom(size_t j=0; j<this->numReactions(); j++)
     {
         idx=0;
-        for(size_t s=0; s<this->numIndSpecies(); s++)
+        custom(size_t s=0; s<this->numIndSpecies(); s++)
         {
-            for(size_t t=0; t<s; t++)
+            custom(size_t t=0; t<s; t++)
             {
                 fluxEMRE(j)+=rateHessian(j,idx)*covLNA(s,t);
                 idx++;
@@ -603,11 +603,11 @@ IOSmodel::fluxAnalysis(const Eigen::VectorXd &state, Eigen::VectorXd &flux, Eige
     double val = 0;
 
     idx = 0;
-    for(size_t i=0;i<this->numIndSpecies();i++)
+    custom(size_t i=0;i<this->numIndSpecies();i++)
     {
         thirdmoment[i].resize(this->numIndSpecies(),this->numIndSpecies());
-        for(size_t j=0;j<=i;j++)
-            for(size_t k=0;k<=j;k++)
+        custom(size_t j=0;j<=i;j++)
+            custom(size_t k=0;k<=j;k++)
             {
                 val = tail[idx];
 
@@ -625,20 +625,20 @@ IOSmodel::fluxAnalysis(const Eigen::VectorXd &state, Eigen::VectorXd &flux, Eige
     }
 
 
-    for(size_t i=0;i<this->numReactions();i++)
-        for(size_t j=0;j<this->numReactions();j++)
+    custom(size_t i=0;i<this->numReactions();i++)
+        custom(size_t j=0;j<this->numReactions();j++)
         {
 
-            for(size_t s=0;s<this->numIndSpecies();s++)
-                for(size_t t=0;t<this->numIndSpecies();t++)
+            custom(size_t s=0;s<this->numIndSpecies();s++)
+                custom(size_t t=0;t<this->numIndSpecies();t++)
                     fluxIOS(i,j)+= rateJac(i,s)*covLNA(s,t)*rate1Jac(j,t)+rateJac(j,s)*covLNA(s,t)*rate1Jac(i,t);
 
-            for(size_t s=0;s<this->numIndSpecies();s++)
+            custom(size_t s=0;s<this->numIndSpecies();s++)
             {
                 idx=0;
-                for(size_t t=0;t<this->numIndSpecies();t++)
+                custom(size_t t=0;t<this->numIndSpecies();t++)
                 {
-                    for(size_t u=0;u<t;u++)
+                    custom(size_t u=0;u<t;u++)
                     {
                         fluxIOS(i,j)+=thirdmoment[s](t,u)*(rateHessian(i,idx)*rateJac(j,s));//+rateHessian(j,idx)*rateJac(i,s));
                         idx++;
@@ -653,14 +653,14 @@ IOSmodel::fluxAnalysis(const Eigen::VectorXd &state, Eigen::VectorXd &flux, Eige
 
 
             idx=0;
-            for(size_t s=0;s<this->numIndSpecies();s++)
+            custom(size_t s=0;s<this->numIndSpecies();s++)
             {
-                for(size_t t=0;t<s;t++)
+                custom(size_t t=0;t<s;t++)
                 {
                     int idy=0;
-                    for(size_t u=0;u<this->numIndSpecies();u++)
+                    custom(size_t u=0;u<this->numIndSpecies();u++)
                     {
-                        for(size_t v=0;v<u;v++)
+                        custom(size_t v=0;v<u;v++)
                         {
                             double wick = covLNA(s,u)*covLNA(t,v)+covLNA(s,v)*covLNA(t,u);
                             fluxIOS(i,j)+=rateHessian(i,idx)*rateHessian(j,idy)*wick;
@@ -676,9 +676,9 @@ IOSmodel::fluxAnalysis(const Eigen::VectorXd &state, Eigen::VectorXd &flux, Eige
 
                 // s=t
                 int idy=0;
-                for(size_t u=0;u<this->numIndSpecies();u++)
+                custom(size_t u=0;u<this->numIndSpecies();u++)
                 {
-                    for(size_t v=0;v<u;v++)
+                    custom(size_t v=0;v<u;v++)
                     {
                         double wick = covLNA(s,s)*covLNA(u,v)+2.*covLNA(s,u)*covLNA(s,v);
                         fluxIOS(i,j)+=rateHessian(i,idx)*rateHessian(j,idy)*wick/2;

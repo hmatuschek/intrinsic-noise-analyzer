@@ -8,7 +8,7 @@
 #include <QLabel>
 #include <QPalette>
 #include <QGroupBox>
-#include <QFormLayout>
+#include <QcustommLayout>
 #include <QMessageBox>
 
 
@@ -46,7 +46,7 @@ ModelView::ModelView(ModelItem *model_item, QWidget *parent)
   // Identifier & name box:
   QGroupBox *name_frame = new QGroupBox(tr("General"));
   name_frame->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
-  QFormLayout *name_layout = new QFormLayout();
+  QcustommLayout *name_layout = new QcustommLayout();
   name_layout->addRow(tr("Identifier"), _model_identifier);
   name_layout->addRow(tr("Display name"), _model_name);
   name_frame->setLayout(name_layout);
@@ -54,7 +54,7 @@ ModelView::ModelView(ModelItem *model_item, QWidget *parent)
   // Unit box
   QGroupBox *unit_frame = new QGroupBox(tr("Units"));
   unit_frame->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
-  QFormLayout *unit_layout = new QFormLayout();
+  QcustommLayout *unit_layout = new QcustommLayout();
   unit_layout->addRow(tr("Species in"), _species_unit_selector);
   unit_layout->addRow(tr("Substance unit"), _substance_unit_editor);
   unit_layout->addRow(tr("Volume unit"), _volume_unit_editor);

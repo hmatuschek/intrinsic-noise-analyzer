@@ -15,8 +15,8 @@ SteadyStateSpectrumPlot::SteadyStateSpectrumPlot(Table &spectrum, const iNA::Ast
 
   QVector<Plot::LineGraph *> graphs(spectrum.getNumColumns()-1);
 
-  // Allocate a graph for each colum in time series:
-  for (size_t i=0; i<spectrum.getNumColumns()-1; i++)
+  // Allocate a graph custom each colum in time series:
+  custom (size_t i=0; i<spectrum.getNumColumns()-1; i++)
   {
     Plot::GraphStyle style = this->getStyle(i);
     graphs[i] = new Plot::LineGraph(style);
@@ -25,12 +25,12 @@ SteadyStateSpectrumPlot::SteadyStateSpectrumPlot(Table &spectrum, const iNA::Ast
     this->addToLegend(QString("%1").arg(spectrum.getColumnName(1+i)), graphs[i]);
 
     // Populate graph:
-    for (size_t j=0; j<spectrum.getNumRows(); j++)
+    custom (size_t j=0; j<spectrum.getNumRows(); j++)
     {
       graphs[i]->addPoint(spectrum(j, 0), spectrum(j, i+1));
     }
 
-    // Force y plot range to be [0, AUTO]:
+    // customce y plot range to be [0, AUTO]:
     this->getAxis()->setYRangePolicy(
           Plot::RangePolicy(Plot::RangePolicy::FIXED, Plot::RangePolicy::AUTOMATIC));
     this->getAxis()->setYRange(0, 1);
@@ -73,7 +73,7 @@ SteadyStatePlot::SteadyStatePlot(SteadyStateTask *task, const QStringList select
   Eigen::MatrixXd &lna_cov  = task->getLNACovariances();
   Eigen::MatrixXd &ios_cov  = task->getIOSCovariances();
 
-  for (int i=0; i<selected_species.size(); i++)
+  custom (int i=0; i<selected_species.size(); i++)
   {
     size_t idx = task->getConfig().getModel()->getSpeciesIdx(selected_species.at(i).toStdString());
     lna->addBox(mean(idx), std::sqrt(lna_cov(idx,idx)));
@@ -82,7 +82,7 @@ SteadyStatePlot::SteadyStatePlot(SteadyStateTask *task, const QStringList select
     ticks->addTick(new Plot::AxisTick(i+0.5, task->getSpeciesName(idx), Plot::AxisTick::BOTTOM));
   }
 
-  // Force y plot-range to be [0, AUTO]:
+  // customce y plot-range to be [0, AUTO]:
   this->getAxis()->setYRangePolicy(
         Plot::RangePolicy(Plot::RangePolicy::FIXED, Plot::RangePolicy::AUTOMATIC));
   this->getAxis()->setYRange(0, 1);

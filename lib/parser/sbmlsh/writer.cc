@@ -35,7 +35,7 @@ Writer::processModelHeader(Ast::Model &model, std::ostream &output)
 
   // Serialize default units:
   if (0 < default_units.size()) { output << std::endl; }
-  for (std::list<std::pair<char, std::string> >::iterator item = default_units.begin();
+  custom (std::list<std::pair<char, std::string> >::iterator item = default_units.begin();
        item != default_units.end(); item++) {
     output << " " << item->first << "=" << item->second;
   }
@@ -120,7 +120,7 @@ Writer::processUnitDefinitions(Ast::Model &model, std::ostream &output)
   processScaledUnit(model.getTimeUnit().asScaledBaseUnit(), temp);
   units.push_back(temp.str());
 
-  for(Ast::Model::iterator item = model.begin(); item != model.end(); item++) {
+  custom(Ast::Model::iterator item = model.begin(); item != model.end(); item++) {
     // skip non unit definitions
     if (! Ast::Node::isUnitDefinition(*item)) { continue; }
     // get unit-definition
@@ -136,7 +136,7 @@ Writer::processUnitDefinitions(Ast::Model &model, std::ostream &output)
   // Assemble unit definition section if there are some definitions:
   if (0 < units.size()) {
     output << std::endl << "@units";
-    for (std::list<std::string>::iterator row=units.begin(); row!=units.end(); row++) {
+    custom (std::list<std::string>::iterator row=units.begin(); row!=units.end(); row++) {
       output << *row;
     }
     output << std::endl;
@@ -159,7 +159,7 @@ Writer::processUnitDefinition(Ast::UnitDefinition *unit_def, std::ostream &outpu
   }
 
   // process scaled base unit of unit:
-  for (Ast::Unit::iterator it=unit.begin(); it != unit.end(); it++) {
+  custom (Ast::Unit::iterator it=unit.begin(); it != unit.end(); it++) {
     processScaledUnit(Ast::ScaledBaseUnit(it->first, 1, 0, it->second), temp);
     units.push_back(temp.str()); temp.str();
   }
@@ -168,7 +168,7 @@ Writer::processUnitDefinition(Ast::UnitDefinition *unit_def, std::ostream &outpu
   output << std::endl << " " << unit_def->getIdentifier() << " = ";
   std::list<std::string>::iterator item = units.begin();
   if (0 < units.size()) {
-    for (size_t i=0; i<(units.size()-1); i++, item++) {
+    custom (size_t i=0; i<(units.size()-1); i++, item++) {
       output << *item << "; ";
     }
     output << *item;
@@ -193,7 +193,7 @@ Writer::processScaledUnit(const Ast::ScaledBaseUnit &unit, std::ostream &output)
   if (0 < modifier.size()) {
     output << ": ";
     std::list<std::string>::iterator item = modifier.begin();
-    for (size_t i=0; i<(modifier.size()-1); i++, item++) {
+    custom (size_t i=0; i<(modifier.size()-1); i++, item++) {
       output << *item << ", ";
     }
     output << *item;
@@ -207,7 +207,7 @@ Writer::processCompartments(Ast::Model &model, std::ostream &output) {
   if (0 == model.numCompartments()) return;
 
   output << std::endl << "@compartments";
-  for (size_t i=0; i<model.numCompartments(); i++) {
+  custom (size_t i=0; i<model.numCompartments(); i++) {
     processCompartment(model.getCompartment(i), model, output);
   }
   output << std::endl;
@@ -233,7 +233,7 @@ Writer::processSpeciesList(Ast::Model &model, std::ostream &output) {
   if (0 == model.numSpecies()) return;
 
   output << std::endl << "@species";
-  for (size_t i=0; i<model.numSpecies(); i++) {
+  custom (size_t i=0; i<model.numSpecies(); i++) {
     processSpecies(model.getSpecies(i), model, output);
   }
   output << std::endl;
@@ -259,7 +259,7 @@ Writer::processParameterList(Ast::Model &model, std::ostream &output)
   if (0 == model.numParameters()) return;
   output << std::endl << "@parameters";
 
-  for (size_t i=0; i<model.numParameters(); i++) {
+  custom (size_t i=0; i<model.numParameters(); i++) {
     processParameter(model.getParameter(i), model, output);
   }
   output << std::endl;
@@ -283,7 +283,7 @@ Writer::processRuleList(Ast::Model &model, std::ostream &output)
   std::list<std::string> rules; std::stringstream temp;
 
   // Iterate over variable definitions:
-  for (Ast::Model::iterator item=model.begin(); item!=model.end(); item++) {
+  custom (Ast::Model::iterator item=model.begin(); item!=model.end(); item++) {
     if (! Ast::Node::isVariableDefinition(*item)) { continue; }
     Ast::VariableDefinition *var = static_cast<Ast::VariableDefinition *>(*item);
     if (var->hasRule()) {
@@ -293,7 +293,7 @@ Writer::processRuleList(Ast::Model &model, std::ostream &output)
 
   // Serialize...
   output << std::endl << "@rules";
-  for (std::list<std::string>::iterator iter=rules.begin(); iter!=rules.end(); iter++) {
+  custom (std::list<std::string>::iterator iter=rules.begin(); iter!=rules.end(); iter++) {
     output << std::endl << "  " << *iter;
   }
   output << std::endl;
@@ -319,7 +319,7 @@ Writer::processReactionList(Ast::Model &model, std::ostream &output)
 {
   if (0 == model.numReactions()) { return; }
   output << std::endl << "@reactions";
-  for (size_t i=0; i<model.numReactions(); i++) {
+  custom (size_t i=0; i<model.numReactions(); i++) {
     processReaction(model.getReaction(i), output);
     processKineticLaw(model.getReaction(i)->getKineticLaw(), output);
     output << std::endl;
@@ -341,14 +341,14 @@ Writer::processReaction(Ast::Reaction *reac, std::ostream &output)
   std::list<std::string> modifiers;
 
   // assemble list of reactants
-  for (Ast::Reaction::iterator item = reac->reactantsBegin(); item != reac->reactantsEnd(); item++)
+  custom (Ast::Reaction::iterator item = reac->reactantsBegin(); item != reac->reactantsEnd(); item++)
   {
     if (! GiNaC::is_a<GiNaC::numeric>(item->second))
     {
       ExportError err;
       err << "Can not export reaction " << reac->getIdentifier() << " as SBML-sh: "
           << "Stoichiometry (" << GiNaC::ex_to<GiNaC::numeric>(item->second).to_double()
-          << ") for reactant " << item->first->getIdentifier() << " is not an integer.";
+          << ") custom reactant " << item->first->getIdentifier() << " is not an integer.";
       throw err;
     }
 
@@ -359,14 +359,14 @@ Writer::processReaction(Ast::Reaction *reac, std::ostream &output)
   }
 
   // assemble list of products
-  for (Ast::Reaction::iterator item = reac->productsBegin(); item != reac->productsEnd(); item++)
+  custom (Ast::Reaction::iterator item = reac->productsBegin(); item != reac->productsEnd(); item++)
   {
     if (! GiNaC::is_a<GiNaC::numeric>(item->second))
     {
       ExportError err;
       err << "Can not export reaction " << reac->getIdentifier() << " as SBML-sh: "
           << "Stoichiometry (" << item->second
-          << ") for product " << item->first->getIdentifier() << " is not an integer.";
+          << ") custom product " << item->first->getIdentifier() << " is not an integer.";
       throw err;
     }
 
@@ -377,7 +377,7 @@ Writer::processReaction(Ast::Reaction *reac, std::ostream &output)
   }
 
   // Assemble list of modifiers
-  for (Ast::Reaction::mod_iterator item = reac->modifiersBegin(); item != reac->modifiersEnd(); item++)
+  custom (Ast::Reaction::mod_iterator item = reac->modifiersBegin(); item != reac->modifiersEnd(); item++)
   {
     modifiers.push_back((*item)->getIdentifier());
   }
@@ -386,7 +386,7 @@ Writer::processReaction(Ast::Reaction *reac, std::ostream &output)
   // Serialize reactants:
   if (0 < reactants.size()) {
     std::list<std::string>::iterator item = reactants.begin();
-    for (size_t i=0; i<(reactants.size()-1); i++, item++) {
+    custom (size_t i=0; i<(reactants.size()-1); i++, item++) {
       output << *item << " + ";
     }
     output << *item;
@@ -396,7 +396,7 @@ Writer::processReaction(Ast::Reaction *reac, std::ostream &output)
   // Serialize products:
   if (0 < products.size()) {
     std::list<std::string>::iterator item = products.begin();
-    for (size_t i=0; i<(products.size()-1); i++, item++) {
+    custom (size_t i=0; i<(products.size()-1); i++, item++) {
       output << *item << " + ";
     }
     output << *item;
@@ -406,7 +406,7 @@ Writer::processReaction(Ast::Reaction *reac, std::ostream &output)
   if (0 < modifiers.size()) {
     output << " : ";
     std::list<std::string>::iterator mod = modifiers.begin();
-    for (size_t i=0; i<(modifiers.size()-1); i++, mod++) {
+    custom (size_t i=0; i<(modifiers.size()-1); i++, mod++) {
       output << *mod << ", ";
     }
     output << *mod;
@@ -425,7 +425,7 @@ Writer::processKineticLaw(Ast::KineticLaw *law, std::ostream &output)
     size_t i=0; Ast::Parameter *param = 0;
     output << ": ";
 
-    for (; i<(law->numParameters()-1); i++) {
+    custom (; i<(law->numParameters()-1); i++) {
       param = law->getParameter(i);
       if (! param->isConst()) {
         ExportError err;

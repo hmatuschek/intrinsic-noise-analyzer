@@ -31,7 +31,7 @@ SSEBaseModel::SSEBaseModel(const Ast::Model &model)
 GiNaC::exmap SSEBaseModel::makeExclusionTable(const ParameterSet & parameters)
 {
     GiNaC::exmap result;
-    for(ParameterSet::const_iterator it=parameters.begin(); it!=parameters.end(); it++)
+    custom(ParameterSet::const_iterator it=parameters.begin(); it!=parameters.end(); it++)
         result.insert(std::pair<GiNaC::ex,GiNaC::ex>( this->getParameter((*it).first)->getSymbol(), (*it).second ));
     return result;
 }
@@ -43,7 +43,7 @@ SSEBaseModel::postConstructor()
 
 
     // get gradient/hessian of rates
-    for (size_t i=0; i<this->numReactions(); i++)
+    custom (size_t i=0; i<this->numReactions(); i++)
     {
 
       // substitute conservation relations
@@ -53,18 +53,18 @@ SSEBaseModel::postConstructor()
 
       int idx=0;
       int idy=0;
-      for (size_t j=0; j<this->numIndSpecies(); j++)
+      custom (size_t j=0; j<this->numIndSpecies(); j++)
       {
 
         // differentiate
         rates_gradient(i,j) = GiNaC::diff(rate_expressions(i), species[PermutationVec(j)]);
         rates_gradientO1(i,j) = GiNaC::diff(rate_corrections(i), species[PermutationVec(j)]);
 
-        for (size_t k=0; k<=j; k++)
+        custom (size_t k=0; k<=j; k++)
         {
             // differentiate again
             rates_hessian(i,idx) = GiNaC::diff(rates_gradient(i,j), species[PermutationVec(k)]);
-            for(size_t l=0; l<=k; l++)
+            custom(size_t l=0; l<=k; l++)
             {
                 rates_3rd(i,idy) =
                         GiNaC::diff( rates_hessian(i,idx), species[PermutationVec(l)]);
@@ -95,14 +95,14 @@ SSEBaseModel::postConstructor()
 
     size_t idy = 0;
     size_t idz = 0;
-    // construct diffusion matrix in vectorized and matrix form
-    for(size_t i=0;i<this->numIndSpecies();i++)
+    // construct diffusion matrix in vectorized and matrix customm
+    custom(size_t i=0;i<this->numIndSpecies();i++)
     {
-       for(size_t j=0;j<this->numIndSpecies();j++)
+       custom(size_t j=0;j<this->numIndSpecies();j++)
        {
            size_t idx=i+j*this->numIndSpecies();
            this->DiffusionVec(idx)=0.;
-           for(size_t m=0;m<this->numReactions();m++)
+           custom(size_t m=0;m<this->numReactions();m++)
            {
              this->DiffusionMatrixO1(i,j)+=(this->reduced_stoichiometry.cast< GiNaC::ex >()(i,m)*rate_corrections(m)*this->reduced_stoichiometry.transpose().cast< GiNaC::ex >()(m,j));
              this->DiffusionVec(idx)=this->DiffusionVec(idx)+
@@ -111,15 +111,15 @@ SSEBaseModel::postConstructor()
            //divide by volume squared
            this->DiffusionMatrixO1(i,j)/=this->Omega_ind(i)*this->Omega_ind(j);
            this->DiffusionVec(idx)/=this->Omega_ind(i)*this->Omega_ind(j);
-           //store also in matrix form
+           //store also in matrix customm
            this->DiffusionMatrix(i,j) = this->DiffusionVec(idx);
        }
 
-       for(size_t j=0;j<=i;j++)
+       custom(size_t j=0;j<=i;j++)
        {
-           for(size_t k=0;k<numIndSpecies();k++)
+           custom(size_t k=0;k<numIndSpecies();k++)
            {
-               for(size_t m=0;m<this->numReactions();m++)
+               custom(size_t m=0;m<this->numReactions();m++)
                {
                     this->DiffusionJacM(idy,k)+=rates_gradient(m,k)
                       *this->reduced_stoichiometry.cast< GiNaC::ex >()(i,m)
@@ -133,9 +133,9 @@ SSEBaseModel::postConstructor()
            }
            idy++;
 
-           for(size_t k=0;k<=j;k++)
+           custom(size_t k=0;k<=j;k++)
            {
-               for(size_t m=0;m<this->numReactions();m++)
+               custom(size_t m=0;m<this->numReactions();m++)
                {
                     this->Diffusion3Tensor(idz)+=
                          rate_expressions(m)
@@ -153,15 +153,15 @@ SSEBaseModel::postConstructor()
     }
 
     size_t idx = 0;
-    for(size_t i=0;i<this->numIndSpecies();i++)
-       for(size_t j=0;j<=i;j++)
+    custom(size_t i=0;i<this->numIndSpecies();i++)
+       custom(size_t j=0;j<=i;j++)
        {
 
            idy = 0;
-           for(size_t k=0;k<this->numIndSpecies();k++)
-              for(size_t l=0;l<=k;l++)
+           custom(size_t k=0;k<this->numIndSpecies();k++)
+              custom(size_t l=0;l<=k;l++)
               {
-                  for(size_t m=0;m<this->numReactions();m++)
+                  custom(size_t m=0;m<this->numReactions();m++)
                       this->DiffusionHessianM(idx,idy)+=
                            rates_hessian(m,idy)
                            *this->reduced_stoichiometry.cast< GiNaC::ex >()(i,m)
@@ -189,8 +189,8 @@ SSEBaseModel::vertex(std::list<size_t> &lower, std::list<size_t> &upper, size_t 
 
     std::vector<GiNaC::symbol> indSpecies(numIndSpecies());
 
-    for(size_t i=0; i<numIndSpecies(); i++){
-    for(size_t j=0; j<numSpecies(); j++){
+    custom(size_t i=0; i<numIndSpecies(); i++){
+    custom(size_t j=0; j<numSpecies(); j++){
        if(PermutationM(i,j)){
            indSpecies[i] = this->species[j];
            break;
@@ -202,7 +202,7 @@ SSEBaseModel::vertex(std::list<size_t> &lower, std::list<size_t> &upper, size_t 
 
     std::list<size_t>::iterator i;
 
-    for(size_t j=0; j < this->numReactions() ; j++)
+    custom(size_t j=0; j < this->numReactions() ; j++)
     {
         switch(order)
         {
@@ -214,12 +214,12 @@ SSEBaseModel::vertex(std::list<size_t> &lower, std::list<size_t> &upper, size_t 
             throw InternalError("order not defined");
         }
 
-        for(i=lower.begin(); i != lower.end(); ++i)
+        custom(i=lower.begin(); i != lower.end(); ++i)
             tempv *= this->reduced_stoichiometry(*i,j)/this->Omega_ind(*i);
         vertex += tempv;
     }
 
-    for(i = upper.begin(); i != upper.end(); ++i)
+    custom(i = upper.begin(); i != upper.end(); ++i)
         vertex = GiNaC::diff(vertex, indSpecies[*i]);
 
     return vertex;

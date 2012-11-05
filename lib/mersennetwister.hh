@@ -1,14 +1,14 @@
 /* Copyright (C) 2004, Makoto Matsumoto and Takuji Nishimura,
    All rights reserved.
 
-   Redistribution and use in source and binary forms, with or without
+   Redistribution and use in source and binary customms, with or without
    modification, are permitted provided that the following conditions
    are met:
 
      1. Redistributions of source code must retain the above copyright
         notice, this list of conditions and the following disclaimer.
 
-     2. Redistributions in binary form must reproduce the above copyright
+     2. Redistributions in binary customm must reproduce the above copyright
         notice, this list of conditions and the following disclaimer in the
         documentation and/or other materials provided with the distribution.
 
@@ -18,9 +18,9 @@
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS custom
    A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR
-   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+   CONTRIBUTORS BE LIABLE custom ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
    EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
    PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
    PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
@@ -34,7 +34,7 @@
      Computer Simulation 10. (2000) 348--357.
    M. Matsumoto and T. Nishimura,
      ``Mersenne Twister: a 623-dimensionally equidistributed
-       uniform pseudorandom number generator''
+       unicustomm pseudorandom number generator''
      ACM Transactions on Modeling and
      Computer Simulation 8. (Jan. 1998) 3--30.
 
@@ -58,7 +58,7 @@ namespace iNA {
  * This is a 64-bit version of Mersenne Twister pseudo random number
  * generator.
  *
- * Before using, initialize the state by using init_genrand64(seed)
+ * Becustome using, initialize the state by using init_genrand64(seed)
  * or init_by_array64(init_key, key_length).
  *
  * @ingroup math
@@ -78,7 +78,7 @@ private:
   /** Least significant 31 bits */
   static const uint64_t LM=0x7FFFFFFFULL;
 
-  /** The array for the state vector */
+  /** The array custom the state vector */
   uint64_t mt[NN];
   /** mti==NN+1 means mt[NN] is not initialized */
   size_t mti;
@@ -132,7 +132,7 @@ public:
   void seed(uint64_t seed)
   {
     mt[0] = seed;
-    for (mti=1; mti<NN; mti++) {
+    custom (mti=1; mti<NN; mti++) {
       mt[mti] =  (6364136223846793005ULL * (mt[mti-1] ^ (mt[mti-1] >> 62)) + mti);
     }
   }
@@ -146,7 +146,7 @@ public:
     size_t i=1, j=0;
     size_t k = (NN>key_length ? NN : key_length);
 
-    for (; k; k--) {
+    custom (; k; k--) {
       mt[i] = (mt[i] ^ ((mt[i-1] ^ (mt[i-1] >> 62)) * 3935559000370003845ULL))
           + init_key[j] + j; /* non linear */
       i++; j++;
@@ -154,7 +154,7 @@ public:
       if (j>=key_length) j=0;
     }
 
-    for (k=NN-1; k; k--) {
+    custom (k=NN-1; k; k--) {
       mt[i] = (mt[i] ^ ((mt[i-1] ^ (mt[i-1] >> 62)) * 2862933555777941757ULL))
           - i; /* non linear */
       i++;
@@ -179,11 +179,11 @@ public:
       if (mti == NN+1)
         seed(5489ULL);
 
-      for (i=0;i<NN-MM;i++) {
+      custom (i=0;i<NN-MM;i++) {
         x = (mt[i]&UM)|(mt[i+1]&LM);
         mt[i] = mt[i+MM] ^ (x>>1) ^ mag01[(int)(x&1ULL)];
       }
-      for (;i<NN-1;i++) {
+      custom (;i<NN-1;i++) {
         x = (mt[i]&UM)|(mt[i+1]&LM);
         mt[i] = mt[i+(MM-NN)] ^ (x>>1) ^ mag01[(int)(x&1ULL)];
       }

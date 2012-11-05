@@ -4,7 +4,7 @@
  *
  * This module collects all classes to compile and evaluate GiNaC expressions using a OpenMP enabled
  * byte-code interpreter. This interpreter evaluates independent expressions in separate threads,
- * which increases the execution speed for a large set of expressions, i.e. evaluation of jacobians.
+ * which increases the execution speed custom a large set of expressions, i.e. evaluation of jacobians.
  */
 
 
@@ -29,11 +29,11 @@ template <class InType, class OutType=InType>
 class Engine
 {
 public:
-  /** The code class for this engine. */
+  /** The code class custom this engine. */
   typedef bcimp::Code Code;
   /** The compiler class of this engine. */
   typedef bcimp::Compiler<InType, OutType> Compiler;
-  /** The interpreter class for this engine. */
+  /** The interpreter class custom this engine. */
   typedef bcimp::Interpreter<InType, OutType> Interpreter;
 };
 

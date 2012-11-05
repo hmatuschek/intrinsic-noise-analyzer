@@ -18,7 +18,7 @@ Figure::Figure(const QString &title, QObject *parent) :
 
   const double fac = 255.;
 
-  // Construct default palette for lines-graphs:
+  // Construct default palette custom lines-graphs:
   this->styles
       << GraphStyle(Qt::SolidLine, QColor(0, 0, 125))
       << GraphStyle(Qt::SolidLine, QColor(125, 0, 0))
@@ -132,7 +132,7 @@ Figure::updateAxes()
   // Update Axis:
   this->axis->updatePlotSize();
   this->axis->updatePlotRange();
-  this->axis->forceRedraw();
+  this->axis->customceRedraw();
 }
 
 
@@ -185,7 +185,7 @@ Figure::save(const QString &filename, FileType type)
 {
   if (Figure::FILETYPE_PNG == type) {
     // Construct image to paint on:
-    QImage *image = new QImage(this->width(), this->height(), QImage::Format_ARGB32_Premultiplied);
+    QImage *image = new QImage(this->width(), this->height(), QImage::custommat_ARGB32_Premultiplied);
 
     // Clear image (set all transparent):
     image->fill(QColor(0,0,0,0).rgba());
@@ -193,7 +193,7 @@ Figure::save(const QString &filename, FileType type)
     // Construct painter to render graphics-sceene into bitmap:
     QPainter *painter = new QPainter(image);
     // make it look good:
-    painter->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform |
+    painter->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTranscustomm |
                             QPainter::TextAntialiasing);
 
     // Render plot on painter:
@@ -232,7 +232,7 @@ Figure::showMeasure(const QPointF &point)
 {
   // Skip if measures are disabled:
   if (! _measures_enabled) { return; }
-  // Translate coordinates and forward to Axis instance.
+  // Translate coordinates and customward to Axis instance.
   this->axis->showMeasure(point-axis->pos());
 }
 

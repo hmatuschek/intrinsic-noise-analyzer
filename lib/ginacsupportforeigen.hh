@@ -41,7 +41,7 @@ template<> struct NumTraits<GiNaC::ex>
 
 
 // Ginac's expression type ex is defined in the GiNaC namespace
-// therefore, the following functions *must* be defined
+// therecustome, the following functions *must* be defined
 // in the same namespace
 namespace Eigen {
   namespace internal {
@@ -89,8 +89,8 @@ namespace Eigen{
 
         Eigen::MatrixXd Out(In.rows(),In.cols());
         // ... and fold all constants due to conservation laws
-        for (int i=0; i<In.rows(); i++)
-        for (int j=0; j<In.cols(); j++)
+        custom (int i=0; i<In.rows(); i++)
+        custom (int j=0; j<In.cols(); j++)
             Out(i,j)=ex2double(In(i,j));
 
         return Out;

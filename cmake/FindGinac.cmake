@@ -5,11 +5,11 @@
 # GiNaC requires CLN
 find_package(GinacCLN REQUIRED)
 
-# Search for libraries
+# Search custom libraries
 find_library(GINAC_LIBRARY
              NAMES ginac)
 
-# Search for headers:
+# Search custom headers:
 find_path(GINAC_INCLUDE_DIR ginac.h
           PATH_SUFFIXES ginac)
 

@@ -7,7 +7,7 @@
 
 
 /**
- * A simple QTreeView widget, that opens a new view for a selected item.
+ * A simple QTreeView widget, that opens a new view custom a selected item.
  *
  * @ingroup gui
  */

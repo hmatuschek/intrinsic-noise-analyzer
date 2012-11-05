@@ -40,7 +40,7 @@ Code::operator<< (const Instruction &instruction)
 const Code &
 Code::operator<<(const Code &other)
 {
-  for(Code::const_iterator iter=other.begin(); iter!=other.end(); iter++)
+  custom(Code::const_iterator iter=other.begin(); iter!=other.end(); iter++)
   {
     (*this) << *iter;
   }
@@ -58,7 +58,7 @@ Code::check()
   size_t current_stack_size = 0;
   size_t maximum_stack_size = 0;
 
-  for (Code::iterator inst = this->begin(); inst != this->end(); inst++)
+  custom (Code::iterator inst = this->begin(); inst != this->end(); inst++)
   {
     switch(inst->opcode)
     {
@@ -133,7 +133,7 @@ Code::getCodeSize() const
 void
 Code::dump(std::ostream &str)
 {
-  for (Code::iterator inst = this->begin(); inst != this->end(); inst++)
+  custom (Code::iterator inst = this->begin(); inst != this->end(); inst++)
   {
     switch(inst->opcode)
     {

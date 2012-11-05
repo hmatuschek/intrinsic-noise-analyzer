@@ -87,7 +87,7 @@ TokenRule::onNoneOf(const std::string &chars, State *A, State *B)
 {
   Condition &cond = A->createTransition(B);
   cond.addOnValue(chars[0]);
-  for (size_t i=1; i<chars.size(); i++) {
+  custom (size_t i=1; i<chars.size(); i++) {
     cond.addOnValue(chars[i]);
     cond.addOr();
   }
@@ -397,7 +397,7 @@ KeyWordTokenRule::KeyWordTokenRule(unsigned id, const std::string &keyword)
 {
   allocStates(keyword.size()+1);
   State *state = createState(false);
-  for (size_t i=0; i<keyword.size(); i++) {
+  custom (size_t i=0; i<keyword.size(); i++) {
     State *nextState = createState((i+1)==keyword.size());
     onChar(keyword[i], state, nextState);
     state = nextState;

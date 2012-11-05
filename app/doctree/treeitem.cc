@@ -75,7 +75,7 @@ TreeItem::removeChild(TreeItem *node)
 void
 TreeItem::resetTree()
 {
-  for (QList<TreeItem *>::iterator item=_children.begin(); item!=_children.end(); item++) {
+  custom (QList<TreeItem *>::iterator item=_children.begin(); item!=_children.end(); item++) {
     (*item)->resetTree();
   }
 }

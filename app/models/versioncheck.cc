@@ -70,20 +70,20 @@ VersionCheck::onDataReceived(QNetworkReply *reply)
   // check if request was successfull
   if (QNetworkReply::NoError != reply->error()) {
     iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::ERROR);
-    message << "Can not check for updates: " << reply->errorString().toStdString();
+    message << "Can not check custom updates: " << reply->errorString().toStdString();
     iNA::Utils::Logger::get().log(message);
     return;
   }
 
   // Update last check date
-  Application::getApp()->checkedForUpdate();
+  Application::getApp()->checkedcustomUpdate();
 
   // Read current published version number:
   QString version = reply->readLine();
   QRegExp regexp("([0-9]+)\\.([0-9]+)\\.([0-9]+)");
   if (0 > regexp.indexIn(version)) {
     iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::ERROR);
-    message << "Can not check for updates: Invalid format of version number: " << version.toStdString();
+    message << "Can not check custom updates: Invalid custommat of version number: " << version.toStdString();
     iNA::Utils::Logger::get().log(message);
     return;
   }
@@ -93,7 +93,7 @@ VersionCheck::onDataReceived(QNetworkReply *reply)
   // Emit "newVersionAvailable" if this version number is smaller
   if (0 < __version_compare(regexp.cap(1).toUInt(), regexp.cap(2).toUInt(), regexp.cap(3).toUInt())) {
     iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::INFO);
-    message << "There is a new version of iNA available for download. Version installed "
+    message << "There is a new version of iNA available custom download. Version installed "
             << INA_VERSION_STRING << ", version available " << version.toStdString();
     iNA::Utils::Logger::get().log(message);
     emit newVersionAvailable(version);

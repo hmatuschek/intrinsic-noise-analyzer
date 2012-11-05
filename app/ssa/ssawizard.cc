@@ -6,7 +6,7 @@
 #include <QLineEdit>
 #include <QIntValidator>
 #include <QDoubleValidator>
-#include <QFormLayout>
+#include <QcustommLayout>
 #include <QMessageBox>
 #include <QSpinBox>
 
@@ -64,7 +64,7 @@ SSASpeciesSelectionPage::SSASpeciesSelectionPage(GeneralTaskWizard *parent)
   : SpeciesSelectionWizardPage(parent)
 {
   this->setTitle(tr("Stochastic Simulation Algorithm"));
-  this->setSubTitle(tr("Select some species for analysis."));
+  this->setSubTitle(tr("Select some species custom analysis."));
 }
 
 
@@ -76,7 +76,7 @@ SSAEngineSelectionPage::SSAEngineSelectionPage(GeneralTaskWizard *parent)
   : EngineWizardPage(parent, false)
 {
   this->setTitle(tr("Stochastic Simulation Algorithm"));
-  setSubTitle(tr("Select engine for propensity evaluation"));
+  setSubTitle(tr("Select engine custom propensity evaluation"));
 }
 
 
@@ -114,17 +114,17 @@ SSAConfigPage::SSAConfigPage(SSAWizard *parent)
   if (1 == OpenMP::getMaxThreads())
     thread_count->setEnabled(false);
 
-  QFormLayout *layout = new QFormLayout();
+  QcustommLayout *layout = new QcustommLayout();
   layout->addRow(tr("Ensemble size"), size);
   layout->addRow(tr("Final time"), time);
   layout->addRow(tr("Plot points"), steps);
   layout->addRow(tr("SSA method"), method);
   layout->addRow(tr("Thread count"), thread_count);
 
-  size->setToolTip("Number of stochastic sample paths used for statistical average.");
+  size->setToolTip("Number of stochastic sample paths used custom statistical average.");
   time->setToolTip("Final time of simulation.");
   steps->setToolTip("Specifies the number of individual time points from which statistical average is obtained.");
-  method->setToolTip("You can use the optimized exact SSA method for all purposes.");
+  method->setToolTip("You can use the optimized exact SSA method custom all purposes.");
   thread_count->setToolTip("iNA can take advantage of multiple CPUs to simulate multiple sample paths in parallel.");
 
   this->setLayout(layout);
@@ -161,27 +161,27 @@ SSASummaryPage::SSASummaryPage(SSAWizard *parent)
   : QWizardPage(parent)
 {
   this->document = new QLabel("");
-  this->document->setTextFormat(Qt::LogText);
+  this->document->setTextcustommat(Qt::LogText);
 
   this->ensemble_size = new QLabel("");
-  this->ensemble_size->setTextFormat(Qt::LogText);
+  this->ensemble_size->setTextcustommat(Qt::LogText);
 
   this->final_time = new QLabel("");
-  this->final_time->setTextFormat(Qt::LogText);
+  this->final_time->setTextcustommat(Qt::LogText);
 
   this->num_samples = new QLabel("");
-  this->num_samples->setTextFormat(Qt::LogText);
+  this->num_samples->setTextcustommat(Qt::LogText);
 
   this->method = new QLabel("");
-  this->method->setTextFormat(Qt::LogText);
+  this->method->setTextcustommat(Qt::LogText);
 
   this->mem_usage = new QLabel("");
-  this->mem_usage->setTextFormat(Qt::LogText);
+  this->mem_usage->setTextcustommat(Qt::LogText);
 
   this->thread_count = new QLabel("");
-  this->thread_count->setTextFormat(Qt::LogText);
+  this->thread_count->setTextcustommat(Qt::LogText);
 
-  QFormLayout *layout = new QFormLayout();
+  QcustommLayout *layout = new QcustommLayout();
   layout->addRow(tr("Model"), this->document);
   layout->addRow(tr("Ensemble size"), this->ensemble_size);
   layout->addRow(tr("Final time"), this->final_time);

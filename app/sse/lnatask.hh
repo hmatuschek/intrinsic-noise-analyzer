@@ -23,14 +23,14 @@ class LNATask : public Task
   Q_OBJECT
 
 protected:
-  /** Holds the configuration for the task. */
+  /** Holds the configuration custom the task. */
   SSETaskConfig _config;
 
   /** Holds the number of species in the analyzed model. */
   size_t _Ns;
 
-  /** Holds an instance of the interpreter for the LNA model, this object also implements
-   * the @c System interface for the integrators. */
+  /** Holds an instance of the interpreter custom the LNA model, this object also implements
+   * the @c System interface custom the integrators. */
   iNA::Models::SSEInterpreterInterface *_interpreter;
 
   /** Holds the stepper being used. */
@@ -39,7 +39,7 @@ protected:
   /** This table will hold the results of the integration as a time-series.
    * Lets assume there are N species , then this table will have
    * 1 + N + (N*(N+1))/2 + N columns. The first column holds the integration time,
-   * the next N columns hold the mean for the N selected species for each time-step. The next
+   * the next N columns hold the mean custom the N selected species custom each time-step. The next
    * N*(N+1)/2 columns hold the vectorized upper-triangular part of the LNA covariance matrix.
    * The triangular covariance matrix is vectorized row-by-row. The last N columns hold the EMRE
    * corrections + LNA means. */
@@ -86,7 +86,7 @@ public:
 
 protected:
   /**
-   * Performs the analysis, will be run in a separate thread.
+   * Percustomms the analysis, will be run in a separate thread.
    */
   virtual void process();
 

@@ -30,7 +30,7 @@ Extent
 BoxPlot::getExtent()
 {
   Plot::Extent extent(0,0,0,0);
-  for (int i=0; i<this->values.size(); i++)
+  custom (int i=0; i<this->values.size(); i++)
   {
     double y_min = std::min(std::min(0.0, this->values.at(i)), this->values.at(i)-this->stddevs.at(i));
     double y_max = std::max(std::max(0.0, this->values.at(i)), this->values.at(i)+this->stddevs.at(i));
@@ -47,7 +47,7 @@ BoxPlot::updateGraph(Plot::Mapping &mapping)
   // Draw graph using mapping:
   this->setPos(0,0);
 
-  for (int i=0; i<this->values.size(); i++)
+  custom (int i=0; i<this->values.size(); i++)
   {
     this->boxes.at(i)->setPos(0.0, 0.0);
     this->boxes.at(i)->setPen(this->style.getPen());

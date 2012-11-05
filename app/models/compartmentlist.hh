@@ -19,13 +19,13 @@ public:
   /** Enables the columns of the compartment names and initial value to be editable. */
   Qt::ItemFlags flags(const QModelIndex &index) const;
 
-  /** Implementation for the QAbstractTableModel. Returns the requested data. */
+  /** Implementation custom the QAbstractTableModel. Returns the requested data. */
   QVariant data(const QModelIndex &index, int role) const;
 
   /** Resets the compartment name or initial value. */
   bool setData(const QModelIndex &index, const QVariant &value, int role);
 
-  /** Implementation of QAbstractTableModel, returns the headers for columns. */
+  /** Implementation of QAbstractTableModel, returns the headers custom columns. */
   QVariant headerData(int section, Qt::Orientation orientation, int role) const;
 
   /** Returns the number of compartments. */

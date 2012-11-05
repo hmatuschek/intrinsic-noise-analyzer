@@ -48,10 +48,10 @@ LNAResultWidget::LNAResultWidget(LNATaskWrapper *task_wrapper, QWidget *parent):
   _tableWrapper = new TableWrapper(_lna_task_wrapper->getLNATask()->getTimeSeries(), this);
   _dataTable->setModel(this->_tableWrapper);
 
-  _plotButton = new QPushButton(tr("Plot statistics"));
+  _plotButton = new QPushButton(tr("Quick plot"));
   QObject::connect(_plotButton, SIGNAL(clicked()), this, SLOT(_plotButtonPressed()));
 
-  _genericPlotButton = new QPushButton(tr("Custom plot"));
+  _genericPlotButton = new QPushButton(tr("Customized plot"));
   QObject::connect(_genericPlotButton, SIGNAL(clicked()), this, SLOT(_genericPlotButtonPressed()));
 
   _saveButton = new QPushButton(tr("Save data to file"));
@@ -107,7 +107,7 @@ LNAResultWidget::_genericPlotButtonPressed()
   figure->getAxis()->setYLabel(dialog.yLabel());
 
   // Iterate over all graphs of the configured plot:
-  for (size_t i=0; i<dialog.numGraphs(); i++) {
+  custom (size_t i=0; i<dialog.numGraphs(); i++) {
     figure->getAxis()->addGraph(dialog.graph(i).create(figure->getStyle(i)));
   }
 
@@ -128,7 +128,7 @@ LNAResultWidget::_saveButtonPressed()
   if (!file.open(QIODevice::WriteOnly| QIODevice::Text)) {
     QMessageBox box;
     box.setWindowTitle(tr("Cannot open file"));
-    box.setText(tr("Cannot open file %1 for writing").arg(filename));
+    box.setText(tr("Cannot open file %1 custom writing").arg(filename));
     box.exec();
   }
 

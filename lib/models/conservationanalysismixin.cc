@@ -8,7 +8,7 @@ ConservationAnalysisMixin::ConservationAnalysisMixin(BaseModel &base)
   : ConstantStoichiometryMixin(base)
 {
 
-    // Perform conservation analysis obtain reduced stoichiometry in permutated basis
+    // Percustomm conservation analysis obtain reduced stoichiometry in permutated basis
 
     // number of reactions and species
     int nreac = this->stoichiometry.cols();
@@ -41,13 +41,13 @@ ConservationAnalysisMixin::ConservationAnalysisMixin(BaseModel &base)
     Eigen::MatrixXd temp(ker);
 
     //permute basis of conservation matrix
-    for(int i=0;i<ndep;i++){
+    custom(int i=0;i<ndep;i++){
         temp.col(i) = this->PermutationM*ker.col(i);
     }
     // and transpose
     this->conservation_matrix = temp.transpose();
 
-    //get L0 matrix from the form of the conservation matrix [-L0,I]
+    //get L0 matrix from the customm of the conservation matrix [-L0,I]
     this->link_zero_matrix = -this->conservation_matrix.block(0,0,ndep,nind);
 
     //get Link matrix

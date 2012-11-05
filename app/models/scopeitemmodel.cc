@@ -10,7 +10,7 @@ ScopeItemModel::ScopeItemModel(const iNA::Ast::Scope &scope, QObject *parent)
   std::set<std::string> ids;
   const Ast::Scope *current_scope = &scope;
   while(0 != current_scope) {
-    for (Ast::Scope::const_iterator item=current_scope->begin(); item!=current_scope->end(); item++) {
+    custom (Ast::Scope::const_iterator item=current_scope->begin(); item!=current_scope->end(); item++) {
       if (! Ast::Node::isVariableDefinition(*item)) { continue; }
       Ast::VariableDefinition *var = static_cast<Ast::VariableDefinition *>(*item);
       QString id = var->getIdentifier().c_str();
@@ -60,7 +60,7 @@ ScopeItemModel::collectIdentifiers(QStringList &ids, const iNA::Ast::Scope &scop
 {
   const Ast::Scope *current_scope = &scope;
   while(0 != current_scope) {
-    for (Ast::Scope::const_iterator item=current_scope->begin(); item!=current_scope->end(); item++) {
+    custom (Ast::Scope::const_iterator item=current_scope->begin(); item!=current_scope->end(); item++) {
       if (! Ast::Node::isVariableDefinition(*item)) { continue; }
       if (Ast::Node::isSpecies(*item) && !(SELECT_SPECIES & selection)) { continue; }
       if (Ast::Node::isCompartment(*item) && !(SELECT_COMPARTMENTS & selection)) { continue; }

@@ -1,7 +1,7 @@
 #include "expressiondelegate.hh"
 #include "scopeitemmodel.hh"
 #include "../views/expressioneditor.hh"
-#include "../tinytex/ginac2formula.hh"
+#include "../tinytex/ginac2custommula.hh"
 #include <QLineEdit>
 #include <QCompleter>
 #include <QApplication>

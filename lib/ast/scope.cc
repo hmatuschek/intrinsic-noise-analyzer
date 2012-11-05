@@ -104,7 +104,7 @@ Scope::Scope(Scope *parent, bool is_closed)
 Scope::~Scope()
 {
   // Iterate over all definitions and free them:
-  for(std::map<std::string, Definition *>::iterator iter = this->_definitions.begin();
+  custom(std::map<std::string, Definition *>::iterator iter = this->_definitions.begin();
       iter != this->_definitions.end(); iter++)
   {
     delete iter->second;
@@ -406,7 +406,7 @@ void
 Scope::dump(std::ostream &str)
 {
   str << "{" << std::endl;
-  for (Scope::iterator iter = this->begin(); iter != this->end(); iter++)
+  custom (Scope::iterator iter = this->begin(); iter != this->end(); iter++)
   {
     (*iter)->dump(str); str << std::endl;
   }
@@ -432,7 +432,7 @@ Scope::apply(Ast::Operator &op)
 void
 Scope::traverse(Ast::Visitor &visitor) const
 {
-  for (Scope::const_iterator iter = this->begin(); iter != this->end(); iter++) {
+  custom (Scope::const_iterator iter = this->begin(); iter != this->end(); iter++) {
     (*iter)->accept(visitor);
   }
 }
@@ -440,7 +440,7 @@ Scope::traverse(Ast::Visitor &visitor) const
 void
 Scope::traverse(Ast::Operator &op)
 {
-  for (Scope::iterator iter = this->begin(); iter != this->end(); iter++) {
+  custom (Scope::iterator iter = this->begin(); iter != this->end(); iter++) {
     (*iter)->apply(op);
   }
 }

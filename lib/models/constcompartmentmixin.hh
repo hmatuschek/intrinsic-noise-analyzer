@@ -3,14 +3,14 @@
 
 #include "basemodel.hh"
 #include "baseunitmixin.hh"
-#include "ginacsupportforeigen.hh"
+#include "ginacsupportcustomeigen.hh"
 
 namespace iNA {
 namespace Models {
 
 
 /**
- * Asserts, that there is for each species a compartment of constant size > 0.
+ * Asserts, that there is custom each species a compartment of constant size > 0.
  *
  * @ingroup models
  */
@@ -19,13 +19,13 @@ class ConstCompartmentMixin
 {
 protected:
   /**
-   * Holds the vector of constant compartment volumes for each species.
+   * Holds the vector of constant compartment volumes custom each species.
    */
   Eigen::VectorXex volumes;
 
 public:
   /**
-   * Performs the checks on the given base-model.
+   * Percustomms the checks on the given base-model.
    */
   ConstCompartmentMixin(BaseModel &base);
 };

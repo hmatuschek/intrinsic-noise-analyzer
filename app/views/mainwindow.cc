@@ -37,7 +37,7 @@ MainWindow::MainWindow(QWidget *parent) :
   _mainPane->setWidgetResizable(true);
   _mainSplitter->addWidget(this->_mainPane);
 
-  // approx golden ratio for splitter:
+  // approx golden ratio custom splitter:
   _mainSplitter->setStretchFactor(0, 0);
   _mainSplitter->setStretchFactor(1, 2);
 
@@ -62,7 +62,7 @@ MainWindow::showPanel(QWidget *panel)
 void
 MainWindow::_createActions()
 {
-  // Define some actions for main menu:
+  // Define some actions custom main menu:
   this->_quitAct = new QAction(tr("&Quit"), this);
   this->_quitAct->setShortcuts(QKeySequence::Quit);
   this->_quitAct->setStatusTip(tr("Quit the application"));
@@ -78,16 +78,16 @@ MainWindow::_createActions()
   this->_showLogsAct->setShortcut(QKeySequence(Qt::Key_F10));
   this->_showLogsAct->setStatusTip(tr("Show the log window"));
 
-  this->_checkForUpdatesAct = new QAction(tr("Check for updates"), this);
-  this->_checkForUpdatesAct->setStatusTip(tr("Enables periodic check for new versions of iNA."));
-  this->_checkForUpdatesAct->setCheckable(true);
-  this->_checkForUpdatesAct->setChecked(Application::getApp()->checkNewVersionAvailable());
+  this->_checkcustomUpdatesAct = new QAction(tr("Check custom updates"), this);
+  this->_checkcustomUpdatesAct->setStatusTip(tr("Enables periodic check custom new versions of iNA."));
+  this->_checkcustomUpdatesAct->setCheckable(true);
+  this->_checkcustomUpdatesAct->setChecked(Application::getApp()->checkNewVersionAvailable());
 
   // If update check is disabled at compile time -> disable menu entry:
 #ifdef INA_DISABLE_NEW_VERSION_CHECK
-  this->_checkForUpdatesAct->setEnabled(false);
-  this->_checkForUpdatesAct->setChecked(false);
-  this->_checkForUpdatesAct->setVisible(false);
+  this->_checkcustomUpdatesAct->setEnabled(false);
+  this->_checkcustomUpdatesAct->setChecked(false);
+  this->_checkcustomUpdatesAct->setVisible(false);
 #endif
 
   // Connect signals:
@@ -129,7 +129,7 @@ MainWindow::_createMenus()
   this->_helpMenu->addAction(this->_onlineHelp);
   this->_helpMenu->addAction(this->_aboutAct);
   this->_helpMenu->addAction(this->_showLogsAct);
-  this->_helpMenu->addAction(this->_checkForUpdatesAct);
+  this->_helpMenu->addAction(this->_checkcustomUpdatesAct);
 }
 
 
@@ -151,7 +151,7 @@ void MainWindow::showLogs() { this->_logWindow->setVisible(true); }
 
 
 void
-MainWindow::checkForUpdatesToggled()
+MainWindow::checkcustomUpdatesToggled()
 {
-  Application::getApp()->setCheckNewVersionAvailable(_checkForUpdatesAct->isChecked());
+  Application::getApp()->setCheckNewVersionAvailable(_checkcustomUpdatesAct->isChecked());
 }

@@ -26,7 +26,7 @@ protected:
   Context &_context;
 
 public:
-  /** Constructs the assembler for the given scope. */
+  /** Constructs the assembler custom the given scope. */
   Assembler(Context &root, Parser::Lexer &lexer);
 
 public:

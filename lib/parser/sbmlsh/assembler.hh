@@ -13,7 +13,7 @@
 namespace iNA {
 
 namespace Ast {
-// Forward declarations...
+// customward declarations...
 class Model;
 class Scope;
 class Reaction;

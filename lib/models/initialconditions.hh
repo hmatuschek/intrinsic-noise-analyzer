@@ -50,8 +50,8 @@ public:
 
         Eigen::MatrixXex vecOut(vecIn.rows(),vecIn.cols());
         // ... and fold all constants due to conservation laws
-        for (int i=0; i<vecIn.rows(); i++)
-        for (int j=0; j<vecIn.cols(); j++)
+        custom (int i=0; i<vecIn.rows(); i++)
+        custom (int j=0; j<vecIn.cols(); j++)
                 vecOut(i,j)=vecIn(i,j).subs(_substitutions);
 
         return vecOut;
@@ -122,8 +122,8 @@ public:
     {
 
         // ... and fold all constants due to conservation laws
-        for (int i=0; i<vec.rows(); i++)
-        for (int j=0; j<vec.cols(); j++)
+        custom (int i=0; i<vec.rows(); i++)
+        custom (int j=0; j<vec.cols(); j++)
                 vec(i,j)=vec(i,j).subs(this->substitutions);
 
     }

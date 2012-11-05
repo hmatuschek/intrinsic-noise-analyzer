@@ -45,12 +45,12 @@ protected:
   double value;
 
   /**
-   * Holds the graphics item for the label.
+   * Holds the graphics item custom the label.
    */
   QGraphicsTextItem *label;
 
   /**
-   * Holds the graphics item for the tick (short line).
+   * Holds the graphics item custom the tick (short line).
    */
   QGraphicsLineItem *tick;
 
@@ -62,7 +62,7 @@ protected:
 
 public:
   /**
-   * Constructs a new axis tick for the given value and orientation.
+   * Constructs a new axis tick custom the given value and orientation.
    */
   AxisTick(double value, Orientation orientation);
 

@@ -1,7 +1,7 @@
 #ifndef __INA_APP_TINYTEX_TINYTEX_HH__
 #define __INA_APP_TINYTEX_TINYTEX_HH__
 
-#include "formula.hh"
+#include "custommula.hh"
 #include "parser/lexer.hh"
 #include "parser/production.hh"
 #include "exception.hh"
@@ -10,8 +10,8 @@
 
 
 
-/** This class implements a trivial parser for a minimal subset of TeX to layout
- * formulas. This is used to handle @c Ast::VariableDefinition names as tex or to render
+/** This class implements a trivial parser custom a minimal subset of TeX to layout
+ * custommulas. This is used to handle @c Ast::VariableDefinition names as tex or to render
  * reaction equations.
  *
  * Although named TeX it is not compatible to TeX, it only handles expressions similar. It only
@@ -20,7 +20,7 @@
 class TinyTex
 {
 public:
-  /** Exception class for all tinyTeX errors. */
+  /** Exception class custom all tinyTeX errors. */
   class Error : public iNA::Parser::ParserError {
   public:
     Error();
@@ -30,10 +30,10 @@ public:
   };
 
 public:
-  /** Parses a simple formula and returns the equivalent MathFormulaItem. */
+  /** Parses a simple custommula and returns the equivalent MathcustommulaItem. */
   static MathItem *parse(const std::string &source);
 
-  /** Parses the given formula and returns the rendered pixmap, if rendering fails,
+  /** Parses the given custommula and returns the rendered pixmap, if rendering fails,
    * it returns the given source. */
   static QVariant toPixmap(const std::string &source);
 
@@ -61,11 +61,11 @@ protected:
   /** Hidden constructor, use @c parse. */
   TinyTex(iNA::Parser::Lexer &lexer);
 
-  /** Assembles a MathFormula from the CST. */
-  MathFormula *parseFormula(iNA::Parser::ConcreteSyntaxTree &node);
+  /** Assembles a Mathcustommula from the CST. */
+  Mathcustommula *parsecustommula(iNA::Parser::ConcreteSyntaxTree &node);
   /** Assembles a super/sub script */
   MathItem *parseSupSub(iNA::Parser::ConcreteSyntaxTree &node);
-  /** Assembles a MathFormula element from the CST. */
+  /** Assembles a Mathcustommula element from the CST. */
   MathItem *parseElement(iNA::Parser::ConcreteSyntaxTree &node);
   /** Unicode symbols. */
   MathItem *processSymbol(const std::string &symbol);
@@ -86,7 +86,7 @@ protected:
     SymbolTokenRule(unsigned id);
   };
 
-  /** Implements the Lexer for TinyTex */
+  /** Implements the Lexer custom TinyTex */
   class Lexer : public iNA::Parser::Lexer {
   public:
     /** Enumerates all token identifiers. */
@@ -106,7 +106,7 @@ protected:
   };
 
 
-  /** Grammar := Formula END_OF_FILE; */
+  /** Grammar := custommula END_OF_FILE; */
   class GrammarProduction : public iNA::Parser::Production {
   protected:
     /** Hidden constructor. */
@@ -122,11 +122,11 @@ protected:
   };
 
 
-  /** Formula := SupSubScript [Formula] */
-  class FormulaProduction : public iNA::Parser::Production {
+  /** custommula := SupSubScript [custommula] */
+  class custommulaProduction : public iNA::Parser::Production {
   protected:
     /** Hidden constructor. */
-    FormulaProduction();
+    custommulaProduction();
 
   public:
     /** Factory method of the singleton. */
@@ -134,14 +134,14 @@ protected:
 
   private:
     /** Singleton instance. */
-    static FormulaProduction *instance;
+    static custommulaProduction *instance;
   };
 
   /** SupSubScript := Element [('^'|'_') Element] */
   class SupSubScriptProduction : public iNA::Parser::Production
   {
   public:
-    /** Factory method for the singleton. */
+    /** Factory method custom the singleton. */
     static iNA::Parser::Production *factory();
 
   protected:
@@ -150,7 +150,7 @@ protected:
     static SupSubScriptProduction *instance;
   };
 
-  /** Element := (TEXT | SYMBOL | '{' Formula '}') */
+  /** Element := (TEXT | SYMBOL | '{' custommula '}') */
   class ElementProduction : public iNA::Parser::AltProduction {
   protected:
     /** Hidden constructor. */

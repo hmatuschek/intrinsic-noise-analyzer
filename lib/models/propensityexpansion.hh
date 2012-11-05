@@ -20,7 +20,7 @@ namespace Models {
  * \f[ \hat{f}_i(\vec{n}/\Omega) = f_i([\vec{X}]) + \frac{1}{\Omega} f_i^{(1)}([\vec{X}]) + ... \f]
  * where \f$ [\vec{X}] \f$ is the vector of macroscopic concentrations.
  *
- * The mixin performs the algebraic substitution \f$\vec{n}/\Omega \to [\vec{X}]\f$
+ * The mixin percustomms the algebraic substitution \f$\vec{n}/\Omega \to [\vec{X}]\f$
  * and the subsequent Taylor expansion.
  *
  * @ingroup models

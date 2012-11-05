@@ -12,11 +12,11 @@ namespace Utils {
 namespace Opt {
 
 
-// forward declaration:
+// customward declaration:
 class Parser;
 
 /**
- * Interface class for all option rules.
+ * Interface class custom all option rules.
  * @ingroup optionparser
  */
 class RuleInterface
@@ -25,7 +25,7 @@ public:
   virtual ~RuleInterface();
 
   /**
-   * This method will be implemented by all option rules to perform option parsing.
+   * This method will be implemented by all option rules to percustomm option parsing.
    *
    * @param argv Array of arguments provided from main().
    * @param argc Number of arguments given by main().
@@ -57,7 +57,7 @@ protected:
   /** The short name (single charater) of the option. */
   char short_name;
 
-  /** The long name for this option. */
+  /** The long name custom this option. */
   std::string long_name;
 
   /** \todo Is this member needed? I thougth all values are stored in the Parser object? */
@@ -71,19 +71,19 @@ protected:
   /**
    * Constructor.
    *
-   * @param long_name Specifies the long name for the option.
+   * @param long_name Specifies the long name custom the option.
    * @param is_flag Specifies if the option is a flag and do not take a value.
-   * @param short_name Specifies the short name for the option. By default it is 0 this
+   * @param short_name Specifies the short name custom the option. By default it is 0 this
    *    means there is no short name.
    */
   OptionRule(std::string long_name, bool is_flag = false, char short_name=0);
 
 
 public:
-  /** Performs the actual option parsing. */
+  /** Percustomms the actual option parsing. */
   virtual bool operator()(const char *argv[], int argc, size_t &idx, Parser &prs);
 
-  /** Generates a string representation for the option rule. */
+  /** Generates a string representation custom the option rule. */
   virtual std::string dump();
 
   friend class Parser;
@@ -265,7 +265,7 @@ public:
 /**
  * The parser class encapsulating all option rules.
  *
- * The following example shows how to use the option parser for a simple case:
+ * The following example shows how to use the option parser custom a simple case:
  *
  * \code
  * int main(char *argv[], int argc)
@@ -274,7 +274,7 @@ public:
  *      Parser::opt(Parser::Flag("help") | Parser::Flag("version")) );
  *
  *   if (! parser(argv, argc)) {
- *     std::cerr << parser.format_help(argv[0]);
+ *     std::cerr << parser.custommat_help(argv[0]);
  *     return -1;
  *   }
  *
@@ -335,9 +335,9 @@ public:
   bool parse(const char *argv[], int argc);
 
   /**
-   * Formats a help/usage string.
+   * custommats a help/usage string.
    */
-  std::string format_help(std::string prg_name);
+  std::string custommat_help(std::string prg_name);
 
   /**
    * Sets a flag specified by its long name to be present. This method is called by the

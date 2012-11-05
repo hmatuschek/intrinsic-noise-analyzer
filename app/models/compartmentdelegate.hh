@@ -5,7 +5,7 @@
 #include "ast/model.hh"
 
 
-/** This class implements a simple delegate to enable a QComboBox for compartment selection. */
+/** This class implements a simple delegate to enable a QComboBox custom compartment selection. */
 class CompartmentDelegate : public QItemDelegate
 {
   Q_OBJECT

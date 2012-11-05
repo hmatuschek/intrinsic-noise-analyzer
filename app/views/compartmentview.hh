@@ -9,13 +9,13 @@
 #include "../models/expressiondelegate.hh"
 
 
-/** A simple view for the compartments. */
+/** A simple view custom the compartments. */
 class CompartmentView : public QWidget
 {
   Q_OBJECT
 
 public:
-  /** Constructs a new view for the model compartments. */
+  /** Constructs a new view custom the model compartments. */
   explicit CompartmentView(CompartmentsItem *_compartments, QWidget *parent = 0);
 
 
@@ -23,9 +23,9 @@ private slots:
   /** The view is connected to @c destroyed() signal of the @c CompartmentsItem instance, so that
    * the view is closed if the CompartmentsItem is destroyed. */
   void onCompartmentsDestroyed();
-  /** callback for _addCompartment. */
+  /** callback custom _addCompartment. */
   void onAddCompartment();
-  /** callback for _remCompartment. */
+  /** callback custom _remCompartment. */
   void onRemCompartment();
   /** callback on selection change. */
   void onSelectionChanged(const QItemSelection &selected, const QItemSelection &unselected);

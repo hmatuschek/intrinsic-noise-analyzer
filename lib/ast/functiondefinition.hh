@@ -22,9 +22,9 @@ namespace Ast {
 class FunctionArgument : public VariableDefinition
 {
 public:
-  /** Visitor class for function arguments. */
+  /** Visitor class custom function arguments. */
   class Visitor { public: virtual void visit(const FunctionArgument *arg) = 0; };
-  /** Operator class for function arguments. */
+  /** Operator class custom function arguments. */
   class Operator { public: virtual void act(FunctionArgument *arg) = 0; };
 
 public:
@@ -32,7 +32,7 @@ public:
    * @param id Specifies the identifier of the argument. */
   FunctionArgument(const std::string &id);
 
-  /** Handles a visitor for the function argument. */
+  /** Handles a visitor custom the function argument. */
   virtual void accept(Ast::Visitor &visitor) const;
 
   /** Applies an operator on the function argument. */
@@ -50,9 +50,9 @@ public:
 class FunctionDefinition : public Definition, public Scope
 {
 public:
-  /** Visitor class for function definitions. */
+  /** Visitor class custom function definitions. */
   class Visitor { public: virtual void visit(const FunctionDefinition *func) = 0; };
-  /** Operator class for function definitions. */
+  /** Operator class custom function definitions. */
   class Operator { public: virtual void act(FunctionDefinition *func) = 0; };
 
   /** Defines the iterator type over function argument definitions. */
@@ -131,13 +131,13 @@ public:
    */
   virtual void dump(std::ostream &str);
 
-  /** Handles a visitor for function definitions. */
+  /** Handles a visitor custom function definitions. */
   virtual void accept(Ast::Visitor &visitor) const;
 
   /** Applies an operator on the function definition. */
   virtual void apply(Ast::Operator &op);
 
-  /** Forwards the visitor to function arguments. */
+  /** customwards the visitor to function arguments. */
   virtual void traverse(Ast::Visitor &visitor) const;
 
   /** Applies the operator on function arguments. */

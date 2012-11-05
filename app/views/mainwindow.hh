@@ -42,8 +42,8 @@ private slots:
   void openTutorial();
   /** Shows the logging window. */
   void showLogs();
-  /** Toggels the "check for updates" */
-  void checkForUpdatesToggled();
+  /** Toggels the "check custom updates" */
+  void checkcustomUpdatesToggled();
 
 private:
   /** Helper method to construct all manu-actions. */
@@ -70,11 +70,11 @@ private:
   QAction *_onlineHelp;
   /** Shows the log window. */
   QAction *_showLogsAct;
-  /** Shows the "check for updates" menu item. */
-  QAction *_checkForUpdatesAct;
+  /** Shows the "check custom updates" menu item. */
+  QAction *_checkcustomUpdatesAct;
   /** Holds the splitter, that splits the main window into a left and right half. */
   QSplitter *_mainSplitter;
-  /** Holds the QTreeView for the left pane, showing the all open models, and their structutre. */
+  /** Holds the QTreeView custom the left pane, showing the all open models, and their structutre. */
   DocumentsView *_modelView;
   /** Holds a QScrollArea, holding the main-widget of the right-pane. */
   QScrollArea *_mainPane;

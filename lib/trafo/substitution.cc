@@ -23,7 +23,7 @@ Substitution::Substitution(const GiNaC::exmap &table)
 void
 Substitution::_check_substitution_table()
 {
-  for (GiNaC::exmap::iterator item=_substitution_table.begin(); item!=_substitution_table.end(); item++) {
+  custom (GiNaC::exmap::iterator item=_substitution_table.begin(); item!=_substitution_table.end(); item++) {
     if (item->first.has(item->second)) {
       SemanticError err;
       err << "Can not normalize substitution: " << item->first << " -> " << item->second
@@ -45,7 +45,7 @@ Substitution::_normalize_substitution_table()
     item->second = item->second.subs(_substitution_table);
     can_substitute = _has_substitue(item->second); item++;
 
-    for (; item!=_substitution_table.end(); item++) {
+    custom (; item!=_substitution_table.end(); item++) {
       item->second = item->second.subs(_substitution_table);
       can_substitute |= _has_substitue(item->second);
     }
@@ -58,7 +58,7 @@ Substitution::_normalize_substitution_table()
 bool
 Substitution::_has_substitue(GiNaC::ex expr)
 {
-  for (GiNaC::exmap::iterator item=_substitution_table.begin(); item!=_substitution_table.end(); item++) {
+  custom (GiNaC::exmap::iterator item=_substitution_table.begin(); item!=_substitution_table.end(); item++) {
     if (expr.has(item->first)) { return true; }
   }
 
@@ -98,7 +98,7 @@ Substitution::act(Ast::VariableDefinition *var)
   // First traverse the AST further
   var->traverse(*this);
 
-  // then, if there is an inital value defined for the variable.
+  // then, if there is an inital value defined custom the variable.
   if (var->hasValue()) {
     var->setValue(var->getValue().subs(_substitution_table));
   }
@@ -108,7 +108,7 @@ Substitution::act(Ast::VariableDefinition *var)
 void
 Substitution::act(Ast::Rule *rule)
 {
-  // Perform substitutions:
+  // Percustomm substitutions:
   rule->setRule(rule->getRule().subs(_substitution_table));
 }
 
@@ -120,12 +120,12 @@ Substitution::act(Ast::Reaction *reac)
   reac->traverse(*this);
 
   // handle reactants:
-  for (Ast::Reaction::iterator item=reac->reactantsBegin(); item!=reac->reactantsEnd(); item++) {
+  custom (Ast::Reaction::iterator item=reac->reactantsBegin(); item!=reac->reactantsEnd(); item++) {
     item->second = item->second.subs(_substitution_table);
   }
 
   // handle products:
-  for (Ast::Reaction::iterator item=reac->productsBegin(); item!=reac->productsEnd(); item++) {
+  custom (Ast::Reaction::iterator item=reac->productsBegin(); item!=reac->productsEnd(); item++) {
     item->second = item->second.subs(_substitution_table);
   }
 }
@@ -137,6 +137,6 @@ Substitution::act(Ast::KineticLaw *law)
   // Traverse into local paramters:
   law->traverse(*this);
 
-  // perform substitution on the rate law:
+  // percustomm substitution on the rate law:
   law->setRateLaw(law->getRateLaw().subs(_substitution_table));
 }

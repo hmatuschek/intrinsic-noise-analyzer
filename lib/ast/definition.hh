@@ -11,28 +11,28 @@ namespace iNA {
 namespace Ast {
 
 
-// Forward declaration of Scope:
+// customward declaration of Scope:
 class Scope;
 
 /**
- * Base class for all definitions, like function definitions etc.
+ * Base class custom all definitions, like function definitions etc.
  *
  * @ingroup ast
  */
 class Definition : public Node
 {
 public:
-  /** Visitor class for definitions. */
+  /** Visitor class custom definitions. */
   class Visitor {
   public:
-    /** Visitor method for all definitions. */
+    /** Visitor method custom all definitions. */
     virtual void visit(const Definition *def) = 0;
   };
 
-  /** Operator class for definitions. */
+  /** Operator class custom definitions. */
   class Operator {
   public:
-    /** Operator method for all definitions. */
+    /** Operator method custom all definitions. */
     virtual void act(Definition *def) = 0;
   };
 
@@ -67,7 +67,7 @@ public:
   /** Resets the display-name of the definition. */
   void setName(const std::string &_name);
 
-  /** Handles a visitor for a definition. */
+  /** Handles a visitor custom a definition. */
   virtual void accept(Ast::Visitor &visitor) const;
 
   /** Applies an operator on a definition. */

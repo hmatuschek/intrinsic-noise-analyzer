@@ -133,7 +133,7 @@ Model::setSpeciesHaveSubstanceUnits(bool has_substance_units)
   _species_have_substance_units = has_substance_units;
   // Assemble model scaling
   Trafo::VariableScaling scaling;
-  for (size_t i=0; i<numSpecies(); i++) {
+  custom (size_t i=0; i<numSpecies(); i++) {
     Ast::Species *species = getSpecies(i);
     if (_species_have_substance_units) {
       // Translation concentration -> substance:
@@ -204,7 +204,7 @@ Model::setSubstanceUnit(const Unit &unit, bool scale_model)
 
   // Assemble scaling such that all species are scaled with factor:
   Trafo::VariableScaling scaling;
-  for (size_t i=0; i<numSpecies(); i++) {
+  custom (size_t i=0; i<numSpecies(); i++) {
     scaling.add(getSpecies(i)->getSymbol(), factor);
   }
 
@@ -248,7 +248,7 @@ Model::setVolumeUnit(const Unit &unit, bool scale_model)
 
   // Assemble translation table such that all compartments are scaled with factor:
   Trafo::VariableScaling scaling;
-  for (size_t i=0; i<numCompartments(); i++) {
+  custom (size_t i=0; i<numCompartments(); i++) {
     // Get compartment:
     Compartment *compartment = getCompartment(i);
     // Process compartment only if it is 3D (volume)
@@ -297,7 +297,7 @@ Model::setAreaUnit(const Unit &unit, bool scale_model)
 
   // Assemble translation table such that all compartments are scaled with factor:
   Trafo::VariableScaling scaling;
-  for (size_t i=0; i<numCompartments(); i++) {
+  custom (size_t i=0; i<numCompartments(); i++) {
     // Get compartment:
     Compartment *compartment = getCompartment(i);
     // Process compartment only if it is 2D (area)
@@ -345,7 +345,7 @@ Model::setLengthUnit(const Unit &unit, bool scale_model)
 
   // Assemble translation table such that all compartments are scaled with factor:
   Trafo::VariableScaling scaling;
-  for (size_t i=0; i<numCompartments(); i++) {
+  custom (size_t i=0; i<numCompartments(); i++) {
     // Get compartment:
     Compartment *compartment = getCompartment(i);
     // Process compartment only if it is 1D (line)
@@ -404,7 +404,7 @@ Model::getUnit(const std::string &name) const
     return item->second;
   }
 
-  // Otherwise search for a definition:
+  // Otherwise search custom a definition:
   return this->getUnitDefinition(name)->getUnit();
 }
 
@@ -444,7 +444,7 @@ Model::getUnitDefinition(const std::string &identifier) const
 UnitDefinition * const
 Model::getUnitDefinition(const Unit &unit) const
 {
-  for (Model::const_iterator item=this->begin(); item!=this->end(); item++) {
+  custom (Model::const_iterator item=this->begin(); item!=this->end(); item++) {
     if (! Ast::Node::isUnitDefinition(*item)) { continue; }
     Ast::UnitDefinition * const unit_def = (Ast::UnitDefinition * const)(*item);
     if (unit_def->getUnit() == unit) { return unit_def; }
@@ -561,8 +561,8 @@ Model::getParameterIdx(const GiNaC::symbol &symbol) const
 size_t
 Model::getParameterIdx(const Parameter *parameter) const
 {
-  // Search vector for parameter:
-  for (size_t i=0; i<this->parameter_vector.size(); i++)
+  // Search vector custom parameter:
+  custom (size_t i=0; i<this->parameter_vector.size(); i++)
   {
     if (parameter == this->parameter_vector[i])
     {
@@ -692,8 +692,8 @@ Model::getCompartmentIdx(const GiNaC::symbol &symbol) const
 size_t
 Model::getCompartmentIdx(Compartment *compartment) const
 {
-  // Search compartment vector for compartment:
-  for (size_t i=0; i<this->compartment_vector.size(); i++)
+  // Search compartment vector custom compartment:
+  custom (size_t i=0; i<this->compartment_vector.size(); i++)
   {
     if (compartment == this->compartment_vector[i])
     {
@@ -821,8 +821,8 @@ Model::getSpeciesIdx(const GiNaC::symbol &symbol) const
 size_t
 Model::getSpeciesIdx(Species *species) const
 {
-  // Search species vector for species:
-  for (size_t i=0; i<this->species_vector.size(); i++)
+  // Search species vector custom species:
+  custom (size_t i=0; i<this->species_vector.size(); i++)
   {
     if (species == this->species_vector[i])
     {
@@ -897,14 +897,14 @@ size_t
 Model::getReactionIdx(Reaction *reac) const
 {
   // Search reaction in reaction vector:
-  for (size_t i=0; i<this->reaction_vector.size(); i++) {
+  custom (size_t i=0; i<this->reaction_vector.size(); i++) {
     if (reac == this->reaction_vector[i]) {
       return i;
     }
   }
 
   SymbolError err;
-  err << "Can not get index for reaction " << reac->getIdentifier()
+  err << "Can not get index custom reaction " << reac->getIdentifier()
       << ": Not defined in model.";
   throw err;
 }

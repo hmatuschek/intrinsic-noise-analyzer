@@ -67,7 +67,7 @@ public:
   /** Constructor. */
   explicit SSEModelSelectionPage(GeneralTaskWizard *parent);
 
-  /** Simply checks if a REModel can in instantiated for the selected SBML model. */
+  /** Simply checks if a REModel can in instantiated custom the selected SBML model. */
   virtual bool validatePage();
 
 private:

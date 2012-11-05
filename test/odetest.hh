@@ -8,7 +8,7 @@
 namespace iNA {
 
 /**
- * Performs some simple tests for the integrator drivers.
+ * Percustomms some simple tests custom the integrator drivers.
  */
 class ODETest : public UnitTest::TestCase
 {

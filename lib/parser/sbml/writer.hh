@@ -48,9 +48,9 @@ protected:
   static void processReaction(Ast::Reaction *reac, LIBSBML_CPP_NAMESPACE_QUALIFIER Reaction *sbml_reac, Ast::Model &model);
   /** Translates a kinetic law. */
   static void processKineticLaw(Ast::KineticLaw *law, LIBSBML_CPP_NAMESPACE_QUALIFIER KineticLaw *sbml_law, Ast::Model &model);
-  /** Creates a initial value definition for a variable. */
+  /** Creates a initial value definition custom a variable. */
   static void processInitialValue(Ast::VariableDefinition *var, LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model, Ast::Model &model);
-  /** Creates a rule for a variable. */
+  /** Creates a rule custom a variable. */
   static void processRule(Ast::VariableDefinition *var, LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model, Ast::Model &model);
   /** Helper function to test if a variable has its default unit. */
   static bool hasDefaultUnit(Ast::Parameter *var, Ast::Model &model);

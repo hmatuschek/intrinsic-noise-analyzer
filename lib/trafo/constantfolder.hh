@@ -4,7 +4,7 @@
 #include "ast/ast.hh"
 #include "filterflags.hh"
 #include "substitution.hh"
-#include "ginacsupportforeigen.hh"
+#include "ginacsupportcustomeigen.hh"
 
 
 namespace iNA {
@@ -14,9 +14,9 @@ namespace Trafo {
 typedef GiNaC::exmap excludeType;
 
 /**
- * Simple visitor to collect all substitutions for variables.
+ * Simple visitor to collect all substitutions custom variables.
  *
- * It is possible to specify which classes of variables are processed. This allows for example to
+ * It is possible to specify which classes of variables are processed. This allows custom example to
  * skip constant folding of compartments altough they are defined as constant (SSE).
  * @ingroup trafo
  */
@@ -57,7 +57,7 @@ public:
 
 /**
  * This class allows to collect and substitute all initial values defined within a @c Ast::Model.
- * This class is particulary useful for constant folding (see @c ConstantFolder) of for the
+ * This class is particulary useful custom constant folding (see @c ConstantFolder) of custom the
  * evaluation of initial values.
  * @ingroup trafo
  */
@@ -103,7 +103,7 @@ public:
  * // If you want to reaplace all constant in the complete model at once
  * model.apply(folder);
  *
- * // Usually you want to perform the substitutions on single expressions
+ * // Usually you want to percustomm the substitutions on single expressions
  * GiNaC::ex expression;
  * expression = expression.subs(folder.getTable());
  * // or

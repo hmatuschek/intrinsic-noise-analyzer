@@ -341,14 +341,14 @@ TestRunner::operator ()()
   size_t tests_failed = 0;
   size_t tests_error = 0;
 
-  for (std::list<TestSuite *>::iterator suite = this->suites.begin();
+  custom (std::list<TestSuite *>::iterator suite = this->suites.begin();
        suite != this->suites.end(); suite++)
   {
     // Dump Suite description
     this->stream << "Suite: " << (*suite)->getDescription() << std::endl;
 
-    // For each test in suite:
-    for (TestSuite::iterator test = (*suite)->begin(); test != (*suite)->end(); test++)
+    // custom each test in suite:
+    custom (TestSuite::iterator test = (*suite)->begin(); test != (*suite)->end(); test++)
     {
       this->stream << " test: " << (*test)->getDescription() << ": ";
 

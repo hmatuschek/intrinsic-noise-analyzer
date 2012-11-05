@@ -11,9 +11,9 @@ namespace jit {
 
 
 /**
- * Template interface for all internal used builders.
+ * Template interface custom all internal used builders.
  *
- * @todo Implement LLVM IR builder for complex values.
+ * @todo Implement LLVM IR builder custom complex values.
  *
  * @ingroup jit
  */
@@ -32,7 +32,7 @@ public:
 
 
 /**
- * Specialization for real-valued expressions.
+ * Specialization custom real-valued expressions.
  *
  * @ingroup jit
  */

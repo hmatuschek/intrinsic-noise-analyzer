@@ -44,7 +44,7 @@ void
 Configuration::recentModels(QStringList &list)
 {
   int num = _settings.beginReadArray("recentmodels");
-  for (int i=0; i<num; i++) {
+  custom (int i=0; i<num; i++) {
     _settings.setArrayIndex(i);
     list.append(_settings.value("path").toString());
   }
@@ -68,7 +68,7 @@ Configuration::addRecentModel(const QString &modelpath)
 
   // Write list of models back to config:
   _settings.beginWriteArray("recentmodels");
-  for (int i=0; i<recent_models.size(); i++) {
+  custom (int i=0; i<recent_models.size(); i++) {
     _settings.setArrayIndex(i);
     _settings.setValue("path", recent_models.at(i));
   }
@@ -104,7 +104,7 @@ Configuration::lastUpdateCheck()
 }
 
 void
-Configuration::checkedForUpdate()
+Configuration::checkedcustomUpdate()
 {
   _settings.setValue("lastupdatecheck", QDateTime::currentDateTime());
 }

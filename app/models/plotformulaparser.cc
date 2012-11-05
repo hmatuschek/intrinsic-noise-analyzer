@@ -1,4 +1,4 @@
-#include "plotformulaparser.hh"
+#include "plotcustommulaparser.hh"
 #include <utils/logger.hh>
 
 using namespace iNA;
@@ -25,7 +25,7 @@ typedef enum {
 
 
 /* ******************************************************************************************** *
- * Implementation of Tokenrules for Plot formula parser:
+ * Implementation of Tokenrules custom Plot custommula parser:
  * ******************************************************************************************** */
 class ColumnIdentifierTokenRule : public Parser::TokenRule
 {
@@ -46,81 +46,81 @@ public:
 
 
 /* ******************************************************************************************** *
- * Forward declaration of parser productions...
+ * customward declaration of parser productions...
  * ******************************************************************************************** */
-class PlotFormulaGrammar : public iNA::Parser::Production {
+class PlotcustommulaGrammar : public iNA::Parser::Production {
 public:
   static iNA::Parser::Production *get();
 protected:
-  PlotFormulaGrammar();
-  static PlotFormulaGrammar *_instance;
+  PlotcustommulaGrammar();
+  static PlotcustommulaGrammar *_instance;
 };
 
-class PlotFormulaProduction : public iNA::Parser::AltProduction {
+class PlotcustommulaProduction : public iNA::Parser::AltProduction {
 public:
   static iNA::Parser::Production *get();
 protected:
-  PlotFormulaProduction();
-  static PlotFormulaProduction *_instance;
+  PlotcustommulaProduction();
+  static PlotcustommulaProduction *_instance;
 };
 
-class PlotFormulaProductProduction : public iNA::Parser::AltProduction {
+class PlotcustommulaProductProduction : public iNA::Parser::AltProduction {
 public:
   static iNA::Parser::Production *get();
 protected:
-  PlotFormulaProductProduction();
-  static PlotFormulaProductProduction *_instance;
+  PlotcustommulaProductProduction();
+  static PlotcustommulaProductProduction *_instance;
 };
 
-class PlotFormulaPowerProduction : public iNA::Parser::AltProduction {
+class PlotcustommulaPowerProduction : public iNA::Parser::AltProduction {
 public:
   static iNA::Parser::Production *get();
 protected:
-  PlotFormulaPowerProduction();
-  static PlotFormulaPowerProduction *_instance;
+  PlotcustommulaPowerProduction();
+  static PlotcustommulaPowerProduction *_instance;
 };
 
-class PlotFormulaAtomicProduction : public iNA::Parser::AltProduction {
+class PlotcustommulaAtomicProduction : public iNA::Parser::AltProduction {
 public:
   static iNA::Parser::Production *get();
 protected:
-  PlotFormulaAtomicProduction();
-  static PlotFormulaAtomicProduction *_instance;
+  PlotcustommulaAtomicProduction();
+  static PlotcustommulaAtomicProduction *_instance;
 };
 
-class PlotFormulaFunction : public iNA::Parser::Production {
+class PlotcustommulaFunction : public iNA::Parser::Production {
 public:
   static iNA::Parser::Production *get();
 public:
-  PlotFormulaFunction();
-  static PlotFormulaFunction *_instance;
+  PlotcustommulaFunction();
+  static PlotcustommulaFunction *_instance;
 };
 
-class PlotFormulaFunctionArgumentList : public iNA::Parser::Production {
+class PlotcustommulaFunctionArgumentList : public iNA::Parser::Production {
 public:
   static iNA::Parser::Production *get();
 protected:
-  PlotFormulaFunctionArgumentList();
-  static PlotFormulaFunctionArgumentList *_instance;
+  PlotcustommulaFunctionArgumentList();
+  static PlotcustommulaFunctionArgumentList *_instance;
 };
 
 
 /* ******************************************************************************************** *
  *  FunctionArgumentList := Expression [, FunctionArgumentList];
  * ******************************************************************************************** */
-PlotFormulaFunctionArgumentList *PlotFormulaFunctionArgumentList::_instance = 0;
-Parser::Production *PlotFormulaFunctionArgumentList::get() {
+PlotcustommulaFunctionArgumentList *PlotcustommulaFunctionArgumentList::_instance = 0;
+Parser::Production *PlotcustommulaFunctionArgumentList::get() {
   if (0 == _instance) {
-    return new PlotFormulaFunctionArgumentList();
+    return new PlotcustommulaFunctionArgumentList();
   }
   return _instance;
 }
 
-PlotFormulaFunctionArgumentList::PlotFormulaFunctionArgumentList()
+PlotcustommulaFunctionArgumentList::PlotcustommulaFunctionArgumentList()
   : Parser::Production()
 {
   _instance = this;
-  elements.push_back(PlotFormulaProduction::get());
+  elements.push_back(PlotcustommulaProduction::get());
   elements.push_back(
         new Parser::OptionalProduction(
           new Parser::Production(2, new Parser::TokenProduction(T_COMMA), this)));
@@ -129,45 +129,45 @@ PlotFormulaFunctionArgumentList::PlotFormulaFunctionArgumentList()
 /* ******************************************************************************************** *
  *  Identifier ([FunctionArgumentList]);
  * ******************************************************************************************** */
-PlotFormulaFunction *PlotFormulaFunction::_instance = 0;
-Parser::Production *PlotFormulaFunction::get() {
-  if (0 == PlotFormulaFunction::_instance) {
-    return new PlotFormulaFunction();
+PlotcustommulaFunction *PlotcustommulaFunction::_instance = 0;
+Parser::Production *PlotcustommulaFunction::get() {
+  if (0 == PlotcustommulaFunction::_instance) {
+    return new PlotcustommulaFunction();
   }
-  return PlotFormulaFunction::_instance;
+  return PlotcustommulaFunction::_instance;
 }
 
-PlotFormulaFunction::PlotFormulaFunction()
+PlotcustommulaFunction::PlotcustommulaFunction()
   : Parser::Production()
 {
   _instance = this;
   elements.push_back(new Parser::TokenProduction(T_IDENTIFIER));
   elements.push_back(new Parser::TokenProduction(T_LPAR));
-  elements.push_back(new Parser::OptionalProduction(PlotFormulaFunctionArgumentList::get()));
+  elements.push_back(new Parser::OptionalProduction(PlotcustommulaFunctionArgumentList::get()));
   elements.push_back(new Parser::TokenProduction(T_RPAR));
 }
 
 /* ******************************************************************************************** *
  *  Number | FunctionCall | Identifier | ("(" Expression ")") | "-" AtomicExpression;
  * ******************************************************************************************** */
-PlotFormulaAtomicProduction *PlotFormulaAtomicProduction::_instance = 0;
-Parser::Production *PlotFormulaAtomicProduction::get() {
-  if (0 == _instance) { return new PlotFormulaAtomicProduction(); }
+PlotcustommulaAtomicProduction *PlotcustommulaAtomicProduction::_instance = 0;
+Parser::Production *PlotcustommulaAtomicProduction::get() {
+  if (0 == _instance) { return new PlotcustommulaAtomicProduction(); }
   return _instance;
 }
 
-PlotFormulaAtomicProduction::PlotFormulaAtomicProduction()
+PlotcustommulaAtomicProduction::PlotcustommulaAtomicProduction()
   : Parser::AltProduction()
 {
   _instance = this;
   alternatives.push_back(new Parser::TokenProduction(T_INTEGER));
   alternatives.push_back(new Parser::TokenProduction(T_FLOAT));
-  alternatives.push_back(PlotFormulaFunction::get());
+  alternatives.push_back(PlotcustommulaFunction::get());
   alternatives.push_back(new Parser::TokenProduction(T_COLUMN_ID));
   alternatives.push_back(
         new Parser::Production(
           3, new Parser::TokenProduction(T_LPAR),
-          PlotFormulaProduction::get(),
+          PlotcustommulaProduction::get(),
           new Parser::TokenProduction(T_RPAR)));
   alternatives.push_back(
         new Parser::Production(
@@ -178,123 +178,123 @@ PlotFormulaAtomicProduction::PlotFormulaAtomicProduction()
 /* ******************************************************************************************** *
  * (AtomicExpression ("**" | "^") PowerExpression) | AtomicExpression;
  * ******************************************************************************************** */
-PlotFormulaPowerProduction *PlotFormulaPowerProduction::_instance = 0;
-Parser::Production *PlotFormulaPowerProduction::get() {
-  if (0 == _instance) { return new PlotFormulaPowerProduction(); }
+PlotcustommulaPowerProduction *PlotcustommulaPowerProduction::_instance = 0;
+Parser::Production *PlotcustommulaPowerProduction::get() {
+  if (0 == _instance) { return new PlotcustommulaPowerProduction(); }
   return _instance;
 }
 
-PlotFormulaPowerProduction::PlotFormulaPowerProduction()
+PlotcustommulaPowerProduction::PlotcustommulaPowerProduction()
   : Parser::AltProduction()
 {
   _instance = this;
   alternatives.push_back(
         new Parser::Production(
           3,
-          PlotFormulaAtomicProduction::get(),
+          PlotcustommulaAtomicProduction::get(),
           new Parser::TokenProduction(T_POWER),
-          PlotFormulaPowerProduction::get()));
-  alternatives.push_back(PlotFormulaAtomicProduction::get());
+          PlotcustommulaPowerProduction::get()));
+  alternatives.push_back(PlotcustommulaAtomicProduction::get());
 }
 
 
 /* ******************************************************************************************** *
  * (PowerExpression ("*" | "/") ProductExpression) | PowerExpression;
  * ******************************************************************************************** */
-PlotFormulaProductProduction *PlotFormulaProductProduction::_instance = 0;
-Parser::Production *PlotFormulaProductProduction::get() {
-  if (0 == _instance) { return new PlotFormulaProductProduction(); }
+PlotcustommulaProductProduction *PlotcustommulaProductProduction::_instance = 0;
+Parser::Production *PlotcustommulaProductProduction::get() {
+  if (0 == _instance) { return new PlotcustommulaProductProduction(); }
   return _instance;
 }
 
-PlotFormulaProductProduction::PlotFormulaProductProduction()
+PlotcustommulaProductProduction::PlotcustommulaProductProduction()
   : Parser::AltProduction()
 {
   _instance = this;
   alternatives.push_back(
         new Parser::Production(
           3,
-          PlotFormulaPowerProduction::get(),
+          PlotcustommulaPowerProduction::get(),
           new Parser::AltProduction(
             2, new Parser::TokenProduction(T_TIMES),
             new Parser::TokenProduction(T_DIVIVE)),
-          PlotFormulaProductProduction::get()));
-  alternatives.push_back(PlotFormulaPowerProduction::get());
+          PlotcustommulaProductProduction::get()));
+  alternatives.push_back(PlotcustommulaPowerProduction::get());
 }
 
 
 /* ******************************************************************************************** *
  * (ProductExpression ('+'|'-') Expression) | ProductExpression
  * ******************************************************************************************** */
-PlotFormulaProduction *PlotFormulaProduction::_instance = 0;
+PlotcustommulaProduction *PlotcustommulaProduction::_instance = 0;
 
 Parser::Production *
-PlotFormulaProduction::get() {
-  if (0 == _instance) { return new PlotFormulaProduction(); }
+PlotcustommulaProduction::get() {
+  if (0 == _instance) { return new PlotcustommulaProduction(); }
   return _instance;
 }
 
-PlotFormulaProduction::PlotFormulaProduction()
+PlotcustommulaProduction::PlotcustommulaProduction()
   : Parser::AltProduction()
 {
   _instance = this;
   alternatives.push_back(
         new Parser::Production(
           3,
-          PlotFormulaProductProduction::get(),
+          PlotcustommulaProductProduction::get(),
           new Parser::AltProduction(
             2, new Parser::TokenProduction(T_PLUS),
             new Parser::TokenProduction(T_MINUS)),
-          PlotFormulaProduction::get()));
-  alternatives.push_back(PlotFormulaProductProduction::get());
+          PlotcustommulaProduction::get()));
+  alternatives.push_back(PlotcustommulaProductProduction::get());
 }
 
 
 /* ******************************************************************************************** *
- * Implementation of Plot formula grammar
- * Grammar = PlotFormulaProduction END_OF_LINE
+ * Implementation of Plot custommula grammar
+ * Grammar = PlotcustommulaProduction END_OF_LINE
  * ******************************************************************************************** */
-PlotFormulaGrammar *PlotFormulaGrammar::_instance = 0;
+PlotcustommulaGrammar *PlotcustommulaGrammar::_instance = 0;
 
 Parser::Production *
-PlotFormulaGrammar::get() {
-  if (0 == _instance) { return new PlotFormulaGrammar(); }
+PlotcustommulaGrammar::get() {
+  if (0 == _instance) { return new PlotcustommulaGrammar(); }
   return _instance;
 }
 
-PlotFormulaGrammar::PlotFormulaGrammar()
+PlotcustommulaGrammar::PlotcustommulaGrammar()
   : Parser::Production()
 {
   _instance = this;
-  elements.push_back(PlotFormulaProduction::get());
+  elements.push_back(PlotcustommulaProduction::get());
   elements.push_back(new Parser::TokenProduction(Parser::Token::END_OF_INPUT));
 }
 
 /* ******************************************************************************************** *
  * Implementation of assembler:
  * ******************************************************************************************** */
-void __plot_formula_process_function_arguments(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, PlotFormulaParser::Context &ctx, std::vector<GiNaC::ex> &args);
-GiNaC::ex __plot_formula_process_function(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, PlotFormulaParser::Context &ctx);
-GiNaC::ex __plot_formula_process_atomic(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, PlotFormulaParser::Context &ctx);
-GiNaC::ex __plot_formula_process_power(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, PlotFormulaParser::Context &ctx);
-GiNaC::ex __plot_formula_process_product(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, PlotFormulaParser::Context &ctx);
-GiNaC::ex __plot_formula_process_expression(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, PlotFormulaParser::Context &ctx);
+void __plot_custommula_process_function_arguments(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, PlotcustommulaParser::Context &ctx, std::vector<GiNaC::ex> &args);
+GiNaC::ex __plot_custommula_process_function(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, PlotcustommulaParser::Context &ctx);
+GiNaC::ex __plot_custommula_process_atomic(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, PlotcustommulaParser::Context &ctx);
+GiNaC::ex __plot_custommula_process_power(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, PlotcustommulaParser::Context &ctx);
+GiNaC::ex __plot_custommula_process_product(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, PlotcustommulaParser::Context &ctx);
+GiNaC::ex __plot_custommula_process_expression(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, PlotcustommulaParser::Context &ctx);
 
-void __plot_formula_process_function_arguments(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, PlotFormulaParser::Context &ctx, std::vector<GiNaC::ex> &args)
+void __plot_custommula_process_function_arguments(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, PlotcustommulaParser::Context &ctx, std::vector<GiNaC::ex> &args)
 {
-  args.push_back(__plot_formula_process_expression(node[0], lexer, ctx));
+  args.push_back(__plot_custommula_process_expression(node[0], lexer, ctx));
 
   if (node[1].matched()) {
-    __plot_formula_process_function_arguments(node[1][0][1], lexer, ctx, args);
+    __plot_custommula_process_function_arguments(node[1][0][1], lexer, ctx, args);
   }
 }
 
-GiNaC::ex __plot_formula_process_function(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, PlotFormulaParser::Context &ctx)
+GiNaC::ex __plot_custommula_process_function(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, PlotcustommulaParser::Context &ctx)
 {
   std::string function_name = lexer[node[0].getTokenIdx()].getValue();
   std::vector<GiNaC::ex> arguments;
   if (node[2].matched()) {
-    __plot_formula_process_function_arguments(node[2][0], lexer, ctx, arguments);
+    __plot_custommula_process_function_arguments(node[2][0], lexer, ctx, arguments);
   }
 
   // Dispatch function name:
@@ -326,7 +326,7 @@ GiNaC::ex __plot_formula_process_function(Parser::ConcreteSyntaxTree &node, Pars
   throw err;
 }
 
-GiNaC::ex __plot_formula_process_atomic(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, PlotFormulaParser::Context &ctx)
+GiNaC::ex __plot_custommula_process_atomic(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, PlotcustommulaParser::Context &ctx)
 {
   switch (node.getAltIdx()) {
   // On integer | float
@@ -339,7 +339,7 @@ GiNaC::ex __plot_formula_process_atomic(Parser::ConcreteSyntaxTree &node, Parser
 
   // On function call
   case 2: {
-    GiNaC::ex value = __plot_formula_process_function(node[0], lexer, ctx);
+    GiNaC::ex value = __plot_custommula_process_function(node[0], lexer, ctx);
     return value;
   }
 
@@ -353,12 +353,12 @@ GiNaC::ex __plot_formula_process_atomic(Parser::ConcreteSyntaxTree &node, Parser
 
   // On ( Expression )
   case 4: {
-    return __plot_formula_process_expression(node[0][1], lexer, ctx);
+    return __plot_custommula_process_expression(node[0][1], lexer, ctx);
   }
 
   // On negation
   case 5: {
-    return -__plot_formula_process_atomic(node[0][1], lexer, ctx);
+    return -__plot_custommula_process_atomic(node[0][1], lexer, ctx);
   }
 
   default: break;
@@ -367,56 +367,56 @@ GiNaC::ex __plot_formula_process_atomic(Parser::ConcreteSyntaxTree &node, Parser
   throw InternalError(__FILE__ ": Invalid CST node!");
 }
 
-GiNaC::ex __plot_formula_process_power(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, PlotFormulaParser::Context &ctx) {
+GiNaC::ex __plot_custommula_process_power(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, PlotcustommulaParser::Context &ctx) {
   if (0 == node.getAltIdx()) {
-    GiNaC::ex lhs = __plot_formula_process_atomic(node[0][0], lexer, ctx);
-    GiNaC::ex rhs = __plot_formula_process_power(node[0][2], lexer, ctx);
+    GiNaC::ex lhs = __plot_custommula_process_atomic(node[0][0], lexer, ctx);
+    GiNaC::ex rhs = __plot_custommula_process_power(node[0][2], lexer, ctx);
     return GiNaC::pow(lhs, rhs);
   }
-  return __plot_formula_process_atomic(node[0], lexer, ctx);
+  return __plot_custommula_process_atomic(node[0], lexer, ctx);
 }
 
-GiNaC::ex __plot_formula_process_product(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, PlotFormulaParser::Context &ctx) {
+GiNaC::ex __plot_custommula_process_product(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, PlotcustommulaParser::Context &ctx) {
   if (0 == node.getAltIdx()) {
-    GiNaC::ex lhs = __plot_formula_process_power(node[0][0], lexer, ctx);
-    GiNaC::ex rhs = __plot_formula_process_product(node[0][2], lexer, ctx);
+    GiNaC::ex lhs = __plot_custommula_process_power(node[0][0], lexer, ctx);
+    GiNaC::ex rhs = __plot_custommula_process_product(node[0][2], lexer, ctx);
     if (0 == node[0][1].getAltIdx()) {
       return lhs * rhs;
     }
     return lhs / rhs;
   }
-  return __plot_formula_process_power(node[0], lexer, ctx);
+  return __plot_custommula_process_power(node[0], lexer, ctx);
 }
 
-GiNaC::ex __plot_formula_process_expression(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, PlotFormulaParser::Context &ctx) {
+GiNaC::ex __plot_custommula_process_expression(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, PlotcustommulaParser::Context &ctx) {
   if (0 == node.getAltIdx()) {
-    GiNaC::ex lhs = __plot_formula_process_product(node[0][0], lexer, ctx);
-    GiNaC::ex rhs = __plot_formula_process_expression(node[0][2], lexer, ctx);
+    GiNaC::ex lhs = __plot_custommula_process_product(node[0][0], lexer, ctx);
+    GiNaC::ex rhs = __plot_custommula_process_expression(node[0][2], lexer, ctx);
     if (0 == node[0][1].getAltIdx()) {
       return lhs + rhs;
     }
     return lhs-rhs;
   }
-  return __plot_formula_process_product(node[0], lexer, ctx);
+  return __plot_custommula_process_product(node[0], lexer, ctx);
 }
 
 
 
 /* ******************************************************************************************** *
- * Implementation of PlotFormulaSerializer
+ * Implementation of PlotcustommulaSerializer
  * ******************************************************************************************** */
-class PlotFormulaSerializer
+class PlotcustommulaSerializer
     : public GiNaC::visitor, public GiNaC::basic::visitor, public GiNaC::add::visitor,
     public GiNaC::mul::visitor, public GiNaC::power::visitor, public GiNaC::function::visitor,
     public GiNaC::symbol::visitor, public GiNaC::numeric::visitor
 {
 protected:
-  PlotFormulaParser::Context &_context;
+  PlotcustommulaParser::Context &_context;
   int _current_precedence;
   std::ostream &_stream;
 
 public:
-  PlotFormulaSerializer(std::ostream &stream, PlotFormulaParser::Context &context)
+  PlotcustommulaSerializer(std::ostream &stream, PlotcustommulaParser::Context &context)
     : _context(context), _stream(stream) {
     // pass...
   }
@@ -428,7 +428,7 @@ public:
     if (old_precedence > _current_precedence) { _stream << "("; }
     if (0 < node.nops()) {
       node.op(0).accept(*this);
-      for (size_t i=1; i<node.nops(); i++) {
+      custom (size_t i=1; i<node.nops(); i++) {
         _stream << "+";
         node.op(i).accept(*this);
       }
@@ -444,7 +444,7 @@ public:
 
     if (0 < node.nops()) {
       node.op(0).accept(*this);
-      for (size_t i=1; i<node.nops(); i++) {
+      custom (size_t i=1; i<node.nops(); i++) {
         _stream << "*";
         node.op(i).accept(*this);
       }
@@ -506,19 +506,19 @@ public:
 
 
 /* ******************************************************************************************** *
- * Implementation of PlotFormulaParser
+ * Implementation of PlotcustommulaParser
  * ******************************************************************************************** */
-PlotFormulaParser::Context::Context(Table *table)
+PlotcustommulaParser::Context::Context(Table *table)
   : _table(table)
 {
-  // Assign for each column a symbol.
+  // Assign custom each column a symbol.
   _symbols.resize(_table->getNumColumns());
-  for (size_t i=0; i<_table->getNumColumns(); i++) {
+  custom (size_t i=0; i<_table->getNumColumns(); i++) {
     _symbols[i] = GiNaC::symbol(table->getColumnName(i).toStdString());
   }
 }
 
-PlotFormulaParser::Context::Context(const Context &other)
+PlotcustommulaParser::Context::Context(const Context &other)
   : _table(other._table), _symbols(other._symbols)
 {
   // pass...
@@ -526,13 +526,13 @@ PlotFormulaParser::Context::Context(const Context &other)
 
 
 GiNaC::symbol
-PlotFormulaParser::Context::getColumnSymbol(size_t column) {
+PlotcustommulaParser::Context::getColumnSymbol(size_t column) {
   return _symbols[column];
 }
 
 size_t
-PlotFormulaParser::Context::getColumnIdx(GiNaC::symbol symbol) {
-  for (size_t i=0; i<_symbols.size(); i++) {
+PlotcustommulaParser::Context::getColumnIdx(GiNaC::symbol symbol) {
+  custom (size_t i=0; i<_symbols.size(); i++) {
     if (_symbols[i] == symbol) { return i; }
   }
 
@@ -542,10 +542,10 @@ PlotFormulaParser::Context::getColumnIdx(GiNaC::symbol symbol) {
 }
 
 double
-PlotFormulaParser::Context::operator ()(size_t row, GiNaC::ex expression)
+PlotcustommulaParser::Context::operator ()(size_t row, GiNaC::ex expression)
 {
   GiNaC::exmap values;
-  for (size_t i=0; i<_table->getNumColumns(); i++) {
+  custom (size_t i=0; i<_table->getNumColumns(); i++) {
     values[_symbols[i]] = (*_table)(row, i);
   }
 
@@ -578,9 +578,9 @@ PlotFormulaParser::Context::operator ()(size_t row, GiNaC::ex expression)
 
 
 bool
-PlotFormulaParser::check(const QString &formula, Context &context)
+PlotcustommulaParser::check(const QString &custommula, Context &context)
 {
-  std::stringstream buffer; buffer << formula.toStdString();
+  std::stringstream buffer; buffer << custommula.toStdString();
 
   Parser::Lexer lexer(buffer);
   lexer.addRule(new Parser::WhiteSpaceTokenRule(T_WHITESPACE));
@@ -603,8 +603,8 @@ PlotFormulaParser::check(const QString &formula, Context &context)
 
   try {
     Parser::ConcreteSyntaxTree cst;
-    PlotFormulaGrammar::get()->parse(lexer, cst);
-    __plot_formula_process_expression(cst[0], lexer, context);
+    PlotcustommulaGrammar::get()->parse(lexer, cst);
+    __plot_custommula_process_expression(cst[0], lexer, context);
   } catch (Parser::ParserError &err) {
     return false;
   } catch (std::exception &err) {
@@ -619,9 +619,9 @@ PlotFormulaParser::check(const QString &formula, Context &context)
 
 
 GiNaC::ex
-PlotFormulaParser::parse(const QString &formula, Context &context)
+PlotcustommulaParser::parse(const QString &custommula, Context &context)
 {
-  std::stringstream buffer; buffer << formula.toStdString();
+  std::stringstream buffer; buffer << custommula.toStdString();
 
   Parser::Lexer lexer(buffer);
   lexer.addRule(new Parser::WhiteSpaceTokenRule(T_WHITESPACE));
@@ -643,14 +643,14 @@ PlotFormulaParser::parse(const QString &formula, Context &context)
   Parser::ConcreteSyntaxTree cts;
 
   Parser::ConcreteSyntaxTree cst;
-  PlotFormulaGrammar::get()->parse(lexer, cst);
-  return __plot_formula_process_expression(cst[0], lexer, context);
+  PlotcustommulaGrammar::get()->parse(lexer, cst);
+  return __plot_custommula_process_expression(cst[0], lexer, context);
 }
 
 
 void
-PlotFormulaParser::serialize(GiNaC::ex formula, std::ostream &stream, Context &context)
+PlotcustommulaParser::serialize(GiNaC::ex custommula, std::ostream &stream, Context &context)
 {
-  PlotFormulaSerializer serializer(stream, context);
-  formula.accept(serializer);
+  PlotcustommulaSerializer serializer(stream, context);
+  custommula.accept(serializer);
 }

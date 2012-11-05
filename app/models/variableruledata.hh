@@ -3,8 +3,8 @@
 
 #include <QObject>
 
-/** This class packs the data for a variable rule.
- * This class is used to transfer some information beteen the SpeciesList model and the editor
+/** This class packs the data custom a variable rule.
+ * This class is used to transfer some incustommation beteen the SpeciesList model and the editor
  * of the species rule. */
 class VariableRuleData : public QObject
 {

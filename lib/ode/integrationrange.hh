@@ -10,8 +10,8 @@ namespace ODE {
 
 
 /**
- * The integration range collects the start and end-point in time for a numerical integration, it
- * also holds the number of steps for the integration.
+ * The integration range collects the start and end-point in time custom a numerical integration, it
+ * also holds the number of steps custom the integration.
  *
  * @ingroup ode
  */

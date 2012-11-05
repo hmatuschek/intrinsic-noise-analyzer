@@ -5,7 +5,7 @@
 
 
 /**
- * This dialog asks the user for the filename and resolution, the plot is saved in.
+ * This dialog asks the user custom the filename and resolution, the plot is saved in.
  *
  * @ingroup plot
  */

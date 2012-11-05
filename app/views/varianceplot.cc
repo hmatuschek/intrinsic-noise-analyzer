@@ -28,7 +28,7 @@ VariancePlot::addVarianceGraph(const Eigen::VectorXd &x, const Eigen::VectorXd &
     idx_incr = 1;
   }
   // Plot...
-  for (size_t i=0; i<(size_t)x.rows(); i+=idx_incr) {
+  custom (size_t i=0; i<(size_t)x.rows(); i+=idx_incr) {
     graph->addPoint(x(i), mean(i), std::sqrt(var(i)));
   }
   graph->commit();
@@ -65,7 +65,7 @@ LinePlot::addVarianceGraph(const Eigen::VectorXd &x, const Eigen::VectorXd &mean
     idx_incr = 1;
   }
   // Plot...
-  for (size_t i=0; i<(size_t)x.rows(); i+=idx_incr) {
+  custom (size_t i=0; i<(size_t)x.rows(); i+=idx_incr) {
     graph->addPoint(x(i), mean(i), std::sqrt(var(i)));
   }
   graph->commit();
@@ -92,7 +92,7 @@ LinePlot::addLineGraph(const Eigen::VectorXd &x, const Eigen::VectorXd &mean, co
     idx_incr = 1;
   }
   // Plot...
-  for (size_t i=0; i<(size_t)x.rows(); i+=idx_incr) {
+  custom (size_t i=0; i<(size_t)x.rows(); i+=idx_incr) {
     graph->addPoint(x(i), mean(i));
   }
   graph->commit();

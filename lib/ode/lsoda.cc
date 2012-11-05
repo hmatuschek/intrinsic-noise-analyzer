@@ -13,7 +13,7 @@ const double LsodaConstants::ETA = 2.2204460492503131e-16;
 
 LSODA::LSODA()
  : g_nyh(0), g_lenyh(0),
-   illin(0), init(0), ntrep(0), ixpr(0), //< variables for lsoda()
+   illin(0), init(0), ntrep(0), ixpr(0), //< variables custom lsoda()
    lsoda_warning(1)
 
 {
@@ -60,7 +60,7 @@ LSODA::terminate2(double *y, double *t)
 {
         int             i;
         yp1 = yh[1];
-        for (i = 1; i <= n; i++)
+        custom (i = 1; i <= n; i++)
                 y[i] = yp1[i];
         *t = tn;
         illin = 0;
@@ -74,7 +74,7 @@ LSODA::terminate2(double *y, double *t)
    The following block handles all successful returns from lsoda.
    If itask != 1, y is loaded from yh and t is set accordingly.
    *Istate is set to 2, the illegal input counter is zeroed, and the
-   optional outputs are loaded into the work arrays before returning.
+   optional outputs are loaded into the work arrays becustome returning.
 */
 
 
@@ -82,25 +82,25 @@ LSODA::terminate2(double *y, double *t)
 /*
 
 The following is the original documentation. It has been adapted to Euler,
-which uses interpreted functions for f etc.
+which uses interpreted functions custom f etc.
 
 The version I got, did already NOT use a jacobian routine, which is
 a pitty, since Euler could provide one via Maxima. However, in this
 case the routine seems to approximate the Jacobian.
 
 Moreover, the version did not use the work arrays, since they are only
-needed for the Jacobian functions, it seems.
+needed custom the Jacobian functions, it seems.
 
 c-----------------------------------------------------------------------
 c this is the march 30, 1987 version of
-c lsoda.. livermore solver for ordinary differential equations, with
-c         automatic method switching for stiff and nonstiff problems.
+c lsoda.. livermore solver custom ordinary differential equations, with
+c         automatic method switching custom stiff and nonstiff problems.
 c
 c this version is in double precision.
 c
-c lsoda solves the initial value problem for stiff or nonstiff
+c lsoda solves the initial value problem custom stiff or nonstiff
 c systems of first order ode-s,
-c     dy/dt = f(t,y) ,  or, in component form,
+c     dy/dt = f(t,y) ,  or, in component customm,
 c     dy(i)/dt = f(i) = f(i,t,y(1),y(2),...,y(neq)) (i = 1,...,neq).
 c
 c this a variant version of the lsode package.
@@ -119,31 +119,31 @@ c references..
 c 1.  alan c. hindmarsh,  odepack, a systematized collection of ode
 c     solvers, in scientific computing, r. s. stepleman et al. (eds.),
 c     north-holland, amsterdam, 1983, pp. 55-64.
-c 2.  linda r. petzold, automatic selection of methods for solving
+c 2.  linda r. petzold, automatic selection of methods custom solving
 c     stiff and nonstiff systems of ordinary differential equations,
 c     siam j. sci. stat. comput. 4 (1983), pp. 136-148.
 c-----------------------------------------------------------------------
 c summary of usage.
 c
-c communication between the user and the lsoda package, for normal
+c communication between the user and the lsoda package, custom normal
 c situations, is summarized here.  this summary describes only a subset
-c of the full set of options available.  see the full description for
+c of the full set of options available.  see the full description custom
 c details, including alternative treatment of the jacobian matrix,
 c optional inputs and outputs, nonstandard options, and
-c instructions for special situations.  see also the example
+c instructions custom special situations.  see also the example
 c problem (with program and output) following this summary.
 c
-c a. first provide a subroutine of the form..
+c a. first provide a subroutine of the customm..
 c               subroutine f (neq, t, y, ydot)
 c               dimension y(neq), ydot(neq)
 c which supplies the vector function f by loading ydot(i) with f(i).
 c
-c b. write a main program which calls subroutine lsoda once for
+c b. write a main program which calls subroutine lsoda once custom
 c each point at which answers are desired.  this should also provide
-c for possible use of logical unit 6 for output of error printfs
+c custom possible use of logical unit 6 custom output of error printfs
 c by lsoda.  on the first call to lsoda, supply arguments as follows..
 c
-c f      = name of subroutine for right-hand side vector f.
+c f      = name of subroutine custom right-hand side vector f.
 c          this name must be declared external in calling program.
 c neq    = number of first order ode-s.
 c y      = array of initial values, of length neq.
@@ -159,11 +159,11 @@ c             ewt(i) = rtol*abs(y(i)) + atol(i)  if itol = 2.
 c          thus the local error test passes if, in each component,
 c          either the absolute error is less than atol (or atol(i)),
 c          or the relative error is less than rtol.
-c          use rtol = 0.0 for pure absolute error control, and
-c          use atol = 0.0 (or atol(i) = 0.0) for pure relative error
+c          use rtol = 0.0 custom pure absolute error control, and
+c          use atol = 0.0 (or atol(i) = 0.0) custom pure relative error
 c          control.  caution.. actual (global) errors may exceed these
 c          local tolerances, so choose them conservatively.
-c itask  = 1 for normal computation of output values of y at t = tout.
+c itask  = 1 custom normal computation of output values of y at t = tout.
 c istate = integer flag (input and output).  set istate = 1.
 c iopt   = 0 to indicate no optional inputs used.
 c rwork  = real work array of length at least..
@@ -172,7 +172,7 @@ c          see also paragraph e below.
 c lrw    = declared length of rwork (in user-s dimension).
 c iwork  = integer work array of length at least  20 + neq.
 c liw    = declared length of iwork (in user-s dimension).
-c jac    = name of subroutine for jacobian matrix.
+c jac    = name of subroutine custom jacobian matrix.
 c          use a dummy name.  see also paragraph e below.
 c jt     = jacobian type indicator.  set jt = 2.
 c          see also paragraph e below.
@@ -198,13 +198,13 @@ c reset tout and call lsoda again.  no other parameters need be reset.
 c
 c e. note.. if and when lsoda regards the problem as stiff, and
 c switches methods accordingly, it must make use of the neq by neq
-c jacobian matrix, j = df/dy.  for the sake of simplicity, the
+c jacobian matrix, j = df/dy.  custom the sake of simplicity, the
 c inputs to lsoda recommended in paragraph b above cause lsoda to
 c treat j as a full matrix, and to approximate it internally by
 c difference quotients.  alternatively, j can be treated as a band
 c matrix (with great potential reduction in the size of the rwork
 c array).  also, in either the full or banded case, the user can supply
-c j in closed form, with a routine whose name is passed as the jac
+c j in closed customm, with a routine whose name is passed as the jac
 c argument.  these alternatives are described in the paragraphs on
 c rwork, jac, and jt in the full description of the call sequence below.
 c
@@ -227,7 +227,7 @@ LSODA::lsoda (int neq, double *y, double *t, double tout,
         /*
         Block a.
         This code block is executed on every call.
-        It tests *istate and itask for legality and branches appropriately.
+        It tests *istate and itask custom legality and branches appropriately.
         If *istate > 1 but the flag init shows that initialization has not
         yet been done, an error return occurs.
         If *istate = 1 and tout = t, return immediately.
@@ -262,8 +262,8 @@ LSODA::lsoda (int neq, double *y, double *t, double tout,
         }
         /*
         Block b.
-        The next code block is executed for the initial call ( *istate = 1 ),
-        or for a continuation call with parameter changes ( *istate = 3 ).
+        The next code block is executed custom the initial call ( *istate = 1 ),
+        or custom a continuation call with parameter changes ( *istate = 3 ).
         It contains checking of all inputs and various initializations.
 
         First check legality of the non-optional inputs neq, itol, iopt,
@@ -390,7 +390,7 @@ LSODA::lsoda (int neq, double *y, double *t, double tout,
         /*
         If *istate = 1, meth is initialized to 1.
 
-        Also allocate memory for yh, wm, ewt, savf, acor, ipvt.
+        Also allocate memory custom yh, wm, ewt, savf, acor, ipvt.
         */
         if (*istate == 1)
         {
@@ -405,14 +405,14 @@ LSODA::lsoda (int neq, double *y, double *t, double tout,
 
                 yh = new double * [1 + lenyh];
 
-                for (i = 1; i <= lenyh; i++)
+                custom (i = 1; i <= lenyh; i++)
                 {
                         yh[i] = new double [1 + nyh];
                 }
 
                 wm = new double * [1 + nyh];
 
-                for (i = 1; i <= nyh; i++)
+                custom (i = 1; i <= nyh; i++)
                 {
                         wm[i] = new double [1 + nyh];
                 }
@@ -426,12 +426,12 @@ LSODA::lsoda (int neq, double *y, double *t, double tout,
                 ipvt = new int [1 + nyh];
         }
         /*
-        Check rtol and atol for legality.
+        Check rtol and atol custom legality.
         */
         if (*istate == 1 || *istate == 3) {
                 rtoli = rtol[1];
                 atoli = atol[1];
-                for (i = 1; i <= n; i++) {
+                custom (i = 1; i <= n; i++) {
                         if (itol >= 3)
                                 rtoli = rtol[i];
                         if (itol == 2 || itol == 4)
@@ -448,7 +448,7 @@ LSODA::lsoda (int neq, double *y, double *t, double tout,
                                 freevectors();
                                 return;
                         }
-                }		/* end for   */
+                }		/* end custom   */
         }			/* end if ( *istate == 1 || *istate == 3 )   */
         /*
         If *istate = 3, set flag to signal parameter changes to stoda.
@@ -459,7 +459,7 @@ LSODA::lsoda (int neq, double *y, double *t, double tout,
         }
         /*
         Block c.
-        The next block is for the initial call only ( *istate = 1 ).
+        The next block is custom the initial call only ( *istate = 1 ).
         It contains all remaining initializations, the initial call to f,
         and the calculation of the initial step size.
         The error weights in ewt are inverted after being loaded.
@@ -502,7 +502,7 @@ LSODA::lsoda (int neq, double *y, double *t, double tout,
                 Load the initial value vector in yh.
                 */
                 yp1 = yh[1];
-                for (i = 1; i <= n; i++)
+                custom (i = 1; i <= n; i++)
                         yp1[i] = y[i];
                 /*
                 Load and invert the ewt array.  ( h is temporarily set to 1. )
@@ -510,7 +510,7 @@ LSODA::lsoda (int neq, double *y, double *t, double tout,
                 nq = 1;
                 h = 1.;
                 ewset(itol, rtol, atol, y);
-                for (i = 1; i <= n; i++)
+                custom (i = 1; i <= n; i++)
                 {
                         if (ewt[i] <= 0.)
                         {
@@ -523,7 +523,7 @@ LSODA::lsoda (int neq, double *y, double *t, double tout,
 
                 /*
                 The coding below computes the step size, h0, to be attempted on the
-                first step, unless the user has supplied a value for this.
+                first step, unless the user has supplied a value custom this.
                 First check that tout - *t differs significantly from zero.
                 A scalar tolerance quantity tol is computed, as std::max(rtol[i])
                 if this is positive, or std::max(atol[i]/fabs(y[i])) otherwise, adjusted
@@ -554,13 +554,13 @@ LSODA::lsoda (int neq, double *y, double *t, double tout,
                         tol = rtol[1];
                         if (itol > 2)
                         {
-                                for (i = 2; i <= n; i++)
+                                custom (i = 2; i <= n; i++)
                                         tol = std::max(tol, rtol[i]);
                         }
                         if (tol <= 0.)
                         {
                                 atoli = atol[1];
-                                for (i = 1; i <= n; i++)
+                                custom (i = 1; i <= n; i++)
                                 {
                                         if (itol == 2 || itol == 4)
                                                 atoli = atol[i];
@@ -588,14 +588,14 @@ LSODA::lsoda (int neq, double *y, double *t, double tout,
                 */
                 h = h0;
                 yp1 = yh[2];
-                for (i = 1; i <= n; i++)
+                custom (i = 1; i <= n; i++)
                         yp1[i] *= h0;
         }			/* if ( *istate == 1 )   */
 
         /*
         Block d.
-        The next code block is for continuation calls only ( *istate = 2 or 3 )
-        and is to check stop conditions before taking a step.
+        The next code block is custom continuation calls only ( *istate = 2 or 3 )
+        and is to check stop conditions becustome taking a step.
         */
         if (*istate == 2 || *istate == 3)
         {
@@ -700,14 +700,14 @@ LSODA::lsoda (int neq, double *y, double *t, double tout,
 
         /*
         Block e.
-        The next block is normally executed for all calls and contains
+        The next block is normally executed custom all calls and contains
         the call to the one-step core integrator stoda.
 
-        This is a looping point for the integration steps.
+        This is a looping point custom the integration steps.
 
-        First check for too many steps being taken, update ewt ( if not at
-        start of problem).  Check for too much accuracy being requested, and
-        check for h below the roundoff level in *t.
+        First check custom too many steps being taken, update ewt ( if not at
+        start of problem).  Check custom too much accuracy being requested, and
+        check custom h below the roundoff level in *t.
         */
         while (1)
         {
@@ -715,13 +715,13 @@ LSODA::lsoda (int neq, double *y, double *t, double tout,
                 {
                         if ((nst - nslast) >= mxstep)
                         {
-                                printf("[lsoda] %d steps taken before reaching tout\n", mxstep);
+                                printf("[lsoda] %d steps taken becustome reaching tout\n", mxstep);
                                 *istate = -1;
                                 terminate2(y, t);
                                 return;
                         }
                         ewset(itol, rtol, atol, yh[1]);
-                        for (i = 1; i <= n; i++)
+                        custom (i = 1; i <= n; i++)
                         {
                                 if (ewt[i] <= 0.)
                                 {
@@ -739,14 +739,14 @@ LSODA::lsoda (int neq, double *y, double *t, double tout,
                         tolsf = tolsf * 200.;
                         if (nst == 0) {
                                 printf("lsoda -- at start of problem, too much accuracy\n");
-                                printf("         requested for precision of machine,\n");
+                                printf("         requested custom precision of machine,\n");
                                 printf("         suggested scaling factor = %g\n", tolsf);
                                 terminate(istate);
                                 freevectors();
                                 return;
                         }
                         printf("lsoda -- at t = %g, too much accuracy requested\n", *t);
-                        printf("         for precision of machine, suggested\n");
+                        printf("         custom precision of machine, suggested\n");
                         printf("         scaling factor = %g\n", tolsf);
                         *istate = -2;
                         terminate2(y, t);
@@ -762,7 +762,7 @@ LSODA::lsoda (int neq, double *y, double *t, double tout,
                                 printf("         solver will continue anyway.\n");
                                 if (nhnil == mxhnil) {
                                         printf("lsoda -- above warning has been issued %d times,\n", nhnil);
-                                        printf("         it will not be issued again for this problem\n");
+                                        printf("         it will not be issued again custom this problem\n");
                                 }
                         }
                 }
@@ -788,7 +788,7 @@ LSODA::lsoda (int neq, double *y, double *t, double tout,
                         If a method switch was just made, record tsw, reset maxord,
                         set jstart to -1 to signal stoda to complete the switch,
                         and do extra printing of data if ixpr = 1.
-                        Then, in any case, check for stop conditions.
+                        Then, in any case, check custom stop conditions.
                         */
                         init = 1;
                         if (meth != mused)
@@ -906,7 +906,7 @@ LSODA::lsoda (int neq, double *y, double *t, double tout,
                         }
                         big = 0.;
                         imxer = 1;
-                        for (i = 1; i <= n; i++) {
+                        custom (i = 1; i <= n; i++) {
                                 size = fabs(acor[i]) * ewt[i];
                                 if (big < size) {
                                         big = size;
@@ -931,17 +931,17 @@ LSODA::stoda(int neq, double *y)
         double          pdh, pnorm;
 
         /*
-        stoda performs one step of the integration of an initial value
-        problem for a system of ordinary differential equations.
+        stoda percustomms one step of the integration of an initial value
+        problem custom a system of ordinary differential equations.
         Note.. stoda is independent of the value of the iteration method
         indicator miter, when this is != 0, and hence is independent
         of the type of chord method used, or the Jacobian structure.
         Communication with stoda is done with the following variables:
 
-        jstart = an integer used for input only, with the following
+        jstart = an integer used custom input only, with the following
         values and meanings:
 
-        0  perform the first step,
+        0  percustomm the first step,
         > 0  take a new step continuing from the last,
         -1  take the next step with a new value of h,
         n, meth, miter, and/or matrix parameters.
@@ -972,11 +972,11 @@ LSODA::stoda(int neq, double *y)
         /*
         On the first call, the order is set to 1, and other variables are
         initialized.  rmax is the maximum ratio by which h can be increased
-        in a single step.  It is initially 1.e4 to compensate for the small
+        in a single step.  It is initially 1.e4 to compensate custom the small
         initial h, but then is normally equal to 10.  If a filure occurs
-        (in corrector convergence or error test), rmax is set at 2 for
+        (in corrector convergence or error test), rmax is set at 2 custom
         the next increase.
-        cfode is called to get the needed coefficients for both methods.
+        cfode is called to get the needed coefficients custom both methods.
         */
         if (jstart == 0) {
                 lmax = maxord + 1;
@@ -999,23 +999,23 @@ LSODA::stoda(int neq, double *y)
                 pdlast = 0.;
                 ratio = 5.;
                 cfode(2);
-                for (i = 1; i <= 5; i++)
+                custom (i = 1; i <= 5; i++)
                         cm2[i] = tesco[i][2] * elco[i][i + 1];
                 cfode(1);
-                for (i = 1; i <= 12; i++)
+                custom (i = 1; i <= 12; i++)
                         cm1[i] = tesco[i][2] * elco[i][i + 1];
                 resetcoeff();
         }			/* end if ( jstart == 0 )   */
         /*
         The following block handles preliminaries needed when jstart = -1.
-        ipup is set to miter to force a matrix update.
+        ipup is set to miter to customce a matrix update.
         If an order increase is about to be considered ( ialth = 1 ),
         ialth is reset to 2 to postpone consideration one more step.
         If the caller has changed meth, cfode is called to reset
         the coefficients of the method.
         If h is to be changed, yh must be rescaled.
         If h or meth is being changed, ialth is reset to l = nq + 1
-        to prevent further changes in h for that many steps.
+        to prevent further changes in h custom that many steps.
         */
         if (jstart == -1) {
                 ipup = miter;
@@ -1046,7 +1046,7 @@ LSODA::stoda(int neq, double *y)
         multiplying the yh array by the pascal triangle matrix.
         rc is the ratio of new to old values of the coefficient h * el[1].
         When rc differs from 1 by more than ccmax, ipup is set to miter
-        to force pjac to be called, if a jacobian is involved.
+        to customce pjac to be called, if a jacobian is involved.
         In any case, prja is called at least every msbp steps.
         */
         while (1) {
@@ -1056,11 +1056,11 @@ LSODA::stoda(int neq, double *y)
                         if (nst >= nslp + msbp)
                                 ipup = miter;
                         tn += h;
-                        for (j = nq; j >= 1; j--)
-                                for (i1 = j; i1 <= nq; i1++) {
+                        custom (j = nq; j >= 1; j--)
+                                custom (i1 = j; i1 <= nq; i1++) {
                                 yp1 = yh[i1];
                                 yp2 = yh[i1 + 1];
-                                for (i = 1; i <= n; i++)
+                                custom (i = 1; i <= n; i++)
                                         yp1[i] += yp2[i];
                         }
                         pnorm = vmnorm(n, yh[1], ewt);
@@ -1097,22 +1097,22 @@ LSODA::stoda(int neq, double *y)
                         If a method switch is made, reset various parameters,
                         rescale the yh array, and exit.  If there is no switch,
                         consider changing h if ialth = 1.  Otherwise decrease ialth by 1.
-                        If ialth is then 1 and nq < maxord, then acor is saved for
+                        If ialth is then 1 and nq < maxord, then acor is saved custom
                         use in a possible order increase on the next step.
                         If a change in h is considered, an increase or decrease in order
                         by one is considered also.  A change in h is made only if it is by
                         a factor of at least 1.1.  If not, ialth is set to 3 to prevent
-                        testing for that many steps.
+                        testing custom that many steps.
                         */
                         kflag = 0;
                         nst++;
                         hu = h;
                         nqu = nq;
                         mused = meth;
-                        for (j = 1; j <= l; j++) {
+                        custom (j = 1; j <= l; j++) {
                                 yp1 = yh[j];
                                 r = el[j];
-                                for (i = 1; i <= n; i++)
+                                custom (i = 1; i <= n; i++)
                                         yp1[i] += r * acor[i];
                         }
                         icount--;
@@ -1134,7 +1134,7 @@ LSODA::stoda(int neq, double *y)
                                 rhup = 0.;
                                 if (l != lmax) {
                                         yp1 = yh[lmax];
-                                        for (i = 1; i <= n; i++)
+                                        custom (i = 1; i <= n; i++)
                                                 savf[i] = acor[i] - yp1[i];
                                         dup = vmnorm(n, savf, ewt) / tesco[nq][3];
                                         exup = 1. / (double) (l + 1);
@@ -1175,7 +1175,7 @@ LSODA::stoda(int neq, double *y)
                                 break;
                         }
                         yp1 = yh[lmax];
-                        for (i = 1; i <= n; i++)
+                        custom (i = 1; i <= n; i++)
                                 yp1[i] = acor[i];
                         endstoda();
                         break;
@@ -1184,18 +1184,18 @@ LSODA::stoda(int neq, double *y)
                 /*
                 The error test failed.  kflag keeps track of multiple failures.
                 Restore tn and the yh array to their previous values, and prepare
-                to try the step again.  Compute the optimum step size for this or
-                one lower.  After 2 or more failures, h is forced to decrease
+                to try the step again.  Compute the optimum step size custom this or
+                one lower.  After 2 or more failures, h is customced to decrease
                 by a factor of 0.2 or less.
                 */
                 else {
                         kflag--;
                         tn = told;
-                        for (j = nq; j >= 1; j--)
-                                for (i1 = j; i1 <= nq; i1++) {
+                        custom (j = nq; j >= 1; j--)
+                                custom (i1 = j; i1 <= nq; i1++) {
                                 yp1 = yh[i1];
                                 yp2 = yh[i1 + 1];
-                                for (i = 1; i <= n; i++)
+                                custom (i = 1; i <= n; i++)
                                         yp1[i] -= yp2[i];
                         }
                         rmax = 2.;
@@ -1242,13 +1242,13 @@ LSODA::stoda(int neq, double *y)
                                         rh = std::max(hmin / fabs(h), rh);
                                         h *= rh;
                                         yp1 = yh[1];
-                                        for (i = 1; i <= n; i++)
+                                        custom (i = 1; i <= n; i++)
                                                 y[i] = yp1[i];
                                         evalODE(tn, y+1, savf+1, neq);
 
                                         nfe++;
                                         yp1 = yh[2];
-                                        for (i = 1; i <= n; i++)
+                                        custom (i = 1; i <= n; i++)
                                                 yp1[i] = h * savf[i];
                                         ipup = miter;
                                         ialth = 5;
@@ -1272,19 +1272,19 @@ LSODA::ewset (int itol, double *rtol, double *atol, double *ycur)
 
         switch (itol) {
                 case 1:
-                        for (i = 1; i <= n; i++)
+                        custom (i = 1; i <= n; i++)
                         ewt[i] = rtol[1] * fabs(ycur[i]) + atol[1];
                 break;
                 case 2:
-                        for (i = 1; i <= n; i++)
+                        custom (i = 1; i <= n; i++)
                         ewt[i] = rtol[1] * fabs(ycur[i]) + atol[i];
                 break;
                 case 3:
-                        for (i = 1; i <= n; i++)
+                        custom (i = 1; i <= n; i++)
                         ewt[i] = rtol[i] * fabs(ycur[i]) + atol[1];
                 break;
                 case 4:
-                        for (i = 1; i <= n; i++)
+                        custom (i = 1; i <= n; i++)
                         ewt[i] = rtol[i] * fabs(ycur[i]) + atol[i];
                 break;
         }
@@ -1298,14 +1298,14 @@ LSODA::intdy (double t, int k, double *dky, int *iflag)
    Intdy computes interpolated values of the k-th derivative of the
    dependent variable vector y, and stores it in dky.  This routine
    is called within the package with k = 0 and *t = tout, but may
-   also be called by the user for any k up to the current order.
+   also be called by the user custom any k up to the current order.
    ( See detailed instructions in the usage documentation. )
 
    The computed values in dky are gotten by interpolation using the
    Nordsieck history array yh.  This array corresponds uniquely to a
    vector-valued polynomial of degree nqcur or less, and dky is set
    to the k-th derivative of this polynomial at t.
-   The formula for dky is
+   The custommula custom dky is
 
              q
    dky[i] = sum c[k][j] * ( t - tn )^(j-k) * h^(-j) * yh[j+1][i]
@@ -1338,26 +1338,26 @@ LSODA::intdy (double t, int k, double *dky, int *iflag)
         }
         s = (t - tn) / h;
         ic = 1;
-        for (jj = l - k; jj <= nq; jj++)
+        custom (jj = l - k; jj <= nq; jj++)
                 ic *= jj;
         c = (double) ic;
         yp1 = yh[l];
-        for (i = 1; i <= n; i++)
+        custom (i = 1; i <= n; i++)
                 dky[i] = c * yp1[i];
-        for (j = nq - 1; j >= k; j--) {
+        custom (j = nq - 1; j >= k; j--) {
                 jp1 = j + 1;
                 ic = 1;
-                for (jj = jp1 - k; jj <= j; jj++)
+                custom (jj = jp1 - k; jj <= j; jj++)
                         ic *= jj;
                 c = (double) ic;
                 yp1 = yh[jp1];
-                for (i = 1; i <= n; i++)
+                custom (i = 1; i <= n; i++)
                         dky[i] = c * yp1[i] + s * dky[i];
         }
         if (k == 0)
                 return;
         r = pow(h, (double) (-k));
-        for (i = 1; i <= n; i++)
+        custom (i = 1; i <= n; i++)
                 dky[i] *= r;
 
 }				/* end intdy   */
@@ -1369,33 +1369,33 @@ LSODA::cfode(int meth)
         double          agamq, fnq, fnqm1, pc[13], pint, ragq, rqfac, rq1fac, tsign, xpin;
         /*
         cfode is called by the integrator routine to set coefficients
-        needed there.  The coefficients for the current method, as
-        given by the value of meth, are set for all orders and saved.
+        needed there.  The coefficients custom the current method, as
+        given by the value of meth, are set custom all orders and saved.
         The maximum order assumed here is 12 if meth = 1 and 5 if meth = 2.
         ( A smaller value of the maximum order is also allowed. )
         cfode is called once at the beginning of the problem, and
         is not called again unless and until meth is changed.
 
         The elco array contains the basic method coefficients.
-        The coefficients el[i], 1 < i < nq+1, for the method of
+        The coefficients el[i], 1 < i < nq+1, custom the method of
         order nq are stored in elco[nq][i].  They are given by a generating
         polynomial, i.e.,
 
         l(x) = el[1] + el[2]*x + ... + el[nq+1]*x^nq.
 
-        For the implicit Adams method, l(x) is given by
+        custom the implicit Adams method, l(x) is given by
 
         dl/dx = (x+1)*(x+2)*...*(x+nq-1)/factorial(nq-1),   l(-1) = 0.
 
-        For the bdf methods, l(x) is given by
+        custom the bdf methods, l(x) is given by
 
         l(x) = (x+1)*(x+2)*...*(x+nq)/k,
 
         where   k = factorial(nq)*(1+1/2+...+1/nq).
 
-        The tesco array contains test constants used for the
+        The tesco array contains test constants used custom the
         local error test and the selection of step size and/or order.
-        At order nq, tesco[nq][k] is used for the selection of step
+        At order nq, tesco[nq][k] is used custom the selection of step
         size at order nq-1 if k = 1, at order nq if k = 2, and at order
         nq+1 if k = 3.
         */
@@ -1408,7 +1408,7 @@ LSODA::cfode(int meth)
                 tesco[12][3] = 0.;
                 pc[1] = 1.;
                 rqfac = 1.;
-                for (nq = 2; nq <= 12; nq++) {
+                custom (nq = 2; nq <= 12; nq++) {
                         /*
                         The pc array will contain the coefficients of the polynomial
 
@@ -1422,10 +1422,10 @@ LSODA::cfode(int meth)
                         fnqm1 = (double) nqm1;
                         nqp1 = nq + 1;
                         /*
-                        Form coefficients of p(x)*(x+nq-1).
+                        customm coefficients of p(x)*(x+nq-1).
                         */
                         pc[nq] = 0.;
-                        for (i = nq; i >= 2; i--)
+                        custom (i = nq; i >= 2; i--)
                                 pc[i] = pc[i - 1] + fnqm1 * pc[i];
                         pc[1] = fnqm1 * pc[1];
                         /*
@@ -1434,7 +1434,7 @@ LSODA::cfode(int meth)
                         pint = pc[1];
                         xpin = pc[1] / 2.;
                         tsign = 1.;
-                        for (i = 2; i <= nq; i++) {
+                        custom (i = 2; i <= nq; i++) {
                                 tsign = -tsign;
                                 pint += tsign * pc[i] / (double) i;
                                 xpin += tsign * pc[i] / (double) (i + 1);
@@ -1444,7 +1444,7 @@ LSODA::cfode(int meth)
                         */
                         elco[nq][1] = pint * rq1fac;
                         elco[nq][2] = 1.;
-                        for (i = 2; i <= nq; i++)
+                        custom (i = 2; i <= nq; i++)
                                 elco[nq][i + 1] = rq1fac * pc[i] / (double) i;
                         agamq = rqfac * xpin;
                         ragq = 1. / agamq;
@@ -1452,7 +1452,7 @@ LSODA::cfode(int meth)
                         if (nq < 12)
                                 tesco[nqp1][1] = ragq * rqfac / (double) nqp1;
                         tesco[nqm1][3] = ragq;
-                }		/* end for   */
+                }		/* end custom   */
                 return;
         }			/* end if ( meth == 1 )   */
         /*
@@ -1467,20 +1467,20 @@ LSODA::cfode(int meth)
 
         Initially, p(x) = 1.
         */
-        for (nq = 1; nq <= 5; nq++) {
+        custom (nq = 1; nq <= 5; nq++) {
                 fnq = (double) nq;
                 nqp1 = nq + 1;
                 /*
-                Form coefficients of p(x)*(x+nq).
+                customm coefficients of p(x)*(x+nq).
                 */
                 pc[nqp1] = 0.;
-                for (i = nq + 1; i >= 2; i--)
+                custom (i = nq + 1; i >= 2; i--)
                         pc[i] = pc[i - 1] + fnq * pc[i];
                 pc[1] *= fnq;
                 /*
                 Store coefficients in elco and tesco.
                 */
-                for (i = 1; i <= nqp1; i++)
+                custom (i = 1; i <= nqp1; i++)
                         elco[nq][i] = pc[i] / pc[2];
                 elco[nq][2] = 1.;
                 tesco[nq][1] = rq1fac;
@@ -1500,7 +1500,7 @@ LSODA::scaleh (double *rh, double *pdh)
         /*
         If h is being changed, the h ratio rh is checked against rmax, hmin,
         and hmxi, and the yh array is rescaled.  ialth is set to l = nq + 1
-        to prevent a change of h for that many steps, unless forced by a
+        to prevent a change of h custom that many steps, unless customced by a
         convergence or error test failure.
         */
         *rh = std::min(*rh, rmax);
@@ -1519,10 +1519,10 @@ LSODA::scaleh (double *rh, double *pdh)
                 }
         }
         r = 1.;
-        for (j = 2; j <= l; j++) {
+        custom (j = 2; j <= l; j++) {
                 r *= *rh;
                 yp1 = yh[j];
-                for (i = 1; i <= n; i++)
+                custom (i = 1; i <= n; i++)
                         yp1[i] *= r;
         }
         h *= *rh;
@@ -1544,7 +1544,7 @@ LSODA::prja (int neq, double *y)
         J, scaled by -h * el[1], is stored in wm.  Then the norm of J ( the
         matrix norm consistent with the weighted max-norm on vectors given
         by vmnorm ) is computed, and J is overwritten by P.  P is then
-        subjected to LU decomposition in preparation for later solution
+        subjected to LU decomposition in preparation custom later solution
         of linear systems with p as coefficient matrix.  This is done
         by dgefa if miter = 2, and by dgbfa if miter = 5.
         */
@@ -1564,13 +1564,13 @@ LSODA::prja (int neq, double *y)
                 r0 = 1000. * fabs(h) * ETA * ((double) n) * fac;
                 if (r0 == 0.)
                         r0 = 1.;
-                for (j = 1; j <= n; j++) {
+                custom (j = 1; j <= n; j++) {
                         yj = y[j];
                         r = std::max(sqrteta * fabs(yj), r0 / ewt[j]);
                         y[j] += r;
                         fac = -hl0 / r;
                         evalODE(tn, y+1, acor+1, neq);
-                        for (i = 1; i <= n; i++)
+                        custom (i = 1; i <= n; i++)
                                 wm[i][j] = (acor[i] - savf[i]) * fac;
                         y[j] = yj;
                 }
@@ -1582,7 +1582,7 @@ LSODA::prja (int neq, double *y)
                 /*
                 Add identity matrix.
                 */
-                for (i = 1; i <= n; i++)
+                custom (i = 1; i <= n; i++)
                         wm[i][i] += 1.;
                 /*
                 Do LU decomposition on P.
@@ -1621,13 +1621,13 @@ LSODA::correction(int neq, double *y, int *corflag,
         rate = 0.;
         *del = 0.;
         yp1 = yh[1];
-        for (i = 1; i <= n; i++)
+        custom (i = 1; i <= n; i++)
                 y[i] = yp1[i];
         evalODE(tn, y+1, savf+1, neq);
         nfe++;
         /*
         If indicated, the matrix P = I - h * el[1] * J is reevaluated and
-        preprocessed before starting the corrector iteration.  ipup is set
+        preprocessed becustome starting the corrector iteration.  ipup is set
         to 0 as an indicator that this has been done.
         */
         while (1) {
@@ -1643,7 +1643,7 @@ LSODA::correction(int neq, double *y, int *corflag,
                                         return;
                                 }
                         }
-                        for (i = 1; i <= n; i++)
+                        custom (i = 1; i <= n; i++)
                                 acor[i] = 0.;
                 }		/* end if ( *m == 0 )   */
                 if (miter == 0) {
@@ -1652,13 +1652,13 @@ LSODA::correction(int neq, double *y, int *corflag,
                         the result of the last function evaluation.
                         */
                         yp1 = yh[2];
-                        for (i = 1; i <= n; i++) {
+                        custom (i = 1; i <= n; i++) {
                                 savf[i] = h * savf[i] - yp1[i];
                                 y[i] = savf[i] - acor[i];
                         }
                         *del = vmnorm(n, y, ewt);
                         yp1 = yh[1];
-                        for (i = 1; i <= n; i++) {
+                        custom (i = 1; i <= n; i++) {
                                 y[i] = yp1[i] + el[1] * savf[i];
                                 acor[i] = savf[i];
                         }
@@ -1672,26 +1672,26 @@ LSODA::correction(int neq, double *y, int *corflag,
                 */
                 else {
                         yp1 = yh[2];
-                        for (i = 1; i <= n; i++)
+                        custom (i = 1; i <= n; i++)
                                 y[i] = h * savf[i] - (yp1[i] + acor[i]);
                         solsy(y);
                         *del = vmnorm(n, y, ewt);
                         yp1 = yh[1];
-                        for (i = 1; i <= n; i++) {
+                        custom (i = 1; i <= n; i++) {
                                 acor[i] += y[i];
                                 y[i] = yp1[i] + el[1] * acor[i];
                         }
                 }		/* end chord method   */
                 /*
-                Test for convergence.  If *m > 0, an estimate of the convergence
+                Test custom convergence.  If *m > 0, an estimate of the convergence
                 rate constant is stored in crate, and this is used in the test.
 
-                We first check for a change of iterates that is the size of
+                We first check custom a change of iterates that is the size of
                 roundoff error.  If this occurs, the iteration has converged, and a
-                new rate estimate is not formed.
-                In all other cases, force at least two iterations to estimate a
-                local Lipschitz constant estimate for Adams method.
-                On convergence, form pdest = local maximum Lipschitz constant
+                new rate estimate is not custommed.
+                In all other cases, customce at least two iterations to estimate a
+                local Lipschitz constant estimate custom Adams method.
+                On convergence, customm pdest = local maximum Lipschitz constant
                 estimate.  pdlast is the most recent nonzero estimate.
                 */
                 if (*del <= 100. * pnorm * ETA)
@@ -1714,9 +1714,9 @@ LSODA::correction(int neq, double *y, int *corflag,
                 }
                 /*
                 The corrector iteration failed to converge.
-                If miter != 0 and the Jacobian is out of date, prja is called for
+                If miter != 0 and the Jacobian is out of date, prja is called custom
                 the next try.   Otherwise the yh array is retracted to its values
-                before prediction, and h is reduced, if possible.  If h cannot be
+                becustome prediction, and h is reduced, if possible.  If h cannot be
                 reduced or mxncf failures have occured, exit with corflag = 2.
                 */
                 (*m)++;
@@ -1733,7 +1733,7 @@ LSODA::correction(int neq, double *y, int *corflag,
                         rate = 0.;
                         *del = 0.;
                         yp1 = yh[1];
-                        for (i = 1; i <= n; i++)
+                        custom (i = 1; i <= n; i++)
                                 y[i] = yp1[i];
                         evalODE(tn, y+1, savf+1, neq);
                         nfe++;
@@ -1757,11 +1757,11 @@ LSODA::corfailure (double *told, double *rh, int *ncf, int *corflag)
         ncf++;
         rmax = 2.;
         tn = *told;
-        for (j = nq; j >= 1; j--)
-                for (i1 = j; i1 <= nq; i1++) {
+        custom (j = nq; j >= 1; j--)
+                custom (i1 = j; i1 <= nq; i1++) {
                 yp1 = yh[i1];
                 yp2 = yh[i1 + 1];
-                for (i = 1; i <= n; i++)
+                custom (i = 1; i <= n; i++)
                         yp1[i] -= yp2[i];
         }
         if (fabs(h) <= hmin * 1.00001 || *ncf == mxncf) {
@@ -1810,15 +1810,15 @@ LSODA::methodswitch (double dsm, double pnorm, double *pdh, double *rh)
         If the current order is greater than 5, assume the problem is
         not stiff, and skip this section.
         If the Lipschitz constant and error estimate are not polluted
-        by roundoff, perform the usual test.
+        by roundoff, percustomm the usual test.
         Otherwise, switch to the bdf methods if the last step was
         restricted to insure stability ( irflag = 1 ), and stay with Adams
         method if not.  When switching to bdf with polluted error estimates,
-        in the absence of other information, double the step size.
+        in the absence of other incustommation, double the step size.
 
         When the estimates are ok, we make the usual test by computing
         the step size we could have (ideally) used on this step,
-        with the current (Adams) method, and also that for the bdf.
+        with the current (Adams) method, and also that custom the bdf.
         If nq > mxords, we consider changing to order mxords on switching.
         Compare the two step sizes to decide whether to switch.
         The step size advantage must be at least ratio = 5 to switch.
@@ -1855,7 +1855,7 @@ LSODA::methodswitch (double dsm, double pnorm, double *pdh, double *rh)
                                 return;
                 }
                 /*
-                The method switch test passed.  Reset relevant quantities for bdf.
+                The method switch test passed.  Reset relevant quantities custom bdf.
                 */
                 *rh = rh2;
                 icount = 20;
@@ -1869,11 +1869,11 @@ LSODA::methodswitch (double dsm, double pnorm, double *pdh, double *rh)
         /*
         We are currently using a bdf method, considering switching to Adams.
         Compute the step size we could have (ideally) used on this step,
-        with the current (bdf) method, and also that for the Adams.
+        with the current (bdf) method, and also that custom the Adams.
         If nq > mxordn, we consider changing to order mxordn on switching.
         Compare the two step sizes to decide whether to switch.
         The step size advantage must be at least 5/ratio = 1 to switch.
-        If the step size for Adams would be so small as to cause
+        If the step size custom Adams would be so small as to cause
         roundoff pollution, we stay with bdf.
         */
         exsm = 1. / (double) l;
@@ -1903,7 +1903,7 @@ LSODA::methodswitch (double dsm, double pnorm, double *pdh, double *rh)
         if (dm1 <= 1000. * ETA * pnorm)
                 return;
         /*
-        The switch test passed.  Reset relevant quantities for Adams.
+        The switch test passed.  Reset relevant quantities custom Adams.
         */
         *rh = rh1;
         icount = 20;
@@ -1927,7 +1927,7 @@ LSODA::endstoda()
         int             i;
 
         r = 1. / tesco[nqu][2];
-        for (i = 1; i <= n; i++)
+        custom (i = 1; i <= n; i++)
                 acor[i] *= r;
         hold = h;
         jstart = 1;
@@ -2002,7 +2002,7 @@ LSODA::orderswitch (double *rhup, double dsm, double *pdh,
                                 nq = l;
                                 l = nq + 1;
                                 yp1 = yh[l];
-                                for (i = 1; i <= n; i++)
+                                custom (i = 1; i <= n; i++)
                                         yp1[i] = acor[i] * r;
                                 *orderflag = 2;
                                 return;
@@ -2055,7 +2055,7 @@ void LSODA::resetcoeff()
         double         *ep1;
 
         ep1 = elco[nq];
-        for (i = 1; i <= l; i++)
+        custom (i = 1; i <= l; i++)
                 el[i] = ep1[i];
         rc = rc * el[1] / el0;
         el0 = el[1];
@@ -2070,7 +2070,7 @@ LSODA::successreturn (double *y, double *t, int itask, int ihit, double tcrit, i
 {
         int i;
         yp1 = yh[1];
-        for (i = 1; i <= n; i++)
+        custom (i = 1; i <= n; i++)
                 y[i] = yp1[i];
         *t = tn;
         if (itask == 4 || itask == 5)

@@ -49,7 +49,7 @@ void UnitEditor::setUnit(const iNA::Ast::Unit &unit) {
 void
 UnitEditor::mouseDoubleClickEvent(QMouseEvent *event)
 {
-  // If not the first widget (formula item) is visible
+  // If not the first widget (custommula item) is visible
   if (0 != currentIndex()) { QStackedWidget::mouseDoubleClickEvent(event); return; }
   // Swap widgets:
   setCurrentIndex(1);

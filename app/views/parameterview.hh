@@ -10,7 +10,7 @@
 
 
 /** Simply extends QTableView to show parameters.
- * Default view for @c ParameterList model. */
+ * Default view custom @c ParameterList model. */
 class ParameterTable : public QTableView
 {
   Q_OBJECT
@@ -20,7 +20,7 @@ protected:
   ParameterList *_parameters;
 
 public:
-  /** Constructs a view for the parameters. */
+  /** Constructs a view custom the parameters. */
   ParameterTable(ParameterList *_parameters, QWidget *parent=0);
 
   /** Returns a weak reference to the list of paramters. */
@@ -30,7 +30,7 @@ public:
 
 
 /** A simple view widget to show some parameters.
- * Default view for the @c ParametersItem model. */
+ * Default view custom the @c ParametersItem model. */
 class ParameterView : public QWidget
 {
   Q_OBJECT

@@ -40,7 +40,7 @@ ModelCopyTest::testAlgebraicConstraint(Ast::AlgebraicConstraint *A, Ast::Algebra
 void
 ModelCopyTest::testFunctionDefinition(Ast::FunctionDefinition *A, Ast::FunctionDefinition *B)
 {
-  // Perform simple tests on local variables and populate scope:
+  // Percustomm simple tests on local variables and populate scope:
   GiNaC::exmap symbol_table;
   testScopeEqual(*A, *B, symbol_table);
 
@@ -161,7 +161,7 @@ ModelCopyTest::testReactionEqual(Ast::Reaction *A, Ast::Reaction *B, GiNaC::exma
   UT_ASSERT(A->isReversible() == B->isReversible());
 
   // Test reactant stoichiometry
-  for (Ast::Reaction::iterator reac = B->reactantsBegin(); reac != B->reactantsEnd(); reac++) {
+  custom (Ast::Reaction::iterator reac = B->reactantsBegin(); reac != B->reactantsEnd(); reac++) {
     GiNaC::symbol reac_sym = GiNaC::ex_to<GiNaC::symbol>(symbol_table[reac->first->getSymbol()]);
     // Check if reactant is in A:
     UT_ASSERT(A->hasReactant(reac_sym));
@@ -170,7 +170,7 @@ ModelCopyTest::testReactionEqual(Ast::Reaction *A, Ast::Reaction *B, GiNaC::exma
   }
 
   // Test product stoichiometry
-  for (Ast::Reaction::iterator prod = B->productsBegin(); prod != B->productsEnd(); prod++) {
+  custom (Ast::Reaction::iterator prod = B->productsBegin(); prod != B->productsEnd(); prod++) {
     GiNaC::symbol prod_sym = GiNaC::ex_to<GiNaC::symbol>(symbol_table[prod->first->getSymbol()]);
     // Check if product is in A:
     UT_ASSERT(A->hasProduct(prod_sym));
@@ -179,7 +179,7 @@ ModelCopyTest::testReactionEqual(Ast::Reaction *A, Ast::Reaction *B, GiNaC::exma
   }
 
   // Test modifier.
-  for (Ast::Reaction::mod_iterator mod = B->modifiersBegin(); mod != B->modifiersEnd(); mod++) {
+  custom (Ast::Reaction::mod_iterator mod = B->modifiersBegin(); mod != B->modifiersEnd(); mod++) {
     GiNaC::symbol mod_sym = GiNaC::ex_to<GiNaC::symbol>(symbol_table[(*mod)->getSymbol()]);
     // Check if A has modifier:
     UT_ASSERT(A->isModifier(mod_sym));
@@ -195,7 +195,7 @@ void
 ModelCopyTest::testScopeEqual(Ast::Scope &A, Ast::Scope &B, GiNaC::exmap &symbol_table)
 {
   // Iterate over all definitions in A:
-  for (Ast::Scope::iterator item = A.begin(); item != A.end(); item++) {
+  custom (Ast::Scope::iterator item = A.begin(); item != A.end(); item++) {
     Ast::Definition *def_a = *item;
     // Check if model B has this definition:
     UT_ASSERT(B.hasDefinition(def_a->getIdentifier()));
@@ -224,11 +224,11 @@ void
 ModelCopyTest::testModelEqual(Ast::Model &A, Ast::Model &B)
 {
   GiNaC::exmap symbol_table;
-  // First perform basic checks and populate symbol-table:
+  // First percustomm basic checks and populate symbol-table:
   testScopeEqual(A,B, symbol_table);
 
   // Then, iterate over definitions in A and compare with definitions in B
-  for (Ast::Model::iterator item=A.begin(); item != A.end(); item++)
+  custom (Ast::Model::iterator item=A.begin(); item != A.end(); item++)
   {
     Ast::Definition *def_a = *item;
     Ast::Definition *def_b = B.getDefinition(def_a->getIdentifier());
@@ -261,22 +261,22 @@ ModelCopyTest::testModelEqual(Ast::Model &A, Ast::Model &B)
 
   //Compare parameter, species, compartment idxs:
   UT_ASSERT(A.numSpecies() == B.numSpecies());
-  for (size_t i=0; i<A.numSpecies(); i++) {
+  custom (size_t i=0; i<A.numSpecies(); i++) {
     UT_ASSERT(A.getSpecies(i) != B.getSpecies(i));
     UT_ASSERT_EQUAL(A.getSpecies(i)->getIdentifier(), B.getSpecies(i)->getIdentifier());
   }
   UT_ASSERT(A.numParameters() == B.numParameters());
-  for (size_t i=0; i<A.numParameters(); i++) {
+  custom (size_t i=0; i<A.numParameters(); i++) {
     UT_ASSERT(A.getParameter(i) != B.getParameter(i));
     UT_ASSERT_EQUAL(A.getParameter(i)->getIdentifier(), B.getParameter(i)->getIdentifier());
   }
   UT_ASSERT(A.numCompartments() == B.numCompartments());
-  for (size_t i=0; i<A.numCompartments(); i++) {
+  custom (size_t i=0; i<A.numCompartments(); i++) {
     UT_ASSERT(A.getCompartment(i) != B.getCompartment(i));
     UT_ASSERT_EQUAL(A.getCompartment(i)->getIdentifier(), B.getCompartment(i)->getIdentifier());
   }
   UT_ASSERT(A.numReactions() == B.numReactions());
-  for (size_t i=0; i<A.numReactions(); i++) {
+  custom (size_t i=0; i<A.numReactions(); i++) {
     UT_ASSERT(A.getReaction(i) != B.getReaction(i));
     UT_ASSERT_EQUAL(A.getReaction(i)->getIdentifier(), B.getReaction(i)->getIdentifier());
   }

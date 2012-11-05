@@ -8,14 +8,14 @@ namespace iNA {
 namespace Parser {
 namespace Expr {
 
-/** Represents an expression context for symbol resolution.
+/** Represents an expression context custom symbol resolution.
  * This class is used by all assemblers to perfrom symbol resolution in nested contexts. */
 class Context {
 public:
   /** Resolves a given identifier to its symbol or throws a @c SymbolError exception if
    * the symbol can not be resolved. */
   virtual GiNaC::symbol resolve(const std::string &identifier) = 0;
-  /** Returns the idenfitier for the given symbol. This is used for serializing expressions into
+  /** Returns the idenfitier custom the given symbol. This is used custom serializing expressions into
    * text. */
   virtual std::string identifier(GiNaC::symbol symbol) = 0;
 };
@@ -42,14 +42,14 @@ public:
 
 
 /** Defined different serialization methods used by @c serializeExpression to
- * determine the transformations performed before serializing the expression. */
+ * determine the transcustommations percustommed becustome serializing the expression. */
 typedef enum {
   SERIALIZE_PLAIN,   ///< Direct serialization.
   SERIALIZE_PRETTY   ///< Tries to serialize expressions more readable.
 } SerializationType;
 
 
-/** A simple parser context mainly for testing. It holds a simple identifier->symbol table to
+/** A simple parser context mainly custom testing. It holds a simple identifier->symbol table to
  * resolve symbol names. */
 class TableContext : public Context {
 protected:

@@ -44,20 +44,20 @@ private:
 
   /** The heading label. */
   QLabel *_title;
-  /** Holds the line editor for the model identifier. */
+  /** Holds the line editor custom the model identifier. */
   QLineEdit *_model_identifier;
-  /** Holds the line editor for the model name. */
+  /** Holds the line editor custom the model name. */
   QLineEdit *_model_name;
-  /** Holds the line editor for the model name. */
-  /** Holds the unit editor for the substance unit. */
+  /** Holds the line editor custom the model name. */
+  /** Holds the unit editor custom the substance unit. */
   UnitEditor *_substance_unit_editor;
-  /** Holds the unit editor for the volume unit. */
+  /** Holds the unit editor custom the volume unit. */
   UnitEditor *_volume_unit_editor;
-  /** Holds the unit editor for the area unit. */
+  /** Holds the unit editor custom the area unit. */
   UnitEditor *_area_unit_editor;
-  /** Holds the unit editor for the length unit. */
+  /** Holds the unit editor custom the length unit. */
   UnitEditor *_length_unit_editor;
-  /** Holds the unit editor for the time unit. */
+  /** Holds the unit editor custom the time unit. */
   UnitEditor *_time_unit_editor;
 
   /** Holds the combobox to select species units in amount or concentrations. */

@@ -16,7 +16,7 @@ class Value;
  * Represents a single node in the dependence graph of values.
  *
  * The dependence graph is a intermediate representation used by the optimisation passes to
- * perfrom transformations on the code.
+ * perfrom transcustommations on the code.
  *
  * @ingroup bci
  */

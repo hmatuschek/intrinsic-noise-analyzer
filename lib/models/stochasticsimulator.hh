@@ -17,7 +17,7 @@ namespace iNA {
 namespace Models {
 
 /**
- * Base model for all stochastic simulators.
+ * Base model custom all stochastic simulators.
  *
  * @ingroup ssa
  */
@@ -43,7 +43,7 @@ protected:
   std::vector<MersenneTwister> rand;
 
   /**
-  * index map for bytecode interpreter
+  * index map custom bytecode interpreter
   **/
   std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> stateIndex;
 
@@ -58,7 +58,7 @@ protected:
   Eigen::VectorXd ics;
 
   /**
-  * Vector containing the values of the compartment volumes for each reactant
+  * Vector containing the values of the compartment volumes custom each reactant
   **/
   Eigen::VectorXd Omega;
 
@@ -73,20 +73,20 @@ protected:
   virtual void evaluate(const Eigen::VectorXd &populationVec, Eigen::VectorXd &propensities);
 
   /**
-   * Returns a random number distributed uniform in [0,1).
+   * Returns a random number distributed unicustomm in [0,1).
    */
-  virtual double uniform();
+  virtual double unicustomm();
 
 
 public:
   /**
-   * Is initialized with a model, the number of realization @c ensembleSize and a seed for the
+   * Is initialized with a model, the number of realization @c ensembleSize and a seed custom the
    * random number generator
    **/
   StochasticSimulator(const Ast::Model &model, int ensembleSize, int seed, size_t num_threads=OpenMP::getMaxThreads());
 
   /**
-  * Gives number of threads used for OpenMP parallelism
+  * Gives number of threads used custom OpenMP parallelism
   **/
   const size_t &numThreads();
 
@@ -106,7 +106,7 @@ public:
   void getState(Eigen::MatrixXd &state);
 
   /**
-  *  Performs the ensemble average of concentration statistics.
+  *  Percustomms the ensemble average of concentration statistics.
   *
   *  @param mean the vector of mean concentrations
   *  @param covariance the lower diagonal covariance matrix
@@ -115,7 +115,7 @@ public:
   void stats(Eigen::VectorXd &mean, Eigen::MatrixXd &covariance, Eigen::VectorXd &skewness);
 
   /**
-  *  Performs the ensemble average of the flux statistics.
+  *  Percustomms the ensemble average of the flux statistics.
   *
   *  @param mean the vector of mean fluxes
   *  @param covariance of fluxes

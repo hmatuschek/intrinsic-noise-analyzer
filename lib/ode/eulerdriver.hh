@@ -11,7 +11,7 @@ namespace ODE {
 
 
 /**
- * Implements the Euler method for ODE integration.
+ * Implements the Euler method custom ODE integration.
  *
  * @ingroup ode
  */
@@ -25,14 +25,14 @@ protected:
   Sys &system;
 
   /**
-   * Holds the step-size for an integration step.
+   * Holds the step-size custom an integration step.
    */
   const double step_size;
 
 
 public:
   /**
-   * Constructs a new Euler integration step for the given system and step-size.
+   * Constructs a new Euler integration step custom the given system and step-size.
    */
   EulerDriver(Sys &system, double dt)
     : system(system), step_size(dt)
@@ -41,7 +41,7 @@ public:
   }
 
   /**
-   * Performs the actual integration step.
+   * Percustomms the actual integration step.
    */
   inline void step(const Eigen::VectorXd &state, double time, Eigen::VectorXd &delta)
   {

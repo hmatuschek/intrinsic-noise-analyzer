@@ -17,7 +17,7 @@ InitialConditions::InitialConditions(SSEBaseModel &model, Trafo::excludeType exc
     // Evaluate initial concentrations and evaluate volumes:
     Trafo::InitialValueFolder evICs(model,Trafo::Filter::ALL,excludes);
     Eigen::VectorXd ICs(model.numSpecies());
-    for(size_t i=0; i<model.numSpecies();i++)
+    custom(size_t i=0; i<model.numSpecies();i++)
         ICs(i)=Eigen::ex2double(params.apply(evICs.apply(model.getSpecies(i)->getSymbol())));
 
 
@@ -43,7 +43,7 @@ InitialConditions::InitialConditions(SSEBaseModel &model, Trafo::excludeType exc
 const Eigen::VectorXd &
 InitialConditions::getInitialState()
 {
-  // deterministic initial conditions for state
+  // deterministic initial conditions custom state
   return this->ICsPermuted;
 }
 
@@ -69,8 +69,8 @@ InitialConditions::apply(const Eigen::MatrixXex &vecIn)
 
     Eigen::MatrixXex vecOut(vecIn.rows(),vecIn.cols());
     // ... and fold all constants due to conservation laws
-    for (int i=0; i<vecIn.rows(); i++)
-    for (int j=0; j<vecIn.cols(); j++)
+    custom (int i=0; i<vecIn.rows(); i++)
+    custom (int j=0; j<vecIn.cols(); j++)
             vecOut(i,j)=vecIn(i,j).subs(substitutions);
 
     return vecOut;

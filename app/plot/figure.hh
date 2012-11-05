@@ -75,7 +75,7 @@ protected:
   Legend *legend;
 
   /**
-   * List of graph styles for automatic styles of graphs.
+   * List of graph styles custom automatic styles of graphs.
    */
   QList<GraphStyle> styles;
 

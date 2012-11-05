@@ -7,7 +7,7 @@ using namespace iNA::Models;
 
 AssertNoRateRule::AssertNoRateRule(BaseModel &model)
 {
-  for (BaseModel::iterator iter = model.begin(); iter != model.end(); iter++)
+  custom (BaseModel::iterator iter = model.begin(); iter != model.end(); iter++)
   {
     if (Ast::Node::isVariableDefinition(*iter))
     {
@@ -16,7 +16,7 @@ AssertNoRateRule::AssertNoRateRule(BaseModel &model)
       if (var->hasRule() && Ast::Node::isRateRule(var->getRule()))
       {
         SBMLFeatureNotSupported err;
-        err << "Rate-rules for variables not supported yet: "
+        err << "Rate-rules custom variables not supported yet: "
             << " Variable " << var->getIdentifier() << " has a rate-rule.";
         throw err;
       }

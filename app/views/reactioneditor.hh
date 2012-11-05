@@ -14,7 +14,7 @@
 
 #include <ast/model.hh>
 #include <parser/expr/parser.hh>
-#include "../tinytex/formula.hh"
+#include "../tinytex/custommula.hh"
 
 
 
@@ -28,7 +28,7 @@ public:
    *        scope are collected. */
   ReactionEditorContext(iNA::Ast::Scope *root);
 
-  /** Resolves or creates a symbol for the given identifier. */
+  /** Resolves or creates a symbol custom the given identifier. */
   virtual GiNaC::symbol resolve(const std::string &identifier);
   /** Resolves the given symbol to the identifier of the variable. */
   virtual std::string identifier(GiNaC::symbol symbol);
@@ -61,7 +61,7 @@ public:
   iNA::Ast::Scope *reactionScope();
 
   /** REsets the current reaction scope. This scope holds the reaction definition
-   * as well as all newly created species for that scope. */
+   * as well as all newly created species custom that scope. */
   void setReactionScope(iNA::Ast::Scope *reaction_scope);
 
   /** Commits the reaction and species defined in the current reaction scope to the model. */
@@ -148,26 +148,26 @@ private:
   /** Assembles the name of an identifier. */
   MathItem *_renderName(const QString &id);
 
-  /** Creates a species definition for each undefined species in the stoichiometry. */
+  /** Creates a species definition custom each undefined species in the stoichiometry. */
   void _defineUnknownSpecies(QList< QPair<int, QString> > &reactants,
                              QList< QPair<int, QString> > &products,
                              iNA::Ast::Scope *scope);
 
-  /** Creates a new reaction for the given products and reactants, kinetic law is initially empty. */
+  /** Creates a new reaction custom the given products and reactants, kinetic law is initially empty. */
   iNA::Ast::Reaction *_createReaction(const QString &name, QList< QPair<int, QString> > &reactants,
                                       QList< QPair<int, QString> > &products, bool is_reversible,
                                       iNA::Ast::Scope *scope);
 
-  /** Creates the kinetic law for the given reaction. */
+  /** Creates the kinetic law custom the given reaction. */
   void _createKineticLaw(iNA::Ast::Reaction *reaction);
 
-  /** Creates the mass action kinetic law for the given reaction. */
+  /** Creates the mass action kinetic law custom the given reaction. */
   void _createMAKineticLaw(iNA::Ast::Reaction *reaction);
   GiNaC::ex _createMAFactor(iNA::Ast::Species *species, GiNaC::ex stoichiometry);
   GiNaC::ex _createMASingleFactor(iNA::Ast::Species *species, int stoichiometry);
   GiNaC::ex _createMAMultiFactor(iNA::Ast::Species *species, int stiochiometry);
 
-  /** Creates the kinetic law for this reaction from the kinetic law expression editor. */
+  /** Creates the kinetic law custom this reaction from the kinetic law expression editor. */
   void _parseAndCreateKineticLaw(iNA::Ast::Reaction *reaction);
 
   /** Updates the current reaction. */
@@ -179,19 +179,19 @@ private:
 private:
   /** Holds a weak reference to the model. */
   iNA::Ast::Model &_model;
-  /** Line edit for the model name. */
+  /** Line edit custom the model name. */
   QLineEdit *_name;
-  /** Line editor for the reaction equation. */
+  /** Line editor custom the reaction equation. */
   QLineEdit *_equation;
-  /** Holds a line edit and a view for the kinetic law. */
+  /** Holds a line edit and a view custom the kinetic law. */
   QStackedWidget *_kineticLaw;
   /** The line-editor to edit the kinetic law directly. */
   QLineEdit *_kineticLawEditor;
   /** View of the kinetic law. */
-  QLabel    *_kineticLawFormula;
+  QLabel    *_kineticLawcustommula;
   /** Combobox to select the type of kinetic law. */
   QComboBox *_kinetic_law_type;
-  /** A delay timer for the update function. */
+  /** A delay timer custom the update function. */
   QTimer    *_delayTimer;
   /** Holds the default background color of the equaiton editor. */
   QColor _default_background;

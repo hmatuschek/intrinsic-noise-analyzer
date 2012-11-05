@@ -9,7 +9,7 @@ namespace ODE {
 
 
 /**
- * A driver for the semi-implicit Euler method.
+ * A driver custom the semi-implicit Euler method.
  *
  * This method is the most simple implicit method suitable to integrate stiff systems.
  *
@@ -34,14 +34,14 @@ protected:
   const double step_size;
 
   /**
-   * Holds a matrix for the jacobian.
+   * Holds a matrix custom the jacobian.
    */
   Eigen::MatrixXd jacobian;
 
 
 public:
   /**
-   * Constructs a new driver for the semi-implicit Euler method.
+   * Constructs a new driver custom the semi-implicit Euler method.
    *
    * @param system Specifies the system to integrate.
    * @param dt Specifies the step-size.

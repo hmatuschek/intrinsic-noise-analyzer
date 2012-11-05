@@ -49,7 +49,7 @@ public:
   std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> stateIndex;
 
   /**
-   * Interface for the integrator: Size of the state vector.
+   * Interface custom the integrator: Size of the state vector.
    */
   size_t getDimension();
 
@@ -78,13 +78,13 @@ public:
 
 
   /**
-   * Interface for the integrator: get initial state vector.
+   * Interface custom the integrator: get initial state vector.
    */
 
   void getInitialState(Eigen::VectorXd &x);
 
   /**
-   * Get initial state vector for specific initial conditions.
+   * Get initial state vector custom specific initial conditions.
    */
 
   virtual void getInitial(InitialConditions &ICs, Eigen::VectorXd &x);

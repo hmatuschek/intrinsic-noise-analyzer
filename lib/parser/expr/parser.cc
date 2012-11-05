@@ -13,7 +13,7 @@ using namespace iNA::Parser::Expr;
 
 
 /* ******************************************************************************************** *
- * Implementation of ScopeContext, a context for Ast::Scopes
+ * Implementation of ScopeContext, a context custom Ast::Scopes
  * ******************************************************************************************** */
 ScopeContext::ScopeContext(const Ast::Scope *model)
   : _scope(model)
@@ -38,7 +38,7 @@ ScopeContext::identifier(GiNaC::symbol symbol)
 
 
 /* ******************************************************************************************** *
- * Implementation of TableContext, a context for unit tests:
+ * Implementation of TableContext, a context custom unit tests:
  * ******************************************************************************************** */
 TableContext::TableContext()
   : _symbol_table()
@@ -66,7 +66,7 @@ TableContext::resolve(const std::string &identifier)
 std::string
 TableContext::identifier(GiNaC::symbol symbol)
 {
-  for (std::map<std::string, GiNaC::symbol>::iterator item=_symbol_table.begin();
+  custom (std::map<std::string, GiNaC::symbol>::iterator item=_symbol_table.begin();
        item != _symbol_table.end(); item++)
   {
     if (item->second == symbol) {

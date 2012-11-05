@@ -1,5 +1,5 @@
 #
-# Build script for the GUI application:
+# Build script custom the GUI application:
 #
 
 SET(ina_app_base_SOURCES main.cc)
@@ -65,7 +65,7 @@ SET(ina_app_models_SOURCES models/configuration.cc
     models/generaltaskconfig.cc models/compartmentdelegate.cc models/variableruledelegate.cc
     models/variableruledata.cc models/referencecounter.cc models/scopeitemmodel.cc
     models/expressiondelegate.cc models/sbmlshhighlighter.cc models/reactionlist.cc
-    models/pixmapdelegate.cc models/plotformulaparser.cc models/versioncheck.cc models/task.cc
+    models/pixmapdelegate.cc models/plotcustommulaparser.cc models/versioncheck.cc models/task.cc
     models/timeseries.cc models/application.cc)
 SET(ina_app_models_HEADERS
     models/parameterlist.hh models/specieslist.hh models/compartmentlist.hh
@@ -73,7 +73,7 @@ SET(ina_app_models_HEADERS
     models/generaltaskconfig.hh models/compartmentdelegate.hh models/variableruledelegate.hh
     models/variableruledata.hh models/referencecounter.hh models/scopeitemmodel.hh
     models/expressiondelegate.hh models/sbmlshhighlighter.hh models/reactionlist.hh
-    models/pixmapdelegate.hh models/plotformulaparser.hh models/versioncheck.hh models/task.hh
+    models/pixmapdelegate.hh models/plotcustommulaparser.hh models/versioncheck.hh models/task.hh
     models/timeseries.hh models/application.hh)
 
 SET(ina_app_views_SOURCES
@@ -98,7 +98,7 @@ SET(ina_app_views_HEADERS
     views/newversiondialog.hh views/mainwindow.hh)
 
 SET(ina_app_tinytex_SOURCES
-    tinytex/tinytex.cc tinytex/formula.cc tinytex/ginac2formula.cc)
+    tinytex/tinytex.cc tinytex/custommula.cc tinytex/ginac2custommula.cc)
 SET(ina_app_tinytex_HEADERS)
 
 SET(ina_app_SOURCES

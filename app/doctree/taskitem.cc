@@ -55,7 +55,7 @@ TaskItem::~TaskItem()
 {
   //std::cerr << "In TaskWrapper::~TaskWrapper() ..." << std::endl;
 
-  // Hide and clean menu, and mark it for deletion later on:
+  // Hide and clean menu, and mark it custom deletion later on:
   this->context_menu->hide();
   this->context_menu->clear();
   this->context_menu->deleteLater();
@@ -118,8 +118,8 @@ TaskItem::onProgress()
   // Update label:
   this->itemLabel = QString("%1 (%2 \%)").arg(this->task->getLabel()).arg(int(this->task->getProgress()*100));
 
-  // Mark item for update
-  Application::getApp()->docTree()->markForUpdate(this);
+  // Mark item custom update
+  Application::getApp()->docTree()->markcustomUpdate(this);
 }
 
 
@@ -165,8 +165,8 @@ TaskItem::onStateChanged()
     this->itemLabel = QString("%1 (done)").arg(this->task->getLabel());
   }
 
-  // Mark item for update
-  Application::getApp()->docTree()->markForUpdate(this);
+  // Mark item custom update
+  Application::getApp()->docTree()->markcustomUpdate(this);
 }
 
 
@@ -190,7 +190,7 @@ TaskItem::removeTask()
   // Remove item from document tree:
   Application::getApp()->docTree()->removeTask(this);
 
-  // Mark object for deletion:
+  // Mark object custom deletion:
   this->deleteLater();
 }
 

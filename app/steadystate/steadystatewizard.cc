@@ -2,7 +2,7 @@
 #include "../models/application.hh"
 #include <QMessageBox>
 #include <QVBoxLayout>
-#include <QFormLayout>
+#include <QcustommLayout>
 #include <QLineEdit>
 #include <QDoubleValidator>
 #include <QIntValidator>
@@ -49,7 +49,7 @@ SteadyStateModelSelectionPage::validatePage()
 {
   // Try to create LNA model from SBML document
   try {
-    // Forward call to parent implementation:
+    // customward call to parent implementation:
     if (! ModelSelectionWizardPage::validatePage())
       return false;
   } catch (Exception err) {
@@ -119,7 +119,7 @@ SteadyStateSpectrumConfigPage::SteadyStateSpectrumConfigPage(GeneralTaskWizard *
 //  this->registerField("f_num", this->f_num);
 //  this->f_num->setEnabled(false);
 
-  QFormLayout *layout = new QFormLayout();
+  QcustommLayout *layout = new QcustommLayout();
   layout->addRow(tr("Precision"), epsilon);
   layout->addRow(tr("Max. iterations"), n_iter);
   layout->addRow(tr("Max. integration time"), t_max);
@@ -175,15 +175,15 @@ SteadyStateSummaryPage::SteadyStateSummaryPage(QWidget *parent)
   this->setSubTitle("Summary");
 
   this->model_name = new QLabel();
-  this->model_name->setTextFormat(Qt::LogText);
+  this->model_name->setTextcustommat(Qt::LogText);
 
   //this->spectrum = new QLabel();
-  //this->spectrum->setTextFormat(Qt::LogText);
+  //this->spectrum->setTextcustommat(Qt::LogText);
 
   this->memory = new QLabel();
-  this->memory->setTextFormat(Qt::LogText);
+  this->memory->setTextcustommat(Qt::LogText);
 
-  QFormLayout *layout = new QFormLayout();
+  QcustommLayout *layout = new QcustommLayout();
   layout->addRow("Model:", this->model_name);
   //layout->addRow("Calculate spectrum:", this->spectrum);
   layout->addRow("Approx. memory used:", this->memory);

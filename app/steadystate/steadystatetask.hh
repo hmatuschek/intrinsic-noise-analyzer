@@ -9,7 +9,7 @@
 #include <models/steadystateanalysis.hh>
 
 
-/** A task to perform the steady state analysis. */
+/** A task to percustomm the steady state analysis. */
 class SteadyStateTask : public Task
 {
   Q_OBJECT

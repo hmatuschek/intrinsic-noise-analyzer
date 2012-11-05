@@ -34,7 +34,7 @@ iNA::Parser::Sbmlsh::Parser::parse(Ast::Model &model)
   Assembler assembler(model, _lexer);
   assembler.process(root);
 
-  // Check model for consistency:
+  // Check model custom consistency:
   Trafo::ConsistencyCheck::assertConsistent(&model);
 }
 

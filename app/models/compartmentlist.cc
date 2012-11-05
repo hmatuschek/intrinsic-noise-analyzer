@@ -4,7 +4,7 @@
 #include "exception.hh"
 #include "utils/logger.hh"
 #include "referencecounter.hh"
-#include "../tinytex/ginac2formula.hh"
+#include "../tinytex/ginac2custommula.hh"
 #include "../tinytex/tinytex.hh"
 #include "../views/unitrenderer.hh"
 #include <QMessageBox>
@@ -138,7 +138,7 @@ CompartmentList::_updateIndentifier(iNA::Ast::Compartment *compartment, const QV
   std::string id = qid.toStdString();
   // If nothing changed -> done.
   if (id == compartment->getIdentifier()) { return true; }
-  // Check ID format
+  // Check ID custommat
   if (! QRegExp("[a-zA-Z_][a-zA-Z0-9_]*").exactMatch(qid)) { return false; }
   // Check if id is not assigned allready:
   if (_model->hasDefinition(id)) { return false; }
@@ -180,9 +180,9 @@ CompartmentList::_getInitValue(iNA::Ast::Compartment *comp, int role) const
 {
   if (Qt::DisplayRole == role) {
     // Render initial value:
-    return Ginac2Formula::toPixmap(comp->getValue(), *_model);
+    return Ginac2custommula::toPixmap(comp->getValue(), *_model);
   } else if (Qt::EditRole == role) {
-    // Serialize expression for editing:
+    // Serialize expression custom editing:
     std::stringstream buffer;
     iNA::Parser::Expr::serializeExpression(comp->getValue(), buffer, _model);
     return QString(buffer.str().c_str());
@@ -216,13 +216,13 @@ CompartmentList::_getUnit(iNA::Ast::Compartment *compartment, int role) const
 {
   if ((Qt::DecorationRole != role) || (Qt::EditRole == role)) { return QVariant(); }
 
-  // Return rendered unit for decoration role:
+  // Return rendered unit custom decoration role:
   if (Qt::DecorationRole == role) {
     UnitRenderer renderer(_model->getVolumeUnit());
     return renderer.toPixmap();
   }
 
-  // Return serialized unit for edit role:
+  // Return serialized unit custom edit role:
   return iNA::Parser::Unit::UnitParser::write(_model->getVolumeUnit()).c_str();
 }
 
@@ -275,7 +275,7 @@ CompartmentList::remCompartment(int row)
 
   // Show message id
   if (0 < refs.references().size()) {
-    QMessageBox::information(
+    QMessageBox::incustommation(
           0, tr("Can not delete compartment."),
           tr("Can not delete compartment as it is referenced %1").arg(
             QStringList(refs.references()).join(", ")));

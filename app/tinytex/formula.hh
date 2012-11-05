@@ -1,5 +1,5 @@
-#ifndef __INA_APP_TINYTEX_FORMULA_HH__
-#define __INA_APP_TINYTEX_FORMULA_HH__
+#ifndef __INA_APP_TINYTEX_customMULA_HH__
+#define __INA_APP_TINYTEX_customMULA_HH__
 
 #include <QFont>
 #include <QGraphicsItem>
@@ -8,7 +8,7 @@
 #include <QGraphicsLineItem>
 
 
-/** A couple of settings for the rendering. */
+/** A couple of settings custom the rendering. */
 class MathContext {
 public:
   /** Default context. */
@@ -32,9 +32,9 @@ protected:
 };
 
 
-/** A the metrics of a MathFormulaItem.
- * This class is essential for the layout of the formula, as it describes important measures
- * of a formula item. */
+/** A the metrics of a MathcustommulaItem.
+ * This class is essential custom the layout of the custommula, as it describes important measures
+ * of a custommula item. */
 class MathMetrics {
 public:
   /** Empty contructor. */
@@ -110,14 +110,14 @@ protected:
 };
 
 
-/** A container, renders as a series of formula items. */
-class MathFormula : public MathItem
+/** A container, renders as a series of custommula items. */
+class Mathcustommula : public MathItem
 {
 public:
-  MathFormula();
-  MathFormula(const MathFormula &other);
+  Mathcustommula();
+  Mathcustommula(const Mathcustommula &other);
 
-  virtual ~MathFormula();
+  virtual ~Mathcustommula();
 
   size_t size() const;
   void appendItem(MathItem *item);
@@ -174,7 +174,7 @@ private:
 };
 
 
-/** Simple formula item to draw a fraction. */
+/** Simple custommula item to draw a fraction. */
 class MathFraction : public MathItem
 {
 public:
@@ -223,7 +223,7 @@ private:
 };
 
 
-/** Simple X^Y formula element. */
+/** Simple X^Y custommula element. */
 class MathSup : public MathItem
 {
 public:
@@ -255,4 +255,4 @@ private:
   MathItem *_lower;
 };
 
-#endif // __INA_APP_TINYTEX_FORMULA_HH__
+#endif // __INA_APP_TINYTEX_customMULA_HH__

@@ -111,7 +111,7 @@ SteadyStateTask::process()
     return;
   }
 
-  // Get full state and covariance and EMRE corrections for steady state;
+  // Get full state and covariance and EMRE corrections custom steady state;
   Eigen::VectorXd thirdOrder(_Ns);
   ios_model->fullState(reduced_state, re_concentrations, lna_covariances, emre_corrections,
                        ios_covariances, thirdOrder, ios_corrections);
@@ -125,11 +125,11 @@ SteadyStateTask::process()
 //  std::cerr << "   ... done." << std::endl;
 
   // Copy spectrum into table
-  /*for (int i=0; i<this->frequencies.size(); i++)
+  /*custom (int i=0; i<this->frequencies.size(); i++)
   {
     this->spectrum.matrix()(i,0) = this->frequencies(i);
 
-    for (int j=0; j<this->species.size(); j++)
+    custom (int j=0; j<this->species.size(); j++)
     {
       size_t idx = this->index_table[j];
       this->spectrum.matrix()(i,j+1) = spectrum(i, idx);

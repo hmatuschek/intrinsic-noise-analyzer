@@ -76,7 +76,7 @@ Benchmark::integrate_BCI_LSODA(Models::IOSmodel *model, double t_end, size_t opt
   Utils::RealTime real_clock; real_clock.start();
 
   double t = 0.0;
-  for(size_t i=0; i<N_steps; i++,t+=dt)
+  custom(size_t i=0; i<N_steps; i++,t+=dt)
   {
     integrator.step(x,t,dx);
     x += dx; t += dt;
@@ -103,7 +103,7 @@ Benchmark::integrate_BCIMP_LSODA(Models::IOSmodel *model, double t_end, size_t o
   Utils::RealTime real_clock; real_clock.start();
 
   double t = 0.0;
-  for(size_t i=0; i<N_steps; i++,t+=dt)
+  custom(size_t i=0; i<N_steps; i++,t+=dt)
   {
     integrator.step(x,t,dx);
     x += dx; t += dt;
@@ -132,7 +132,7 @@ Benchmark::integrate_JIT_LSODA(Models::IOSmodel *model, double t_end, size_t opt
   Utils::RealTime real_clock; real_clock.start();
 
   double t = 0.0;
-  for(size_t i=0; i<N_steps; i++,t+=dt)
+  custom(size_t i=0; i<N_steps; i++,t+=dt)
   {
     integrator.step(x,t,dx);
     x += dx; t += dt;
@@ -162,7 +162,7 @@ Benchmark::integrate_GiNaC_LSODA(Models::IOSmodel *model, double t_end, size_t o
   Utils::RealTime real_clock; real_clock.start();
 
   double t = 0.0;
-  for(size_t i=0; i<N_steps; i++,t+=dt)
+  custom(size_t i=0; i<N_steps; i++,t+=dt)
   {
     integrator.step(x,t,dx);
     x += dx; t += dt;
@@ -190,7 +190,7 @@ Benchmark::integrate_BCI_Rosen4(Models::IOSmodel *model, double t_end, size_t op
   Utils::RealTime real_clock; real_clock.start();
 
   double t = 0.0;
-  for(size_t i=0; i<N_steps; i++,t+=dt)
+  custom(size_t i=0; i<N_steps; i++,t+=dt)
   {
     integrator.step(x,t,dx);
     x += dx; t += dt;
@@ -217,7 +217,7 @@ Benchmark::integrate_BCIMP_Rosen4(Models::IOSmodel *model, double t_end, size_t 
   Utils::RealTime real_clock; real_clock.start();
 
   double t = 0.0;
-  for(size_t i=0; i<N_steps; i++,t+=dt)
+  custom(size_t i=0; i<N_steps; i++,t+=dt)
   {
     integrator.step(x,t,dx);
     x += dx; t += dt;
@@ -240,14 +240,14 @@ Benchmark::integrate_JIT_Rosen4(Models::IOSmodel *model, double t_end, size_t op
   Eigen::VectorXd dx(interpreter.getDimension());
   lna->getInitialState(x);
 
-  // Force code-emmission:
+  // customce code-emmission:
   integrator.step(x, 0.0, dx);
 
   Utils::CpuTime  cpu_clock; cpu_clock.start();
   Utils::RealTime real_clock; real_clock.start();
 
   double t = 0.0;
-  for(size_t i=0; i<N_steps; i++,t+=dt)
+  custom(size_t i=0; i<N_steps; i++,t+=dt)
   {
     integrator.step(x,t,dx);
     x += dx; t += dt;
@@ -268,7 +268,7 @@ Benchmark::simulate_BCI_gillespie(Ast::Model *model, double t, size_t opt_level)
   Utils::CpuTime  cpu_clock; cpu_clock.start();
   Utils::RealTime real_clock; real_clock.start();
 
-  for (size_t i=0; i<N_steps; i++) {
+  custom (size_t i=0; i<N_steps; i++) {
     simulator.run(dt);
   }
 
@@ -286,7 +286,7 @@ Benchmark::simulate_JIT_gillespie(Ast::Model *model, double t, size_t opt_level)
   Utils::CpuTime  cpu_clock; cpu_clock.start();
   Utils::RealTime real_clock; real_clock.start();
 
-  for (size_t i=0; i<N_steps; i++) {
+  custom (size_t i=0; i<N_steps; i++) {
     simulator.run(dt);
   }
 
@@ -305,7 +305,7 @@ Benchmark::simulate_GiNaC_gillespie(Ast::Model *model, double t, size_t opt_leve
   Utils::CpuTime  cpu_clock; cpu_clock.start();
   Utils::RealTime real_clock; real_clock.start();
 
-  for (size_t i=0; i<N_steps; i++) {
+  custom (size_t i=0; i<N_steps; i++) {
     simulator.run(dt);
   }
 
@@ -324,7 +324,7 @@ Benchmark::simulate_BCI_optSSA(Ast::Model *model, double t, size_t opt_level)
   Utils::CpuTime  cpu_clock; cpu_clock.start();
   Utils::RealTime real_clock; real_clock.start();
 
-  for (size_t i=0; i<N_steps; i++) {
+  custom (size_t i=0; i<N_steps; i++) {
     simulator.run(dt);
   }
 
@@ -343,7 +343,7 @@ Benchmark::simulate_JIT_optSSA(Ast::Model *model, double t, size_t opt_level)
   Utils::CpuTime  cpu_clock; cpu_clock.start();
   Utils::RealTime real_clock; real_clock.start();
 
-  for (size_t i=0; i<N_steps; i++) {
+  custom (size_t i=0; i<N_steps; i++) {
     simulator.run(dt);
   }
 
@@ -362,7 +362,7 @@ Benchmark::simulate_GiNaC_optSSA(Ast::Model *model, double t, size_t opt_level)
   Utils::CpuTime  cpu_clock; cpu_clock.start();
   Utils::RealTime real_clock; real_clock.start();
 
-  for (size_t i=0; i<N_steps; i++) {
+  custom (size_t i=0; i<N_steps; i++) {
     simulator.run(dt);
   }
 

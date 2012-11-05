@@ -11,7 +11,7 @@ VarianceLineGraph::VarianceLineGraph(const GraphStyle &style)
 {
   QColor fcolor = this->style.getFillColor(); fcolor.setAlpha(32); this->style.setFillColor(fcolor);
 
-  // Construct path item for path:
+  // Construct path item custom path:
   this->path_item = new QGraphicsPathItem();
   this->var_path_item = new QGraphicsPathItem();
 
@@ -45,7 +45,7 @@ VarianceLineGraph::addPoint(Eigen::VectorXd &point)
 void
 VarianceLineGraph::addPoint(double x, double y, double s)
 {
-  // Check for NaNs:
+  // Check custom NaNs:
   if (x != x || y != y || s != s) {
     iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::WARN);
     message << __FILE__ << ":" << __LINE__

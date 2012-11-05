@@ -1,6 +1,6 @@
 #include "tinytex.hh"
 #include "exception.hh"
-#include "formula.hh"
+#include "custommula.hh"
 
 #include <sstream>
 #include <QGraphicsScene>
@@ -32,7 +32,7 @@ TinyTex::Error::~Error() throw () {
 
 
 /* ******************************************************************************************** *
- * Token rules for tinyTeX lexer
+ * Token rules custom tinyTeX lexer
  * ******************************************************************************************** */
 TinyTex::TextTokenRule::TextTokenRule(unsigned id)
   : Parser::TokenRule(id)
@@ -103,7 +103,7 @@ TinyTex::GrammarProduction::GrammarProduction()
   : Parser::Production()
 {
   GrammarProduction::instance = this;
-  elements.push_back(FormulaProduction::factory());
+  elements.push_back(custommulaProduction::factory());
   elements.push_back(new Parser::TokenProduction(Parser::Token::END_OF_INPUT));
 }
 
@@ -118,23 +118,23 @@ TinyTex::GrammarProduction::factory() {
 }
 
 
-TinyTex::FormulaProduction::FormulaProduction()
+TinyTex::custommulaProduction::custommulaProduction()
   : Parser::Production()
 {
-  FormulaProduction::instance = this;
+  custommulaProduction::instance = this;
 
   elements.push_back(SupSubScriptProduction::factory());
   elements.push_back(new Parser::OptionalProduction(this));
 }
 
-TinyTex::FormulaProduction *TinyTex::FormulaProduction::instance = 0;
+TinyTex::custommulaProduction *TinyTex::custommulaProduction::instance = 0;
 
 Parser::Production *
-TinyTex::FormulaProduction::factory() {
-  if (0 == FormulaProduction::instance) {
-    return new FormulaProduction();
+TinyTex::custommulaProduction::factory() {
+  if (0 == custommulaProduction::instance) {
+    return new custommulaProduction();
   }
-  return FormulaProduction::instance;
+  return custommulaProduction::instance;
 }
 
 
@@ -171,11 +171,11 @@ TinyTex::ElementProduction::ElementProduction()
 
   alternatives.push_back(new Parser::TokenProduction(Lexer::TEXT_TOKEN));
   alternatives.push_back(new Parser::TokenProduction(Lexer::SYMBOL_TOKEN));
-  // '{' Formula '}'
+  // '{' custommula '}'
   alternatives.push_back(
         new Parser::Production(
           3, new Parser::TokenProduction(Lexer::LBRA_TOKEN),
-          FormulaProduction::factory(),
+          custommulaProduction::factory(),
           new Parser::TokenProduction(Lexer::RBRA_TOKEN)));
 }
 
@@ -254,7 +254,7 @@ TinyTex::parse(const std::string &source)
   try {
     grammar->parse(lexer, cst);
     TinyTex parser(lexer);
-    item = parser.parseFormula(cst[0]);
+    item = parser.parsecustommula(cst[0]);
   } catch (iNA::Parser::ParserError &err) {
     throw TinyTex::Error(err);
   }
@@ -263,25 +263,25 @@ TinyTex::parse(const std::string &source)
 }
 
 
-MathFormula *
-TinyTex::parseFormula(iNA::Parser::ConcreteSyntaxTree &node)
+Mathcustommula *
+TinyTex::parsecustommula(iNA::Parser::ConcreteSyntaxTree &node)
 {
-  /* Formula = SupSubScript [Formula] */
-  MathFormula *formula = 0;
+  /* custommula = SupSubScript [custommula] */
+  Mathcustommula *custommula = 0;
 
   if (node[1].matched()) {
-    formula = parseFormula(node[1][0]);
-    formula->prependItem(parseSupSub(node[0]));
+    custommula = parsecustommula(node[1][0]);
+    custommula->prependItem(parseSupSub(node[0]));
   } else {
     MathItem *item = parseSupSub(node[0]);
-    if (0 == dynamic_cast<MathFormula *>(item)) {
-      formula = new MathFormula(); formula->appendItem(item);
+    if (0 == dynamic_cast<Mathcustommula *>(item)) {
+      custommula = new Mathcustommula(); custommula->appendItem(item);
     } else {
-      formula = static_cast<MathFormula *>(item);
+      custommula = static_cast<Mathcustommula *>(item);
     }
   }
 
-  return formula;
+  return custommula;
 }
 
 
@@ -316,8 +316,8 @@ TinyTex::parseElement(iNA::Parser::ConcreteSyntaxTree &node)
   case 1: // Symbol
     return processSymbol(_lexer[node[0].getTokenIdx()].getValue());
 
-  case 2: { // '{' Formula  '}'
-    return parseFormula(node[0][1]);
+  case 2: { // '{' custommula  '}'
+    return parsecustommula(node[0][1]);
   }
 
   default: break;
@@ -357,7 +357,7 @@ TinyTex::toPixmap(const std::string &source)
   }
 
   QGraphicsItem *rendered_item = item->layout(MathContext());
-  // Draw formula into pixmap:
+  // Draw custommula into pixmap:
   QGraphicsScene *scene = new QGraphicsScene();
   scene->addItem(rendered_item);
   QSize size = scene->sceneRect().size().toSize();

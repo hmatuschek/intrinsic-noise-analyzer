@@ -1,7 +1,7 @@
 #include "plotrangedialog.hh"
 #include <QDoubleValidator>
 #include <QHBoxLayout>
-#include <QFormLayout>
+#include <QcustommLayout>
 #include <QPushButton>
 #include <QDialogButtonBox>
 
@@ -66,7 +66,7 @@ PlotRangeDialog::PlotRangeDialog(const Range &xrange, const RangePolicy &xpolicy
                                                       QDialogButtonBox::Ok);
 
   // Construct layout:
-  QFormLayout *from_layout = new QFormLayout();
+  QcustommLayout *from_layout = new QcustommLayout();
   QHBoxLayout *xmin_layout = new QHBoxLayout();
   xmin_layout->addWidget(xmin_fixed); xmin_layout->addWidget(xmin_edit);
   from_layout->addRow(tr("Min. X:"), xmin_layout);

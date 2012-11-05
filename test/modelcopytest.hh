@@ -32,7 +32,7 @@ protected:
   void testModelEqual(Ast::Model &A, Ast::Model &B);
   void testScopeEqual(Ast::Scope &A, Ast::Scope &B, GiNaC::exmap &symbol_table);
 
-  // Performs the test:
+  // Percustomms the test:
   void testCopy(const std::string &file);
 
 

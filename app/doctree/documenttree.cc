@@ -97,7 +97,7 @@ DocumentTree::removePlot(PlotItem *plot)
 }
 
 void
-DocumentTree::markForUpdate(TreeItem *item)
+DocumentTree::markcustomUpdate(TreeItem *item)
 {
   QModelIndex idx = this->getIndexOf(item);
   emit this->dataChanged(idx, idx);

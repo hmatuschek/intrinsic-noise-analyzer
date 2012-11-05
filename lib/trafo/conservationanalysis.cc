@@ -1,6 +1,6 @@
 #include "conservationanalysis.hh"
 #include "exception.hh"
-#include "ginacsupportforeigen.hh"
+#include "ginacsupportcustomeigen.hh"
 #include "utils/logger.hh"
 
 
@@ -14,7 +14,7 @@ ConservationAnalysis::ConservationAnalysis(Ast::Model &model)
   // Assemble vector of initially independent species:
   Eigen::VectorXex species(model.numSpecies());
   size_t numSpecies=0;
-  for (size_t i=0; i<model.numSpecies(); i++) {
+  custom (size_t i=0; i<model.numSpecies(); i++) {
     if (! model.getSpecies(i)->hasRule()) {
       species(numSpecies) = model.getSpecies(i)->getSymbol(); numSpecies++;
     }
@@ -23,14 +23,14 @@ ConservationAnalysis::ConservationAnalysis(Ast::Model &model)
   // Assemble reduced stoichiometry:
   Eigen::MatrixXd stoichiometry(numSpecies, model.numReactions());
 
-  for (size_t j=0; j<model.numReactions(); j++) {
+  custom (size_t j=0; j<model.numReactions(); j++) {
     Ast::Reaction *reaction = model.getReaction(j);
-    for (size_t i=0; i<numSpecies; i++) {
+    custom (size_t i=0; i<numSpecies; i++) {
       if (reaction->hasProduct(GiNaC::ex_to<GiNaC::symbol>(species(i)))) {
         GiNaC::ex coeff = reaction->getProductStoichiometry(GiNaC::ex_to<GiNaC::symbol>(species(i)));
         if (! GiNaC::is_a<GiNaC::numeric>(coeff.evalf())) {
           SBMLFeatureNotSupported err;
-          err << "Can not perform conservation analysis: Stoichiometry of product "
+          err << "Can not percustomm conservation analysis: Stoichiometry of product "
               << species(i) << " is not a numeric constant.";
           throw err;
         }
@@ -43,7 +43,7 @@ ConservationAnalysis::ConservationAnalysis(Ast::Model &model)
         GiNaC::ex coeff = reaction->getReactantStoichiometry(GiNaC::ex_to<GiNaC::symbol>(species(i)));
         if (! GiNaC::is_a<GiNaC::numeric>(coeff.evalf())) {
           SBMLFeatureNotSupported err;
-          err << "Can not perform conservation analysis: Stoichiometry of reactant "
+          err << "Can not percustomm conservation analysis: Stoichiometry of reactant "
               << species(i) << " is not a numeric constant.";
           throw err;
         }
@@ -65,13 +65,13 @@ ConservationAnalysis::ConservationAnalysis(Ast::Model &model)
   Eigen::MatrixXd linkMatrix = -(pM*LU.kernel()).transpose();
 
 
-  // Assemble expressions for assignment rules
-  // for some reason, the scalar product of double-matrix and expression vector does not work:
-  for (size_t i=0; i<n_dep; i++) {
+  // Assemble expressions custom assignment rules
+  // custom some reason, the scalar product of double-matrix and expression vector does not work:
+  custom (size_t i=0; i<n_dep; i++) {
     GiNaC::ex link = 0;
 
     // product \vec{link} = linkMatrix * \vec{ind_species}:
-    for (size_t j=0; j<n_indep; j++) {
+    custom (size_t j=0; j<n_indep; j++) {
       link += linkMatrix(i,j)*ind_spec(j);
     }
 

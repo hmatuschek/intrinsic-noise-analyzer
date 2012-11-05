@@ -23,8 +23,8 @@ namespace bci {
 class Pass
 {
 public:
-  /** This method may be overridden by any implementation of a @c Pass to perform the actual
-   * transformation.
+  /** This method may be overridden by any implementation of a @c Pass to percustomm the actual
+   * transcustommation.
    *
    * By default this method terverses recursively the dependence-tree and returns true immediately,
    * once a pass applied on a value. */
@@ -108,7 +108,7 @@ public:
 
 
 /**
- * Performs simple constant folding on functions called with constants.
+ * Percustomms simple constant folding on functions called with constants.
  *
  * @ingroup bci
  */

@@ -14,7 +14,7 @@
 
 
 /**
- * General view object for @c RETask instances.
+ * General view object custom @c RETask instances.
  */
 class RETaskView : public TaskView
 {

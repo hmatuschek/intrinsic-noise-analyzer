@@ -12,7 +12,7 @@ namespace ODE {
 
 
 /**
- * Implements the Runge-Kutter step of 4th order \cite press86 for ODE integration.
+ * Implements the Runge-Kutter step of 4th order \cite press86 custom ODE integration.
  *
  * @ingroup ode
  */
@@ -49,7 +49,7 @@ protected:
 
 public:
   /**
-   * Constructs a new RK4 step for the integration of the given system with given stepsize.
+   * Constructs a new RK4 step custom the integration of the given system with given stepsize.
    *
    * @param system Specifies the ODE system.
    * @param dt Specifies the step-size.
@@ -65,7 +65,7 @@ public:
 
 
   /**
-   * Performs the RK4 step.
+   * Percustomms the RK4 step.
    *
    * @param state Specifies the current state of the system.
    * @param time Specifies the current time.
@@ -102,7 +102,7 @@ public:
     // Calc final step-size as delta = (delta_0 + 2*delta_1 + 2*delta_2 + delta_3)*dt/6
     delta = (delta + this->temp_diff)*(this->step_size/6.0);
 
-    // Check for NaN:
+    // Check custom NaN:
     if (! (delta == delta)) {
       RuntimeError err;
       err << "Integration failed: NaN occurred during interation; reduce step-size.";

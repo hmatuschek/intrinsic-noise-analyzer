@@ -28,25 +28,25 @@ LNAmodel::postConstructor()
     // assign a set of new symbols
     // ... and add them to index table
     this->stateVariables.reserve(dimCOV+numIndSpecies());
-    for(size_t i = 0; i<stateVariables.capacity(); i++)
+    custom(size_t i = 0; i<stateVariables.capacity(); i++)
     {
         stateVariables.push_back( GiNaC::symbol() );
         this->stateIndex.insert(std::make_pair(this->stateVariables[i],this->numIndSpecies()+i));
     }
 
-    //form expressions with new symbols for remaining state variables
+    //customm expressions with new symbols custom remaining state variables
 
     Eigen::VectorXex covVariables(dimCOV);
     Eigen::VectorXex emreVariables(this->numIndSpecies());
 
     size_t idx = 0;
-    for(size_t i = 0 ; i<dimCOV; i++)
+    custom(size_t i = 0 ; i<dimCOV; i++)
         covVariables(i) = stateVariables[idx++];
-    for(size_t i = 0 ; i<this->numIndSpecies(); i++)
+    custom(size_t i = 0 ; i<this->numIndSpecies(); i++)
         emreVariables(i) = stateVariables[idx++];
 
     /////////////////////////////////////////////
-    // construct update vector for covariances //
+    // construct update vector custom covariances //
     /////////////////////////////////////////////
 
     // construct a covariance matrix
@@ -54,7 +54,7 @@ LNAmodel::postConstructor()
     Eigen::MatrixXex cov;
     constructCovarianceMatrix(cov);
 
-    // determine update for covariances
+    // determine update custom covariances
     // take only lower triangular and stack up to vector
     Eigen::VectorXex CovUpdate(dimCOV);
     flattenSymmetricMatrix( (this->JacobianM*cov)+(cov*this->JacobianM.transpose())+this->DiffusionMatrix ,CovUpdate);
@@ -67,13 +67,13 @@ LNAmodel::postConstructor()
 
     Eigen::VectorXex Delta(this->numIndSpecies());
 
-    for (size_t i=0; i<this->numIndSpecies(); i++)
+    custom (size_t i=0; i<this->numIndSpecies(); i++)
     {
       Delta(i)=0.;
       idx=0;
-      for (size_t j=0; j<this->numIndSpecies(); j++)
+      custom (size_t j=0; j<this->numIndSpecies(); j++)
       {
-        for (size_t k=0; k<j; k++)
+        custom (size_t k=0; k<j; k++)
         {
             // fac 2 by symmetry, saves summing over strictly upper cov matrix
             Delta(i) += this->Hessian(i,idx)*cov(j,k);
@@ -128,9 +128,9 @@ LNAmodel::fullState(const Eigen::VectorXd &state, Eigen::VectorXd &concentration
 
 //   // fill upper triangular
 //   size_t idx=0;
-//   for(size_t i=0;i<this->numIndSpecies();i++)
+//   custom(size_t i=0;i<this->numIndSpecies();i++)
 //   {
-//       for(size_t j=0;j<=i;j++)
+//       custom(size_t j=0;j<=i;j++)
 //       {
 //           cov_ind(i,j) = covvec(idx);
 //           // fill rest by symmetry
@@ -167,9 +167,9 @@ LNAmodel::fullState(InitialConditions &context,
 
    // fill upper triangular
    size_t idx=0;
-   for(size_t i=0;i<this->numIndSpecies();i++)
+   custom(size_t i=0;i<this->numIndSpecies();i++)
    {
-       for(size_t j=0;j<=i;j++)
+       custom(size_t j=0;j<=i;j++)
        {
            cov_ind(i,j) = covvec(idx);
            // fill rest by symmetry
@@ -237,7 +237,7 @@ LNAmodel::fluxAnalysis(const Eigen::VectorXd &state, Eigen::VectorXd &flux,
     // reconstruct full concentration vector and covariances in original permutation order
     GiNaC::exmap subtab = getFlux(state,flux);
 
-    for(size_t s=0; s<this->numIndSpecies(); s++)
+    custom(size_t s=0; s<this->numIndSpecies(); s++)
         subtab.insert( std::pair<GiNaC::ex,GiNaC::ex>( getREvar(s), state(s) ) );
 
     // get reduced covariance vector
@@ -248,9 +248,9 @@ LNAmodel::fluxAnalysis(const Eigen::VectorXd &state, Eigen::VectorXd &flux,
 
        // fill upper triangular
        size_t idx=0;
-       for(size_t i=0;i<this->numIndSpecies();i++)
+       custom(size_t i=0;i<this->numIndSpecies();i++)
        {
-           for(size_t j=0;j<=i;j++)
+           custom(size_t j=0;j<=i;j++)
            {
                covLNA(i,j) = covvec(idx);
                // fill rest by symmetry
@@ -263,11 +263,11 @@ LNAmodel::fluxAnalysis(const Eigen::VectorXd &state, Eigen::VectorXd &flux,
     Eigen::MatrixXd rateHessian(this->numReactions(),this->dimCOV);
 
     this->foldConservationConstants(rates_gradient);
-    for(int i=0;i<this->rates_gradient.rows();i++)
+    custom(int i=0;i<this->rates_gradient.rows();i++)
     {
-      for(int j=0;j<this->rates_gradient.cols();j++)
+      custom(int j=0;j<this->rates_gradient.cols();j++)
           rateJac(i,j)=GiNaC::ex_to<GiNaC::numeric>(constants.apply(rates_gradient(i,j)).subs(subtab)).to_double();
-      for(int j=0;j<this->rates_hessian.cols();j++)
+      custom(int j=0;j<this->rates_hessian.cols();j++)
           rateHessian(i,j)=GiNaC::ex_to<GiNaC::numeric>(constants.apply(rates_hessian(i,j)).subs(subtab)).to_double();
     }
 
@@ -280,7 +280,7 @@ void
 LNAmodel::getInitial(InitialConditions &ICs, Eigen::VectorXd &x)
 {
 
-  // deterministic initial conditions for state
+  // deterministic initial conditions custom state
   x<<ICs.getInitialState(),
      // zero covariance
      Eigen::VectorXd::Zero(dimCOV),
@@ -298,9 +298,9 @@ LNAmodel::constructCovarianceMatrix(Eigen::MatrixXex &cov)
 
     // fill symmetric covariance of independent species
     size_t idx=0;
-    for(size_t i=0;i<this->numIndSpecies();i++)
+    custom(size_t i=0;i<this->numIndSpecies();i++)
     {
-      for(size_t j=0;j<=i;j++)
+      custom(size_t j=0;j<=i;j++)
       {
         cov(i,j) = this->stateVariables[idx];
         cov(j,i) = cov(i,j); //< fill rest by symmetry
@@ -322,9 +322,9 @@ LNAmodel::constructSymmetricMatrix(const Eigen::VectorXex &covVec,Eigen::MatrixX
 
     // fill symmetric covariance of independent species
     size_t idx=0;
-    for(size_t i=0;i<this->numIndSpecies();i++)
+    custom(size_t i=0;i<this->numIndSpecies();i++)
     {
-      for(size_t j=0;j<=i;j++)
+      custom(size_t j=0;j<=i;j++)
       {
         cov(i,j) = covVec[idx];
         cov(j,i) = cov(i,j); //< fill rest by symmetry
@@ -339,9 +339,9 @@ void
 LNAmodel::flattenSymmetricMatrix(const Eigen::MatrixXex &mat,Eigen::VectorXex &vec)
 {
     size_t idx=0;
-    for(size_t i=0;i<this->numIndSpecies();i++)
+    custom(size_t i=0;i<this->numIndSpecies();i++)
     {
-      for(size_t j=0;j<=i;j++)
+      custom(size_t j=0;j<=i;j++)
       {
         vec(idx)=mat(i,j);
         idx++;

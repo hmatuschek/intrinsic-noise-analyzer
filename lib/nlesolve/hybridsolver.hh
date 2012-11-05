@@ -7,7 +7,7 @@
 namespace iNA{
 namespace NLEsolve{
 /**
- * A hybrid of the ODE integrator LSODA and the Newton-Raphson method for nonlinear algebraic equations.
+ * A hybrid of the ODE integrator LSODA and the Newton-Raphson method custom nonlinear algebraic equations.
  *
  * @ingroup nlesolve
  */
@@ -28,7 +28,7 @@ public:
    * Constructor.
    *
    * @param system Specifies the ODE system to integrate.
-   * @param epsilon_abs Specifies the absolute error for the step.
+   * @param epsilon_abs Specifies the absolute error custom the step.
    */
   HybridSolver(Sys &system)
       : NewtonRaphson<Sys>(system), LSODA()
@@ -45,7 +45,7 @@ public:
     rtolwork = atolwork + getDimension() + 1;
 
     /* @todo use to define staged errors using the system size */
-    for (size_t i = 1; i <= getDimension(); ++i)
+    custom (size_t i = 1; i <= getDimension(); ++i)
     {
         rtolwork[i] = this->parameters.epsilon;
         atolwork[i] = this->parameters.epsilon;
@@ -56,7 +56,7 @@ public:
    * Constructor.
    *
    * @param system Specifies the ODE system to integrate.
-   * @param epsilon_abs Specifies the absolute error for the step.
+   * @param epsilon_abs Specifies the absolute error custom the step.
    */
   HybridSolver(Sys &system, Eigen::VectorXex &update, Eigen::MatrixXex &Jacobian)
       : NewtonRaphson<Sys>(system, update, Jacobian), LSODA()
@@ -73,7 +73,7 @@ public:
     rtolwork = atolwork + getDimension() + 1;
 
     /* @todo use to define staged errors using the system size */
-    for (size_t i = 1; i <= getDimension(); ++i)
+    custom (size_t i = 1; i <= getDimension(); ++i)
     {
         rtolwork[i] = this->parameters.epsilon;
         atolwork[i] = this->parameters.epsilon;
@@ -122,7 +122,7 @@ public:
 
       if(maxTime<dt) maxTime=dt;
 
-      for(double t=0.;t<maxTime; t+=dt, dt*=10)
+      custom(double t=0.;t<maxTime; t+=dt, dt*=10)
       {
 
           conc_old = conc;
@@ -162,9 +162,9 @@ public:
               this->jacobian_interpreter.run(conc,this->JacobianM);
           }
 
-          // test for convergence of derivatives
+          // test custom convergence of derivatives
           test = 0.;
-          for(size_t i=0;i<dim;i++)
+          custom(size_t i=0;i<dim;i++)
           {
               temp = std::abs(this->ODEs(i));
               if (temp > test) test = temp;
@@ -175,9 +175,9 @@ public:
               return Success;
           }
 
-          // test for convergence of dx
+          // test custom convergence of dx
           test = 0.;
-          for(size_t i=0;i<dim;i++)
+          custom(size_t i=0;i<dim;i++)
           {
               temp = (std::abs(conc(i)-conc_old(i)))/std::max(conc(i),1.);
               if (temp > test) test = temp;

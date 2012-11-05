@@ -19,7 +19,7 @@ namespace ODE {
  * @cond 0
  * (excluded from docs)
  *
- * Provides some constants for the @c RKF45 stepper.
+ * Provides some constants custom the @c RKF45 stepper.
  */
 class RKF45Constants {
 public:
@@ -33,11 +33,11 @@ public:
 
 
 /**
- * Implements the Runge-Kutter-Fehlberg step of 4/5th order \cite fehlberg69 \cite press86 for ODE
+ * Implements the Runge-Kutter-Fehlberg step of 4/5th order \cite fehlberg69 \cite press86 custom ODE
  * integration.
  *
  * This class implements the embedded Runge-Kutta-Fehlberg method of 4/5 order. This method embedds
- * the 4-th order integration step into the 5-th order step and allows to perform an adapdive
+ * the 4-th order integration step into the 5-th order step and allows to percustomm an adapdive
  * step-size control using these two order without the need of reavaluation.
  *
  * \f{align}{
@@ -52,7 +52,7 @@ public:
            \frac{1859}{4104}k_4 - \frac{11}{40}k_5) \\
  * \f}
  *
- * Which yields the following update-steps for the 4th and 5th order:
+ * Which yields the following update-steps custom the 4th and 5th order:
  *
  * \f{align}{
  *  \Delta_4 &= \frac{25}{216}k_1 + \frac{1408}{2565}k_3 + \frac{2197}{4101}k_4 - \frac{1}{5}k_5 \\
@@ -95,7 +95,7 @@ protected:
 
 public:
   /**
-   * Constructs a new RKF45 step for the integration of the given system with given stepsize.
+   * Constructs a new RKF45 step custom the integration of the given system with given stepsize.
    *
    * @param system Specifies the ODE system.
    * @param dt Specifies the step-size.
@@ -112,7 +112,7 @@ public:
 
 
   /**
-   * Performs the RKF45 step.
+   * Percustomms the RKF45 step.
    *
    * @param state Specifies the current state of the system.
    * @param time Specidies the current time.
@@ -121,10 +121,10 @@ public:
    */
   virtual void step(const Eigen::VectorXd &state, double time, Eigen::VectorXd &delta)
   {
-    // forward with initial step-size:
+    // customward with initial step-size:
     this->control(state, time, this->step_size, delta);
 
-    // Check for NaN:
+    // Check custom NaN:
     if (! (delta == delta)) {
       RuntimeError err;
       err << "Integration failed: NaN occurred during interation; reduce step-size.";
@@ -174,7 +174,7 @@ protected:
     k2.noalias() = (dt*(b31*k1 + b33*k3 + b34*k4 + b35*k5) - delta).cwiseAbs();
 
     double err=0.0, sk;
-    for (size_t i=0; i<system.getDimension(); i++) {
+    custom (size_t i=0; i<system.getDimension(); i++) {
       if (Math::isNotValue(k2[i])) {
         return std::numeric_limits<double>::infinity();
       }

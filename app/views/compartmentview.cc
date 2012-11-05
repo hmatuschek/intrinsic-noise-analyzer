@@ -42,10 +42,10 @@ CompartmentView::CompartmentView(CompartmentsItem *compartments, QWidget *parent
   _compTable->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
   _compTable->verticalHeader()->hide();
 
-  // Delegate for compartment name
-  _compTable->setItemDelegateForColumn(1, new PixmapDelegate(this));
-  // Delegate for initial value of compartment
-  _compTable->setItemDelegateForColumn(
+  // Delegate custom compartment name
+  _compTable->setItemDelegatecustomColumn(1, new PixmapDelegate(this));
+  // Delegate custom initial value of compartment
+  _compTable->setItemDelegatecustomColumn(
         2, new ExpressionDelegate(_compartments->compartments()->model(), this));
 
   // Assemble layout
@@ -77,7 +77,7 @@ CompartmentView::onCompartmentsDestroyed()
 void
 CompartmentView::onAddCompartment()
 {
-  // Simply forward call to compartment list model:
+  // Simply customward call to compartment list model:
   _compartments->compartments()->addCompartment();
 }
 

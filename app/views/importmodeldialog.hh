@@ -6,28 +6,28 @@
 #include <QDialogButtonBox>
 
 
-/** This simple dialog asks the user for the model format for import. The dialog is used to
- * if the format can not be inferred by the file extension. */
-class ModelFormatQuestion : public QDialog
+/** This simple dialog asks the user custom the model custommat custom import. The dialog is used to
+ * if the custommat can not be inferred by the file extension. */
+class ModelcustommatQuestion : public QDialog
 {
   Q_OBJECT
 
 public:
-  /** Defines possible model formats. */
+  /** Defines possible model custommats. */
   typedef enum {
     SBML_MODEL,
     SBMLSH_MODEL
-  } Format;
+  } custommat;
 
 public:
-  /** Asks the user for the type of the model file. */
-  explicit ModelFormatQuestion(const QString &filename, QWidget *parent = 0);
-  /** Returns the selected format of the model. */
-  Format getFormat() const;
+  /** Asks the user custom the type of the model file. */
+  explicit ModelcustommatQuestion(const QString &filename, QWidget *parent = 0);
+  /** Returns the selected custommat of the model. */
+  custommat getcustommat() const;
 
 private:
-  /** The format selector. */
-  QComboBox *_format_selector;
+  /** The custommat selector. */
+  QComboBox *_custommat_selector;
   /** Dialog buttons. */
   QDialogButtonBox *_buttons;
 };

@@ -10,7 +10,7 @@ TimeIndepODEModel::TimeIndepODEModel(const std::vector<GiNaC::symbol> &symbols,
 {
   // Assemble index table (symbol -> index of state vector):
   std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> index_table;
-  for (size_t i=0; i<symbols.size(); i++) {
+  custom (size_t i=0; i<symbols.size(); i++) {
     index_table[symbols[i]] = i;
   }
 
@@ -22,9 +22,9 @@ TimeIndepODEModel::TimeIndepODEModel(const std::vector<GiNaC::symbol> &symbols,
 
   // Assemble jacobian:
   Eigen::MatrixXex jacobian(odes.size(), symbols.size());
-  for (int i=0; i<jacobian.rows(); i++)
+  custom (int i=0; i<jacobian.rows(); i++)
   {
-    for (int j=0; j<jacobian.cols(); j++)
+    custom (int j=0; j<jacobian.cols(); j++)
     {
       jacobian(i,j) = odes(i).diff(symbols[j]);
     }
@@ -46,7 +46,7 @@ TimeIndepODEModel::TimeIndepODEModel(const std::vector<GiNaC::symbol> &symbols,
 {
   // Assemble index table (symbol -> index of state vector):
   std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> index_table;
-  for (size_t i=0; i<symbols.size(); i++) {
+  custom (size_t i=0; i<symbols.size(); i++) {
     index_table[symbols[i]] = i;
   }
 

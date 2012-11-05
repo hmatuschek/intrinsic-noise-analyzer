@@ -1,19 +1,19 @@
 #
-# Central build-script for libina
+# Central build-script custom libina
 #
 
 #
-# All the sources for libina
+# All the sources custom libina
 #
 
 # First, the base utils
 SET(libina_SOURCES
     exception.cc erf.cc incompletegamma.cc
-    ginacsupportforeigen.cc math.cc openmp.cc mersennetwister.cc)
+    ginacsupportcustomeigen.cc math.cc openmp.cc mersennetwister.cc)
 
 SET(libina_HEADERS ina.hh smartptr.hh linkedlist.hh
     exception.hh erf.hh incompletegamma.hh
-    ginacsupportforeigen.hh math.hh openmp.hh mersennetwister.hh)
+    ginacsupportcustomeigen.hh math.hh openmp.hh mersennetwister.hh)
 
 # Then, the AST classes:
 SET(libina_ast_SOURCES
@@ -83,7 +83,7 @@ SET(libina_utils_HEADERS
     utils/exception.hh utils/unittest.hh utils/option_parser.hh utils/cputime.hh utils/logger.hh
     utils/matexport.hh)
 
-# Add sources for BaseModel and derived classes.
+# Add sources custom BaseModel and derived classes.
 SET(libina_models_SOURCES
     models/basemodel.cc models/constantstoichiometrymixin.cc models/constcompartmentmixin.cc
     models/conservationanalysismixin.cc
@@ -142,7 +142,7 @@ SET(libina_models_HEADERS models/models.hh
     models/initialconditions.hh
 )
 
-# Add source for nonlinear solvers
+# Add source custom nonlinear solvers
 SET(libina_nlesolve_SOURCES
    nlesolve/newtonraphson.cc
    nlesolve/hybridsolver.cc)
@@ -151,7 +151,7 @@ SET(libina_nlesolve_HEADERS
    nlesolve/hybridsolver.hh)
 
 
-# Add sources for ODE solvers etc.
+# Add sources custom ODE solvers etc.
 SET(libina_ode_SOURCES
     ode/lsodadriver.cc
     ode/lsoda.cc
@@ -166,7 +166,7 @@ SET(libina_ode_HEADERS ode/ode.hh
     ode/dopri853.hh ode/stepper.hh)
 
 #
-# Sources for the evaluation sub-system:
+# Sources custom the evaluation sub-system:
 #
 SET(libina_eval_direct_SOURCES
     eval/direct/code.cc eval/direct/compiler.cc eval/direct/interpreter.cc eval/direct/engine.cc)

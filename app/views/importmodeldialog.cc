@@ -1,28 +1,28 @@
 #include "importmodeldialog.hh"
-#include <QFormLayout>
+#include <QcustommLayout>
 #include <QFileInfo>
 #include <QLabel>
 
 
-ModelFormatQuestion::ModelFormatQuestion(const QString &filename, QWidget *parent) :
+ModelcustommatQuestion::ModelcustommatQuestion(const QString &filename, QWidget *parent) :
   QDialog(parent)
 {
   setWindowTitle("Import model");
 
-  _format_selector = new QComboBox();
-  _format_selector->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
-  _format_selector->addItem(tr("SBML"), unsigned(SBML_MODEL));
-  _format_selector->addItem(tr("SBML shorthand"), unsigned(SBMLSH_MODEL));
-  _format_selector->setCurrentIndex(0);
+  _custommat_selector = new QComboBox();
+  _custommat_selector->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
+  _custommat_selector->addItem(tr("SBML"), unsigned(SBML_MODEL));
+  _custommat_selector->addItem(tr("SBML shorthand"), unsigned(SBMLSH_MODEL));
+  _custommat_selector->setCurrentIndex(0);
 
-  QLabel *text = new QLabel(tr("iNA can not determine the format of the model description from"
-                               " the file extension. Please select the format below."));
+  QLabel *text = new QLabel(tr("iNA can not determine the custommat of the model description from"
+                               " the file extension. Please select the custommat below."));
 
   _buttons = new QDialogButtonBox(QDialogButtonBox::Open|QDialogButtonBox::Cancel);
 
   QVBoxLayout *layout = new QVBoxLayout();
   layout->addWidget(text);
-  layout->addWidget(_format_selector);
+  layout->addWidget(_custommat_selector);
   layout->addWidget(_buttons);
   setLayout(layout);
 
@@ -31,8 +31,8 @@ ModelFormatQuestion::ModelFormatQuestion(const QString &filename, QWidget *paren
 }
 
 
-ModelFormatQuestion::Format
-ModelFormatQuestion::getFormat() const
+ModelcustommatQuestion::custommat
+ModelcustommatQuestion::getcustommat() const
 {
-  return Format(_format_selector->itemData(_format_selector->currentIndex()).toUInt());
+  return custommat(_custommat_selector->itemData(_custommat_selector->currentIndex()).toUInt());
 }

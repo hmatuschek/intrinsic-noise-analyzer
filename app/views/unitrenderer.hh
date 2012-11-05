@@ -3,13 +3,13 @@
 
 #include <QPixmap>
 #include <QList>
-#include "../tinytex/formula.hh"
+#include "../tinytex/custommula.hh"
 
 #include "ast/unitdefinition.hh"
 #include <QGraphicsScene>
 
 
-/** A renderer for units. */
+/** A renderer custom units. */
 class UnitRenderer : QObject
 {
   Q_OBJECT
@@ -24,7 +24,7 @@ public:
   static QPixmap toPixmap(const iNA::Ast::Unit &unit);
 
 private:
-  MathFormula *_formula;
+  Mathcustommula *_custommula;
   QPixmap *_pixmap;
 };
 

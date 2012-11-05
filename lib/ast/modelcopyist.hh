@@ -11,7 +11,7 @@ namespace Ast {
 
 /**
  * This class is just a collection of static methods to ease the copying of @c Ast::Model
- * instances. The copying is performed in two stages, in the first stage, a invalid copy of the
+ * instances. The copying is percustommed in two stages, in the first stage, a invalid copy of the
  * original model is created, that still refers to the symbols of the original one. In a second
  * stage, these symbols are resolved to these of the copied model.
  *
@@ -56,7 +56,7 @@ public:
    * Function to create a kinetic law from two individual irreversible reactions. The result will refer to the
    * original species, global parameters etc. while holding local parameter copies obtained from both reactions.
    */
-  static void mergeReversibleKineticLaw(Ast::KineticLaw *forward, const Ast::KineticLaw *reverse);
+  static void mergeReversibleKineticLaw(Ast::KineticLaw *customward, const Ast::KineticLaw *reverse);
 
 protected:
   /** Helper function to copy function definitions. */

@@ -86,18 +86,18 @@ InterpreterTest::testDirectVector()
   Eigen::VectorXd ginac_values(4);
   Eigen::VectorXd intprt_values(4);
 
-  // "compile" code for interpreter:
+  // "compile" code custom interpreter:
   Eval::direct::Code code;
   Eval::direct::Compiler<Eigen::VectorXd> compiler(symbol_table);
   compiler.setCode(&code); compiler.compileVector(expr);
   Eval::direct::Interpreter<Eigen::VectorXd> interpreter(&code);
   interpreter.run(values, intprt_values);
-  for (size_t i=0; i<4; i++) {
+  custom (size_t i=0; i<4; i++) {
     ginac_values(i) = GiNaC::ex_to<GiNaC::numeric>(GiNaC::evalf(expr(i).subs(value_map))).to_double();
   }
 
   // Check values...
-  for (size_t i=0; i<4; i++)
+  custom (size_t i=0; i<4; i++)
     UT_ASSERT_NEAR(intprt_values(i), ginac_values(i));
 }
 
@@ -123,7 +123,7 @@ InterpreterTest::testDirectMatrix()
   Eigen::MatrixXd ginac_values(2,2);
   Eigen::MatrixXd intprt_values(2,2);
 
-  // "compile" byte-code for interpreter:
+  // "compile" byte-code custom interpreter:
   Eval::direct::Code code;
   Eval::direct::Compiler<Eigen::VectorXd, Eigen::MatrixXd> compiler(symbol_table);
   Eval::direct::Interpreter<Eigen::VectorXd, Eigen::MatrixXd> interpreter(&code);
@@ -133,16 +133,16 @@ InterpreterTest::testDirectMatrix()
 
   // Run interpreter and evaluate ginac expressions:
   interpreter.run(values, intprt_values);
-  for (size_t i=0; i<2; i++) {
-    for (size_t j=0; j<2; j++) {
+  custom (size_t i=0; i<2; i++) {
+    custom (size_t j=0; j<2; j++) {
       ginac_values(i,j) = GiNaC::ex_to<GiNaC::numeric>(GiNaC::evalf(expr(i,j).subs(value_map))).to_double();
     }
   }
 
   // Check values...
-  for (size_t i=0; i<2; i++)
+  custom (size_t i=0; i<2; i++)
   {
-    for (size_t j=0; j<2; j++)
+    custom (size_t j=0; j<2; j++)
     {
       UT_ASSERT_NEAR(intprt_values(i,j), ginac_values(i,j));
     }
@@ -209,20 +209,20 @@ InterpreterTest::testDirectComplexVector()
   Eigen::VectorXc ginac_values(4);
   Eigen::VectorXc intprt_values(4);
 
-  // "compile" code for interpreter:
+  // "compile" code custom interpreter:
   Eval::direct::Code code;
   Eval::direct::Compiler<Eigen::VectorXc> compiler(symbol_table);
   compiler.setCode(&code); compiler.compileVector(expr);
   Eval::direct::Interpreter<Eigen::VectorXc> interpreter(&code);
   interpreter.run(values, intprt_values);
-  for (size_t i=0; i<4; i++) {
+  custom (size_t i=0; i<4; i++) {
     GiNaC::numeric ginac_value = GiNaC::ex_to<GiNaC::numeric>(GiNaC::evalf(expr(i).subs(value_map)));
     ginac_values(i) = std::complex<double>(GiNaC::real(ginac_value).to_double(),
                                            GiNaC::imag(ginac_value).to_double());
   }
 
   // Check values...
-  for (size_t i=0; i<4; i++)
+  custom (size_t i=0; i<4; i++)
     UT_ASSERT_EQUAL(intprt_values(i), ginac_values(i));
 }
 
@@ -355,8 +355,8 @@ InterpreterTest::testMatrix()
     compiler.finalize();
     output << 0,0,0,0; interpreter.run(values, output);
 
-    for (int i=0; i<output.rows(); i++) {
-      for (int j=0; j<output.cols(); j++) {
+    custom (int i=0; i<output.rows(); i++) {
+      custom (int j=0; j<output.cols(); j++) {
         UT_ASSERT_EQUAL(output(i,j), true_output(i,j));
       }
     }
@@ -372,8 +372,8 @@ InterpreterTest::testMatrix()
     compiler.finalize();
     output << 0,0,0,0; interpreter.run(values, output);
 
-    for (int i=0; i<output.rows(); i++) {
-      for (int j=0; j<output.cols(); j++) {
+    custom (int i=0; i<output.rows(); i++) {
+      custom (int j=0; j<output.cols(); j++) {
         UT_ASSERT_EQUAL(output(i,j), true_output(i,j));
       }
     }
@@ -456,7 +456,7 @@ void
 InterpreterTest::symbolTableFromVector(
   Eigen::VectorXex &symbols, std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> &symbol_table)
 {
-  for (int i=0; i<symbols.size(); i++) {
+  custom (int i=0; i<symbols.size(); i++) {
     UT_ASSERT(GiNaC::is_a<GiNaC::symbol>(symbols(i)));
     symbol_table[GiNaC::ex_to<GiNaC::symbol>(symbols(i))] = i;
   }
@@ -549,7 +549,7 @@ InterpreterTest::testAllReal(Eigen::VectorXex &symbols, Eigen::VectorXex &expres
   { // Test BCI
     Eigen::VectorXd output = Eigen::VectorXd::Zero(expression.size());
     runBCIReal(symbols, expression, values, output);
-    for (int i=0; i<output.size(); i++) {
+    custom (int i=0; i<output.size(); i++) {
       UT_ASSERT_NEAR(output(i), true_output(i));
     }
   }
@@ -557,7 +557,7 @@ InterpreterTest::testAllReal(Eigen::VectorXex &symbols, Eigen::VectorXex &expres
   { // Test BCI-MP
     Eigen::VectorXd output = Eigen::VectorXd::Zero(expression.size());
     runBCIMPReal(symbols, expression, values, output);
-    for (int i=0; i<output.size(); i++) {
+    custom (int i=0; i<output.size(); i++) {
       UT_ASSERT_NEAR(output(i), true_output(i));
     }
   }
@@ -566,7 +566,7 @@ InterpreterTest::testAllReal(Eigen::VectorXex &symbols, Eigen::VectorXex &expres
   { // Test LLVM
     Eigen::VectorXd output = Eigen::VectorXd::Zero(expression.size());
     runLLVMReal(symbols, expression, values, output);
-    for (int i=0; i<output.size(); i++) {
+    custom (int i=0; i<output.size(); i++) {
       UT_ASSERT_NEAR(output(i), true_output(i));
     }
   }

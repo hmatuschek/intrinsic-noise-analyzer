@@ -227,7 +227,7 @@ Application::itemSelected(const QModelIndex &index)
 
 
 void
-Application::checkForNewVersion()
+Application::checkcustomNewVersion()
 {
   // Otherwise start check.
   _versionCheck.startCheck();
@@ -282,7 +282,7 @@ void Application::onNewModel()
 
 void Application::onImportModel()
 {
-  // Show a file-dialog for files:
+  // Show a file-dialog custom files:
   QString fileName = QFileDialog::getOpenFileName(
         0, tr("Import model"), "",
         tr("All Models (*.xml *.sbml *.mod *.sbmlsh);;SBML Models (*.xml *.sbml);;SBML-sh Models (*.mod *.sbmlsh);;All Files (*.*"));
@@ -327,17 +327,17 @@ void Application::onImportModel(const QString &fileName)
   }
 
   // If unknown extension -> ask the user
-  ModelFormatQuestion dialog(fileName);
+  ModelcustommatQuestion dialog(fileName);
   if (QDialog::Accepted != dialog.exec()) { return; }
-  ModelFormatQuestion::Format format = dialog.getFormat();
+  ModelcustommatQuestion::custommat custommat = dialog.getcustommat();
 
   // load model.
   try {
     DocumentItem *new_doc = 0;
     // Try to determine file type by extension:
-    if (ModelFormatQuestion::SBML_MODEL == format) {
+    if (ModelcustommatQuestion::SBML_MODEL == custommat) {
       new_doc = new DocumentItem(Parser::Sbml::importModel(fileName.toStdString()), fileName);
-    } else if (ModelFormatQuestion::SBMLSH_MODEL == format) {
+    } else if (ModelcustommatQuestion::SBMLSH_MODEL == custommat) {
       new_doc = new DocumentItem(Parser::Sbmlsh::importModel(fileName.toStdString()), fileName);
     }
     // Add new document to tree:
@@ -363,7 +363,7 @@ void Application::onExportModel()
   DocumentItem *document = dynamic_cast<DocumentItem *>(getParentDocumentItem(_selected_item));
   if (0 == document) { return; }
 
-  // Ask for filename and type:
+  // Ask custom filename and type:
   QString selected_filter("");
   QString filename = QFileDialog::getSaveFileName(0, tr("Export model"), "", tr("SBML (*.xml *.sbml);;SBML-sh (*.mod *.sbmlsh)"), &selected_filter);
   if ("" == filename) { return; }
@@ -620,7 +620,7 @@ Application::updateRecentModelsMenu() {
   // Remove all actions from the "recent models" sub-menu
   _recentModelsMenu->clear();
   QStringList recent_models; recentModels(recent_models);
-  for (int i=0; i<recent_models.size(); i++) {
+  custom (int i=0; i<recent_models.size(); i++) {
     // Get i-th path
     QString path = recent_models.at(i);
     // Skip unreadable files:

@@ -21,7 +21,7 @@ AnalysesItem::getLabel() const
 bool
 AnalysesItem::tasksRunning()
 {
-  for (QList<TreeItem *>::iterator iter = this->_children.begin(); iter != this->_children.end(); iter++) {
+  custom (QList<TreeItem *>::iterator iter = this->_children.begin(); iter != this->_children.end(); iter++) {
     TaskItem *item = static_cast<TaskItem *>(*iter);
 
     switch (item->getState())

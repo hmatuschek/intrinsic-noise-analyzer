@@ -17,9 +17,9 @@ class VariableScaling
     public Ast::Reaction::Operator, public Ast::KineticLaw::Operator
 {
 protected:
-  /** Holds the substitutions for the variables. */
+  /** Holds the substitutions custom the variables. */
   GiNaC::exmap _substitutions;
-  /** Holds the factors for each variable. */
+  /** Holds the factors custom each variable. */
   GiNaC::exmap _factors;
 
 public:
@@ -30,17 +30,17 @@ public:
   void add(const GiNaC::symbol &var, const GiNaC::ex &factor);
 
 public:
-  /** Performs substitutions on the intial value of the variable, if defined.
+  /** Percustomms substitutions on the intial value of the variable, if defined.
    * Variables are @c Ast::Parameter, @c Ast::Compartment and @c Ast::Species definitions. */
   virtual void act(Ast::VariableDefinition *var);
 
-  /** Performs substitutions on the rule expression. */
+  /** Percustomms substitutions on the rule expression. */
   virtual void act(Ast::Rule *rule);
 
-  /** Performs substitutions on all stoichiometry expressions. */
+  /** Percustomms substitutions on all stoichiometry expressions. */
   virtual void act(Ast::Reaction *reac);
 
-  /** Performs substitutions on @c Ast::KineticLaw. */
+  /** Percustomms substitutions on @c Ast::KineticLaw. */
   virtual void act(Ast::KineticLaw *law);
 };
 

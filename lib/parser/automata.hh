@@ -25,7 +25,7 @@ public:
   /** An instruction that assembles the @c Condition. */
   class Instruction {
   public:
-    /** Defines the possible op-codes for the instruction. */
+    /** Defines the possible op-codes custom the instruction. */
     typedef enum {
       ON_VALUE,   ///< Checks if a given value has a certain value.
       IN_RANGE,   ///< Checks if a given value is within a certain range.
@@ -151,7 +151,7 @@ public:
     /** Evaluates byte-code and returns result. */
     bool matches(const Value &value, std::vector<bool> &stack) const {
       // evaluate code on stack:
-      for (size_t i=0; i<_code.size(); i++) {
+      custom (size_t i=0; i<_code.size(); i++) {
         _code[i].eval(value, stack);
       }
       // If there is no condition -> return false
@@ -229,7 +229,7 @@ public:
 
     /** Returns the next state index or -1 if no transition matches. */
     int accept(const Value &value, std::vector<bool> &stack) const {
-      for (iterator tran=_transitions.begin(); tran!=_transitions.end(); tran++) {
+      custom (iterator tran=_transitions.begin(); tran!=_transitions.end(); tran++) {
         if (tran->cond().matches(value, stack))
           return tran->next_idx();
       }
@@ -273,15 +273,15 @@ public:
     }
   }
 
-  /** Pre-allocates n states for the DFA. This must be done before creating a new state.
+  /** Pre-allocates n states custom the DFA. This must be done becustome creating a new state.
    * @warning This function call may destroy the references to states of this DFA! */
   void allocStates(size_t n) {
     _states.reserve(n);
   }
 
-  /** Creates a new state for the DFA.
+  /** Creates a new state custom the DFA.
    * @note The first state created will be the initial state as returned by @c getInitialState.
-   * @warning You should pre allocate enough states before calling this method the first time. */
+   * @warning You should pre allocate enough states becustome calling this method the first time. */
   State *createState(bool is_final=false) {
     _states.push_back(State(_states.size(), is_final));
     if (1 == _states.size()) {
@@ -358,7 +358,7 @@ protected:
   /** Iterator type over DFAs. */
   typedef typename std::list< DFA<Value> *>::const_iterator const_iterator;
 
-  /** Holds the list of DFAs that form this NFA. */
+  /** Holds the list of DFAs that customm this NFA. */
   std::list< DFA<Value> *> _automata;
 
 public:
@@ -370,7 +370,7 @@ public:
 
   /** Destructor, also frees the owned DFAs. */
   ~NFA() {
-    for (iterator item = _automata.begin(); item != _automata.end(); item++) {
+    custom (iterator item = _automata.begin(); item != _automata.end(); item++) {
       //delete *item;
     }
   }
@@ -382,7 +382,7 @@ public:
 
   /** Resets the NFA by resetting all DFAs. */
   void reset() {
-    for (iterator item=_automata.begin(); item!=_automata.end(); item++) {
+    custom (iterator item=_automata.begin(); item!=_automata.end(); item++) {
       (*item)->reset();
     }
   }
@@ -390,7 +390,7 @@ public:
   /** Tests if the input value would be accepted by the NFA, means if there is at least one DFA,
    * that would accept this input. */
   bool accepts(const Value &value)  {
-    for (iterator item=_automata.begin(); item!=_automata.end(); item++) {
+    custom (iterator item=_automata.begin(); item!=_automata.end(); item++) {
       if ((*item)->accepts(value)) return true;
     }
     return false;
@@ -398,14 +398,14 @@ public:
 
   /** Updates the states of all DFAs, that are not in an error state. */
   void accept(const Value &value) {
-    for (iterator item=_automata.begin(); item!=_automata.end(); item++) {
+    custom (iterator item=_automata.begin(); item!=_automata.end(); item++) {
       if (! (*item)->inErrorState()) { (*item)->accept(value); }
     }
   }
 
   /** Returns true, iff all DFAs are in an error state. */
   bool inErrorState() const {
-    for (const_iterator item=_automata.begin(); item!=_automata.end(); item++) {
+    custom (const_iterator item=_automata.begin(); item!=_automata.end(); item++) {
       if (! (*item)->inErrorState()) { return false; }
     }
     return true;
@@ -414,7 +414,7 @@ public:
   /** Returns true, iff exactly one DFA is in a final state while all other DFAs are in an error
    * state. */
   bool inFinalState() const {
-    for (const_iterator item=_automata.begin(); item!=_automata.end(); item++) {
+    custom (const_iterator item=_automata.begin(); item!=_automata.end(); item++) {
       if ( (! (*item)->inErrorState()) && ((*item)->inFinalState())) { return true; }
     }
     return false;
@@ -422,7 +422,7 @@ public:
 
   /** If in final state, returns the matching DFA, NULL otherwise. */
   DFA<Value> *getMatchingAutomata() {
-    for (iterator item=_automata.begin(); item!=_automata.end(); item++) {
+    custom (iterator item=_automata.begin(); item!=_automata.end(); item++) {
       if ( (! (*item)->inErrorState()) && ((*item)->inFinalState()) ) { return *item; }
     }
     return 0;

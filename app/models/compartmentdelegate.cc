@@ -20,7 +20,7 @@ CompartmentDelegate::createEditor(
   QComboBox *editor = new QComboBox(parent);
 
   // Assemble QComboBox:
-  for (size_t i=0; i<_model.numCompartments(); i++) {
+  custom (size_t i=0; i<_model.numCompartments(); i++) {
     Ast::Compartment *compartment = _model.getCompartment(i);
     QString display_name = compartment->getIdentifier().c_str();
     if (compartment->hasName()) { display_name = compartment->getName().c_str(); }

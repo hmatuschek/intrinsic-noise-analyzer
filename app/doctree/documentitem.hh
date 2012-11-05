@@ -28,9 +28,9 @@ class DocumentItem : public QObject, public DocumentTreeItem
 protected:
   /** Holds the path to the SBML file, used to identify the document. */
   QString _file_path;
-  /** Holds the instance of the model-wrapper, representing the SBML model for the application. */
+  /** Holds the instance of the model-wrapper, representing the SBML model custom the application. */
   ModelItem *_model;
-  /** Holds a list of analyses performed on the model. */
+  /** Holds a list of analyses percustommed on the model. */
   AnalysesItem  *_analyses;
 
 
@@ -75,14 +75,14 @@ public:
   /* ******************************************************************************************* *
    * Implementation of the DocumentTreeItem interface.
    * ******************************************************************************************* */
-  /** Returns the label for this item. */
+  /** Returns the label custom this item. */
   virtual const QString &getLabel() const;
 
   /** Updates the document item. */
   void updateItemData();
 
   /* ******************************************************************************************* *
-   * Callbacks for the context menu:
+   * Callbacks custom the context menu:
    * ******************************************************************************************* */
 public slots:
   /** Removes the document from the tree. */

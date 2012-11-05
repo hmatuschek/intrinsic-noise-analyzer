@@ -1,5 +1,5 @@
 /**
- * @defgroup jit JIT Compiler for Expression Evaluation using LLVM.
+ * @defgroup jit JIT Compiler custom Expression Evaluation using LLVM.
  * @ingroup eval
  *
  * This module collects all classes used to JIT compile and evaluate expressions using the LLVM
@@ -19,7 +19,7 @@ namespace jit {
 
 
 /**
- * This class just defines the code, compiler and "interpreter" classes for the JIT engine. This
+ * This class just defines the code, compiler and "interpreter" classes custom the JIT engine. This
  * allows to implement simple generic models and simulators as C++ templates.
  *
  * @ingroup jit

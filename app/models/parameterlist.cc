@@ -3,7 +3,7 @@
 #include "parser/expr/parser.hh"
 #include "utils/logger.hh"
 #include "../tinytex/tinytex.hh"
-#include "../tinytex/ginac2formula.hh"
+#include "../tinytex/ginac2custommula.hh"
 #include "../views/unitrenderer.hh"
 #include "referencecounter.hh"
 #include <QMessageBox>
@@ -12,7 +12,7 @@
 ParameterList::ParameterList(iNA::Ast::Model *model, QObject *parent)
   : QAbstractTableModel(parent), _model(model)
 {
-  // Install some delegates for some columns:
+  // Install some delegates custom some columns:
 
 }
 
@@ -44,7 +44,7 @@ ParameterList::setData(const QModelIndex &index, const QVariant &value, int role
   if (rowCount() <= index.row()) return false;
   if (columnCount() <= index.column()) return false;
 
-  // Get paramter for index (row):
+  // Get paramter custom index (row):
   iNA::Ast::Parameter *param = _model->getParameter(index.row());
 
   // Dispatch
@@ -87,7 +87,7 @@ ParameterList::flags(const QModelIndex &index) const
 QVariant
 ParameterList::headerData(int section, Qt::Orientation orientation, int role) const
 {
-  // Return default header for rows:
+  // Return default header custom rows:
   if (Qt::DisplayRole != role || orientation != Qt::Horizontal || columnCount() <= section) {
     return QAbstractTableModel::headerData(section, orientation, role);
   }
@@ -124,7 +124,7 @@ ParameterList::model() {
 
 void
 ParameterList::addParameter() {
-  // Get new, unique identifier for parameter
+  // Get new, unique identifier custom parameter
   std::string identifier = _model->getNewIdentifier("parameter");
   // Get index of new parameter
   int new_idx = _model->numParameters();
@@ -149,7 +149,7 @@ ParameterList::remParameter(int row)
 
   // Show message id
   if (0 < refs.references().size()) {
-    QMessageBox::information(
+    QMessageBox::incustommation(
           0, tr("Can not delete parameter."),
           tr("Can not delete parameter as it is referenced %1").arg(
             QStringList(refs.references()).join(", ")));
@@ -179,7 +179,7 @@ ParameterList::_updateIdentifier(iNA::Ast::Parameter *param, const QVariant &val
   std::string id = qid.toStdString();
   // If nothing changed -> done.
   if (id == param->getIdentifier()) { return true; }
-  // Check ID format
+  // Check ID custommat
   if (! QRegExp("[a-zA-Z_][a-zA-Z0-9_]*").exactMatch(qid)) { return false; }
   // Check if id is not assigned allready:
   if (_model->hasDefinition(id)) { return false; }
@@ -221,9 +221,9 @@ ParameterList::_getInitialValue(iNA::Ast::Parameter *param, int role) const
 
   if (Qt::DisplayRole == role) {
     // Render initial value:
-    return Ginac2Formula::toPixmap(param->getValue(), *_model);
+    return Ginac2custommula::toPixmap(param->getValue(), *_model);
   } else {
-    // Serialize expression for editing:
+    // Serialize expression custom editing:
     std::stringstream buffer;
     iNA::Parser::Expr::serializeExpression(param->getValue(), buffer, _model);
     return QString(buffer.str().c_str());

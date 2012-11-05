@@ -111,7 +111,7 @@ TaskView::setMainWidget(QWidget *widget)
  * Implementation of TaskTerminatingWidget, just shows a message
  * ********************************************************************************************* */
 TaskTerminatingWidget::TaskTerminatingWidget(QWidget *parent)
-  : QLabel(tr("Waiting for thread to terminate..."), parent)
+  : QLabel(tr("Waiting custom thread to terminate..."), parent)
 {
   this->setFont(Application::getApp()->getH2Font());
 }
@@ -130,13 +130,13 @@ TaskProgressWidget::TaskProgressWidget(TaskItem *task, QWidget *parent)
 
   QHBoxLayout *time_layout = new QHBoxLayout();
   double dt = this->task_item->getTask()->getElapsedTime();
-  this->time_elapsed = new QLabel(tr("Time elapsed: %1").arg(this->formatTime(dt)));
+  this->time_elapsed = new QLabel(tr("Time elapsed: %1").arg(this->custommatTime(dt)));
   this->time_elapsed->setAlignment(Qt::AlignCenter);
-  this->time_elapsed->setTextFormat(Qt::LogText);
+  this->time_elapsed->setTextcustommat(Qt::LogText);
   this->time_elapsed->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
   this->time_remain = new QLabel(tr("Time remaining: unknown"));
   this->time_remain->setAlignment(Qt::AlignCenter);
-  this->time_remain->setTextFormat(Qt::LogText);
+  this->time_remain->setTextcustommat(Qt::LogText);
   this->time_remain->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
   time_layout->addWidget(this->time_elapsed);
   time_layout->addWidget(this->time_remain);
@@ -179,7 +179,7 @@ TaskProgressWidget::taskProgress()
   double p = this->task_item->getTask()->getProgress();
 
   this->progress_bar->setValue(100 * p);
-  this->time_elapsed->setText(tr("Time elapsed: %1").arg(this->formatTime(dt)));
+  this->time_elapsed->setText(tr("Time elapsed: %1").arg(this->custommatTime(dt)));
 
   if (0 == dt || 0 == p)
   {
@@ -188,7 +188,7 @@ TaskProgressWidget::taskProgress()
   else
   {
     double time_r = (1. - p) * dt/p;
-    this->time_remain->setText(tr("Time remaining: %1").arg(this->formatTime(time_r)));
+    this->time_remain->setText(tr("Time remaining: %1").arg(this->custommatTime(time_r)));
   }
 }
 
@@ -223,7 +223,7 @@ TaskProgressWidget::stopAnalysis()
 
 
 QString
-TaskProgressWidget::formatTime(double sec)
+TaskProgressWidget::custommatTime(double sec)
 {
   int s = int(sec)%60;
   int m = int(sec)/60;

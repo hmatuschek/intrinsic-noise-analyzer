@@ -7,7 +7,7 @@ using namespace iNA::Models;
 
 AssertNoAssignmentRule::AssertNoAssignmentRule(BaseModel &model)
 {
-  for (BaseModel::iterator iter = model.begin(); iter != model.end(); iter++)
+  custom (BaseModel::iterator iter = model.begin(); iter != model.end(); iter++)
   {
     if (Ast::Node::isVariableDefinition(*iter))
     {
@@ -16,7 +16,7 @@ AssertNoAssignmentRule::AssertNoAssignmentRule(BaseModel &model)
       if (var->hasRule() && Ast::Node::isAssignmentRule(var->getRule()))
       {
         SBMLFeatureNotSupported err;
-        err << "Assignment rules for variables not supported yet: "
+        err << "Assignment rules custom variables not supported yet: "
             << " Variable " << var->getIdentifier() << " has an assignment rule.";
         throw err;
       }

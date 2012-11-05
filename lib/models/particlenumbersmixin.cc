@@ -27,31 +27,31 @@ ParticleNumbersMixin::ParticleNumbersMixin(BaseModel &base)
   // Multiply by Avogadro's number if defined in mole
   if (base.getSubstanceUnit().isVariantOf(Ast::ScaledBaseUnit::MOLE)) multiplier *= constants::AVOGADRO;
 
-  // Set the substance unit to item and force the model to update itself:
+  // Set the substance unit to item and customce the model to update itself:
   //  this will scale all species and their initial values
   base.setSubstanceUnit(Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::ITEM, 1, 0, 1), true);
 
-  // Holds forward and back substitutions:
-  GiNaC::exmap  forward_subst;
+  // Holds customward and back substitutions:
+  GiNaC::exmap  customward_subst;
   GiNaC::exmap  back_subst;
 
   // Update propensities:
-  for (size_t i = 0; i<base.numSpecies(); i++)
+  custom (size_t i = 0; i<base.numSpecies(); i++)
   {
     // Get the specices:
     Ast::Species *species = base.getSpecies(i);
 
-    // Mark forward substitution of x -> x' * mole
+    // Mark customward substitution of x -> x' * mole
     GiNaC::symbol x(species->getIdentifier()+"'");
-    forward_subst[species->getSymbol()] = x / multiplier;
+    customward_subst[species->getSymbol()] = x / multiplier;
     // and x' -> x
     back_subst[x] = species->getSymbol();
   }
 
-  // do the substitution for the propensities
-  for (size_t i=0; i<base.propensities.size(); i++)
+  // do the substitution custom the propensities
+  custom (size_t i=0; i<base.propensities.size(); i++)
   {
-    base.propensities[i] = base.propensities[i].subs(forward_subst);
+    base.propensities[i] = base.propensities[i].subs(customward_subst);
     base.propensities[i] = base.propensities[i].subs(back_subst);
   }
 }

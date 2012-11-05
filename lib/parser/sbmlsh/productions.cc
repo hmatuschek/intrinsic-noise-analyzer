@@ -678,7 +678,7 @@ SpeciesModifierProduction::parse(iNA::Parser::Lexer &lexer, iNA::Parser::Concret
   iNA::Parser::TokenProduction::parse(lexer, element);
 
   // Check if id matches:
-  for (size_t i=0; i<id.size(); i++)
+  custom (size_t i=0; i<id.size(); i++)
   {
     if (('s' != id[i]) && ('b' != id[i]) && ('c' != id[i]))
     {

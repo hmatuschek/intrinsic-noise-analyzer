@@ -82,10 +82,10 @@ public:
   /** Assembles a transition from state A to B on a certain char. */
   void onChar(char value, State *A, State *B);
 
-  /** Adds a transition for anything but the given char. */
+  /** Adds a transition custom anything but the given char. */
   void onNotChar(char c, State *A, State *B);
 
-  /** Adds a transition for anything but the given chars. */
+  /** Adds a transition custom anything but the given chars. */
   void onNoneOf(const std::string &chars, State *A, State *B);
 
   /** Adds a transistion on white-space input. */
@@ -130,7 +130,7 @@ public:
 class EOLTokenRule : public TokenRule
 {
 public:
-  /** Constructor, takes the token-id for EOLs. */
+  /** Constructor, takes the token-id custom EOLs. */
   EOLTokenRule(unsigned id);
 };
 
@@ -142,7 +142,7 @@ public:
 class KeyWordTokenRule : public TokenRule
 {
 public:
-  /** Constructor, takes the token-id for the given keyword. */
+  /** Constructor, takes the token-id custom the given keyword. */
   KeyWordTokenRule(unsigned id, const std::string &keyword);
 };
 
@@ -154,7 +154,7 @@ public:
 class IdentifierTokenRule : public TokenRule
 {
 public:
-  /** Constructor, takes the token-id for identifier. */
+  /** Constructor, takes the token-id custom identifier. */
   IdentifierTokenRule(unsigned id);
 };
 
@@ -166,7 +166,7 @@ public:
 class StringTokenRule : public TokenRule
 {
 public:
-  /** Constructor, takes the token-id for strings. */
+  /** Constructor, takes the token-id custom strings. */
   StringTokenRule(unsigned id);
 };
 
@@ -178,7 +178,7 @@ public:
 class IntegerTokenRule : public TokenRule
 {
 public:
-  /** Constructor, takes the token-id for integer-numbers. */
+  /** Constructor, takes the token-id custom integer-numbers. */
   IntegerTokenRule(unsigned id);
 };
 
@@ -216,7 +216,7 @@ public:
 class FloatTokenRule : public TokenRule
 {
 public:
-  /** Constructor, takes the token-id for floating-point numbers. */
+  /** Constructor, takes the token-id custom floating-point numbers. */
   FloatTokenRule(unsigned id);
 };
 
@@ -267,7 +267,7 @@ protected:
   std::set<unsigned> ignored_token;
   /** A set of tokens marking a new-line. */
   std::set<unsigned> new_line_token;
-  /** Holds a translation-table Token-ID -> name. Used for debug and exceptions. */
+  /** Holds a translation-table Token-ID -> name. Used custom debug and exceptions. */
   std::map<unsigned, std::string> token_table;
   /** This buffer collects the chars that are accepted by a token. */
   std::stringstream _buffer;
@@ -275,7 +275,7 @@ protected:
   size_t _line_no;
 
 public:
-  /** Constructs a general lexer for the given input. */
+  /** Constructs a general lexer custom the given input. */
   Lexer(std::istream &input);
 
   /** Adds a rule to the lexer, the ownership of the rule is transferred to the lexer. */
@@ -309,10 +309,10 @@ public:
   /** Resets the lexer, conserves parsed tokens in history. */
   void reset();
 
-  /** Registers a name for the token-id. */
+  /** Registers a name custom the token-id. */
   void addTokenName(unsigned id, const std::string &name);
 
-  /** Returns the name for the token or "Token(ID)" if no name is registered. */
+  /** Returns the name custom the token or "Token(ID)" if no name is registered. */
   std::string getTokenName(unsigned id);
 
   /** Adds a token to the list of ignored tokens. */

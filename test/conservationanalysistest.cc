@@ -79,7 +79,7 @@ ConservationAnalysisTest::testWithAssignmentRule()
   // Define a conserved cycle explicitly as a assignment rule: S == -ES - P
   _model->getSpecies("S")->setRule(new Ast::AssignmentRule(-ES-P));
 
-  // now perform conservation analysis on remainting independent species:
+  // now percustomm conservation analysis on remainting independent species:
   Trafo::ConservationAnalysis::apply(*_model);
 
   // Should find conserved cycle E = ES;

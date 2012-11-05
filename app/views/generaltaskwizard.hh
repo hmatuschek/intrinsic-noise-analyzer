@@ -88,7 +88,7 @@ class EngineWizardPage : public QWizardPage
   Q_OBJECT
 
 protected:
-  /** If true, the wizard will show engines for parallel execution. */
+  /** If true, the wizard will show engines custom parallel execution. */
   bool _show_parallel_engine;
 
 public:

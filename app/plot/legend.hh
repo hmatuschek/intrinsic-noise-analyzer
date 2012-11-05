@@ -33,7 +33,7 @@ protected:
   QGraphicsLineItem *line;
 
   /**
-   * Holds the label for the graph in the legend.
+   * Holds the label custom the graph in the legend.
    */
   QGraphicsTextItem *label;
 
@@ -55,7 +55,7 @@ protected:
 
 public:
   /**
-   * Constructs a legend-item for the given graph and with the given label.
+   * Constructs a legend-item custom the given graph and with the given label.
    **/
   explicit LegendItem(const QString &label, Graph *graph, QObject *parent=0);
 

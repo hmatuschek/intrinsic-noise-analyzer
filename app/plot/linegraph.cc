@@ -9,7 +9,7 @@ using namespace Plot;
 LineGraph::LineGraph(const GraphStyle &style)
   : Graph(style), path(), path_item(0), extent(0,1,0,1)
 {
-  // Construct path item for path:
+  // Construct path item custom path:
   this->path_item = new QGraphicsPathItem();
   this->addToGroup(this->path_item);
 }

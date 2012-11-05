@@ -11,7 +11,7 @@ namespace Ast {
 /**
  * A specialization of @c Ast::VariableDefinition that represents a species definition.
  *
- * This class holds some more information about the species definition than the
+ * This class holds some more incustommation about the species definition than the
  * @c Ast::VariableDefinition. It links the variable to the compartment, the species live in as well
  * as the unit-definition, the species is measured in.
  *
@@ -20,9 +20,9 @@ namespace Ast {
 class Species : public VariableDefinition
 {
 public:
-  /** Visitor class for species. */
+  /** Visitor class custom species. */
   class Visitor { public: virtual void visit(const Species *var) = 0; };
-  /** Operator class for species. */
+  /** Operator class custom species. */
   class Operator { public: virtual void act(Species *var) = 0; };
 
 protected:
@@ -31,18 +31,18 @@ protected:
 
 public:
   /**
-   * Minimal constructor for a species definition.
+   * Minimal constructor custom a species definition.
    *
-   * @param id Specifies the unique identifier for the species.
+   * @param id Specifies the unique identifier custom the species.
    * @param compartment Specifies the compartment, the species lives in.
    * @param is_const Specifies if the species amount
    */
   Species(const std::string &id, Compartment *compartment, bool _is_const=false);
 
   /**
-   * Full constructor for a species definition.
+   * Full constructor custom a species definition.
    *
-   * @param id Specifies the unique identifier for the species.
+   * @param id Specifies the unique identifier custom the species.
    * @param init_val Specifies the initial value of the species.
    * @param compartment Specifies the compartment, the species lives in.
    * @param name Specifies display name of the species.
@@ -60,7 +60,7 @@ public:
   /** (Re-) Sets the compartment. */
   void setCompartment(Compartment *compartment);
 
-  /** Handles a visitor for the species. */
+  /** Handles a visitor custom the species. */
   virtual void accept(Ast::Visitor &visitor) const;
 
   /** Applies an operator on the species. */

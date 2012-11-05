@@ -9,7 +9,7 @@
 #include "../views/varianceplot.hh"
 
 
-/** Implements a simple quick plot for the RE mean and LAN var. */
+/** Implements a simple quick plot custom the RE mean and LAN var. */
 class LNATimeSeriesPlot : public LinePlot
 {
   Q_OBJECT
@@ -19,7 +19,7 @@ public:
 };
 
 
-/** Implements a simple correlation plot for LNA covariances. */
+/** Implements a simple correlation plot custom LNA covariances. */
 class LNACorrelationPlot : public LinePlot
 {
   Q_OBJECT

@@ -253,7 +253,7 @@ Assembler::processUnitDefinition(Parser::ConcreteSyntaxTree &unit)
   //   [QuotedString]                :unit[3]; unit[3][0] -> QuotedString
   //   [EOL UnitDefinitionList]      :unit[4]; 4.0.1
 
-  // Collect scaled base units for this unit:
+  // Collect scaled base units custom this unit:
   std::list<Ast::ScaledBaseUnit> units;
   processScaledUnitList(unit[2], units);
 
@@ -379,7 +379,7 @@ Assembler::processCompartmentDefinitions(Parser::ConcreteSyntaxTree &comp)
   // Handle inner/outer relation if needed:
   if (comp[1].matched()) {
     SBMLFeatureNotSupported err;
-    err << "Can not define inner/outer relation for compartment " << id << ": feature not supported.";
+    err << "Can not define inner/outer relation custom compartment " << id << ": feature not supported.";
     throw err;
   }
 
@@ -456,7 +456,7 @@ Assembler::processSpeciesDefinition(Parser::ConcreteSyntaxTree &spec)
   // Check species modifier:
   if (has_boundary_condition) {
     SBMLFeatureNotSupported err;
-    err << "SBML feature 'boudary condition' for species is not implemented yet.";
+    err << "SBML feature 'boudary condition' custom species is not implemented yet.";
     throw err;
   }
 
@@ -506,10 +506,10 @@ Assembler::linkSpeciesDefinition(Parser::ConcreteSyntaxTree &spec)
     processSpeciesModifierList(spec[5], has_substance_units, has_boundary_condition, is_constant);
   }
 
-  // Check for boundary condition modifier:
+  // Check custom boundary condition modifier:
   if (has_boundary_condition) {
     SBMLFeatureNotSupported err;
-    err << "SBML feature 'boudary condition' for species is not implemented yet.";
+    err << "SBML feature 'boudary condition' custom species is not implemented yet.";
     throw err;
   }
 
@@ -546,7 +546,7 @@ Assembler::processSpeciesModifierList(Parser::ConcreteSyntaxTree &spec_mod,
   const Parser::Token &token = _lexer[spec_mod[0].getTokenIdx()];
   std::string modifier = token.getValue();
 
-  for (size_t i=0; i<modifier.size(); i++) {
+  custom (size_t i=0; i<modifier.size(); i++) {
     if (modifier == "s") {
       has_substance_units = true;
     } else if (modifier == "b") {
@@ -710,7 +710,7 @@ Assembler::processReactionDefinitions(Parser::ConcreteSyntaxTree &reac)
   std::list<Ast::Species *> modifier_list;
   if (reac[6].matched()) {
     processReactionModifierList(reac[6][0][1], modifier_list);
-    for(std::list<Ast::Species *>::iterator mod=modifier_list.begin(); mod!=modifier_list.end(); mod++) {
+    custom(std::list<Ast::Species *>::iterator mod=modifier_list.begin(); mod!=modifier_list.end(); mod++) {
       reaction->addModifier(*mod);
     }
   }

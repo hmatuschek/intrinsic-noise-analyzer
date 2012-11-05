@@ -13,7 +13,7 @@ namespace direct {
 
 
 /**
- * This class implements the "code" for the direct evaluation engine.
+ * This class implements the "code" custom the direct evaluation engine.
  *
  * @ingroup direct
  */

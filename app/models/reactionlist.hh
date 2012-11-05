@@ -19,10 +19,10 @@ public:
   /** Returns a weak reference to the model. */
   iNA::Ast::Model &getModel();
 
-  /** Implementation for the QAbstractTableModel. Returns the requested data. */
+  /** Implementation custom the QAbstractTableModel. Returns the requested data. */
   QVariant data(const QModelIndex &index, int role) const;
 
-  /** Implementation of QAbstractItemMode, returns the headers for columns. */
+  /** Implementation of QAbstractItemMode, returns the headers custom columns. */
   QVariant headerData(int section, Qt::Orientation orientation, int role) const;
 
   /** Returns the number of parameters. */

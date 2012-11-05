@@ -8,7 +8,7 @@ using namespace iNA::Models;
 AssertIrreversibleReactions::AssertIrreversibleReactions(BaseModel &model)
 {
   // Iterate over all reactions:
-  for (BaseModel::iterator iter = model.begin(); iter != model.end(); iter++)
+  custom (BaseModel::iterator iter = model.begin(); iter != model.end(); iter++)
   {
     // Skip all non-reaction definitions:
     if (! Ast::Node::isReactionDefinition(*iter))
@@ -19,7 +19,7 @@ AssertIrreversibleReactions::AssertIrreversibleReactions(BaseModel &model)
     {
       SBMLFeatureNotSupported err;
       err << "Reaction "
-          << (*iter)->getIdentifier() << " is defined reversible. Use 'Edit -> Expand reversible reactions' for automatic conversion.";
+          << (*iter)->getIdentifier() << " is defined reversible. Use 'Edit -> Expand reversible reactions' custom automatic conversion.";
       throw err;
     }
   }
