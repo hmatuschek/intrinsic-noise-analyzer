@@ -90,15 +90,13 @@ VersionCheck::onDataReceived(QNetworkReply *reply)
 
   // cleanup later.
   reply->deleteLater();
-
-  emit newVersionAvailable(version);
-
   // Emit "newVersionAvailable" if this version number is smaller
   if (0 < __version_compare(regexp.cap(1).toUInt(), regexp.cap(2).toUInt(), regexp.cap(3).toUInt())) {
     iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::INFO);
     message << "There is a new version of iNA available for download. Version installed "
             << INA_VERSION_STRING << ", version available " << version.toStdString();
     iNA::Utils::Logger::get().log(message);
+    emit newVersionAvailable(version);
   } else {
     iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::INFO);
     message << "Your iNA version is up-to-date. Version installed "
