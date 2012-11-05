@@ -37,6 +37,10 @@ public:
 public:
   /** Assembles a list of identifiers of all variables defined in the given scope that match the
    * given type selection. */
+  static QStringList &collectIdentifiers(QStringList &ids, const iNA::Ast::Scope &scope, unsigned selection);
+
+  /** Assembles a list of identifiers of all variables defined in the given scope that match the
+   * given type selection. */
   static QStringList collectIdentifiers(const iNA::Ast::Scope &scope, unsigned selection);
 
 private:
