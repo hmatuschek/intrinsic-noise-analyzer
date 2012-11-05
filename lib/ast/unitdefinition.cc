@@ -346,8 +346,7 @@ Unit::dump(std::ostream &str, bool html) const
   // return standard dump
   if(!html)
   {
-    if (1 != this->common_multiplier || 0 != this->common_scale)
-    {
+    if (1 != this->common_multiplier || 0 != this->common_scale) {
       str << this->common_multiplier << "e" << this->common_scale;
     }
 
@@ -394,20 +393,17 @@ Unit::dump(std::ostream &str, bool html) const
   }
 
   // first dump the scale
-  if (1 != this->common_multiplier)
-  {
-      str << this->common_multiplier << "&times;";
+  if (1 != this->common_multiplier) {
+    str << this->common_multiplier << "&times;";
   }
 
-  if (0 != this->common_scale)
-  {
-      str << "10<sup>" << this->common_scale << "</sup>";
+  if (0 != this->common_scale) {
+    str << "10<sup>" << this->common_scale << "</sup>";
   }
 
   // then the units
   if (0 < this->units.size())
   {
-
     std::ostringstream numerator,denominator;
     size_t nnum=0,nden=0;
 
@@ -417,45 +413,38 @@ Unit::dump(std::ostream &str, bool html) const
     std::map<ScaledBaseUnit::BaseUnit, int>::const_iterator iter = this->units.begin();
     for (size_t i=0; i<this->units.size(); i++, iter++)
     {
-
       if (0 < iter->second)
       {
-          numerator << ScaledBaseUnit::baseUnitRepr(iter->first);
-          if (iter->second!=1)
-             numerator << "<sup>"<<(iter->second)<<"</sup>";
-          numerator << " ";
-          nnum++;
+        numerator << ScaledBaseUnit::baseUnitRepr(iter->first);
+        if (iter->second!=1)
+          numerator << "<sup>"<<(iter->second)<<"</sup>";
+        numerator << " ";
+        nnum++;
       }
       else if(0 > iter->second)
       {
-          denominator << ScaledBaseUnit::baseUnitRepr(iter->first);
-          if (iter->second!=-1)
-             denominator << "<sup>"<<-(iter->second)<<"</sup>";
-          denominator << " ";
+        denominator << ScaledBaseUnit::baseUnitRepr(iter->first);
+        if (iter->second!=-1)
+          denominator << "<sup>"<<-(iter->second)<<"</sup>";
+        denominator << " ";
       }
     }
 
     nden = units.size()-nnum;
 
-    if(nnum>0)
-    {
-        if (nnum>1) str << "(";
-        str << numerator.str().substr(0, numerator.str().size()-1 );
-        if (nnum>1) str << ")";
-
+    if(nnum>0) {
+      if (nnum>1) str << "(";
+      str << numerator.str().substr(0, numerator.str().size()-1 );
+      if (nnum>1) str << ")";
     } else {
-        str<< "1";
+      str<< "1";
     }
 
-    if (nden>0)
-    {
-
+    if (nden>0) {
        str << "/";
-
        if (nden>1) str << "(";
        str << denominator.str().substr(0, denominator.str().size()-1 );
        if (nden>1) str << ")";
-
     }
 
     if (1 != this->common_multiplier || 0 != this->common_scale)

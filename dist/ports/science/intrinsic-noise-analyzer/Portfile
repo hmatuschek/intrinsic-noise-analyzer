@@ -24,8 +24,8 @@ license GPL-2
 
 homepage http://code.google.com/p/intrinsic-noise-analyzer
 
-#master_sites http://intrinsic-noise-analyzer.googlecode.com/files/
-master_sites http://dl.dropbox.com/u/17326152/
+master_sites http://intrinsic-noise-analyzer.googlecode.com/files/
+#master_sites http://dl.dropbox.com/u/17326152/
 
 checksums md5    354adf4a1a0067adb54f80ba58c66b03 \
           sha1   2f993d9d9cfd751d768f924d25459432df832c35 \
@@ -41,7 +41,7 @@ depends_build port:cmake
 configure.cmd       cmake
 configure.pre_args  -DCMAKE_INSTALL_PREFIX=${prefix}
 configure.args      -DCMAKE_VERBOSE_MAKEFILE=ON \
-                    -DCMAKE_COLOR_MAKEFILE=ON \
+                    -DCMAKE_COLOR_MAKEFILE=OFF \
                     -DCMAKE_BUILD_TYPE=Release \
                     -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON \
                     -DCMAKE_INSTALL_NAME_DIR=${prefix}/lib \
