@@ -119,7 +119,7 @@ public:
                 throw InternalError("Solver returned non-standard error. Status not resolved."); break;
         }
 
-        std::cerr << solver.getJacobianM().eigenvalues() << std::endl;
+        //std::cerr << solver.getJacobianM().eigenvalues() << std::endl;
 
         // test for negative concentrations
         if((conc.array()<0).any())
