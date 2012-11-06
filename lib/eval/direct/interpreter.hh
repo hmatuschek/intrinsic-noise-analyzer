@@ -165,6 +165,11 @@ public:
         new_err << "Cannot evaluate expression " << item->first
                 << ": A run-time exception was thrown: " << err.what();
         throw new_err;
+      } catch (std::domain_error &err) {
+        NumericError new_err;
+        new_err << "Cannot evaluate expression " << item->first
+                << ": A domain-error exception was thrown: " << err.what();
+        throw new_err;
       } catch (std::exception &err) {
         InternalError new_err;
         new_err << "Cannot evaluate expression " << item->first
