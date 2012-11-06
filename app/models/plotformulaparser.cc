@@ -552,25 +552,20 @@ PlotFormulaParser::Context::operator ()(size_t row, GiNaC::ex expression)
   GiNaC::ex value;
   try {
     value = GiNaC::evalf(expression.subs(values));
-  } catch (std::runtime_error &err) {
-    iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::ERROR);
-    message << "Can not evaluate expression " << expression
-            << ". Got: " << err.what();
-    iNA::Utils::Logger::get().log(message);
-    return std::numeric_limits<double>::quiet_NaN();
-  } catch (std::domain_error &err) {
-    iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::ERROR);
-    message << "Can not evaluate expression " << expression
-            << ". Got: " << err.what();
-    iNA::Utils::Logger::get().log(message);
-    return std::numeric_limits<double>::quiet_NaN();
   } catch (std::exception &err) {
     iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::ERROR);
     message << "Can not evaluate expression " << expression
             << ". Got: " << err.what();
     iNA::Utils::Logger::get().log(message);
     return std::numeric_limits<double>::quiet_NaN();
-}
+  } catch (...) {
+    // Catch all...
+    iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::ERROR);
+    message << "Can not evaluate expression " << expression
+            << ". An unknown exception class was caught!";
+    iNA::Utils::Logger::get().log(message);
+    return std::numeric_limits<double>::quiet_NaN();
+  }
 
   if (! GiNaC::is_a<GiNaC::numeric>(value)) {
     iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::ERROR);
