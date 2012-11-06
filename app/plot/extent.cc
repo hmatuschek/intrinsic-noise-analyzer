@@ -46,9 +46,9 @@ Extent
 Extent::united(const Extent other) const
 {
   double min_x = Math::min(this->min_x, other.min_x);
-  double max_x = Math::max(this->min_x, other.min_x);
+  double max_x = Math::max(this->max_x, other.max_x);
   double min_y = Math::min(this->min_y, other.min_y);
-  double max_y = Math::max(this->min_y, other.min_y);
+  double max_y = Math::max(this->max_y, other.max_y);
 
   return Extent(min_x, max_x, min_y, max_y);
 }

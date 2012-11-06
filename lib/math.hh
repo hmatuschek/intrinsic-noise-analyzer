@@ -45,10 +45,10 @@ namespace Math {
 template <typename T>
 inline bool isValue(const T &value)
 {
-  return value == value && // if value != NaN
-      (! std::numeric_limits<T>::has_infinity ||   // if value type has no inf:
-       ( value != std::numeric_limits<T>::infinity() &&  // if value != inf
-         value != -std::numeric_limits<T>::infinity())); // if value != -inf
+  return ((value == value) && // if value != NaN
+      ( (! std::numeric_limits<T>::has_infinity) ||         // if value type has no inf:
+        ( value != std::numeric_limits<T>::infinity() &&    // if value != inf
+          value != -std::numeric_limits<T>::infinity())) ); // if value != -inf
 }
 
 
