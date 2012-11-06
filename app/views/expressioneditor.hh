@@ -2,6 +2,9 @@
 #define __INA_APP_VIEWS_EXPRESSIONEDITOR_HH__
 
 #include <QLineEdit>
+#include <QModelIndex>
+#include <QCompleter>
+#include <ast/scope.hh>
 
 
 /** Tiny helper widget for editing expressions. */
@@ -10,12 +13,25 @@ class ExpressionEditor : public QLineEdit
   Q_OBJECT
 
 public:
-  /** Trivial constructor. */
+  /** Trivial constructor w/o completer. */
   explicit ExpressionEditor(QWidget *parent = 0);
+
+  /** Constructor with completer. */
+  explicit ExpressionEditor(iNA::Ast::Scope &scope, QWidget *parent = 0);
 
 protected:
   /** Handles iteration through possible completions. */
   void keyPressEvent(QKeyEvent *event);
+  /** Returns the ID or parts of it under the cursor. */
+  void idUnderCursor(QString &word);
+
+private slots:
+  /** Callback that inserts the completion at the current cursor position. */
+  void insertCompletion(const QString &completion);
+
+private:
+  /** Holds the auto-completion. */
+  QCompleter *_completer;
 };
 
-#endif // EXPRESSIONEDITOR_HH
+#endif

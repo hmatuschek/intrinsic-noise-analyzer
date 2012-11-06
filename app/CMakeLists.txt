@@ -5,12 +5,12 @@
 SET(ina_app_base_SOURCES main.cc)
 SET(ina_app_base_HEADERS )
 
-SET(ina_app_plot_SOURCES plot/axisticks.cc plot/extent.cc
-    plot/canvas.cc plot/axis.cc plot/graph.cc plot/legend.cc plot/configuration.cc
+SET(ina_app_plot_SOURCES plot/axisticks.cc plot/extent.cc plot/configuration.cc
+    plot/canvas.cc plot/axis.cc plot/graph.cc plot/legend.cc
     plot/variancelinegraph.cc plot/mapping.cc plot/figure.cc plot/linegraph.cc plot/savedialog.cc
     plot/boxplot.cc plot/plotrangedialog.cc)
 SET(ina_app_plot_HEADERS
-    plot/canvas.hh plot/axis.hh plot/graph.hh plot/legend.hh plot/configuration.hh
+    plot/canvas.hh plot/axis.hh plot/graph.hh plot/legend.hh
     plot/variancelinegraph.hh plot/mapping.hh plot/figure.hh plot/linegraph.hh plot/savedialog.hh
     plot/boxplot.hh plot/plotrangedialog.hh)
 

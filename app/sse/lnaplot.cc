@@ -79,7 +79,7 @@ LNACorrelationPlot::LNACorrelationPlot(QList<QString> &selected_species, LNATask
 
     for (size_t j=i+1; j<Nsel; j++)
     {
-      iNA::Ast::Species *species_j = model->getSpecies(selected_species.at(i).toStdString());
+      iNA::Ast::Species *species_j = model->getSpecies(selected_species.at(j).toStdString());
       size_t species_idx_j = model->getSpeciesIdx(species_j);
       QString species_name_j = data->getColumnName(1+species_idx_j);
       size_t var_idx_j = offset + species_idx_j*(Ntot+1) - (species_idx_j*(species_idx_j+1))/2;

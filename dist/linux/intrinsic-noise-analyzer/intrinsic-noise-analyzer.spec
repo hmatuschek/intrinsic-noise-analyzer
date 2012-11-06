@@ -54,7 +54,7 @@ Provides the runtime library for the intrinsic Noise Analyzer.
 %setup -q
 
 %build
-cmake -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX=$RPM_BUILD_ROOT/usr
+cmake -DCMAKE_BUILD_TYPE=RELEASE -DINA_DISABLE_NEW_VERSION_CHECK -DCMAKE_INSTALL_PREFIX=$RPM_BUILD_ROOT/usr
 make
 
 %install

@@ -346,82 +346,64 @@ Unit::dump(std::ostream &str, bool html) const
   // return standard dump
   if(!html)
   {
+    if (1 != this->common_multiplier || 0 != this->common_scale) {
+      str << this->common_multiplier << "e" << this->common_scale;
+    }
+
+    if (0 < this->units.size())
+    {
       if (1 != this->common_multiplier || 0 != this->common_scale)
+        str << "(";
+
+      std::map<ScaledBaseUnit::BaseUnit, int>::const_iterator iter = this->units.begin();
+      for (size_t i=0; i<this->units.size()-1; i++, iter++)
       {
-          str << this->common_multiplier << "e" << this->common_scale;
+        str << ScaledBaseUnit::baseUnitRepr(iter->first);
+        if (1 != iter->second)
+          str << "^"<<iter->second;
+        str << " * ";
       }
 
-      if (0 < this->units.size())
-      {
-          if (1 != this->common_multiplier || 0 != this->common_scale)
-            str << "(";
-
-          std::map<ScaledBaseUnit::BaseUnit, int>::const_iterator iter = this->units.begin();
-          for (size_t i=0; i<this->units.size()-1; i++, iter++)
-          {
-            str << ScaledBaseUnit::baseUnitRepr(iter->first);
-            if (1 != iter->second)
-              str << "^"<<iter->second;
-            str << " * ";
-          }
-
-          str << ScaledBaseUnit::baseUnitRepr(iter->first);
-          if (1 != iter->second)
-              str << "^"<<iter->second;
-      }
+      str << ScaledBaseUnit::baseUnitRepr(iter->first);
+      if (1 != iter->second)
+        str << "^"<<iter->second;
+    }
 
 
-      if (1 != this->common_multiplier || 0 != this->common_scale)
-          str << ")";
+    if (1 != this->common_multiplier || 0 != this->common_scale)
+      str << ")";
 
-      return;
-
+    return;
   }
-
 
   // otherwise dump html
 
   // catch arbitrary units
-  if(this->units.size()==0) str<<"a.u.";
+  if(isDimensionless()) str << "a.u.";
 
   // catch times which refer explictly to units of minutes, hours or days
-  if (this->isVariantOf(ScaledBaseUnit::SECOND) && this->units.size()==1)
+  if (isVariantOf(ScaledBaseUnit::SECOND))
   {
-      double fac = this->common_multiplier*std::pow(10.,this->common_scale);
+    float fac = common_multiplier;
+    fac *= (0 != common_scale) ? std::pow(10.,common_scale) : 1;
 
-      if( fac==86400 )
-      {
-          str << "d";
-          return;
-      }
-      else if ( fac==3600 )
-      {
-          str << "h";
-          return;
-      }
-      else if ( fac==60 )
-      {
-          str << "min";
-          return;
-      }
-
+    if( fac==86400 ) { str << "d"; return; }
+    else if ( fac==3600 ) { str << "h"; return; }
+    else if ( fac==60 ) { str << "min"; return; }
   }
 
   // first dump the scale
-  if (1 != this->common_multiplier)
-  {
-      str << this->common_multiplier << "&times;";
+  if (1 != this->common_multiplier) {
+    str << this->common_multiplier << "&times;";
   }
 
-  if (0 != this->common_scale)
-  {
-      str << "10<sup>" << this->common_scale << "</sup>";
+  if (0 != this->common_scale) {
+    str << "10<sup>" << this->common_scale << "</sup>";
   }
 
   // then the units
   if (0 < this->units.size())
   {
-
     std::ostringstream numerator,denominator;
     size_t nnum=0,nden=0;
 
@@ -431,45 +413,38 @@ Unit::dump(std::ostream &str, bool html) const
     std::map<ScaledBaseUnit::BaseUnit, int>::const_iterator iter = this->units.begin();
     for (size_t i=0; i<this->units.size(); i++, iter++)
     {
-
       if (0 < iter->second)
       {
-          numerator << ScaledBaseUnit::baseUnitRepr(iter->first);
-          if (iter->second!=1)
-             numerator << "<sup>"<<(iter->second)<<"</sup>";
-          numerator << " ";
-          nnum++;
+        numerator << ScaledBaseUnit::baseUnitRepr(iter->first);
+        if (iter->second!=1)
+          numerator << "<sup>"<<(iter->second)<<"</sup>";
+        numerator << " ";
+        nnum++;
       }
       else if(0 > iter->second)
       {
-          denominator << ScaledBaseUnit::baseUnitRepr(iter->first);
-          if (iter->second!=-1)
-             denominator << "<sup>"<<-(iter->second)<<"</sup>";
-          denominator << " ";
+        denominator << ScaledBaseUnit::baseUnitRepr(iter->first);
+        if (iter->second!=-1)
+          denominator << "<sup>"<<-(iter->second)<<"</sup>";
+        denominator << " ";
       }
     }
 
     nden = units.size()-nnum;
 
-    if(nnum>0)
-    {
-        if (nnum>1) str << "(";
-        str << numerator.str().substr(0, numerator.str().size()-1 );
-        if (nnum>1) str << ")";
-
+    if(nnum>0) {
+      if (nnum>1) str << "(";
+      str << numerator.str().substr(0, numerator.str().size()-1 );
+      if (nnum>1) str << ")";
     } else {
-        str<< "1";
+      str<< "1";
     }
 
-    if (nden>0)
-    {
-
+    if (nden>0) {
        str << "/";
-
        if (nden>1) str << "(";
        str << denominator.str().substr(0, denominator.str().size()-1 );
        if (nden>1) str << ")";
-
     }
 
     if (1 != this->common_multiplier || 0 != this->common_scale)

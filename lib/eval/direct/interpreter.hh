@@ -160,15 +160,15 @@ public:
       // First, try to evaluate the ginac expression
       try {
         value = item->first.subs(values).evalf();
-      } catch (std::runtime_error &err) {
-        NumericError new_err;
-        new_err << "Cannot evaluate expression " << item->first
-                << ": A run-time exception was thrown: " << err.what();
-        throw new_err;
       } catch (std::exception &err) {
         InternalError new_err;
         new_err << "Cannot evaluate expression " << item->first
-                << " : An unhandled exception was thrown: " << err.what();
+                << " : An unhandled std::exception was thrown: " << err.what();
+        throw new_err;
+      } catch (...) {
+        InternalError new_err;
+        new_err << "Cannot evaluate expression " << item->first
+                << " : An unhandled, unkown exception was thrown!";
         throw new_err;
       }
 

@@ -20,13 +20,7 @@ QWidget *
 ExpressionDelegate::createEditor(
   QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
-  QLineEdit *editor = new ExpressionEditor(parent);
-
-  QCompleter *completer = new QCompleter(editor);
-  completer->setCompletionMode(QCompleter::InlineCompletion);
-  completer->setModel(new ScopeItemModel(_scope, completer));
-  editor->setCompleter(completer);
-
+  QLineEdit *editor = new ExpressionEditor(_scope, parent);
   return editor;
 }
 

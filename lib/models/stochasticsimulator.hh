@@ -26,6 +26,9 @@ class StochasticSimulator :
     public ParticleNumbersMixin,
     public ReasonableModelMixin
 {
+
+  using BaseModel::getConcentrationUnit;
+
 private:
   /**
    * Number of OpenMP threads to be used.
@@ -134,6 +137,9 @@ public:
   * Returns the ensemble size
   **/
   size_t size();
+
+
+  Ast::Unit getConcentrationUnit() const;
  };
 
 

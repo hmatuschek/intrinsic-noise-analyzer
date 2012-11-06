@@ -28,6 +28,8 @@ public:
 
   virtual void removeDocument(DocumentItem *document);
 
+  virtual void removePlot(PlotItem *plot);
+
   virtual void markForUpdate(TreeItem *item);
 
   /* ******************************************************************************************* *

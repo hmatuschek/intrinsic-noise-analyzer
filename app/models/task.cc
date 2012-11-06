@@ -2,6 +2,8 @@
 #include "exception.hh"
 #include <iostream>
 #include <stdexcept>
+#include <utils/logger.hh>
+
 
 
 Task::Task(QObject *parent)
@@ -14,7 +16,7 @@ Task::Task(QObject *parent)
 
 Task::~Task()
 {
-  //std::cerr << "Task::~Task(): deleted." << std::endl;
+  // Pass...
 }
 
 
@@ -27,19 +29,21 @@ Task::run()
   // Try to catch all Fluc::Exception instances, avoids a crash of the application if an error
   // occures.
   try {
-    this->start_time = clock();
-    this->process();
-  } catch (iNA::Exception &err)
-  {
-    std::cerr << "Task:: Caught exception: " << err.what() << std::endl;
-    this->error_message.setTitle("Exception during analysis.");
-    this->error_message.setDetails(err.what());
-    this->setState(Task::ERROR);
+    start_time = clock();
+    process();
+  } catch (iNA::Exception &err) {
+    iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::INFO);
+    message << "Task: Caught exception: " << err.what();
+    iNA::Utils::Logger::get().log(message);
+    error_message.setTitle("Exception during analysis.");
+    error_message.setDetails(err.what());
+    setState(Task::ERROR);
   } catch (std::runtime_error &err) {
-    std::cerr << "Task:: Caught std::runtime_error: " << err.what() << std::endl;
-    this->error_message.setTitle("Runtime exception during analysis.");
-    this->error_message.setDetails(err.what());
-    this->setState(Task::ERROR);
+    iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::ERROR);
+    message << "Task:: Caught std::runtime_error: " << err.what();
+    error_message.setTitle("Runtime exception during analysis.");
+    error_message.setDetails(err.what());
+    setState(Task::ERROR);
   }
 }
 

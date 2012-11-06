@@ -276,9 +276,6 @@ Axis::showMeasure(const QPointF &point)
   _measure->setValues(values);
   _measure->setPos(point);
   _measure->setVisible(true);
-
-  /*std::cerr << "Show measure of " << values.x() << ", " << values.y()
-            << " at " << point.x() << ", " << point.y() << std::endl;*/
 }
 
 

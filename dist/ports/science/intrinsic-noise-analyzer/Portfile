@@ -25,10 +25,11 @@ license GPL-2
 homepage http://code.google.com/p/intrinsic-noise-analyzer
 
 master_sites http://intrinsic-noise-analyzer.googlecode.com/files/
+#master_sites http://dl.dropbox.com/u/17326152/
 
-checksums md5    7717cc18fafcf840d50494e8b0772b4c \
-          sha1   9d985f104beea6b1346a325c4fc77fe6a542d50c \
-          rmd160 666133cf07826e48617e3109c2ede69ff4391e9b
+checksums md5    3d78e5403d39e1dfbf28687bb470d20e \
+          sha1   a4168d225c5120e1c07caf388963a35c153a9539 \
+          rmd160 85619a9120986716f439651034ab1ac55d323d69
 
 depends_lib  port:libsbml \
              port:qt4-mac \
@@ -40,7 +41,7 @@ depends_build port:cmake
 configure.cmd       cmake
 configure.pre_args  -DCMAKE_INSTALL_PREFIX=${prefix}
 configure.args      -DCMAKE_VERBOSE_MAKEFILE=ON \
-                    -DCMAKE_COLOR_MAKEFILE=ON \
+                    -DCMAKE_COLOR_MAKEFILE=OFF \
                     -DCMAKE_BUILD_TYPE=Release \
                     -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON \
                     -DCMAKE_INSTALL_NAME_DIR=${prefix}/lib \

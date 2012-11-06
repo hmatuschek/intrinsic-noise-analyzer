@@ -14,8 +14,8 @@ SpeciesView::SpeciesView(SpeciesItem *species ,QWidget *parent) :
   QWidget(parent), _species(species)
 {
   // basic Layout settings
-  this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
-  this->setBackgroundRole(QPalette::Window);
+  setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
+  setBackgroundRole(QPalette::Window);
 
   // Label
   QLabel *label = new QLabel(tr("Species"));
@@ -68,7 +68,6 @@ SpeciesView::SpeciesView(SpeciesItem *species ,QWidget *parent) :
 void
 SpeciesView::speciesItemDestoyed()
 {
-  //std::cerr << "SpeciesItem destroyed -> close view... " << std::endl;
   this->deleteLater();
 }
 

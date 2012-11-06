@@ -119,6 +119,8 @@ public:
                 throw InternalError("Solver returned non-standard error. Status not resolved."); break;
         }
 
+        //std::cerr << solver.getJacobianM().eigenvalues() << std::endl;
+
         // test for negative concentrations
         if((conc.array()<0).any())
             throw NumericError("iNA encountered negative concentrations. The system may not have a positive root.");

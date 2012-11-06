@@ -13,13 +13,13 @@ NewVersionDialog::NewVersionDialog(const QString &version, QWidget *parent)
   QLabel *heading = new QLabel("<b>A new version of iNA is available.</b>");
   heading->setAlignment(Qt::AlignCenter);
 
-  QLabel *details = new QLabel();
-  details->setText(
-        tr("You are currenlty using iNA version %1, but version %2 is "
-           "available for <a href=\"http://intrinsic-noise-analyzer.googlecode.com/files/list\">download</a>.").arg(INA_VERSION_STRING).arg(version));
+  QLabel *details = new QLabel(
+        tr("You are currently using iNA version <b>%1</b>. The recent version <b>%2</b> is "
+           "available for <a href=\"http://code.google.com/p/intrinsic-noise-analyzer/downloads/list\">download</a>.").arg(INA_VERSION_STRING).arg(version));
   details->setAlignment(Qt::AlignHCenter);
 
-  _checkEnabled = new QCheckBox("periodically check for updates");
+  _checkEnabled = new QCheckBox("Notify about new versions");
+  _checkEnabled->setChecked(true);
 
   QDialogButtonBox *buttons = new QDialogButtonBox(QDialogButtonBox::Ok);
 
@@ -28,6 +28,7 @@ NewVersionDialog::NewVersionDialog(const QString &version, QWidget *parent)
   layout->addWidget(details, 1);
   layout->addWidget(_checkEnabled);
   layout->addWidget(buttons);
+  setLayout(layout);
 
   QObject::connect(buttons, SIGNAL(accepted()), this, SLOT(onAccept()));
 }

@@ -100,7 +100,7 @@ Configuration::setCheckNewVersionAvailable(bool enabled) {
 QDateTime
 Configuration::lastUpdateCheck()
 {
-  return _settings.value("lastupdatecheck", QDateTime()).toDateTime();
+  return _settings.value("lastupdatecheck", QDateTime(QDate(1970,1,1))).toDateTime();
 }
 
 void

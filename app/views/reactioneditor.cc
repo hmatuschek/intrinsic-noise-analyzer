@@ -7,6 +7,7 @@
 #include "reactionequationrenderer.hh"
 #include "../tinytex/tinytex.hh"
 #include "../models/scopeitemmodel.hh"
+#include "expressioneditor.hh"
 
 #include <ast/unitconverter.hh>
 #include <parser/exception.hh>
@@ -60,7 +61,10 @@ ReactionEditorContext::undefinedSymbols() const {
 ReactionEditor::ReactionEditor(iNA::Ast::Model &model, iNA::Ast::Reaction *reaction, QWidget *parent)
   : QWizard(parent), _model(model), _current_reaction_scope(0), _current_reaction(reaction)
 {
-  setWindowTitle(tr("Create new reaction"));
+  if (0 == reaction)
+    setWindowTitle(tr("Create new reaction"));
+  else
+    setWindowTitle(tr("Edit reaction"));
 
   // Assemble wizard pages:
   addPage(new ReactionEditorPage(reaction, this));
@@ -153,10 +157,10 @@ ReactionEditorPage::ReactionEditorPage(iNA::Ast::Reaction *reaction, ReactionEdi
   }
 
   // The reactants stoichiometry
-  _equation = new QLineEdit();
+  _equation = new ExpressionEditor(_model);
   _equation->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
-  QCompleter *completer = new QCompleter(ScopeItemModel::collectIdentifiers(_model, ScopeItemModel::SELECT_ALL));
-  _equation->setCompleter(completer);
+  /*QCompleter *completer = new QCompleter(ScopeItemModel::collectIdentifiers(_model, ScopeItemModel::SELECT_ALL));
+  _equation->setCompleter(completer); */
   if ((0 != _current_reaction)) {
     _equation->setText(_serializeReactionEquation());
   }
@@ -177,7 +181,7 @@ ReactionEditorPage::ReactionEditorPage(iNA::Ast::Reaction *reaction, ReactionEdi
   _kineticLaw = new QStackedWidget();
   _kineticLawFormula = new QLabel();
   _kineticLaw->addWidget(_kineticLawFormula);
-  _kineticLawEditor = new QLineEdit();
+  _kineticLawEditor = new ExpressionEditor(_model);
   _kineticLawEditor->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
   _kineticLawEditor->setEnabled(true);
   _kineticLaw->addWidget(_kineticLawEditor);
@@ -710,13 +714,14 @@ ReactionEditorPage::_defineUnknownSpecies(QList<QPair<int, QString> > &reactants
 
     // Create a compartment if there is none.
     if (0 == _model.numCompartments()) {
-      iNA::Ast::Compartment * new_compartment = new iNA::Ast::Compartment("compartment", iNA::Ast::Compartment::VOLUME, true);
+      iNA::Ast::Compartment * new_compartment = new iNA::Ast::Compartment("compartment", 1, iNA::Ast::Compartment::VOLUME, true);
       _model.addDefinition(new_compartment);
     }
 
     // identifier not in use -> define species with this identifier.
     iNA::Ast::Species *new_species = new iNA::Ast::Species(
-          item->second.toStdString(), _model.getCompartment(0), false);
+          item->second.toStdString(),_model.getCompartment(0), false);
+    new_species->setValue(0);
     scope->addDefinition(new_species);
   }
 
@@ -736,16 +741,16 @@ ReactionEditorPage::_defineUnknownSpecies(QList<QPair<int, QString> > &reactants
       throw err;
     }
 
+    // Create a compartment if there is none.
     if (0 == _model.numCompartments()) {
-      iNA::InternalError err;
-      err << "Can not define species with identifier " << item->second.toStdString()
-          << ", no compartment defined.";
-      throw err;
+      iNA::Ast::Compartment * new_compartment = new iNA::Ast::Compartment("compartment", 1, iNA::Ast::Compartment::VOLUME, true);
+      _model.addDefinition(new_compartment);
     }
 
     // identifier not in use -> define species with this identifier.
     iNA::Ast::Species *new_species = new iNA::Ast::Species(
           item->second.toStdString(), _model.getCompartment(0), false);
+    new_species->setValue(0);
     scope->addDefinition(new_species);
   }
 }
