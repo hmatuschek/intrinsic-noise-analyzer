@@ -154,6 +154,7 @@ INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/unsupported)
 #
 add_subdirectory(lib)
 add_subdirectory(app)
+add_subdirectory(cli)
 
 #
 # Exclude unit tests requiring glibc which is not available under Windows!

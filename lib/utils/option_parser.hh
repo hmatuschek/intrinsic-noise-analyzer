@@ -284,7 +284,7 @@ public:
  *
  * In this example, there are two flags, that exclude eachother but they are optional.
  * This means you could call with --help, with --version or without any flag. But to call
- * the program with --help and --flag would be invalid.
+ * the program with --help and --version flag would be invalid.
  *
  * The example above can be extended with an mandory argument:
  * \code

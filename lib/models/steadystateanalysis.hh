@@ -304,6 +304,8 @@ public:
         calcIOS(sseModel, x, sseUpdate);
     }
 
+    /** Returns the dimension of the reduced state. */
+    inline size_t getDimension() const { return sseModel.getDimension(); }
 };
 
 
