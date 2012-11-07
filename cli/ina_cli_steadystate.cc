@@ -1,5 +1,6 @@
 #include "ina_cli_steadystate.hh"
 #include "ina_cli_importmodel.hh"
+#include "ina_cli_fileextension.hh"
 
 #include <ast/model.hh>
 #include <models/IOSmodel.hh>
@@ -68,26 +69,50 @@ saveSteadyStateAnalysis(Utils::Opt::Parser &option_parser, Eigen::VectorXd &re_m
                         Eigen::MatrixXd &ios_cov, Eigen::VectorXd &ios_corr)
 {
   if (option_parser.has_option("output-csv")) {
-    std::fstream file(option_parser.get_option("output-csv").front().c_str());
+    std::string filename(option_parser.get_option("output-csv").front());
+    std::fstream file(filename.c_str(), std::ios_base::out);
     if (! file.is_open()) {
       std::cerr << "Can not open file " << option_parser.get_option("output-csv").front() << std::endl;
       return -1;
     }
     return saveSteadyStateAnalysisCSV(file, re_mean, lna_cov, emre_corr, ios_cov, ios_corr);
   } else if (option_parser.has_option("output-mat")) {
-    std::fstream file(option_parser.get_option("output-csv").front().c_str());
+    std::string filename(option_parser.get_option("output-csv").front());
+    std::fstream file(filename.c_str(), std::ios_base::out);
     if (! file.is_open()) {
       std::cerr << "Can not open file " << option_parser.get_option("output-csv").front() << std::endl;
       return -1;
     }
     return saveSteadyStateAnalysisMAT(file, re_mean, lna_cov, emre_corr, ios_cov, ios_corr);
   } else if (option_parser.has_option("output")) {
-    std::cerr << "This feature is not implemented yet. " << std::endl;
+    // Get filename & extension
+    std::string filename = option_parser.get_option("output-csv").front().c_str();
+    std::string extension = getFileExtension(filename);
+    // Dispatch...
+    if ("csv" == extension) {
+      std::fstream file(filename.c_str(), std::ios_base::out);
+      if (! file.is_open()) {
+        std::cerr << "Can not open file " << filename << std::endl; return -1;
+      }
+      return saveSteadyStateAnalysisCSV(file, re_mean, lna_cov, emre_corr, ios_cov, ios_corr);
+    } else if ("mat" == extension) {
+      std::fstream file(filename.c_str(), std::ios_base::out);
+      if (! file.is_open()) {
+        std::cerr << "Can not open file " << filename << std::endl; return -1;
+      }
+      return saveSteadyStateAnalysisMAT(file, re_mean, lna_cov, emre_corr, ios_cov, ios_corr);
+    }
+    // If extension is unknown:
+    Utils::Message message = LOG_MESSAGE(Utils::Message::ERROR);
+    message << "Can not export results to \"" << filename << "\" unrecognized file extension "
+            << extension << std::endl;
+    Utils::Logger::get().log(message);
     return -1;
   } else if (option_parser.has_flag("output-stdout")) {
     return saveSteadyStateAnalysisCSV(std::cout, re_mean, lna_cov, emre_corr, ios_cov, ios_corr);
   }
 
+  // This should not happen...
   std::cerr << "No ouput is given!" << std::cerr;
   return -1;
 }
@@ -99,6 +124,30 @@ saveSteadyStateAnalysisCSV(std::ostream &stream, Eigen::VectorXd &re_mean,
                            Eigen::MatrixXd &lna_cov, Eigen::VectorXd &emre_corr,
                            Eigen::MatrixXd &ios_cov, Eigen::VectorXd &ios_corr)
 {
+  stream << "# First line: REs steady state," << std::endl
+         << "# Second line: EMRE steady state," << std::endl
+         << "# Third line: IOS steady state." << std::endl;
+
+  stream << re_mean(0);
+  for (int i=1; i<re_mean.rows(); i++) { stream << "\t" << re_mean(i); }
+  stream << std::endl;
+
+  stream << re_mean(0) + emre_corr(0);
+  for (int i=1; i<re_mean.rows(); i++) { stream << "\t" << re_mean(i) + emre_corr(i); }
+  stream << std::endl;
+
+  stream << re_mean(0) + emre_corr(0) + ios_corr(0);
+  for (int i=1; i<re_mean.rows(); i++) { stream << "\t" << re_mean(i) + emre_corr(i) + ios_corr(i); }
+  stream << std::endl;
+
+  for (int i=0; i<re_mean.rows(); i++) {
+    stream << lna_cov(i,0) + ios_cov(i,0);
+    for (int j=1; j<re_mean.rows(); j++) {
+      stream << "\t" << lna_cov(i,j) + ios_cov(i,j);
+    }
+    stream << std::endl;
+  }
+
   return 0;
 }
 
@@ -108,7 +157,9 @@ saveSteadyStateAnalysisMAT(std::ostream &stream, Eigen::VectorXd &re_mean,
                            Eigen::MatrixXd &lna_cov, Eigen::VectorXd &emre_corr,
                            Eigen::MatrixXd &ios_cov, Eigen::VectorXd &ios_corr)
 {
-  return 0;
+  /// @todo Implement.
+  std::cerr << "This feature is not implemented yet." << std::endl;
+  return -1;
 }
 
 

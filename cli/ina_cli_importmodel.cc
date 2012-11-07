@@ -1,16 +1,11 @@
 #include "ina_cli_importmodel.hh"
+#include "ina_cli_fileextension.hh"
+
 #include <parser/parser.hh>
 #include <utils/logger.hh>
 
 
 using namespace iNA;
-
-std::string getFileExtension(const std::string &path) {
-  size_t idx = path.find_last_of('.');
-  if (idx == std::string::npos) { return ""; }
-  return path.substr(idx+1);
-}
-
 
 Ast::Model *
 importModel(Utils::Opt::Parser &option_parser)
