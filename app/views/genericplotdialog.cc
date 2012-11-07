@@ -214,13 +214,20 @@ GenericPlotDialog::GenericPlotDialog(Table *table, QWidget *parent)
   _plotview->setMinimumSize(320,240);
   _plotview->setPlot(_plot);
   _plotview->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
+
   _graph_list = new QListView();
-  _graph_list->setMaximumWidth(160);
-  _graph_list->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
+  //_graph_list->setMaximumWidth(160);
+  _graph_list->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
   _graph_list->setModel(&_graphs);
+
   _add_graph  = new QPushButton(tr("+"));
+  _add_graph->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+
   _rem_graph  = new QPushButton(tr("-"));
+  _rem_graph->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+
   _edit_labels = new QPushButton(tr("labels"));
+  _edit_labels->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
   _stack = new QStackedWidget();
   _stack->addWidget(_plotview);
