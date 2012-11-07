@@ -17,36 +17,56 @@ Ast::Model *importModel(Utils::Opt::Parser &option_parser);
 int main(int argc, const char *argv[])
 {
   std::stringstream help_string;
-  help_string << "Usage: " << argv[0] << " [GLOBAL-OPTIONS] COMMAND MODEL [CMD-OPTIONS] OUTPUT"
-              << std::endl << std::endl
-              << "GLOBAL-OPTIONS : Specifies some global options, independent of analysis command." << std::endl
-              << "COMMAND        : The command to be executed, see below for details." << std::endl
-              << "MODEL          : The model specification." << std::endl
-              << "CMD-OPTIONS    : Command specific options." << std::endl
-              << "OUTPUT         : Output specification."
-              << std::endl << std::endl
-              << "Commands:" << std::endl
-              << " --help        : Prints this help text." << std::endl
-              << " --version     : Prints the version number of iNA." << std::endl
-              << " --steadystate : Performs a stready state analysis." << std::endl
-              << std::endl << std::endl
-              << "Model specification:" << std::endl
-              << " --model=FILENAME        : Specifies the model file, the file extension determines" << std::endl
-              << "   the model type. *.xml and *.sbml are loaded as SBML and *.sbmlsh are loaded as" << std::endl
-              << "   SBML-sh." << std::endl
-              << " --model-sbml=FILENAME   : Specifies the SBML model file to load." << std::endl
-              << " --model-sbmlsh=FILENAME : Specifies teh SBML-sh model file to load."
-              << std::endl << std::endl
-              << "Ouput:" << std::endl
-              << " --output=FILENAME     : Exports the analysis in the given file, the file type is" << std::endl
-              << "   determined by the file extension. *.csv = CSV, *.mat = Matlab version 5 file." << std::endl
-              << " --output-csv=FILENAME : Exports the analysis data as CSV into the given filename" << std::endl
-              << " --output-stdcerr      : Exports the analysis data as CSV to stdout." << std::endl
-              << " --output-mat=FILENAME : Exports the analysis data as MAT (Matlab version 5) file."
-              << std::endl << std::endl
-              << "Steady state analysis: --streadystate" << std::endl
-              << "  If this command is present, iNA performs a steady state analysis ..." << std::endl
-              << "  There are no command specific options for that analysis yet." << std::endl;
+  help_string
+      << "iNA command line interface tool - version " << INA_VERSION_STRING << std::endl
+      << std::endl
+      << "Usage: " << std::endl
+      << "  ina-cli [GLOBAL-OPTIONS] COMMAND MODEL [CMD-OPTIONS] OUTPUT" << std::endl
+      << std::endl << std::endl
+      << "GLOBAL-OPTIONS : Specifies some global options, independent of analysis command." << std::endl
+      << "COMMAND        : The command to be executed, see below for details." << std::endl
+      << "MODEL          : The model specification." << std::endl
+      << "CMD-OPTIONS    : Command specific options." << std::endl
+      << "OUTPUT         : Output specification." << std::endl
+      << std::endl << std::endl
+      << "Global Options:" << std::endl
+      << " --loglevel=LEVEL" << std::endl
+      << "               : Enables log messages and specifies the message level. LEVEL must be one" << std::endl
+      << "                 of 'debug', 'info', 'warn' and 'error'." << std::endl
+      << std::endl << std::endl
+      << "Commands:" << std::endl
+      << " --help        : Prints this help text." << std::endl
+      << " --version     : Prints the version number of iNA." << std::endl
+      << " --steadystate : Performs a steady state analysis." << std::endl
+      << std::endl << std::endl
+      << "Model specification:" << std::endl
+      << " -m FILENAME, --model=FILENAME" << std::endl
+      << "               : Specifies the model file, the file extension determines the model type." << std::endl
+      << "                 *.xml and *.sbml are loaded as SBML and *.sbmlsh are loaded as SBML-sh." << std::endl
+      << std::endl
+      << " --model-sbml=FILENAME" << std::endl
+      << "               : Specifies the SBML model file to load." << std::endl
+      << std::endl
+      << " --model-sbmlsh=FILENAME" << std::endl
+      << "               : Specifies teh SBML-sh model file to load." << std::endl
+      << std::endl << std::endl
+      << "Ouput:" << std::endl
+      << " -o FILENAME, --output=FILENAME" << std::endl
+      << "               : Exports the analysis in the given file, the file type is determined by " << std::endl
+      << "                 the file extension. *.csv = CSV, *.mat = Matlab version 5 file." << std::endl
+      << std::endl
+      << " --output-csv=FILENAME" << std::endl
+      << "               : Exports the analysis data as CSV into the given filename" << std::endl
+      << std::endl
+      << " --output-stdcerr" << std::endl
+      << "               : Exports the analysis data as CSV to stdout." << std::endl
+      << std::endl
+      << " --output-mat=FILENAME" << std::endl
+      << "               : Exports the analysis data as MAT (Matlab version 5) file." << std::endl
+      << std::endl
+      << "Steady state analysis: --steadystate" << std::endl
+      << "  If this command is present, iNA performs a steady state analysis ..." << std::endl
+      << "  There are no command specific options for that analysis yet." << std::endl;
 
   // Global options:
   Utils::Opt::RuleInterface &loglevel_option = Utils::Opt::Parser::Option("loglevel");
