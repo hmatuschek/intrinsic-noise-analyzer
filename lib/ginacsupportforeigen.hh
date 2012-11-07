@@ -1,5 +1,5 @@
-#ifndef EIGENGINACSUPPORT_HH
-#define EIGENGINACSUPPORT_HH
+#ifndef __INA_GINACSUPPORTFOREIGEN_HH__
+#define __INA_GINACSUPPORTFOREIGEN_HH__
 
 #include <eigen3/Eigen/Eigen>
 #include <ginac/ginac.h>
@@ -99,4 +99,4 @@ namespace Eigen{
 
 }
 
-#endif // EIGENGINACSUPPORT_HH
+#endif // __INA_GINACSUPPORTFOREIGEN_HH__

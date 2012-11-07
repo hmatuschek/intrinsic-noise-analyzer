@@ -6,6 +6,7 @@ PROJECT(intrinsic-noise-analyzer)
 # Register own CMake extensions:
 #
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
+include(InstallHeadersWithDirectory)
 
 #
 # Define some options
@@ -62,8 +63,8 @@ ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 # Make sure libina can be found
 #
 LINK_DIRECTORIES(${PROJECT_BINARY_DIR}/lib)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/lib)
-
+#INCLUDE_DIRECTORIES("${PROJECT_BINARY_DIR}/lib/include/libina")
+INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/lib")
 
 #
 # Used libaries:

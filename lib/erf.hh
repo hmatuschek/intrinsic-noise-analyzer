@@ -1,5 +1,5 @@
-#ifndef __FLUC_MATH_ERF_HH__
-#define __FLUC_MATH_ERF_HH__
+#ifndef __INA_MATH_ERF_HH__
+#define __INA_MATH_ERF_HH__
 
 #include <cmath>
 

@@ -11,7 +11,7 @@ SET(libina_SOURCES
     exception.cc erf.cc incompletegamma.cc
     ginacsupportforeigen.cc math.cc openmp.cc mersennetwister.cc)
 
-SET(libina_HEADERS ina.hh smartptr.hh linkedlist.hh
+SET(libina_HEADERS ina.hh smartptr.hh
     exception.hh erf.hh incompletegamma.hh
     ginacsupportforeigen.hh math.hh openmp.hh mersennetwister.hh)
 
@@ -126,16 +126,12 @@ SET(libina_models_HEADERS models/models.hh
     models/histogram.hh
     models/gillespieSSA.hh
     models/optimizedSSA.hh
-    models/partialsumSSA.hh
-    models/optimizedSSAginac.hh
-    models/gillespieSSAginac.hh
-    models/gillespieCLE.hh
     models/assertnoconstantspeciesmixin.hh
     models/assertconstantparametermixin.hh
     models/assertnoassignmentrule.hh models/assertnoraterule.hh
     models/assertirreversiblereactions.hh
     models/reasonablemodelmixin.hh
-    models/baseunitmin.hh
+    models/baseunitmixin.hh
     models/particlenumbersmixin.hh
     models/sseinterpreter.hh
     models/steadystateanalysis.hh
@@ -232,6 +228,12 @@ SET(libina_HEADERS
     ${libina_ode_HEADERS}
     ${libina_eval_HEADERS})
 
+
+#
+# Recursive copy header files to ${CMAKE_BINARY_DIR}/include/libina
+#
+COPY_HEADERS_WITH_DIRECTORY("${libina_HEADERS}" "${CMAKE_CURRENT_BINARY_DIR}/include/libina")
+
 #
 # Compile library
 #
@@ -240,5 +242,9 @@ SET_TARGET_PROPERTIES(libina PROPERTIES OUTPUT_NAME "ina")
 TARGET_LINK_LIBRARIES(libina ${LIBS})
 
 
+# Install library files
 INSTALL(TARGETS libina
         DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
+# Install header files
+INSTALL_HEADERS_WITH_DIRECTORY("${libina_HEADERS}" "${CMAKE_INSTALL_INCLUDEDIR}/libina")
