@@ -31,11 +31,18 @@ int main(int argc, const char *argv[])
               << " --steadystate : Performs a stready state analysis." << std::endl
               << std::endl << std::endl
               << "Model specification:" << std::endl
-              << " --model        : Specifies the model file, the file extension determines the" << std::endl
-              << "   model type. *.xml and *.sbml are loaded as SBML and *.sbmlsh are loaded as" << std::endl
+              << " --model=FILENAME        : Specifies the model file, the file extension determines" << std::endl
+              << "   the model type. *.xml and *.sbml are loaded as SBML and *.sbmlsh are loaded as" << std::endl
               << "   SBML-sh." << std::endl
-              << " --model-sbml   : Specifies the SBML model file to load." << std::endl
-              << " --model-sbmlsh : Specifies teh SBML-sh model file to load."
+              << " --model-sbml=FILENAME   : Specifies the SBML model file to load." << std::endl
+              << " --model-sbmlsh=FILENAME : Specifies teh SBML-sh model file to load."
+              << std::endl << std::endl
+              << "Ouput:" << std::endl
+              << " --output=FILENAME     : Exports the analysis in the given file, the file type is" << std::endl
+              << "   determined by the file extension. *.csv = CSV, *.mat = Matlab version 5 file." << std::endl
+              << " --output-csv=FILENAME : Exports the analysis data as CSV into the given filename" << std::endl
+              << " --output-stdcerr      : Exports the analysis data as CSV to stdout." << std::endl
+              << " --output-mat=FILENAME : Exports the analysis data as MAT (Matlab version 5) file."
               << std::endl << std::endl
               << "Steady state analysis: --streadystate" << std::endl
               << "  If this command is present, iNA performs a steady state analysis ..." << std::endl
@@ -86,7 +93,7 @@ int main(int argc, const char *argv[])
   }
   // Display version:
   if (option_parser.has_flag("version")) {
-    std::cout << "iNA version" << INA_VERSION_STRING << std::cerr;
+    std::cout << INA_VERSION_STRING << std::endl;
     return 0;
   }
 
