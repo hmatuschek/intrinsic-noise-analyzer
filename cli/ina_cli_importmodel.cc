@@ -10,26 +10,36 @@ using namespace iNA;
 Ast::Model *
 importModel(Utils::Opt::Parser &option_parser)
 {
-  std::string filename = option_parser.get_option("model-sbml").front();
-
-  if (option_parser.has_option("model-sbml")) {
-    // Parse as SBML
-    return Parser::Sbml::importModel(filename);
-  } else if (option_parser.has_option("model-sbmlsh")) {
-    // Parse as SBML-sh
-    return Parser::Sbmlsh::importModel(filename);
-  } else if (option_parser.has_option("model")){
-    // Determine by file extension:
-    std::string extension = getFileExtension(filename);
-    if (("xml" == extension) || ("sbml" == extension)) {
+  std::string filename;
+  try {
+    if (option_parser.has_option("model-sbml")) {
+      // Parse as SBML
+      filename = option_parser.get_option("model-sbml").front();
       return Parser::Sbml::importModel(filename);
-    } else if ("sbmlsh" == extension) {
+    } else if (option_parser.has_option("model-sbmlsh")) {
+      // Parse as SBML-sh
+      filename = option_parser.get_option("model-sbmlsh").front();
       return Parser::Sbmlsh::importModel(filename);
+    } else if (option_parser.has_option("model")){
+      // Determine by file extension:
+          filename = option_parser.get_option("model").front();
+      std::string extension = getFileExtension(filename);
+      if (("xml" == extension) || ("sbml" == extension)) {
+        return Parser::Sbml::importModel(filename);
+      } else if ("sbmlsh" == extension) {
+        return Parser::Sbmlsh::importModel(filename);
+      }
+      // If extension is unknown:
+      Utils::Message message = LOG_MESSAGE(Utils::Message::ERROR);
+      message << "Can not import model \"" << filename << "\" unrecognized file extension "
+              << extension << std::endl;
+      Utils::Logger::get().log(message);
+      return 0;
     }
-    // If extension is unknown:
+  } catch (Exception &err) {
+    // Handle error during import...
     Utils::Message message = LOG_MESSAGE(Utils::Message::ERROR);
-    message << "Can not import model \"" << filename << "\" unrecognized file extension "
-            << extension << std::endl;
+    message << "Can not import model " << filename << ": " << err.what();
     Utils::Logger::get().log(message);
     return 0;
   }
