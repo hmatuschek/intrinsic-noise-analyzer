@@ -3,6 +3,7 @@
 
 #include <parser/parser.hh>
 #include <utils/logger.hh>
+#include "ina_cli_listmodel.h"
 
 
 using namespace iNA;
@@ -15,19 +16,27 @@ importModel(Utils::Opt::Parser &option_parser)
     if (option_parser.has_option("model-sbml")) {
       // Parse as SBML
       filename = option_parser.get_option("model-sbml").front();
-      return Parser::Sbml::importModel(filename);
+      Ast::Model *model = Parser::Sbml::importModel(filename);
+      if (0 != setInitialValue(model, option_parser)) { delete model; return 0; }
+      return model;
     } else if (option_parser.has_option("model-sbmlsh")) {
       // Parse as SBML-sh
       filename = option_parser.get_option("model-sbmlsh").front();
-      return Parser::Sbmlsh::importModel(filename);
+      Ast::Model *model = Parser::Sbmlsh::importModel(filename);
+      if (0 != setInitialValue(model, option_parser)) { delete model; return 0; }
+      return model;
     } else if (option_parser.has_option("model")){
       // Determine by file extension:
           filename = option_parser.get_option("model").front();
       std::string extension = getFileExtension(filename);
       if (("xml" == extension) || ("sbml" == extension)) {
-        return Parser::Sbml::importModel(filename);
+        Ast::Model *model = Parser::Sbml::importModel(filename);
+        if (0 != setInitialValue(model, option_parser)) { delete model; return 0; }
+        return model;
       } else if ("sbmlsh" == extension) {
-        return Parser::Sbmlsh::importModel(filename);
+        Ast::Model *model = Parser::Sbmlsh::importModel(filename);
+        if (0 != setInitialValue(model, option_parser)) { delete model; return 0; }
+        return model;
       }
       // If extension is unknown:
       Utils::Message message = LOG_MESSAGE(Utils::Message::ERROR);
@@ -51,12 +60,12 @@ importModel(Utils::Opt::Parser &option_parser)
 
 
 
-void
+int
 exportModel(Ast::Model *model, Utils::Opt::Parser &option_parser)
 {
+  std::string filename;
   try {
     if (option_parser.has_option("model-sbml")) {
-      // Parse as SBML
       filename = option_parser.get_option("model-sbml").front();
       Parser::Sbml::exportModel(*model, filename);
       return 0;

@@ -42,11 +42,9 @@ int main(int argc, const char *argv[])
       << " --list-species, --list-compartments, --list-parameters" << std::endl
       << "               : Lists species, compartments or global paramters of the specified model." << std::endl
       << std::endl
-      << " --set-value=ASSIGNMENT" << std::endl
-      << "               : Sets the initial value of a species, compartment or global parameter. " << std::endl
-      << "                 ASSIGNMEN has the form ID=EXPRESSION, where ID is the identifier of the " << std::endl
-      << "                 species, compartment or global parameter to be set and expression is an" << std::endl
-      << "                 arbitrary expression or value. (NOT IMPLEMENTED YET)" << std::endl
+      << " --update, --help-update" << std::endl
+      << "               : Updates a model together with --set-value, --help-update shows some more" << std::endl
+      << "                 detailed information about this command. (NOT IMPLEMENTED YET)" << std::endl
       << std::endl
       << " --steadystate, --help-steadystate" << std::endl
       << "               : Performs a steady state analysis for the given model. --help-steadystate" << std::endl
@@ -62,6 +60,11 @@ int main(int argc, const char *argv[])
       << std::endl
       << " --model-sbmlsh=FILENAME" << std::endl
       << "               : Specifies the SBML-sh model file to load." << std::endl
+      << std::endl
+      << " --set-value=ASSIGNMENT" << std::endl
+      << "               : This option may be to set the initial value of a variable before" << std::endl
+      << "                 performing any analysis. In contrast to --update-value, this option does" << std::endl
+      << "                 alter the model file." << std::endl
       << std::endl << std::endl
       << "Ouput:" << std::endl
       << " -o FILENAME, --output=FILENAME" << std::endl
@@ -112,7 +115,9 @@ int main(int argc, const char *argv[])
   Utils::Opt::RuleInterface &any_model = Utils::Opt::Parser::Option("model", 'm');
   Utils::Opt::RuleInterface &sbml_model = Utils::Opt::Parser::Option("model-sbml");
   Utils::Opt::RuleInterface &sbmlsh_model = Utils::Opt::Parser::Option("model-sbml");
-  Utils::Opt::RuleInterface &model_specifier = (sbml_model | sbmlsh_model | any_model);
+  Utils::Opt::RuleInterface &set_value_option = Utils::Opt::Parser::Option("set-value");
+  Utils::Opt::RuleInterface &model_specifier =
+      ((sbml_model | sbmlsh_model | any_model), Utils::Opt::Parser::zeroOrMore(set_value_option));
 
   // Assemble output specifier:
   Utils::Opt::RuleInterface &any_output = Utils::Opt::Parser::Option("output", 'o');
@@ -134,11 +139,10 @@ int main(int argc, const char *argv[])
   Utils::Opt::RuleInterface &steady_state_specifier =
       (steady_state_flag, model_specifier, steadystate_options, output_specifier);
 
-  // List model commands
+  // Model commands
   Utils::Opt::RuleInterface &list_species_flag = Utils::Opt::Parser::Flag("list-species");
   Utils::Opt::RuleInterface &list_params_flag = Utils::Opt::Parser::Flag("list-parameters");
   Utils::Opt::RuleInterface &list_comps_flag = Utils::Opt::Parser::Flag("list-compartments");
-  Utils::Opt::RuleInterface &set_value_option = Utils::Opt::Parser::Option("set-value");
   Utils::Opt::RuleInterface &list_model_specifier =
       ((list_species_flag|list_params_flag|list_comps_flag|set_value_option), model_specifier);
 
@@ -190,8 +194,6 @@ int main(int argc, const char *argv[])
     return listCompartments(option_parser);
   } else if (option_parser.has_flag("list-parameters")) {
     return listParameters(option_parser);
-  } else if (option_parser.has_option("set-value")) {
-    return setInitialValue(option_parser);
   }
 
   std::cerr << "Unknown task selected!" << std::endl;

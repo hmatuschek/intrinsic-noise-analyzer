@@ -100,54 +100,55 @@ int listCompartments(Utils::Opt::Parser &option_parser)
 }
 
 
-int setInitialValue(Utils::Opt::Parser &option_parser)
+int setInitialValue(Ast::Model *model, Utils::Opt::Parser &option_parser)
 {
-  std::string assignment = option_parser.get_option("set-value").front();
-  size_t idx = assignment.find_first_of('=');
-  std::string identifier = assignment.substr(0, idx);
-  std::string expression = assignment.substr(idx+1);
-  identifier = stringStrip(identifier);
+  std::list<std::string> items = option_parser.get_option("update-value");
 
-  // check if an identifier is given:
-  if (0 == identifier.size()) {
-    Utils::Message message = LOG_MESSAGE(Utils::Message::ERROR);
-    message << "Can not set value: Empty identifier given.";
+  for(std::list<std::string>::iterator item=items.begin(); item!=items.end(); item++)
+  {
+    // Get identifier and expression strings:
+    std::string assignment = *item;
+    size_t idx = assignment.find_first_of('=');
+    std::string identifier = assignment.substr(0, idx);
+    std::string expression = assignment.substr(idx+1);
+    identifier = stringStrip(identifier);
+
+    // check if an identifier is given:
+    if (0 == identifier.size()) {
+      Utils::Message message = LOG_MESSAGE(Utils::Message::ERROR);
+      message << "Can not set value: Empty identifier given.";
+      Utils::Logger::get().log(message);
+      return -1;
+    }
+
+    // parse expression in global model context:
+    GiNaC::ex value;
+    try { value = Parser::Expr::parseExpression(expression, model); }
+    catch (Exception &err) {
+      Utils::Message message = LOG_MESSAGE(Utils::Message::ERROR);
+      message << "Can not parse expression \"" << expression << "\": " << err.what();
+      Utils::Logger::get().log(message);
+      return -1;
+    }
+
+    // Get variable by identifier:
+    if (! model->hasVariable(identifier)) {
+      Utils::Message message = LOG_MESSAGE(Utils::Message::ERROR);
+      message << "Can not set value of \"" << identifier << "\": Unknown identifier.";
+      Utils::Logger::get().log(message);
+      return -1;
+    }
+
+    Utils::Message message = LOG_MESSAGE(Utils::Message::DEBUG);
+    message << "Set initial value of " << identifier << " to ";
+    Parser::Expr::serializeExpression(value, message, model);
+    message << std::endl;
     Utils::Logger::get().log(message);
-    return -1;
+
+    // Finally set the value
+    model->getVariable(identifier)->setValue(value);
   }
 
-  // load model:
-  Ast::Model *model = importModel(option_parser);
-  if (0 == model) { return -1; }
-
-  // parse expression in global model context:
-  GiNaC::ex value;
-  try { value = Parser::Expr::parseExpression(expression, model); }
-  catch (Exception &err) {
-    Utils::Message message = LOG_MESSAGE(Utils::Message::ERROR);
-    message << "Can not parse expression \"" << expression << "\": " << err.what();
-    Utils::Logger::get().log(message);
-    return -1;
-  }
-
-  // Get variable by identifier:
-  if (! model->hasVariable(identifier)) {
-    Utils::Message message = LOG_MESSAGE(Utils::Message::ERROR);
-    message << "Can not set value of \"" << identifier << "\": Unknown identifier.";
-    Utils::Logger::get().log(message);
-    return -1;
-  }
-
-  Utils::Message message = LOG_MESSAGE(Utils::Message::DEBUG);
-  message << "Set initial value of " << identifier << " to ";
-  Parser::Expr::serializeExpression(value, message, model);
-  message << std::endl;
-  Utils::Logger::get().log(message);
-
-  // Finally set the value
-  model->getVariable(identifier)->setValue(value);
-
-  // Write back file
-  //return exportModel(model, option_parser);
-  return -1;
+  // Done.
+  return 0;
 }
