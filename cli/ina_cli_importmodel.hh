@@ -7,4 +7,8 @@
 /** Imports a model as specified by the command line options. */
 iNA::Ast::Model *importModel(iNA::Utils::Opt::Parser &option_parser);
 
+/** Imports a model as specified by the command line options. */
+int exportModel(iNA::Ast::Model *model, iNA::Utils::Opt::Parser &option_parser);
+
+
 #endif // INA_CLI_IMPORTMODEL_HH
