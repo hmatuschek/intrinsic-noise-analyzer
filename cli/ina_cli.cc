@@ -7,6 +7,7 @@
 #include <models/steadystateanalysis.hh>
 
 #include "ina_cli_steadystate.hh"
+#include "ina_cli_listmodel.h"
 
 
 using namespace iNA;
@@ -41,11 +42,11 @@ int main(int argc, const char *argv[])
       << " --list-species, --list-compartments, --list-parameters" << std::endl
       << "               : Lists species, compartments or global paramters of the specified model." << std::endl
       << std::endl
-      << " --set=ASSIGNMENT" << std::endl
+      << " --set-value=ASSIGNMENT" << std::endl
       << "               : Sets the initial value of a species, compartment or global parameter. " << std::endl
       << "                 ASSIGNMEN has the form ID=EXPRESSION, where ID is the identifier of the " << std::endl
       << "                 species, compartment or global parameter to be set and expression is an" << std::endl
-      << "                 arbitrary expression or value." << std::endl
+      << "                 arbitrary expression or value. (NOT IMPLEMENTED YET)" << std::endl
       << std::endl
       << " --steadystate, --help-steadystate" << std::endl
       << "               : Performs a steady state analysis for the given model. --help-steadystate" << std::endl
@@ -123,7 +124,6 @@ int main(int argc, const char *argv[])
 
   // Steady state analysis flag: --steadystate MODEL OUTPUT
   Utils::Opt::RuleInterface &steady_state_flag = Utils::Opt::Parser::Flag("steadystate");
-  // Assemble steady state specific options
   Utils::Opt::RuleInterface &max_iter_option = Utils::Opt::Parser::Option("max-iter");
   Utils::Opt::RuleInterface &epsilon_option = Utils::Opt::Parser::Option("eps");
   Utils::Opt::RuleInterface &min_dt_option = Utils::Opt::Parser::Option("min-dt");
@@ -134,8 +134,17 @@ int main(int argc, const char *argv[])
   Utils::Opt::RuleInterface &steady_state_specifier =
       (steady_state_flag, model_specifier, steadystate_options, output_specifier);
 
+  // List model commands
+  Utils::Opt::RuleInterface &list_species_flag = Utils::Opt::Parser::Flag("list-species");
+  Utils::Opt::RuleInterface &list_params_flag = Utils::Opt::Parser::Flag("list-parameters");
+  Utils::Opt::RuleInterface &list_comps_flag = Utils::Opt::Parser::Flag("list-compartments");
+  Utils::Opt::RuleInterface &set_value_option = Utils::Opt::Parser::Option("set-value");
+  Utils::Opt::RuleInterface &list_model_specifier =
+      ((list_species_flag|list_params_flag|list_comps_flag|set_value_option), model_specifier);
+
   // Task commands:
-  Utils::Opt::RuleInterface &task_command = (global_options, steady_state_specifier);
+  Utils::Opt::RuleInterface &task_command =
+      (global_options, (steady_state_specifier | list_model_specifier));
 
   // Assemble option parser
   Utils::Opt::Parser option_parser((version_flag | (help_flag | steadystate_help_flag) | task_command));
@@ -175,6 +184,14 @@ int main(int argc, const char *argv[])
   // Dispatch by task:
   if (option_parser.has_flag("steadystate")) {
     return performSteadyStateAnalysis(option_parser);
+  } else if (option_parser.has_flag("list-species")) {
+    return listSpecies(option_parser);
+  } else if (option_parser.has_flag("list-compartments")) {
+    return listCompartments(option_parser);
+  } else if (option_parser.has_flag("list-parameters")) {
+    return listParameters(option_parser);
+  } else if (option_parser.has_option("set-value")) {
+    return setInitialValue(option_parser);
   }
 
   std::cerr << "Unknown task selected!" << std::endl;

@@ -41,20 +41,23 @@ performSteadyStateAnalysis(Utils::Opt::Parser &option_parser)
   iNA::Ast::Model *model = 0;
   if (0 == (model = importModel(option_parser))) { return -1; }
 
-  /// Process steady state specific options
+  // Process steady state specific options
   size_t max_iter = 100;
-  double epsilon  = 1e-9;
-  double max_t    = 1e9;
-  double dt       = 1e-1;
   if (option_parser.has_option("max-iter")) {
     std::stringstream buffer(option_parser.get_option("max-iter").front()); buffer >> max_iter;
   }
+
+  double epsilon  = 1e-9;
   if (option_parser.has_option("eps")) {
     std::stringstream buffer(option_parser.get_option("eps").front()); buffer >> epsilon;
   }
+
+  double max_t    = 1e9;
   if (option_parser.has_option("max-dt")) {
     std::stringstream buffer(option_parser.get_option("max-dt").front()); buffer >> max_t;
   }
+
+  double dt       = 1e-1;
   if (option_parser.has_option("min-dt")) {
     std::stringstream buffer(option_parser.get_option("min-dt").front()); buffer >> dt;
   }
