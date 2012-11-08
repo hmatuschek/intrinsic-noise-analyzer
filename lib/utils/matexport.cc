@@ -1,6 +1,8 @@
 #include "matexport.hh"
 #include <config.hh>
 #include <ostream>
+#include <iostream>
+
 
 using namespace iNA;
 using namespace iNA::Utils;
@@ -52,7 +54,7 @@ MatFile::serialize(std::ostream &stream)
   std::string header_text = "Matlab 5.0 MAT-file, created with iNA " INA_VERSION_STRING;
   if (116 < header_text.size()) { header_text = header_text.substr(0, 116); }
   stream << header_text;
-  for (size_t i=header_text.size(); i<124; i++) { stream.put(0x00); }
+  for (size_t i=header_text.size(); i<124; i++) { stream.put(' '); }
   // serialize header version:
   uint16_t version = 0x0100;
   stream.write((char *)(&version), 2);
@@ -348,11 +350,11 @@ MatFileMatrixElement::MatFileMatrixElement(const std::string &name, const Eigen:
   MatFileValue *array_data = MatFileValue::allocDouble(values.rows()*values.cols());
 
   // Add sub elements:
-  add(array_flags); add(array_dimensions); add(array_name); add(array_data);
+  this->add(array_flags); this->add(array_dimensions); this->add(array_name); this->add(array_data);
 
   // Assemble array flags:
-  array_flags->dataUInt32()[0] = 0;
-  array_flags->dataUInt32()[1] = (0x0400u | uint8_t(_arrayType));
+  array_flags->dataUInt32()[0] = uint8_t(_arrayType);
+  array_flags->dataUInt32()[1] = 0;
 
   // Assemble dimensions array:
   array_dimensions->dataInt32()[0] = values.rows();

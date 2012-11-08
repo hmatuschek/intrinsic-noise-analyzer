@@ -186,13 +186,15 @@ saveSteadyStateAnalysisMAT(std::ostream &stream, Eigen::VectorXd &re_mean,
 {
   // Create and assemble MAT file
   Utils::MatFile mat;
-  mat.add("REs", re_mean);
-  mat.add("EMREs", re_mean+emre_corr);
+  mat.add("RE_means", re_mean);
+  mat.add("EMRE_means", re_mean+emre_corr);
   mat.add("IOS_means", re_mean+emre_corr+ios_corr);
   mat.add("LNA_cov", lna_cov);
   mat.add("IOS_cov", lna_cov+ios_cov);
+
   // Serialize into given stream:
   mat.serialize(stream);
+
   // done.
   return 0;
 }
