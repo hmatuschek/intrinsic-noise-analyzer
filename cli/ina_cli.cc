@@ -8,6 +8,8 @@
 
 #include "ina_cli_steadystate.hh"
 #include "ina_cli_listmodel.h"
+#include "ina_cli_importmodel.hh"
+
 
 
 using namespace iNA;
@@ -40,11 +42,11 @@ int main(int argc, const char *argv[])
       << " --version     : Prints the version number of iNA." << std::endl
       << std::endl
       << " --list-species, --list-compartments, --list-parameters" << std::endl
-      << "               : Lists species, compartments or global paramters of the specified model." << std::endl
+      << "               : Lists species, compartments or global parameters of the specified model." << std::endl
       << std::endl
-      << " --update, --help-update" << std::endl
-      << "               : Updates a model together with --set-value, --help-update shows some more" << std::endl
-      << "                 detailed information about this command. (NOT IMPLEMENTED YET)" << std::endl
+      << " --export=FILE, --export-sbml=FILE, --export-sbmlsh, --update, --help-export" << std::endl
+      << "               : Exports the model again. This can be used to update a model or to" << std::endl
+      << "                 translate models between formats." << std::endl
       << std::endl
       << " --steadystate, --help-steadystate" << std::endl
       << "               : Performs a steady state analysis for the given model. --help-steadystate" << std::endl
@@ -53,7 +55,7 @@ int main(int argc, const char *argv[])
       << "Model specification:" << std::endl
       << " -m FILENAME, --model=FILENAME" << std::endl
       << "               : Specifies the model file, the file extension determines the model type." << std::endl
-      << "                 *.xml and *.sbml are loaded as SBML and *.sbmlsh are loaded as SBML-sh." << std::endl
+      << "                 *.xml and *.sbml are loaded as SBML and *.sbmlsh is loaded as SBML-sh." << std::endl
       << std::endl
       << " --model-sbml=FILENAME" << std::endl
       << "               : Specifies the SBML model file to load." << std::endl
@@ -63,8 +65,8 @@ int main(int argc, const char *argv[])
       << std::endl
       << " --set-value=ASSIGNMENT" << std::endl
       << "               : This option may be to set the initial value of a variable before" << std::endl
-      << "                 performing any analysis. In contrast to --update-value, this option does" << std::endl
-      << "                 alter the model file." << std::endl
+      << "                 performing any analysis. This option may be present multiple times to " << std::endl
+      << "                 set several values."<< std::endl
       << std::endl << std::endl
       << "Ouput:" << std::endl
       << " -o FILENAME, --output=FILENAME" << std::endl
@@ -93,14 +95,33 @@ int main(int argc, const char *argv[])
       << "  If this command is present, iNA performs a steady state analysis ..." << std::endl
       << std::endl << std::endl
       << "The steady state command specific options are:" << std::endl
-      << "  --max-iter=N : Specifies the maximum number (N, integer) of iterations for convergence." << std::endl
+      << " --max-iter=N  : Specifies the maximum number (N, integer) of iterations for convergence." << std::endl
       << "                 By default  = 100." << std::endl
-      << "  --eps=F      : Specifies the absolute error (F, floating point) for the steady state." << std::endl
+      << " --eps=F       : Specifies the absolute error (F, floating point) for the steady state." << std::endl
       << "                 By default = 1e-9." << std::endl
-      << "  --max-df=F   : Specifies the maximum time step of intermediate integration to reach" << std::endl
+      << " --max-df=F    : Specifies the maximum time step of intermediate integration to reach" << std::endl
       << "                 quadratic convergence. By default = 1e9." << std::endl
-      << "  --min-df=F   : Specified the smalles time-step (F, floating point) for intermediate" << std::endl
+      << " --min-df=F    : Specified the smalles time-step (F, floating point) for intermediate" << std::endl
       << "                 integration. By default = 1e-1."<< std::endl;
+
+  // Assemble help for export commands:
+  std::stringstream export_help;
+  export_help
+      << "iNA command line interface tool - version " << INA_VERSION_STRING << std::endl
+      << std::endl
+      << "Usage: " << std::endl
+      << "  ina-cli [GLOBAL-OPTIONS] EXPORT_COMMAND MODEL" << std::endl
+      << std::endl << std::endl
+      << "Export commands:" << std::endl
+      << " --export=FILENAME" << std::endl
+      << "               : Exports the loaded model into the given file. The file extension" << std::endl
+      << "                 determines the export model type. *.xml and *.sbml are SBML files and" << std::endl
+      << "                 *.sbmlsh are SBML-sh files." << std::endl
+      << std::endl
+      << " --export-sbml=FILENAME" << std::endl
+      << " --export-sbmlsh=FILENAME" << std::endl
+      << " --update" << std::endl;
+
 
   // Global options:
   Utils::Opt::RuleInterface &loglevel_option = Utils::Opt::Parser::Option("loglevel");
@@ -110,6 +131,7 @@ int main(int argc, const char *argv[])
   Utils::Opt::RuleInterface &version_flag = Utils::Opt::Parser::Flag("version");
   Utils::Opt::RuleInterface &help_flag = Utils::Opt::Parser::Flag("help");
   Utils::Opt::RuleInterface &steadystate_help_flag = Utils::Opt::Parser::Flag("help-steadystate");
+  Utils::Opt::RuleInterface &export_help_flag = Utils::Opt::Parser::Flag("help-export");
 
   // Assemble model specifier
   Utils::Opt::RuleInterface &any_model = Utils::Opt::Parser::Option("model", 'm');
@@ -136,26 +158,34 @@ int main(int argc, const char *argv[])
   Utils::Opt::RuleInterface &steadystate_options =
       Utils::Opt::Parser::zeroOrMore(
         (max_iter_option | epsilon_option | min_dt_option, max_dt_option));
-  Utils::Opt::RuleInterface &steady_state_specifier =
+  Utils::Opt::RuleInterface &steadystate_command =
       (steady_state_flag, model_specifier, steadystate_options, output_specifier);
 
   // Model commands
   Utils::Opt::RuleInterface &list_species_flag = Utils::Opt::Parser::Flag("list-species");
   Utils::Opt::RuleInterface &list_params_flag = Utils::Opt::Parser::Flag("list-parameters");
   Utils::Opt::RuleInterface &list_comps_flag = Utils::Opt::Parser::Flag("list-compartments");
-  Utils::Opt::RuleInterface &list_model_specifier =
+  Utils::Opt::RuleInterface &list_model_command =
       ((list_species_flag|list_params_flag|list_comps_flag|set_value_option), model_specifier);
+
+  // Export commands
+  Utils::Opt::RuleInterface &export_option = Utils::Opt::Parser::Option("export");
+  Utils::Opt::RuleInterface &export_sbml_option = Utils::Opt::Parser::Option("export-sbml");
+  Utils::Opt::RuleInterface &export_sbmlsh_option = Utils::Opt::Parser::Option("export-sbmlsh");
+  Utils::Opt::RuleInterface &update_option = Utils::Opt::Parser::Option("update");
+  Utils::Opt::RuleInterface &export_commands =
+      ((export_option, export_sbml_option, export_sbmlsh_option, update_option), model_specifier);
 
   // Task commands:
   Utils::Opt::RuleInterface &task_command =
-      (global_options, (steady_state_specifier | list_model_specifier));
+      (global_options, (steadystate_command | list_model_command | export_commands));
 
   // Assemble option parser
   Utils::Opt::Parser option_parser((version_flag | (help_flag | steadystate_help_flag) | task_command));
 
   // If invalid argument -> print help
   if (! option_parser.parse(argv, argc)) {
-    std::cout << help_string.str();
+    std::cerr << help_string.str();
     return -1;
   }
   // If --help -> print help and exit:
@@ -166,6 +196,11 @@ int main(int argc, const char *argv[])
   // If --help-steadystate -> print help for steadystate analysis and exit
   if (option_parser.has_flag("help-steadystate")) {
     std::cout << steadystate_help.str();
+    return 0;
+  }
+  // If --help-export -> print help for model export
+  if (option_parser.has_flag("help-export")) {
+    std::cout << export_help.str();
     return 0;
   }
   // Display version:
@@ -194,6 +229,10 @@ int main(int argc, const char *argv[])
     return listCompartments(option_parser);
   } else if (option_parser.has_flag("list-parameters")) {
     return listParameters(option_parser);
+  } else if (option_parser.has_option("export") || option_parser.has_option("export-sbml") ||
+             option_parser.has_option("export-sbmlsh") || option_parser.has_option("update"))
+  {
+    return exportModel(option_parser);
   }
 
   std::cerr << "Unknown task selected!" << std::endl;
