@@ -180,14 +180,24 @@ int main(int argc, const char *argv[])
   Utils::Opt::RuleInterface &task_command =
       (global_options, (steadystate_command | list_model_command | export_commands));
 
-  // Assemble option parser
-  Utils::Opt::Parser option_parser((version_flag | (help_flag | steadystate_help_flag) | task_command));
+  // Help flags
+  Utils::Opt::RuleInterface &help_flags =
+      (help_flag | steadystate_help_flag | export_help_flag);
 
-  // If invalid argument -> print help
+  // Assemble option parser
+  Utils::Opt::Parser option_parser((version_flag | help_flags | task_command));
+
+  /*
+   * Parse arguments: If invalid argument -> print help
+   */
   if (! option_parser.parse(argv, argc)) {
     std::cerr << help_string.str();
     return -1;
   }
+
+  /*
+   * Dispatch help flags.
+   */
   // If --help -> print help and exit:
   if (option_parser.has_flag("help")) {
     std::cout << help_string.str();
@@ -220,7 +230,10 @@ int main(int argc, const char *argv[])
   }
   Utils::Logger::get().addHandler(new Utils::TextMessageHandler(std::cerr, level));
 
-  // Dispatch by task:
+
+  /*
+   * Dispatch by commands
+   */
   if (option_parser.has_flag("steadystate")) {
     return performSteadyStateAnalysis(option_parser);
   } else if (option_parser.has_flag("list-species")) {
