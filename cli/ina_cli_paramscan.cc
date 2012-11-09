@@ -7,6 +7,28 @@
 
 using namespace iNA;
 
+
+bool string2Double(const std::string &string, double &value) {
+  const char *ptr = string.c_str();  char *endPtr = (char *)ptr;
+  value = strtod(ptr, &endPtr);
+  if (0 == value && ptr==endPtr) {
+    return false;
+  }
+  return true;
+}
+
+bool string2Int(const std::string &string, long int &value) {
+  const char *ptr = string.c_str();  char *endPtr = (char *)ptr;
+  value = strtol(ptr, &endPtr, 10);
+  if (0 == value && ptr==endPtr) {
+    return false;
+  }
+  return true;
+}
+
+
+int saveParameterScan(std::vector<Eigen::VectorXd> &result, Utils::Opt::Parser &option_parser);
+
 int performParamScan(Utils::Opt::Parser &option_parser)
 {
   // Determine parameter identifier
@@ -14,7 +36,7 @@ int performParamScan(Utils::Opt::Parser &option_parser)
 
   // Determine parameter rage:
   std::string range = option_parser.get_option("range").front();
-  double p_min, p_max; size_t N=100;
+  double p_min, p_max; size_t N=100; bool success=true;
   size_t idx_1 = range.find_first_of(':');
   if (idx_1 == std::string::npos) {
     Utils::Message message = LOG_MESSAGE(Utils::Message::ERROR);
@@ -22,14 +44,28 @@ int performParamScan(Utils::Opt::Parser &option_parser)
     Utils::Logger::get().log(message);
     return -1;
   }
-  std::stringstream buffer; buffer.str(range.substr(0, idx_1)); buffer >> p_min;
+  success = success && string2Double(range.substr(0, idx_1), p_min);
   size_t idx_2 = range.find_first_of(':', idx_1+1);
   if (idx_2 != std::string::npos) {
-    buffer.str(range.substr(idx_1+1, idx_2)); buffer >> p_max;
-    buffer.str(range.substr(idx_2+1)); buffer >> N;
+    success = success && string2Double(range.substr(idx_1+1, idx_2-1-idx_1), p_max);
+    long int tmp;
+    success = success && string2Int(range.substr(idx_2+1), tmp); N = tmp;
+    if (0 > tmp) { success = false; }
   } else {
-    buffer.str(range.substr(idx_1+1)); buffer >> p_max;
+    long int tmp;
+    success = success && string2Int(range.substr(idx_1+1), tmp); N = tmp;
+    if (0 > tmp) { success = false; }
   }
+
+  // Check if range was parsed successfully:
+  if (! success) {
+    Utils::Message message = LOG_MESSAGE(Utils::Message::ERROR);
+    message << "Invalid reange format in '" << range << "'. Must be FROM:TO[:STEPS]";
+    Utils::Logger::get().log(message);
+    return -1;
+  }
+
+  // Determine step size
   double delta_p = (p_max-p_min)/(N-1);
 
   // Load model
@@ -44,6 +80,7 @@ int performParamScan(Utils::Opt::Parser &option_parser)
     return -1;
   }
 
+  // Assemble parameter scan
   Models::IOSmodel ios_model(*model);
   std::vector< std::map<std::string, double> > parameter_sets(N);
   std::vector<Eigen::VectorXd> result(N);
@@ -54,10 +91,22 @@ int performParamScan(Utils::Opt::Parser &option_parser)
     result[i] = Eigen::VectorXd(ios_model.getDimension());
   }
 
+  // Show summary as debug message:
+  Utils::Message message = LOG_MESSAGE(Utils::Message::DEBUG);
+  message << "Perform parameter scan for parameter " << identifier
+          << " from " << p_min << " to " << p_max << " in " << N << "steps.";
+  Utils::Logger::get().log(message);
+
+  // Run scan...
   Models::ParameterScan<Models::IOSmodel> pscan(ios_model);
-  pscan.parameterScan(parameter_sets, result);
+  if (0 < pscan.parameterScan(parameter_sets, result)) {
+    return -1;
+  }
 
-  /// @bug Export scan.
+  return saveParameterScan(result, option_parser);
+}
 
+
+int saveParameterScan(std::vector<Eigen::VectorXd> &result, Utils::Opt::Parser &option_parser) {
   return -1;
 }

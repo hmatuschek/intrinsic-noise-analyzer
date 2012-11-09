@@ -188,7 +188,7 @@ int main(int argc, const char *argv[])
   Utils::Opt::RuleInterface &paramscan_option = Utils::Opt::Parser::Option("scan");
   Utils::Opt::RuleInterface &range_option = Utils::Opt::Parser::Option("range");
   Utils::Opt::RuleInterface &paramscan_command =
-      (paramscan_option, range_option);
+      (paramscan_option, range_option, model_specifier, output_specifier);
 
   // Task commands:
   Utils::Opt::RuleInterface &task_command =
