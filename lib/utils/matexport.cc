@@ -1,6 +1,8 @@
 #include "matexport.hh"
 #include <config.hh>
 #include <ostream>
+#include <iostream>
+
 
 using namespace iNA;
 using namespace iNA::Utils;
@@ -48,16 +50,17 @@ void MatFile::add(const std::string &name, const Eigen::MatrixXd &value) {
 void
 MatFile::serialize(std::ostream &stream)
 {
-  // Serialize header text (124 bytes):
+  // Serialize header text (116 bytes):
   std::string header_text = "Matlab 5.0 MAT-file, created with iNA " INA_VERSION_STRING;
-  if (124 < header_text.size()) { header_text = header_text.substr(0, 124); }
+  if (116 < header_text.size()) { header_text = header_text.substr(0, 116); }
   stream << header_text;
-  for (size_t i=header_text.size(); i<124; i++) { stream.put(0x00); }
+  for (size_t i=header_text.size(); i<124; i++) { stream.put(' '); }
   // serialize header version:
-  stream.put(0x01); stream.put(0x00);
+  uint16_t version = 0x0100;
+  stream.write((char *)(&version), 2);
   // serialize endian indicator:
-  short endian = short(('M'<<8)||'I');
-  stream.write((char *)(&endian), 2);
+  uint16_t endian = 0x4d49;
+  stream.write(((char *)(&endian)), 2);
 
   // Serialize elements:
   for (std::list<MatFileElement *>::iterator element = _elements.begin();
@@ -96,7 +99,7 @@ void
 MatFileElement::serialize(std::ostream &stream) const
 {
   uint32_t type_field = uint32_t(_type);
-  uint32_t length_field = uint32_t(dataSize());
+  uint32_t length_field = uint32_t(this->dataSize());
   stream.write((char *)(&type_field), sizeof(uint32_t));
   stream.write((char *)(&length_field), sizeof(uint32_t));
 }
@@ -163,8 +166,11 @@ size_t
 MatFileValue::dataSize() const
 {
   switch (_type) {
-  case miInt64:  return _num_elements*sizeof(long);
-  case miUInt64: return _num_elements*sizeof(unsigned long);
+  case miInt8:   return _num_elements*sizeof(char);
+  case miInt32:  return _num_elements*sizeof(int32_t);
+  case miUInt32:  return _num_elements*sizeof(uint32_t);
+  case miInt64:  return _num_elements*sizeof(int64_t);
+  case miUInt64: return _num_elements*sizeof(uint64_t);
   case miDouble: return _num_elements*sizeof(double);
   case miUTF8:   return _num_elements*sizeof(char);
   default: break;
@@ -181,11 +187,20 @@ MatFileValue::serialize(std::ostream &stream) const
 
   // Serialize data
   switch (_type) {
+  case miInt8:
+    stream.write((char *)(_value.asInt8), _num_elements*sizeof(int8_t));
+    break;
+  case miInt32:
+    stream.write((char *)(_value.asInt32), _num_elements*sizeof(int32_t));
+    break;
+  case miUInt32:
+    stream.write((char *)(_value.asUInt32), _num_elements*sizeof(uint32_t));
+    break;
   case miInt64:
-    stream.write((char *)(_value.asInt64), _num_elements*sizeof(long));
+    stream.write((char *)(_value.asInt64), _num_elements*sizeof(int64_t));
     break;
   case miUInt64:
-    stream.write((char *)(_value.asUInt64), _num_elements*sizeof(unsigned long));
+    stream.write((char *)(_value.asUInt64), _num_elements*sizeof(uint64_t));
     break;
   case miDouble:
     stream.write((char *)(_value.asDouble), _num_elements*sizeof(double));
@@ -194,6 +209,7 @@ MatFileValue::serialize(std::ostream &stream) const
     stream.write((char *)(_value.asString), _num_elements*sizeof(char));
     break;
   default:
+    /// @todo Throw exception.
     break;
   }
 
@@ -216,6 +232,7 @@ MatFileValue::allocInt8(size_t num)
 {
   MatFileValue *element = new MatFileValue(MatFileElement::miInt8);
   element->_value.asInt8 = new int8_t[num];
+  element->_num_elements = num;
   return element;
 }
 
@@ -224,6 +241,7 @@ MatFileValue::allocInt32(size_t num)
 {
   MatFileValue *element = new MatFileValue(MatFileElement::miInt32);
   element->_value.asInt32 = new int32_t[num];
+  element->_num_elements = num;
   return element;
 }
 
@@ -232,6 +250,7 @@ MatFileValue::allocUInt32(size_t num)
 {
   MatFileValue *element = new MatFileValue(MatFileElement::miUInt32);
   element->_value.asUInt32 = new uint32_t[num];
+  element->_num_elements = num;
   return element;
 }
 
@@ -240,6 +259,7 @@ MatFileValue::allocInt64(size_t num)
 {
   MatFileValue *element = new MatFileValue(MatFileElement::miInt64);
   element->_value.asInt64 = new int64_t[num];
+  element->_num_elements = num;
   return element;
 }
 
@@ -248,6 +268,7 @@ MatFileValue::allocUInt64(size_t num)
 {
   MatFileValue *element = new MatFileValue(MatFileElement::miUInt64);
   element->_value.asUInt64 = new uint64_t[num];
+  element->_num_elements = num;
   return element;
 }
 
@@ -256,6 +277,7 @@ MatFileValue::allocDouble(size_t num)
 {
   MatFileValue *element = new MatFileValue(MatFileElement::miDouble);
   element->_value.asDouble = new double[num];
+  element->_num_elements = num;
   return element;
 }
 
@@ -264,6 +286,7 @@ MatFileValue::allocUTF8(size_t num)
 {
   MatFileValue *element = new MatFileValue(MatFileElement::miUTF8);
   element->_value.asString = new char[num];
+  element->_num_elements = num;
   return element;
 }
 
@@ -327,11 +350,11 @@ MatFileMatrixElement::MatFileMatrixElement(const std::string &name, const Eigen:
   MatFileValue *array_data = MatFileValue::allocDouble(values.rows()*values.cols());
 
   // Add sub elements:
-  add(array_flags); add(array_dimensions); add(array_name); add(array_data);
+  this->add(array_flags); this->add(array_dimensions); this->add(array_name); this->add(array_data);
 
   // Assemble array flags:
-  array_flags->dataUInt32()[0] = 0;
-  array_flags->dataUInt32()[1] = (0x0400u | uint8_t(_arrayType));
+  array_flags->dataUInt32()[0] = uint8_t(_arrayType);
+  array_flags->dataUInt32()[1] = 0;
 
   // Assemble dimensions array:
   array_dimensions->dataInt32()[0] = values.rows();

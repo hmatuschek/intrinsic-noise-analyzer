@@ -112,7 +112,9 @@ IOSResultWidget::_onGenericPlotButtonPressed()
 
   // Iterate over all graphs of the configured plot:
   for (size_t i=0; i<dialog.numGraphs(); i++) {
-    figure->getAxis()->addGraph(dialog.graph(i).create(figure->getStyle(i)));
+    Plot::Graph *graph = dialog.graph(i).create(figure->getStyle(i));
+    figure->getAxis()->addGraph(graph);
+    figure->addToLegend(dialog.graph(i).label(), graph);
   }
 
   // Add timeseries plot:
