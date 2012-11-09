@@ -7,6 +7,7 @@
 #include <models/steadystateanalysis.hh>
 
 #include "ina_cli_steadystate.hh"
+#include "ina_cli_paramscan.hh"
 #include "ina_cli_listmodel.h"
 #include "ina_cli_importmodel.hh"
 
@@ -119,8 +120,15 @@ int main(int argc, const char *argv[])
       << "                 *.sbmlsh are SBML-sh files." << std::endl
       << std::endl
       << " --export-sbml=FILENAME" << std::endl
+      << "               : Exports the loaded model as SBML into the given file." << std::endl
+      << std::endl
       << " --export-sbmlsh=FILENAME" << std::endl
-      << " --update" << std::endl;
+      << "               : Exports the loaded model as SBML-sh into the given file." << std::endl
+      << std::endl
+      << " --update" << std::endl
+      << "               : Updates the loaded model file. NOTE: iNA does not keep all annotations" << std::endl
+      << "                 of the original model, these annotations may be lost when using this" << std::endl
+      << "                 command." << std::endl;
 
 
   // Global options:
@@ -149,6 +157,13 @@ int main(int argc, const char *argv[])
   Utils::Opt::RuleInterface &output_specifier =
       (csv_output | mat_output | stdout_output | any_output);
 
+  // Model access commands
+  Utils::Opt::RuleInterface &list_species_flag = Utils::Opt::Parser::Flag("list-species");
+  Utils::Opt::RuleInterface &list_params_flag = Utils::Opt::Parser::Flag("list-parameters");
+  Utils::Opt::RuleInterface &list_comps_flag = Utils::Opt::Parser::Flag("list-compartments");
+  Utils::Opt::RuleInterface &list_model_command =
+      ((list_species_flag|list_params_flag|list_comps_flag|set_value_option), model_specifier);
+
   // Steady state analysis flag: --steadystate MODEL OUTPUT
   Utils::Opt::RuleInterface &steady_state_flag = Utils::Opt::Parser::Flag("steadystate");
   Utils::Opt::RuleInterface &max_iter_option = Utils::Opt::Parser::Option("max-iter");
@@ -161,13 +176,6 @@ int main(int argc, const char *argv[])
   Utils::Opt::RuleInterface &steadystate_command =
       (steady_state_flag, model_specifier, steadystate_options, output_specifier);
 
-  // Model commands
-  Utils::Opt::RuleInterface &list_species_flag = Utils::Opt::Parser::Flag("list-species");
-  Utils::Opt::RuleInterface &list_params_flag = Utils::Opt::Parser::Flag("list-parameters");
-  Utils::Opt::RuleInterface &list_comps_flag = Utils::Opt::Parser::Flag("list-compartments");
-  Utils::Opt::RuleInterface &list_model_command =
-      ((list_species_flag|list_params_flag|list_comps_flag|set_value_option), model_specifier);
-
   // Export commands
   Utils::Opt::RuleInterface &export_option = Utils::Opt::Parser::Option("export");
   Utils::Opt::RuleInterface &export_sbml_option = Utils::Opt::Parser::Option("export-sbml");
@@ -176,9 +184,15 @@ int main(int argc, const char *argv[])
   Utils::Opt::RuleInterface &export_commands =
       ((export_option, export_sbml_option, export_sbmlsh_option, update_option), model_specifier);
 
+  // Param scan commands
+  Utils::Opt::RuleInterface &paramscan_option = Utils::Opt::Parser::Option("scan");
+  Utils::Opt::RuleInterface &range_option = Utils::Opt::Parser::Option("range");
+  Utils::Opt::RuleInterface &paramscan_command =
+      (paramscan_option, range_option);
+
   // Task commands:
   Utils::Opt::RuleInterface &task_command =
-      (global_options, (steadystate_command | list_model_command | export_commands));
+      (global_options, (steadystate_command | paramscan_command | list_model_command | export_commands));
 
   // Help flags
   Utils::Opt::RuleInterface &help_flags =
@@ -236,6 +250,8 @@ int main(int argc, const char *argv[])
    */
   if (option_parser.has_flag("steadystate")) {
     return performSteadyStateAnalysis(option_parser);
+  } else if (option_parser.has_option("scan")) {
+    return performParamScan(option_parser);
   } else if (option_parser.has_flag("list-species")) {
     return listSpecies(option_parser);
   } else if (option_parser.has_flag("list-compartments")) {
