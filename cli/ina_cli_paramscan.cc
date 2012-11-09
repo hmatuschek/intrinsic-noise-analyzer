@@ -1,6 +1,8 @@
 #include "ina_cli_paramscan.hh"
 #include "ina_cli_importmodel.hh"
 #include <utils/logger.hh>
+#include <models/steadystateanalysis.hh>
+#include <models/IOSmodel.hh>
 
 
 using namespace iNA;
@@ -28,6 +30,7 @@ int performParamScan(Utils::Opt::Parser &option_parser)
   } else {
     buffer.str(range.substr(idx_1+1)); buffer >> p_max;
   }
+  double delta_p = (p_max-p_min)/(N-1);
 
   // Load model
   Ast::Model *model = importModel(option_parser);
@@ -40,9 +43,21 @@ int performParamScan(Utils::Opt::Parser &option_parser)
     Utils::Logger::get().log(message);
     return -1;
   }
-  Ast::Parameter *param = model->getParameter(identifier);
 
-  /// @bug Implement.
+  Models::IOSmodel ios_model(*model);
+  std::vector< std::map<std::string, double> > parameter_sets(N);
+  std::vector<Eigen::VectorXd> result(N);
+  double value = p_min;
+  for (size_t i=0; i<N; i++) {
+    std::map<std::string, double> values; values[identifier] = value; value += delta_p;
+    parameter_sets[i] = values;
+    result[i] = Eigen::VectorXd(ios_model.getDimension());
+  }
+
+  Models::ParameterScan<Models::IOSmodel> pscan(ios_model);
+  pscan.parameterScan(parameter_sets, result);
+
+  /// @bug Export scan.
 
   return -1;
 }
