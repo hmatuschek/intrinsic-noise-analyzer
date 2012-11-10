@@ -226,7 +226,7 @@ GenericPlotDialog::GenericPlotDialog(Table *table, QWidget *parent)
   _rem_graph  = new QPushButton(tr("-"));
   _rem_graph->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
-  _edit_labels = new QPushButton(tr("labels"));
+  _edit_labels = new QPushButton(tr("Edit labels"));
   _edit_labels->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
   _stack = new QStackedWidget();
