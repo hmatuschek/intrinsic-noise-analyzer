@@ -6,8 +6,8 @@ SET(ina_CLI_HEADERS
     ina_cli.hh ina_cli_steadystate.hh ina_cli_importmodel.hh ina_cli_fileextension.hh
     ina_cli_listmodel.hh ina_cli_paramscan.hh ina_cli_savetable.hh)
 
-#ADD_EXECUTABLE(ina-cli ${ina_CLI_SOURCES})
-#TARGET_LINK_LIBRARIES(ina-cli ${LIBS} libina)
+ADD_EXECUTABLE(ina-cli ${ina_CLI_SOURCES})
+TARGET_LINK_LIBRARIES(ina-cli ${LIBS} libina)
  
 #
 # Central build-script for all the tiny CLI programs
