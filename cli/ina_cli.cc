@@ -52,6 +52,9 @@ int main(int argc, const char *argv[])
       << " --steadystate, --help-steadystate" << std::endl
       << "               : Performs a steady state analysis for the given model. --help-steadystate" << std::endl
       << "                 shows a details help about the analysis and the analysis specific options." << std::endl
+      << std::endl
+      << " --scan=ID, --help-scan" << std::endl
+      << "               : Performs a scan over a parameter specified by ID." << std::endl
       << std::endl << std::endl
       << "Model specification:" << std::endl
       << " -m FILENAME, --model=FILENAME" << std::endl
@@ -130,6 +133,22 @@ int main(int argc, const char *argv[])
       << "                 of the original model, these annotations may be lost when using this" << std::endl
       << "                 command." << std::endl;
 
+  // Param scan help
+  std::stringstream scan_help;
+  scan_help
+      << "iNA command line interface tool - version " << INA_VERSION_STRING << std::endl
+      << std::endl
+      << "Usage: " << std::endl
+      << "  ina-cli [GLOBAL-OPTIONS] --scan=ID --range=RANGE MODEL OUTPUT" << std::endl
+      << std::endl << std::endl
+      << "Parameter scan:" << std::endl
+      << " --scan=ID" << std::endl
+      << "               : Specifies the parameter for the parameter scan." << std::endl
+      << std::endl
+      << " --range=RANGE" << std::endl
+      << "               : Specifies the value range for the parameter scan. The range format is"<< std::endl
+      << "                 FROM:TO[:STEPS]." << std::endl;
+
 
   // Global options:
   Utils::Opt::RuleInterface &loglevel_option = Utils::Opt::Parser::Option("loglevel");
@@ -140,6 +159,7 @@ int main(int argc, const char *argv[])
   Utils::Opt::RuleInterface &help_flag = Utils::Opt::Parser::Flag("help");
   Utils::Opt::RuleInterface &steadystate_help_flag = Utils::Opt::Parser::Flag("help-steadystate");
   Utils::Opt::RuleInterface &export_help_flag = Utils::Opt::Parser::Flag("help-export");
+  Utils::Opt::RuleInterface &scan_help_flag = Utils::Opt::Parser::Flag("help-scan");
 
   // Assemble model specifier
   Utils::Opt::RuleInterface &any_model = Utils::Opt::Parser::Option("model", 'm');
@@ -196,7 +216,7 @@ int main(int argc, const char *argv[])
 
   // Help flags
   Utils::Opt::RuleInterface &help_flags =
-      (help_flag | steadystate_help_flag | export_help_flag);
+      (help_flag | steadystate_help_flag | export_help_flag | scan_help_flag);
 
   // Assemble option parser
   Utils::Opt::Parser option_parser((version_flag | help_flags | task_command));
@@ -225,6 +245,11 @@ int main(int argc, const char *argv[])
   // If --help-export -> print help for model export
   if (option_parser.has_flag("help-export")) {
     std::cout << export_help.str();
+    return 0;
+  }
+  // If --help-scan -> print help for parameter scan and exit:
+  if (option_parser.has_flag("help-scan")) {
+    std::cout << scan_help.str();
     return 0;
   }
   // Display version:
