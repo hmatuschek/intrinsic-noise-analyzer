@@ -146,8 +146,10 @@ int main(int argc, const char *argv[])
       << "               : Specifies the parameter for the parameter scan." << std::endl
       << std::endl
       << " --range=RANGE" << std::endl
-      << "               : Specifies the value range for the parameter scan. The range format is"<< std::endl
-      << "                 FROM:TO[:STEPS]." << std::endl;
+      << "               : Specifies the value range for the parameter scan. The range format is"<<std::endl
+      << "                 FROM:TO[:STEPS].  FROM specifies the start value and TO specifies the"<<std::endl
+      << "                 final value for  the parameter scan. N is optional  and specifies the"<<std::endl
+      << "                 number steps. If not prensent, N is by default 100." << std::endl;
 
 
   // Global options:
@@ -210,9 +212,18 @@ int main(int argc, const char *argv[])
   Utils::Opt::RuleInterface &paramscan_command =
       (paramscan_option, range_option, model_specifier, output_specifier);
 
+  // SSE timecourse analysis options
+  Utils::Opt::RuleInterface &re_timecourse_flag = Utils::Opt::Parser::Flag("re");
+  Utils::Opt::RuleInterface &lna_timecourse_flag = Utils::Opt::Parser::Flag("lna");
+  Utils::Opt::RuleInterface &emre_timecourse_flag = Utils::Opt::Parser::Flag("emre");
+  Utils::Opt::RuleInterface &sse_timecourse_command =
+      ( (re_timecourse_flag|lna_timecourse_flag|emre_timecourse_flag),
+        model_specifier, output_specifier );
+
   // Task commands:
   Utils::Opt::RuleInterface &task_command =
-      (global_options, (steadystate_command | paramscan_command | list_model_command | export_commands));
+      (global_options, (steadystate_command | paramscan_command | sse_timecourse_command |
+                        list_model_command | export_commands));
 
   // Help flags
   Utils::Opt::RuleInterface &help_flags =
