@@ -60,8 +60,8 @@ int main(int argc, char *argv[])
 //    Eigen::VectorXd third=Eigen::VectorXd::Zero(SSEmodel.numSpecies());
 //    Eigen::VectorXd fourth=Eigen::VectorXd::Zero(SSEmodel.numSpecies());
 
-    Eigen::VectorXd domain(100);
-    double Min = -20e3, Max = 20.0e3;
+    Eigen::VectorXd domain(1000);
+    double Min = 0, Max = 100;
 
     double x=Min;
     for(int i=0; i<domain.size(); i++, x+=(Max-Min)/(domain.size()-1))
@@ -69,15 +69,29 @@ int main(int argc, char *argv[])
 
 //    SSEmodel.getCentralMoments(state,first,second,third,fourth);
 
-    Eigen::VectorXd moments(2);
+    Eigen::VectorXd moments(11);
     // Moments of gamma distribution
     //for(int r=0; r<moments.size(); r++)
-    //        moments(r) = pow(beta,r+1)*pochammer(alpha,r+1);
+    //   moments(r) = pow(beta,r)*pochammer(alpha,r);
 
-    moments(0) = 0.76;//1498.5;//first(2);
-    moments(1) = 0.8816;//second(2,2);
-    //moments(2) = 9.985e8;//third(2);
-    //moments(3) = 1.96842e13;//fourth(2);
+//    moments(0) = 1498.5;//first(2);
+//    moments(1) = 1.4985e6;//second(2,2);
+//    moments(2) = 9.985e8;//third(2);
+//    moments(3) = 6.73651e12;//fourth(2);
+
+//    moments << 5994., 5.994e6, 1.1982e10, 1.3473e14, 4.98751e17, 1.86938e21;
+
+    //moments<<1498.5, 1.4985e6, 2.9955e9, 1.57185e13, 3.69076e16,
+    //         4.54883e19, 2.61582e22, 6.53629e24;
+        //, 1.57697e25, 1.33975e29, 1.27212e33,
+                  //1.33505e37;
+    //Schloegl set 1
+    moments << 1,34.1526,1232.75,45501.2,1.70699e6,6.49222e7,2.49923e9,9.72636e10,5.32507e11,1.97972e13,7.45706e14;
+    //Schloegl set 2
+    //moments << 1,22.8441,723.839,24724.3,872717.,3.14956e7,1.15697e9,4.31486e10,1.6308e12,6.23778e13;
+    //Schloegl set 3
+    //moments << 1,12.6268,321.046,9972.9,331565.,1.1423e7,4.03455e8,1.45351e10,5.32507e11,1.97972e13;
+    //moments = Models::MaximumEntropyPDF::getNonCentralMoments(moments);
 
     std::cout << "Fitting the moments:" << std::endl;
     std::cout << moments.transpose() << std::endl;
@@ -86,13 +100,14 @@ int main(int argc, char *argv[])
     std::cout << Models::MaximumEntropyPDF::getNonCentralMoments(moments).transpose() << std::endl;
 
     Models::MaximumEntropyPDF MEP;
-    Eigen::VectorXd pdf = MEP.computePDFfromCentralMoments(domain,moments);
+    Eigen::VectorXd pdf = MEP.computePDF2(domain,moments);
     Eigen::VectorXd gamma = gammaPDF(domain,alpha,beta);
 
     std::ofstream histfile;
     histfile.open ("MEPhistogram.dat");
     for(int i=0; i<domain.size(); i++)
-        histfile << domain(i) << "\t" << pdf(i) << "\t" << gamma(i) <<std::endl;
+        histfile << domain(i) << " " << pdf(i) //<< "\t" << gamma(i)
+                 <<std::endl;
     histfile.close();
 
     return 0;
