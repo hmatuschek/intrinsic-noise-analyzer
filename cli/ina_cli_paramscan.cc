@@ -82,6 +82,7 @@ int performParamScan(Utils::Opt::Parser &option_parser)
     return -1;
   }
 
+  /// @todo Process paramscan specific options.
   // Assemble parameter scan
   Models::IOSmodel ios_model(*model);
   std::vector< std::map<std::string, double> > parameter_sets(N_steps);
