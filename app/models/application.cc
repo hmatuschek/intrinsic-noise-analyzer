@@ -306,9 +306,9 @@ void Application::onImportModel(const QString &fileName)
     DocumentItem *new_doc = 0;
     // Try to determine file type by extension:
     if (("xml" == info.suffix()) || ("sbml" == info.suffix())) {
-      new_doc = new DocumentItem(Parser::Sbml::importModel(fileName.toStdString()), fileName);
+      new_doc = new DocumentItem(Parser::Sbml::importModel(fileName.toLocal8Bit().data()), fileName);
     } else if (("mod" == info.suffix()) || ("sbmlsh" == info.suffix())) {
-      new_doc = new DocumentItem(Parser::Sbmlsh::importModel(fileName.toStdString()), fileName);
+      new_doc = new DocumentItem(Parser::Sbmlsh::importModel(fileName.toLocal8Bit().data()), fileName);
     }
     // Add new document to tree:
     if (0 != new_doc) {
@@ -373,11 +373,11 @@ void Application::onExportModel()
     if ("SBML (*.xml *.sbml)" == selected_filter) {
       QFileInfo info(filename);
       if ( ("xml" != info.suffix()) && ("sbml" != info.suffix()) ) { filename.append(".xml"); }
-      Parser::Sbml::exportModel(document->getModel(), filename.toStdString());
+      Parser::Sbml::exportModel(document->getModel(), filename.toLocal8Bit().data());
     } else if ("SBML-sh (*.mod *.sbmlsh)" == selected_filter){
       QFileInfo info(filename);
       if ( ("mod" != info.suffix()) && ("sbmlsh" != info.suffix()) ) { filename.append(".sbmlsh"); }
-      Parser::Sbmlsh::exportModel(document->getModel(), filename.toStdString());
+      Parser::Sbmlsh::exportModel(document->getModel(), filename.toLocal8Bit().data());
     } else {
       QMessageBox::critical(0, tr("Can not export model"), tr("Unkown file type: %1").arg(selected_filter));
     }
