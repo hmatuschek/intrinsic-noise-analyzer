@@ -1,6 +1,7 @@
 #include "ina_cli_savetable.hh"
 #include "ina_cli_fileextension.hh"
 
+#include <iostream>
 #include <fstream>
 #include <utils/matexport.hh>
 #include <utils/logger.hh>
