@@ -12,8 +12,7 @@ namespace Trafo {
 
 
 /** Base class of all modification items. Representing a single modification of a model. See
- * @c ModelHistory for details.
- * @ingroup ast */
+ * @c ModelHistory for details. */
 class ModelDiffItem {
 public:
   /** Constructor, does nothing. */
@@ -35,8 +34,7 @@ public:
 
 
 /** Base class for all simple modification of a single variable (Compartment, Species,
- * Parameter, ...). This class holds some information to address the variable uniquely.
- * @ingroup ast */
+ * Parameter, ...). This class holds some information to address the variable uniquely. */
 class ModelDiffVariableItem: public ModelDiffItem {
 protected:
   /** A modification to a global variable. */
@@ -75,7 +73,7 @@ protected:
 
 
 /** Represents the simple modification of a single local or global variable.
- * @ingroup ast */
+ * @ingroup trafo */
 class SetVariableIdentifierItem: public ModelDiffVariableItem {
 public:
   /** Constructs the diff item for a simple identifier modification of a global variable. */
@@ -106,7 +104,7 @@ protected:
 
 
 /** Represents the simple modification of a single local or global variable.
- * @ingroup ast */
+ * @ingroup trafo */
 class SetVariableNameItem: public ModelDiffVariableItem {
 public:
   /** Constructs the diff item for a simple name modification of a global variable. */
@@ -141,7 +139,7 @@ protected:
 
 
 /** Represents the simple modification of a single local or global variable.
- * @ingroup ast */
+ * @ingroup trafo */
 class SetVariableConstFlagItem: public ModelDiffVariableItem {
 public:
   /** Constructs the diff item for a simple name modification of a global variable. */
@@ -175,7 +173,7 @@ protected:
 
 
 /** Represents the simple modification of a single local or global variable.
- * @ingroup ast */
+ * @ingroup trafo */
 class SetVariableValueItem: public ModelDiffVariableItem {
 public:
   /** Constructs the diff item for a simple value modification of a global variable. */
@@ -209,9 +207,68 @@ protected:
 
 
 
+/** This class represents the modification of the compartment of a species.
+ * @ingroup trafo */
+class SetSpeciesCompartmentItem: public ModelDiffVariableItem {
+public:
+  /** Constructor. */
+  SetSpeciesCompartmentItem(const std::string &id, const std::string &old_compartment, const std::string &new_compartment);
 
-/** A collection of several modification items handled as a single modification.
- * @ingroup ast */
+  /** Destructor. */
+  virtual ~SetSpeciesCompartmentItem();
+
+  /** Returns true if a diff item can be undone on the given model. */
+  virtual bool canUndo(const Ast::Model &model);
+  /** Retruns true if a diff item can be redone on the given model. */
+  virtual bool canRedo(const Ast::Model &model);
+
+  /** Undoes the name modification on the given model. */
+  virtual void undo(Ast::Model &model);
+  /** Redoes the name modification on the given model. */
+  virtual void redo(Ast::Model &model);
+
+protected:
+  /** Holds the old compartment id of the species. */
+  std::string _old_compartment;
+  /** Holds the new compartment id of the species. */
+  std::string _new_compartment;
+};
+
+
+
+/** This class represents the modification of the unit of a parameter.
+ * @ingroup trafo */
+class SetParameterUnitItem: public ModelDiffVariableItem {
+public:
+  /** Constructs the modification of the unit of a global parameter. */
+  SetParameterUnitItem(const std::string &id, const Ast::Unit &old_unit, const Ast::Unit &new_unit);
+  /** Constructs the modification of the unit of a local parameter. */
+  SetParameterUnitItem(const std::string &id, const std::string &parent,
+                       const Ast::Unit &old_unit, const Ast::Unit &new_unit);
+
+  /** Destructor. */
+  virtual ~SetParameterUnitItem();
+
+  /** Returns true if a diff item can be undone on the given model. */
+  virtual bool canUndo(const Ast::Model &model);
+  /** Retruns true if a diff item can be redone on the given model. */
+  virtual bool canRedo(const Ast::Model &model);
+
+  /** Undoes the unit modification on the given model. */
+  virtual void undo(Ast::Model &model);
+  /** Redoes the unit modification on the given model. */
+  virtual void redo(Ast::Model &model);
+
+protected:
+  /** Holds the old unit of the parameter. */
+  Ast::Unit _old_unit;
+  /** Holds the new unit of the parameter. */
+  Ast::Unit _new_unit;
+};
+
+
+
+/** A collection of several modification items handled as a single modification. */
 class ModelDiffGroup : public ModelDiffItem {
 public:
   /** Constructs an empty model modification group. */
@@ -245,7 +302,7 @@ protected:
 
 /** Tracks series of model modifications. This class can be used to implement a simple undo/redo
  * mechanism.
- * @ingroup ast */
+ * @ingroup trafo */
 class ModelHistory: public ModelDiffGroup {
 public:
   /** Constructor of an empty history. */

@@ -509,3 +509,119 @@ SetVariableValueItem::redo(Ast::Model &model)
   GiNaC::ex value = iNA::Parser::Expr::parseExpression(_new_value, context);
   variable->setValue(value);
 }
+
+
+
+/* ********************************************************************************************* *
+ * Implementation set species compartment item
+ * ********************************************************************************************* */
+SetSpeciesCompartmentItem::SetSpeciesCompartmentItem(const std::string &id, const std::string &old_compartment,
+                                                     const std::string &new_compartment)
+  : ModelDiffVariableItem(id), _old_compartment(old_compartment), _new_compartment(new_compartment)
+{
+  // pass...
+}
+
+SetSpeciesCompartmentItem::~SetSpeciesCompartmentItem()
+{
+  // Pass...
+}
+
+
+bool
+SetSpeciesCompartmentItem::canUndo(const Ast::Model &model)
+{
+  // check if variable exists:
+  if (! model.hasSpecies(_var_id)) { return false; }
+  // check if old compartment exsists:
+  if (! model.hasCompartment(_old_compartment)) { return false; }
+  return true;
+}
+
+bool
+SetSpeciesCompartmentItem::canRedo(const Ast::Model &model)
+{
+  // check if variable exists:
+  if (! model.hasSpecies(_var_id)) { return false; }
+  // check if new compartment exsists:
+  if (! model.hasCompartment(_new_compartment)) { return false; }
+  return true;
+}
+
+
+void
+SetSpeciesCompartmentItem::undo(Ast::Model &model)
+{
+  // Get Variable
+  Ast::Species *species = model.getSpecies(_var_id);
+  // set compartment
+  species->setCompartment(model.getCompartment(_old_compartment));
+}
+
+
+void
+SetSpeciesCompartmentItem::redo(Ast::Model &model)
+{
+  // Get Variable
+  Ast::Species *species = model.getSpecies(_var_id);
+  // set compartment
+  species->setCompartment(model.getCompartment(_new_compartment));
+}
+
+
+
+
+/* ********************************************************************************************* *
+ * Implementation set parameter unit item
+ * ********************************************************************************************* */
+SetParameterUnitItem::SetParameterUnitItem(const std::string &id, const Ast::Unit &old_unit,
+                                           const Ast::Unit & new_unit)
+  : ModelDiffVariableItem(id), _old_unit(old_unit), _new_unit(new_unit)
+{
+  // pass...
+}
+
+SetParameterUnitItem::SetParameterUnitItem(const std::string &id, const std::string &parent_id,
+                                           const Ast::Unit &old_unit, const Ast::Unit &new_unit)
+  : ModelDiffVariableItem(id, parent_id), _old_unit(old_unit), _new_unit(new_unit)
+{
+  // pass...
+}
+
+SetParameterUnitItem::~SetParameterUnitItem()
+{
+  // Pass...
+}
+
+
+bool
+SetParameterUnitItem::canUndo(const Ast::Model &model)
+{
+  return model.hasParameter(_var_id);
+}
+
+bool
+SetParameterUnitItem::canRedo(const Ast::Model &model)
+{
+  return model.hasParameter(_var_id);
+}
+
+
+void
+SetParameterUnitItem::undo(Ast::Model &model)
+{
+  // Get parameter
+  Ast::Parameter *param = model.getParameter(_var_id);
+  // set unit:
+  param->setUnit(_old_unit);
+}
+
+void
+SetParameterUnitItem::redo(Ast::Model &model)
+{
+  // Get parameter
+  Ast::Parameter *param = model.getParameter(_var_id);
+  // set unit:
+  param->setUnit(_new_unit);
+}
+
