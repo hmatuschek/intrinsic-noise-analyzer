@@ -32,12 +32,12 @@ SET(libina_trafo_SOURCES
     trafo/assertions.cc trafo/substitution.cc trafo/constantfolder.cc
     trafo/partialmodel.cc trafo/assignmentruleinliner.cc
     trafo/conservationanalysis.cc trafo/reversiblereactionconverter.cc trafo/variablescaling.cc
-    trafo/consistencycheck.cc)
+    trafo/consistencycheck.cc trafo/modeldiff.cc)
 SET(libina_trafo_HEADERS trafo/trafo.hh trafo/filterflags.hh
     trafo/assertions.hh trafo/substitution.hh trafo/constantfolder.hh
     trafo/partialmodel.hh trafo/assignmentruleinliner.hh
     trafo/conservationanalysis.hh trafo/reversiblereactionconverter.hh trafo/variablescaling.hh
-    trafo/consistencycheck.hh)
+    trafo/consistencycheck.hh trafo/modeldiff.hh)
 
 SET(libina_sbmlsh_parser_SOURCES
     parser/sbmlsh/lexer.cc parser/sbmlsh/parser.cc parser/sbmlsh/productions.cc
