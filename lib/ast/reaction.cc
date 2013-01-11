@@ -287,7 +287,7 @@ Reaction::clearModifier() {
 }
 
 KineticLaw *
-Reaction::getKineticLaw()
+Reaction::getKineticLaw() const
 {
   return this->_kinetic_law;
 }

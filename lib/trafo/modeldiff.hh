@@ -35,17 +35,17 @@ public:
 
 /** Base class for all simple modification of a single variable (Compartment, Species,
  * Parameter, ...). This class holds some information to address the variable uniquely. */
-class ModelDiffVariableItem: public ModelDiffItem {
+class VariableReferenceItem: public ModelDiffItem {
 protected:
   /** A modification to a global variable. */
-  ModelDiffVariableItem(const std::string &id);
+  VariableReferenceItem(const std::string &id);
 
   /** A modification to a local variable. */
-  ModelDiffVariableItem(const std::string &id, const std::string &parent_id);
+  VariableReferenceItem(const std::string &id, const std::string &parent_id);
 
 public:
   /** Destructor. */
-  virtual ~ModelDiffVariableItem();
+  virtual ~VariableReferenceItem();
 
   /** Returns true if a diff item can be undone on the given model. */
   virtual bool canUndo(const Ast::Model &model);
@@ -74,7 +74,7 @@ protected:
 
 /** Represents the simple modification of a single local or global variable.
  * @ingroup trafo */
-class SetVariableIdentifierItem: public ModelDiffVariableItem {
+class SetVariableIdentifierItem: public VariableReferenceItem {
 public:
   /** Constructs the diff item for a simple identifier modification of a global variable. */
   SetVariableIdentifierItem(const std::string &id, const std::string &new_id);
@@ -105,7 +105,7 @@ protected:
 
 /** Represents the simple modification of a single local or global variable.
  * @ingroup trafo */
-class SetVariableNameItem: public ModelDiffVariableItem {
+class SetVariableNameItem: public VariableReferenceItem {
 public:
   /** Constructs the diff item for a simple name modification of a global variable. */
   SetVariableNameItem(
@@ -140,7 +140,7 @@ protected:
 
 /** Represents the simple modification of a single local or global variable.
  * @ingroup trafo */
-class SetVariableConstFlagItem: public ModelDiffVariableItem {
+class SetVariableConstFlagItem: public VariableReferenceItem {
 public:
   /** Constructs the diff item for a simple name modification of a global variable. */
   SetVariableConstFlagItem(
@@ -174,7 +174,7 @@ protected:
 
 /** Represents the simple modification of a single local or global variable.
  * @ingroup trafo */
-class SetVariableValueItem: public ModelDiffVariableItem {
+class SetVariableValueItem: public VariableReferenceItem {
 public:
   /** Constructs the diff item for a simple value modification of a global variable. */
   SetVariableValueItem(
@@ -209,10 +209,11 @@ protected:
 
 /** This class represents the modification of the compartment of a species.
  * @ingroup trafo */
-class SetSpeciesCompartmentItem: public ModelDiffVariableItem {
+class SetSpeciesCompartmentItem: public VariableReferenceItem {
 public:
   /** Constructor. */
-  SetSpeciesCompartmentItem(const std::string &id, const std::string &old_compartment, const std::string &new_compartment);
+  SetSpeciesCompartmentItem(
+      const std::string &id, const std::string &old_compartment, const std::string &new_compartment);
 
   /** Destructor. */
   virtual ~SetSpeciesCompartmentItem();
@@ -238,7 +239,7 @@ protected:
 
 /** This class represents the modification of the unit of a parameter.
  * @ingroup trafo */
-class SetParameterUnitItem: public ModelDiffVariableItem {
+class SetParameterUnitItem: public VariableReferenceItem {
 public:
   /** Constructs the modification of the unit of a global parameter. */
   SetParameterUnitItem(const std::string &id, const Ast::Unit &old_unit, const Ast::Unit &new_unit);
@@ -264,6 +265,141 @@ protected:
   Ast::Unit _old_unit;
   /** Holds the new unit of the parameter. */
   Ast::Unit _new_unit;
+};
+
+
+
+/** This class holds the complete information stored in a variable, it forms the base for the
+ * removal and creation of variables. */
+class FullVariableItem: public VariableReferenceItem
+{
+protected:
+  /** Constructor, for global variables. */
+  FullVariableItem(Ast::VariableDefinition *var, const Ast::Model &parent);
+  /** Constructor, for local variables. */
+  FullVariableItem(Ast::VariableDefinition *var, const Ast::Reaction *parent);
+
+public:
+  /** Destructor. */
+  virtual ~FullVariableItem();
+
+protected:
+  /** Holds the name of the variable. */
+  std::string _name;
+  /** Holds the serialized expression of the value of the variable. */
+  std::string _value;
+  /** Holds the constant flag. */
+  bool _is_constant;
+};
+
+
+
+/** Represents the addition of a species. Undo will remove the species redo will recreate the
+ * species.
+ * @ingroup trafo */
+class AddSpeciesItem: public FullVariableItem
+{
+public:
+  /** Constructor. */
+  AddSpeciesItem(Ast::Species *species, const Ast::Model &parent);
+  /** Destructor. */
+  virtual ~AddSpeciesItem();
+
+  /** Checks if the species creation can be undone. */
+  virtual bool canUndo(const Ast::Model &model);
+  /** Checks if the species can be recreated. */
+  virtual bool canRedo(const Ast::Model &model);
+
+  /** Removes the referenced speices. */
+  virtual void undo(Ast::Model &model);
+  /** Recreates the species. */
+  virtual void redo(Ast::Model &model);
+
+protected:
+  /** Holds the identifier of the compartment of the species. */
+  std::string _compartment;
+};
+
+
+/** Represents the removal of a species. Undo will recreate the species redo will remove the
+ * species again.
+ * @ingroup trafo */
+class RemSpeciesItem: public FullVariableItem
+{
+public:
+  /** Constructor. */
+  RemSpeciesItem(Ast::Species *species, const Ast::Model &parent);
+  /** Destructor. */
+  virtual ~RemSpeciesItem();
+
+  /** Checks if the species creation can be undone. */
+  virtual bool canUndo(const Ast::Model &model);
+  /** Checks if the species can be recreated. */
+  virtual bool canRedo(const Ast::Model &model);
+
+  /** Removes the referenced speices. */
+  virtual void undo(Ast::Model &model);
+  /** Recreates the species. */
+  virtual void redo(Ast::Model &model);
+
+protected:
+  /** Holds the identifier of the compartment of the species. */
+  std::string _compartment;
+};
+
+
+
+/** Represents the addition of a compartment. Undo will remove that compartment and redo
+ * will recreate it.
+ * @ingroup trafo */
+class AddCompartmentItem: public FullVariableItem
+{
+public:
+  /** Constructor. */
+  AddCompartmentItem(Ast::Compartment *compartment, const Ast::Model &parent);
+  /** Destructor. */
+  virtual ~AddCompartmentItem();
+
+  /** Checks if the compartment can be removed. */
+  virtual bool canUndo(const Ast::Model &model);
+  /** Checks if the compartment can be recreated. */
+  virtual bool canRedo(const Ast::Model &model);
+
+  /** Removes the compartment. */
+  virtual void undo(Ast::Model &model);
+  /** Recreates the compartment. */
+  virtual void redo(Ast::Model &model);
+
+protected:
+  /** Holds the spacial dimension of the compartment. */
+  Ast::Compartment::SpatialDimension _dimension;
+};
+
+
+/** Represents the removal of a compartment. Undo will recreate that compartment and redo
+ * will delete it.
+ * @ingroup trafo */
+class RemCompartmentItem: public FullVariableItem
+{
+public:
+  /** Constructor. */
+  RemCompartmentItem(Ast::Compartment *compartment, const Ast::Model &parent);
+  /** Destructor. */
+  virtual ~RemCompartmentItem();
+
+  /** Checks if the compartment can be recreated. */
+  virtual bool canUndo(const Ast::Model &model);
+  /** Checks if the compartment can be removed. */
+  virtual bool canRedo(const Ast::Model &model);
+
+  /** Recreates the compartment. */
+  virtual void undo(Ast::Model &model);
+  /** Removes the compartment. */
+  virtual void redo(Ast::Model &model);
+
+protected:
+  /** Holds the spacial dimension of the compartment. */
+  Ast::Compartment::SpatialDimension _dimension;
 };
 
 

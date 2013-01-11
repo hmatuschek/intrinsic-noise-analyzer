@@ -1,6 +1,7 @@
 #include "modeldiff.hh"
 #include <ast/reaction.hh>
 #include <parser/expr/parser.hh>
+#include "referencecounter.hh"
 
 
 using namespace iNA;
@@ -165,28 +166,28 @@ ModelDiffGroup::addModification(ModelDiffItem *item)
 /* ********************************************************************************************* *
  * Implementation generic variable modification
  * ********************************************************************************************* */
-ModelDiffVariableItem::ModelDiffVariableItem(const std::string &id)
+VariableReferenceItem::VariableReferenceItem(const std::string &id)
   : ModelDiffItem(), _var_id(id), _parent_id("")
 {
   // Pass...
 }
 
 
-ModelDiffVariableItem::ModelDiffVariableItem(const std::string &id, const std::string &parent_id)
+VariableReferenceItem::VariableReferenceItem(const std::string &id, const std::string &parent_id)
   : ModelDiffItem(), _var_id(id), _parent_id(parent_id)
 {
   // Pass...
 }
 
 
-ModelDiffVariableItem::~ModelDiffVariableItem()
+VariableReferenceItem::~VariableReferenceItem()
 {
   // pass...
 }
 
 
 bool
-ModelDiffVariableItem::canUndo(const Ast::Model &model)
+VariableReferenceItem::canUndo(const Ast::Model &model)
 {
   // can be undone if the referenced variable exists:
   if (0 == _parent_id.size())
@@ -195,7 +196,7 @@ ModelDiffVariableItem::canUndo(const Ast::Model &model)
 }
 
 bool
-ModelDiffVariableItem::canRedo(const Ast::Model &model)
+VariableReferenceItem::canRedo(const Ast::Model &model)
 {
   // can be redone if the referenced variable exists:
   if (0 == _parent_id.size())
@@ -205,13 +206,13 @@ ModelDiffVariableItem::canRedo(const Ast::Model &model)
 
 
 bool
-ModelDiffVariableItem::_hasVariable(const std::string &id, const Ast::Model &model)
+VariableReferenceItem::_hasVariable(const std::string &id, const Ast::Model &model)
 {
   return model.hasVariable(id);
 }
 
 bool
-ModelDiffVariableItem::_hasVariable(const std::string &id, const std::string &parent,
+VariableReferenceItem::_hasVariable(const std::string &id, const std::string &parent,
                                     const Ast::Model &model)
 {
   if (! model.hasReaction(parent)) { return false; }
@@ -221,13 +222,13 @@ ModelDiffVariableItem::_hasVariable(const std::string &id, const std::string &pa
 
 
 Ast::VariableDefinition *
-ModelDiffVariableItem::_getVariable(const std::string &id, const Ast::Model &model)
+VariableReferenceItem::_getVariable(const std::string &id, const Ast::Model &model)
 {
   return model.getVariable(id);
 }
 
 Ast::VariableDefinition *
-ModelDiffVariableItem::_getVariable(const std::string &id, const std::string &parent, const Ast::Model &model)
+VariableReferenceItem::_getVariable(const std::string &id, const std::string &parent, const Ast::Model &model)
 {
   Ast::Reaction *reac = model.getReaction(parent);
   return reac->getKineticLaw()->getVariable(id);
@@ -239,14 +240,14 @@ ModelDiffVariableItem::_getVariable(const std::string &id, const std::string &pa
  * Implementation set variable identifier modification
  * ********************************************************************************************* */
 SetVariableIdentifierItem::SetVariableIdentifierItem(const std::string &id, const std::string &new_id)
-  : ModelDiffVariableItem(id), _new_identifier(new_id)
+  : VariableReferenceItem(id), _new_identifier(new_id)
 {
   // Pass...
 }
 
 SetVariableIdentifierItem::SetVariableIdentifierItem(const std::string &id, const std::string &new_id,
                                                      const std::string &parent_id)
-  : ModelDiffVariableItem(id, parent_id), _new_identifier(new_id)
+  : VariableReferenceItem(id, parent_id), _new_identifier(new_id)
 {
   // Pass...
 }
@@ -311,14 +312,14 @@ SetVariableIdentifierItem::redo(Ast::Model &model)
  * ********************************************************************************************* */
 SetVariableNameItem::SetVariableNameItem(const std::string &id, const std::string &old_name,
                                          const std::string &new_name)
-  : ModelDiffVariableItem(id), _old_name(old_name), _new_name(new_name)
+  : VariableReferenceItem(id), _old_name(old_name), _new_name(new_name)
 {
   // pass...
 }
 
 SetVariableNameItem::SetVariableNameItem(const std::string &id, const std::string &parent_id,
                                          const std::string &old_name, const std::string &new_name)
-  : ModelDiffVariableItem(id, parent_id), _old_name(old_name), _new_name(new_name)
+  : VariableReferenceItem(id, parent_id), _old_name(old_name), _new_name(new_name)
 {
   // pass...
 }
@@ -332,13 +333,13 @@ SetVariableNameItem::~SetVariableNameItem()
 bool
 SetVariableNameItem::canUndo(const Ast::Model &model)
 {
-  return ModelDiffVariableItem::canUndo(model);
+  return VariableReferenceItem::canUndo(model);
 }
 
 bool
 SetVariableNameItem::canRedo(const Ast::Model &model)
 {
-  return ModelDiffVariableItem::canRedo(model);
+  return VariableReferenceItem::canRedo(model);
 }
 
 
@@ -367,14 +368,14 @@ SetVariableNameItem::redo(Ast::Model &model)
  * ********************************************************************************************* */
 SetVariableConstFlagItem::SetVariableConstFlagItem(const std::string &id, bool old_state,
                                                    bool new_state)
-  : ModelDiffVariableItem(id), _old_state(old_state), _new_state(new_state)
+  : VariableReferenceItem(id), _old_state(old_state), _new_state(new_state)
 {
   // pass...
 }
 
 SetVariableConstFlagItem::SetVariableConstFlagItem(const std::string &id, const std::string &parent_id,
                                                    bool old_state, bool new_state)
-  : ModelDiffVariableItem(id, parent_id), _old_state(old_state), _new_state(new_state)
+  : VariableReferenceItem(id, parent_id), _old_state(old_state), _new_state(new_state)
 {
   // pass...
 }
@@ -388,13 +389,13 @@ SetVariableConstFlagItem::~SetVariableConstFlagItem()
 bool
 SetVariableConstFlagItem::canUndo(const Ast::Model &model)
 {
-  return ModelDiffVariableItem::canUndo(model);
+  return VariableReferenceItem::canUndo(model);
 }
 
 bool
 SetVariableConstFlagItem::canRedo(const Ast::Model &model)
 {
-  return ModelDiffVariableItem::canRedo(model);
+  return VariableReferenceItem::canRedo(model);
 }
 
 
@@ -424,14 +425,14 @@ SetVariableConstFlagItem::redo(Ast::Model &model)
  * ********************************************************************************************* */
 SetVariableValueItem::SetVariableValueItem(const std::string &id, const std::string &old_value,
                                            const std::string &new_value)
-  : ModelDiffVariableItem(id), _old_value(old_value), _new_value(new_value)
+  : VariableReferenceItem(id), _old_value(old_value), _new_value(new_value)
 {
   // pass...
 }
 
 SetVariableValueItem::SetVariableValueItem(const std::string &id, const std::string &parent_id,
                                            const std::string &old_value, const std::string &new_value)
-  : ModelDiffVariableItem(id, parent_id), _old_value(old_value), _new_value(new_value)
+  : VariableReferenceItem(id, parent_id), _old_value(old_value), _new_value(new_value)
 {
   // pass...
 }
@@ -446,7 +447,7 @@ bool
 SetVariableValueItem::canUndo(const Ast::Model &model)
 {
   // check if variable exists:
-  if (! ModelDiffVariableItem::canUndo(model)) { return false; }
+  if (! VariableReferenceItem::canUndo(model)) { return false; }
   // the old value can be set, if it can be parsed in its context
   if (0 != _parent_id.size()) {
     iNA::Parser::Expr::ScopeContext context(model.getReaction(_parent_id)->getKineticLaw());
@@ -464,7 +465,7 @@ bool
 SetVariableValueItem::canRedo(const Ast::Model &model)
 {
   // check if variable exists:
-  if (! ModelDiffVariableItem::canUndo(model)) { return false; }
+  if (! VariableReferenceItem::canUndo(model)) { return false; }
   // the new value can be set, if it can be parsed in its context
   if (0 != _parent_id.size()) {
     iNA::Parser::Expr::ScopeContext context(model.getReaction(_parent_id)->getKineticLaw());
@@ -517,7 +518,7 @@ SetVariableValueItem::redo(Ast::Model &model)
  * ********************************************************************************************* */
 SetSpeciesCompartmentItem::SetSpeciesCompartmentItem(const std::string &id, const std::string &old_compartment,
                                                      const std::string &new_compartment)
-  : ModelDiffVariableItem(id), _old_compartment(old_compartment), _new_compartment(new_compartment)
+  : VariableReferenceItem(id), _old_compartment(old_compartment), _new_compartment(new_compartment)
 {
   // pass...
 }
@@ -576,14 +577,14 @@ SetSpeciesCompartmentItem::redo(Ast::Model &model)
  * ********************************************************************************************* */
 SetParameterUnitItem::SetParameterUnitItem(const std::string &id, const Ast::Unit &old_unit,
                                            const Ast::Unit & new_unit)
-  : ModelDiffVariableItem(id), _old_unit(old_unit), _new_unit(new_unit)
+  : VariableReferenceItem(id), _old_unit(old_unit), _new_unit(new_unit)
 {
   // pass...
 }
 
 SetParameterUnitItem::SetParameterUnitItem(const std::string &id, const std::string &parent_id,
                                            const Ast::Unit &old_unit, const Ast::Unit &new_unit)
-  : ModelDiffVariableItem(id, parent_id), _old_unit(old_unit), _new_unit(new_unit)
+  : VariableReferenceItem(id, parent_id), _old_unit(old_unit), _new_unit(new_unit)
 {
   // pass...
 }
@@ -625,3 +626,261 @@ SetParameterUnitItem::redo(Ast::Model &model)
   param->setUnit(_new_unit);
 }
 
+
+
+
+/* ********************************************************************************************* *
+ * Implementation full variable item
+ * ********************************************************************************************* */
+FullVariableItem::FullVariableItem(Ast::VariableDefinition *var, const Ast::Model &parent)
+  : VariableReferenceItem(var->getIdentifier()),
+    _name(var->getName()), _value(""), _is_constant(var->isConst())
+{
+  // Serialize expression
+  std::stringstream buffer;
+  Parser::Expr::serializeExpression(var->getValue(), buffer, &parent);
+  _value = buffer.str();
+}
+
+FullVariableItem::FullVariableItem(Ast::VariableDefinition *var, const Ast::Reaction *parent)
+  : VariableReferenceItem(var->getIdentifier(), parent->getIdentifier()),
+    _name(var->getName()), _value(""), _is_constant(var->isConst())
+{
+  // Serialize expression
+  std::stringstream buffer;
+  Parser::Expr::serializeExpression(var->getValue(), buffer, parent->getKineticLaw());
+  _value = buffer.str();
+}
+
+FullVariableItem::~FullVariableItem()
+{
+  // Pass...
+}
+
+
+
+
+/* ********************************************************************************************* *
+ * Implementation add species item
+ * ********************************************************************************************* */
+AddSpeciesItem::AddSpeciesItem(Ast::Species *species, const Ast::Model &parent)
+  : FullVariableItem(species, parent), _compartment(species->getCompartment()->getIdentifier())
+{
+  // Pass...
+}
+
+AddSpeciesItem::~AddSpeciesItem()
+{
+  // Pass...
+}
+
+
+bool
+AddSpeciesItem::canUndo(const Ast::Model &model)
+{
+  // A species can be removed if it exists
+  if (! model.hasSpecies(_var_id)) { return false; }
+  Ast::Species *species = model.getSpecies(_var_id);
+  // and is not referenced
+  if (0 != ReferenceCounter::count(species, model)) { return false; }
+  return true;
+}
+
+bool
+AddSpeciesItem::canRedo(const Ast::Model &model) {
+  // A species can be created if there is no definition with the same identifier:
+  if (model.hasDefinition(_var_id)) { return false; }
+  // and if the referenced compartment exists:
+  if (! model.hasCompartment(_compartment)) { return false; }
+  return true;
+}
+
+
+void
+AddSpeciesItem::undo(Ast::Model &model)
+{
+  Ast::Species *species = model.getSpecies(_var_id);
+  model.remDefinition(species);
+}
+
+void
+AddSpeciesItem::redo(Ast::Model &model)
+{
+  // Get referenced compartment
+  Ast::Compartment *compartment = model.getCompartment(_compartment);
+  // Parse expression in global context
+  GiNaC::ex value = Parser::Expr::parseExpression(_value, &model);
+  // Create species
+  Ast::Species *species = new Ast::Species(_var_id, value, compartment, _name, _is_constant);
+  // Add to model
+  model.addDefinition(species);
+}
+
+
+
+
+/* ********************************************************************************************* *
+ * Implementation rem species item
+ * ********************************************************************************************* */
+RemSpeciesItem::RemSpeciesItem(Ast::Species *species, const Ast::Model &parent)
+  : FullVariableItem(species, parent), _compartment(species->getCompartment()->getIdentifier())
+{
+  // Pass...
+}
+
+RemSpeciesItem::~RemSpeciesItem()
+{
+  // Pass...
+}
+
+
+bool
+RemSpeciesItem::canRedo(const Ast::Model &model)
+{
+  // A species can be removed if it exists
+  if (! model.hasSpecies(_var_id)) { return false; }
+  Ast::Species *species = model.getSpecies(_var_id);
+  // and is not referenced
+  if (0 != ReferenceCounter::count(species, model)) { return false; }
+  return true;
+}
+
+bool
+RemSpeciesItem::canUndo(const Ast::Model &model) {
+  // A species can be created if there is no definition with the same identifier:
+  if (model.hasDefinition(_var_id)) { return false; }
+  // and if the referenced compartment exists:
+  if (! model.hasCompartment(_compartment)) { return false; }
+  return true;
+}
+
+
+void
+RemSpeciesItem::redo(Ast::Model &model)
+{
+  Ast::Species *species = model.getSpecies(_var_id);
+  model.remDefinition(species);
+}
+
+void
+RemSpeciesItem::undo(Ast::Model &model)
+{
+  // Get referenced compartment
+  Ast::Compartment *compartment = model.getCompartment(_compartment);
+  // Parse expression in global context
+  GiNaC::ex value = Parser::Expr::parseExpression(_value, &model);
+  // Create species
+  Ast::Species *species = new Ast::Species(_var_id, value, compartment, _name, _is_constant);
+  // Add to model
+  model.addDefinition(species);
+}
+
+
+
+
+/* ********************************************************************************************* *
+ * Implementation add compartment item
+ * ********************************************************************************************* */
+AddCompartmentItem::AddCompartmentItem(Ast::Compartment *compartment, const Ast::Model &parent)
+  : FullVariableItem(compartment, parent), _dimension(compartment->getDimension())
+{
+  // Pass...
+}
+
+AddCompartmentItem::~AddCompartmentItem()
+{
+  // Pass...
+}
+
+
+bool
+AddCompartmentItem::canUndo(const Ast::Model &model)
+{
+  // A compartment can be removed if it exists
+  if (! model.hasCompartment(_var_id)) { return false; }
+  Ast::Compartment *compartment = model.getCompartment(_var_id);
+  // and is not referenced
+  if (0 != ReferenceCounter::count(compartment, model)) { return false; }
+  return true;
+}
+
+bool
+AddCompartmentItem::canRedo(const Ast::Model &model) {
+  // A compartment can be created if there is no definition with the same identifier:
+  if (model.hasDefinition(_var_id)) { return false; }
+  return true;
+}
+
+
+void
+AddCompartmentItem::undo(Ast::Model &model)
+{
+  Ast::Compartment *compartment = model.getCompartment(_var_id);
+  model.remDefinition(compartment);
+}
+
+void
+AddCompartmentItem::redo(Ast::Model &model)
+{
+  // Parse expression in global context
+  GiNaC::ex value = Parser::Expr::parseExpression(_value, &model);
+  // Create Compartment
+  Ast::Compartment *compartment = new Ast::Compartment(_var_id, value, _dimension, _is_constant);
+  // Add to model
+  model.addDefinition(compartment);
+}
+
+
+
+
+/* ********************************************************************************************* *
+ * Implementation rem compartment item
+ * ********************************************************************************************* */
+RemCompartmentItem::RemCompartmentItem(Ast::Compartment *compartment, const Ast::Model &parent)
+  : FullVariableItem(compartment, parent), _dimension(compartment->getDimension())
+{
+  // Pass...
+}
+
+RemCompartmentItem::~RemCompartmentItem()
+{
+  // Pass...
+}
+
+
+bool
+RemCompartmentItem::canRedo(const Ast::Model &model)
+{
+  // A compartment can be removed if it exists
+  if (! model.hasCompartment(_var_id)) { return false; }
+  Ast::Compartment *compartment = model.getCompartment(_var_id);
+  // and is not referenced
+  if (0 != ReferenceCounter::count(compartment, model)) { return false; }
+  return true;
+}
+
+bool
+RemCompartmentItem::canUndo(const Ast::Model &model) {
+  // A compartment can be created if there is no definition with the same identifier:
+  if (model.hasDefinition(_var_id)) { return false; }
+  return true;
+}
+
+
+void
+RemCompartmentItem::redo(Ast::Model &model)
+{
+  Ast::Compartment *compartment = model.getCompartment(_var_id);
+  model.remDefinition(compartment);
+}
+
+void
+RemCompartmentItem::undo(Ast::Model &model)
+{
+  // Parse expression in global context
+  GiNaC::ex value = Parser::Expr::parseExpression(_value, &model);
+  // Create Compartment
+  Ast::Compartment *compartment = new Ast::Compartment(_var_id, value, _dimension, _is_constant);
+  // Add to model
+  model.addDefinition(compartment);
+}
