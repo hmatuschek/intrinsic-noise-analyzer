@@ -1527,3 +1527,141 @@ RemReactionModifierItem::undo(Ast::Model &model)
   Ast::Species *species = model.getSpecies(_species);
   reaction->addModifier(species);
 }
+
+
+
+/* ********************************************************************************************* *
+ * Implementation set ratelaw item
+ * ********************************************************************************************* */
+SetRatelawItem::SetRatelawItem(GiNaC::ex old_value, GiNaC::ex new_value,
+                               const Ast::Reaction *reaction, const Ast::Model &model)
+  : ReactionReferenceItem(reaction->getIdentifier()), _old_law(""), _new_law("")
+{
+  std::stringstream buffer;
+  Parser::Expr::ScopeContext context(reaction->getKineticLaw());
+  // serialize old expression
+  Parser::Expr::serializeExpression(old_value, buffer, context);
+  _old_law = buffer.str(); buffer.str("");
+  // serialize new expression
+  Parser::Expr::serializeExpression(new_value, buffer, context);
+  _new_law = buffer.str();
+}
+
+
+SetRatelawItem::~SetRatelawItem()
+{
+  // Pass...
+}
+
+
+bool
+SetRatelawItem::canUndo(const Ast::Model &model)
+{
+  return model.hasReaction(_identifier);
+}
+
+bool
+SetRatelawItem::canRedo(const Ast::Model &model)
+{
+  return model.hasReaction(_identifier);
+}
+
+
+void
+SetRatelawItem::undo(Ast::Model &model)
+{
+  Ast::Reaction *reaction = model.getReaction(_identifier);
+  GiNaC::ex law = Parser::Expr::parseExpression(_old_law, reaction->getKineticLaw());
+  reaction->getKineticLaw()->setRateLaw(law);
+}
+
+
+void
+SetRatelawItem::redo(Ast::Model &model)
+{
+  Ast::Reaction *reaction = model.getReaction(_identifier);
+  GiNaC::ex law = Parser::Expr::parseExpression(_new_law, reaction->getKineticLaw());
+  reaction->getKineticLaw()->setRateLaw(law);
+}
+
+
+
+/* ********************************************************************************************* *
+ * Implementation rem reaction item
+ * ********************************************************************************************* */
+RemReactionItem::RemReactionItem(const Ast::Reaction *reaction, const Ast::Model &model)
+  : ModelDiffGroup()
+{
+  // get kinetic law
+  Ast::KineticLaw *kinetic_law = reaction->getKineticLaw();
+
+  // First, set rate law to 0
+  addModification(
+        new SetRatelawItem(reaction->getKineticLaw()->getRateLaw(), 0, reaction, model));
+
+  // Then remove all local parameters:
+  for (size_t i=0; i<kinetic_law->numParameters(); i++) {
+    Ast::Parameter *param = kinetic_law->getParameter(i);
+    addModification(new RemParameterItem(param, reaction));
+  }
+
+  // Remove all modifiers from reaction
+  for (Ast::Reaction::const_mod_iterator item=reaction->modifiersBegin();
+       item != reaction->modifiersEnd(); item++)
+  {
+    addModification(new RemReactionModifierItem((*item)->getIdentifier(), reaction, model));
+  }
+
+  // Remove all poducts from reaction
+  for (Ast::Reaction::const_iterator item=reaction->productsBegin();
+       item != reaction->productsEnd(); item++)
+  {
+    Ast::Species *product = item->first;
+    GiNaC::ex     value   = item->second;
+    addModification(new SetProductItem(product->getIdentifier(), value, 0, reaction, model));
+  }
+
+  // Remove all reactants from reaction
+  for (Ast::Reaction::const_iterator item=reaction->reactantsBegin();
+       item != reaction->reactantsEnd(); item++)
+  {
+    Ast::Species *reactant = item->first;
+    GiNaC::ex     value    = item->second;
+    addModification(new SetReactantItem(reactant->getIdentifier(), value, 0, reaction, model));
+  }
+
+  // Now, delete empty reaction
+  addModification(new RemEmptyReactionItem(reaction, model));
+}
+
+
+RemReactionItem::~RemReactionItem()
+{
+  // pass...
+}
+
+bool
+RemReactionItem::canUndo(const Ast::Model &model)
+{
+  return ModelDiffGroup::canUndo(model);
+}
+
+bool
+RemReactionItem::canRedo(const Ast::Model &model)
+{
+  return ModelDiffGroup::canRedo(model);
+}
+
+
+void
+RemReactionItem::undo(Ast::Model &model)
+{
+  return ModelDiffGroup::undo(model);
+}
+
+void
+RemReactionItem::redo(Ast::Model &model)
+{
+  return ModelDiffGroup::redo(model);
+}
+

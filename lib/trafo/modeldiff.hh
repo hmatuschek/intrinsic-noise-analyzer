@@ -661,6 +661,34 @@ protected:
 };
 
 
+/** This class represents the modification of the rate law of a reaction. */
+class SetRatelawItem: public ReactionReferenceItem
+{
+public:
+  /** Constructor. */
+  SetRatelawItem(GiNaC::ex old_value, GiNaC::ex new_value,
+                 const Ast::Reaction *reaction, const Ast::Model &model);
+  /** Destructor. */
+  virtual ~SetRatelawItem();
+
+  /** Checks if the rate law can be reset. */
+  virtual bool canUndo(const Ast::Model &model);
+  /** Checks if the rate law can be reset. */
+  virtual bool canRedo(const Ast::Model &model);
+
+  /** Resets the rate law to old value. */
+  virtual void undo(Ast::Model &model);
+  /** Resets the rate law to new value. */
+  virtual void redo(Ast::Model &model);
+
+protected:
+  /** Holds the old law expression. */
+  std::string _old_law;
+  /** Holds the new law expression. */
+  std::string _new_law;
+};
+
+
 
 /** A series of several modification items handled as a single modification. */
 class ModelDiffGroup : public ModelDiffItem {
@@ -694,6 +722,28 @@ public:
 protected:
   /** Holds the modification items that form this group. */
   std::vector<ModelDiffItem *> _items;
+};
+
+
+
+/** Represents the deletion of a complete reaction. */
+class RemReactionItem: public ModelDiffGroup
+{
+public:
+  /** Constructor. */
+  RemReactionItem(const Ast::Reaction *reaction, const Ast::Model &model);
+  /** Destructor. */
+  ~RemReactionItem();
+
+  /** Returns true if the reaction can be recreated. */
+  virtual bool canUndo(const Ast::Model &model);
+  /** Returns true if the reaction can be removed. */
+  virtual bool canRedo(const Ast::Model &model);
+
+  /** Recreates the complete reaction. */
+  virtual void undo(Ast::Model &model);
+  /** Removes the complete reaction. */
+  virtual void redo(Ast::Model &model);
 };
 
 
