@@ -6,7 +6,7 @@ using namespace iNA;
 using namespace iNA::Trafo;
 
 
-ReferenceCounter::ReferenceCounter(iNA::Ast::VariableDefinition *var)
+ReferenceCounter::ReferenceCounter(const Ast::VariableDefinition *var)
   : _var(var), _references(0)
 {
   // Pass...
@@ -118,7 +118,7 @@ ReferenceCounter::reset() {
 
 
 size_t
-ReferenceCounter::count(Ast::VariableDefinition *var, const Ast::Model &model)
+ReferenceCounter::count(const Ast::VariableDefinition *var, const Ast::Model &model)
 {
   ReferenceCounter counter(var);
   model.accept(counter);

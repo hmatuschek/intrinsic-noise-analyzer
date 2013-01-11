@@ -404,6 +404,65 @@ protected:
 
 
 
+/** This class represents the addition of a global or local parameter. Undo will remove that
+ * parameter and redo will recreate it.
+ * @ingroup trafo */
+class AddParameterItem: public FullVariableItem
+{
+public:
+  /** Constructor for a global parameter. */
+  AddParameterItem(Ast::Parameter *param, const Ast::Model &model);
+  /** Constructor for a local parameter. */
+  AddParameterItem(Ast::Parameter *param, const Ast::Reaction *reaction);
+  /** Destructor. */
+  virtual ~AddParameterItem();
+
+  /** Checks if the parameter can be removed. */
+  virtual bool canUndo(const Ast::Model &model);
+  /** Checks if the parameter can be recreated. */
+  virtual bool canRedo(const Ast::Model &model);
+
+  /** Removes the paramter from the model. */
+  virtual void undo(Ast::Model &model);
+  /** Recreates the parameter. */
+  virtual void redo(Ast::Model &model);
+
+protected:
+  /** Holds the unit of the paramter. */
+  Ast::Unit _unit;
+};
+
+
+/** This class represents the removal of a global or local parameter. Undo will recreate that
+ * parameter and redo will remove it again.
+ * @ingroup trafo */
+class RemParameterItem: public FullVariableItem
+{
+public:
+  /** Constructor for a global parameter. */
+  RemParameterItem(Ast::Parameter *param, const Ast::Model &model);
+  /** Constructor for a local parameter. */
+  RemParameterItem(Ast::Parameter *param, const Ast::Reaction *reaction);
+  /** Destructor. */
+  virtual ~RemParameterItem();
+
+  /** Checks if the parameter can be removed. */
+  virtual bool canUndo(const Ast::Model &model);
+  /** Checks if the parameter can be recreated. */
+  virtual bool canRedo(const Ast::Model &model);
+
+  /** Removes the paramter from the model. */
+  virtual void undo(Ast::Model &model);
+  /** Recreates the parameter. */
+  virtual void redo(Ast::Model &model);
+
+protected:
+  /** Holds the unit of the paramter. */
+  Ast::Unit _unit;
+};
+
+
+
 /** A collection of several modification items handled as a single modification. */
 class ModelDiffGroup : public ModelDiffItem {
 public:

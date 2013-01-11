@@ -884,3 +884,223 @@ RemCompartmentItem::undo(Ast::Model &model)
   // Add to model
   model.addDefinition(compartment);
 }
+
+
+
+
+/* ********************************************************************************************* *
+ * Implementation add parameter item
+ * ********************************************************************************************* */
+AddParameterItem::AddParameterItem(Ast::Parameter *param, const Ast::Model &model)
+  : FullVariableItem(param, model), _unit(param->getUnit())
+{
+  // Pass...
+}
+
+AddParameterItem::AddParameterItem(Ast::Parameter *param, const Ast::Reaction *reaction)
+  : FullVariableItem(param, reaction), _unit(param->getUnit())
+{
+  // Pass...
+}
+
+AddParameterItem::~AddParameterItem()
+{
+  // Pass...
+}
+
+
+bool
+AddParameterItem::canUndo(const Ast::Model &model)
+{
+  // Switch if param is local
+  if (0 != _parent_id.size()) {
+    // Check if parent exists:
+    if (! model.hasReaction(_parent_id)) { return false; }
+    Ast::Reaction *reaction = model.getReaction(_parent_id);
+    // Check if param exists:
+    if (! reaction->getKineticLaw()->hasVariable(_var_id)) { return false; }
+    Ast::Parameter *param = reaction->getKineticLaw()->getParameter(_var_id);
+    // Check if param is referenced:
+    if (0 != ReferenceCounter::count(param, model)) { return false; }
+  } else {
+    // A parameter can be removed if it exists
+    if (! model.hasParameter(_var_id)) { return false; }
+    const Ast::Parameter *param = model.getParameter(_var_id);
+    // check if param is referenced
+    if (0 != ReferenceCounter::count(param, model)) { return false; }
+  }
+  return true;
+}
+
+
+bool
+AddParameterItem::canRedo(const Ast::Model &model)
+{
+  // Switch if param is local
+  if (0 != _parent_id.size()) {
+    // Check if parent exists:
+    if (! model.hasReaction(_parent_id)) { return false; }
+    Ast::Reaction *reaction = model.getReaction(_parent_id);
+    // check if param is defined:
+    if (reaction->getKineticLaw()->hasDefinition(_var_id, true)) { return false; }
+  } else {
+    // Check if param is defined:
+    if (model.hasDefinition(_var_id)) { return false; }
+  }
+  return true;
+}
+
+
+
+void
+AddParameterItem::undo(Ast::Model &model)
+{
+  // Switch if param is local
+  if (0 != _parent_id.size()) {
+    // Get parent
+    Ast::Reaction *reaction = model.getReaction(_parent_id);
+    // Get parameter
+    Ast::Parameter *param = reaction->getKineticLaw()->getParameter(_var_id);
+    // delete parameter:
+    reaction->getKineticLaw()->remDefinition(param);
+  } else {
+    // Get Parameter
+    Ast::Parameter *param = model.getParameter(_var_id);
+    // remove
+    model.remDefinition(param);
+  }
+}
+
+
+void
+AddParameterItem::redo(Ast::Model &model)
+{
+  // Switch if param is local
+  if (0 != _parent_id.size()) {
+    // Get parent
+    Ast::Reaction *reaction = model.getReaction(_parent_id);
+    // Parse initial value:
+    GiNaC::ex value = Parser::Expr::parseExpression(_value, reaction->getKineticLaw());
+    // Create parameter:
+    Ast::Parameter *param = new Ast::Parameter(_var_id, value, _unit, _is_constant);
+    // add parameter
+    reaction->getKineticLaw()->addDefinition(param);
+  } else {
+    // Parse initial value:
+    GiNaC::ex value = Parser::Expr::parseExpression(_value, &model);
+    // Create parameter:
+    Ast::Parameter *param = new Ast::Parameter(_var_id, value, _unit, _is_constant);
+    // add parameter
+    model.addDefinition(param);
+  }
+}
+
+
+
+
+/* ********************************************************************************************* *
+ * Implementation rem parameter item
+ * ********************************************************************************************* */
+RemParameterItem::RemParameterItem(Ast::Parameter *param, const Ast::Model &model)
+  : FullVariableItem(param, model), _unit(param->getUnit())
+{
+  // Pass...
+}
+
+RemParameterItem::RemParameterItem(Ast::Parameter *param, const Ast::Reaction *reaction)
+  : FullVariableItem(param, reaction), _unit(param->getUnit())
+{
+  // Pass...
+}
+
+RemParameterItem::~RemParameterItem()
+{
+  // Pass...
+}
+
+
+bool
+RemParameterItem::canRedo(const Ast::Model &model)
+{
+  // Switch if param is local
+  if (0 != _parent_id.size()) {
+    // Check if parent exists:
+    if (! model.hasReaction(_parent_id)) { return false; }
+    Ast::Reaction *reaction = model.getReaction(_parent_id);
+    // Check if param exists:
+    if (! reaction->getKineticLaw()->hasVariable(_var_id)) { return false; }
+    Ast::Parameter *param = reaction->getKineticLaw()->getParameter(_var_id);
+    // Check if param is referenced:
+    if (0 != ReferenceCounter::count(param, model)) { return false; }
+  } else {
+    // A parameter can be removed if it exists
+    if (! model.hasParameter(_var_id)) { return false; }
+    const Ast::Parameter *param = model.getParameter(_var_id);
+    // check if param is referenced
+    if (0 != ReferenceCounter::count(param, model)) { return false; }
+  }
+  return true;
+}
+
+
+bool
+RemParameterItem::canUndo(const Ast::Model &model)
+{
+  // Switch if param is local
+  if (0 != _parent_id.size()) {
+    // Check if parent exists:
+    if (! model.hasReaction(_parent_id)) { return false; }
+    Ast::Reaction *reaction = model.getReaction(_parent_id);
+    // check if param is defined:
+    if (reaction->getKineticLaw()->hasDefinition(_var_id, true)) { return false; }
+  } else {
+    // Check if param is defined:
+    if (model.hasDefinition(_var_id)) { return false; }
+  }
+  return true;
+}
+
+
+
+void
+RemParameterItem::redo(Ast::Model &model)
+{
+  // Switch if param is local
+  if (0 != _parent_id.size()) {
+    // Get parent
+    Ast::Reaction *reaction = model.getReaction(_parent_id);
+    // Get parameter
+    Ast::Parameter *param = reaction->getKineticLaw()->getParameter(_var_id);
+    // delete parameter:
+    reaction->getKineticLaw()->remDefinition(param);
+  } else {
+    // Get Parameter
+    Ast::Parameter *param = model.getParameter(_var_id);
+    // remove
+    model.remDefinition(param);
+  }
+}
+
+
+void
+RemParameterItem::undo(Ast::Model &model)
+{
+  // Switch if param is local
+  if (0 != _parent_id.size()) {
+    // Get parent
+    Ast::Reaction *reaction = model.getReaction(_parent_id);
+    // Parse initial value:
+    GiNaC::ex value = Parser::Expr::parseExpression(_value, reaction->getKineticLaw());
+    // Create parameter:
+    Ast::Parameter *param = new Ast::Parameter(_var_id, value, _unit, _is_constant);
+    // add parameter
+    reaction->getKineticLaw()->addDefinition(param);
+  } else {
+    // Parse initial value:
+    GiNaC::ex value = Parser::Expr::parseExpression(_value, &model);
+    // Create parameter:
+    Ast::Parameter *param = new Ast::Parameter(_var_id, value, _unit, _is_constant);
+    // add parameter
+    model.addDefinition(param);
+  }
+}

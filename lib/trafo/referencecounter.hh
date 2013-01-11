@@ -16,7 +16,7 @@ class ReferenceCounter
 {
 public:
   /** Constructor, specifies the variable to be searched for. */
-  explicit ReferenceCounter(iNA::Ast::VariableDefinition *var);
+  explicit ReferenceCounter(const iNA::Ast::VariableDefinition *var);
   /** Processes the volume expression of the compartment.*/
   void visit(const iNA::Ast::Compartment *var);
   /** Processes the species initial value and optional rule expression. */
@@ -37,11 +37,11 @@ public:
 
   /** Counts the reference of the given variable found the the given model, not counting the
    * variable itself. */
-  static size_t count(Ast::VariableDefinition *var, const Ast::Model &model);
+  static size_t count(const Ast::VariableDefinition *var, const Ast::Model &model);
 
 private:
   /** Counts the references of this variable. */
-  iNA::Ast::VariableDefinition *_var;
+  const iNA::Ast::VariableDefinition *_var;
   /** Collects the references found. */
   size_t _references;
 };
