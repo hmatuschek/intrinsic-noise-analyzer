@@ -106,6 +106,7 @@ ModelDiffGroup::ModelDiffGroup(ModelDiffItem *item)
 
 ModelDiffGroup::~ModelDiffGroup()
 {
+  // Delete all modification items
   for (size_t i=0; i<_items.size(); i++) {
     delete _items[i];
   }
@@ -116,22 +117,20 @@ ModelDiffGroup::~ModelDiffGroup()
 bool
 ModelDiffGroup::canUndo(const Ast::Model &model)
 {
-  // check if all items can be undone
-  for (size_t i=0; i<_items.size(); i++) {
-    if (! _items[i]->canUndo(model)) { return false; }
-  }
-  return true;
+  // Nothing can always be undone.
+  if (0 == _items.size()) { return true; }
+  // checks if last item can be undone:
+  return _items.back()->canUndo(model);
 }
 
 
 bool
 ModelDiffGroup::canRedo(const Ast::Model &model)
 {
-  // check if all items can be redone
-  for (size_t i=0; i<_items.size(); i++) {
-    if (! _items[i]->canRedo(model)) { return false; }
-  }
-  return true;
+  // Nothing can always be redone
+  if (0 == _items.size()) { return true; }
+  // checks if the first item can be redone:
+  return _items.front()->canRedo(model);
 }
 
 
@@ -701,6 +700,7 @@ AddSpeciesItem::undo(Ast::Model &model)
 {
   Ast::Species *species = model.getSpecies(_var_id);
   model.remDefinition(species);
+  delete species;
 }
 
 void
@@ -760,6 +760,7 @@ RemSpeciesItem::redo(Ast::Model &model)
 {
   Ast::Species *species = model.getSpecies(_var_id);
   model.remDefinition(species);
+  delete species;
 }
 
 void
@@ -817,6 +818,7 @@ AddCompartmentItem::undo(Ast::Model &model)
 {
   Ast::Compartment *compartment = model.getCompartment(_var_id);
   model.remDefinition(compartment);
+  delete compartment;
 }
 
 void
@@ -872,6 +874,7 @@ RemCompartmentItem::redo(Ast::Model &model)
 {
   Ast::Compartment *compartment = model.getCompartment(_var_id);
   model.remDefinition(compartment);
+  delete compartment;
 }
 
 void
@@ -963,11 +966,13 @@ AddParameterItem::undo(Ast::Model &model)
     Ast::Parameter *param = reaction->getKineticLaw()->getParameter(_var_id);
     // delete parameter:
     reaction->getKineticLaw()->remDefinition(param);
+    delete param;
   } else {
     // Get Parameter
     Ast::Parameter *param = model.getParameter(_var_id);
     // remove
     model.remDefinition(param);
+    delete param;
   }
 }
 
@@ -1073,11 +1078,13 @@ RemParameterItem::redo(Ast::Model &model)
     Ast::Parameter *param = reaction->getKineticLaw()->getParameter(_var_id);
     // delete parameter:
     reaction->getKineticLaw()->remDefinition(param);
+    delete param;
   } else {
     // Get Parameter
     Ast::Parameter *param = model.getParameter(_var_id);
     // remove
     model.remDefinition(param);
+    delete param;
   }
 }
 
@@ -1103,4 +1110,420 @@ RemParameterItem::undo(Ast::Model &model)
     // add parameter
     model.addDefinition(param);
   }
+}
+
+
+
+/* ********************************************************************************************* *
+ * Implementation reaction reference item
+ * ********************************************************************************************* */
+ReactionReferenceItem::ReactionReferenceItem(const std::string &reac_id)
+  : ModelDiffItem(), _identifier(reac_id)
+{
+  // Pass...
+}
+
+ReactionReferenceItem::~ReactionReferenceItem()
+{
+  // Pass...
+}
+
+
+
+
+/* ********************************************************************************************* *
+ * Implementation add empty reaction item
+ * ********************************************************************************************* */
+AddEmptyReactionItem::AddEmptyReactionItem(const Ast::Reaction *reaction, const Ast::Model &model)
+  : ReactionReferenceItem(reaction->getIdentifier()),
+    _name(reaction->getName()), _is_reversible(reaction->isReversible())
+{
+  // Pass...
+}
+
+AddEmptyReactionItem::~AddEmptyReactionItem()
+{
+  // Pass...
+}
+
+
+bool
+AddEmptyReactionItem::canUndo(const Ast::Model &model)
+{
+  // a reaction can be removed, if it exists:
+  return model.hasReaction(_identifier);
+}
+
+bool
+AddEmptyReactionItem::canRedo(const Ast::Model &model)
+{
+  // a reaction can be created if there is no definition with the same identifier
+  return !model.hasDefinition(_identifier);
+}
+
+
+void
+AddEmptyReactionItem::undo(Ast::Model &model)
+{
+  // Get reaction:
+  Ast::Reaction *reaction = model.getReaction(_identifier);
+  // remove it
+  model.remDefinition(reaction);
+  // Free reaction
+  delete reaction;
+}
+
+void
+AddEmptyReactionItem::redo(Ast::Model &model)
+{
+  // Simply create an empty kinetic law:
+  Ast::KineticLaw *law = new Ast::KineticLaw(0);
+  // And add an empty reaction
+  model.addDefinition(new Ast::Reaction(_identifier, _name, law, _is_reversible));
+}
+
+
+
+
+/* ********************************************************************************************* *
+ * Implementation rem empty reaction item
+ * ********************************************************************************************* */
+RemEmptyReactionItem::RemEmptyReactionItem(const Ast::Reaction *reaction, const Ast::Model &model)
+  : ReactionReferenceItem(reaction->getIdentifier()),
+    _name(reaction->getName()), _is_reversible(reaction->isReversible())
+{
+  // Pass...
+}
+
+RemEmptyReactionItem::~RemEmptyReactionItem()
+{
+  // Pass...
+}
+
+
+bool
+RemEmptyReactionItem::canRedo(const Ast::Model &model)
+{
+  // a reaction can be removed, if it exists:
+  return model.hasReaction(_identifier);
+}
+
+bool
+RemEmptyReactionItem::canUndo(const Ast::Model &model)
+{
+  // a reaction can be created if there is no definition with the same identifier
+  return !model.hasDefinition(_identifier);
+}
+
+
+void
+RemEmptyReactionItem::redo(Ast::Model &model)
+{
+  // Get reaction:
+  Ast::Reaction *reaction = model.getReaction(_identifier);
+  // remove it
+  model.remDefinition(reaction);
+  // Free reaction
+  delete reaction;
+}
+
+void
+RemEmptyReactionItem::undo(Ast::Model &model)
+{
+  // Simply create an empty kinetic law:
+  Ast::KineticLaw *law = new Ast::KineticLaw(0);
+  // And add an empty reaction
+  model.addDefinition(new Ast::Reaction(_identifier, _name, law, _is_reversible));
+}
+
+
+
+
+/* ********************************************************************************************* *
+ * Implementation set stoichiometric item
+ * ********************************************************************************************* */
+SetStoichiometricItem::SetStoichiometricItem(const std::string &species,
+                                             GiNaC::ex old_value, GiNaC::ex new_value,
+                                             const Ast::Reaction *reaction, const Ast::Model &model)
+  : ReactionReferenceItem(reaction->getIdentifier()), _species(species),
+    _old_stoichiometry(""), _new_stoichiometry("")
+{
+  // Serialize stoichiometric constants:
+  if (0 != old_value) {
+    std::stringstream buffer;
+    Parser::Expr::serializeExpression(old_value, buffer, &model);
+    _old_stoichiometry = buffer.str();
+  }
+  if (0 != new_value) {
+    std::stringstream buffer;
+    Parser::Expr::serializeExpression(new_value, buffer, &model);
+    _new_stoichiometry = buffer.str();
+  }
+}
+
+SetStoichiometricItem::~SetStoichiometricItem()
+{
+  // pass...
+}
+
+bool
+SetStoichiometricItem::_hasOldStoichiometry() {
+  return 0 != _old_stoichiometry.size();
+}
+
+bool
+SetStoichiometricItem::_hasNewStoichiometry() {
+  return 0 != _new_stoichiometry.size();
+}
+
+
+
+/* ********************************************************************************************* *
+ * Implementation set reactant item
+ * ********************************************************************************************* */
+SetReactantItem::SetReactantItem(const std::string &species, GiNaC::ex old_value, GiNaC::ex new_value,
+                                 const Ast::Reaction *reaction, const Ast::Model &model)
+  : SetStoichiometricItem(species, old_value, new_value, reaction, model)
+{
+  // Pass...
+}
+
+SetReactantItem::~SetReactantItem()
+{
+  // pass...
+}
+
+
+bool
+SetReactantItem::canUndo(const Ast::Model &model)
+{
+  // check if reaction exists:
+  if (! model.hasReaction(_identifier)) { return false; }
+  // check if species exisits:
+  if (! model.hasSpecies(_species)) { return false; }
+  return true;
+}
+
+
+bool
+SetReactantItem::canRedo(const Ast::Model &model)
+{
+  // check if reaction exists:
+  if (! model.hasReaction(_identifier)) { return false; }
+  // check if species exisits:
+  if (! model.hasSpecies(_species)) { return false; }
+  return true;
+}
+
+
+void
+SetReactantItem::undo(Ast::Model &model)
+{
+  Ast::Reaction *reaction = model.getReaction(_identifier);
+  Ast::Species *species = model.getSpecies(_species);
+
+  if (! _hasOldStoichiometry()) {
+    // Remove reactant if no old stoichiometry is set
+    reaction->setReactantStoichiometry(species, 0);
+  } else {
+    // Parse stoichiometric constant
+    GiNaC::ex value = Parser::Expr::parseExpression(_old_stoichiometry, &model);
+    // set constant:
+    reaction->setReactantStoichiometry(species, value);
+  }
+}
+
+
+void
+SetReactantItem::redo(Ast::Model &model)
+{
+  Ast::Reaction *reaction = model.getReaction(_identifier);
+  Ast::Species *species = model.getSpecies(_species);
+
+  if (! _hasNewStoichiometry()) {
+    // Remove reactant if no new stoichiometry is set
+    reaction->setReactantStoichiometry(species, 0);
+  } else {
+    // Parse stoichiometric constant
+    GiNaC::ex value = Parser::Expr::parseExpression(_new_stoichiometry, &model);
+    // set constant:
+    reaction->setReactantStoichiometry(species, value);
+  }
+}
+
+
+
+
+/* ********************************************************************************************* *
+ * Implementation set product item
+ * ********************************************************************************************* */
+SetProductItem::SetProductItem(const std::string &species, GiNaC::ex old_value, GiNaC::ex new_value,
+                               const Ast::Reaction *reaction, const Ast::Model &model)
+  : SetStoichiometricItem(species, old_value, new_value, reaction, model)
+{
+  // Pass...
+}
+
+SetProductItem::~SetProductItem()
+{
+  // pass...
+}
+
+
+bool
+SetProductItem::canUndo(const Ast::Model &model)
+{
+  // check if reaction exists:
+  if (! model.hasReaction(_identifier)) { return false; }
+  // check if species exisits:
+  if (! model.hasSpecies(_species)) { return false; }
+  return true;
+}
+
+
+bool
+SetProductItem::canRedo(const Ast::Model &model)
+{
+  // check if reaction exists:
+  if (! model.hasReaction(_identifier)) { return false; }
+  // check if species exisits:
+  if (! model.hasSpecies(_species)) { return false; }
+  return true;
+}
+
+
+void
+SetProductItem::undo(Ast::Model &model)
+{
+  Ast::Reaction *reaction = model.getReaction(_identifier);
+  Ast::Species *species = model.getSpecies(_species);
+
+  if (! _hasOldStoichiometry()) {
+    // Remove product if no old stoichiometry is set
+    reaction->setProductStoichiometry(species, 0);
+  } else {
+    // Parse stoichiometric constant
+    GiNaC::ex value = Parser::Expr::parseExpression(_old_stoichiometry, &model);
+    // set constant:
+    reaction->setProductStoichiometry(species, value);
+  }
+}
+
+
+void
+SetProductItem::redo(Ast::Model &model)
+{
+  Ast::Reaction *reaction = model.getReaction(_identifier);
+  Ast::Species *species = model.getSpecies(_species);
+
+  if (! _hasNewStoichiometry()) {
+    // Remove product if no new stoichiometry is set
+    reaction->setProductStoichiometry(species, 0);
+  } else {
+    // Parse stoichiometric constant
+    GiNaC::ex value = Parser::Expr::parseExpression(_new_stoichiometry, &model);
+    // set constant:
+    reaction->setProductStoichiometry(species, value);
+  }
+}
+
+
+
+
+/* ********************************************************************************************* *
+ * Implementation add reaction modifier item
+ * ********************************************************************************************* */
+AddReactionModifierItem::AddReactionModifierItem(
+    const std::string &species, const Ast::Reaction *reaction, const Ast::Model &model)
+  : ReactionReferenceItem(reaction->getIdentifier()), _species(species)
+{
+  // Pass...
+}
+
+AddReactionModifierItem::~AddReactionModifierItem()
+{
+  // Pass...
+}
+
+
+bool
+AddReactionModifierItem::canUndo(const Ast::Model &model)
+{
+  if (!model.hasReaction(_identifier)) { return false; }
+  return model.hasSpecies(_species);
+}
+
+bool
+AddReactionModifierItem::canRedo(const Ast::Model &model)
+{
+  if (!model.hasReaction(_identifier)) { return false; }
+  return model.hasSpecies(_species);
+}
+
+
+void
+AddReactionModifierItem::undo(Ast::Model &model)
+{
+  Ast::Reaction *reaction = model.getReaction(_identifier);
+  Ast::Species *species = model.getSpecies(_species);
+  if (reaction->hasModifier())
+    reaction->remModifier(species);
+}
+
+void
+AddReactionModifierItem::redo(Ast::Model &model)
+{
+  Ast::Reaction *reaction = model.getReaction(_identifier);
+  Ast::Species *species = model.getSpecies(_species);
+  reaction->addModifier(species);
+}
+
+
+
+/* ********************************************************************************************* *
+ * Implementation rem reaction modifier item
+ * ********************************************************************************************* */
+RemReactionModifierItem::RemReactionModifierItem(
+    const std::string &species, const Ast::Reaction *reaction, const Ast::Model &model)
+  : ReactionReferenceItem(reaction->getIdentifier()), _species(species)
+{
+  // Pass...
+}
+
+RemReactionModifierItem::~RemReactionModifierItem()
+{
+  // Pass...
+}
+
+
+bool
+RemReactionModifierItem::canUndo(const Ast::Model &model)
+{
+  if (!model.hasReaction(_identifier)) { return false; }
+  return model.hasSpecies(_species);
+}
+
+bool
+RemReactionModifierItem::canRedo(const Ast::Model &model)
+{
+  if (!model.hasReaction(_identifier)) { return false; }
+  return model.hasSpecies(_species);
+}
+
+
+void
+RemReactionModifierItem::redo(Ast::Model &model)
+{
+  Ast::Reaction *reaction = model.getReaction(_identifier);
+  Ast::Species *species = model.getSpecies(_species);
+  if (reaction->hasModifier())
+    reaction->remModifier(species);
+}
+
+void
+RemReactionModifierItem::undo(Ast::Model &model)
+{
+  Ast::Reaction *reaction = model.getReaction(_identifier);
+  Ast::Species *species = model.getSpecies(_species);
+  reaction->addModifier(species);
 }

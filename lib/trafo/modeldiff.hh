@@ -463,7 +463,206 @@ protected:
 
 
 
-/** A collection of several modification items handled as a single modification. */
+/** This class is the basis of all reaction modifications, it only references a reaction. */
+class ReactionReferenceItem: public ModelDiffItem {
+protected:
+  /** Hidden constructor. */
+  ReactionReferenceItem(const std::string &reac_id);
+
+public:
+  /** Destructor. */
+  virtual ~ReactionReferenceItem();
+
+protected:
+  /** Holds the identifier of the reaction. */
+  std::string _identifier;
+};
+
+
+/** This class represents the creation of an empty reaction. */
+class AddEmptyReactionItem: public ReactionReferenceItem
+{
+public:
+  /** Constructor. */
+  AddEmptyReactionItem(const Ast::Reaction *reaction, const Ast::Model &model);
+  /** Destructor. */
+  virtual ~AddEmptyReactionItem();
+
+  /** Checks if the reaction can be removed. */
+  virtual bool canUndo(const Ast::Model &model);
+  /** Checks if the reaction can be recreated. */
+  virtual bool canRedo(const Ast::Model &model);
+
+  /** Removes the reaction. */
+  virtual void undo(Ast::Model &model);
+  /** Recreates the reaction. */
+  virtual void redo(Ast::Model &model);
+
+protected:
+  /** Holds the name of the reaction. */
+  std::string _name;
+  /** If reaction is reversible. */
+  bool _is_reversible;
+};
+
+
+/** This class represents the removal of an empty reaction. */
+class RemEmptyReactionItem: public ReactionReferenceItem
+{
+public:
+  /** Constructor. */
+  RemEmptyReactionItem(const Ast::Reaction *reaction, const Ast::Model &model);
+  /** Destructor. */
+  virtual ~RemEmptyReactionItem();
+
+  /** Checks if the reaction can be removed. */
+  virtual bool canUndo(const Ast::Model &model);
+  /** Checks if the reaction can be recreated. */
+  virtual bool canRedo(const Ast::Model &model);
+
+  /** Removes the reaction. */
+  virtual void undo(Ast::Model &model);
+  /** Recreates the reaction. */
+  virtual void redo(Ast::Model &model);
+
+protected:
+  /** Holds the name of the reaction. */
+  std::string _name;
+  /** If reaction is reversible. */
+  bool _is_reversible;
+};
+
+
+/** This class holds the soichiometry for one species in a reaction. */
+class SetStoichiometricItem: public ReactionReferenceItem
+{
+protected:
+  /** Constructor. */
+  SetStoichiometricItem(const std::string &species, GiNaC::ex old_value, GiNaC::ex new_value,
+                     const Ast::Reaction *reaction, const Ast::Model &model);
+
+public:
+  /** Destructor. */
+  virtual ~SetStoichiometricItem();
+
+protected:
+  /** Returns true if the old stoichiometric value is not null. */
+  bool _hasOldStoichiometry();
+  /** Returns true if the new stoichiometric value is not null. */
+  bool _hasNewStoichiometry();
+
+protected:
+  /** Holds the identifier of the species. */
+  std::string _species;
+  /** Holds the old stoichiometric expression. */
+  std::string _old_stoichiometry;
+  /** Holds the new stoichiometric expression. */
+  std::string _new_stoichiometry;
+};
+
+
+/** This class represents the modification of a reactant.
+ * @ingroup trafo */
+class SetReactantItem: public SetStoichiometricItem
+{
+public:
+  /** Constructor. */
+  SetReactantItem(const std::string &species, GiNaC::ex old_value, GiNaC::ex new_value,
+                  const Ast::Reaction *reaction, const Ast::Model &model);
+  /** Destructor. */
+  ~SetReactantItem();
+
+  /** Checks if the reactant can be removed. */
+  virtual bool canUndo(const Ast::Model &model);
+  /** Checks if the reactant can be added. */
+  virtual bool canRedo(const Ast::Model &model);
+
+  /** Removes a reactant from the reaction. */
+  virtual void undo(Ast::Model &model);
+  /** Adds the reactant to the reaction. */
+  virtual void redo(Ast::Model &model);
+};
+
+
+/** This class represents the modification of a reaction product.
+ * @ingroup trafo */
+class SetProductItem: public SetStoichiometricItem
+{
+public:
+  /** Constructor. */
+  SetProductItem(const std::string &species, GiNaC::ex old_value, GiNaC::ex new_value,
+                 const Ast::Reaction *reaction, const Ast::Model &model);
+  /** Destructor. */
+  ~SetProductItem();
+
+  /** Checks if the reactant can be removed. */
+  virtual bool canUndo(const Ast::Model &model);
+  /** Checks if the reactant can be added. */
+  virtual bool canRedo(const Ast::Model &model);
+
+  /** Removes a reactant from the reaction. */
+  virtual void undo(Ast::Model &model);
+  /** Adds the reactant to the reaction. */
+  virtual void redo(Ast::Model &model);
+};
+
+
+/** This class represents the addition of a reaction modifier.
+ * @ingroup trafo */
+class AddReactionModifierItem: public ReactionReferenceItem
+{
+public:
+  /** Constructor. */
+  AddReactionModifierItem(const std::string &species, const Ast::Reaction *reaction,
+                          const Ast::Model &model);
+  /** Destructor. */
+  ~AddReactionModifierItem();
+
+  /** Checks if the modifier can be removed. */
+  virtual bool canUndo(const Ast::Model &model);
+  /** Checks if the modifier can be added. */
+  virtual bool canRedo(const Ast::Model &model);
+
+  /** Removes the modifier. */
+  virtual void undo(Ast::Model &model);
+  /** Adds the modifier. */
+  virtual void redo(Ast::Model &model);
+
+protected:
+  /** Holds the identifier of the modifier species. */
+  std::string _species;
+};
+
+
+/** This class represents the removal of a reaction modifier.
+ * @ingroup trafo */
+class RemReactionModifierItem: public ReactionReferenceItem
+{
+public:
+  /** Constructor. */
+  RemReactionModifierItem(const std::string &species, const Ast::Reaction *reaction,
+                          const Ast::Model &model);
+  /** Destructor. */
+  ~RemReactionModifierItem();
+
+  /** Checks if the modifier can be removed. */
+  virtual bool canUndo(const Ast::Model &model);
+  /** Checks if the modifier can be added. */
+  virtual bool canRedo(const Ast::Model &model);
+
+  /** Removes the modifier. */
+  virtual void undo(Ast::Model &model);
+  /** Adds the modifier. */
+  virtual void redo(Ast::Model &model);
+
+protected:
+  /** Holds the identifier of the modifier species. */
+  std::string _species;
+};
+
+
+
+/** A series of several modification items handled as a single modification. */
 class ModelDiffGroup : public ModelDiffItem {
 public:
   /** Constructs an empty model modification group. */
@@ -475,14 +674,18 @@ public:
   /** Destructor, also frees the associated diff items. */
   virtual ~ModelDiffGroup();
 
-  /** Returns true if the modifications can be undone on the given model. */
+  /** Returns true if the modifications can be undone on the given model.
+   * This fuction checks if the last item of the series can be undone. */
   virtual bool canUndo(const Ast::Model &model);
-  /** Retruns true if the modifications can be redone on the given model. */
+  /** Retruns true if the modifications can be redone on the given model.
+   * This function checks if the first item of the series can be redone. */
   virtual bool canRedo(const Ast::Model &model);
 
-  /** Undo the modifications on the given model. */
+  /** Undo the modifications on the given model, by successively undoing all items in reverse
+   * order. */
   virtual void undo(Ast::Model &model);
-  /** Redo the modifications on the given model. */
+  /** Redo the modifications on the given model, by successively redoing all items in forward
+   * order. */
   virtual void redo(Ast::Model &model);
 
   /** Appends a modification item to the group. */
