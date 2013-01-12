@@ -190,6 +190,8 @@ public:
   const Unit &operator =(const Unit &other);
   /** Returns true if units are equal. */
   bool operator ==(const Unit &other) const;
+  /** Returns true if units are not equal. */
+  bool operator !=(const Unit &other) const;
   /** Implements simple unit manipulations. */
   Unit operator *(const Unit &other) const;
   /** Implements simple unit manipulations. */
