@@ -412,19 +412,27 @@ void Application::onCloseAll()
   }
 
   resetSelectedItem();
-
 }
+
 
 void Application::onEditModel()
 {
+  // Get selected document item.
   DocumentItem *document = 0;
-
-// redundant:  if (0 == _selected_item) { return; }
-  if (0 == (document = dynamic_cast<DocumentItem *>(getParentDocumentItem(_selected_item)))) { return; }
+  if (0 == (document = dynamic_cast<DocumentItem *>(getParentDocumentItem(_selected_item)))) {
+    return;
+  }
 
   // Create model editor dialog:
   SbmlshEditorDialog dialog;
-  dialog.setModel(document->getModel());
+  // Set model
+  iNA::Ast::Model &model = document->getModel();
+  dialog.setModel(model);
+  // Get and set window title:
+  QString window_title(model.getIdentifier().c_str());
+  if (model.hasName()) { window_title = model.getName().c_str(); }
+  dialog.setWindowTitle(QString("edit - %1").arg(window_title));
+  // RUN
   if (QDialog::Accepted != dialog.exec()) { return; }
 
   // Obtain model from dialog
