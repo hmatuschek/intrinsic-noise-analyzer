@@ -598,7 +598,7 @@ SpeciesDefinitionListProduction::SpeciesDefinitionListProduction()
             new iNA::Parser::TokenProduction(T_RBRAC)),
           new iNA::Parser::TokenProduction(T_IDENTIFIER)));
 
-  // "=" Number
+  // "=" Expression
   this->elements.push_back(new iNA::Parser::TokenProduction(T_ASSIGN));
   this->elements.push_back(Expr::ExpressionProduction::get());
 
@@ -671,8 +671,8 @@ void
 SpeciesModifierProduction::parse(iNA::Parser::Lexer &lexer, iNA::Parser::ConcreteSyntaxTree &element)
 {
   // Get token value:
-  std::string id = lexer.current().getValue();
-  unsigned int line    = lexer.current().getLine();
+  std::string id    = lexer.current().getValue();
+  unsigned int line = lexer.current().getLine();
 
   // consume token.
   iNA::Parser::TokenProduction::parse(lexer, element);
