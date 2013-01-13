@@ -13,11 +13,8 @@
 
 
 
-/**
- * The application main window, implements the layout.
- *
- * @ingroup gui
- */
+/** The application main window, implements the layout.
+ * @ingroup gui */
 class MainWindow : public QMainWindow
 {
   Q_OBJECT
@@ -27,11 +24,9 @@ public:
   /** Constructor. */
   explicit MainWindow(QWidget *parent = 0);
 
-
 public slots:
   /** Shows the given widget in the main-panel. */
   void showPanel(QWidget *panel);
-
 
 private slots:
   /** When triggered, quits the application. */
@@ -48,10 +43,8 @@ private slots:
 private:
   /** Helper method to construct all manu-actions. */
   void _createActions();
-
   /** Helper method to construct menu-bar. */
   void _createMenus();
-
 
 private:
   /** Holds the file-menu. */

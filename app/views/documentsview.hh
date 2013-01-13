@@ -1,5 +1,5 @@
-#ifndef SBMLMODELSVIEW_HH
-#define SBMLMODELSVIEW_HH
+#ifndef __INA_APP_VIEWS_DOCUMENTSVIEW_HH__
+#define __INA_APP_VIEWS_DOCUMENTSVIEW_HH__
 
 #include <QWidget>
 #include <QTreeView>
@@ -39,4 +39,4 @@ protected:
 
 
 
-#endif // SBMLMODELSVIEW_HH
+#endif // __INA_APP_VIEWS_DOCUMENTSVIEW_HH__

@@ -1,5 +1,5 @@
-#ifndef DOWNLOADDIALOG_H
-#define DOWNLOADDIALOG_H
+#ifndef __INA_APP_VIEWS_DOWNLOADDIALOG_HH__
+#define __INA_APP_VIEWS_DOWNLOADDIALOG_HH__
 
 #include <QUrl>
 #include <QWidget>
@@ -55,4 +55,4 @@ private:
   QString _remote_file_name;
 };
 
-#endif // DOWNLOADDIALOG_H
+#endif // __INA_APP_VIEWS_DOWNLOADDIALOG_HH__
