@@ -25,26 +25,18 @@ protected slots:
 
   /** Handles a context-menu event. */
   void conextMenuRequested(const QPoint &pos);
+
+protected:
+  /** Implements the DragEnter event handler. */
+  virtual void dragEnterEvent(QDragEnterEvent *event);
+  /** Implements the DragMove event handler. */
+  virtual void dragMoveEvent(QDragMoveEvent *event);
+  /** Implements the DragLeave event handler. */
+  virtual void dragLeaveEvent(QDragLeaveEvent *event);
+  /** Implements the DropEvent event handler. */
+  virtual void dropEvent(QDropEvent *event);
 };
 
-
-
-/**
- * The Side-panel showing all open models and there analysises.
- * @ingroup gui
- */
-class DocumentsSidePanel : public QWidget
-{
-  Q_OBJECT
-
-public:
-  /** Constructor. */
-  explicit DocumentsSidePanel(QWidget *perent=0);
-
-private:
-  /** The actual view. */
-  DocumentsView *documents_view;
-};
 
 
 #endif // SBMLMODELSVIEW_HH

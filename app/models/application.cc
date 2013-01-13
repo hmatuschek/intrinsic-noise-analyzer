@@ -235,6 +235,13 @@ Application::checkForNewVersion()
 
 
 void
+Application::importModel(const QString &path, bool anonymous)
+{
+  onImportModel(path, anonymous);
+}
+
+
+void
 Application::showContextMenuAt(const QModelIndex &index, const QPoint &global_pos)
 {
   TreeItem *item = static_cast<TreeItem *>(index.internalPointer());
@@ -292,7 +299,7 @@ void Application::onImportModel()
 }
 
 
-void Application::onImportModel(const QString &fileName)
+void Application::onImportModel(const QString &fileName, bool anonymous)
 {
   QFileInfo info(fileName);
   // Check if file is readable:
@@ -306,15 +313,23 @@ void Application::onImportModel(const QString &fileName)
     DocumentItem *new_doc = 0;
     // Try to determine file type by extension:
     if (("xml" == info.suffix()) || ("sbml" == info.suffix())) {
-      new_doc = new DocumentItem(Parser::Sbml::importModel(fileName.toLocal8Bit().data()), fileName);
+      if (anonymous)
+        new_doc = new DocumentItem(Parser::Sbml::importModel(fileName.toLocal8Bit().data()));
+      else
+        new_doc = new DocumentItem(Parser::Sbml::importModel(fileName.toLocal8Bit().data()), fileName);
     } else if (("mod" == info.suffix()) || ("sbmlsh" == info.suffix())) {
-      new_doc = new DocumentItem(Parser::Sbmlsh::importModel(fileName.toLocal8Bit().data()), fileName);
+      if (anonymous)
+        new_doc = new DocumentItem(Parser::Sbmlsh::importModel(fileName.toLocal8Bit().data()));
+      else
+        new_doc = new DocumentItem(Parser::Sbmlsh::importModel(fileName.toLocal8Bit().data()), fileName);
     }
     // Add new document to tree:
     if (0 != new_doc) {
       docTree()->addDocument(new_doc);
-      addRecentModel(fileName);
-      updateRecentModelsMenu();
+      if (! anonymous) {
+        addRecentModel(fileName);
+        updateRecentModelsMenu();
+      }
       return;
     }
   } catch (iNA::Parser::ParserError &err) {
@@ -336,15 +351,23 @@ void Application::onImportModel(const QString &fileName)
     DocumentItem *new_doc = 0;
     // Try to determine file type by extension:
     if (ModelFormatQuestion::SBML_MODEL == format) {
-      new_doc = new DocumentItem(Parser::Sbml::importModel(fileName.toStdString()), fileName);
+      if (anonymous)
+        new_doc = new DocumentItem(Parser::Sbml::importModel(fileName.toStdString()));
+      else
+        new_doc = new DocumentItem(Parser::Sbml::importModel(fileName.toStdString()), fileName);
     } else if (ModelFormatQuestion::SBMLSH_MODEL == format) {
-      new_doc = new DocumentItem(Parser::Sbmlsh::importModel(fileName.toStdString()), fileName);
+      if (anonymous)
+        new_doc = new DocumentItem(Parser::Sbmlsh::importModel(fileName.toStdString()));
+      else
+        new_doc = new DocumentItem(Parser::Sbmlsh::importModel(fileName.toStdString()), fileName);
     }
     // Add new document to tree:
     if (0 != new_doc) {
       docTree()->addDocument(new_doc);
-      addRecentModel(fileName);
-      updateRecentModelsMenu();
+      if (! anonymous) {
+        addRecentModel(fileName);
+        updateRecentModelsMenu();
+      }
       return;
     }
   } catch (iNA::Parser::ParserError &err) {

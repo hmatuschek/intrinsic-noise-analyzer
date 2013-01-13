@@ -85,7 +85,7 @@ SET(ina_app_views_SOURCES
     views/variableruleeditor.cc views/expressioneditor.cc views/unitrenderer.cc
     views/sbmlsheditordialog.cc views/modelview.cc views/uniteditor.cc views/reactionlistview.cc
     views/reactioneditor.cc views/genericplotdialog.cc views/speciesselectiondialog.cc
-    views/newversiondialog.cc views/mainwindow.cc)
+    views/newversiondialog.cc views/mainwindow.cc views/downloaddialog.cc)
 SET(ina_app_views_HEADERS
     views/documentsview.hh views/parameterview.hh views/reactionview.hh
     views/reactionequationrenderer.hh views/compartmentview.hh views/speciesview.hh
@@ -95,7 +95,7 @@ SET(ina_app_views_HEADERS
     views/variableruleeditor.hh views/expressioneditor.hh views/unitrenderer.hh
     views/sbmlsheditordialog.hh views/modelview.hh views/uniteditor.hh views/reactionlistview.hh
     views/reactioneditor.hh views/genericplotdialog.hh  views/speciesselectiondialog.hh
-    views/newversiondialog.hh views/mainwindow.hh)
+    views/newversiondialog.hh views/mainwindow.hh views/downloaddialog.hh)
 
 SET(ina_app_tinytex_SOURCES
     tinytex/tinytex.cc tinytex/formula.cc tinytex/ginac2formula.cc)
