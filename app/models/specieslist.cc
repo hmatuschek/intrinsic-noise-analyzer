@@ -84,7 +84,7 @@ SpeciesList::setData(const QModelIndex &index, const QVariant &value, int role)
   case 0: success = _updateIdentifier(species, value); break;
   case 1: success = _updateName(species, value); break;
   case 2: success = _updateInitialValue(species, value); break;
-  case 3: success = _updateUnit(species, value); break;
+  //case 3: success = _updateUnit(species, value); break;
   case 4: success = _updateConstFlag(species, value); break;
   case 5: success = _updateCompartment(species, value); break;
   default: break;
@@ -135,12 +135,24 @@ SpeciesList::_updateIdentifier(iNA::Ast::Species *species, const QVariant &value
   // Get ID
   QString qid = value.toString();
   std::string id = qid.toStdString();
+
   // If nothing changed -> done.
   if (id == species->getIdentifier()) { return true; }
+
   // Check ID format
-  if (! QRegExp("[a-zA-Z_][a-zA-Z0-9_]*").exactMatch(qid)) { return false; }
+  if (! QRegExp("[a-zA-Z_][a-zA-Z0-9_]*").exactMatch(qid)) {
+    QMessageBox::warning(0, tr("Can not set identifier"),
+                         tr("Identifier \"%1\" has invalid format.").arg(qid));
+    return false;
+  }
+
   // Check if id is not assigned allready:
-  if (_model->hasDefinition(id)) { return false; }
+  if (_model->hasDefinition(id)) {
+    QMessageBox::warning(0, tr("Can not set identifier"),
+                         tr("Identifier \"%1\" already in use.").arg(qid));
+    return false;
+  }
+
   // Ok, assign identifier:
   _model->resetIdentifier(species->getIdentifier(), id);
   return true;
@@ -209,15 +221,22 @@ SpeciesList::_updateInitialValue(iNA::Ast::Species *species, const QVariant &val
 {
   // If the initial value was changed: get expression
   std::string expression = value.toString().toStdString();
+
   // parse expression
   GiNaC::ex new_value;
   try { new_value = iNA::Parser::Expr::parseExpression(expression, _model); }
   catch (iNA::Exception &err) {
+    // Log message
     iNA::Utils::Message msg = LOG_MESSAGE(iNA::Utils::Message::INFO);
     msg << "Can not parse expression: " << expression << ": " << err.what();
     iNA::Utils::Logger::get().log(msg);
+    // Show message
+    QMessageBox::warning(
+          0, tr("Can not parse expression"),
+          tr("Can not parse expression \"%1\": %2").arg(value.toString(), err.what()));
     return false;
   }
+
   // Set new "value"
   species->setValue(new_value);
   return true;

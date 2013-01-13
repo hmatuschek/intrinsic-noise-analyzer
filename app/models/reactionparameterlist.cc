@@ -186,12 +186,24 @@ ReactionParameterList::_updateIdentifier(iNA::Ast::Parameter *param, const QVari
   // Get ID
   QString qid = value.toString();
   std::string id = qid.toStdString();
+
   // If nothing changed -> done.
   if (id == param->getIdentifier()) { return true; }
+
   // Check ID format
-  if (! QRegExp("[a-zA-Z_][a-zA-Z0-9_]*").exactMatch(qid)) { return false; }
+  if (! QRegExp("[a-zA-Z_][a-zA-Z0-9_]*").exactMatch(qid)) {
+    QMessageBox::warning(0, tr("Can not set identifier"),
+                         tr("Identifier \"%1\" has invalid format.").arg(qid));
+    return false;
+  }
+
   // Check if id is not assigned allready:
-  if (_kinetic_law->hasDefinition(id)) { return false; }
+  if (_kinetic_law->hasDefinition(id)) {
+    QMessageBox::warning(0, tr("Can not set identifier"),
+                         tr("Identifier \"%1\" already in use.").arg(qid));
+    return false;
+  }
+
   // Ok, assign identifier:
   _kinetic_law->resetIdentifier(param->getIdentifier(), id);
   return true;
@@ -253,15 +265,22 @@ ReactionParameterList::_updateInitialValue(iNA::Ast::Parameter *param, const QVa
 {
   // If the initial value was changed: get expression
   std::string expression = value.toString().toStdString();
+
   // parse expression
   GiNaC::ex new_value;
   try { new_value = iNA::Parser::Expr::parseExpression(expression, _kinetic_law); }
   catch (iNA::Exception &err) {
+    // Log message:
     iNA::Utils::Message msg = LOG_MESSAGE(iNA::Utils::Message::INFO);
     msg << "Can not parse expression: " << expression << ": " << err.what();
     iNA::Utils::Logger::get().log(msg);
+    // Show message:
+    QMessageBox::warning(
+          0, tr("Can not parse expression"),
+          tr("Can not parse expression \"%1\": %2").arg(value.toString(), err.what()));
     return false;
   }
+
   // Set new "value"
   param->setValue(new_value);
   return true;

@@ -76,7 +76,7 @@ ParameterList::flags(const QModelIndex &index) const
   if (columnCount() <= index.column()) return Qt::NoItemFlags;
   if (rowCount() <= index.row()) return Qt::NoItemFlags;
 
-  // Mark only column 1 & 2 editable
+  // Mark only column 1, 2 & 3 editable
   if ( (0 == index.column()) || (1 == index.column()) || (2 == index.column()) ) item_flags |= Qt::ItemIsEditable;
 
   return item_flags;
@@ -177,12 +177,24 @@ ParameterList::_updateIdentifier(iNA::Ast::Parameter *param, const QVariant &val
   // Get ID
   QString qid = value.toString();
   std::string id = qid.toStdString();
+
   // If nothing changed -> done.
   if (id == param->getIdentifier()) { return true; }
+
   // Check ID format
-  if (! QRegExp("[a-zA-Z_][a-zA-Z0-9_]*").exactMatch(qid)) { return false; }
+  if (! QRegExp("[a-zA-Z_][a-zA-Z0-9_]*").exactMatch(qid)) {
+    QMessageBox::warning(0, tr("Can not set identifier"),
+                         tr("Identifier \"%1\" has invalid format.").arg(qid));
+    return false;
+  }
+
   // Check if id is not assigned allready:
-  if (_model->hasDefinition(id)) { return false; }
+  if (_model->hasDefinition(id)) {
+    QMessageBox::warning(0, tr("Can not set identifier"),
+                         tr("Identifier \"%1\" is already in use.").arg(qid));
+    return false;
+  }
+
   // Ok, assign identifier:
   _model->resetIdentifier(param->getIdentifier(), id);
   return true;
@@ -239,9 +251,14 @@ ParameterList::_updateInitialValue(iNA::Ast::Parameter *param, const QVariant &v
   GiNaC::ex new_value;
   try { new_value = iNA::Parser::Expr::parseExpression(expression, _model); }
   catch (iNA::Exception &err) {
+    // Log message
     iNA::Utils::Message msg = LOG_MESSAGE(iNA::Utils::Message::INFO);
     msg << "Can not parse expression: " << expression << ": " << err.what();
     iNA::Utils::Logger::get().log(msg);
+    // Show message:
+    QMessageBox::warning(
+          0, tr("Can not set initial value"),
+          tr("Can not parse expression \"%1\": %2").arg(value.toString(), err.what()));
     return false;
   }
   // Set new "value"
