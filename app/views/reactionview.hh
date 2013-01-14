@@ -48,6 +48,8 @@ private slots:
   void onAddParamClicked();
   /** Will be called if "rem param" is clicked. */
   void onRemParamClicked();
+  /** Will move a selected parameter into the global scope. */
+  void onMakeParamGlobalClicked();
   /** Will be called if the selection of the parameterlist is changed, is used to enable/disable
    * the "rem param" button. */
   void onSelectionChanged(const QItemSelection &selected,const QItemSelection &unselected);
@@ -63,6 +65,8 @@ private:
   QPushButton *_addParamButton;
   /** The "rem param" button. */
   QPushButton *_remParamButton;
+  /** The "make global" button. */
+  QPushButton *_makeGlobalButton;
   /** Holds the table view of local parameters. */
   QTableView *_paramTable;
 };
