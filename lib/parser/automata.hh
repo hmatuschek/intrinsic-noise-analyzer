@@ -10,14 +10,12 @@
 namespace iNA {
 namespace Parser {
 
-/**
- * An efficient implementation of a deterministic finite automate using a simple bytecode
+/** An efficient implementation of a deterministic finite automate using a simple bytecode
  * interpreting state machine.
  *
- * @note As the DFA is a state machine it is not thread save, make sure, that only on thrad accesses
- *       a DFA at a time.
- * @ingroup parser
- */
+ * @note As the DFA is a state machine it is not thread save, make sure, that only one thrad
+ *       accesses the DFA at a time.
+ * @ingroup parser */
 template <class Value>
 class DFA
 {
@@ -45,11 +43,15 @@ public:
   protected:
     /** Hidden constructor. Use factory methods to assemble a condition. */
     Instruction(Type type, const Value &min = Value(), const Value &max = Value())
-      : _type(type), _min(min), _max(max) { }
+      : _type(type), _min(min), _max(max) {
+      // Pass...
+    }
 
   public:
     /** Copy constructor. */
-    Instruction(const Instruction &other) : _type(other._type), _min(other._min), _max(other._max) { }
+    Instruction(const Instruction &other) : _type(other._type), _min(other._min), _max(other._max) {
+      // Pass...
+    }
 
   public:
     /** Creates a condition that matched if the input is a certain value. */
@@ -155,7 +157,7 @@ public:
         _code[i].eval(value, stack);
       }
       // If there is no condition -> return false
-      //if (0 == stack.size()) return false;
+      // if (0 == stack.size()) return false;
       // If there are more than one element on the stack:
       if (1 != stack.size()) {
         InternalError err;
@@ -342,12 +344,9 @@ public:
 
 
 
-/**
- * Implements a non-deterministic finite automata (NFA, a collection of determinisitic finite
+/** Implements a non-deterministic finite automata (NFA, a collection of determinisitic finite
  * automata, @c DFA).
- *
- * @ingroup parser
- */
+ * @ingroup parser */
 template <class Value>
 class NFA
 {
