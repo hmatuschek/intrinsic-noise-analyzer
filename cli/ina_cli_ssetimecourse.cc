@@ -25,6 +25,13 @@ int saveLNATimecourseAnalysis(Eigen::MatrixXd &table, Opt::Parser &parser)
   return saveTable(header.str(), "LNA", table, parser);
 }
 
+int saveIOSTimecourseAnalysis(Eigen::MatrixXd &table, Opt::Parser &parser)
+{
+  std::stringstream header; header << "# Result of IOS time-course analysis:" << std::endl;
+  return saveTable(header.str(), "IOS", table, parser);
+}
+
+
 
 int performRETimecourseAnalysis(iNA::Utils::Opt::Parser &option_parser)
 {
@@ -156,19 +163,19 @@ int performLNATimecourseAnalysis(iNA::Utils::Opt::Parser &option_parser)
   }
 
   // Holds the number of species:
-  size_t _Ns = lna_model.numSpecies();
+  size_t Ns = lna_model.numSpecies();
   // Holds the current system state (reduced state)
   Eigen::VectorXd x(lna_model.getDimension());
   // Holds the update to the next state (reduced state)
   Eigen::VectorXd dx(lna_model.getDimension());
   // Holds the concentrations for each species (full state)
-  Eigen::VectorXd concentrations(_Ns);
+  Eigen::VectorXd concentrations(Ns);
   // Holds the covariance matrix of species concentrations
-  Eigen::MatrixXd cov(_Ns, _Ns);
+  Eigen::MatrixXd cov(Ns, Ns);
   // Holds EMRE correction for state:
-  Eigen::VectorXd emre(_Ns);
+  Eigen::VectorXd emre(Ns);
   // Allocate output
-  Eigen::MatrixXd timeseries(1+N_steps, 1+2*_Ns+(_Ns*(_Ns+1))/2);
+  Eigen::MatrixXd timeseries(1+N_steps, 1+2*Ns+(Ns*(Ns+1))/2);
 
   // initialize (reduced) state
   lna_model.getInitialState(x);
@@ -179,18 +186,18 @@ int performLNATimecourseAnalysis(iNA::Utils::Opt::Parser &option_parser)
 
   // store initial state RE
   timeseries(0,0) = t;
-  for (size_t j=0; j<_Ns; j++) {
+  for (size_t j=0; j<Ns; j++) {
     timeseries(0, 1+j) = concentrations(j);
   }
   // store initial state LNA
-  size_t idx = 1 + _Ns;
-  for (size_t j=0; j<_Ns; j++) {
-    for (size_t k=j; k<_Ns; k++, idx++) {
+  size_t idx = 1 + Ns;
+  for (size_t j=0; j<Ns; j++) {
+    for (size_t k=j; k<Ns; k++, idx++) {
       timeseries(0, idx) = cov(j, k);
     }
   }
   // store initial state EMRE
-  for (size_t j=0; j<_Ns; j++, idx++) {
+  for (size_t j=0; j<Ns; j++, idx++) {
     timeseries(0, idx) = emre(j) + concentrations(j);
   }
 
@@ -206,21 +213,156 @@ int performLNATimecourseAnalysis(iNA::Utils::Opt::Parser &option_parser)
     // Store new time:
     timeseries(i+1, 0) = t;
     // Store states of selected species:
-    for (size_t j=0; j<_Ns; j++) {
+    for (size_t j=0; j<Ns; j++) {
       timeseries(1+i, 1+j) = concentrations(j);
     }
     // Store cov() of species.
-    size_t idx = 1 + _Ns;
-    for (size_t j=0; j<_Ns; j++) {
-      for (size_t k=j; k<_Ns; k++, idx++) {
+    size_t idx = 1 + Ns;
+    for (size_t j=0; j<Ns; j++) {
+      for (size_t k=j; k<Ns; k++, idx++) {
         timeseries(1+i, idx) = cov(j, k);
       }
     }
     // Store EMRE correction + LNA state:
-    for (size_t j=0; j<_Ns; j++, idx++) {
+    for (size_t j=0; j<Ns; j++, idx++) {
       timeseries(1+i, idx) = emre(j) + concentrations(j);
     }
   }
 
   return saveLNATimecourseAnalysis(timeseries, option_parser);
+}
+
+
+
+
+int performIOSTimecourseAnalysis(iNA::Utils::Opt::Parser &option_parser)
+{
+  // Determine time rage:
+  std::string range = option_parser.get_option("range").front();
+  double t_min, t_max; size_t N_steps=100;
+  if (! ina_cli_parseRange(range, t_min, t_max, N_steps)) {
+    Utils::Message message = LOG_MESSAGE(Utils::Message::ERROR);
+    message << "Invalid range format in '" << range << "'. Must be FROM:TO[:STEPS]";
+    Utils::Logger::get().log(message);
+    return -1;
+  }
+
+  // Assemble constants
+  ODE::IntegrationRange integration_range(t_min, t_max, N_steps);
+  double err_abs = 1e-4, err_rel=1e-6;
+  double dt = integration_range.getStepSize();
+
+  // Load model and construct analysis:
+  Ast::Model *model = importModel(option_parser);
+  if (0 == model) { return -1; }
+  Models::IOSmodel ios_model(*model);
+
+  // Using JIT compiler and LSODA integrator.
+  Models::GenericSSEinterpreter<
+      Models::IOSmodel,
+      Eval::jit::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+      Eval::jit::Engine<Eigen::VectorXd, Eigen::MatrixXd> > interpreter(ios_model, 0);
+  // Configure ODE integrator
+  ODE::Stepper *stepper = new ODE::LsodaDriver< Models::GenericSSEinterpreter<
+      Models::IOSmodel, Eval::jit::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+      Eval::jit::Engine<Eigen::VectorXd, Eigen::MatrixXd> > >(
+        interpreter, integration_range.getStepSize(), err_abs, err_rel);
+
+  { // Short information about analysis:
+    Utils::Message message = LOG_MESSAGE(Utils::Message::DEBUG);
+    message << "Start IOS time-course analysis for model \"" << model->getIdentifier()
+            << "\" from t=" << t_min << ".." << t_max << " in " << N_steps << " steps.";
+    Utils::Logger::get().log(message);
+  }
+
+  // Holds the number of species:
+  size_t Ns = ios_model.numSpecies();
+  // Holds the current system state (reduced state)
+  Eigen::VectorXd x(ios_model.getDimension());
+  // Holds the concentrations for each species (full state)
+  Eigen::VectorXd concentrations(Ns);
+  // Holds the covariance matrix of species concentrations
+  Eigen::MatrixXd lna(Ns, Ns);
+  // Holds EMRE correction for state:
+  Eigen::VectorXd emre(Ns);
+  // Holds the covariance matrix of species concentrations
+  Eigen::MatrixXd ios(Ns, Ns);
+  // Holds the 3rd moment for each species.
+  Eigen::VectorXd thirdMoment = Eigen::VectorXd::Zero(Ns);
+  // Holds the iosemre for each species.
+  Eigen::VectorXd iosemre(Ns);
+  // Holds a row of the output-table:
+  Eigen::MatrixXd timeseries(1+N_steps, 1+3*Ns+(Ns*(Ns+1)));
+
+  // Assemble index tables:
+  Eigen::VectorXi re_index_table(Ns), emre_index_table(Ns), ios_emre_index_table(Ns);
+  Eigen::MatrixXi lna_index_table(Ns,Ns), ios_index_table(Ns,Ns);
+  size_t column = 1;
+  for (int i=0; i<(int)Ns; i++, column++) {
+    re_index_table(i) = column;
+  }
+  for (int i=0; i<(int)Ns; i++) {
+    for (int j=i; j<(int)Ns; j++, column++) {
+      lna_index_table(i,j) = column; lna_index_table(j,i) = column;
+    }
+  }
+  for (int i=0; i<(int)Ns; i++, column++) {
+    emre_index_table(i) = column;
+  }
+  for (int i=0; i<(int)Ns; i++) {
+    for (int j=i; j<(int)Ns; j++, column++) {
+      ios_index_table(i,j) = column; lna_index_table(j,i) = column;
+    }
+  }
+  for (int i=0; i<(int)Ns; i++, column++) {
+    ios_emre_index_table(i) = column;
+  }
+
+  // initialize (reduced) state
+  ios_model.getInitialState(x);
+  // get full initial concentrations and covariance
+  ios_model.fullState(x, concentrations, lna, emre, ios, thirdMoment, iosemre);
+
+  // store initial state:
+  timeseries(0, 0) = t_min;
+  for (size_t i=0; i<Ns; i++)
+  {
+    timeseries(0, re_index_table(i)) = concentrations(i);
+    timeseries(0, emre_index_table(i)) = concentrations(i);
+    timeseries(0, ios_emre_index_table(i)) = concentrations(i);
+    for (size_t j=i; j<Ns; j++){
+      timeseries(0, lna_index_table(i,j)) = 0.0;
+      timeseries(0, ios_index_table(i,j)) = 0.0;
+    }
+  }
+
+  /*
+   * Perfrom integration.
+   */
+  double t=t_min;
+  for (size_t s=0; s<N_steps; s++)
+  {
+    // Update state & time
+    stepper->step(x, t); t += dt;
+
+    // Get full state:
+    ios_model.fullState(x, concentrations, lna, emre, ios, thirdMoment, iosemre);
+
+    // store state and time:
+    timeseries(s,0) = t;
+    for (size_t i=0; i<Ns; i++) {
+      // Store means
+      timeseries(s,re_index_table(i)) = concentrations(i);
+      timeseries(s,emre_index_table(i)) = emre(i) + concentrations(i);
+      timeseries(s,ios_emre_index_table(i)) = emre(i) + concentrations(i) + iosemre(i);
+      // Store covariances:
+      for (size_t j=i; j<Ns; j++){
+        timeseries(s,lna_index_table(i,j)) = lna(i, j);
+        timeseries(s,ios_index_table(i,j)) = lna(i, j) + ios(i, j);
+      }
+    }
+  }
+
+  // Done:
+  return saveIOSTimecourseAnalysis(timeseries, option_parser);
 }

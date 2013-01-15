@@ -218,7 +218,7 @@ int main(int argc, const char *argv[])
   Utils::Opt::RuleInterface &lna_timecourse_flag = Utils::Opt::Parser::Flag("lna");
   Utils::Opt::RuleInterface &emre_timecourse_flag = Utils::Opt::Parser::Flag("emre");
   Utils::Opt::RuleInterface &sse_timecourse_command =
-      ( (re_timecourse_flag | lna_timecourse_flag),
+      ( (re_timecourse_flag | lna_timecourse_flag | emre_timecourse_flag),
         range_option, model_specifier, output_specifier );
 
   // Task commands:
@@ -295,6 +295,8 @@ int main(int argc, const char *argv[])
     return performRETimecourseAnalysis(option_parser);
   } else if (option_parser.has_flag("lna")) {
     return performLNATimecourseAnalysis(option_parser);
+  } else if (option_parser.has_flag("emre")) {
+    return performIOSTimecourseAnalysis(option_parser);
   } else if (option_parser.has_flag("list-species")) {
     return listSpecies(option_parser);
   } else if (option_parser.has_flag("list-compartments")) {
