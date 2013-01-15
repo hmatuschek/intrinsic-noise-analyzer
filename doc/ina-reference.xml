@@ -1,0 +1,80 @@
+<?xml version='1.0'?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+  "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">  
+  
+  
+<book>
+<refentry id="ina">
+<refmeta>
+  <refentrytitle>ina</refentrytitle>
+  <manvolnum>1</manvolnum>
+</refmeta>  
+
+<refnamediv>
+  <refname>ina</refname>
+  <refpurpose>the intrinsic noise analyzer</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+  <cmdsynopsis>
+    <command>ina-cli</command>
+    <arg choice="opt">MODELFILE</arg>
+  </cmdsynopsis>
+</refsynopsisdiv>
+<refentry>
+
+
+<refentry id="ina-cli">
+<refmeta>
+  <refentrytitle>ina-cli</refentrytitle>
+  <manvolnum>1</manvolnum>
+</refmeta>  
+
+<refnamediv>
+  <refname>ina-cli</refname>
+  <refpurpose>the command line interface to iNA</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+  <cmdsynopsis>
+    <command>ina-cli</command>
+    <arg choice="opt">GLOBAL_OPTIONS</arg>
+    <arg>COMAND</ARG> 
+    <arg choice="opt">COMMAND_OPTIONS</arg>
+  </cmdsynopsis>
+</refsynopsisdiv>
+
+<refsect1>
+  <title>Description</title>
+  <para> <command>ina-cli<command> provides a easy to use command line 
+  interface to iNA. This tool is distributed along with the iNA GUI application.
+  It allows to perform analyses from command line, thus also on remote machines 
+  via SSH. </para>
+  
+  <para>This tool implements the following operations and analyses:</para>
+  
+  <itemizedlist>
+    <listitem><para>Steady state analysis,</para></listitem>
+    <listitem><para>Parameter scan in steady state,</para></listitem>
+    <listitem><para>Setting of initial values for parameters, compartments and 
+      species,</para></listitem>
+    <listitem><para>Listing of parameters, species and compartments. 
+      </para></listitem> 
+  </itemizedlist>
+  
+  <para>The analyses results can be exported as either CSV into a file or 
+  printed to stdout. Alternatively, the analyses results might be exported into
+  a Matlat MAT file.</para>
+</refsect1>
+
+<refsect1>
+  <title>Analyses Commands</title>
+  
+  <refsect2>
+    <title>Steady state analysis</title>
+  </refsect2>
+</refsect1>
+
+
+</refentry>
+</book>

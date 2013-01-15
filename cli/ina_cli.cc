@@ -8,6 +8,7 @@
 
 #include "ina_cli_steadystate.hh"
 #include "ina_cli_paramscan.hh"
+#include "ina_cli_ssetimecourse.hh"
 #include "ina_cli_listmodel.h"
 #include "ina_cli_importmodel.hh"
 
@@ -25,7 +26,7 @@ int main(int argc, const char *argv[])
       << "iNA command line interface tool - version " << INA_VERSION_STRING << std::endl
       << std::endl
       << "Usage: " << std::endl
-      << "  ina-cli [GLOBAL-OPTIONS] COMMAND MODEL [CMD-OPTIONS] OUTPUT" << std::endl
+      << "  ina-cli [GLOBAL-OPTIONS] COMMAND [CMD-OPTIONS] MODEL OUTPUT" << std::endl
       << std::endl << std::endl
       << "GLOBAL-OPTIONS : Specifies some global options, independent of analysis command." << std::endl
       << "COMMAND        : The command to be executed, see below for details." << std::endl
@@ -80,7 +81,7 @@ int main(int argc, const char *argv[])
       << " --output-csv=FILENAME" << std::endl
       << "               : Exports the analysis data as CSV into the given filename" << std::endl
       << std::endl
-      << " --output-stdcerr" << std::endl
+      << " --output-stdout" << std::endl
       << "               : Exports the analysis data as CSV to stdout." << std::endl
       << std::endl
       << " --output-mat=FILENAME" << std::endl
@@ -217,13 +218,13 @@ int main(int argc, const char *argv[])
   Utils::Opt::RuleInterface &lna_timecourse_flag = Utils::Opt::Parser::Flag("lna");
   Utils::Opt::RuleInterface &emre_timecourse_flag = Utils::Opt::Parser::Flag("emre");
   Utils::Opt::RuleInterface &sse_timecourse_command =
-      ( (re_timecourse_flag|lna_timecourse_flag|emre_timecourse_flag),
-        model_specifier, output_specifier );
+      ( re_timecourse_flag, range_option, model_specifier, output_specifier );
 
   // Task commands:
   Utils::Opt::RuleInterface &task_command =
-      (global_options, (steadystate_command | paramscan_command | sse_timecourse_command |
-                        list_model_command | export_commands));
+      (global_options,
+       (steadystate_command | paramscan_command | sse_timecourse_command | list_model_command |
+        export_commands));
 
   // Help flags
   Utils::Opt::RuleInterface &help_flags =
@@ -263,6 +264,7 @@ int main(int argc, const char *argv[])
     std::cout << scan_help.str();
     return 0;
   }
+  /// @todo Write help for SSE time course analysis.
   // Display version:
   if (option_parser.has_flag("version")) {
     std::cout << INA_VERSION_STRING << std::endl;
@@ -288,6 +290,9 @@ int main(int argc, const char *argv[])
     return performSteadyStateAnalysis(option_parser);
   } else if (option_parser.has_option("scan")) {
     return performParamScan(option_parser);
+  } else if (option_parser.has_flag("re")) {
+    std::cerr << "Perform RE analysis." << std::endl;
+    return performRETimecourseAnalysis(option_parser);
   } else if (option_parser.has_flag("list-species")) {
     return listSpecies(option_parser);
   } else if (option_parser.has_flag("list-compartments")) {
