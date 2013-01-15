@@ -218,7 +218,8 @@ int main(int argc, const char *argv[])
   Utils::Opt::RuleInterface &lna_timecourse_flag = Utils::Opt::Parser::Flag("lna");
   Utils::Opt::RuleInterface &emre_timecourse_flag = Utils::Opt::Parser::Flag("emre");
   Utils::Opt::RuleInterface &sse_timecourse_command =
-      ( re_timecourse_flag, range_option, model_specifier, output_specifier );
+      ( (re_timecourse_flag | lna_timecourse_flag),
+        range_option, model_specifier, output_specifier );
 
   // Task commands:
   Utils::Opt::RuleInterface &task_command =
@@ -291,8 +292,9 @@ int main(int argc, const char *argv[])
   } else if (option_parser.has_option("scan")) {
     return performParamScan(option_parser);
   } else if (option_parser.has_flag("re")) {
-    std::cerr << "Perform RE analysis." << std::endl;
     return performRETimecourseAnalysis(option_parser);
+  } else if (option_parser.has_flag("lna")) {
+    return performLNATimecourseAnalysis(option_parser);
   } else if (option_parser.has_flag("list-species")) {
     return listSpecies(option_parser);
   } else if (option_parser.has_flag("list-compartments")) {
