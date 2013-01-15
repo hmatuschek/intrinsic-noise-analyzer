@@ -1,9 +1,10 @@
-<?xml version='1.0'?>
+<?xml version='1.0'?> 
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
   "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">  
   
   
 <book>
+
 <refentry id="ina">
 <refmeta>
   <refentrytitle>ina</refentrytitle>
@@ -21,7 +22,9 @@
     <arg choice="opt">MODELFILE</arg>
   </cmdsynopsis>
 </refsynopsisdiv>
-<refentry>
+</refentry>
+
+
 
 
 <refentry id="ina-cli">
@@ -38,18 +41,28 @@
 <refsynopsisdiv>
   <cmdsynopsis>
     <command>ina-cli</command>
+    <arg choice="plain">--version</arg> 
+  </cmdsynopsis>
+  <cmdsynopsis>
+    <command>ina-cli</command>
+    <arg choice="plain">--help</arg> 
+  </cmdsynopsis>
+  <cmdsynopsis>
+    <command>ina-cli</command>
     <arg choice="opt">GLOBAL_OPTIONS</arg>
-    <arg>COMAND</ARG> 
+    <arg choice="plain">COMAND</arg> 
     <arg choice="opt">COMMAND_OPTIONS</arg>
+    <arg choice="plain">MODEL</arg>
+    <arg choice="plain">OUTPUT</arg>
   </cmdsynopsis>
 </refsynopsisdiv>
 
 <refsect1>
   <title>Description</title>
-  <para> <command>ina-cli<command> provides a easy to use command line 
-  interface to iNA. This tool is distributed along with the iNA GUI application.
-  It allows to perform analyses from command line, thus also on remote machines 
-  via SSH. </para>
+  
+  <para> <command>ina-cli</command> provides a easy to use command line interface to iNA. This tool
+  is distributed along with the iNA GUI application. It allows to perform analyses from command 
+  line, thus also on remote machines via SSH. </para>
   
   <para>This tool implements the following operations and analyses:</para>
   
@@ -62,19 +75,203 @@
       </para></listitem> 
   </itemizedlist>
   
-  <para>The analyses results can be exported as either CSV into a file or 
-  printed to stdout. Alternatively, the analyses results might be exported into
-  a Matlat MAT file.</para>
+  <para>The analyses results can be exported as either CSV into a file or printed to stdout. 
+  Alternatively, the analyses results might be exported into a Matlat MAT file.</para>
+	<para/>
 </refsect1>
+
 
 <refsect1>
-  <title>Analyses Commands</title>
+  <title>Global Options</title>
   
-  <refsect2>
-    <title>Steady state analysis</title>
-  </refsect2>
+  <para> Global parameters specifiy options, that apply globally on all analyses. </para>
+  
+  <cmdsynopsis>
+    <arg choice="plain">--loglevel=LEVEL</arg>
+  </cmdsynopsis>
+  
+  <para>The <option>--loglevel</option> specifies the log-level. The level is specified by name and
+  must be one of debug, info, warn or error. </para>
+	<para/>
 </refsect1>
 
 
+<refsect1>
+  <title>Model specification</title>
+  
+  <para>TODO</para>
+	<para/>  
+</refsect1>
+
+
+<refsect1>
+  <title>Output specification</title>
+  
+  <para>TODO</para>
+	<para/>  
+</refsect1>
+
+
+<refsect1>
+  <title>Steady state analysis</title>
+  
+  <cmdsynopsis>
+    <command>ina-cli</command>
+    <arg choice="opt">GLOBAL_OPTIONS</arg>
+    <arg choice="plain"><option>--steadystate</option></arg> 
+    <arg choice="opt"><option>--max-iter</option>=<replaceable class="parameter">VALUE</replaceable></arg>
+    <arg choice="opt"><option>--eps</option>=<replaceable class="parameter">VALUE</replaceable></arg>
+    <arg choice="opt"><option>--max-df</option>=<replaceable class="parameter">VALUE</replaceable></arg>  
+    <arg choice="opt"><option>--min-df</option>=<replaceable class="parameter">VALUE</replaceable></arg>    
+    <arg choice="plain">MODEL</arg>
+    <arg choice="plain">OUTPUT</arg>
+  </cmdsynopsis>
+  
+  <para> The <option>--steadystate</option> command performs a steady state analysis on a model
+  specified by MODEL. The result is exported as specified by OUTPUT. </para>
+  
+  <variablelist>
+	  <varlistentry>
+		  <term><option>--max-iter</option>=<replaceable class="parameter">VALUE</replaceable></term>
+		  <listitem><para>specifies the maximum number of iterations allowed to reach the steady state.
+		  (default: VALUE=100)</para> </listitem>
+	  </varlistentry>
+	  
+	  <varlistentry>
+		  <term><option>--eps</option>=<replaceable class="parameter">VALUE</replaceable></term>
+	    <listitem><para>specifies the absolute precision of the steady state. 
+	    (default: VALUE=1e-9)</para></listitem>
+	  </varlistentry>
+	  
+	  <varlistentry>
+		  <term><option>--max-df</option>=<replaceable class="parameter">VALUE</replaceable></term>
+	    <listitem><para>specifies the maximum time-step size for the intermediate integration to reach the
+	    steady state. (default: VALUE=1e9)</para></listitem>
+	  </varlistentry>
+
+	  <varlistentry>
+		  <term><option>--min-df</option>=<replaceable class="parameter">VALUE</replaceable></term>
+	    <listitem><para>specifies the minimum time-step size for the intermediate integration to reach the
+	    steady state. (default: VALUE=1e-1)</para></listitem>
+	  </varlistentry>
+	</variablelist>
+	<para/>	
+</refsect1>
+
+
+<refsect1>
+  <title>Parameter scan</title>
+  
+  <cmdsynopsis>
+    <command>ina-cli</command>
+    <arg choice="opt">GLOBAL_OPTIONS</arg>
+    <arg choice="plain"><option>--scan</option>=<replaceable class="parameter">PARAMETER</replaceable></arg> 
+    <arg choice="plain"><option>--range</option>=<replaceable class="parameter">RANGE</replaceable></arg>
+    <arg choice="plain">MODEL</arg>
+    <arg choice="plain">OUTPUT</arg>
+  </cmdsynopsis>
+  
+  <para>The <option>--scan</option> command performs a parameter scan for the parameter specified
+  by <replaceable>PARAMETER</replaceable>.</para> 
+  
+  <variablelist>
+    <varlistentry>
+      <term><option>--range</option>=<replaceable class="parameter">RANGE</replaceable></term>
+      <listitem><para>specifies the value range for the scan. RANGE must be of the form 
+      FROM:TO:[STEPS]. This performs a parameters scan from value FROM to value TO with STEPS steps.
+      If STEPS is obmitted, 100 steps are taken.</para></listitem>
+    </varlistentry>
+  </variablelist>
+</refsect1>
+
+
+<refsect1>
+  <title>System size expansion</title>
+  
+  <cmdsynopsis>
+    <command>ina-cli</command>
+    <arg choice="opt">GLOBAL_OPTIONS</arg>
+    <group>
+      <arg choice="plain"><option>--re</option></arg> 
+      <arg choice="plain"><option>--lna</option></arg> 
+      <arg choice="plain"><option>--emre</option></arg> 
+    </group>
+    <arg choice="plain"><option>--range</option>=<replaceable class="parameter">RANGE</replaceable></arg>
+    <arg choice="plain">MODEL</arg>
+    <arg choice="plain">OUTPUT</arg>
+  </cmdsynopsis>
+  
+  <para>These commands perform a time-course analysis using the system size expansion. </para> 
+  
+  <variablelist>
+    <varlistentry>
+      <term><option>--re</option></term>
+      <listitem><para>performs a time-course analysis with the rate-equations.</para></listitem>
+    </varlistentry>
+
+    <varlistentry>
+      <term><option>--lna</option></term>
+      <listitem><para>performs a time-course analysis with the linear noise approximation.
+      </para></listitem>
+    </varlistentry>
+
+    <varlistentry>
+      <term><option>--emre</option></term>
+      <listitem><para>performs a time-course analysis with the effective mesoscopic 
+      rate-equations.</para></listitem>
+    </varlistentry>
+
+    <varlistentry>
+      <term><option>--range</option>=<replaceable class="parameter">RANGE</replaceable></term>
+      <listitem><para>specifies the time range for the integration.</para></listitem>
+    </varlistentry>
+  </variablelist>
+</refsect1>
+
+
+<refsect1>
+  <title>Stochastic simulation</title>
+  
+  <cmdsynopsis>
+    <command>ina-cli</command>
+    <arg choice="opt">GLOBAL_OPTIONS</arg>
+    <arg choice="plain"><option>--ssa</option></arg> 
+    <arg choice="plain"><option>--range</option>=<replaceable class="parameter">RANGE</replaceable></arg>
+    <arg choice="plain"><option>--ensemble</option>=<replaceable class="parameter">N</replaceable></arg> 
+    <arg choice="plain">MODEL</arg>
+    <arg choice="plain">OUTPUT</arg>
+  </cmdsynopsis>
+  
+  <para>The <option>--ssa</option> command performs a time-course analysis using the stochastic 
+  simulation algorihtm.</para> 
+  
+  <variablelist>
+    <varlistentry>
+      <term><option>--range</option>=<replaceable class="parameter">RANGE</replaceable></term>
+      <listitem><para>specifies the time range for the integration.</para></listitem>
+    </varlistentry>
+    
+    <varlistentry>
+      <term><option>--ensemble</option>=<replaceable class="parameter">N</replaceable></term>
+      <listitem><para>specifies the ensemble size.</para></listitem>
+    </varlistentry>
+  </variablelist>
+</refsect1>
+
+
+<refsect1>
+	<title>Usage</title>
+	<para> TODO: put some examples here. </para>
+	<para><command>ina-cli</command> ... </para>
+	<para/>
+</refsect1>
+
+
+<refsect1>
+	<title>Authors</title>
+	<para><author><firstname>Hannes</firstname><surname>Matuschek</surname></author>, 
+	<author><firstname>Philipp</firstname><surname>Thomas</surname></author></para>
+	<para/>
+</refsect1>
 </refentry>
 </book>
