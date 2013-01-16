@@ -91,7 +91,7 @@ int performSSATimecourseAnalysis(Utils::Opt::Parser &option_parser)
     timeseries(i, 0) = i*dt;
     for (size_t j=0; j<_Ns; j++) {
       timeseries(i, 1+j) = mean(j);
-      timeseries(i, 1+_Ns+(_Ns*(_Ns+1))/2+j) = skewness(j);
+      //timeseries(i, 1+_Ns+(_Ns*(_Ns+1))/2+j) = skewness(j);
       for (size_t k=j; k<_Ns; k++) {
         size_t cov_jk = 1+_Ns+j*(_Ns+1)-(j*(j+1))/2 + (k-j);
         timeseries(i, cov_jk) = cov(j, k);
@@ -100,6 +100,11 @@ int performSSATimecourseAnalysis(Utils::Opt::Parser &option_parser)
 
     // Perfrom simulation:
     simulator.run(dt);
+
+    // Signal progress to user
+    Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
+    message << "SSA: " << int(100*double(1+i)/(N_steps+1)) << "% complete.";
+    Utils::Logger::get().log(message);
   }
 
   // Done.

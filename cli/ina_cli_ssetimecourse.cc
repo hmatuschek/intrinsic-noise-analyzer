@@ -208,6 +208,11 @@ int performRETimecourseAnalysis(iNA::Utils::Opt::Parser &option_parser)
     for (size_t j=0; j<re_model.numSpecies(); j++) {
       timeseries(i+1,1+j) = concentrations(j);
     }
+
+    // Signal progress to user
+    Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
+    message << "RE: " << int(100*double(1+i)/N_steps) << "% complete.";
+    Utils::Logger::get().log(message);
   }
 
   return saveRETimecourseAnalysis(timeseries, *model, option_parser);
@@ -321,6 +326,11 @@ int performLNATimecourseAnalysis(iNA::Utils::Opt::Parser &option_parser)
     for (size_t j=0; j<Ns; j++, idx++) {
       timeseries(1+i, idx) = emre(j) + concentrations(j);
     }
+
+    // Signal progress to user
+    Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
+    message << "LNA: " << int(100*double(1+i)/N_steps) << "% complete.";
+    Utils::Logger::get().log(message);
   }
 
   return saveLNATimecourseAnalysis(timeseries, *model, option_parser);
@@ -455,6 +465,12 @@ int performIOSTimecourseAnalysis(iNA::Utils::Opt::Parser &option_parser)
         timeseries(s,ios_index_table(i,j)) = lna(i, j) + ios(i, j);
       }
     }
+
+    // Signal progress to user
+    Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
+    message << "EMRE+IOS: " << int(100*double(1+s)/N_steps) << "% complete.";
+    Utils::Logger::get().log(message);
+
   }
 
   // Done:

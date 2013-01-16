@@ -57,6 +57,11 @@ int main(int argc, const char *argv[])
       << std::endl
       << " --scan=ID, --help-scan" << std::endl
       << "               : Performs a scan over a parameter specified by ID." << std::endl
+      << std::endl
+      << " --re, --lna, --emre" << std::endl
+      << "               : Performs a time-course analysis using the system size expansion." << std::endl
+      << std::endl
+      << " --ssa         : Performs a time-course analysis using the stochastic simulation algorithm." << std::endl
       << std::endl << std::endl
       << "Model specification:" << std::endl
       << " -m FILENAME, --model=FILENAME" << std::endl
