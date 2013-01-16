@@ -13,22 +13,116 @@ using namespace iNA::Utils;
 
 
 
-int saveRETimecourseAnalysis(Eigen::MatrixXd &table, Opt::Parser &parser)
+int saveRETimecourseAnalysis(Eigen::MatrixXd &table, const Ast::Model &model, Opt::Parser &parser)
 {
-  std::stringstream header; header << "# Result of RE time-course analysis:" << std::endl;
-  return saveTable(header.str(), "RE", table, parser);
+  // Assemble table header
+  std::stringstream header;
+  header << "# Result of RE time-course analysis:" << std::endl;
+  // Assemble column names for table:
+  std::vector<std::string> columns;
+  columns.reserve(1+model.numSpecies());
+  // First column -> time
+  columns.push_back("time");
+  // Remaining columns -> species concentrations
+  for (size_t i=0; i<model.numSpecies(); i++) {
+    columns.push_back(model.getSpecies(i)->getIdentifier());
+    if (model.getSpecies(i)->hasName()) {
+      columns[1+i] = model.getSpecies(i)->getName();
+    }
+  }
+  // Finally save data
+  return saveTable(header.str(), columns, "RE", table, parser);
 }
 
-int saveLNATimecourseAnalysis(Eigen::MatrixXd &table, Opt::Parser &parser)
+
+int saveLNATimecourseAnalysis(Eigen::MatrixXd &table, const Ast::Model &model, Opt::Parser &parser)
 {
   std::stringstream header; header << "# Result of LNA time-course analysis:" << std::endl;
-  return saveTable(header.str(), "LNA", table, parser);
+  // Assemble column names for table:
+  std::vector<std::string> columns;
+  size_t N=model.numSpecies(); std::vector<std::string> species(N);
+  columns.reserve(1+2*N+(N*(N+1))/2);
+  // Assemble species names:
+  for (size_t i=0; i<N; i++) {
+    species[i] = model.getSpecies(i)->getIdentifier();
+    if (model.getSpecies(i)->hasName()) { species[i] = model.getSpecies(i)->getName(); }
+  }
+  // First column -> time
+  columns.push_back("time");
+  // RE concentrations
+  for (size_t i=0; i<N; i++) {
+    std::stringstream buffer;
+    buffer << "RE(" << species[i] << ")";
+    columns.push_back(buffer.str());
+  }
+  // LNA covariance
+  for (size_t i=0; i<N; i++) {
+    for (size_t j=i; j<N; j++) {
+      std::stringstream buffer;
+      buffer << "COV("<<species[i]<<","<<species[j]<<")";
+      columns.push_back(buffer.str());
+    }
+  }
+  // EMRE concentrations
+  for (size_t i=0; i<N; i++) {
+    std::stringstream buffer;
+    buffer << "EMRE(" << species[i] << ")";
+    columns.push_back(buffer.str());
+  }
+  return saveTable(header.str(), columns, "LNA", table, parser);
 }
 
-int saveIOSTimecourseAnalysis(Eigen::MatrixXd &table, Opt::Parser &parser)
+
+int saveIOSTimecourseAnalysis(Eigen::MatrixXd &table, const Ast::Model &model, Opt::Parser &parser)
 {
   std::stringstream header; header << "# Result of IOS time-course analysis:" << std::endl;
-  return saveTable(header.str(), "IOS", table, parser);
+  // Assemble column names for table:
+  std::vector<std::string> columns;
+  size_t N=model.numSpecies(); std::vector<std::string> species(N);
+  columns.reserve(1+3*N+(N*(N+1)));
+  // Assemble species names:
+  for (size_t i=0; i<N; i++) {
+    species[i] = model.getSpecies(i)->getIdentifier();
+    if (model.getSpecies(i)->hasName()) { species[i] = model.getSpecies(i)->getName(); }
+  }
+  // First column -> time
+  columns.push_back("time");
+  // RE concentrations
+  for (size_t i=0; i<N; i++) {
+    std::stringstream buffer;
+    buffer << "RE(" << species[i] << ")";
+    columns.push_back(buffer.str());
+  }
+  // LNA covariance
+  for (size_t i=0; i<N; i++) {
+    for (size_t j=i; j<N; j++) {
+      std::stringstream buffer;
+      buffer << "LNA_COV("<<species[i]<<","<<species[j]<<")";
+      columns.push_back(buffer.str());
+    }
+  }
+  // EMRE concentrations
+  for (size_t i=0; i<N; i++) {
+    std::stringstream buffer;
+    buffer << "EMRE(" << species[i] << ")";
+    columns.push_back(buffer.str());
+  }
+  // IOS covariance
+  for (size_t i=0; i<N; i++) {
+    for (size_t j=i; j<N; j++) {
+      std::stringstream buffer;
+      buffer << "IOS_COV("<<species[i]<<","<<species[j]<<")";
+      columns.push_back(buffer.str());
+    }
+  }
+  // IOS+EMRE concentrations
+  for (size_t i=0; i<N; i++) {
+    std::stringstream buffer;
+    buffer << "IOS(" << species[i] << ")";
+    columns.push_back(buffer.str());
+  }
+
+  return saveTable(header.str(), columns, "IOS", table, parser);
 }
 
 
@@ -116,7 +210,7 @@ int performRETimecourseAnalysis(iNA::Utils::Opt::Parser &option_parser)
     }
   }
 
-  return saveRETimecourseAnalysis(timeseries, option_parser);
+  return saveRETimecourseAnalysis(timeseries, *model, option_parser);
 }
 
 
@@ -229,7 +323,7 @@ int performLNATimecourseAnalysis(iNA::Utils::Opt::Parser &option_parser)
     }
   }
 
-  return saveLNATimecourseAnalysis(timeseries, option_parser);
+  return saveLNATimecourseAnalysis(timeseries, *model, option_parser);
 }
 
 
@@ -364,5 +458,5 @@ int performIOSTimecourseAnalysis(iNA::Utils::Opt::Parser &option_parser)
   }
 
   // Done:
-  return saveIOSTimecourseAnalysis(timeseries, option_parser);
+  return saveIOSTimecourseAnalysis(timeseries, *model, option_parser);
 }

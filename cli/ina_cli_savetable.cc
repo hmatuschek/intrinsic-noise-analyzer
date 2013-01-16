@@ -15,6 +15,38 @@ int saveTableMAT(std::ostream &file, const std::string &header,
                  const std::string &table_name, Eigen::MatrixXd &table);
 
 
+// Join column names with given delimiter:
+std::string join(const std::vector<std::string> &headers, const std::string &delim="\t",
+                 bool quote=false)
+{
+  // If empty -> return empty string
+  if (0 == headers.size()) { return ""; }
+  // Join strings:
+  std::stringstream buffer;
+  for (size_t i=0; i<(headers.size()-1); i++) {
+    if (quote) buffer << "\"";
+    buffer << headers[i];
+    if (quote) buffer << "\"";
+    buffer << delim;
+  }
+  if (quote) buffer << "\"";
+  buffer << headers.back();
+  if (quote) buffer << "\"";
+  return buffer.str();
+}
+
+
+int saveTable(const std::string &header, const std::vector<std::string> &columns,
+              const std::string &table_name, Eigen::MatrixXd &table, Opt::Parser &option_parser)
+{
+  // Append column names to table header:
+  std::stringstream buffer;
+  buffer << header << std::endl << join(columns, "\t", true) << std::endl;
+  // Save table with new header:
+  return saveTable(buffer.str(), table_name, table, option_parser);
+}
+
+
 int saveTable(const std::string &header, const std::string &table_name,
               Eigen::MatrixXd &table, iNA::Utils::Opt::Parser &option_parser)
 {

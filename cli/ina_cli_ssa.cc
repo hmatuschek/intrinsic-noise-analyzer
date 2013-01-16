@@ -9,10 +9,30 @@
 using namespace iNA;
 
 
-int saveSSATimecourseAnalysis(Eigen::MatrixXd &table, Utils::Opt::Parser &parser)
+int saveSSATimecourseAnalysis(Eigen::MatrixXd &table, const Ast::Model &model, Utils::Opt::Parser &parser)
 {
   std::stringstream header; header << "# Result of SSA time-course analysis:" << std::endl;
-  return saveTable(header.str(), "SSA", table, parser);
+  // Assemble column names for table:
+  std::vector<std::string> columns;
+  size_t N=model.numSpecies(); std::vector<std::string> species(N);
+  columns.reserve(1+N+(N*(N+1))/2);
+  // Assemble species names:
+  for (size_t i=0; i<N; i++) {
+    species[i] = model.getSpecies(i)->getIdentifier();
+    if (model.getSpecies(i)->hasName()) { species[i] = model.getSpecies(i)->getName(); }
+  }
+  // First column -> time
+  columns.push_back("time");
+  // mean concentrations
+  for (size_t i=0; i<N; i++) { columns.push_back(species[i]); }
+  // covariance
+  for (size_t i=0; i<N; i++) {
+    for (size_t j=i; j<N; j++) {
+      std::stringstream buffer; buffer << "COV("<<species[i]<<","<<species[j]<<")";
+      columns.push_back(buffer.str());
+    }
+  }
+  return saveTable(header.str(), columns, "SSA", table, parser);
 }
 
 
@@ -83,5 +103,5 @@ int performSSATimecourseAnalysis(Utils::Opt::Parser &option_parser)
   }
 
   // Done.
-  return saveSSATimecourseAnalysis(timeseries, option_parser);
+  return saveSSATimecourseAnalysis(timeseries, *model, option_parser);
 }
