@@ -65,6 +65,8 @@ private:
   bool _updateInitialValue(iNA::Ast::Parameter *param, const QVariant &value);
   /** Retunrs the unit (rendered). */
   QVariant _getUnit(iNA::Ast::Parameter *param, int role) const;
+  /** Updates the unit. */
+  bool _updateUnit(iNA::Ast::Parameter *param, const QVariant &value);
   /** Returns the const flag of the parameter. Should always be constant. */
   QVariant _getConstFlag(iNA::Ast::Parameter *param, int role) const;
   /** Returns the const flag of the parameter. Should always be constant. */
