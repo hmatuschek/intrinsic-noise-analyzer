@@ -276,28 +276,36 @@ SteadyStateResultWidget::setValues()
     QTableWidgetItem *item;
 
     item = new QTableWidgetItem(QString("%1").arg(conc(i)));
-    item->setFlags(Qt::ItemIsSelectable);
+    item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
     this->state_view->setItem(0, i, item);
 
     item = new QTableWidgetItem(QString("%1").arg(conc(i) + emre(i)));
-    item->setFlags(Qt::ItemIsSelectable);
+    item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
     this->state_view->setItem(1, i, item);
 
     item = new QTableWidgetItem(QString("%1").arg(conc(i) + emre(i) + iosemre(i)));
-    item->setFlags(Qt::ItemIsSelectable);
+    item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
     this->state_view->setItem(2, i, item);
 
     for (int j=0; j<conc.size(); j++)
     {
       item = new QTableWidgetItem(QString("%1").arg(lna_cov(j,i)));
-      item->setFlags(Qt::ItemIsSelectable);
+      item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
       this->lna_covariance_view->setItem(j,i, item);
 
       item = new QTableWidgetItem(QString("%1").arg(lna_cov(j,i) + ios_cov(j,i)));
-      item->setFlags(Qt::ItemIsSelectable);
+      item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
       this->ios_covariance_view->setItem(j,i, item);
     }
   }
+
+  // Set selection mode to avoid gray shaded color of values:
+  this->state_view->setSelectionMode(QAbstractItemView::ContiguousSelection);
+  this->state_view->setSelectionBehavior(QAbstractItemView::SelectItems);
+  this->lna_covariance_view->setSelectionMode(QAbstractItemView::ContiguousSelection);
+  this->lna_covariance_view->setSelectionBehavior(QAbstractItemView::SelectItems);
+  this->ios_covariance_view->setSelectionMode(QAbstractItemView::ContiguousSelection);
+  this->ios_covariance_view->setSelectionBehavior(QAbstractItemView::SelectItems);
 }
 
 
