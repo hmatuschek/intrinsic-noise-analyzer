@@ -38,6 +38,7 @@
 <refmeta>
   <refentrytitle>ina-cli</refentrytitle>
   <manvolnum>1</manvolnum>
+  <refmiscinfo class="manual">intrinsic Noise Anaylzer</refmiscinfo>
   <refmiscinfo class="version">0.4.1</refmiscinfo>
 </refmeta>  
 
@@ -412,10 +413,19 @@
   </variablelist>
 </refsect1>
 
+
 <refsect1>
   <title>Usage</title>
   <para> TODO: put some examples here. </para>
   <para><command>ina-cli</command> ... </para>
+</refsect1>
+
+
+<refsect1>
+  <title>See also</title>
+  <para><command>ina</command>(1), <command>screen</command>(1)</para>
+  <para><emphasis remap='I'>iNA manual</emphasis> 
+  <ulink url='http://intrinsic-noise-analyzer.googlecode.com'>http://intrinsic-noise-analyzer.googlecode.com</ulink></para>
 </refsect1>
 
 

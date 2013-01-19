@@ -98,6 +98,10 @@ int performParamScan(Utils::Opt::Parser &option_parser)
     }
     // Store IOS means:
     for (size_t j=0; j<N_spec; j++, col++) { result_table(i, col) = ios_means(j); }
+
+    Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
+    message << "Parameter scan: " << int(100*double(1+i)/N_steps) << "% complete.";
+    Utils::Logger::get().log(message);
   }
 
   return saveParameterScan(result_table, option_parser);
