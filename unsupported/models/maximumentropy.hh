@@ -3,6 +3,7 @@
 
 #include <eigen3/Eigen/Eigen>
 #include <ginac/ginac.h>
+#include "nlesolve/minpack.hh"
 #include "math.hh"
 
 namespace iNA {
@@ -366,7 +367,7 @@ public:
 
 
     Eigen::VectorXd
-    computePDF2(const Eigen::VectorXd &domain, const Eigen::VectorXd &nonCentralMoments, double epsilon=0.01)
+    computePDF2(const Eigen::VectorXd &domain, const Eigen::VectorXd &nonCentralMoments, double epsilon=0.0001)
 
     {
 
@@ -422,7 +423,7 @@ public:
             // Test convergence
             maxError = 0.;
             for(size_t i=0; i<M; i++)
-              if(std::abs(Gn(i)-moments(i))/moments(i)>maxError) maxError=std::abs(Gn(i)-moments(i))/moments(i);
+              if(std::abs(Gn(i)-moments(i))>maxError) maxError=std::abs(Gn(i)-moments(i));
 
 
             if(maxError<epsilon) break;
@@ -456,7 +457,6 @@ public:
             // Calculate the entropy
             entropy = -lambda.transpose()*Gn;
 
-
         }
 
         if(iter!=maxIter) std::cerr << "Converged in " << iter << " iterations." << std::endl;
@@ -468,7 +468,110 @@ public:
 
 
 
+
 };
+
+class MaximumEntropyMP
+    : public NLEsolve::MinPack
+{
+
+protected:
+
+  Eigen::VectorXd domain;
+
+  Eigen::VectorXd moments;
+
+  Eigen::VectorXd pdf;
+
+  Eigen::MatrixXd function;
+
+  double epsilon;
+
+  double L;
+  double dx;
+
+public:
+
+
+
+  MaximumEntropyMP(const Eigen::VectorXd &domain, const Eigen::VectorXd &nonCentralMoments, double epsilon=0.0001)
+    : MinPack(),
+      domain(domain), moments(nonCentralMoments),
+      function(domain.size(),moments.size()), epsilon(epsilon)
+  {
+
+
+    // set domain length
+    L = domain(domain.size()-1)-domain(0);
+    dx = (domain(1)-domain(0))/L;
+
+    // Normalize moments
+    for(int i=1; i<moments.size(); i++)
+      moments(i)*=pow(L,-i);
+
+    size_t M = moments.size();
+    size_t N = domain.size();
+
+    // Initialize x^n
+    Eigen::MatrixXd function(domain.size(),M);
+    // Set x^0
+    function.col(0) = Eigen::VectorXd::Ones(domain.size());
+    // Fill the rest for n = 1...M
+    for(size_t n=1; n<M; n++) function.col(n)=domain.cwiseProduct(function.col(n-1))/L;
+
+
+  }
+
+  Eigen::VectorXd computePDF()
+  {
+
+
+    size_t M = moments.size();
+
+    Eigen::VectorXd lambda=Eigen::VectorXd::Zero(M);
+
+    Eigen::VectorXd fvec=Eigen::VectorXd::Zero(M);
+
+    int lwa = (M*(3*M+13))/2;
+
+    Eigen::VectorXd wa=Eigen::VectorXd::Zero(lwa);
+
+    // solve
+    //std::cout << this->hybrd1 ( M, lambda.data(), fvec.data(), epsilon, wa.data(), lwa ) << std::endl;
+
+
+    // return pdf
+    Eigen::VectorXd pdf;
+    pdf = -function.leftCols(M)*lambda;
+    for(int i=0; i<pdf.size(); i++)
+        pdf(i) = exp(pdf(i));
+
+    return pdf;
+
+  }
+
+  virtual void fcn(int n, double _lambda[], double _vec[], int *iflag)
+
+  {
+
+    size_t M = moments.size();
+
+    Eigen::Map<Eigen::VectorXd> lambda(_lambda,M);
+    Eigen::Map<Eigen::VectorXd> vec(_vec,M);
+
+    Eigen::VectorXd pdf = -function.leftCols(M)*lambda;
+    for(int i=0; i<pdf.size(); i++)
+        pdf(i) = exp(pdf(i));
+
+    // Calculate G_n = integral dx x^n p(x)  of length M
+    Eigen::VectorXd Gn = dx*(pdf.transpose()*function);
+
+    vec = (moments-Gn);
+
+  }
+
+};
+
 
 }}
 

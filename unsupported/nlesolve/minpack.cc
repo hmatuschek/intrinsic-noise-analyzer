@@ -7,7 +7,7 @@
 
 
 
-using namespace Fluc::NLEsolve;
+using namespace iNA::NLEsolve;
 using namespace std;
 
 //****************************************************************************80

@@ -1,9 +1,11 @@
 # Add source for unsupported modules
 SET(libina_unsupported_SOURCES
+   nlesolve/minpack.cc
    models/maximumentropy.cc
    models/spectrumrecorder.cc)
 
 SET(libina_unsupported_HEADERS
+   nlesolve/minpack.hh
    models/maximumentropy.hh
    models/spectrumrecorder.hh)
 

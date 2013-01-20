@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 
-namespace Fluc {
+namespace iNA {
 
 namespace NLEsolve {
 
@@ -21,8 +21,6 @@ class MinPack
 
 {
 public:
-
-    MinPack();
 
     /**
     //       fcn is a user-supplied subroutine which
