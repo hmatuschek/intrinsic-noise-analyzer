@@ -235,6 +235,13 @@ Application::checkForNewVersion()
 
 
 void
+Application::importModel(const QString &path, bool anonymous)
+{
+  onImportModel(path, anonymous);
+}
+
+
+void
 Application::showContextMenuAt(const QModelIndex &index, const QPoint &global_pos)
 {
   TreeItem *item = static_cast<TreeItem *>(index.internalPointer());
@@ -292,7 +299,7 @@ void Application::onImportModel()
 }
 
 
-void Application::onImportModel(const QString &fileName)
+void Application::onImportModel(const QString &fileName, bool anonymous)
 {
   QFileInfo info(fileName);
   // Check if file is readable:
@@ -306,15 +313,23 @@ void Application::onImportModel(const QString &fileName)
     DocumentItem *new_doc = 0;
     // Try to determine file type by extension:
     if (("xml" == info.suffix()) || ("sbml" == info.suffix())) {
-      new_doc = new DocumentItem(Parser::Sbml::importModel(fileName.toStdString()), fileName);
+      if (anonymous)
+        new_doc = new DocumentItem(Parser::Sbml::importModel(fileName.toLocal8Bit().data()));
+      else
+        new_doc = new DocumentItem(Parser::Sbml::importModel(fileName.toLocal8Bit().data()), fileName);
     } else if (("mod" == info.suffix()) || ("sbmlsh" == info.suffix())) {
-      new_doc = new DocumentItem(Parser::Sbmlsh::importModel(fileName.toStdString()), fileName);
+      if (anonymous)
+        new_doc = new DocumentItem(Parser::Sbmlsh::importModel(fileName.toLocal8Bit().data()));
+      else
+        new_doc = new DocumentItem(Parser::Sbmlsh::importModel(fileName.toLocal8Bit().data()), fileName);
     }
     // Add new document to tree:
     if (0 != new_doc) {
       docTree()->addDocument(new_doc);
-      addRecentModel(fileName);
-      updateRecentModelsMenu();
+      if (! anonymous) {
+        addRecentModel(fileName);
+        updateRecentModelsMenu();
+      }
       return;
     }
   } catch (iNA::Parser::ParserError &err) {
@@ -336,15 +351,23 @@ void Application::onImportModel(const QString &fileName)
     DocumentItem *new_doc = 0;
     // Try to determine file type by extension:
     if (ModelFormatQuestion::SBML_MODEL == format) {
-      new_doc = new DocumentItem(Parser::Sbml::importModel(fileName.toStdString()), fileName);
+      if (anonymous)
+        new_doc = new DocumentItem(Parser::Sbml::importModel(fileName.toStdString()));
+      else
+        new_doc = new DocumentItem(Parser::Sbml::importModel(fileName.toStdString()), fileName);
     } else if (ModelFormatQuestion::SBMLSH_MODEL == format) {
-      new_doc = new DocumentItem(Parser::Sbmlsh::importModel(fileName.toStdString()), fileName);
+      if (anonymous)
+        new_doc = new DocumentItem(Parser::Sbmlsh::importModel(fileName.toStdString()));
+      else
+        new_doc = new DocumentItem(Parser::Sbmlsh::importModel(fileName.toStdString()), fileName);
     }
     // Add new document to tree:
     if (0 != new_doc) {
       docTree()->addDocument(new_doc);
-      addRecentModel(fileName);
-      updateRecentModelsMenu();
+      if (! anonymous) {
+        addRecentModel(fileName);
+        updateRecentModelsMenu();
+      }
       return;
     }
   } catch (iNA::Parser::ParserError &err) {
@@ -373,11 +396,11 @@ void Application::onExportModel()
     if ("SBML (*.xml *.sbml)" == selected_filter) {
       QFileInfo info(filename);
       if ( ("xml" != info.suffix()) && ("sbml" != info.suffix()) ) { filename.append(".xml"); }
-      Parser::Sbml::exportModel(document->getModel(), filename.toStdString());
+      Parser::Sbml::exportModel(document->getModel(), filename.toLocal8Bit().data());
     } else if ("SBML-sh (*.mod *.sbmlsh)" == selected_filter){
       QFileInfo info(filename);
       if ( ("mod" != info.suffix()) && ("sbmlsh" != info.suffix()) ) { filename.append(".sbmlsh"); }
-      Parser::Sbmlsh::exportModel(document->getModel(), filename.toStdString());
+      Parser::Sbmlsh::exportModel(document->getModel(), filename.toLocal8Bit().data());
     } else {
       QMessageBox::critical(0, tr("Can not export model"), tr("Unkown file type: %1").arg(selected_filter));
     }
@@ -412,19 +435,27 @@ void Application::onCloseAll()
   }
 
   resetSelectedItem();
-
 }
+
 
 void Application::onEditModel()
 {
+  // Get selected document item.
   DocumentItem *document = 0;
-
-// redundant:  if (0 == _selected_item) { return; }
-  if (0 == (document = dynamic_cast<DocumentItem *>(getParentDocumentItem(_selected_item)))) { return; }
+  if (0 == (document = dynamic_cast<DocumentItem *>(getParentDocumentItem(_selected_item)))) {
+    return;
+  }
 
   // Create model editor dialog:
   SbmlshEditorDialog dialog;
-  dialog.setModel(document->getModel());
+  // Set model
+  iNA::Ast::Model &model = document->getModel();
+  dialog.setModel(model);
+  // Get and set window title:
+  QString window_title(model.getIdentifier().c_str());
+  if (model.hasName()) { window_title = model.getName().c_str(); }
+  dialog.setWindowTitle(QString("edit - %1").arg(window_title));
+  // RUN
   if (QDialog::Accepted != dialog.exec()) { return; }
 
   // Obtain model from dialog
@@ -438,15 +469,16 @@ void Application::onEditModel()
 void Application::onExpandRevReactions()
 {
   DocumentItem *document = 0;
-
-// redundant:  if (0 == _selected_item) { return; }
-  if (0 == (document = dynamic_cast<DocumentItem *>(getParentDocumentItem(_selected_item)))) { return; }
+  // If no model is selected:
+  if (0 == (document = dynamic_cast<DocumentItem *>(getParentDocumentItem(_selected_item)))) {
+    return;
+  }
+  // Get model
   iNA::Ast::Model &model = document->getModel();
-
+  // Expand reversible reactions
   iNA::Trafo::ReversibleReactionConverter converter; converter.apply(model);
-
+  // Update tree model
   docTree()->resetCompleteTree();
-
 }
 
 void Application::onCombineIrrevReactions()

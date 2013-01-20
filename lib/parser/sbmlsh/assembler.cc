@@ -143,6 +143,10 @@ Assembler::processModel(Parser::ConcreteSyntaxTree &model)
 void
 Assembler::linkModel(ConcreteSyntaxTree &model)
 {
+  // Some species might be scaled once the model is parsed to match units. This can only be
+  // perfromed on the final model.
+  Trafo::VariableScaling scaleing;
+
   // If there are parameter definitions...
   if (model[4].matched()) {
     // link initial values of parameters:
@@ -157,13 +161,16 @@ Assembler::linkModel(ConcreteSyntaxTree &model)
 
   // If there are species definitions...
   if (model[3].matched()) {
-    linkSpeciesDefinition(model[3][0][1][2]);
+    linkSpeciesDefinition(model[3][0][1][2], scaleing);
   }
 
   // If there are reaction definitions...
   if (model[6].matched()) {
     linkReactionDefinitions(model[6][0][1][2]);
   }
+
+  // Now scale the species:
+  _model.apply(scaleing);
 }
 
 
@@ -450,7 +457,7 @@ Assembler::processSpeciesDefinition(Parser::ConcreteSyntaxTree &spec)
 
   // Parse modifier:
   if (spec[5].matched()) {
-    processSpeciesModifierList(spec[5], has_substance_units, has_boundary_condition, is_constant);
+    processSpeciesModifierList(spec[5][0], has_substance_units, has_boundary_condition, is_constant);
   }
 
   // Check species modifier:
@@ -480,16 +487,23 @@ Assembler::processSpeciesDefinition(Parser::ConcreteSyntaxTree &spec)
 
 
 void
-Assembler::linkSpeciesDefinition(Parser::ConcreteSyntaxTree &spec)
+Assembler::linkSpeciesDefinition(Parser::ConcreteSyntaxTree &spec, Trafo::VariableScaling &scaleing)
 {
-  std::string compartment_id = _lexer[spec[0].getTokenIdx()].getValue();
   std::string identifier;
   GiNaC::ex initial_value;
-  bool has_substance_units=false; bool has_boundary_condition=false; bool is_constant=false;
+
+  // Default species flags
+  bool has_substance_units=false, has_boundary_condition=false, is_constant=false;
+  // If initial value species is given in concentrations or amount (default).
   bool has_initial_amount=true;
+  // Determine if species are defined globally in amount
   bool species_have_substance_units = _model.speciesHaveSubstanceUnits();
 
+  // Get compartment compartment of species
+  std::string compartment_id = _lexer[spec[0].getTokenIdx()].getValue();
   Ast::Compartment *compartment = _model.getCompartment(compartment_id);
+
+  // Get species ID an determine if its initial value is in amount or concentraion
   if (0 == spec[2].getAltIdx()) {
     identifier = _lexer[spec[2][0][1].getTokenIdx()].getValue();
     has_initial_amount = false;
@@ -497,13 +511,17 @@ Assembler::linkSpeciesDefinition(Parser::ConcreteSyntaxTree &spec)
     identifier = _lexer[spec[2][0].getTokenIdx()].getValue();
     has_initial_amount = true;
   }
+  // Get species instance
+  Ast::Species *species = _model.getSpecies(identifier);
 
   // parse initial value:
   Parser::Expr::ScopeContext context(&_model);
   Parser::Expr::Assembler expr_assembler(context, _lexer);
   initial_value = expr_assembler.processExpression(spec[4]);
+
+  // Get species modifiers
   if (spec[5].matched()) {
-    processSpeciesModifierList(spec[5], has_substance_units, has_boundary_condition, is_constant);
+    processSpeciesModifierList(spec[5][0], has_substance_units, has_boundary_condition, is_constant);
   }
 
   // Check for boundary condition modifier:
@@ -513,24 +531,36 @@ Assembler::linkSpeciesDefinition(Parser::ConcreteSyntaxTree &spec)
     throw err;
   }
 
-  // Unit voodoo...
-  if (species_have_substance_units) {
-    if (! has_initial_amount) {
-      initial_value = initial_value * compartment->getSymbol();
-    }
-  } else {
-    if (has_initial_amount) {
-      initial_value = initial_value / compartment->getSymbol();
-    }
+  // First step, ensure that the initial value is consistent with the species flags.
+  // This means, if the species has only substance units, the initial value is scaled to be in
+  // substance units also:
+  if (has_substance_units && (! has_initial_amount)) {
+    // Species has substance units but an initial concentration is given!
+    initial_value = initial_value * compartment->getSymbol();
+  } else if ((! has_substance_units) && (has_initial_amount)) {
+    // Species has concentration units but an initial amount is given:
+    initial_value = initial_value / compartment->getSymbol();
   }
 
   // Set initial value
-  Ast::Species *species = _model.getSpecies(identifier);
   species->setValue(initial_value);
+
+  // Second step, the species initial value is now consistent with the species modifier flags.
+  // Now, it has to be ensured, that the species is defined in substance units if the model is
+  // defined in substance units. This also means that all occurences of the species must be
+  // scaled accordingly. This can only be done, once the complete model is parsed. Therefore
+  // the scaleing is stored in a @c VariableScaleing class to be applied later.
+  if (species_have_substance_units && (! has_substance_units)) {
+    // The model is defined in substance units but the species has concentration units:
+    scaleing.add(species->getSymbol(), compartment->getSymbol());
+  } else if ((!species_have_substance_units) && has_substance_units) {
+    // The model is defined in concentration units but the species has substance units:
+    scaleing.add(species->getSymbol(), 1/compartment->getSymbol());
+  }
 
   // Handle remaining species definition:
   if (spec[7].matched()) {
-    linkSpeciesDefinition(spec[7][0][1]);
+    linkSpeciesDefinition(spec[7][0][1], scaleing);
   }
 }
 
@@ -547,17 +577,22 @@ Assembler::processSpeciesModifierList(Parser::ConcreteSyntaxTree &spec_mod,
   std::string modifier = token.getValue();
 
   for (size_t i=0; i<modifier.size(); i++) {
-    if (modifier == "s") {
+    switch (modifier[i]) {
+    case 's':
       has_substance_units = true;
-    } else if (modifier == "b") {
+      break;
+    case 'b':
       has_boundary_condition = true;
-    } else if (modifier == "c") {
+      break;
+    case 'c':
       is_constant = true;
-    } else {
+      break;
+    default: {
       SBMLParserError err;
       err << "Can not parse SBML SH @ line " << token.getLine()
-          << ": Invalid species modifier " << modifier << ", expected s,b or c";
+          << ": Invalid species modifier " << modifier << ", expected s, b or c";
       throw err;
+    }
     }
   }
 

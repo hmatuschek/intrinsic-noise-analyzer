@@ -31,7 +31,6 @@ Ast::Model *importModel(const std::string &filename);
 void exportModel(Ast::Model &model, std::ostream &stream);
 
 /** Exports the given @c Ast::Model as SBML-sh into the given file.
- *
  * If the file does not exist, it will be created otherwise it will be overridden.
  * @ingroup modelio */
 void exportModel(Ast::Model &model, const std::string &filename);

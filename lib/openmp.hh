@@ -4,7 +4,6 @@
 #include <cstdlib>
 #include <omp.h>
 
-
 /**
  * Simple wrapper class to encapsulate OpenMP.
  *

@@ -7,6 +7,7 @@
 #include <parser/lexer.hh>
 #include <parser/production.hh>
 #include <parser/expr/assembler.hh>
+#include <trafo/variablescaling.hh>
 
 
 
@@ -72,7 +73,7 @@ protected:
   /** Handles a list species definition. */
   void processSpeciesDefinition(iNA::Parser::ConcreteSyntaxTree &spec);
   /** Parses the initial value of species definitions. */
-  void linkSpeciesDefinition(iNA::Parser::ConcreteSyntaxTree &spec);
+  void linkSpeciesDefinition(iNA::Parser::ConcreteSyntaxTree &spec, Trafo::VariableScaling &scaleing);
   /** Handles a list of species modifiers. */
   void processSpeciesModifierList(iNA::Parser::ConcreteSyntaxTree &spec_mod, bool &has_substance_units,
                                   bool &has_boundary_condition, bool &is_constant);

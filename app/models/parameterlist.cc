@@ -1,6 +1,7 @@
 #include "parameterlist.hh"
 #include "exception.hh"
 #include "parser/expr/parser.hh"
+#include "parser/unit/unitparser.hh"
 #include "utils/logger.hh"
 #include "../tinytex/tinytex.hh"
 #include "../tinytex/ginac2formula.hh"
@@ -53,6 +54,7 @@ ParameterList::setData(const QModelIndex &index, const QVariant &value, int role
   case 0: success = _updateIdentifier(param, value); break;
   case 1: success = _updateName(param, value); break;
   case 2: success = _updateInitialValue(param, value); break;
+  case 3: success = _updateUnit(param, value); break;
   case 4: success = _updateConstFlag(param, value); break;
   default: break;
   }
@@ -76,8 +78,9 @@ ParameterList::flags(const QModelIndex &index) const
   if (columnCount() <= index.column()) return Qt::NoItemFlags;
   if (rowCount() <= index.row()) return Qt::NoItemFlags;
 
-  // Mark only column 1 & 2 editable
-  if ( (0 == index.column()) || (1 == index.column()) || (2 == index.column()) ) item_flags |= Qt::ItemIsEditable;
+  // Mark only column 1, 2, 3 & 4 editable
+  if ( (0 == index.column()) || (1 == index.column()) || (2 == index.column()) || (3== index.column()))
+    item_flags |= Qt::ItemIsEditable;
 
   return item_flags;
 }
@@ -177,12 +180,24 @@ ParameterList::_updateIdentifier(iNA::Ast::Parameter *param, const QVariant &val
   // Get ID
   QString qid = value.toString();
   std::string id = qid.toStdString();
+
   // If nothing changed -> done.
   if (id == param->getIdentifier()) { return true; }
+
   // Check ID format
-  if (! QRegExp("[a-zA-Z_][a-zA-Z0-9_]*").exactMatch(qid)) { return false; }
+  if (! QRegExp("[a-zA-Z_][a-zA-Z0-9_]*").exactMatch(qid)) {
+    QMessageBox::warning(0, tr("Can not set identifier"),
+                         tr("Identifier \"%1\" has invalid format.").arg(qid));
+    return false;
+  }
+
   // Check if id is not assigned allready:
-  if (_model->hasDefinition(id)) { return false; }
+  if (_model->hasDefinition(id)) {
+    QMessageBox::warning(0, tr("Can not set identifier"),
+                         tr("Identifier \"%1\" is already in use.").arg(qid));
+    return false;
+  }
+
   // Ok, assign identifier:
   _model->resetIdentifier(param->getIdentifier(), id);
   return true;
@@ -239,9 +254,14 @@ ParameterList::_updateInitialValue(iNA::Ast::Parameter *param, const QVariant &v
   GiNaC::ex new_value;
   try { new_value = iNA::Parser::Expr::parseExpression(expression, _model); }
   catch (iNA::Exception &err) {
+    // Log message
     iNA::Utils::Message msg = LOG_MESSAGE(iNA::Utils::Message::INFO);
     msg << "Can not parse expression: " << expression << ": " << err.what();
     iNA::Utils::Logger::get().log(msg);
+    // Show message:
+    QMessageBox::warning(
+          0, tr("Can not set initial value"),
+          tr("Can not parse expression \"%1\": %2").arg(value.toString(), err.what()));
     return false;
   }
   // Set new "value"
@@ -252,11 +272,47 @@ ParameterList::_updateInitialValue(iNA::Ast::Parameter *param, const QVariant &v
 QVariant
 ParameterList::_getUnit(iNA::Ast::Parameter *param, int role) const
 {
-  if ((Qt::DecorationRole != role)) { return QVariant(); }
-
-  UnitRenderer renderer(param->getUnit());
-  return renderer.toPixmap();
+  if (Qt::DecorationRole == role) {
+    // Render unit as pixmap
+    UnitRenderer renderer(param->getUnit());
+    return renderer.toPixmap();
+  } else if (Qt::EditRole == role) {
+    // Serialize unit to string:
+    return QString(iNA::Parser::Unit::UnitParser::write(param->getUnit()).c_str());
+  }
+  // Unknown role:
+  return QVariant();
 }
+
+bool
+ParameterList::_updateUnit(iNA::Ast::Parameter *param, const QVariant &value)
+{
+  // If unit expression is empty -> set to dimensionless:
+  if (0 == value.toString().size()) {
+    param->setUnit(iNA::Ast::Unit::dimensionless());
+    return true;
+  }
+
+  // Parse Unit;
+  iNA::Ast::Unit unit;
+  try {
+    unit = iNA::Parser::Unit::UnitParser::parse(value.toString().toStdString());
+  } catch (iNA::Exception &err) {
+    // Log message
+    iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::WARN);
+    message << "Can not parse unit expression: " << err.what();
+    iNA::Utils::Logger::get().log(message);
+    // Show message
+    QMessageBox::warning(
+          0, tr("Can not parse unit expression"),
+          tr("Can not parse unit expression \"%1\": %2").arg(value.toString(), err.what()));
+    return false;
+  }
+  // Set parsed unit and signal success:
+  param->setUnit(unit);
+  return true;
+}
+
 
 QVariant
 ParameterList::_getConstFlag(iNA::Ast::Parameter *param, int role) const {

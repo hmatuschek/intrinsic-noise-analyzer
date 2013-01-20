@@ -83,6 +83,9 @@ public slots:
   /** Checks if a new version of iNA is available. */
   void checkForNewVersion();
 
+  /** Opens a model specified by the given path. */
+  void importModel(const QString &path, bool anonymous=false);
+
 public:
   /** Shuts the only running application instance down. */
   static void shutdown();
@@ -97,7 +100,7 @@ private slots:
   /** Handler for the "import model" menu action. */
   void onImportModel();
   /** Slot to import a certain model. */
-  void onImportModel(const QString &path);
+  void onImportModel(const QString &path, bool anonymous=false);
   /** Handler for "export model" action. */
   void onExportModel();
   /** Handler for "remove model" action. */

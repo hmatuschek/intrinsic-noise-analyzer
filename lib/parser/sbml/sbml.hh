@@ -17,7 +17,8 @@ void importModel(Ast::Model &model, const std::string &filename);
  * @ingroup modelio */
 Ast::Model *importModel(const std::string &filename);
 
-/** Exports an @c Ast::Model into the given file as SBML. */
+/** Exports an @c Ast::Model into the given file as SBML.
+ * @ingroup modelio */
 void exportModel(Ast::Model &model, const std::string &filename);
 
 }

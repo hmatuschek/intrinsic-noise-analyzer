@@ -1,10 +1,12 @@
 
 SET(ina_CLI_SOURCES 
     ina_cli.cc ina_cli_steadystate.cc ina_cli_importmodel.cc ina_cli_fileextension.cc
-    ina_cli_listmodel.cc ina_cli_paramscan.cc ina_cli_savetable.cc ina_cli_ssetimecourse.cc)
+    ina_cli_listmodel.cc ina_cli_paramscan.cc ina_cli_savetable.cc ina_cli_ssetimecourse.cc
+    ina_cli_utils.cc ina_cli_ssa.cc)
 SET(ina_CLI_HEADERS
     ina_cli.hh ina_cli_steadystate.hh ina_cli_importmodel.hh ina_cli_fileextension.hh
-    ina_cli_listmodel.hh ina_cli_paramscan.hh ina_cli_savetable.hh ina_cli_ssetimecourse.hh)
+    ina_cli_listmodel.hh ina_cli_paramscan.hh ina_cli_savetable.hh ina_cli_ssetimecourse.hh
+    ina_cli_utils.hh ina_cli_ssa.hh)
 
 ADD_EXECUTABLE(ina-cli ${ina_CLI_SOURCES})
 TARGET_LINK_LIBRARIES(ina-cli ${LIBS} libina)

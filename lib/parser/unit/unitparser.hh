@@ -62,7 +62,6 @@ protected:
   public:
     /** Constructor. */
     Lexer(std::istream &input);
-
   };
 
   /** Simple token rule to lex floating point numbers w/o sign. */

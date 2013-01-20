@@ -188,23 +188,6 @@ Parser::Sbml::__process_model(LIBSBML_CPP_NAMESPACE_QUALIFIER Model *model, Pars
     }
     Ast::VariableDefinition *var = ctx.model().getVariable(sbml_assignment->getId());
     var->setValue(__process_expression(sbml_assignment->getMath(), ctx));
-
-    // Initial values of species must be handled separately:
-    if (Ast::Node::isSpecies(var)) {
-      // Cast to Ast::Species:
-      Ast::Species *species = static_cast<Ast::Species *>(var);
-      // Get SBML species by id
-      LIBSBML_CPP_NAMESPACE_QUALIFIER Species *sbml_species = model->getSpecies(var->getIdentifier());
-      // Is model in substance or concentration units?
-      bool species_have_substance_units = ctx.model().speciesHaveSubstanceUnits();
-      if (sbml_species->getHasOnlySubstanceUnits() && (! species_have_substance_units)) {
-        // Initial value vas given in substance units but model has concentration units:
-        species->setValue(species->getValue()/species->getCompartment()->getSymbol());
-      } else if (species_have_substance_units){
-        // Initial value was given in concentrations but model is in substance units:
-        species->setValue(species->getValue()*species->getCompartment()->getSymbol());
-      }
-    }
   }
 
   /* Process rules for variables: */
@@ -285,19 +268,22 @@ Parser::Sbml::__process_species_definition(
   Ast::Compartment *compartment = ctx.model().getCompartment(node->getCompartment());
 
   /* Second, process unit and initial value of species. */
-  bool species_have_substance_units = ctx.model().speciesHaveSubstanceUnits();
-  Ast::Unit substance_unit = ctx.model().getSubstanceUnit();
+  bool model_has_substance_units = ctx.model().speciesHaveSubstanceUnits();
+  bool species_has_substance_units = node->getHasOnlySubstanceUnits();
+  Ast::Unit model_substance_unit = ctx.model().getSubstanceUnit();
 
-  /* Setup initial value. */
+  /* Setup initial value. It is ensured that the initial value is an amount if the species is
+   * defined to have substance units and concentration if the species is defined to have
+   * concentration units. */
   GiNaC::ex init_value;
   if (node->isSetInitialAmount()) {
-    if (species_have_substance_units) {
+    if (species_has_substance_units) {
       init_value = GiNaC::numeric(node->getInitialAmount());
     } else {
       init_value = GiNaC::numeric(node->getInitialAmount())/compartment->getSymbol();
     }
   } else if (node->isSetInitialConcentration()){
-    if (species_have_substance_units) {
+    if (species_has_substance_units) {
       init_value = GiNaC::numeric(node->getInitialConcentration())*compartment->getSymbol();
     } else {
       init_value = GiNaC::numeric(node->getInitialConcentration());
@@ -308,29 +294,58 @@ Parser::Sbml::__process_species_definition(
   Ast::Species *species = new Ast::Species(node->getId(), init_value, compartment, node->getName(),
                                            node->getConstant());
 
-  // Now, init_value is now given in a proper from either as substance or as concentration
-  // depending on whether species_have_substance_units is set to true or not (globally)
-  // Finally we must check if the substance unit defined with the species matches the default
-  // substance unit. If not the species must be scaled:
-  if (node->isSetUnits() && !(substance_unit == ctx.model().getUnit(node->getUnits()))) {
-    Ast::Unit old_unit = ctx.model().getUnit(node->getUnits());
-    Ast::Unit scale = old_unit/substance_unit; double factor;
-    if (scale.isDimensionless()) {
-      factor = scale.getMultiplier(); factor *= std::pow(10., scale.getScale());
-    } else if (2 == scale.size() && scale.hasVariantOf(Ast::ScaledBaseUnit::MOLE, 1) &&
-               scale.hasVariantOf(Ast::ScaledBaseUnit::ITEM, -1)) {
-      factor = scale.getMultiplier(); factor *= std::pow(10., scale.getScale());
-      factor *= constants::AVOGADRO;
-    } else if (2 == scale.size() && scale.hasVariantOf(Ast::ScaledBaseUnit::MOLE, -1) &&
-               scale.hasVariantOf(Ast::ScaledBaseUnit::ITEM, 1)) {
-      factor = scale.getMultiplier(); factor *= std::pow(10., scale.getScale());
-      factor /= constants::AVOGADRO;
+  /* Now, init_value is now given in a unit corresponding to the unit specified in the species
+   * definition. While SBML allows to specify species specific units the species itself might be
+   * scaled to match the global units of the model. */
+  // by default the subtance unit of the species is the global substance unit
+  Ast::Unit species_substance_unit = model_substance_unit;
+  // If the species has its own unit
+  if (node->isSetUnits()) {
+    // Get unit defined for species:
+    species_substance_unit = ctx.model().getUnit(node->getUnits());
+  }
+
+  // Get the factor that scales the species substance unit into the model substance unit
+  GiNaC::ex factor = 1;
+  if (species_substance_unit != model_substance_unit) {
+    // The quotient of the model substance units and the species substance unit.
+    Ast::Unit quotient = model_substance_unit/species_substance_unit;
+    // If the quotient is a number -> use the number as a factor to scale the species:
+    if (! quotient.isDimensionless()) {
+      factor = factor * quotient.getMultiplier();
+      factor = factor * GiNaC::pow(10, quotient.getScale());
+    } else if ((2==quotient.size()) && quotient.hasVariantOf(Ast::ScaledBaseUnit::MOLE, 1) &&
+        quotient.hasVariantOf(Ast::ScaledBaseUnit::ITEM, -1)) {
+      // Quotient is linear scaleing of MOLE/#
+      factor = factor * quotient.getMultiplier();
+      factor = factor * GiNaC::pow(10, quotient.getScale());
+      factor = factor * constants::AVOGADRO;
+    } else if ((2==quotient.size()) && quotient.hasVariantOf(Ast::ScaledBaseUnit::MOLE, -1) &&
+              quotient.hasVariantOf(Ast::ScaledBaseUnit::ITEM, 1)) {
+      // Quotient is linear scaleing of #/MOLE
+      factor = factor * quotient.getMultiplier();
+      factor = factor * GiNaC::pow(10, quotient.getScale());
+      factor = factor / constants::AVOGADRO;
     } else {
+      // Unknown quotient
       TypeError err;
-      err << "Can not rescale species with unit " << old_unit.dump()
-          << ". Can not be traslated into unit " << substance_unit.dump();
+      err << "Can not rescale species with unit " << species_substance_unit.dump()
+          << ". Can not be traslated into unit " << model_substance_unit.dump();
       throw err;
     }
+  }
+
+  // Finally, if the species is defined in concentrations and the model in substance units,
+  // scale species accordingly. Also the other way around, if the species is defined in substance
+  // units and the model is defined in concentration units.
+  if (model_has_substance_units && (! species_has_substance_units)) {
+    factor = factor * species->getCompartment()->getSymbol();
+  } else if ( (!model_has_substance_units) && species_has_substance_units) {
+    factor = factor / species->getCompartment()->getSymbol();
+  }
+
+  // if the species needs to be rescaled:
+  if (1 != factor) {
     subst.add(species->getSymbol(), factor);
   }
 

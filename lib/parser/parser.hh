@@ -17,5 +17,6 @@
 #include "expr/parser.hh"
 #include "sbml/sbml.hh"
 #include "sbmlsh/sbmlsh.hh"
+#include "unit/unitparser.hh"
 
 #endif // __INA_PARSER_PARSER_HH__

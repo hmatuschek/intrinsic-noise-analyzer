@@ -54,15 +54,11 @@
 
 namespace iNA {
 
-/**
- * This is a 64-bit version of Mersenne Twister pseudo random number
+/** This is a 64-bit version of Mersenne Twister pseudo random number
  * generator.
  *
- * Before using, initialize the state by using init_genrand64(seed)
- * or init_by_array64(init_key, key_length).
- *
- * @ingroup math
- */
+ * Before using, initialize the state by calling @c seed.
+ * @ingroup math */
 class MersenneTwister
 {
 private:
@@ -85,9 +81,7 @@ private:
 
 
 public:
-  /**
-   * Constructor with seed.
-   */
+  /** Constructor with seed. */
   MersenneTwister(uint64_t seed)
     : mti(NN+1)
   {
@@ -95,7 +89,7 @@ public:
   }
 
   /**
-   * Constructor w/o seed, needs explicit call to @c seed().
+   * Constructor w/o seed, needs explicit call to @c seed.
    */
   MersenneTwister()
     : mti(NN+1)
@@ -105,7 +99,6 @@ public:
 
   /**
    * Copy-constructor. Also copies the internal state of the RNG.
-   *
    * The copy will then generate the same random numbers as the original.
    */
   MersenneTwister(const MersenneTwister &other)
@@ -114,9 +107,7 @@ public:
     memcpy(this->mt, other.mt, sizeof(uint64_t)*NN);
   }
 
-  /**
-   * Assignment operator, copies the state of the RHS.
-   */
+  /** Assignment operator, copies the state of the RHS. */
   const MersenneTwister &
   operator =(const MersenneTwister &other)
   {
@@ -126,9 +117,7 @@ public:
     return *this;
   }
 
-  /**
-   * Initializes the RNG with given seed.
-   */
+  /** Initializes the RNG with given seed. */
   void seed(uint64_t seed)
   {
     mt[0] = seed;
@@ -137,9 +126,7 @@ public:
     }
   }
 
-  /**
-   * Initializes the RNG with vector seed.
-   */
+  /** Initializes the RNG with vector seed. */
   void seed(uint64_t init_key[], size_t key_length)
   {
     seed(19650218ULL);
@@ -164,9 +151,7 @@ public:
     mt[0] = 1ULL << 63; /* MSB is 1; assuring non-zero initial array */
   }
 
-  /**
-   * Returns an unsigned 64bit integer random number.
-   */
+  /** Returns an unsigned 64bit integer random number. */
   inline uint64_t rand_int()
   {
     size_t i;

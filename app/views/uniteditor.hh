@@ -4,8 +4,31 @@
 #include <QStackedWidget>
 #include <QLabel>
 #include <QLineEdit>
+#include "unitrenderer.hh"
 
 #include <ast/unitdefinition.hh>
+
+
+/** A trivial display widget for rendered units. */
+class UnitDisplayWidget: public QLabel
+{
+  Q_OBJECT
+
+public:
+  /** Constructor. */
+  explicit UnitDisplayWidget(const iNA::Ast::Unit &unit, QWidget *parent=0);
+
+  /** Updates the unit. */
+  void setUnit(const iNA::Ast::Unit &unit);
+
+protected:
+  /** Renders the unit. */
+  virtual void paintEvent(QPaintEvent *event);
+
+private:
+  /** Holds the unit renderer for the current unit. */
+  UnitRenderer _renderer;
+};
 
 
 /** Simple Unit display & editor widget. */
@@ -41,7 +64,7 @@ private:
   /** Holds the current unit. */
   iNA::Ast::Unit _unit;
   /** The unit display widget. */
-  QLabel *_unitDisplay;
+  UnitDisplayWidget *_unitDisplay;
   /** The unit editor widget. */
   QLineEdit *_unitEditor;
 

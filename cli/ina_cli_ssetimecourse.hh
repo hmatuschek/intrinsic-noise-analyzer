@@ -5,7 +5,7 @@
 
 int performRETimecourseAnalysis(iNA::Utils::Opt::Parser &option_parser);
 int performLNATimecourseAnalysis(iNA::Utils::Opt::Parser &option_parser);
-int performEMRETimecourseAnalysis(iNA::Utils::Opt::Parser &option_parser);
+int performIOSTimecourseAnalysis(iNA::Utils::Opt::Parser &option_parser);
 
 
 #endif // INA_CLI_SSETIMECOURSE_HH
