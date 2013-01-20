@@ -510,7 +510,7 @@ public:
       moments(i)*=pow(L,-i);
 
     size_t M = moments.size();
-    size_t N = domain.size();
+    //size_t N = domain.size();
 
     // Initialize x^n
     Eigen::MatrixXd function(domain.size(),M);
