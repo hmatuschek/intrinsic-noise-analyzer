@@ -215,50 +215,45 @@ public:
       Eigen::VectorXd nablaf;
       Eigen::VectorXd dx;
 
-      // Evaluate ODEs
-      this->interpreter.run(conc,this->ODEs);
-
       // Dimension
       size_t dim = conc.size();
 
-      // Calc max step
+      // Calculate maximum step size heuristic
       const double stpmax=this->parameters.STPMX*std::max(conc.norm(),double(dim));
 
-
+      // Do Newton iteration
       for(this->iterations=1;this->iterations<parameters.maxIterations;this->iterations++)
       {
-
-          // evaluate rate equations
-          this->interpreter.run(conc,this->ODEs);
 
           conc_old = conc;
 
           LineSearchStatus lcheck = newtonStep(conc_old,conc,stpmax);
 
-          if (!(conc.array()>0).all())
+          if ((conc.array()<0).any())
           {
               conc = conc_old;
               return NegativeValues;
           }
 
-          // test for convergence of REs
+          // Test for convergence of ODEs
           if ( maxNorm(this->ODEs) < this->parameters.TOLF )
           {
              return Success;
           }
 
-          // check linesearch
+          // Check linesearch
           switch(lcheck)
           {
             case Converged:
               return Success;
             case RoundOffProblem:
             case LineSearchFailed:
-              conc = conc_old; return IterationFailed;
+              conc = conc_old;
+              return IterationFailed;
             default: break;
           }
 
-          // test for convergence of dx
+          // Test for convergence of update vector dx
           test = 0.;
           for(size_t i=0;i<dim;i++)
           {
@@ -291,23 +286,23 @@ public:
       Eigen::VectorXd nablaf;
       Eigen::VectorXd dx;
 
-      // construct Jacobian matrix
+      // Construct Jacobian matrix
       this->interpreter.run(inState,this->ODEs);
       this->jacobian_interpreter.run(inState,this->JacobianM);
 
-      // compute f to minimize
+      // Evaluate objective function f
       f = .5*(this->ODEs.squaredNorm());
-      // calculate steepest descent direction
+      // Calculate steepest descent direction
       nablaf = this->JacobianM.transpose()*this->ODEs;
 
-      // store also old f
+      // Store also old value of objective function f
       fold = f;
 
-      // solve JacobianM*dx=-REs
+      // Solve JacobianM*dx=-REs to obtain the update vector
       dx = precisionSolve(this->JacobianM, -this->ODEs);
 
+      // Perform linesearch
       LineSearchStatus lcheck;
-
       switch(parameters.linesearch)
       {
           case Optimization:
@@ -318,9 +313,13 @@ public:
           default: return Done;
 
       }
-      //< returns new outState and f, also updates REs
+      //< returns new outState and f, also updates ODEs
 
-      // check for spurious convergence of nablaf = 0
+      // Check for NaNs
+      for(int i=0; i<outState.size(); i++)
+        if(std::isnan(outState(i))) return LineSearchFailed;
+
+      // Check for spurious convergence of nablaf = 0
       if (lcheck==LineSearchFailed) {
          test = 0.0;
          den = std::max(f,0.5*double(dim));
@@ -331,7 +330,9 @@ public:
          }
 
          if(test < this->parameters.TOLMIN)
+         {
              return LineSearchFailed;
+         }
          else
          {
              return Converged;
@@ -408,7 +409,7 @@ public:
 
       // first do newton step
       lambda   = 1.0;
-      for(;;){
+      for(int it=0;;it++){
 
           x = xold+lambda*dx;
 
@@ -450,6 +451,8 @@ public:
           lambda2 = lambda;
           f2 = f;
           lambda = std::max(tmplambda,0.1*lambda);
+
+          if(it>100000)return LineSearchFailed;
 
       }
 

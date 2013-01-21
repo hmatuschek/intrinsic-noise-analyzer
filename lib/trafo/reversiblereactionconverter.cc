@@ -12,9 +12,9 @@ void ReversibleReactionConverter::apply(Ast::Model &model)
 
   // Iterate over all reactions:
   for (Ast::Model::ReactionIterator it=model.reactionsBegin(); it!=model.reactionsEnd(); it++)
-  //for (size_t i=0; i<model.numReactions(); i++)
   {
-      Ast::Reaction *reaction = (*it);
+    // Get reaction:
+    Ast::Reaction *reaction = (*it);
 
     // Check if reaction is reversible:
     if (! reaction->isReversible()) { continue; }
@@ -121,39 +121,38 @@ void IrreversibleReactionCollapser::apply(Ast::Model &model)
   // Iterate over all reactions:
   for (Ast::Model::ReactionIterator it=model.reactionsBegin(); it!=model.reactionsEnd(); it++)
   {
-      Ast::Reaction *forward = (*it);
+    // Get reaction
+    Ast::Reaction *forward = (*it);
 
     // Skip if reaction is reversible:
-    if ( forward->isReversible()) { continue; }
+    if (forward->isReversible()) { continue; }
 
+    // Search for the reverse direction:
     for (Ast::Model::ReactionIterator other=(it+1); other!=model.reactionsEnd(); other++)
     {
+      Ast::Reaction *reverse = (*other);
 
-        Ast::Reaction *reverse = (*other);
+      // Do comparison
+      if(forward->isReverseOf(reverse))
+      {
+        // Make reversible
+        forward->setReversible(true);
+        Ast::ModelCopyist::mergeReversibleKineticLaw(forward->getKineticLaw(),reverse->getKineticLaw());
 
-        // Do comparison
-        if(forward->isReverseOf(reverse))
+        // and remove reverse reaction
+        model.remDefinition(reverse);
+
+        // Create a log message.
         {
-
-            // Make reversible
-            forward->setReversible(true);
-            Ast::ModelCopyist::mergeReversibleKineticLaw(forward->getKineticLaw(),reverse->getKineticLaw());
-
-            // and remove reverse reaction
-            model.remDefinition(reverse);
-
-            // Create a log message.
-            {
-              Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
-              message << "Collapsed reaction "<<forward->getName()<< " with " << reverse->getName() <<".";
-              Utils::Logger::get().log(message);
-            }
-
-            count++;
-            break;
+          Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
+          message << "Collapsed reaction "<<forward->getName()<< " with " << reverse->getName() <<".";
+          Utils::Logger::get().log(message);
         }
-    }
 
+        // Increment counter and continue with outer loop:
+        count++; break;
+      }
+    }
   }
 
   // Create final log message.

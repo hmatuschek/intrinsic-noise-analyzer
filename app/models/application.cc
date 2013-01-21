@@ -469,15 +469,16 @@ void Application::onEditModel()
 void Application::onExpandRevReactions()
 {
   DocumentItem *document = 0;
-
-// redundant:  if (0 == _selected_item) { return; }
-  if (0 == (document = dynamic_cast<DocumentItem *>(getParentDocumentItem(_selected_item)))) { return; }
+  // If no model is selected:
+  if (0 == (document = dynamic_cast<DocumentItem *>(getParentDocumentItem(_selected_item)))) {
+    return;
+  }
+  // Get model
   iNA::Ast::Model &model = document->getModel();
-
+  // Expand reversible reactions
   iNA::Trafo::ReversibleReactionConverter converter; converter.apply(model);
-
+  // Update tree model
   docTree()->resetCompleteTree();
-
 }
 
 void Application::onCombineIrrevReactions()

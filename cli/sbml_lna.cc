@@ -1,5 +1,6 @@
 #include "sbml_lna.hh"
 #include <parser/sbml/sbml.hh>
+#include "unsupported.hh"
 
 using namespace iNA;
 
@@ -14,7 +15,7 @@ int main(int argc, char *argv[])
   }
 
   // Construct LNA model from SBML model
-  Ast::Model sbml_model; Parser::Sbml::importModel(sbml_model, argv[1]);
+  Ast::Model sbml_model; Parser::Sbmlsh::importModel(sbml_model, argv[1]);
 
   // Do the work:
   //try
@@ -45,7 +46,25 @@ int main(int argc, char *argv[])
 
  //    Just dump all the nice expressions and values:
     steadyState.calcSteadyState(x);
-    //model.fullState(x,concentrations,cov,emre);
+
+
+    Eigen::VectorXd first(model.numSpecies());
+    Eigen::MatrixXd second(model.numSpecies(),model.numSpecies());
+    Eigen::VectorXd third(model.numSpecies());
+    Eigen::VectorXd fourth(model.numSpecies());
+
+    model.getCentralMoments(x,first,second,third,fourth);
+    Eigen::VectorXd cm(4);
+    cm(0) = first(0);
+    cm(1) = second(0);
+    cm(2) = third(0);
+    cm(3) = fourth(0);
+    Eigen::VectorXd ncm=iNA::Models::MaximumEntropyPDF::getNonCentralMoments(cm);
+
+    std::cout << cm.transpose() << std::endl;
+    std::cout << ncm.transpose() << std::endl;
+
+
 
     Eigen::MatrixXd fluxCOV;
     Eigen::MatrixXd fluxIOS;

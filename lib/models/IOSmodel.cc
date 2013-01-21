@@ -470,7 +470,7 @@ IOSmodel::getCentralMoments(const Eigen::VectorXd &state, Eigen::VectorXd &first
     for(size_t i=0; i<this->numSpecies(); i++)
        fourth(i) = 3.*second(i,i)*second(i,i);
 
-    first+=emre;
+    first+=emre+iosemre;
     second+=iosCov;
 
 }

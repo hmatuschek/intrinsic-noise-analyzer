@@ -62,8 +62,6 @@ public:
       : NewtonRaphson<Sys>(system, update, Jacobian), LSODA()
   {
 
-    //parameters.epsilon=epsilon;
-
     this->parameters.maxIterations=100;
 
     istate=1;
@@ -72,7 +70,6 @@ public:
     atolwork = ywork + getDimension() + 1;
     rtolwork = atolwork + getDimension() + 1;
 
-    /* @todo use to define staged errors using the system size */
     for (size_t i = 1; i <= getDimension(); ++i)
     {
         rtolwork[i] = this->parameters.epsilon;
@@ -110,22 +107,10 @@ public:
   solve(Eigen::VectorXd &conc, double maxTime=1.e9, double dt=0.1)
   {
 
-      double test,temp;
-
-      Eigen::VectorXd conc_old;
-
-      Eigen::VectorXd nablaf;
-      Eigen::VectorXd dx;
-
-      // Dimension
-      size_t dim = conc.size();
-
       if(maxTime<dt) maxTime=dt;
 
       for(double t=0.;t<maxTime; t+=dt, dt*=10)
       {
-
-          conc_old = conc;
 
           Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
           message << "Try Newton step ... ";
@@ -146,52 +131,24 @@ public:
 
           Utils::Logger::get().log(message);
 
-          if(lcheck!=Success)
+          if(lcheck==Success)
+          {
+            return Success;
+
+          }
+          else
           {
               Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
               message << "Use integration of duration "<< dt << ".";
               Utils::Logger::get().log(message);
 
-              // Do ODE step
+              // Do ODE step of length dt
               ODEStep(conc,0,dt);
-              // Refine with additional Newton step
-              //NewtonRaphson<Sys>::solve(conc);
 
-              // construct Jacobian matrix
-              this->interpreter.run(conc,this->ODEs);
-              this->jacobian_interpreter.run(conc,this->JacobianM);
-          }
-
-          // test for convergence of derivatives
-          test = 0.;
-          for(size_t i=0;i<dim;i++)
-          {
-              temp = std::abs(this->ODEs(i));
-              if (temp > test) test = temp;
-          }
-          if ( test < this->parameters.TOLF)
-          {
-              NewtonRaphson<Sys>::solve(conc);
-              return Success;
-          }
-
-          // test for convergence of dx
-          test = 0.;
-          for(size_t i=0;i<dim;i++)
-          {
-              temp = (std::abs(conc(i)-conc_old(i)))/std::max(conc(i),1.);
-              if (temp > test) test = temp;
-          }
-          if (test < this->parameters.TOLX)
-          {
-              NewtonRaphson<Sys>::solve(conc);
-              return Success;
           }
 
 
-
-
-      } // next newton iteration
+      } // Next Newton iteration
 
       return MaxIterationsReached;
 }
