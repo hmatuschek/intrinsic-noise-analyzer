@@ -42,7 +42,7 @@ ReactionView::ReactionView(ReactionItem *reaction, QWidget *parent) :
   _remParamButton->setToolTip(tr("Delete parameter"));
   _remParamButton->setEnabled(false);
   _remParamButton->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
-  _makeGlobalButton = new QPushButton(tr("make global"));
+  _makeGlobalButton = new QPushButton(tr("Move to Global Parameters"));
   _makeGlobalButton->setToolTip(tr("Moves the selected parameter into the global scope."));
   _makeGlobalButton->setEnabled(false);
   _makeGlobalButton->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);

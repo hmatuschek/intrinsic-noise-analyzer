@@ -29,6 +29,11 @@ SET(sbml_ssa_SOURCES
 SET(sbml_ssa_HEADERS
     sbml_ssa.hh)
 
+SET(sbml_ssacov_SOURCES
+    sbml_ssacov.cc)
+SET(sbml_ssacov_HEADERS
+    sbml_ssacov.hh)
+
 SET(sbml_pscan_SOURCES
     sbml_pscan.cc)
 SET(sbml_pscan_HEADERS
@@ -42,9 +47,11 @@ SET(sbml_fft_HEADERS
 ADD_EXECUTABLE(sbml_lna ${sbml_lna_SOURCES})
 ADD_EXECUTABLE(sbml_pscan ${sbml_pscan_SOURCES})
 ADD_EXECUTABLE(sbml_ssa ${sbml_ssa_SOURCES})
+ADD_EXECUTABLE(sbml_ssacov ${sbml_ssacov_SOURCES})
 ADD_EXECUTABLE(sbml_fft ${sbml_fft_SOURCES})
 
 TARGET_LINK_LIBRARIES(sbml_lna ${LIBS} libina)
 TARGET_LINK_LIBRARIES(sbml_pscan ${LIBS} libina)
+TARGET_LINK_LIBRARIES(sbml_ssacov ${LIBS} libina)
 TARGET_LINK_LIBRARIES(sbml_ssa ${LIBS} libina libunsupported)
 TARGET_LINK_LIBRARIES(sbml_fft ${LIBS} libina libunsupported)
