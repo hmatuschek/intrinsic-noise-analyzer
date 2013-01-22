@@ -124,6 +124,7 @@ MainWindow::_createMenus()
   this->_analysisMenu->addAction(Application::getApp()->configParameterScanAction());
   this->_analysisMenu->addAction(Application::getApp()->configTimeCourseAction());
   this->_analysisMenu->addAction(Application::getApp()->configSSAAnalysisAction());
+  this->_analysisMenu->addAction(Application::getApp()->configSSAParameterScanAction());
 
   this->_helpMenu = this->menuBar()->addMenu(tr("&Help"));
   this->_helpMenu->addAction(this->_onlineHelp);

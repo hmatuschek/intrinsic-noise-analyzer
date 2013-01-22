@@ -13,6 +13,10 @@
 #include "../paramscan/paramscantaskwrapper.hh"
 #include "../paramscan/paramscanwizard.hh"
 
+#include "../ssaparamscan/ssaparamscantask.hh"
+#include "../ssaparamscan/ssaparamscantaskwrapper.hh"
+#include "../ssaparamscan/ssaparamscanwizard.hh"
+
 #include "../sse/ssewizard.hh"
 #include "../sse/ssetaskconfig.hh"
 #include "../sse/retaskwrapper.hh"
@@ -139,7 +143,10 @@ Application::Application() :
   _parameterScanAction->setStatusTip(tr("Run a parameter scan in steady state using the System Size Expansion (SSE)."));
 
   _ssaAnalysisAction = new QAction(tr("Stochastic Simulation Algorithm (SSA)"), this);
-  _parameterScanAction->setStatusTip(tr("Run a time course analysis using the Stochastic Simulation Algorithm (SSA)."));
+  _ssaAnalysisAction->setStatusTip(tr("Run a time course analysis using the Stochastic Simulation Algorithm (SSA)."));
+
+  _ssaParameterScanAction = new QAction(tr("Time-averaged Parameter Scan (SSA)"), this);
+  _ssaParameterScanAction->setStatusTip(tr("Run a time-averaged parameter scan using the Stochastic Simulation Algorithm (SSA)."));
 
   _recentModelsMenu = new QMenu("Recent models");
   updateRecentModelsMenu();
@@ -157,6 +164,7 @@ Application::Application() :
   QObject::connect(_parameterScanAction, SIGNAL(triggered()), this, SLOT(configParameterScan()));
   QObject::connect(_timeCourseAnalysisAction, SIGNAL(triggered()), this, SLOT(configTimeCourseAnalysis()));
   QObject::connect(_ssaAnalysisAction, SIGNAL(triggered()), this, SLOT(configSSAAnalysis()));
+  QObject::connect(_ssaParameterScanAction, SIGNAL(triggered()), this, SLOT(configSSAParameterScan()));
   QObject::connect(_recentModelsMenu, SIGNAL(triggered(QAction*)), this, SLOT(onOpenRecentModel(QAction*)));
   QObject::connect(&_versionCheck, SIGNAL(newVersionAvailable(QString)), this, SLOT(onNewVersionAvailable(QString)));
 }
@@ -271,6 +279,7 @@ QAction *Application::configSteadyStateAction() { return _steadyStateAction; }
 QAction *Application::configParameterScanAction() { return _parameterScanAction; }
 QAction *Application::configTimeCourseAction() { return _timeCourseAnalysisAction; }
 QAction *Application::configSSAAnalysisAction() { return _ssaAnalysisAction; }
+QAction *Application::configSSAParameterScanAction() { return _ssaParameterScanAction; }
 QMenu   *Application::recentModelsMenu() { return _recentModelsMenu; }
 
 
@@ -541,6 +550,30 @@ Application::configParameterScan()
   docTree()->addTask(
         wizard.getConfigCast<ParamScanTask::Config>().getModelDocument(),
         new ParamScanTaskWrapper(task));
+
+  task->start();
+}
+
+void
+Application::configSSAParameterScan()
+{
+  SSAParamScanWizard wizard(0); wizard.restart();
+  if (QDialog::Accepted != wizard.exec()) { return; }
+
+  // Construct a task from configuration:
+  SSAParamScanTask *task = 0;
+  try {
+    task = new SSAParamScanTask(wizard.getConfigCast<SSAParamScanTask::Config>());
+  } catch (iNA::Exception &err) {
+    QMessageBox::warning(
+          0, tr("Cannot construct parameter scan from model: "), err.what());
+    return;
+  }
+
+  // Add task to application and run it:
+  docTree()->addTask(
+        wizard.getConfigCast<SSAParamScanTask::Config>().getModelDocument(),
+        new SSAParamScanTaskWrapper(task));
 
   task->start();
 }

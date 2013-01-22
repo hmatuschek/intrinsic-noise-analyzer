@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
        model.stats(mean,cov,skew);
 
        outfile << t;
-       for(int i=0; i<model.numSpecies(); i++)
+       for(size_t i=0; i<model.numSpecies(); i++)
             outfile << "\t" << mean(i);
        outfile<<std::endl;
 

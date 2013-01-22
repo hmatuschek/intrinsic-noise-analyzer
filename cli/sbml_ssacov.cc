@@ -15,10 +15,10 @@ int main(int argc, char *argv[])
   }
 
     // Construct SSA model from SBML model
-    Ast::Model sbml_model; Parser::Sbml::importModel(sbml_model, argv[1]);
+    Ast::Model sbml_model; Parser::Sbmlsh::importModel(sbml_model, argv[1]);
     Models::OptimizedSSA model(sbml_model, 1, 1024);
 
-    double min=0.01, max=1.;
+    double min=0., max=2.;
     size_t num = 50;
 
     std::vector<Models::OptimizedSSA*> models(num);
@@ -28,20 +28,20 @@ int main(int argc, char *argv[])
     int i=0;
     for(double p=min; p<=max; p+=(max-min)/num,i++)
     {
-        sbml_model.getParameter(5)->setValue(p);
+        sbml_model.getParameter(7)->setValue(p);
         models[i] = new Models::OptimizedSSA(sbml_model, 1, 1024);
-        models[i]->run(3);
+        models[i]->run(10);
     }
 
     Eigen::VectorXd mean(model.numSpecies());
     Eigen::MatrixXd cov(model.numSpecies(),model.numSpecies());
     Eigen::VectorXd skew(model.numSpecies());
 
-    std::cout<<"Parameter: "<<model.getParameter(5)->getIdentifier()<<std::endl;
+    std::cout<<"Parameter: "<<model.getParameter(7)->getIdentifier()<<std::endl;
 
     double dt=0.1;
     int n=0;
-    for(double t=0;t<100000; t+=dt, n++)
+    for(double t=0;t<1000000; t+=dt, n++)
     {
 
         // average
@@ -58,24 +58,30 @@ int main(int argc, char *argv[])
         }
 
         std::ofstream outfile;
+        std::ofstream fanofile;
         outfile.open ("cov.dat");
+        fanofile.open ("fano.dat");
 
         // write to file
         i=0;
         for(double p=min; p<=max; p+=(max-min)/num, i++)
         {
             outfile << p << "\t";
+            fanofile << p << "\t";
             for(size_t j=0; j<models[i]->numSpecies(); j++)
             {
                 double m = meanVec(i,j)/n;
                 double cc= covVec(i,j)/n-m*m;
                 outfile << std::sqrt(cc)/m << "\t";
+                fanofile << Eigen::ex2double(model.getSpecies(j)->getCompartment()->getValue())*cc/m << "\t";
             }
 
             outfile << std::endl;
+            fanofile << std::endl;
 
         }
         outfile.close();
+        fanofile.close();
 
 
 

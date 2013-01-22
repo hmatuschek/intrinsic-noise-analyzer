@@ -67,6 +67,7 @@ public:
   QAction *configParameterScanAction();
   QAction *configTimeCourseAction();
   QAction *configSSAAnalysisAction();
+  QAction *configSSAParameterScanAction();
 
   /** Returns the recentModelsMenu */
   QMenu *recentModelsMenu();
@@ -119,6 +120,8 @@ private slots:
   void configSteadyState();
   /** Handler to show Parameter Scan Wizard. */
   void configParameterScan();
+  /** Handler to show SSA Parameter Scan Wizard. */
+  void configSSAParameterScan();
   /** Handler to show Time Course Analysis Wizard. */
   void configTimeCourseAnalysis();
   void configSSAAnalysis();
@@ -160,6 +163,7 @@ private:
   QAction *_steadyStateAction;
   QAction *_parameterScanAction;
   QAction *_timeCourseAnalysisAction;
+  QAction *_ssaParameterScanAction;
   QAction *_ssaAnalysisAction;
 
   /** Holds the "recently opened" menu. */

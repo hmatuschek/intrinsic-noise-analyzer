@@ -130,6 +130,15 @@ StochasticSimulator::getState(Eigen::MatrixXd &state)
 
 }
 
+Eigen::MatrixXd
+StochasticSimulator::getState() const
+
+{
+
+    return (observationMatrix*this->Omega.asDiagonal().inverse());
+
+}
+
 
 void
 StochasticSimulator::getHistogram(size_t speciesId,std::map<double,double> &hist)
