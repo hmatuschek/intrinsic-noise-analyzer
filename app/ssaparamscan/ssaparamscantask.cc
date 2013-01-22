@@ -6,18 +6,20 @@
  * ******************************************************************************************* */
 SSAParamScanTask::Config::Config()
   : GeneralTaskConfig(), ModelSelectionTaskConfig(),
-    _model(0), num_threads(0), t_transient(0), t_max(0), timestep(0),
-    parameter(), start_value(0), end_value(1),
-    steps(1)
+    _model(0),
+    parameter(), start_value(0), end_value(1), steps(1),
+    t_transient(0), t_max(0), timestep(0),
+    num_threads(0)
 {
   // Pass...
 }
 
 SSAParamScanTask::Config::Config(const Config &other)
   : GeneralTaskConfig(), ModelSelectionTaskConfig(other),
-    _model(other._model), num_threads(other.num_threads),
+    _model(other._model),
     parameter(other.parameter), start_value(other.start_value), end_value(other.end_value), steps(other.steps),
-    t_transient(other.t_transient), t_max(other.t_max), timestep(other.timestep)
+    t_transient(other.t_transient), t_max(other.t_max), timestep(other.timestep),
+    num_threads(other.num_threads)
 {
   // Pass...
 }
@@ -45,6 +47,12 @@ void
 SSAParamScanTask::Config::setNumThreads(size_t num)
 {
   num_threads = num;
+}
+
+size_t
+SSAParamScanTask::Config::getNumThreads() const
+{
+    return this->num_threads;
 }
 
 double
@@ -143,7 +151,7 @@ SSAParamScanTask::process()
 
   // and perform analysis
   iNA::Models::SSAparamScan pscan(dynamic_cast<iNA::Ast::Model &>(*config.getModel()),
-                                  parameterSets, config.getTransientTime());
+                                  parameterSets, config.getTransientTime(), config.getNumThreads());
 
   for(double t=0;t<=config.getMaxTime(); t+=config.getTimeStep())
   {

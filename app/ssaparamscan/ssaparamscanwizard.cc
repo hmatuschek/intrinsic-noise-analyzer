@@ -120,7 +120,7 @@ SSAParameterScanConfigPage::SSAParameterScanConfigPage(GeneralTaskWizard *parent
   p_num->setValidator(p_num_val);
   registerField("p_num", p_num);
 
-  QSpinBox *thread_count = new QSpinBox();
+  thread_count = new QSpinBox();
   thread_count->setMinimum(1);
   thread_count->setMaximum(OpenMP::getMaxThreads());
   thread_count->setValue(OpenMP::getMaxThreads());
@@ -210,6 +210,7 @@ SSAParameterScanConfigPage::validatePage()
   config.setTransientTime(t_transient->text().toDouble(&ok));
   config.setMaxTime(t_max->text().toDouble(&ok));
   config.setTimeStep(timestep->text().toDouble(&ok));
+  config.setNumThreads(thread_count->text().toDouble(&ok));
 
   std::string pid = p_select->currentText().toStdString();
   // If model does not exists:

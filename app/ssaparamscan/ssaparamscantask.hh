@@ -29,14 +29,14 @@ public:
   protected:
     iNA::Ast::Model *_model;
 
-    size_t num_threads;
-
     iNA::Ast::Parameter * parameter;
     double start_value;
     double end_value;
     size_t steps;
 
     double t_transient, t_max, timestep;
+
+    size_t num_threads;
 
   public:
     /** Default constructor. */
@@ -55,6 +55,7 @@ public:
 
     /** Sets the number of threads for OpenMP. */
     void setNumThreads(size_t num);
+    size_t getNumThreads() const;
 
     /** Returns the max time of simulation.*/
     double getMaxTime() const;

@@ -33,17 +33,6 @@ public:
   explicit SSAParameterScanPlot(const QStringList &selected_species, SSAParamScanTask *task, QObject *parent=0);
 };
 
-/**
- * Collects data from a @c Table and updates the
- * @c VarianceLinesGraph instance.
- */
-class SSAParameterScanIOSPlot : public VariancePlot
-{
-  Q_OBJECT
-
-public:
-  explicit SSAParameterScanIOSPlot(const QStringList &selected_species, SSAParamScanTask *task, QObject *parent=0);
-};
 
 /**
  * Collects data from a @c Table and updates the
@@ -55,18 +44,6 @@ class SSAParameterScanCovPlot : public LinePlot
 
 public:
   explicit SSAParameterScanCovPlot(const QStringList &selected_species, SSAParamScanTask *task, QObject *parent=0);
-};
-
-/**
- * Collects data from a @c Table and updates the
- * @c VarianceLinesGraph instance.
- */
-class SSAParameterScanCovIOSPlot : public LinePlot
-{
-  Q_OBJECT
-
-public:
-  explicit SSAParameterScanCovIOSPlot(const QStringList &selected_species, SSAParamScanTask *task, QObject *parent=0);
 };
 
 

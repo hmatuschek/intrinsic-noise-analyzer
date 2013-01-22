@@ -46,10 +46,6 @@ public:
   explicit SSAParamScanModelSelectionPage(GeneralTaskWizard *parent);
   virtual bool validatePage();
 
-private:
-  QRadioButton *_re_button;
-  QRadioButton *_lna_button;
-  QRadioButton *_ios_button;
 };
 
 
@@ -73,6 +69,8 @@ private:
   QLineEdit *p_min;
   QLineEdit *p_max;
   QLineEdit *p_num;
+
+  QSpinBox *thread_count;
 
 private slots:
   void refreshParamRange(int);

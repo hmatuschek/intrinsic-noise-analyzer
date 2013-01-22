@@ -23,14 +23,14 @@ protected:
     Eigen::MatrixXd _cov;
 
     // Something to store the result
-    Eigen::VectorXd state;
+    std::vector<Eigen::VectorXd> state;
 
 public:
 
-    SSAparamScan(Ast::Model &model, std::vector<ParameterSet> &parameterSets, double transientTime)
+    SSAparamScan(Ast::Model &model, std::vector<ParameterSet> &parameterSets, double transientTime, size_t numThreads=OpenMP::getMaxThreads())
         : sbml_model(model), transientTime(transientTime),
           models(parameterSets.size()),
-          _n(1)
+          _n(1), state(numThreads)
     {
 
         _mean = Eigen::MatrixXd::Zero(parameterSets.size(),sbml_model.numSpecies());
@@ -60,19 +60,22 @@ public:
     void run(double timestep)
     {
 
+        size_t numThreads = state.size();
+
         // Do the average average over time
+#pragma omp parallel for if(numThreads>1) num_threads(numThreads) schedule(dynamic)
         for(size_t i = 0; i < models.size(); i++)
         {
                 models[i]->run(timestep);
-                state = models[i]->getState().row(0);
+                state[OpenMP::getThreadNum()] = models[i]->getState().row(0);
                 size_t idx =0;
                 for(size_t j=0; j<models[i]->numSpecies(); j++)
                 {
-                    _mean(i,j) =( _mean(i,j)*(_n-1) + state(j) )/_n;
+                    _mean(i,j) =( _mean(i,j)*(_n-1) + state[OpenMP::getThreadNum()](j) )/_n;
 
                     for (size_t k=0; k<=j; k++)
                     {
-                        _cov(i,idx) = ( _cov(i,idx)*(_n-1) + (state(k)-_mean(i,k))*(state(j)-_mean(i,j)) )/_n;
+                        _cov(i,idx) = ( _cov(i,idx)*(_n-1) + (state[OpenMP::getThreadNum()](k)-_mean(i,k))*(state[OpenMP::getThreadNum()](j)-_mean(i,j)) )/_n;
                         idx++;
                     }
 
