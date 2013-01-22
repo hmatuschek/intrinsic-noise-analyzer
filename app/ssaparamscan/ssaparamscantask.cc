@@ -1,5 +1,5 @@
 #include "ssaparamscantask.hh"
-#include "models/ssasteadystate.hh"
+#include "models/ssaparamscan.hh"
 
 /* ******************************************************************************************* *
  * Implementation of ParamScanTask::Config, the task configuration.

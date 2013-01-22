@@ -109,6 +109,7 @@ SET(libina_models_SOURCES
     models/sseinterpreter.cc
     models/steadystateanalysis.cc
     models/initialconditions.cc
+    models/ssaparamscan.cc
 )
 
 SET(libina_models_HEADERS models/models.hh
@@ -136,6 +137,7 @@ SET(libina_models_HEADERS models/models.hh
     models/sseinterpreter.hh
     models/steadystateanalysis.hh
     models/initialconditions.hh
+    models/ssaparamscan.hh
 )
 
 # Add source for nonlinear solvers
