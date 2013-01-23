@@ -36,23 +36,26 @@ public:
         _mean = Eigen::MatrixXd::Zero(parameterSets.size(),sbml_model.numSpecies());
         _cov  = Eigen::MatrixXd::Zero(parameterSets.size(),sbml_model.numSpecies()*(sbml_model.numSpecies()+1)/2);
 
-        Ast::Model *mod;
-        // Iterate over all parameter sets
+        // Create SSA for all parameter sets
         for(size_t j = 0; j < parameterSets.size(); j++)
         {
 
             // Copy model
-            mod = new Ast::Model(sbml_model);
+            Ast::Model *mod = new Ast::Model(sbml_model);
             // Apply parameter set
             for(ParameterSet::iterator it=parameterSets[j].begin(); it!=parameterSets[j].end(); it++)
                 mod->getParameter((*it).first)->setValue((*it).second);
             // Create SSA
             models[j] = new Models::OptimizedSSA(*mod, 1, 1024);
-            // Advance state
-            models[j]->run(transientTime);
-
             delete mod;
 
+        }
+
+        // Advance state
+#pragma omp parallel for if(numThreads>1) num_threads(numThreads) schedule(dynamic)
+        for(size_t j = 0; j < parameterSets.size(); j++)
+        {
+            models[j]->run(transientTime);
         }
 
     }
