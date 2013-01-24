@@ -97,95 +97,113 @@ SSAParamScanTask::Config::setTransientTime(double t)
  * Implementation of ParamScanTask::Config, the task configuration.
  * ******************************************************************************************* */
 SSAParamScanTask::SSAParamScanTask(const Config &config, QObject *parent)
-    : Task(parent), config(config), _Ns(config.getModel()->numSpecies()), parameterScan(1,1)
+    : Task(parent), config(config), _Ns(config.getModel()->numSpecies()), parameterScan(1,1),
+      _is_initialized(false), _is_final(false), _pscan(0), _current_time(0.0)
 {
+  // Will hold the species names
+  std::vector<QString> species_name(_Ns);
+  // Make space for result table
+  parameterScan.resize(1+_Ns+_Ns*(_Ns+1)/2, config.getSteps()+1);
 
-    std::vector<QString> species_name(_Ns);
-    // Make space
-    parameterScan.resize(1+_Ns+_Ns*(_Ns+1)/2, config.getSteps()+1);
+  size_t column = 0;
+  // first column parameter name
+  QString name = config.getParameter().getIdentifier().c_str();
+  if (config.getParameter().hasName()) { name = config.getParameter().getName().c_str(); }
+  this->parameterScan.setColumnName(column++, name);
 
-    size_t column = 0;
+  for (size_t i=0; i<_Ns; i++, column++)
+  {
+    // fill index table
+    QString species_id = config.getModel()->getSpecies(i)->getIdentifier().c_str();
+    iNA::Ast::Species *species = config.getModel()->getSpecies(species_id.toStdString());
 
-    // first column parameter name
-    this->parameterScan.setColumnName(column++, config.getParameter().hasName() ? config.getParameter().getName().c_str() : config.getParameter().getIdentifier().c_str() );
+    if (species->hasName())
+      species_name[i] = QString("%1").arg(species->getName().c_str());
+    else
+      species_name[i] = species_id;
 
-    for (size_t i=0; i<_Ns; i++, column++)
-    {
-      // fill index table
-      QString species_id = config.getModel()->getSpecies(i)->getIdentifier().c_str();
-      iNA::Ast::Species *species = config.getModel()->getSpecies(species_id.toStdString());      
+    this->parameterScan.setColumnName(column, QString("%1").arg(species_name[i]));
+  }
 
-      if (species->hasName())
-        species_name[i] = QString("%1").arg(species->getName().c_str());
-      else
-        species_name[i] = species_id;
-
-      this->parameterScan.setColumnName(column, QString("%1").arg(species_name[i]));
+  for (size_t i=0; i<_Ns; i++) {
+    for (size_t j=0; j<=i; j++, column++) {
+      this->parameterScan.setColumnName(
+          column,QString("cov(%1,%2)").arg(species_name[i]).arg(species_name[j]));
     }
+  }
+}
 
-    for (size_t i=0; i<_Ns; i++)
-      for (size_t j=0; j<=i; j++, column++)
-        this->parameterScan.setColumnName(
-              column,QString("cov(%1,%2)").arg(species_name[i]).arg(species_name[j]));
 
+SSAParamScanTask::~SSAParamScanTask()
+{
+  // Free parameter scan if present:
+  if (0 != _pscan) {
+    delete _pscan;
+  }
 }
 
 
 void
 SSAParamScanTask::process()
 {
+  // If task shall terminate -> return immediately
+  if ( Task::TERMINATING == getState() ) {
+    setState(Task::ERROR, tr("Task was terminated by the user."));
+    return;
+  }
+  // If task runs, or is finally done (or in error state)
+  if ( (Task::ERROR == getState()) || (Task::DONE == getState()) || (Task::RUNNING == getState())) {
+    return;
+  }
 
+  // Initialize scan if not done yet:
+  if (! _is_initialized) {
+    initializeScan();
+  }
+
+  // perform a step:
+  performStep();
+}
+
+
+void
+SSAParamScanTask::initializeScan()
+{
   this->setState(Task::INITIALIZED);
   this->setProgress(0);
 
   // Construct parameter sets
-  std::vector<iNA::Models::ParameterSet> parameterSets(config.getSteps()+1);
+  _parameterSets.resize(config.getSteps()+1);
   for(size_t j = 0; j<=config.getSteps(); j++)
   {
-      double val = config.getStartValue()+config.getInterval()*j;
-      parameterSets[j].insert(std::pair<std::string,double>(config.getParameter().getIdentifier(),val));
+    double val = config.getStartValue()+config.getInterval()*j;
+    _parameterSets[j].insert(
+          std::pair<std::string,double>(config.getParameter().getIdentifier(),val));
   }
 
-  // Allocate result matrices
-  Eigen::MatrixXd mean,cov;
+  // Construct analysis:
+  _pscan = new iNA::Models::SSAparamScan(dynamic_cast<iNA::Ast::Model &>(*config.getModel()),
+                                         _parameterSets, config.getTransientTime(),
+                                         config.getNumThreads());
 
-  // and perform analysis
-  iNA::Models::SSAparamScan pscan(dynamic_cast<iNA::Ast::Model &>(*config.getModel()),
-                                  parameterSets, config.getTransientTime(), config.getNumThreads());
+  // Set simulation time.
+  _current_time = 0.0;
 
-  for(double t=0;t<=config.getMaxTime(); t+=config.getTimeStep())
-  {
-      pscan.run(config.getTimeStep());
-
-      /*
-      // Fill table
-      for(size_t pid=0; pid<parameterSets.size(); pid++)
-      {
-
-          parameterScan(pid,0) = GiNaC::ex_to<GiNaC::numeric>(parameterSets[pid][config.getParameter().getIdentifier()]).to_double();
-
-          int col=1;
-
-          // output means
-          for (size_t i=0; i<_Ns; i++)
-              parameterScan(pid,col++) = pscan.getMean()(pid,i);
-
-          // output covariances
-          int idx = 0;
-          for (size_t i=0; i<_Ns; i++)
-            for (size_t j=0; j<=i; j++)
-                parameterScan(pid,col++) =  pscan.getCovariance()(pid,idx++);
-
-      }
-
-      */
-
-      //////////////////////////////////////////////////////////
-      // Should show a preview for the data of parameterScan here every timestep or less.
-      //////////////////////////////////////////////////////////
+  // mark analysis being initialized
+  _is_initialized = true;
+}
 
 
-  }
+void
+SSAParamScanTask::performStep()
+{
+  // Restart
+  this->setState(Task::INITIALIZED);
+  this->setProgress(0);
+
+  // perform a step:
+  _pscan->run(config.getTimeStep());
+  _current_time += config.getTimeStep();
 
   // Check if task shall terminate:
   if (Task::TERMINATING == this->getState())
@@ -195,34 +213,26 @@ SSAParamScanTask::process()
   }
 
   // Fill table
-  for(size_t pid=0; pid<parameterSets.size(); pid++)
+  for(size_t pid=0; pid<_parameterSets.size(); pid++)
   {
+    parameterScan(pid,0) = GiNaC::ex_to<GiNaC::numeric>(
+          _parameterSets[pid][config.getParameter().getIdentifier()]).to_double();
 
-      parameterScan(pid,0) = GiNaC::ex_to<GiNaC::numeric>(parameterSets[pid][config.getParameter().getIdentifier()]).to_double();
+    int col=1;
 
-      int col=1;
+    // output means
+    for (size_t i=0; i<_Ns; i++)
+      parameterScan(pid,col++) = _pscan->getMean()(pid,i);
 
-      // output means
-      for (size_t i=0; i<_Ns; i++)
-          parameterScan(pid,col++) = pscan.getMean()(pid,i);
-
-      // output covariances
-      int idx = 0;
-      for (size_t i=0; i<_Ns; i++)
-        for (size_t j=0; j<=i; j++)
-            parameterScan(pid,col++) =  pscan.getCovariance()(pid,idx++);
-
+    // output covariances
+    int idx = 0;
+    for (size_t i=0; i<_Ns; i++)
+      for (size_t j=0; j<=i; j++)
+        parameterScan(pid,col++) =  _pscan->getCovariance()(pid,idx++);
   }
 
   // Done...
   this->setState(Task::DONE);
-
-  {
-   iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::INFO);
-   message << "Finished parameter scan.";
-   iNA::Utils::Logger::get().log(message);
-  }
-
 }
 
 
@@ -232,10 +242,22 @@ SSAParamScanTask::getConfig() const {
 }
 
 
+bool
+SSAParamScanTask::isFinal() const {
+  return _is_final;
+}
+
+void
+SSAParamScanTask::setFinal(bool final) {
+  _is_final = final;
+  this->setState(Task::DONE);
+}
+
+
 QString
 SSAParamScanTask::getLabel()
 {
-    return "Parameter Scan (SSA)";
+  return "Parameter Scan (SSA)";
 }
 
 

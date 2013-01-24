@@ -98,87 +98,53 @@ private:
 
 
 
-/**
- * Default widget, being shown if a task is about to terminate.
- *
- * @ingroup gui
- */
+/** Default widget, being shown if a task is about to terminate.
+ * @ingroup gui */
 class TaskTerminatingWidget : public QLabel
 {
   Q_OBJECT
 
 public:
-  /**
-   * Constructor.
-   */
+  /** Constructor. */
   explicit TaskTerminatingWidget(QWidget *parent=0);
 };
 
 
 
-/**
- * Default progress widget for a task.
- *
- * @ingroup gui
- */
+/** Default progress widget for a task.
+ * @ingroup gui */
 class TaskProgressWidget : public QWidget
 {
   Q_OBJECT
 
 protected:
-  /**
-   * Holds a weak reference to the taks-item.
-   */
+  /** Holds a weak reference to the taks-item. */
   TaskItem *task_item;
-
   /** Holds a timer to update the state and time of a task. */
   QTimer *_updateTimer;
 
 public:
-  /**
-   * Cosntructor for the given task-item.
-   */
+  /** Cosntructor for the given task-item. */
   explicit TaskProgressWidget(TaskItem *task_item, QWidget *parent=0);
 
-
 protected slots:
-  /**
-   * Callback if the task made some progress.
-   */
+  /** Callback if the task made some progress. */
   void taskProgress();
-
-  /**
-   * Callback if the task state has changed.
-   */
+  /** Callback if the task state has changed. */
   void taskStateChanged();
-
-  /**
-   * Callback to terminate task.
-   */
+  /** Callback to terminate task. */
   void stopAnalysis();
 
-
 private:
-  /**
-   * Tiny helper function to format the elapsed and remaining time.
-   */
+  /** Tiny helper function to format the elapsed and remaining time. */
   QString formatTime(double sec);
 
-
 private:
-  /**
-   * The progress bar.
-   */
+  /** The progress bar. */
   QProgressBar *progress_bar;
-
-  /**
-   * Label to show elapsed time.
-   */
+  /** Label to show elapsed time. */
   QLabel *time_elapsed;
-
-  /**
-   * Label to show remaining time.
-   */
+  /** Label to show remaining time. */
   QLabel *time_remain;
 };
 

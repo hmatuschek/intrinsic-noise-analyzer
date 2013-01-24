@@ -47,10 +47,6 @@ SSAParamScanModelSelectionPage::SSAParamScanModelSelectionPage(GeneralTaskWizard
 bool
 SSAParamScanModelSelectionPage::validatePage()
 {
-  // First set the analysis method, this determines which model will be instantiated:
-  GeneralTaskWizard *wizard = static_cast<GeneralTaskWizard *>(this->wizard());
-  SSAParamScanTask::Config &config = wizard->getConfigCast< SSAParamScanTask::Config >();
-
   // Try to create SSA model from SBML document
   try {
     // Forward call to parent implementation:

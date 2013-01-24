@@ -1,12 +1,15 @@
 #ifndef __INA_APP_SSAPARAMSCAN_TASK_HH__
 #define __INA_APP_SSAPARAMSCAN_TASK_HH__
 
+#include <vector>
 #include "../models/task.hh"
 #include "../models/generaltaskconfig.hh"
 #include "../models/timeseries.hh"
 
 #include <models/stochasticsimulator.hh>
 #include <models/steadystateanalysis.hh>
+#include <models/ssaparamscan.hh>
+
 
 
 /** A task to perform a paramter scan. */
@@ -15,9 +18,7 @@ class SSAParamScanTask : public Task
   Q_OBJECT
 
 public:
-  /**
-   * This class assembles all parameters needed to configure a parameter scan task.
-   */
+  /** This class assembles all parameters needed to configure a parameter scan task. */
   class Config :
       public GeneralTaskConfig,
       public ModelSelectionTaskConfig
@@ -92,9 +93,22 @@ protected:
   /** Will hold the results. */
   Table parameterScan;
 
+  /** If true, the task was initialized already. */
+  bool _is_initialized;
+  /** If true, the current statistic in @c parameterScan is accepted by the user as final. */
+  bool _is_final;
+
+  /** Holds the parameter sets to scan. */
+  std::vector<iNA::Models::ParameterSet> _parameterSets;
+  /** Holds an instance of the parameter scan analysis. */
+  iNA::Models::SSAparamScan *_pscan;
+  /** Holds the current simulation time. */
+  double _current_time;
+
 
 public:
   explicit SSAParamScanTask(const Config &config, QObject *parent=0);
+  virtual ~SSAParamScanTask();
 
   Table &getParameterScan();
 
@@ -104,8 +118,18 @@ public:
 
   const SSAParamScanTask::Config & getConfig() const;
 
+  bool isFinal() const;
+  void setFinal(bool final=true);
+
 protected:
+  /** On the first call, calls @c initializeScan and then @c performStep, for every further call
+   * simply calls @c performStep to continue simulation. */
   virtual void process();
+  /** Initializes the parameter scan. */
+  void initializeScan();
+  /** Performs a simulation step, the simulation can be continued by restarting the thread. */
+  void performStep();
 };
+
 
 #endif

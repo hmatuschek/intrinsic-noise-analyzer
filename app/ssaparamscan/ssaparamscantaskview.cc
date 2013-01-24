@@ -29,7 +29,13 @@ SSAParamScanTaskView::SSAParamScanTaskView(SSAParamScanTaskWrapper *task_wrapper
 QWidget *
 SSAParamScanTaskView::createResultWidget(TaskItem *task_item)
 {
-  return new SSAParamScanResultWidget(static_cast<SSAParamScanTaskWrapper *>(task_item));
+  // get task
+  SSAParamScanTaskWrapper *task_wrapper = dynamic_cast<SSAParamScanTaskWrapper *>(task_item);
+  SSAParamScanTask *task = dynamic_cast<SSAParamScanTask *>(task_wrapper->getTask());
+  // Show result widget if task is finally done:
+  if (task->isFinal())
+    return new SSAParamScanResultWidget(task_wrapper);
+  return new SSAParamScanPreviewWidget(task_wrapper);
 }
 
 
@@ -148,3 +154,116 @@ SSAParamScanResultWidget::saveButtonPressed()
     file.close();
 
 }
+
+
+
+
+/* ********************************************************************************************* *
+ * Implementation of PreviewWidget
+ * ********************************************************************************************* */
+SSAParamScanPreviewWidget::SSAParamScanPreviewWidget(SSAParamScanTaskWrapper *task_wrapper, QWidget *parent):
+  QWidget(parent), _task_item(task_wrapper)
+{
+  this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
+  this->setBackgroundRole(QPalette::Window);
+
+  // Preview
+  _plot_canvas = new Plot::Canvas();
+  _species_list = new QListWidget();
+  _species_list_label = new QLabel();
+
+  QPushButton *continue_button = new QPushButton(tr("continue simulation"));
+  QPushButton *done_button = new QPushButton(tr("done"));
+
+  SSAParamScanTask *task = dynamic_cast<SSAParamScanTask *>(task_wrapper->getTask());
+  // populate species list:
+  for (size_t i=0; i<task->getConfig().getModel()->numSpecies(); i++) {
+    iNA::Ast::Species *species = task->getConfig().getModel()->getSpecies(i);
+    QString id   = species->getIdentifier().c_str();
+    QString name = id;
+    if (species->hasName()) {
+      name = species->getName().c_str();
+    }
+
+    QListWidgetItem *item = new QListWidgetItem(name, _species_list);
+    item->setData(Qt::UserRole, id);
+    item->setCheckState(Qt::Checked);
+    item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable);
+    _species_list->addItem(item);
+  }
+
+  QHBoxLayout *plot_layout = new QHBoxLayout();
+  plot_layout->addWidget(_plot_canvas, 1);
+
+  QVBoxLayout *species_list_layout = new QVBoxLayout();
+  species_list_layout->addWidget(_species_list_label, 0);
+  species_list_layout->addWidget(_species_list, 1);
+  plot_layout->addLayout(species_list_layout);
+
+  QHBoxLayout *button_box = new QHBoxLayout();
+  button_box->addWidget(done_button);
+  button_box->addWidget(continue_button);
+
+  QVBoxLayout *layout = new QVBoxLayout();
+  layout->addLayout(plot_layout);
+  layout->addLayout(button_box);
+  setLayout(layout);
+
+  QObject::connect(_species_list, SIGNAL(itemChanged(QListWidgetItem*)),
+                   this, SLOT(onItemChanged(QListWidgetItem*)));
+  QObject::connect(continue_button, SIGNAL(clicked()), this, SLOT(onContinue()));
+  QObject::connect(done_button, SIGNAL(clicked()), this, SLOT(onDone()));
+
+  // update plot...
+  onUpdatePlot();
+}
+
+
+void
+SSAParamScanPreviewWidget::onItemChanged(QListWidgetItem *item)
+{
+  onUpdatePlot();
+}
+
+
+void
+SSAParamScanPreviewWidget::onUpdatePlot()
+{
+  QStringList selected_species;
+  // Get species list
+  for (int i=0; i<_species_list->count(); i++) {
+    QListWidgetItem *item = _species_list->item(i);
+    if (Qt::Checked == item->checkState()) {
+      selected_species.append(item->data(Qt::UserRole).toString());
+    }
+  }
+
+  Plot::Figure *old_plot = _plot_canvas->getPlot();
+  if (0 != old_plot) { old_plot->deleteLater(); }
+
+  // Update plot
+  SSAParamScanTask *task = dynamic_cast<SSAParamScanTask *>(_task_item->getTask());
+  _plot_canvas->setPlot(new SSAParameterScanPlot(selected_species, task));
+}
+
+
+void
+SSAParamScanPreviewWidget::onContinue()
+{
+  SSAParamScanTask *task = dynamic_cast<SSAParamScanTask *>(_task_item->getTask());
+  if (task->isFinal()) { return; }
+  task->start();
+  task->setState(Task::DONE);
+}
+
+
+void
+SSAParamScanPreviewWidget::onDone()
+{
+  SSAParamScanTask *task = dynamic_cast<SSAParamScanTask *>(_task_item->getTask());
+  if (task->isFinal()) { return; }
+  task->setFinal();
+  task->setState(Task::DONE);
+}
+
+
