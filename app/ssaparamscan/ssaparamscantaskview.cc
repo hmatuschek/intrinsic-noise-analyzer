@@ -31,11 +31,19 @@ SSAParamScanTaskView::createResultWidget(TaskItem *task_item)
 {
   // get task
   SSAParamScanTaskWrapper *task_wrapper = dynamic_cast<SSAParamScanTaskWrapper *>(task_item);
-  SSAParamScanTask *task = dynamic_cast<SSAParamScanTask *>(task_wrapper->getTask());
-  // Show result widget if task is finally done:
-  if (task->isFinal())
-    return new SSAParamScanResultWidget(task_wrapper);
-  return new SSAParamScanPreviewWidget(task_wrapper);
+  return new SSAParamScanResultWidget(task_wrapper);
+}
+
+QWidget *
+SSAParamScanTaskView::createProgressWidget(TaskItem *task_item)
+{
+  // get task
+  SSAParamScanTaskWrapper *task_wrapper = dynamic_cast<SSAParamScanTaskWrapper *>(task_item);
+  if (Task::INITIALIZED == task_wrapper->getTask()->getState())
+    return new TaskProgressWidget(task_wrapper);
+  else {
+    return new SSAParamScanPreviewWidget(task_wrapper);
+  }
 }
 
 
@@ -162,7 +170,7 @@ SSAParamScanResultWidget::saveButtonPressed()
  * Implementation of PreviewWidget
  * ********************************************************************************************* */
 SSAParamScanPreviewWidget::SSAParamScanPreviewWidget(SSAParamScanTaskWrapper *task_wrapper, QWidget *parent):
-  QWidget(parent), _task_item(task_wrapper)
+  QWidget(parent), _task_item(task_wrapper), _updateTimer()
 {
   this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
   this->setBackgroundRole(QPalette::Window);
@@ -180,7 +188,6 @@ SSAParamScanPreviewWidget::SSAParamScanPreviewWidget(SSAParamScanTaskWrapper *ta
   selection_menu->addAction(tr("Invert selection"), this, SLOT(onInvertSelection()));
   selection_button->setMenu(selection_menu);
 
-  QPushButton *continue_button = new QPushButton(tr("continue simulation"));
   QPushButton *done_button = new QPushButton(tr("done"));
 
   SSAParamScanTask *task = dynamic_cast<SSAParamScanTask *>(task_wrapper->getTask());
@@ -210,7 +217,6 @@ SSAParamScanPreviewWidget::SSAParamScanPreviewWidget(SSAParamScanTaskWrapper *ta
 
   QHBoxLayout *button_box = new QHBoxLayout();
   button_box->addWidget(done_button);
-  button_box->addWidget(continue_button);
 
   QVBoxLayout *layout = new QVBoxLayout();
   layout->addLayout(plot_layout);
@@ -219,23 +225,34 @@ SSAParamScanPreviewWidget::SSAParamScanPreviewWidget(SSAParamScanTaskWrapper *ta
 
   QObject::connect(_species_list, SIGNAL(itemChanged(QListWidgetItem*)),
                    this, SLOT(onItemChanged(QListWidgetItem*)));
-  QObject::connect(continue_button, SIGNAL(clicked()), this, SLOT(onContinue()));
   QObject::connect(done_button, SIGNAL(clicked()), this, SLOT(onDone()));
+  QObject::connect(task, SIGNAL(stepPerformed()), this, SLOT(onScheduleUpdatePlot()));
+  QObject::connect(&_updateTimer, SIGNAL(timeout()), this, SLOT(updatePlot()));
 
   // update plot...
-  onUpdatePlot();
+  updatePlot();
 }
 
 
 void
 SSAParamScanPreviewWidget::onItemChanged(QListWidgetItem *item)
 {
-  onUpdatePlot();
+  onScheduleUpdatePlot();
 }
 
 
 void
-SSAParamScanPreviewWidget::onUpdatePlot()
+SSAParamScanPreviewWidget::onScheduleUpdatePlot()
+{
+  // If timer still runs -> done
+  if (_updateTimer.isActive()) { return; }
+  // Schedule update of plot for later...
+  _updateTimer.start(1000);
+}
+
+
+void
+SSAParamScanPreviewWidget::updatePlot()
 {
   QStringList selected_species;
   // Get species list
@@ -256,22 +273,10 @@ SSAParamScanPreviewWidget::onUpdatePlot()
 
 
 void
-SSAParamScanPreviewWidget::onContinue()
-{
-  SSAParamScanTask *task = dynamic_cast<SSAParamScanTask *>(_task_item->getTask());
-  if (task->isFinal()) { return; }
-  task->start();
-  task->setState(Task::DONE);
-}
-
-
-void
 SSAParamScanPreviewWidget::onDone()
 {
   SSAParamScanTask *task = dynamic_cast<SSAParamScanTask *>(_task_item->getTask());
-  if (task->isFinal()) { return; }
-  task->setFinal();
-  task->setState(Task::DONE);
+  task->stopIteration();
 }
 
 

@@ -92,19 +92,8 @@ protected:
   size_t _Ns;
   /** Will hold the results. */
   Table parameterScan;
-
-  /** If true, the task was initialized already. */
-  bool _is_initialized;
-  /** If true, the current statistic in @c parameterScan is accepted by the user as final. */
-  bool _is_final;
-
-  /** Holds the parameter sets to scan. */
-  std::vector<iNA::Models::ParameterSet> _parameterSets;
-  /** Holds an instance of the parameter scan analysis. */
-  iNA::Models::SSAparamScan *_pscan;
-  /** Holds the current simulation time. */
-  double _current_time;
-
+  /** If true, the iteration will be stopped. */
+  bool _stop_iteration;
 
 public:
   explicit SSAParamScanTask(const Config &config, QObject *parent=0);
@@ -118,8 +107,13 @@ public:
 
   const SSAParamScanTask::Config & getConfig() const;
 
-  bool isFinal() const;
-  void setFinal(bool final=true);
+
+  void stopIteration();
+
+signals:
+  /** Will be emitted each time a simulation step was performed. */
+  void stepPerformed();
+
 
 protected:
   /** On the first call, calls @c initializeScan and then @c performStep, for every further call

@@ -98,7 +98,7 @@ SSAParamScanTask::Config::setTransientTime(double t)
  * ******************************************************************************************* */
 SSAParamScanTask::SSAParamScanTask(const Config &config, QObject *parent)
     : Task(parent), config(config), _Ns(config.getModel()->numSpecies()), parameterScan(1,1),
-      _is_initialized(false), _is_final(false), _pscan(0), _current_time(0.0)
+      _stop_iteration(false)
 {
   // Will hold the species names
   std::vector<QString> species_name(_Ns);
@@ -136,10 +136,6 @@ SSAParamScanTask::SSAParamScanTask(const Config &config, QObject *parent)
 
 SSAParamScanTask::~SSAParamScanTask()
 {
-  // Free parameter scan if present:
-  if (0 != _pscan) {
-    delete _pscan;
-  }
 }
 
 
@@ -156,24 +152,11 @@ SSAParamScanTask::process()
     return;
   }
 
-  // Initialize scan if not done yet:
-  if (! _is_initialized) {
-    initializeScan();
-  }
-
-  // perform a step:
-  performStep();
-}
-
-
-void
-SSAParamScanTask::initializeScan()
-{
   this->setState(Task::INITIALIZED);
   this->setProgress(0);
 
   // Construct parameter sets
-  _parameterSets.resize(config.getSteps()+1);
+  std::vector<iNA::Models::ParameterSet> _parameterSets(config.getSteps()+1);
   for(size_t j = 0; j<=config.getSteps(); j++)
   {
     double val = config.getStartValue()+config.getInterval()*j;
@@ -182,37 +165,11 @@ SSAParamScanTask::initializeScan()
   }
 
   // Construct analysis:
-  _pscan = new iNA::Models::SSAparamScan(dynamic_cast<iNA::Ast::Model &>(*config.getModel()),
-                                         _parameterSets, config.getTransientTime(),
-                                         config.getNumThreads());
+  iNA::Models::SSAparamScan _pscan(dynamic_cast<iNA::Ast::Model &>(*config.getModel()),
+                                   _parameterSets, config.getTransientTime(),
+                                   config.getNumThreads());
 
-  // Set simulation time.
-  _current_time = 0.0;
-
-  // mark analysis being initialized
-  _is_initialized = true;
-}
-
-
-void
-SSAParamScanTask::performStep()
-{
-  // Restart
-  this->setState(Task::INITIALIZED);
-  this->setProgress(0);
-
-  // perform a step:
-  _pscan->run(config.getTimeStep());
-  _current_time += config.getTimeStep();
-
-  // Check if task shall terminate:
-  if (Task::TERMINATING == this->getState())
-  {
-    this->setState(Task::ERROR, tr("Task was terminated by user."));
-    return;
-  }
-
-  // Fill table
+  // Fill table with initial statistics:
   for(size_t pid=0; pid<_parameterSets.size(); pid++)
   {
     parameterScan(pid,0) = GiNaC::ex_to<GiNaC::numeric>(
@@ -222,13 +179,57 @@ SSAParamScanTask::performStep()
 
     // output means
     for (size_t i=0; i<_Ns; i++)
-      parameterScan(pid,col++) = _pscan->getMean()(pid,i);
+      parameterScan(pid,col++) = _pscan.getMean()(pid,i);
 
     // output covariances
     int idx = 0;
     for (size_t i=0; i<_Ns; i++)
       for (size_t j=0; j<=i; j++)
-        parameterScan(pid,col++) =  _pscan->getCovariance()(pid,idx++);
+        parameterScan(pid,col++) =  _pscan.getCovariance()(pid,idx++);
+  }
+
+  // Set state to running will show the preview:
+  setState(Task::RUNNING);
+
+  // Iterate
+  for (double current_time=0; current_time<=config.getMaxTime(); current_time+=config.getTimeStep())
+  {
+    // perform a step:
+    _pscan.run(config.getTimeStep());
+
+    // Check if task shall terminate:
+    if (Task::TERMINATING == this->getState())
+    {
+      this->setState(Task::ERROR, tr("Task was terminated by user."));
+      return;
+    }
+
+    // If iteration should be stopped:
+    if (_stop_iteration) {
+      return;
+    }
+
+    // Fill table
+    for(size_t pid=0; pid<_parameterSets.size(); pid++)
+    {
+      parameterScan(pid,0) = GiNaC::ex_to<GiNaC::numeric>(
+            _parameterSets[pid][config.getParameter().getIdentifier()]).to_double();
+
+      int col=1;
+
+      // output means
+      for (size_t i=0; i<_Ns; i++)
+        parameterScan(pid,col++) = _pscan.getMean()(pid,i);
+
+      // output covariances
+      int idx = 0;
+      for (size_t i=0; i<_Ns; i++)
+        for (size_t j=0; j<=i; j++)
+          parameterScan(pid,col++) =  _pscan.getCovariance()(pid,idx++);
+    }
+
+    // signal new step:
+    emit stepPerformed();
   }
 
   // Done...
@@ -242,15 +243,10 @@ SSAParamScanTask::getConfig() const {
 }
 
 
-bool
-SSAParamScanTask::isFinal() const {
-  return _is_final;
-}
-
 void
-SSAParamScanTask::setFinal(bool final) {
-  _is_final = final;
-  this->setState(Task::DONE);
+SSAParamScanTask::stopIteration() {
+  _stop_iteration = true;
+  setState(Task::DONE);
 }
 
 

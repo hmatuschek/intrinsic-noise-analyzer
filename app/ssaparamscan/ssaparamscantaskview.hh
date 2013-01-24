@@ -25,9 +25,10 @@ public:
   explicit SSAParamScanTaskView(SSAParamScanTaskWrapper *task_item, QWidget *parent=0);
 
 protected:
-  /** Returns a preview widget of the current statistics or the result widget if the user accepted
-   * the statistics. */
+  /** Returns the result widget. */
   virtual QWidget *createResultWidget(TaskItem *task_item);
+  /** Returns the preview widget. The widget gets updated at each time-step of the simulation. */
+  virtual QWidget *createProgressWidget(TaskItem *task_item);
 };
 
 
@@ -40,12 +41,11 @@ public:
   /** Constructor. */
   explicit SSAParamScanPreviewWidget(SSAParamScanTaskWrapper *taks_wrapper, QWidget *parent=0);
 
-
 private slots:
-  void onContinue();
   void onDone();
   void onItemChanged(QListWidgetItem *item);
-  void onUpdatePlot();
+  void onScheduleUpdatePlot();
+  void updatePlot();
   void onSelectAllSpecies();
   void onSelectNoSpecies();
   void onInvertSelection();
@@ -57,6 +57,8 @@ private:
   Plot::Canvas *_plot_canvas;
   /** The list widget for species selection. */
   QListWidget *_species_list;
+  /** Timer event to update the plot. This timer is used to slowdown the updating to once a second. */
+  QTimer _updateTimer;
 };
 
 
