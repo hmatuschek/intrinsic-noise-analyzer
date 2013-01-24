@@ -178,28 +178,31 @@ SSAParamScanPreviewWidget::SSAParamScanPreviewWidget(SSAParamScanTaskWrapper *ta
   // Preview
   _plot_canvas = new Plot::Canvas();
   _plot_canvas->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+  // List of species
   _species_list = new QListWidget();
   _species_list->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
-
+  // Button to select species
   QPushButton *selection_button = new QPushButton("Select");
   QMenu *selection_menu = new QMenu();
   selection_menu->addAction(tr("Select all species"), this, SLOT(onSelectAllSpecies()));
   selection_menu->addAction(tr("Unselect all species"), this, SLOT(onSelectNoSpecies()));
   selection_menu->addAction(tr("Invert selection"), this, SLOT(onInvertSelection()));
   selection_button->setMenu(selection_menu);
-
+  // Button to stop simulation
   QPushButton *done_button = new QPushButton(tr("done"));
+  // Label to show number of iteration and simulation time
+  _iteration_label = new QLabel("");
+  _iteration_label->setTextFormat(Qt::LogText);
 
+  // Populate species list
   SSAParamScanTask *task = dynamic_cast<SSAParamScanTask *>(task_wrapper->getTask());
-  // populate species list:
   for (size_t i=0; i<task->getConfig().getModel()->numSpecies(); i++) {
+    // Get name & id
     iNA::Ast::Species *species = task->getConfig().getModel()->getSpecies(i);
     QString id   = species->getIdentifier().c_str();
     QString name = id;
-    if (species->hasName()) {
-      name = species->getName().c_str();
-    }
-
+    if (species->hasName()) { name = species->getName().c_str(); }
+    // Assemble item
     QListWidgetItem *item = new QListWidgetItem(name, _species_list);
     item->setData(Qt::UserRole, id);
     item->setCheckState(Qt::Checked);
@@ -207,22 +210,20 @@ SSAParamScanPreviewWidget::SSAParamScanPreviewWidget(SSAParamScanTaskWrapper *ta
     _species_list->addItem(item);
   }
 
+  // Assemble layout
   QHBoxLayout *plot_layout = new QHBoxLayout();
   plot_layout->addWidget(_plot_canvas, 1);
-
   QVBoxLayout *species_list_layout = new QVBoxLayout();
   species_list_layout->addWidget(selection_button, 0);
   species_list_layout->addWidget(_species_list, 1);
+  species_list_layout->addWidget(done_button);
   plot_layout->addLayout(species_list_layout);
-
-  QHBoxLayout *button_box = new QHBoxLayout();
-  button_box->addWidget(done_button);
-
   QVBoxLayout *layout = new QVBoxLayout();
   layout->addLayout(plot_layout);
-  layout->addLayout(button_box);
+  layout->addWidget(_iteration_label);
   setLayout(layout);
 
+  // Connect some signals
   QObject::connect(_species_list, SIGNAL(itemChanged(QListWidgetItem*)),
                    this, SLOT(onItemChanged(QListWidgetItem*)));
   QObject::connect(done_button, SIGNAL(clicked()), this, SLOT(onDone()));
@@ -247,15 +248,15 @@ SSAParamScanPreviewWidget::onScheduleUpdatePlot()
   // If timer still runs -> done
   if (_updateTimer.isActive()) { return; }
   // Schedule update of plot for later...
-  _updateTimer.start(1000);
+  _updateTimer.start(500);
 }
 
 
 void
 SSAParamScanPreviewWidget::updatePlot()
 {
+  // Get selected species list
   QStringList selected_species;
-  // Get species list
   for (int i=0; i<_species_list->count(); i++) {
     QListWidgetItem *item = _species_list->item(i);
     if (Qt::Checked == item->checkState()) {
@@ -263,11 +264,18 @@ SSAParamScanPreviewWidget::updatePlot()
     }
   }
 
+  SSAParamScanTask *task = dynamic_cast<SSAParamScanTask *>(_task_item->getTask());
+
+  // Update label:
+  _iteration_label->setText(
+        tr("Current iteration (simulation time): %1 (%2)").arg(
+          task->currentIteration()).arg(task->currentTime()));
+
+  // Remove and destroy "old" plot
   Plot::Figure *old_plot = _plot_canvas->getPlot();
   if (0 != old_plot) { old_plot->deleteLater(); }
 
   // Update plot
-  SSAParamScanTask *task = dynamic_cast<SSAParamScanTask *>(_task_item->getTask());
   _plot_canvas->setPlot(new SSAParameterScanPlot(selected_species, task));
 }
 

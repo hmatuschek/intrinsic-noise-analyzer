@@ -192,10 +192,12 @@ SSAParamScanTask::process()
   setState(Task::RUNNING);
 
   // Iterate
+  _current_iteration = 0;
   for (double current_time=0; current_time<=config.getMaxTime(); current_time+=config.getTimeStep())
   {
     // perform a step:
     _pscan.run(config.getTimeStep());
+    _current_iteration++;
 
     // Check if task shall terminate:
     if (Task::TERMINATING == this->getState())
@@ -206,7 +208,7 @@ SSAParamScanTask::process()
 
     // If iteration should be stopped:
     if (_stop_iteration) {
-      return;
+      break;
     }
 
     // Fill table
@@ -246,7 +248,17 @@ SSAParamScanTask::getConfig() const {
 void
 SSAParamScanTask::stopIteration() {
   _stop_iteration = true;
-  setState(Task::DONE);
+}
+
+
+size_t
+SSAParamScanTask::currentIteration() const {
+  return _current_iteration;
+}
+
+double
+SSAParamScanTask::currentTime() const {
+  return _current_iteration*config.getTimeStep();
 }
 
 

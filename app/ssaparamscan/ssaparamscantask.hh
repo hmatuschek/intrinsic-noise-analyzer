@@ -94,6 +94,9 @@ protected:
   Table parameterScan;
   /** If true, the iteration will be stopped. */
   bool _stop_iteration;
+  /** Holds the current iteration number. */
+  size_t _current_iteration;
+
 
 public:
   explicit SSAParamScanTask(const Config &config, QObject *parent=0);
@@ -107,6 +110,8 @@ public:
 
   const SSAParamScanTask::Config & getConfig() const;
 
+  size_t currentIteration() const;
+  double currentTime() const;
 
   void stopIteration();
 

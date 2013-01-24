@@ -59,6 +59,8 @@ private:
   QListWidget *_species_list;
   /** Timer event to update the plot. This timer is used to slowdown the updating to once a second. */
   QTimer _updateTimer;
+  /** Shows the current iteration. */
+  QLabel *_iteration_label;
 };
 
 
