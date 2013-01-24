@@ -46,14 +46,15 @@ private slots:
   void onDone();
   void onItemChanged(QListWidgetItem *item);
   void onUpdatePlot();
+  void onSelectAllSpecies();
+  void onSelectNoSpecies();
+  void onInvertSelection();
 
 private:
   /** Holds a weak refernce to the task item. */
   SSAParamScanTaskWrapper *_task_item;
   /** Shows a parameter scan plot for the selected species. */
   Plot::Canvas *_plot_canvas;
-  /** A label placed over the species list. */
-  QLabel *_species_list_label;
   /** The list widget for species selection. */
   QListWidget *_species_list;
 };

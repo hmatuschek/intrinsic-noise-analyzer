@@ -169,8 +169,16 @@ SSAParamScanPreviewWidget::SSAParamScanPreviewWidget(SSAParamScanTaskWrapper *ta
 
   // Preview
   _plot_canvas = new Plot::Canvas();
+  _plot_canvas->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
   _species_list = new QListWidget();
-  _species_list_label = new QLabel();
+  _species_list->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
+
+  QPushButton *selection_button = new QPushButton("Select");
+  QMenu *selection_menu = new QMenu();
+  selection_menu->addAction(tr("Select all species"), this, SLOT(onSelectAllSpecies()));
+  selection_menu->addAction(tr("Unselect all species"), this, SLOT(onSelectNoSpecies()));
+  selection_menu->addAction(tr("Invert selection"), this, SLOT(onInvertSelection()));
+  selection_button->setMenu(selection_menu);
 
   QPushButton *continue_button = new QPushButton(tr("continue simulation"));
   QPushButton *done_button = new QPushButton(tr("done"));
@@ -196,7 +204,7 @@ SSAParamScanPreviewWidget::SSAParamScanPreviewWidget(SSAParamScanTaskWrapper *ta
   plot_layout->addWidget(_plot_canvas, 1);
 
   QVBoxLayout *species_list_layout = new QVBoxLayout();
-  species_list_layout->addWidget(_species_list_label, 0);
+  species_list_layout->addWidget(selection_button, 0);
   species_list_layout->addWidget(_species_list, 1);
   plot_layout->addLayout(species_list_layout);
 
@@ -266,4 +274,34 @@ SSAParamScanPreviewWidget::onDone()
   task->setState(Task::DONE);
 }
 
+
+void
+SSAParamScanPreviewWidget::onSelectAllSpecies()
+{
+  for (int i=0; i<_species_list->count(); i++) {
+    QListWidgetItem *item = _species_list->item(i);
+    item->setCheckState(Qt::Checked);
+  }
+}
+
+void
+SSAParamScanPreviewWidget::onSelectNoSpecies()
+{
+  for (int i=0; i<_species_list->count(); i++) {
+    QListWidgetItem *item = _species_list->item(i);
+    item->setCheckState(Qt::Unchecked);
+  }
+}
+
+void
+SSAParamScanPreviewWidget::onInvertSelection()
+{
+  for (int i=0; i<_species_list->count(); i++) {
+    QListWidgetItem *item =_species_list->item(i);
+    if (Qt::Checked == item->checkState())
+      item->setCheckState(Qt::Unchecked);
+    else
+      item->setCheckState(Qt::Checked);
+  }
+}
 
