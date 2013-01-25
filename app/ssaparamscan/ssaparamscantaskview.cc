@@ -183,6 +183,7 @@ SSAParamScanPreviewWidget::SSAParamScanPreviewWidget(SSAParamScanTaskWrapper *ta
   QMenu *plot_menu = new QMenu();
   plot_menu->addAction(tr("Concentrations"), this, SLOT(onConcentrationPlotSelected()));
   plot_menu->addAction(tr("Coefficient of variation"), this, SLOT(onCOVPlotSelected()));
+  plot_menu->addAction(tr("Fano factor"), this, SLOT(onFanoPlotSelected()));
   plot_type_button->setMenu(plot_menu);
   // Label to show number of iteration and simulation time
   _iteration_label = new QLabel("");
@@ -289,10 +290,14 @@ SSAParamScanPreviewWidget::updatePlot()
   if (0 != old_plot) { old_plot->deleteLater(); }
 
   // Update plot
-  if (CONCENTRATION_PLOT == _plottype) {
-    _plot_canvas->setPlot(new SSAParameterScanPlot(selected_species, task));
-  } else {
-    _plot_canvas->setPlot(new SSAParameterScanCovPlot(selected_species, task));
+  switch(_plottype)
+  {
+      case CONCENTRATION_PLOT:
+        _plot_canvas->setPlot(new SSAParameterScanPlot(selected_species, task)); break;
+      case FANO_PLOT:
+        _plot_canvas->setPlot(new SSAParameterScanFanoPlot(selected_species, task)); break;
+      case COEFVAR_PLOT:
+        _plot_canvas->setPlot(new SSAParameterScanCovPlot(selected_species, task)); break;
   }
 
 }
@@ -350,4 +355,9 @@ SSAParamScanPreviewWidget::onConcentrationPlotSelected() {
 void
 SSAParamScanPreviewWidget::onCOVPlotSelected() {
   _plottype = COEFVAR_PLOT;
+}
+
+void
+SSAParamScanPreviewWidget::onFanoPlotSelected() {
+  _plottype = FANO_PLOT;
 }
