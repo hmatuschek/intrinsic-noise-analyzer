@@ -19,6 +19,12 @@ MathContext::MathContext()
   // pass...
 }
 
+MathContext::MathContext(const QFont &font)
+  : _font(font)
+{
+  // pass...
+}
+
 MathContext::MathContext(const MathContext &other)
   : _font(other._font)
 {
@@ -29,6 +35,7 @@ MathContext::MathContext(const MathContext &other)
 qreal MathContext::pixelSize() const { return QFontInfo(_font).pixelSize(); }
 qreal MathContext::fontSize() const { return _font.pointSizeF(); }
 void MathContext::setFontSize(qreal size) { _font.setPointSizeF(size); }
+void MathContext::setFont(const QFont &font) { _font = font; }
 qreal MathContext::lineWidth() const { return QFontMetricsF(_font).lineWidth(); }
 
 

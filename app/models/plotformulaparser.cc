@@ -572,9 +572,9 @@ PlotFormulaParser::Context::operator ()(size_t row, GiNaC::ex expression)
   /*GiNaC::exmap values;
   for (size_t i=0; i<_table->getNumColumns(); i++) {
     values[_symbols[i]] = (*_table)(row, i);
-  }*/
+  }
 
-  /*GiNaC::ex value;
+  GiNaC::ex value;
   try {
     value = GiNaC::evalf(expression.subs(values));
   } catch (std::exception &err) {

@@ -14,8 +14,7 @@
 #include "../views/taskview.hh"
 
 
-/** General view object for @c SSAParamScanTask instances.
- */
+/** General view object for @c SSAParamScanTask instances. */
 class SSAParamScanTaskView : public TaskView
 {
   Q_OBJECT
@@ -32,15 +31,17 @@ protected:
 };
 
 
+
 /** Displays a preview of the current statistics. The you can coose to continue the simulation. */
 class SSAParamScanPreviewWidget : public QWidget
 {
   Q_OBJECT
 
 public:
+  /** The possible plot types during preview. */
   typedef enum {
-    CONCENTRATION_PLOT,
-    COEFVAR_PLOT
+    CONCENTRATION_PLOT, ///< Shows a variance plot for the concentrations of the selected species.
+    COEFVAR_PLOT        ///< Shows the CoV for the selected species.
   } PlotType;
 
 public:
@@ -48,14 +49,23 @@ public:
   explicit SSAParamScanPreviewWidget(SSAParamScanTaskWrapper *taks_wrapper, QWidget *parent=0);
 
 private slots:
+  /** Callback for the "done" button. Finishes the simulation task. */
   void onDone();
+  /** Whenever the list of selected species was altered. */
   void onItemChanged(QListWidgetItem *item);
+  /** When the simulation statistics where updated. */
   void onScheduleUpdatePlot();
+  /** Actually updates the plot. */
   void updatePlot();
+  /** Selects all species in the list. */
   void onSelectAllSpecies();
+  /** Unselects all species in the list. */
   void onSelectNoSpecies();
+  /** Inverts the current species selection. */
   void onInvertSelection();
+  /** If a concentration plot is selected. */
   void onConcentrationPlotSelected();
+  /** If a CoV plot is selected. */
   void onCOVPlotSelected();
 
 private:

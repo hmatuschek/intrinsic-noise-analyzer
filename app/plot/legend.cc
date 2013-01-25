@@ -1,6 +1,7 @@
 #include "legend.hh"
 #include "plot.hh"
 #include "configuration.hh"
+#include "../tinytex/tinytex.hh"
 
 using namespace Plot;
 
@@ -10,46 +11,49 @@ using namespace Plot;
  * Implementation of LegendItem:
  * ********************************************************************************************* */
 LegendItem::LegendItem(const QString &label, Graph *graph, QObject *parent)
-  : QObject(parent), QGraphicsItemGroup(), graph(graph)
+  : QObject(parent), QGraphicsItemGroup(), _graph(graph), _label_text(label),
+    _space(5), _sample_length(20)
 {
   this->setPos(0,0);
 
-  this->space = 5;
-  this->sample_length = 20;
+  _line = new QGraphicsLineItem(0,0, _sample_length, 0);
+  _line->setPen(_graph->getStyle().getPen());
+  addToGroup(_line);
+  _line->setPos(0,0);
 
-  this->line = new QGraphicsLineItem(0,0, this->sample_length, 0);
-  this->line->setPen(this->graph->getStyle().getPen());
-  this->addToGroup(this->line);
-  this->line->setPos(0,0);
+  MathItem *label_item = TinyTex::parseInlineQuoted(_label_text.toStdString());
+  MathContext context(Configuration::getConfig()->getScheme(Configuration::DISPLAY_SCHEME).legendFont());
+  _label = label_item->layout(context);
+  _label_size = label_item->metrics().size(); delete label_item;
+  addToGroup(_label);
+  _label->setPos(0,0);
 
-  this->label = new QGraphicsTextItem(label);
-  this->label->setFont(
-        Configuration::getConfig()->getScheme(Configuration::DISPLAY_SCHEME).legentFont());
-  this->addToGroup(this->label);
-  this->label->setPos(0,0);
-
-  this->updateLayout();
+  updateLayout();
 }
 
 
 void
 LegendItem::setScheme(Configuration::Scheme scheme)
 {
-  // First, update label-font:
-  this->label->setFont(
-        Configuration::getConfig()->getScheme(scheme).legentFont());
+  prepareGeometryChange();
+  // First remove "old" lable
+  removeFromGroup(_label); delete _label;
+  // Create new label with scheme
+  MathItem *label_item = TinyTex::parseInlineQuoted(_label_text.toStdString());
+  MathContext context(Configuration::getConfig()->getScheme(Configuration::DISPLAY_SCHEME).legendFont());
+  _label = label_item->layout(context);
+  _label_size = label_item->metrics().size(); delete label_item;
+  addToGroup(_label);
   // Update line-style:
-  this->line->setPen(this->graph->getStyle().getPen());
-
+  _line->setPen(_graph->getStyle().getPen());
   // Update layout:
-  this->updateLayout();
+  updateLayout();
 }
 
 
 QRectF
-LegendItem::boundingRect() const
-{
-  return this->bb;
+LegendItem::boundingRect() const {
+  return this->_bb;
 }
 
 
@@ -57,22 +61,20 @@ void
 LegendItem::updateLayout()
 {
   // Reset...
-  this->line->setPos(0,0);
-  this->label->setPos(0,0);
+  this->_line->setPos(0,0);
+  this->_label->setPos(0,0);
 
   // Update positions:
-  this->line->setPos(0, this->label->boundingRect().height()/2 - this->line->pen().width()/2);
-  this->label->setPos(this->sample_length+this->space, 0);
+  this->_line->setPos(0, _label_size.height()/2 - _line->pen().width()/2);
+  this->_label->setPos(_sample_length+_space, 0);
 
   // recalc BB:
-  this->bb = this->line->boundingRect();
-  this->bb.setX(this->bb.x() + this->line->pos().x());
-  this->bb.setY(this->bb.y() + this->line->pos().y());
-  this->bb = this->bb.united(
-        QRectF(this->label->boundingRect().x()+this->label->pos().x(),
-               this->label->boundingRect().y()+this->label->pos().y(),
-               this->label->boundingRect().width(),
-               this->label->boundingRect().height()));
+  this->_bb = this->_line->boundingRect();
+  this->_bb.setX(this->_bb.x() + this->_line->pos().x());
+  this->_bb.setY(this->_bb.y() + this->_line->pos().y());
+  this->_bb = this->_bb.united(
+        QRectF(_label->pos().x(), _label->pos().y(),
+               _label_size.width(), _label_size.height()));
 }
 
 

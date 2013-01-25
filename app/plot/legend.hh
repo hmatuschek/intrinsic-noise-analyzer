@@ -22,58 +22,37 @@ class LegendItem : public QObject, public QGraphicsItemGroup
   Q_OBJECT
 
 protected:
-  /**
-   * Holds a weak reference to the graph item.
-   */
-  Graph *graph;
-
-  /**
-   * Holds the "sample" of the graph (a short line with the same style as the graph).
-   */
-  QGraphicsLineItem *line;
-
-  /**
-   * Holds the label for the graph in the legend.
-   */
-  QGraphicsTextItem *label;
-
-  /**
-   * Space between sample and label.
-   */
-  double space;
-
-  /**
-   * Length of the sample.
-   */
-  double sample_length;
-
-  /**
-   * The bounding-box of the legend-item.
-   */
-  QRectF bb;
+  /** Holds a weak reference to the graph item. */
+  Graph *_graph;
+  /** Holds the "sample" of the graph (a short line with the same style as the graph). */
+  QGraphicsLineItem *_line;
+  /** Holds the label text. */
+  QString _label_text;
+  /** Holds the label for the graph in the legend. */
+  QGraphicsItem *_label;
+  /** Holds the size of the rendered label item. */
+  QSizeF _label_size;
+  /** Space between sample and label. */
+  double _space;
+  /** Length of the sample. */
+  double _sample_length;
+  /** The bounding-box of the legend-item. */
+  QRectF _bb;
 
 
 public:
-  /**
-   * Constructs a legend-item for the given graph and with the given label.
-   **/
-  explicit LegendItem(const QString &label, Graph *graph, QObject *parent=0);
+  /** Constructs a legend-item for the given graph and with the given label. */
+  explicit LegendItem(const QString &_label, Graph *_graph, QObject *parent=0);
 
-  /**
-   * Returns the bounding-box of the item.
-   */
+  /** Returns the bounding-box of the item. */
   virtual QRectF boundingRect() const;
 
-  /**
-   * Updates the legend-item.
-   */
+  /** Updates the legend-item. */
   void updateLayout();
 
 
 public slots:
-  /**
-   * (Re-) Sets the plot-scheme.
-   */
+  /** (Re-) Sets the plot-scheme. */
   void setScheme(Configuration::Scheme scheme);
 };
 

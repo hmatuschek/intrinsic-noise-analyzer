@@ -13,9 +13,7 @@
 #include "versioncheck.hh"
 
 
-/*
- * Forward declarations...
- */
+/* Forward declarations... */
 class MainWindow;
 
 

@@ -13,6 +13,8 @@ class MathContext {
 public:
   /** Default context. */
   MathContext();
+  /** Creates a context from the given font. */
+  MathContext(const QFont &font);
   /** copy constructor. */
   MathContext(const MathContext &other);
 
@@ -22,7 +24,8 @@ public:
   qreal fontSize() const;
   /** Sets the current font size. */
   void setFontSize(qreal size);
-
+  /** Sets the complete font for the context. */
+  void setFont(const QFont &font);
   /** Fontsize dependent line width. */
   qreal lineWidth() const;
 

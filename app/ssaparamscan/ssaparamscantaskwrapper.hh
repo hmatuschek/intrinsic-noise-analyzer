@@ -6,7 +6,8 @@
 #include "ssaparamscantask.hh"
 
 
-
+/** This class represents the analysis or results of the analysis as a tree item for the side panel.
+ * @todo Rename to item. */
 class SSAParamScanTaskWrapper : public TaskItem
 {
   Q_OBJECT
@@ -21,4 +22,4 @@ public:
 };
 
 
-#endif // LNATASKWRAPPER_HH
+#endif

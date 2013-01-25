@@ -46,6 +46,9 @@ public:
   /** Handles quoted strings. */
   static MathItem *parseQuoted(const std::string &source);
 
+  /** Parses a string with inline TeX quotes. */
+  static MathItem *parseInlineQuoted(const std::string &source);
+
   /** Parses the name of a @c Ast::VariableDefinition if set otherwise the
    * identifier. */
   static MathItem *parseVariable(const iNA::Ast::VariableDefinition *var);
