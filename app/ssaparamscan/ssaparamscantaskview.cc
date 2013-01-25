@@ -170,7 +170,7 @@ SSAParamScanResultWidget::saveButtonPressed()
  * Implementation of PreviewWidget
  * ********************************************************************************************* */
 SSAParamScanPreviewWidget::SSAParamScanPreviewWidget(SSAParamScanTaskWrapper *task_wrapper, QWidget *parent):
-  QWidget(parent), _task_item(task_wrapper), _updateTimer()
+  QWidget(parent), _task_item(task_wrapper), _updateTimer(), _plottype(CONCENTRATION_PLOT)
 {
   this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
   this->setBackgroundRole(QPalette::Window);
@@ -178,11 +178,20 @@ SSAParamScanPreviewWidget::SSAParamScanPreviewWidget(SSAParamScanTaskWrapper *ta
   // Preview
   _plot_canvas = new Plot::Canvas();
   _plot_canvas->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+  // Button to select plot
+  QPushButton *plot_type_button = new QPushButton(tr("Select plot type"));
+  QMenu *plot_menu = new QMenu();
+  plot_menu->addAction(tr("Concentrations"), this, SLOT(onConcentrationPlotSelected()));
+  plot_menu->addAction(tr("Coefficient of variation"), this, SLOT(onCOVPlotSelected()));
+  plot_type_button->setMenu(plot_menu);
+  // Label to show number of iteration and simulation time
+  _iteration_label = new QLabel("");
+  _iteration_label->setTextFormat(Qt::LogText);
   // List of species
   _species_list = new QListWidget();
   _species_list->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
   // Button to select species
-  QPushButton *selection_button = new QPushButton("Select");
+  QPushButton *selection_button = new QPushButton("Select species");
   QMenu *selection_menu = new QMenu();
   selection_menu->addAction(tr("Select all species"), this, SLOT(onSelectAllSpecies()));
   selection_menu->addAction(tr("Unselect all species"), this, SLOT(onSelectNoSpecies()));
@@ -190,9 +199,6 @@ SSAParamScanPreviewWidget::SSAParamScanPreviewWidget(SSAParamScanTaskWrapper *ta
   selection_button->setMenu(selection_menu);
   // Button to stop simulation
   QPushButton *done_button = new QPushButton(tr("done"));
-  // Label to show number of iteration and simulation time
-  _iteration_label = new QLabel("");
-  _iteration_label->setTextFormat(Qt::LogText);
 
   // Populate species list
   SSAParamScanTask *task = dynamic_cast<SSAParamScanTask *>(task_wrapper->getTask());
@@ -211,16 +217,19 @@ SSAParamScanPreviewWidget::SSAParamScanPreviewWidget(SSAParamScanTaskWrapper *ta
   }
 
   // Assemble layout
-  QHBoxLayout *plot_layout = new QHBoxLayout();
+  QHBoxLayout *layout = new QHBoxLayout();
+  QHBoxLayout *plot_header = new QHBoxLayout();
+  plot_header->addWidget(plot_type_button);
+  plot_header->addWidget(_iteration_label);
+  QVBoxLayout *plot_layout = new QVBoxLayout();
   plot_layout->addWidget(_plot_canvas, 1);
+  plot_layout->addLayout(plot_header);
   QVBoxLayout *species_list_layout = new QVBoxLayout();
   species_list_layout->addWidget(selection_button, 0);
   species_list_layout->addWidget(_species_list, 1);
   species_list_layout->addWidget(done_button);
-  plot_layout->addLayout(species_list_layout);
-  QVBoxLayout *layout = new QVBoxLayout();
   layout->addLayout(plot_layout);
-  layout->addWidget(_iteration_label);
+  layout->addLayout(species_list_layout);
   setLayout(layout);
 
   // Connect some signals
@@ -264,6 +273,7 @@ SSAParamScanPreviewWidget::updatePlot()
     }
   }
 
+  // Get task instance...
   SSAParamScanTask *task = dynamic_cast<SSAParamScanTask *>(_task_item->getTask());
 
   // Update label:
@@ -276,7 +286,12 @@ SSAParamScanPreviewWidget::updatePlot()
   if (0 != old_plot) { old_plot->deleteLater(); }
 
   // Update plot
-  _plot_canvas->setPlot(new SSAParameterScanPlot(selected_species, task));
+  if (CONCENTRATION_PLOT == _plottype) {
+    _plot_canvas->setPlot(new SSAParameterScanPlot(selected_species, task));
+  } else {
+    _plot_canvas->setPlot(new SSAParameterScanCovPlot(selected_species, task));
+  }
+
 }
 
 
@@ -318,3 +333,12 @@ SSAParamScanPreviewWidget::onInvertSelection()
   }
 }
 
+void
+SSAParamScanPreviewWidget::onConcentrationPlotSelected() {
+  _plottype = CONCENTRATION_PLOT;
+}
+
+void
+SSAParamScanPreviewWidget::onCOVPlotSelected() {
+  _plottype = COEFVAR_PLOT;
+}

@@ -38,6 +38,12 @@ class SSAParamScanPreviewWidget : public QWidget
   Q_OBJECT
 
 public:
+  typedef enum {
+    CONCENTRATION_PLOT,
+    COEFVAR_PLOT
+  } PlotType;
+
+public:
   /** Constructor. */
   explicit SSAParamScanPreviewWidget(SSAParamScanTaskWrapper *taks_wrapper, QWidget *parent=0);
 
@@ -49,6 +55,8 @@ private slots:
   void onSelectAllSpecies();
   void onSelectNoSpecies();
   void onInvertSelection();
+  void onConcentrationPlotSelected();
+  void onCOVPlotSelected();
 
 private:
   /** Holds a weak refernce to the task item. */
@@ -61,6 +69,8 @@ private:
   QTimer _updateTimer;
   /** Shows the current iteration. */
   QLabel *_iteration_label;
+  /** Which plot-type is selected. */
+  PlotType _plottype;
 };
 
 
