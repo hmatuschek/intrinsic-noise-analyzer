@@ -16,7 +16,7 @@ class LinePlot : public Plot::Figure
 
 public:
   /** Default constructor, with title. */
-  LinePlot(const QString &title, QObject *parent=0);
+  LinePlot(const QString &_title, QObject *parent=0);
   /** Adds a graph to the plot. */
   void addLineGraph(const Eigen::VectorXd &x, const Eigen::VectorXd &mean,
                         const QString &label="");
@@ -37,7 +37,7 @@ class VariancePlot : public Plot::Figure
 
 public:
   /** Default constructor, with title. */
-  VariancePlot(const QString &title, QObject *parent=0);
+  VariancePlot(const QString &_title, QObject *parent=0);
   /** Adds a graph to the plot. */
   void addVarianceGraph(const Eigen::VectorXd &x, const Eigen::VectorXd &mean,
                         const Eigen::VectorXd &var, const QString &label="");

@@ -340,11 +340,11 @@ Unit::end() const {
 
 
 void
-Unit::dump(std::ostream &str, bool html) const
+Unit::dump(std::ostream &str, bool tex) const
 {
 
   // return standard dump
-  if(!html)
+  if(!tex)
   {
     if (1 != this->common_multiplier || 0 != this->common_scale) {
       str << this->common_multiplier << "e" << this->common_scale;
@@ -376,7 +376,8 @@ Unit::dump(std::ostream &str, bool html) const
     return;
   }
 
-  // otherwise dump html
+  // otherwise dump TeX
+  str << "$";
 
   // catch arbitrary units
   if(isDimensionless()) str << "a.u.";
@@ -387,18 +388,18 @@ Unit::dump(std::ostream &str, bool html) const
     float fac = common_multiplier;
     fac *= (0 != common_scale) ? std::pow(10.,common_scale) : 1;
 
-    if( fac==86400 ) { str << "d"; return; }
-    else if ( fac==3600 ) { str << "h"; return; }
-    else if ( fac==60 ) { str << "min"; return; }
+    if( fac==86400 ) { str << "d$"; return; }
+    else if ( fac==3600 ) { str << "h$"; return; }
+    else if ( fac==60 ) { str << "min$"; return; }
   }
 
   // first dump the scale
   if (1 != this->common_multiplier) {
-    str << this->common_multiplier << "&times;";
+    str << this->common_multiplier << "\times";
   }
 
   if (0 != this->common_scale) {
-    str << "10<sup>" << this->common_scale << "</sup>";
+    str << "10^{" << this->common_scale << "}";
   }
 
   // then the units
@@ -417,7 +418,7 @@ Unit::dump(std::ostream &str, bool html) const
       {
         numerator << ScaledBaseUnit::baseUnitRepr(iter->first);
         if (iter->second!=1)
-          numerator << "<sup>"<<(iter->second)<<"</sup>";
+          numerator << "^{"<<(iter->second)<<"}";
         numerator << " ";
         nnum++;
       }
@@ -425,7 +426,7 @@ Unit::dump(std::ostream &str, bool html) const
       {
         denominator << ScaledBaseUnit::baseUnitRepr(iter->first);
         if (iter->second!=-1)
-          denominator << "<sup>"<<-(iter->second)<<"</sup>";
+          denominator << "^{"<<-(iter->second)<<"}";
         denominator << " ";
       }
     }
@@ -450,13 +451,14 @@ Unit::dump(std::ostream &str, bool html) const
     if (1 != this->common_multiplier || 0 != this->common_scale)
         str << ")";
   }
+  str << "$";
 }
 
 
 std::string
-Unit::dump(bool html) const {
+Unit::dump(bool tex) const {
   std::stringstream buffer;
-  dump(buffer, html);
+  dump(buffer, tex);
   return buffer.str();
 }
 

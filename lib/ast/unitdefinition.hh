@@ -231,7 +231,7 @@ public:
   bool isExactlyDimensionless() const;
 
   /** Dumps the unit into the given stream. */
-  void dump(std::ostream &str, bool html=false) const;
+  void dump(std::ostream &str, bool tex=false) const;
   /** Dumps the unit as a string. */
   std::string dump(bool html=false) const;
 
