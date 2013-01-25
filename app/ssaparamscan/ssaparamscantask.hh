@@ -98,7 +98,8 @@ protected:
   bool _reset_stats;
   /** Holds the current iteration number. */
   size_t _current_iteration;
-
+  /** Holds the simulation time. */
+  size_t _simulation_time;
 
 public:
   explicit SSAParamScanTask(const Config &config, QObject *parent=0);

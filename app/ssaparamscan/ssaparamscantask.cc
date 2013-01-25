@@ -98,7 +98,7 @@ SSAParamScanTask::Config::setTransientTime(double t)
  * ******************************************************************************************* */
 SSAParamScanTask::SSAParamScanTask(const Config &config, QObject *parent)
     : Task(parent), config(config), _Ns(config.getModel()->numSpecies()), parameterScan(1,1),
-      _stop_iteration(false), _reset_stats(false)
+      _stop_iteration(false), _reset_stats(false), _simulation_time(config.getTransientTime())
 {
   // Will hold the species names
   std::vector<QString> species_name(_Ns);
@@ -193,7 +193,7 @@ SSAParamScanTask::process()
 
   // Iterate
   _current_iteration = 0;
-  for (double current_time=0; current_time<=config.getMaxTime(); current_time+=config.getTimeStep())
+  for (; _simulation_time<=config.getMaxTime(); _simulation_time+=config.getTimeStep())
   {
     // perform a step:
     _pscan.run(config.getTimeStep());
@@ -259,6 +259,7 @@ SSAParamScanTask::stopIteration() {
 void
 SSAParamScanTask::resetStatistics() {
   _reset_stats = true;
+  _current_iteration = 0;
 }
 
 size_t
@@ -268,7 +269,7 @@ SSAParamScanTask::currentIteration() const {
 
 double
 SSAParamScanTask::currentTime() const {
-  return _current_iteration*config.getTimeStep();
+  return _simulation_time;
 }
 
 

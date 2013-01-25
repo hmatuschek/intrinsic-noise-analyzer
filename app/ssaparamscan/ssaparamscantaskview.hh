@@ -113,4 +113,4 @@ private:
   QPushButton  *customPlotButton;
 };
 
-#endif // LNATASKVIEW_HH
+#endif

@@ -281,7 +281,7 @@ SSAParamScanPreviewWidget::updatePlot()
 
   // Update label:
   _iteration_label->setText(
-        tr("Current iteration (simulation time): %1 (%2)").arg(
+        tr("Sample size (simulation time): %1 (%2)").arg(
           task->currentIteration()).arg(task->currentTime()));
 
   // Remove and destroy "old" plot
