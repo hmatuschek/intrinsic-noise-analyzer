@@ -47,7 +47,7 @@ public:
         for(ParameterSet::iterator it=parameterSets[j].begin(); it!=parameterSets[j].end(); it++)
           mod->getParameter((*it).first)->setValue((*it).second);
         // Create SSA
-        simulators[j] = new Models::OptimizedSSA(*mod, 1, 1024);
+        simulators[j] = new Models::OptimizedSSA(*mod, 1, time(0));
         delete mod;
       }
 
@@ -99,6 +99,17 @@ public:
     {
       return this->_cov;
     }
+
+    void resetStatistics()
+    {
+
+        this->_n=1;
+        this->_mean = Eigen::MatrixXd::Zero(_mean.rows(),_mean.cols());
+        this->_cov  = Eigen::MatrixXd::Zero(_cov.rows(),_cov.cols());
+
+    }
+
+
 
 };
 

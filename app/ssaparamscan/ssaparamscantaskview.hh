@@ -51,6 +51,8 @@ public:
 private slots:
   /** Callback for the "done" button. Finishes the simulation task. */
   void onDone();
+  /** Callback for the "reset" button. Clears statistics during simulation task. */
+  void onReset();
   /** Whenever the list of selected species was altered. */
   void onItemChanged(QListWidgetItem *item);
   /** When the simulation statistics where updated. */

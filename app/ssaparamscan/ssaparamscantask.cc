@@ -98,7 +98,7 @@ SSAParamScanTask::Config::setTransientTime(double t)
  * ******************************************************************************************* */
 SSAParamScanTask::SSAParamScanTask(const Config &config, QObject *parent)
     : Task(parent), config(config), _Ns(config.getModel()->numSpecies()), parameterScan(1,1),
-      _stop_iteration(false)
+      _stop_iteration(false), _reset_stats(false)
 {
   // Will hold the species names
   std::vector<QString> species_name(_Ns);
@@ -211,6 +211,12 @@ SSAParamScanTask::process()
       break;
     }
 
+    // If stats should be reseted:
+    if (_reset_stats) {
+      _pscan.resetStatistics();
+      _reset_stats = false;
+    }
+
     // Fill table
     for(size_t pid=0; pid<_parameterSets.size(); pid++)
     {
@@ -250,6 +256,10 @@ SSAParamScanTask::stopIteration() {
   _stop_iteration = true;
 }
 
+void
+SSAParamScanTask::resetStatistics() {
+  _reset_stats = true;
+}
 
 size_t
 SSAParamScanTask::currentIteration() const {

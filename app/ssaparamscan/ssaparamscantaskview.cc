@@ -198,7 +198,8 @@ SSAParamScanPreviewWidget::SSAParamScanPreviewWidget(SSAParamScanTaskWrapper *ta
   selection_menu->addAction(tr("Invert selection"), this, SLOT(onInvertSelection()));
   selection_button->setMenu(selection_menu);
   // Button to stop simulation
-  QPushButton *done_button = new QPushButton(tr("done"));
+  QPushButton *done_button = new QPushButton(tr("Done"));
+  QPushButton *reset_button = new QPushButton(tr("Reset Statistics"));
 
   // Populate species list
   SSAParamScanTask *task = dynamic_cast<SSAParamScanTask *>(task_wrapper->getTask());
@@ -227,6 +228,7 @@ SSAParamScanPreviewWidget::SSAParamScanPreviewWidget(SSAParamScanTaskWrapper *ta
   QVBoxLayout *species_list_layout = new QVBoxLayout();
   species_list_layout->addWidget(selection_button, 0);
   species_list_layout->addWidget(_species_list, 1);
+  species_list_layout->addWidget(reset_button);
   species_list_layout->addWidget(done_button);
   layout->addLayout(plot_layout);
   layout->addLayout(species_list_layout);
@@ -236,6 +238,7 @@ SSAParamScanPreviewWidget::SSAParamScanPreviewWidget(SSAParamScanTaskWrapper *ta
   QObject::connect(_species_list, SIGNAL(itemChanged(QListWidgetItem*)),
                    this, SLOT(onItemChanged(QListWidgetItem*)));
   QObject::connect(done_button, SIGNAL(clicked()), this, SLOT(onDone()));
+  QObject::connect(reset_button, SIGNAL(clicked()), this, SLOT(onReset()));
   QObject::connect(task, SIGNAL(stepPerformed()), this, SLOT(onScheduleUpdatePlot()));
   QObject::connect(&_updateTimer, SIGNAL(timeout()), this, SLOT(updatePlot()));
 
@@ -302,6 +305,12 @@ SSAParamScanPreviewWidget::onDone()
   task->stopIteration();
 }
 
+void
+SSAParamScanPreviewWidget::onReset()
+{
+  SSAParamScanTask *task = dynamic_cast<SSAParamScanTask *>(_task_item->getTask());
+  task->resetStatistics();
+}
 
 void
 SSAParamScanPreviewWidget::onSelectAllSpecies()
