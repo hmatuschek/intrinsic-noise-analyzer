@@ -15,10 +15,11 @@ int main(int argc, char *argv[])
   }
 
     // Construct SSA model from SBML model
-    Ast::Model sbml_model; Parser::Sbmlsh::importModel(sbml_model, argv[1]);
+    Ast::Model sbml_model; Parser::Sbml::importModel(sbml_model, argv[1]);
     Models::OptimizedSSA model(sbml_model, 1, 1024);
 
-    double min=0., max=2.;
+    int p_idx=5;
+    double min=0.0, max=.5;
     size_t num = 50;
 
     std::vector<Models::OptimizedSSA*> models(num);
@@ -28,16 +29,16 @@ int main(int argc, char *argv[])
     int i=0;
     for(double p=min; p<=max; p+=(max-min)/num,i++)
     {
-        sbml_model.getParameter(7)->setValue(p);
+        sbml_model.getParameter(p_idx)->setValue(p);
         models[i] = new Models::OptimizedSSA(sbml_model, 1, 1024);
-        models[i]->run(10);
+        models[i]->run(3);
     }
 
     Eigen::VectorXd mean(model.numSpecies());
     Eigen::MatrixXd cov(model.numSpecies(),model.numSpecies());
     Eigen::VectorXd skew(model.numSpecies());
 
-    std::cout<<"Parameter: "<<model.getParameter(7)->getIdentifier()<<std::endl;
+    std::cout<<"Parameter: "<<model.getParameter(p_idx)->getIdentifier()<<std::endl;
 
     double dt=0.1;
     int n=0;
@@ -46,7 +47,7 @@ int main(int argc, char *argv[])
 
         // average
         int i=0;
-        for(double p=min; p<=max; p+=(max-min)/num, i++)
+        for(double p=min; p<max; p+=(max-min)/num, i++)
         {
             models[i]->run(dt);
             models[i]->stats(mean,cov,skew);
@@ -64,7 +65,7 @@ int main(int argc, char *argv[])
 
         // write to file
         i=0;
-        for(double p=min; p<=max; p+=(max-min)/num, i++)
+        for(double p=min; p<max; p+=(max-min)/num, i++)
         {
             outfile << p << "\t";
             fanofile << p << "\t";

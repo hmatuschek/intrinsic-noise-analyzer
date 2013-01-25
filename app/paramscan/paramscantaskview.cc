@@ -109,6 +109,12 @@ ParamScanResultWidget::plotButtonPressed()
             new PlotItem(
               new ParameterScanCovPlot(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
 
+      // Add Fano COV plot
+      Application::getApp()->docTree()->addPlot(
+            this->paramscan_task_wrapper,
+            new PlotItem(
+              new ParameterScanFanoPlot(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
+
       break;
   case ParamScanTask::Config::IOS_ANALYSIS:
       // Add IOS parameter plot
@@ -122,6 +128,13 @@ ParamScanResultWidget::plotButtonPressed()
             this->paramscan_task_wrapper,
             new PlotItem(
               new ParameterScanCovIOSPlot(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
+
+      // Add IOS Fano plot
+      Application::getApp()->docTree()->addPlot(
+            this->paramscan_task_wrapper,
+            new PlotItem(
+              new ParameterScanFanoIOSPlot(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
+
       break;
   default:
       break;

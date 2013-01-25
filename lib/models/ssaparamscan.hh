@@ -40,15 +40,12 @@ public:
       for(size_t j = 0; j < parameterSets.size(); j++)
       {
         // Copy model
-        /// @bug Memory leak! Simply set the value of sbml_model itself. OptimizedSSA copies the
-        ///      model anyway.
-        Ast::Model *mod = new Ast::Model(sbml_model);
+        Ast::Model mod(sbml_model);
         // Apply parameter set
         for(ParameterSet::iterator it=parameterSets[j].begin(); it!=parameterSets[j].end(); it++)
-          mod->getParameter((*it).first)->setValue((*it).second);
+          mod.getParameter((*it).first)->setValue((*it).second);
         // Create SSA
-        simulators[j] = new Models::OptimizedSSA(*mod, 1, 1024);
-        delete mod;
+        simulators[j] = new Models::OptimizedSSA(mod, 1, time(0));
       }
 
       // Advance state
@@ -99,6 +96,17 @@ public:
     {
       return this->_cov;
     }
+
+    void resetStatistics()
+    {
+
+        this->_n=1;
+        this->_mean = Eigen::MatrixXd::Zero(_mean.rows(),_mean.cols());
+        this->_cov  = Eigen::MatrixXd::Zero(_cov.rows(),_cov.cols());
+
+    }
+
+
 
 };
 

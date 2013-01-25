@@ -183,6 +183,7 @@ SSAParamScanPreviewWidget::SSAParamScanPreviewWidget(SSAParamScanTaskWrapper *ta
   QMenu *plot_menu = new QMenu();
   plot_menu->addAction(tr("Concentrations"), this, SLOT(onConcentrationPlotSelected()));
   plot_menu->addAction(tr("Coefficient of variation"), this, SLOT(onCOVPlotSelected()));
+  plot_menu->addAction(tr("Fano factor"), this, SLOT(onFanoPlotSelected()));
   plot_type_button->setMenu(plot_menu);
   // Label to show number of iteration and simulation time
   _iteration_label = new QLabel("");
@@ -198,7 +199,8 @@ SSAParamScanPreviewWidget::SSAParamScanPreviewWidget(SSAParamScanTaskWrapper *ta
   selection_menu->addAction(tr("Invert selection"), this, SLOT(onInvertSelection()));
   selection_button->setMenu(selection_menu);
   // Button to stop simulation
-  QPushButton *done_button = new QPushButton(tr("done"));
+  QPushButton *done_button = new QPushButton(tr("Done"));
+  QPushButton *reset_button = new QPushButton(tr("Reset Statistics"));
 
   // Populate species list
   SSAParamScanTask *task = dynamic_cast<SSAParamScanTask *>(task_wrapper->getTask());
@@ -227,6 +229,7 @@ SSAParamScanPreviewWidget::SSAParamScanPreviewWidget(SSAParamScanTaskWrapper *ta
   QVBoxLayout *species_list_layout = new QVBoxLayout();
   species_list_layout->addWidget(selection_button, 0);
   species_list_layout->addWidget(_species_list, 1);
+  species_list_layout->addWidget(reset_button);
   species_list_layout->addWidget(done_button);
   layout->addLayout(plot_layout);
   layout->addLayout(species_list_layout);
@@ -236,6 +239,7 @@ SSAParamScanPreviewWidget::SSAParamScanPreviewWidget(SSAParamScanTaskWrapper *ta
   QObject::connect(_species_list, SIGNAL(itemChanged(QListWidgetItem*)),
                    this, SLOT(onItemChanged(QListWidgetItem*)));
   QObject::connect(done_button, SIGNAL(clicked()), this, SLOT(onDone()));
+  QObject::connect(reset_button, SIGNAL(clicked()), this, SLOT(onReset()));
   QObject::connect(task, SIGNAL(stepPerformed()), this, SLOT(onScheduleUpdatePlot()));
   QObject::connect(&_updateTimer, SIGNAL(timeout()), this, SLOT(updatePlot()));
 
@@ -278,7 +282,7 @@ SSAParamScanPreviewWidget::updatePlot()
 
   // Update label:
   _iteration_label->setText(
-        tr("Current iteration (simulation time): %1 (%2)").arg(
+        tr("Sample size (simulation time): %1 (%2)").arg(
           task->currentIteration()).arg(task->currentTime()));
 
   // Remove and destroy "old" plot
@@ -286,10 +290,14 @@ SSAParamScanPreviewWidget::updatePlot()
   if (0 != old_plot) { old_plot->deleteLater(); }
 
   // Update plot
-  if (CONCENTRATION_PLOT == _plottype) {
-    _plot_canvas->setPlot(new SSAParameterScanPlot(selected_species, task));
-  } else {
-    _plot_canvas->setPlot(new SSAParameterScanCovPlot(selected_species, task));
+  switch(_plottype)
+  {
+      case CONCENTRATION_PLOT:
+        _plot_canvas->setPlot(new SSAParameterScanPlot(selected_species, task)); break;
+      case FANO_PLOT:
+        _plot_canvas->setPlot(new SSAParameterScanFanoPlot(selected_species, task)); break;
+      case COEFVAR_PLOT:
+        _plot_canvas->setPlot(new SSAParameterScanCovPlot(selected_species, task)); break;
   }
 
 }
@@ -302,6 +310,12 @@ SSAParamScanPreviewWidget::onDone()
   task->stopIteration();
 }
 
+void
+SSAParamScanPreviewWidget::onReset()
+{
+  SSAParamScanTask *task = dynamic_cast<SSAParamScanTask *>(_task_item->getTask());
+  task->resetStatistics();
+}
 
 void
 SSAParamScanPreviewWidget::onSelectAllSpecies()
@@ -341,4 +355,9 @@ SSAParamScanPreviewWidget::onConcentrationPlotSelected() {
 void
 SSAParamScanPreviewWidget::onCOVPlotSelected() {
   _plottype = COEFVAR_PLOT;
+}
+
+void
+SSAParamScanPreviewWidget::onFanoPlotSelected() {
+  _plottype = FANO_PLOT;
 }

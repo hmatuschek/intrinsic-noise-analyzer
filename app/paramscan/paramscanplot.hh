@@ -57,6 +57,19 @@ public:
   explicit ParameterScanCovPlot(const QStringList &selected_species, ParamScanTask *task, QObject *parent=0);
 };
 
+
+/**
+ * Collects data from a @c Table and updates the
+ * @c VarianceLinesGraph instance.
+ */
+class ParameterScanFanoPlot : public LinePlot
+{
+  Q_OBJECT
+
+public:
+  explicit ParameterScanFanoPlot(const QStringList &selected_species, ParamScanTask *task, QObject *parent=0);
+};
+
 /**
  * Collects data from a @c Table and updates the
  * @c VarianceLinesGraph instance.
@@ -69,5 +82,16 @@ public:
   explicit ParameterScanCovIOSPlot(const QStringList &selected_species, ParamScanTask *task, QObject *parent=0);
 };
 
+/**
+ * Collects data from a @c Table and updates the
+ * @c VarianceLinesGraph instance.
+ */
+class ParameterScanFanoIOSPlot : public LinePlot
+{
+  Q_OBJECT
+
+public:
+  explicit ParameterScanFanoIOSPlot(const QStringList &selected_species, ParamScanTask *task, QObject *parent=0);
+};
 
 #endif

@@ -41,7 +41,8 @@ public:
   /** The possible plot types during preview. */
   typedef enum {
     CONCENTRATION_PLOT, ///< Shows a variance plot for the concentrations of the selected species.
-    COEFVAR_PLOT        ///< Shows the CoV for the selected species.
+    COEFVAR_PLOT,        ///< Shows the CoV for the selected species.
+    FANO_PLOT        ///< Shows the Fano Factor for the selected species.
   } PlotType;
 
 public:
@@ -51,6 +52,8 @@ public:
 private slots:
   /** Callback for the "done" button. Finishes the simulation task. */
   void onDone();
+  /** Callback for the "reset" button. Clears statistics during simulation task. */
+  void onReset();
   /** Whenever the list of selected species was altered. */
   void onItemChanged(QListWidgetItem *item);
   /** When the simulation statistics where updated. */
@@ -67,6 +70,8 @@ private slots:
   void onConcentrationPlotSelected();
   /** If a CoV plot is selected. */
   void onCOVPlotSelected();
+  /** If a Fano plot is selected. */
+  void onFanoPlotSelected();
 
 private:
   /** Holds a weak refernce to the task item. */
@@ -111,4 +116,4 @@ private:
   QPushButton  *customPlotButton;
 };
 
-#endif // LNATASKVIEW_HH
+#endif

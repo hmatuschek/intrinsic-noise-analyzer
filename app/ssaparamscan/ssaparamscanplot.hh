@@ -46,5 +46,16 @@ public:
   explicit SSAParameterScanCovPlot(const QStringList &selected_species, SSAParamScanTask *task, QObject *parent=0);
 };
 
+/**
+ * Collects data from a @c Table and updates the
+ * @c VarianceLinesGraph instance.
+ */
+class SSAParameterScanFanoPlot : public LinePlot
+{
+  Q_OBJECT
+
+public:
+  explicit SSAParameterScanFanoPlot(const QStringList &selected_species, SSAParamScanTask *task, QObject *parent=0);
+};
 
 #endif

@@ -94,9 +94,12 @@ protected:
   Table parameterScan;
   /** If true, the iteration will be stopped. */
   bool _stop_iteration;
+  /** If true, resets the statistics of the scan. */
+  bool _reset_stats;
   /** Holds the current iteration number. */
   size_t _current_iteration;
-
+  /** Holds the simulation time. */
+  double _simulation_time;
 
 public:
   explicit SSAParamScanTask(const Config &config, QObject *parent=0);
@@ -114,6 +117,7 @@ public:
   double currentTime() const;
 
   void stopIteration();
+  void resetStatistics();
 
 signals:
   /** Will be emitted each time a simulation step was performed. */
