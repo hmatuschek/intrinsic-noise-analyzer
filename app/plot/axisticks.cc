@@ -286,15 +286,11 @@ AxisTicks::updatePositions()
   case AxisTick::LEFT:
     this->_labelitem->setPos(0, _mapping->size().height()/2 + _labelsize.width()/2);
     margin += _labelsize.height();
-    std::cerr << "Move label " << _labeltext.toStdString()
-              << " to " << _labelitem->pos().x() << ", " << _labelitem->pos().y() << std::endl;
     break;
 
   case AxisTick::TOP:
     this->_labelitem->setPos(this->_mapping->size().width()/2 - this->_labelsize.width()/2, 0);
     margin += _labelsize.height();
-    std::cerr << "Move label " << _labeltext.toStdString()
-              << " to " << _labelitem->pos().x() << ", " << _labelitem->pos().y() << std::endl;
     break;
 
   default:
@@ -339,14 +335,10 @@ AxisTicks::updatePositions()
   {
   case AxisTick::RIGHT:
     _labelitem->setPos(max_width, _mapping->size().height()/2+_labelsize.width()/2);
-    std::cerr << "Move label " << _labeltext.toStdString()
-              << " to " << _labelitem->pos().x() << ", " << _labelitem->pos().y() << std::endl;
     break;
 
   case AxisTick::BOTTOM:
     _labelitem->setPos(_mapping->size().width()/2 - _labelsize.width()/2, max_height);
-    std::cerr << "Move label " << _labeltext.toStdString()
-              << " to " << _labelitem->pos().x() << ", " << _labelitem->pos().y() << std::endl;
     break;
 
   default:
