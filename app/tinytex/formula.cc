@@ -36,6 +36,7 @@ qreal MathContext::pixelSize() const { return QFontInfo(_font).pixelSize(); }
 qreal MathContext::fontSize() const { return _font.pointSizeF(); }
 void MathContext::setFontSize(qreal size) { _font.setPointSizeF(size); }
 void MathContext::setFont(const QFont &font) { _font = font; }
+const QFont &MathContext::font() const { return _font; }
 qreal MathContext::lineWidth() const { return QFontMetricsF(_font).lineWidth(); }
 
 
@@ -436,7 +437,7 @@ MathText::layout(const MathContext &context, QGraphicsItem *parent)
 {
   // Create item and get font:
   QGraphicsSimpleTextItem *item = new QGraphicsSimpleTextItem(parent); item->setPos(0,0);
-  QFont font(item->font()); font.setPointSizeF(context.fontSize());
+  QFont font(context.font());
 
   // Update metrics:
   QFontMetricsF font_metrics(font);

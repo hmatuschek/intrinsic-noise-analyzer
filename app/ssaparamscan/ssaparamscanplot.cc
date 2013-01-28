@@ -3,7 +3,7 @@
 #include "../plot/linegraph.hh"
 #include <QVector>
 #include "../views/varianceplot.hh"
-#include "../math.h"
+#include <math.h>
 
 
 SSAParameterScanPlot::SSAParameterScanPlot(const QStringList &selected_species, SSAParamScanTask *task,

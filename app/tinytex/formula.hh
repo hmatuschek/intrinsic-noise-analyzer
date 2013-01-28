@@ -26,6 +26,8 @@ public:
   void setFontSize(qreal size);
   /** Sets the complete font for the context. */
   void setFont(const QFont &font);
+  /** Retrurns the font. */
+  const QFont &font() const;
   /** Fontsize dependent line width. */
   qreal lineWidth() const;
 

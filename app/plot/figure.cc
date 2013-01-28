@@ -14,7 +14,7 @@ using namespace Plot;
 
 
 Figure::Figure(const QString &title, QObject *parent) :
-  QGraphicsScene(parent),_math_ctx(), _titlesize(0,0), _titletext(title), _title(0),
+  QGraphicsScene(parent), _math_ctx(), _titlesize(0,0), _titletext(title), _title(0),
   _legend_pos(TOP_RIGHT),_measures_enabled(true)
 {
   const double fac = 255.;
@@ -84,6 +84,7 @@ Figure::setScheme(Configuration::Scheme scheme)
   MathItem *title_item = TinyTex::parseInlineQuoted(_titletext.toStdString());
   _title = title_item->layout(_math_ctx); _titlesize = title_item->metrics().size();
   delete title_item; _title->setPos(0,0);
+  addItem(_title);
 
   // Update scheme of legend and axis:
   _axis->setScheme(scheme);
@@ -161,7 +162,8 @@ Figure::setTitle(const QString &title)
   // Update title:
   MathItem *title_item = TinyTex::parseInlineQuoted(_titletext.toStdString());
   _title = title_item->layout(_math_ctx); _titlesize = title_item->metrics().size();
-  delete title_item; _title->setPos(0,0);
+  delete title_item; _title->setPos(0,0); addItem(_title);
+
   // layout everything
   updateAxes();
 }
