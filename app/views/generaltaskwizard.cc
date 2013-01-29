@@ -25,34 +25,41 @@ ModelSelectionWizardPage::ModelSelectionWizardPage(GeneralTaskWizard *parent)
   : QWizardPage(parent)
 {
   QVBoxLayout *layout = new QVBoxLayout();
-  this->modelSelection = new QComboBox();
-  this->modelSelection->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
-  this->modelSelection->setFixedWidth(400);
-  this->modelSelection->setModel(Application::getApp()->docTree());
+  _modelSelection = new QComboBox();
+  _modelSelection->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
+  _modelSelection->setFixedWidth(400);
+  _modelSelection->setModel(Application::getApp()->docTree());
   //this->registerField("Model*", this->modelSelection);
 
-  layout->addWidget(this->modelSelection);
-  this->setLayout(layout);
+  layout->addWidget(this->_modelSelection);
+  setLayout(layout);
 }
 
 void
 ModelSelectionWizardPage::initializePage()
 {
-  if (0 < this->modelSelection->model()->rowCount()) {
-    this->modelSelection->setCurrentIndex(0);
+  if (0 < _modelSelection->model()->rowCount()) {
+    _modelSelection->setCurrentIndex(0);
   }
 }
 
 bool
 ModelSelectionWizardPage::validatePage()
 {
+  // Check if a model was selected:
+  if ((0 > _modelSelection->currentIndex()) ||
+      (_modelSelection->currentIndex() >= _modelSelection->model()->rowCount())) {
+    return false;
+  }
+
   // Get the wizard:
   GeneralTaskWizard *wizard = static_cast<GeneralTaskWizard *>(this->wizard());
-
+  // Get the selected document (model)
   DocumentTree *docs = Application::getApp()->docTree();
   TreeItem *item = static_cast<TreeItem *>(
-        docs->index(this->modelSelection->currentIndex(),0).internalPointer());
+        docs->index(_modelSelection->currentIndex(),0).internalPointer());
   DocumentItem *doc = dynamic_cast<DocumentItem *>(item);
+  // Store selected model into config.
   wizard->getConfigCast<ModelSelectionTaskConfig>().setModelDocument(doc);
 
   return true;

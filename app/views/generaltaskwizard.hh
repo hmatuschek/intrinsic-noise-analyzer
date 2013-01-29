@@ -51,7 +51,7 @@ public:
 
 private:
   /** The list of models. */
-  QComboBox *modelSelection;
+  QComboBox *_modelSelection;
 };
 
 
