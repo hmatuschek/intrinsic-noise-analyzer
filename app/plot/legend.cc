@@ -18,15 +18,13 @@ LegendItem::LegendItem(const QString &label, Graph *graph, QObject *parent)
 
   _line = new QGraphicsLineItem(0,0, _sample_length, 0);
   _line->setPen(_graph->getStyle().getPen());
-  addToGroup(_line);
-  _line->setPos(0,0);
+  _line->setPos(0,0); addToGroup(_line);
 
   MathItem *label_item = TinyTex::parseInlineQuoted(_label_text.toStdString());
   MathContext context(Configuration::getConfig()->getScheme(Configuration::DISPLAY_SCHEME).legendFont());
   _label = label_item->layout(context);
   _label_size = label_item->metrics().size(); delete label_item;
-  addToGroup(_label);
-  _label->setPos(0,0);
+  addToGroup(_label); _label->setPos(0,0);
 
   updateLayout();
 }
@@ -43,7 +41,7 @@ LegendItem::setScheme(Configuration::Scheme scheme)
   MathContext context(Configuration::getConfig()->getScheme(Configuration::DISPLAY_SCHEME).legendFont());
   _label = label_item->layout(context);
   _label_size = label_item->metrics().size(); delete label_item;
-  addToGroup(_label);
+  _label->setPos(0,0); addToGroup(_label);
   // Update line-style:
   _line->setPen(_graph->getStyle().getPen());
   // Update layout:
@@ -60,21 +58,18 @@ LegendItem::boundingRect() const {
 void
 LegendItem::updateLayout()
 {
-  // Reset...
-  this->_line->setPos(0,0);
-  this->_label->setPos(0,0);
+  // Reset positions
+  _line->setPos(0,0); _label->setPos(0,0);
 
   // Update positions:
-  this->_line->setPos(0, _label_size.height()/2 - _line->pen().width()/2);
-  this->_label->setPos(_sample_length+_space, 0);
+  _line->setPos(0, _label_size.height()/2);
+  _label->setPos(_sample_length+_space, 0);
 
-  // recalc BB:
-  this->_bb = this->_line->boundingRect();
-  this->_bb.setX(this->_bb.x() + this->_line->pos().x());
-  this->_bb.setY(this->_bb.y() + this->_line->pos().y());
-  this->_bb = this->_bb.united(
-        QRectF(_label->pos().x(), _label->pos().y(),
-               _label_size.width(), _label_size.height()));
+  // update BB:
+  _bb = _line->boundingRect();
+  _bb.setX(_bb.x() + _line->pos().x());
+  _bb.setY(_bb.y() + _line->pos().y());
+  _bb = _bb.united(QRectF(_sample_length+_space, 0, _label_size.width(), _label_size.height()));
 }
 
 
