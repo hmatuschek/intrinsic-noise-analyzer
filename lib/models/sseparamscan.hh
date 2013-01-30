@@ -20,7 +20,7 @@ class ParameterScan2
 
 public:
 
-    ParameterScan(M &model)
+    ParameterScan2(M &model)
         : SteadyStateAnalysis<M>(model)
     {
 
@@ -31,7 +31,7 @@ public:
     /**
     * Constructor
     */
-    ParameterScan(M &model, size_t iter, double epsilon, double t_max=1e9, double dt=1e-1)
+    ParameterScan2(M &model, size_t iter, double epsilon, double t_max=1e9, double dt=1e-1)
       : SteadyStateAnalysis<M>(model,iter,epsilon,t_max,dt)
 
     {
@@ -46,105 +46,6 @@ public:
      *        coordinates. Contents will be overwritten.
      */
     int parameterScan(std::vector<ParameterSet> &parameterSets, std::vector<Eigen::VectorXd> &resultSet, size_t numThreads=OpenMP::getMaxThreads())
-
-    {
-
-        // Only works with single thread due to Ginac
-        numThreads = 1;
-
-        // First make space
-        resultSet.resize(parameterSets.size());
-
-        // Initialize with initial concentrations
-        Eigen::VectorXd x(this->sseModel.getDimension());
-        this->sseModel.getInitialState(x);
-        Eigen::VectorXd conc=x.head(this->sseModel.numIndSpecies());
-
-        // Get the SSE vector
-        size_t offset = this->sseModel.numIndSpecies();
-        //size_t lnaLength = offset*(offset+1)/2;
-        size_t sseLength = this->sseModel.getUpdateVector().size()-this->sseModel.numIndSpecies();
-
-        Eigen::VectorXex updateVector;
-
-        int iter=0;
-
-        std::vector< NLEsolve::HybridSolver<M> > solvers(numThreads,this->solver);
-
-        // Copy models for parallelization
-        std::vector< M * > models(numThreads);
-        models[0] = &this->sseModel;
-        Ast::Model* base = dynamic_cast<Ast::Model*>(&this->sseModel);
-//#pragma omp parallel for if(numThreads>1) num_threads(numThreads)
-        for(size_t j=1; j<numThreads; j++)
-        {
-            models[j] = new M((*base));
-        }
-
-//#pragma omp parallel for if(numThreads>1) num_threads(numThreads) schedule(dynamic) firstprivate(iter,x,conc)
-        // Iterate over all parameter sets
-        for(size_t j = 0; j < parameterSets.size(); j++)
-        {
-
-            // Generate parameter substitution table
-            Trafo::excludeType ptab = models[OpenMP::getThreadNum()]->makeExclusionTable(parameterSets[j]);
-
-            // Collect all the values of constant parameters except variable parameters
-            Trafo::ConstantFolder constants(*(models[OpenMP::getThreadNum()]), Trafo::Filter::ALL_CONST, ptab);
-            InitialConditions ICs(*(models[OpenMP::getThreadNum()]),ptab);
-
-            // Translate identifier to parameters collect variable parameters
-            ParameterFolder parameters(ptab);
-
-            // Fold variable parameters and all the rest
-            Eigen::VectorXex updateVector = ICs.apply(parameters.apply(constants.apply( models[OpenMP::getThreadNum()]->getUpdateVector() ) ));
-            Eigen::VectorXex REs = updateVector.head(offset);
-            Eigen::VectorXex sseUpdate = updateVector.segment(offset,sseLength);
-            Eigen::MatrixXex Jacobian = ICs.apply(parameters.apply(constants.apply( models[OpenMP::getThreadNum()]->getJacobian()) ));
-
-            // Setup solver and solve for RE concentrations
-            try
-            {
-
-                solvers[OpenMP::getThreadNum()].set(models[OpenMP::getThreadNum()]->stateIndex,REs,Jacobian);
-                iter = solvers[OpenMP::getThreadNum()].solve(conc, this->max_time, this->min_time_step);
-                x.head(offset) = conc;
-
-                // ... and substitute RE concentrations
-                GiNaC::exmap subs_table;
-                for (size_t s=0; s<models[OpenMP::getThreadNum()]->numIndSpecies(); s++)
-                    subs_table.insert( std::pair<GiNaC::ex,GiNaC::ex>( models[OpenMP::getThreadNum()]->getREvar(s), conc(s) ) );
-                for (size_t i=0; i<sseLength; i++)
-                    sseUpdate(i) = sseUpdate(i).subs(subs_table);
-
-                // Calc LNA & IOS
-                this->calcLNA(*models[OpenMP::getThreadNum()],x,sseUpdate);
-                this->calcIOS(*models[OpenMP::getThreadNum()],x,sseUpdate);
-
-                // Store result
-                resultSet[j] = x;
-
-            }
-            catch (iNA::NumericError &err)
-            {
-                // Generate a vector of nans the easy way
-                resultSet[j] = Eigen::VectorXd::Zero(models[OpenMP::getThreadNum()]->getDimension())/0.;
-            }
-
-        }
-
-        return iter;
-    }
-
-
-    /**
-     * Perform a parameter scan using the steady state analysis.
-     *
-     * @param parameterSets: Vector of parameter sets to perform analysis for.
-     * @param resultSet: Outputs the steady state concentrations, covariance and EMRE vector in reduced
-     *        coordinates. Contents will be overwritten.
-     */
-    int parameterScanLLVM(std::vector<ParameterSet> &parameterSets, std::vector<Eigen::VectorXd> &resultSet, size_t numThreads=OpenMP::getMaxThreads())
 
     {
 
@@ -182,23 +83,26 @@ public:
 
         std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> index = this->sseModel.stateIndex;
 
-        iNA::Models::LNAmodel test;
+        int nstate = index.size();
+
+        for(size_t i = 0; i<this->sseModel.numCompartments(); i++)
+            index.insert(std::make_pair(this->sseModel.getCompartment(i)->getSymbol(), nstate++));
 
         for(size_t i = 0; i<this->sseModel.numParameters(); i++)
-            index.insert(std::make_pair(this->sseModel.getParameter().getSymbol(), index.size()++));
+            index.insert(std::make_pair(this->sseModel.getParameter(i)->getSymbol(), nstate++));
 
         for(size_t i = 0; i<this->sseModel.getConservationConstants().size(); i++)
-            index.insert(std::make_pair(this->sseModel.getConservationConstants()(i), index.size()++));
+            index.insert(std::make_pair(this->sseModel.getConservationConstants()(i), nstate++));
 
         // now compile
 
-        Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Code &LNAcodeA;
-        Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Code &LNAcodeB;
-        compileLNA(index,LNAcodeA,LNAcodeB);
+        Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Code LNAcodeA;
+        Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Code LNAcodeB;
+        compileLNA(this->sseModel,index,LNAcodeA,LNAcodeB);
 
-        Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Code &IOScodeA;
-        Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Code &IOScodeB;
-        compileIOS(index,IOScodeA,IOScodeB);
+        Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Code IOScodeA;
+        Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Code IOScodeB;
+        compileIOS(this->sseModel,index,IOScodeA,IOScodeB);
 
         // and setup the interpreter
         Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Interpreter interpreter;
@@ -280,7 +184,7 @@ public:
     }
 
     void
-    compileLNA(REmodel &model, const std::map<GiNaC::symbol, size_t, GiNaC::expair_is_less> &indexTable,
+    compileLNA(REmodel &model, const std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> &indexTable,
                Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Code &codeA,
                Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Code &codeB)
 
@@ -288,7 +192,7 @@ public:
         // Pass..
     }
 
-    void compileLNA(LNAmodel &model, const std::map<GiNaC::symbol, size_t, GiNaC::expair_is_less> &indexTable,
+    void compileLNA(LNAmodel &model, const std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> &indexTable,
                     Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Code &codeA,
                     Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Code &codeB)
 
@@ -299,18 +203,16 @@ public:
         Eigen::VectorXex A(lnaLength);
         Eigen::MatrixXex B(lnaLength,lnaLength);
 
-        Eigen::VectorXex& sseUpdate = model.getUpdateVector();
-
         // calc coeff-matrices
         GiNaC::exmap subs_table;
         for (size_t i=0; i<lnaLength; i++)
             subs_table.insert( std::pair<GiNaC::ex,GiNaC::ex>( model.getSSEvar(i), 0 ) );
         for(size_t i=0; i<lnaLength; i++)
         {
-            A(i) =  sseUpdate(i).subs(subs_table);
+            A(i) =  model.getUpdateVector()(i).subs(subs_table);
             for(size_t j=0; j<lnaLength; j++)
             {
-               B(i,j) = sseUpdate(i).diff(model.getSSEvar(j));
+               B(i,j) = model.getUpdateVector()(i).diff(model.getSSEvar(j));
             }
         }
 
@@ -329,7 +231,7 @@ public:
     }
 
     void
-    compileIOS(REmodel &model, const std::map<GiNaC::symbol, size_t, GiNaC::expair_is_less> &indexTable,
+    compileIOS(REmodel &model, const std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> &indexTable,
                Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Code &codeA,
                Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Code &codeB)
 
@@ -338,7 +240,7 @@ public:
     }
 
     void
-    compileIOS(LNAmodel &model, const std::map<GiNaC::symbol, size_t, GiNaC::expair_is_less> &indexTable,
+    compileIOS(LNAmodel &model, const std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> &indexTable,
                Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Code &codeA,
                Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Code &codeB)
 
@@ -348,7 +250,7 @@ public:
 
 
     void
-    compileIOS(IOSmodel &model, const std::map<GiNaC::symbol, size_t, GiNaC::expair_is_less> &indexTable,
+    compileIOS(IOSmodel &model, const std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> &indexTable,
                Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Code &codeA,
                Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Code &codeB)
 
@@ -359,8 +261,6 @@ public:
         size_t lnaLength = offset*(offset+1)/2;
         size_t sseLength = model.getUpdateVector().size()-model.numIndSpecies();
 
-        Eigen::VectorXex& sseUpdate = model.getUpdateVector();
-
         // Calc coefficient matrices
         Eigen::VectorXex A(sseLength-lnaLength);
         Eigen::MatrixXex B(sseLength-lnaLength,sseLength-lnaLength);
@@ -370,10 +270,10 @@ public:
             subs_table.insert( std::pair<GiNaC::ex,GiNaC::ex>( model.getSSEvar(i), 0 ) );
         for(size_t i=lnaLength; i<sseLength; i++)
         {
-            A(i-lnaLength) = sseUpdate(i).subs(subs_table);
+            A(i-lnaLength) = model.getUpdateVector()(i).subs(subs_table);
             for(size_t j=lnaLength; j<sseLength; j++)
             {
-               B(i-lnaLength,j-lnaLength) = sseUpdate(i).diff(model.getSSEvar(j));
+               B(i-lnaLength,j-lnaLength) = model.getUpdateVector()(i).diff(model.getSSEvar(j));
             }
         }
 
@@ -529,8 +429,5 @@ public:
 };
 
 }} // Close namespaces
-
-#endif // __FLUC_MODELS_STEADYSTATEANALYSIS_HH
-
 
 #endif // SSEPARAMSCAN_HH

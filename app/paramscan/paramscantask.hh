@@ -8,6 +8,8 @@
 #include <models/IOSmodel.hh>
 #include <models/steadystateanalysis.hh>
 
+#include <models/sseparamscan.hh>
+
 
 /** A task to perform a paramter scan. */
 class ParamScanTask : public Task

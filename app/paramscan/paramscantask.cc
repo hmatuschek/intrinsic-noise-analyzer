@@ -225,13 +225,13 @@ ParamScanTask::process()
   // Do parameter scan
   if(config.getMethod()==Config::RE_ANALYSIS)
   {
-      iNA::Models::ParameterScan<iNA::Models::REmodel> pscan(dynamic_cast<iNA::Models::REmodel &>(*config.getModel()),
+      iNA::Models::ParameterScan2<iNA::Models::REmodel> pscan(dynamic_cast<iNA::Models::REmodel &>(*config.getModel()),
                                                         config.getMaxIterations(), config.getEpsilon(), config.getMaxTimeStep());
       pscan.parameterScan(parameterSets,scanResult);
   }
   if(config.getMethod()==Config::LNA_ANALYSIS)
   {
-      iNA::Models::ParameterScan<iNA::Models::LNAmodel> pscan(dynamic_cast<iNA::Models::LNAmodel &>(*config.getModel()),
+      iNA::Models::ParameterScan2<iNA::Models::LNAmodel> pscan(dynamic_cast<iNA::Models::LNAmodel &>(*config.getModel()),
                                                         config.getMaxIterations(), config.getEpsilon(), config.getMaxTimeStep());
       pscan.parameterScan(parameterSets,scanResult);
 
@@ -239,7 +239,7 @@ ParamScanTask::process()
   if(config.getMethod()==Config::IOS_ANALYSIS)
   {
       //scanResult.resize(dynamic_cast<iNA::Models::IOSmodel *>(config.getModel())->getDimension());
-      iNA::Models::ParameterScan<iNA::Models::IOSmodel> pscan(dynamic_cast<iNA::Models::IOSmodel &>(*config.getModel()),
+      iNA::Models::ParameterScan2<iNA::Models::IOSmodel> pscan(dynamic_cast<iNA::Models::IOSmodel &>(*config.getModel()),
                                                         config.getMaxIterations(), config.getEpsilon(), config.getMaxTimeStep());
       pscan.parameterScan(parameterSets,scanResult);
   }

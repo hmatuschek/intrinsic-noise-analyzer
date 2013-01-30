@@ -31,10 +31,12 @@
 #include "IOSmodel.hh"
 
 #include "steadystateanalysis.hh"
+#include "sseparamscan.hh"
 #include "sseinterpreter.hh"
 
 #include "stochasticsimulator.hh"
 #include "gillespieSSA.hh"
 #include "optimizedSSA.hh"
+#include "ssaparamscan.hh"
 
 #endif

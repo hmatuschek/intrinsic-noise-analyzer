@@ -5,6 +5,7 @@
 
 #include <utils/logger.hh>
 #include <models/steadystateanalysis.hh>
+#include <models/sseparamscan.hh>
 #include <models/IOSmodel.hh>
 
 
