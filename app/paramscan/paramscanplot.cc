@@ -87,7 +87,7 @@ ParameterScanIOSPlot::ParameterScanIOSPlot(const QStringList &selected_species, 
 }
 
 
-ParameterScanCovPlot::ParameterScanCovPlot(const QStringList &selected_species, ParamScanTask *task,
+ParameterScanCVPlot::ParameterScanCVPlot(const QStringList &selected_species, ParamScanTask *task,
                                            QObject *parent)
     : LinePlot("Coefficient of variation (LNA)", parent)
 {
@@ -176,7 +176,7 @@ ParameterScanFanoPlot::ParameterScanFanoPlot(const QStringList &selected_species
 
 
 
-ParameterScanCovIOSPlot::ParameterScanCovIOSPlot(const QStringList &selected_species, ParamScanTask *task,
+ParameterScanCVIOSPlot::ParameterScanCVIOSPlot(const QStringList &selected_species, ParamScanTask *task,
                                      QObject *parent)
     : LinePlot("Coefficient of variation (IOS)", parent)
 {

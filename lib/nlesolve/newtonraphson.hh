@@ -138,6 +138,23 @@ public:
 
      }
 
+     /**
+      * Sets the ODE and Jacobian code...
+      */
+     void set(Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Code ODEcode, Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Code jacobianCode)
+    {
+
+         // clean up
+         this->iterations = 0;
+         this->ODEcode.clear();
+         this->jacobianCode.clear();
+
+         // Set bytecode for interpreter
+         this->interpreter.setCode(&(ODEcode));
+         this->jacobian_interpreter.setCode(&(jacobianCode));
+
+    }
+
 
 };
 

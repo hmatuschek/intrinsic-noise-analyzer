@@ -38,12 +38,12 @@ public:
  * Collects data from a @c Table and updates the
  * @c VarianceLinesGraph instance.
  */
-class SSAParameterScanCovPlot : public LinePlot
+class SSAParameterScanCVPlot : public LinePlot
 {
   Q_OBJECT
 
 public:
-  explicit SSAParameterScanCovPlot(const QStringList &selected_species, SSAParamScanTask *task, QObject *parent=0);
+  explicit SSAParameterScanCVPlot(const QStringList &selected_species, SSAParamScanTask *task, QObject *parent=0);
 };
 
 /**

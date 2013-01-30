@@ -47,7 +47,7 @@ SSAParameterScanPlot::SSAParameterScanPlot(const QStringList &selected_species, 
 }
 
 
-SSAParameterScanCovPlot::SSAParameterScanCovPlot(const QStringList &selected_species, SSAParamScanTask *task,
+SSAParameterScanCVPlot::SSAParameterScanCVPlot(const QStringList &selected_species, SSAParamScanTask *task,
                                            QObject *parent)
     : LinePlot("Coefficient of Variation (SSA)", parent)
 {

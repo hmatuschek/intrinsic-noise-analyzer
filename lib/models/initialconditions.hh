@@ -58,6 +58,14 @@ public:
 
     }
 
+
+    const GiNaC::exmap &
+    getSubstitutions()
+    {
+        return _substitutions;
+    }
+
+
 };
 
 /**
@@ -142,6 +150,12 @@ public:
 
     {
         return this->LinkCMatrixNumeric;
+    }
+
+    const GiNaC::exmap &
+    getSubstitutions()
+    {
+        return substitutions;
     }
 
 };

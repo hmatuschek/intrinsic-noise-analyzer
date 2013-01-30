@@ -105,11 +105,18 @@ SSAParamScanResultWidget::plotButtonPressed()
             new PlotItem(
               new SSAParameterScanPlot(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
 
-  // Add SSA COV plot
+  // Add SSA CV plot
   Application::getApp()->docTree()->addPlot(
             this->paramscan_task_wrapper,
             new PlotItem(
-              new SSAParameterScanCovPlot(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
+              new SSAParameterScanCVPlot(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
+
+  // Add SSA Fano plot
+  Application::getApp()->docTree()->addPlot(
+            this->paramscan_task_wrapper,
+            new PlotItem(
+              new SSAParameterScanFanoPlot(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
+
 
 }
 
@@ -297,7 +304,7 @@ SSAParamScanPreviewWidget::updatePlot()
       case FANO_PLOT:
         _plot_canvas->setPlot(new SSAParameterScanFanoPlot(selected_species, task)); break;
       case COEFVAR_PLOT:
-        _plot_canvas->setPlot(new SSAParameterScanCovPlot(selected_species, task)); break;
+        _plot_canvas->setPlot(new SSAParameterScanCVPlot(selected_species, task)); break;
   }
 
 }

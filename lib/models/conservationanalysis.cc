@@ -41,7 +41,7 @@ ConservationAnalysis::ConservationAnalysis(const Ast::Model &model)
 
     // reconstruct dependencies due to conservation laws
     // and substititute @c cconstants as constants
-    Eigen::VectorXex dependence = conservationConstants + this->Link0CMatrix.cast<GiNaC::ex>()*ind_species;
+    Eigen::VectorXex dependence = conservationConstants.cast<GiNaC::ex>() + this->Link0CMatrix.cast<GiNaC::ex>()*ind_species;
 
     // generate substitution table to remove dependent species
     for (size_t s=0; s<this->numDepSpecies(); s++)
@@ -129,6 +129,13 @@ ConservationAnalysis::getConservationConstants(const Eigen::VectorXd &conserved_
 
     return table;
 
+}
+
+
+const Eigen::Matrix<GiNaC::symbol,Eigen::Dynamic,1> &
+ConservationAnalysis::getConservationConstants()
+{
+    return this->conservationConstants;
 }
 
 GiNaC::exmap

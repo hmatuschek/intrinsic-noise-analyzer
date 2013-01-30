@@ -49,12 +49,12 @@ public:
  * Collects data from a @c Table and updates the
  * @c VarianceLinesGraph instance.
  */
-class ParameterScanCovPlot : public LinePlot
+class ParameterScanCVPlot : public LinePlot
 {
   Q_OBJECT
 
 public:
-  explicit ParameterScanCovPlot(const QStringList &selected_species, ParamScanTask *task, QObject *parent=0);
+  explicit ParameterScanCVPlot(const QStringList &selected_species, ParamScanTask *task, QObject *parent=0);
 };
 
 
@@ -74,12 +74,12 @@ public:
  * Collects data from a @c Table and updates the
  * @c VarianceLinesGraph instance.
  */
-class ParameterScanCovIOSPlot : public LinePlot
+class ParameterScanCVIOSPlot : public LinePlot
 {
   Q_OBJECT
 
 public:
-  explicit ParameterScanCovIOSPlot(const QStringList &selected_species, ParamScanTask *task, QObject *parent=0);
+  explicit ParameterScanCVIOSPlot(const QStringList &selected_species, ParamScanTask *task, QObject *parent=0);
 };
 
 /**

@@ -71,13 +71,11 @@ public:
         for(size_t j=0; j<simulators[i]->numSpecies(); j++)
         {
           _mean(i,j) =( _mean(i,j)*(_n-1) + state[OpenMP::getThreadNum()](j) )/_n;
-
           for (size_t k=0; k<=j; k++)
           {
             _cov(i,idx) = ( _cov(i,idx)*(_n-1) + (state[OpenMP::getThreadNum()](k)-_mean(i,k))*(state[OpenMP::getThreadNum()](j)-_mean(i,j)) )/_n;
             idx++;
           }
-
         }
       }
 

@@ -84,6 +84,7 @@ public:
 
   /** Tiny helper function to fold all constants in the given vector expression. */
   Eigen::MatrixXex apply(const Eigen::MatrixXex &vecIn);
+
 };
 
 
@@ -118,6 +119,7 @@ class ConstantFolder
 public:
   /** Constructor, collects all substitutions of constant variables and assignment rules. */
   ConstantFolder(const Ast::Model &model, unsigned flags = Filter::ALL_CONST, const excludeType &excludes=excludeType());
+
 };
 
 

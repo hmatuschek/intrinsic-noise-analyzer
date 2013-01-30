@@ -118,4 +118,3 @@ ConstantFolder::ConstantFolder(const Ast::Model &model, unsigned flags, const ex
 {
   // Done...
 }
-
