@@ -37,7 +37,7 @@ IOSmodel::postConstructor()
     // ... and add them to index table
     for(size_t i = dimold; i<this->dim; i++)
     {
-        stateVariables.push_back( GiNaC::symbol() );
+        stateVariables.push_back( GiNaC::symbol("IOS") );
         this->stateIndex.insert(std::make_pair(this->stateVariables[i-this->numIndSpecies()],i));
     }
 

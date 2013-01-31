@@ -55,10 +55,6 @@ public:
         // First make space
         resultSet.resize(parameterSets.size());
 
-        // Initialize with initial concentrations
-        Eigen::VectorXd x(this->sseModel.getDimension());
-        this->sseModel.getInitialState(x);
-        Eigen::VectorXd conc=x.head(this->sseModel.numIndSpecies());
 
         // Get the SSE vector
         size_t offset = this->sseModel.numIndSpecies();
@@ -85,16 +81,29 @@ public:
 
         int nstate = index.size();
 
+        // Fetch compartments
         for(size_t i = 0; i<this->sseModel.numCompartments(); i++)
             index.insert(std::make_pair(this->sseModel.getCompartment(i)->getSymbol(), nstate++));
 
+        // Fetch global parameters
         for(size_t i = 0; i<this->sseModel.numParameters(); i++)
             index.insert(std::make_pair(this->sseModel.getParameter(i)->getSymbol(), nstate++));
 
-        for(size_t i = 0; i<this->sseModel.getConservationConstants().size(); i++)
-            index.insert(std::make_pair(this->sseModel.getConservationConstants()(i), nstate++));
+        // Fetch local parameters
+        for(size_t i = 0; i<this->sseModel.numReactions(); i++)
+        {
+          Ast::KineticLaw *kin = this->sseModel.getReaction(i)->getKineticLaw();
+          for(size_t j=0; j<kin->numParameters(); j++)
+             index.insert(std::make_pair(kin->getParameter(j)->getSymbol(), nstate++));
+        }
 
-        // now compile
+        // Fetch conservation laws
+        for(int i = 0; i<this->sseModel.getConservationConstants().size(); i++)
+        {
+            index.insert(std::make_pair(this->sseModel.getConservationConstants()(i), nstate++));
+            std::cerr<<"c:"<<this->sseModel.getConservationConstants()(i)<<std::endl;
+        }
+        // Now compile
 
         Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Code LNAcodeA;
         Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Code LNAcodeB;
@@ -104,13 +113,17 @@ public:
         Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Code IOScodeB;
         compileIOS(this->sseModel,index,IOScodeA,IOScodeB);
 
-        // and setup the interpreter
+        // ... and setup the interpreter
+
         Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Interpreter interpreter;
         Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Interpreter matrix_interpreter;
 
         interpreter.setCode(&LNAcodeA);
         matrix_interpreter.setCode(&LNAcodeB);
 
+        // Initialize with initial concentrations
+        Eigen::VectorXd x(nstate);
+        Eigen::VectorXd conc;
 
 //#pragma omp parallel for if(numThreads>1) num_threads(numThreads) schedule(dynamic) firstprivate(iter,x,conc)
         // Iterate over all parameter sets
@@ -118,11 +131,11 @@ public:
         {
 
             // Generate parameter substitution table
-            Trafo::excludeType ptab = models[OpenMP::getThreadNum()]->makeExclusionTable(parameterSets[j]);
+            Trafo::excludeType ptab = this->sseModel.makeExclusionTable(parameterSets[j]);
 
             // Collect all the values of constant parameters except variable parameters
-            Trafo::ConstantFolder constants(*(models[OpenMP::getThreadNum()]), Trafo::Filter::ALL_CONST, ptab);
-            InitialConditions ICs(*(models[OpenMP::getThreadNum()]),ptab);
+            Trafo::ConstantFolder constants(this->sseModel, Trafo::Filter::ALL_CONST, ptab);
+            InitialConditions ICs(this->sseModel,ptab);
 
             // Translate identifier to parameters collect variable parameters
             ParameterFolder parameters(ptab);
@@ -130,8 +143,19 @@ public:
             // Initialize the state vector which includes the reaction constants
             for(std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less>::const_iterator it = index.begin(); it!=index.end(); it++)
             {
+
+              if((*it).second>=sseLength)
+              {
+
+                std::cerr << (*it).second << ":" << (*it).first << " ";
+                std::cerr << ICs.apply(parameters.apply(constants.apply((*it).first))) << std::endl;
+
                 x((*it).second) = Eigen::ex2double( ICs.apply(parameters.apply(constants.apply((*it).first))) );
+
+              }
             }
+
+            conc = x.head(this->sseModel.numIndSpecies());
 
             // Fold variable parameters and all the rest
             Eigen::VectorXex updateVector = ICs.apply(parameters.apply(constants.apply( models[OpenMP::getThreadNum()]->getUpdateVector() ) ));

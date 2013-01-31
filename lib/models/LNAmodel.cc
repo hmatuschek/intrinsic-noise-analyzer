@@ -30,7 +30,7 @@ LNAmodel::postConstructor()
     this->stateVariables.reserve(dimCOV+numIndSpecies());
     for(size_t i = 0; i<stateVariables.capacity(); i++)
     {
-        stateVariables.push_back( GiNaC::symbol() );
+        stateVariables.push_back( GiNaC::symbol("LNA") );
         this->stateIndex.insert(std::make_pair(this->stateVariables[i],this->numIndSpecies()+i));
     }
 

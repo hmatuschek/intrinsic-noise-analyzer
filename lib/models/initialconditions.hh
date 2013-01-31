@@ -98,6 +98,8 @@ protected:
 
     SSEBaseModel &model;
 
+    Trafo::InitialValueFolder evICs;
+
 public:
 
     /**
