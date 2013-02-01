@@ -60,24 +60,15 @@ public:
         size_t offset = this->sseModel.numIndSpecies();
         size_t lnaLength = offset*(offset+1)/2;
         size_t sseLength = this->sseModel.getUpdateVector().size()-this->sseModel.numIndSpecies();
+        size_t iosLength = sseLength - lnaLength;
 
-        Eigen::VectorXex updateVector;
+        std::cerr << "size: " << this->sseModel.getUpdateVector().size() << std::endl;
 
         int iter=0;
 
         std::vector< NLEsolve::HybridSolver<M> > solvers(numThreads,this->solver);
 
-        // Copy models for parallelization
-        std::vector< M * > models(numThreads);
-        models[0] = &this->sseModel;
-        Ast::Model* base = dynamic_cast<Ast::Model*>(&this->sseModel);
-//#pragma omp parallel for if(numThreads>1) num_threads(numThreads)
-        for(size_t j=1; j<numThreads; j++)
-        {
-            models[j] = new M((*base));
-        }
-
-        std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> index = this->sseModel.stateIndex;
+        std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> index(this->sseModel.stateIndex);
 
         int nstate = index.size();
 
@@ -99,31 +90,34 @@ public:
 
         // Fetch conservation laws
         for(int i = 0; i<this->sseModel.getConservationConstants().size(); i++)
-        {
-            index.insert(std::make_pair(this->sseModel.getConservationConstants()(i), nstate++));
-            std::cerr<<"c:"<<this->sseModel.getConservationConstants()(i)<<std::endl;
-        }
+            index.insert(std::make_pair<GiNaC::symbol,size_t>(this->sseModel.getConservationConstants()(i), nstate++));
+
         // Now compile
+
+        Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Code codeODE;
+        Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Code codeJac;
+        compileREs(this->sseModel, index, codeODE, codeJac);
 
         Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Code LNAcodeA;
         Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Code LNAcodeB;
-        compileLNA(this->sseModel,index,LNAcodeA,LNAcodeB);
+        compileLNA(this->sseModel, index, LNAcodeA, LNAcodeB);
 
         Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Code IOScodeA;
         Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Code IOScodeB;
-        compileIOS(this->sseModel,index,IOScodeA,IOScodeB);
+        compileIOS(this->sseModel, index, IOScodeA, IOScodeB);
 
         // ... and setup the interpreter
 
         Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Interpreter interpreter;
         Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Interpreter matrix_interpreter;
 
-        interpreter.setCode(&LNAcodeA);
-        matrix_interpreter.setCode(&LNAcodeB);
-
         // Initialize with initial concentrations
         Eigen::VectorXd x(nstate);
-        Eigen::VectorXd conc;
+        Eigen::VectorXd init(sseLength+offset);
+        this->sseModel.getInitialState(init);
+
+        x.head(offset+sseLength)=init;
+        Eigen::VectorXd conc = init.head(offset);
 
 //#pragma omp parallel for if(numThreads>1) num_threads(numThreads) schedule(dynamic) firstprivate(iter,x,conc)
         // Iterate over all parameter sets
@@ -143,69 +137,88 @@ public:
             // Initialize the state vector which includes the reaction constants
             for(std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less>::const_iterator it = index.begin(); it!=index.end(); it++)
             {
-
-              if((*it).second>=sseLength)
-              {
-
-                std::cerr << (*it).second << ":" << (*it).first << " ";
-                std::cerr << ICs.apply(parameters.apply(constants.apply((*it).first))) << std::endl;
-
+              if((*it).second>=(unsigned)this->sseModel.getUpdateVector().size())
                 x((*it).second) = Eigen::ex2double( ICs.apply(parameters.apply(constants.apply((*it).first))) );
-
-              }
             }
 
-            conc = x.head(this->sseModel.numIndSpecies());
+            //conc = x.head(this->sseModel.numIndSpecies());
 
             // Fold variable parameters and all the rest
-            Eigen::VectorXex updateVector = ICs.apply(parameters.apply(constants.apply( models[OpenMP::getThreadNum()]->getUpdateVector() ) ));
+            Eigen::VectorXex updateVector = ICs.apply(parameters.apply(constants.apply( this->sseModel.getUpdateVector() ) ));
             Eigen::VectorXex REs = updateVector.head(offset);
-            //Eigen::VectorXex sseUpdate = updateVector.segment(offset,sseLength);
-            Eigen::MatrixXex Jacobian = ICs.apply(parameters.apply(constants.apply( models[OpenMP::getThreadNum()]->getJacobian()) ));
+            Eigen::VectorXex sseUpdate = updateVector.segment(offset,sseLength);
+            Eigen::MatrixXex Jacobian = ICs.apply(parameters.apply(constants.apply( this->sseModel.getJacobian()) ));
 
             // Setup solver and solve for RE concentrations
             try
             {
 
                 // Solve the deterministic equations
-                solvers[OpenMP::getThreadNum()].set(models[OpenMP::getThreadNum()]->stateIndex,REs,Jacobian);
+                //solvers[OpenMP::getThreadNum()].set(codeODE,codeJac);
+                solvers[OpenMP::getThreadNum()].set(index,REs,Jacobian);
+
                 iter = solvers[OpenMP::getThreadNum()].solve(conc, this->max_time, this->min_time_step);
                 x.head(offset) = conc;
 
-                // Now calc LNA
+                // Now calculate LNA
                 Eigen::VectorXd A(lnaLength);
                 Eigen::MatrixXd B(lnaLength,lnaLength);
+
+                interpreter.setCode(&LNAcodeA);
+                matrix_interpreter.setCode(&LNAcodeB);
                 interpreter.run(x,A);
                 matrix_interpreter.run(x,B);
 
                 // (needs to go in function to match template)
                 x.segment(offset,lnaLength) = solvers[OpenMP::getThreadNum()].precisionSolve(B,-A);
 
-                // Next calc IOS
-                A.resize(sseLength);
-                B.resize(sseLength,sseLength);
+                // Next calculate IOS
+                A.resize(iosLength);
+                B.resize(iosLength,iosLength);
+
                 interpreter.setCode(&IOScodeA);
                 matrix_interpreter.setCode(&IOScodeB);
                 interpreter.run(x,A);
                 matrix_interpreter.run(x,B);
 
                 // (needs to go in function)
-                x.tail(sseLength-lnaLength) = solvers[OpenMP::getThreadNum()].precisionSolve(B,-A);
+                x.segment(offset+lnaLength, iosLength) = solvers[OpenMP::getThreadNum()].precisionSolve(B,-A);
 
                 // Store result
-                resultSet[j] = x;
+                resultSet[j] = x.head(offset+sseLength);
 
             }
             catch (iNA::NumericError &err)
             {
                 // Generate a vector of nans the easy way
-                resultSet[j] = Eigen::VectorXd::Zero(models[OpenMP::getThreadNum()]->getDimension())/0.;
+                resultSet[j] = Eigen::VectorXd::Zero(this->sseModel.getDimension())/0.;
             }
 
         }
 
         return iter;
     }
+
+    void compileREs(REmodel &model, const std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> &indexTable,
+                    Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Code &codeODE,
+                    Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Code &codeJac)
+
+    {
+
+        // Compile ODEs
+        Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Compiler compilerA(indexTable);
+        compilerA.setCode(&codeODE);
+        compilerA.compileVector(model.getUpdateVector().head(model.numIndSpecies()));
+        compilerA.finalize(0);
+
+        // Compile Jacobian
+        Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Compiler compilerB(indexTable);
+        compilerB.setCode(&codeJac);
+        compilerB.compileMatrix(model.getJacobian());
+        compilerB.finalize(0);
+
+    }
+
 
     void
     compileLNA(REmodel &model, const std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> &indexTable,
@@ -227,16 +240,16 @@ public:
         Eigen::VectorXex A(lnaLength);
         Eigen::MatrixXex B(lnaLength,lnaLength);
 
-        // calc coeff-matrices
+        // Calculate coefficent matrices
         GiNaC::exmap subs_table;
         for (size_t i=0; i<lnaLength; i++)
             subs_table.insert( std::pair<GiNaC::ex,GiNaC::ex>( model.getSSEvar(i), 0 ) );
         for(size_t i=0; i<lnaLength; i++)
         {
-            A(i) =  model.getUpdateVector()(i).subs(subs_table);
+            A(i) =  model.getUpdateVector()(offset+i).subs(subs_table);
             for(size_t j=0; j<lnaLength; j++)
             {
-               B(i,j) = model.getUpdateVector()(i).diff(model.getSSEvar(j));
+               B(i,j) = model.getUpdateVector()(offset+i).diff(model.getSSEvar(j));
             }
         }
 
@@ -284,20 +297,21 @@ public:
         size_t offset = model.numIndSpecies();
         size_t lnaLength = offset*(offset+1)/2;
         size_t sseLength = model.getUpdateVector().size()-model.numIndSpecies();
+        size_t iosLength = sseLength - lnaLength;
 
         // Calc coefficient matrices
-        Eigen::VectorXex A(sseLength-lnaLength);
-        Eigen::MatrixXex B(sseLength-lnaLength,sseLength-lnaLength);
+        Eigen::VectorXex A(iosLength);
+        Eigen::MatrixXex B(iosLength,iosLength);
 
         GiNaC::exmap subs_table;
-        for (size_t i=lnaLength; i<sseLength; i++)
-            subs_table.insert( std::pair<GiNaC::ex,GiNaC::ex>( model.getSSEvar(i), 0 ) );
-        for(size_t i=lnaLength; i<sseLength; i++)
+        for (size_t i=0; i<iosLength; i++)
+            subs_table.insert( std::pair<GiNaC::ex,GiNaC::ex>( model.getSSEvar(i+lnaLength), 0 ) );
+        for(size_t i=0; i<iosLength; i++)
         {
-            A(i-lnaLength) = model.getUpdateVector()(i).subs(subs_table);
-            for(size_t j=lnaLength; j<sseLength; j++)
+            A(i) = model.getUpdateVector()(i+offset+lnaLength).subs(subs_table);
+            for(size_t j=0; j<iosLength; j++)
             {
-               B(i-lnaLength,j-lnaLength) = model.getUpdateVector()(i).diff(model.getSSEvar(j));
+               B(i,j) = model.getUpdateVector()(i+offset+lnaLength).diff(model.getSSEvar(j+lnaLength));
             }
         }
 
