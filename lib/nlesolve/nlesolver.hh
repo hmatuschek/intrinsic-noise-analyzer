@@ -112,7 +112,6 @@ public:
          Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Compiler compiler(indexTable);
          compiler.setCode(&this->ODEcode);
          compiler.compileVector(updateVector);
-         //std::cerr << updateVector;
          compiler.finalize(opt_level);
 
          // Set bytecode for interpreter
