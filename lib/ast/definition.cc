@@ -49,6 +49,10 @@ Definition::setName(const std::string &name) {
   this->_name = name;
 }
 
+const std::string &
+Definition::getLabel() const {
+  return this->hasName() ? this->_name : this->_identifier;
+}
 
 void
 Definition::accept(Ast::Visitor &visitor) const

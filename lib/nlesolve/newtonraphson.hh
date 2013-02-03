@@ -21,9 +21,11 @@ maxNorm(const Eigen::VectorXd &vector)
  * Nonlinear algebraic equation solver using the Newton-Raphson method with linesearch.
  * @ingroup nlesolve
  */
-template<typename T>
+template<class T,
+         class VectorEngine=Eval::bci::Engine<Eigen::VectorXd>,
+         class MatrixEngine=Eval::bci::Engine<Eigen::VectorXd,Eigen::MatrixXd> >
 class NewtonRaphson
-    : public NLEsolver<T>
+    : public NLEsolver<T, VectorEngine, MatrixEngine>
 {
 protected:
 
@@ -51,7 +53,7 @@ public:
    */
 
   NewtonRaphson(T &model)
-      : NLEsolver<T>(model),
+      : NLEsolver<T, VectorEngine, MatrixEngine>(model),
         parameters(model.numIndSpecies())
 
   {
@@ -71,6 +73,8 @@ public:
   {
       this->set(model.stateIndex, updateVector, Jacobian);
   }
+
+  virtual ~NewtonRaphson(){ };
 
   const Eigen::MatrixXd&
   getJacobianM()

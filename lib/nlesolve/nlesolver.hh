@@ -27,7 +27,9 @@ enum LineSearchStatus {
     RoundOffProblem = -1,
 };
 
-template<typename T>
+template<class T,
+         class VectorEngine=Eval::bci::Engine<Eigen::VectorXd>,
+         class MatrixEngine=Eval::bci::Engine<Eigen::VectorXd,Eigen::MatrixXd> >
 class NLEsolver
 {
 
@@ -47,22 +49,22 @@ protected:
      /**
       * The bytecode interpreter instance to evaluate the ODEs.
       */
-     Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Interpreter interpreter;
+     typename VectorEngine::Interpreter interpreter;
 
      /**
       * Holds the interpreter to evaluate the Jacobian.
       */
-     Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Interpreter jacobian_interpreter;
+     typename MatrixEngine::Interpreter jacobian_interpreter;
 
      /**
       * The bytecode for the ODE.
       */
-     Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Code ODEcode;
+     typename VectorEngine::Code * ODEcode;
 
      /**
       * The bytecode for the Jacobian.
       */
-     Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Code jacobianCode;
+     typename MatrixEngine::Code * jacobianCode;
 
 public:
 
@@ -70,7 +72,16 @@ public:
          : dim(model.numIndSpecies()), ODEs(dim), JacobianM(dim,dim)
      {
 
+       this->ODEcode = new typename VectorEngine::Code();
+       this->jacobianCode = new typename MatrixEngine::Code();
+
+       // Set bytecode for interpreter
+       this->interpreter.setCode(this->ODEcode);
+       this->jacobian_interpreter.setCode(this->jacobianCode);
+
      }
+
+     virtual ~NLEsolver(){};
 
 
      /**
@@ -105,22 +116,25 @@ public:
 
          // clean up
          this->iterations = 0;
-         this->ODEcode.clear();
-         this->jacobianCode.clear();
+         delete this->ODEcode;
+         delete this->jacobianCode;
+
+         this->ODEcode = new typename VectorEngine::Code();
+         this->jacobianCode = new typename MatrixEngine::Code();
+
+         // Set bytecode for interpreter
+         this->interpreter.setCode(this->ODEcode);
+         this->jacobian_interpreter.setCode(this->jacobianCode);
 
          // Compile expressions
-         Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Compiler compiler(indexTable);
-         compiler.setCode(&this->ODEcode);
+         typename VectorEngine::Compiler compiler(indexTable);
+         compiler.setCode(this->ODEcode);
          compiler.compileVector(updateVector);
          compiler.finalize(opt_level);
 
-         // Set bytecode for interpreter
-         this->interpreter.setCode(&(this->ODEcode));
-         this->jacobian_interpreter.setCode(&(this->jacobianCode));
-
          // Compile jacobian:
-         Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Compiler jacobian_compiler(indexTable);
-         jacobian_compiler.setCode(&jacobianCode);
+         typename MatrixEngine::Compiler jacobian_compiler(indexTable);
+         jacobian_compiler.setCode(jacobianCode);
          jacobian_compiler.compileMatrix(Jacobian);
          jacobian_compiler.finalize(opt_level);
 
@@ -129,13 +143,14 @@ public:
      /**
       * Sets the ODE and Jacobian code...
       */
-     void set(Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Code ODEcode, Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Code jacobianCode)
+     void set(const typename VectorEngine::Code &ODEcode, const typename MatrixEngine::Code &jacobianCode)
     {
 
          // clean up
          this->iterations = 0;
-         this->ODEcode.clear();
-         this->jacobianCode.clear();
+
+         delete this->ODEcode;
+         delete this->jacobianCode;
 
          // Set bytecode for interpreter
          this->interpreter.setCode(&(ODEcode));

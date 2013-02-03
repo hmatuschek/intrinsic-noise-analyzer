@@ -12,9 +12,11 @@ namespace NLEsolve{
  *
  * @ingroup nlesolve
  */
-template <class Sys>
+template <class Sys,
+          class VectorEngine=Eval::bci::Engine<Eigen::VectorXd>,
+          class MatrixEngine=Eval::bci::Engine<Eigen::VectorXd,Eigen::MatrixXd> >
 class HybridSolver
-    : public NewtonRaphson<Sys>,
+    : public NewtonRaphson<Sys, VectorEngine, MatrixEngine>,
       protected ODE::LSODA
 {
 
@@ -32,7 +34,7 @@ public:
    * @param epsilon_abs Specifies the absolute error for the step.
    */
   HybridSolver(Sys &system)
-      : NewtonRaphson<Sys>(system), LSODA()
+      : NewtonRaphson<Sys, VectorEngine, MatrixEngine>(system), LSODA()
   {
 
     this->parameters.maxIterations=100;
@@ -76,6 +78,8 @@ public:
     }
   }
 
+  virtual ~HybridSolver(){ };
+
 
   void ODEStep(Eigen::VectorXd &state, double t, double dt)
   {
@@ -96,7 +100,7 @@ public:
 
   size_t getDimension()
   {
-    return NLEsolver<Sys>::getDimension();
+    return NLEsolver<Sys, VectorEngine, MatrixEngine>::getDimension();
   }
 
   /**
@@ -114,7 +118,7 @@ public:
           Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
           message << "Try Newton step ... ";
 
-          Status lcheck = NewtonRaphson<Sys>::solve(conc);
+          Status lcheck = NewtonRaphson<Sys, VectorEngine, MatrixEngine>::solve(conc);
 
           switch(lcheck)
           {

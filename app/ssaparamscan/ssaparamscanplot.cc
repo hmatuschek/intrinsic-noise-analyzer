@@ -63,7 +63,7 @@ SSAParameterScanCVPlot::SSAParameterScanCVPlot(const QStringList &selected_speci
 
   // Create a plot:
   this->setXLabel(tr("%1").arg(data.getColumnName(0)));
-  this->setYLabel(tr("coefficient of variation"));
+  this->setYLabel(tr("$C_V$"));
 
   // Allocate a graph for each selected species
   size_t offset = 1; // skip parameter column
@@ -101,7 +101,7 @@ SSAParameterScanFanoPlot::SSAParameterScanFanoPlot(const QStringList &selected_s
 
   // Create a plot:
   this->setXLabel(tr("%1").arg(data.getColumnName(0)));
-  this->setYLabel(tr("Fano Factor"));
+  this->setYLabel(tr("$F_Fano$"));
 
   iNA::Ast::Model *model = task->getConfig().getModel();
 

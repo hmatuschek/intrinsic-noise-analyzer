@@ -4,7 +4,6 @@
 #include <QVector>
 #include "../views/varianceplot.hh"
 
-
 ParameterScanPlot::ParameterScanPlot(const QStringList &selected_species, ParamScanTask *task,
                                      QObject *parent)
     : VariancePlot("Mean concentrations (RE & LNA)", parent)
@@ -103,7 +102,7 @@ ParameterScanCVPlot::ParameterScanCVPlot(const QStringList &selected_species, Pa
 
   // Create a plot:
   this->setXLabel(tr("%1").arg(data.getColumnName(0)));
-  this->setYLabel(tr("coefficient of variation"));
+  this->setYLabel(tr("$C_V$"));
 
   // Allocate a graph for each selected species
   size_t offset = 1; // skip parameter column
@@ -113,8 +112,8 @@ ParameterScanCVPlot::ParameterScanCVPlot(const QStringList &selected_species, Pa
     size_t mean_idx = offset + species_idx;
     size_t var_idx  = offset+Ntot + species_idx*(Ntot+1) - (species_idx*(species_idx+1))/2;
     // Coefficient wise operation -> coefficient of variation std.dev(X)/mean(X):
-    Eigen::VectorXd cov = data.getColumn(var_idx).array().sqrt() / data.getColumn(mean_idx).array();
-    this->addLineGraph(data.getColumn(0), cov, data.getColumnName(mean_idx));
+    Eigen::VectorXd cv = data.getColumn(var_idx).array().sqrt() / data.getColumn(mean_idx).array();
+    this->addLineGraph(data.getColumn(0), cv, QString("LNA(")+task->getConfig().getModel()->getSpecies(species_idx)->getLabel().c_str()+QString(")"));
   }
 
   // Force y plot-range to be [0, AUTO]:
@@ -142,7 +141,7 @@ ParameterScanFanoPlot::ParameterScanFanoPlot(const QStringList &selected_species
 
   // Create a plot:
   this->setXLabel(tr("%1").arg(data.getColumnName(0)));
-  this->setYLabel(tr("Fano Factor"));
+  this->setYLabel(tr("$F_Fano$"));
 
   iNA::Ast::Model *model = task->getConfig().getModel();
 
@@ -163,7 +162,7 @@ ParameterScanFanoPlot::ParameterScanFanoPlot(const QStringList &selected_species
 
     // Coefficient wise operation -> coefficient of variation variance(X)/mean(X):
     Eigen::VectorXd fano =  multiplier*( data.getColumn(var_idx).array() / data.getColumn(mean_idx).array() );
-    this->addLineGraph(data.getColumn(0), fano, data.getColumnName(mean_idx));
+    this->addLineGraph(data.getColumn(0), fano, QString("LNA(")+QString(model->getSpecies(species_idx)->getLabel().c_str())+QString(")"));
   }
 
   // Force y plot-range to be [0, AUTO]:
@@ -192,7 +191,7 @@ ParameterScanCVIOSPlot::ParameterScanCVIOSPlot(const QStringList &selected_speci
 
   // Create a plot:
   this->setXLabel(tr("%1").arg(data.getColumnName(0)));
-  this->setYLabel(tr("coefficient of variation"));
+  this->setYLabel(tr("$C_V$"));
 
   // Allocate a graph for each selected species
   size_t offset = 1+Ntot+((Ntot+1)*Ntot)/2;
@@ -203,7 +202,7 @@ ParameterScanCVIOSPlot::ParameterScanCVIOSPlot(const QStringList &selected_speci
     size_t var_idx  = offset+Ntot + species_idx*(Ntot+1) - (species_idx*(species_idx+1))/2;
     // Coefficient wise operation -> coefficient of variation std.dev(X)/mean(X):
     Eigen::VectorXd cov = data.getColumn(var_idx).array().sqrt() / data.getColumn(mean_idx).array();
-    this->addLineGraph(data.getColumn(0), cov, data.getColumnName(mean_idx));
+    this->addLineGraph(data.getColumn(0), cov, QString("IOS(")+QString(task->getConfig().getModel()->getSpecies(species_idx)->getLabel().c_str())+QString(")"));
   }
 
   // Force y plot-range to be [0, AUTO]:
@@ -232,7 +231,7 @@ ParameterScanFanoIOSPlot::ParameterScanFanoIOSPlot(const QStringList &selected_s
 
   // Create a plot:
   this->setXLabel(tr("%1").arg(data.getColumnName(0)));
-  this->setYLabel(tr("Fano Factor"));
+  this->setYLabel(tr("$F_Fano$"));
 
   iNA::Ast::Model *model = task->getConfig().getModel();
 
@@ -252,7 +251,7 @@ ParameterScanFanoIOSPlot::ParameterScanFanoIOSPlot(const QStringList &selected_s
 
     // Coefficient wise operation -> coefficient of variation variance(X)/mean(X):
     Eigen::VectorXd fano =  multiplier*( data.getColumn(var_idx).array() / data.getColumn(mean_idx).array() );
-    this->addLineGraph(data.getColumn(0), fano, data.getColumnName(mean_idx));
+    this->addLineGraph(data.getColumn(0), fano, QString("IOS(")+QString(task->getConfig().getModel()->getSpecies(species_idx)->getLabel().c_str())+QString(")"));
   }
 
   // Force y plot-range to be [0, AUTO]:

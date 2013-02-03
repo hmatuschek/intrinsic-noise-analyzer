@@ -60,7 +60,7 @@ protected:
   llvm::ExecutionEngine *engine;
 
   /** Once all code is assembles as LLVM IR, this pointer will hold the address of the compiled
-   * funciton. */
+   * function. */
   void *function_ptr;
 
 

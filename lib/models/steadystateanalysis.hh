@@ -12,7 +12,9 @@ namespace Models {
 * Performs the Steady State Analysis on a model.
 */
 
-template <typename M>
+template <class M,
+          class VectorEngine = Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+          class MatrixEngine = Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd> >
 class SteadyStateAnalysis
 {
 protected:
@@ -26,7 +28,7 @@ protected:
      * An instance of a nonlinear solver.
      */
     //NLEsolve::NewtonRaphson<M> solver;
-    NLEsolve::HybridSolver<M> solver;
+    NLEsolve::HybridSolver<M, VectorEngine, MatrixEngine> solver;
 
     /**
      * Holds maximum the maximum integrate time.

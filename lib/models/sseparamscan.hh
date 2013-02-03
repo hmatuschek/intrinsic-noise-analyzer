@@ -18,13 +18,13 @@ template <class M,
           class VectorEngine = Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>,
           class MatrixEngine = Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd> >
 class ParameterScan
-        : public SteadyStateAnalysis<M>
+        : public SteadyStateAnalysis<M, VectorEngine, MatrixEngine>
 {
 
 public:
 
     ParameterScan(M &model)
-        : SteadyStateAnalysis<M>(model)
+        : SteadyStateAnalysis<M, VectorEngine, MatrixEngine>(model)
     {
 
         // Pass...
@@ -35,7 +35,7 @@ public:
     * Constructor
     */
     ParameterScan(M &model, size_t iter, double epsilon, double t_max=1e9, double dt=1e-1)
-      : SteadyStateAnalysis<M>(model,iter,epsilon,t_max,dt)
+      : SteadyStateAnalysis<M, VectorEngine, MatrixEngine>(model,iter,epsilon,t_max,dt)
 
     {
 
@@ -71,7 +71,7 @@ public:
 
         int iter=0;
 
-        std::vector< NLEsolve::HybridSolver<M> > solvers(numThreads,this->solver);
+        std::vector< NLEsolve::HybridSolver<M, VectorEngine, MatrixEngine> > solvers(numThreads,this->solver);
 
         std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> index(this->sseModel.stateIndex);
 
