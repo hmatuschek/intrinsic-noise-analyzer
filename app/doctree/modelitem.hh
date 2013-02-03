@@ -35,7 +35,7 @@ public:
   /** Returns a const reference to the SBML model. */
   const iNA::Ast::Model &getModel() const;
 
-  /** Retruns true. */
+  /** Returns true. */
   virtual bool providesView() const;
   /** Create a new model view. */
   virtual QWidget *createView();

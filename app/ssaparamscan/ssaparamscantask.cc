@@ -1,5 +1,6 @@
 #include "ssaparamscantask.hh"
 #include "models/ssaparamscan.hh"
+#include "eval/eval.hh"
 
 /* ******************************************************************************************* *
  * Implementation of ParamScanTask::Config, the task configuration.
@@ -164,10 +165,22 @@ SSAParamScanTask::process()
           std::pair<std::string,double>(config.getParameter().getIdentifier(),val));
   }
 
-  // Construct analysis:
-  iNA::Models::SSAparamScan _pscan(dynamic_cast<iNA::Ast::Model &>(*config.getModel()),
-                                   _parameterSets, config.getTransientTime(),
-                                   config.getNumThreads());
+  iNA::Models::ParamScanInterface *_pscan=0;
+
+  // Construct analysis:  
+  switch(config.getEngine())
+  {
+     case EngineTaskConfig::JIT_ENGINE:
+        _pscan = new iNA::Models::SSAparamScan< iNA::Eval::jit::Engine<Eigen::VectorXd> >
+                      (dynamic_cast<iNA::Ast::Model &>(*config.getModel()),
+                      _parameterSets, config.getTransientTime(), config.getNumThreads(),config.getOptLevel());
+        break;
+     default:
+        _pscan = new iNA::Models::SSAparamScan< iNA::Eval::bci::Engine<Eigen::VectorXd> >
+                      (dynamic_cast<iNA::Ast::Model &>(*config.getModel()),
+                      _parameterSets, config.getTransientTime(), config.getNumThreads(),config.getOptLevel());
+        break;
+  }
 
   // Fill table with initial statistics:
   for(size_t pid=0; pid<_parameterSets.size(); pid++)
@@ -179,13 +192,13 @@ SSAParamScanTask::process()
 
     // output means
     for (size_t i=0; i<_Ns; i++)
-      parameterScan(pid,col++) = _pscan.getMean()(pid,i);
+      parameterScan(pid,col++) = _pscan->getMean()(pid,i);
 
     // output covariances
     int idx = 0;
     for (size_t i=0; i<_Ns; i++)
       for (size_t j=0; j<=i; j++)
-        parameterScan(pid,col++) =  _pscan.getCovariance()(pid,idx++);
+        parameterScan(pid,col++) =  _pscan->getCovariance()(pid,idx++);
   }
 
   // Set state to running will show the preview:
@@ -196,13 +209,14 @@ SSAParamScanTask::process()
   for (; _simulation_time<=config.getMaxTime(); _simulation_time+=config.getTimeStep())
   {
     // perform a step:
-    _pscan.run(config.getTimeStep());
+    _pscan->run(config.getTimeStep());
     _current_iteration++;
 
     // Check if task shall terminate:
     if (Task::TERMINATING == this->getState())
     {
       this->setState(Task::ERROR, tr("Task was terminated by user."));
+      delete _pscan;
       return;
     }
 
@@ -213,7 +227,7 @@ SSAParamScanTask::process()
 
     // If stats should be reseted:
     if (_reset_stats) {
-      _pscan.resetStatistics();
+      _pscan->resetStatistics();
       _reset_stats = false;
     }
 
@@ -227,18 +241,20 @@ SSAParamScanTask::process()
 
       // output means
       for (size_t i=0; i<_Ns; i++)
-        parameterScan(pid,col++) = _pscan.getMean()(pid,i);
+        parameterScan(pid,col++) = _pscan->getMean()(pid,i);
 
       // output covariances
       int idx = 0;
       for (size_t i=0; i<_Ns; i++)
         for (size_t j=0; j<=i; j++)
-          parameterScan(pid,col++) =  _pscan.getCovariance()(pid,idx++);
+          parameterScan(pid,col++) =  _pscan->getCovariance()(pid,idx++);
     }
 
     // signal new step:
     emit stepPerformed();
   }
+
+  delete _pscan;
 
   // Done...
   this->setState(Task::DONE);

@@ -1,5 +1,5 @@
-#ifndef __INA_SSASTEADYSTATE_HH
-#define __INA_SSASTEADYSTATE_HH
+#ifndef __INA_SSAPARAMSCAN_HH
+#define __INA_SSAPARAMSCAN_HH
 
 #include "optimizedSSA.hh"
 #include "ssebasemodel.hh"
@@ -8,14 +8,42 @@
 namespace iNA {
 namespace Models {
 
+class ParamScanInterface
+{
+
+public:
+
+  ParamScanInterface()
+  {
+
+  };
+
+  virtual const Eigen::MatrixXd& getMean() const =0;
+
+  virtual const Eigen::MatrixXd& getCovariance() const =0;
+
+  virtual void resetStatistics()=0;
+
+  virtual void run(double timestep)=0;
+
+  virtual ~ParamScanInterface()
+  {
+
+  };
+
+
+};
+
+template <class Engine = Eval::bci::Engine<Eigen::VectorXd> >
 class SSAparamScan
+  : public ParamScanInterface
 {
 protected:
 
     Ast::Model& sbml_model;
     double transientTime;
 
-    std::vector<Models::OptimizedSSA*> simulators;
+    std::vector<Models::GenericOptimizedSSA<Engine>*> simulators;
 
     size_t _n;
 
@@ -27,7 +55,8 @@ protected:
 
 
 public:
-    SSAparamScan(Ast::Model &model, std::vector<ParameterSet> &parameterSets, double transientTime, size_t numThreads=OpenMP::getMaxThreads())
+    SSAparamScan(Ast::Model &model, std::vector<ParameterSet> &parameterSets,
+                 double transientTime, size_t numThreads=OpenMP::getMaxThreads(), size_t opt_level=0)
       : sbml_model(model), transientTime(transientTime),
         simulators(parameterSets.size()),
         _n(1), state(numThreads)
@@ -45,7 +74,7 @@ public:
         for(ParameterSet::iterator it=parameterSets[j].begin(); it!=parameterSets[j].end(); it++)
           mod.getParameter((*it).first)->setValue((*it).second);
         // Create SSA
-        simulators[j] = new Models::OptimizedSSA(mod, 1, time(0));
+        simulators[j] = new Models::GenericOptimizedSSA<Engine>(mod, 1, time(0), opt_level, 1);
       }
 
       // Advance state
@@ -113,4 +142,4 @@ public:
 }}
 
 
-#endif // SSASTEADYSTATE_HH
+#endif // SSAPARAMSCAN_HH

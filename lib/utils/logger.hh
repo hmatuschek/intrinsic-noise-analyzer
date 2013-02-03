@@ -116,7 +116,7 @@ public:
 public:
   /** Destructor. Also frees all message handlers. */
   ~Logger();
-  /** Retruns the global logger instance. */
+  /** Returns the global logger instance. */
   static Logger &get();
   /** Destroys the global logger instance. */
   static void shutdown();

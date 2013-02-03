@@ -144,9 +144,11 @@ SET(libina_models_HEADERS models/models.hh
 
 # Add source for nonlinear solvers
 SET(libina_nlesolve_SOURCES
+   nlesolve/nlesolver.cc
    nlesolve/newtonraphson.cc
    nlesolve/hybridsolver.cc)
 SET(libina_nlesolve_HEADERS
+   nlesolve/nlesolver.hh
    nlesolve/newtonraphson.hh
    nlesolve/hybridsolver.hh)
 

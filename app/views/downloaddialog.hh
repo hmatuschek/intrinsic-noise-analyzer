@@ -22,12 +22,12 @@ public:
   /** Destructor. */
   virtual ~DownloadDialog();
 
-  /** Retruns the path to the local temporary file. The file will be deleted once the
+  /** Returns the path to the local temporary file. The file will be deleted once the
    * dialog is destroyed. */
   QString localFileName() const;
   /** Returns true, if the remote filename is known. */
   bool hasRemoteFileName() const;
-  /** Retruns the remote file name, if no remote filename is known, an empty string is returned. */
+  /** Returns the remote file name, if no remote filename is known, an empty string is returned. */
   QString remoteFileName() const;
 
 private slots:

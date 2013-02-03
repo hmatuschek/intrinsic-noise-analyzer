@@ -22,8 +22,8 @@ public:
   /** Resolves a GiNaC symbol to the name of the corresponding @c iNA::Ast::VariableDefinition.
    * If the variable has no name assigned, the identifier is returned. */
   std::string identifier(GiNaC::symbol symbol);
-  /** Retruns true if the given symbol belongs to a species and if the model is defined in
-   * substance units. Retruns always false if the scope is not element of an Model. */
+  /** Returns true if the given symbol belongs to a species and if the model is defined in
+   * substance units. Returns always false if the scope is not element of an Model. */
   bool hasConcentrationUnits(GiNaC::symbol symbol);
 
 private:

@@ -295,7 +295,7 @@ public:
   /** Sets the current state as terminal. */
   void setTerminal(bool terminal);
 
-  /** Retruns true if the current state is terminal. */
+  /** Returns true if the current state is terminal. */
   bool isTerminal() const;
 
   /** Saves the current state on the stack. */

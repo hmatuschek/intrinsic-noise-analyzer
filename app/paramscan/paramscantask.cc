@@ -1,4 +1,5 @@
 #include "paramscantask.hh"
+#include "eval/eval.hh"
 
 /* ******************************************************************************************* *
  * Implementation of ParamScanTask::Config, the task configuration.
@@ -225,23 +226,56 @@ ParamScanTask::process()
   // Do parameter scan
   if(config.getMethod()==Config::RE_ANALYSIS)
   {
-      iNA::Models::ParameterScan2<iNA::Models::REmodel> pscan(dynamic_cast<iNA::Models::REmodel &>(*config.getModel()),
-                                                        config.getMaxIterations(), config.getEpsilon(), config.getMaxTimeStep());
+
+    if(config.getEngine()==EngineTaskConfig::JIT_ENGINE)
+    {
+      iNA::Models::ParameterScan<iNA::Models::REmodel, iNA::Eval::jit::Engine<Eigen::VectorXd>, iNA::Eval::jit::Engine<Eigen::VectorXd,Eigen::MatrixXd> >
+          pscan(dynamic_cast<iNA::Models::REmodel &>(*config.getModel()),
+                config.getMaxIterations(), config.getEpsilon(), config.getMaxTimeStep());
       pscan.parameterScan(parameterSets,scanResult);
+    }
+    else
+    {
+      iNA::Models::ParameterScan<iNA::Models::REmodel>
+          pscan(dynamic_cast<iNA::Models::REmodel &>(*config.getModel()),
+                config.getMaxIterations(), config.getEpsilon(), config.getMaxTimeStep());
+      pscan.parameterScan(parameterSets,scanResult);
+    }
+
   }
   if(config.getMethod()==Config::LNA_ANALYSIS)
   {
-      iNA::Models::ParameterScan2<iNA::Models::LNAmodel> pscan(dynamic_cast<iNA::Models::LNAmodel &>(*config.getModel()),
-                                                        config.getMaxIterations(), config.getEpsilon(), config.getMaxTimeStep());
+    if(config.getEngine()==EngineTaskConfig::JIT_ENGINE)
+    {
+      iNA::Models::ParameterScan<iNA::Models::LNAmodel, iNA::Eval::jit::Engine<Eigen::VectorXd>, iNA::Eval::jit::Engine<Eigen::VectorXd,Eigen::MatrixXd> >
+          pscan(dynamic_cast<iNA::Models::LNAmodel &>(*config.getModel()),
+                config.getMaxIterations(), config.getEpsilon(), config.getMaxTimeStep());
       pscan.parameterScan(parameterSets,scanResult);
-
+    }
+    else
+    {
+      iNA::Models::ParameterScan<iNA::Models::LNAmodel>
+          pscan(dynamic_cast<iNA::Models::LNAmodel &>(*config.getModel()),
+                config.getMaxIterations(), config.getEpsilon(), config.getMaxTimeStep());
+      pscan.parameterScan(parameterSets,scanResult);
+    }
   }
   if(config.getMethod()==Config::IOS_ANALYSIS)
   {
-      //scanResult.resize(dynamic_cast<iNA::Models::IOSmodel *>(config.getModel())->getDimension());
-      iNA::Models::ParameterScan2<iNA::Models::IOSmodel> pscan(dynamic_cast<iNA::Models::IOSmodel &>(*config.getModel()),
-                                                        config.getMaxIterations(), config.getEpsilon(), config.getMaxTimeStep());
+    if(config.getEngine()==EngineTaskConfig::JIT_ENGINE)
+    {
+      iNA::Models::ParameterScan<iNA::Models::IOSmodel, iNA::Eval::jit::Engine<Eigen::VectorXd>, iNA::Eval::jit::Engine<Eigen::VectorXd,Eigen::MatrixXd> >
+          pscan(dynamic_cast<iNA::Models::IOSmodel &>(*config.getModel()),
+                config.getMaxIterations(), config.getEpsilon(), config.getMaxTimeStep());
       pscan.parameterScan(parameterSets,scanResult);
+    }
+    else
+    {
+      iNA::Models::ParameterScan<iNA::Models::IOSmodel>
+          pscan(dynamic_cast<iNA::Models::IOSmodel &>(*config.getModel()),
+                config.getMaxIterations(), config.getEpsilon(), config.getMaxTimeStep());
+      pscan.parameterScan(parameterSets,scanResult);
+    }
   }
 
 

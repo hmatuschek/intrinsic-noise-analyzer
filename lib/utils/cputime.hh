@@ -39,7 +39,7 @@ public:
   double stop();
 
   /**
-   * Retruns the current time of the current clock.
+   * Returns the current time of the current clock.
    */
   double getTime();
 };
@@ -75,7 +75,7 @@ public:
   double stop();
 
   /**
-   * Retruns the current time of the current clock.
+   * Returns the current time of the current clock.
    */
   double getTime();
 };

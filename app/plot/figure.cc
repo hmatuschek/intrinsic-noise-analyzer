@@ -226,6 +226,8 @@ Figure::save(const QString &filename, FileType type)
     // Create SVG generator & painter
     QSvgGenerator *generator = new QSvgGenerator();
     generator->setFileName(filename);
+    generator->setTitle(QString("iNA: ")+this->getTitle());
+    generator->setResolution(91);
     generator->setSize(QSize(width(), height()));
     QPainter *painter = new QPainter(generator);
     // Render graphics

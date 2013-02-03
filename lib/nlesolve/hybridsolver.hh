@@ -1,11 +1,12 @@
-#ifndef HYBRIDSOLVER_HH
-#define HYBRIDSOLVER_HH
+#ifndef __INA_NLESOLVE_HYBRIDSOLVER_HH
+#define __INA_NLESOLVE_HYBRIDSOLVER_HH
 
 #include "nlesolve/newtonraphson.hh"
 #include "ode/lsoda.hh"
 
 namespace iNA{
 namespace NLEsolve{
+
 /**
  * A hybrid of the ODE integrator LSODA and the Newton-Raphson method for nonlinear algebraic equations.
  *
@@ -33,8 +34,6 @@ public:
   HybridSolver(Sys &system)
       : NewtonRaphson<Sys>(system), LSODA()
   {
-
-    //parameters.epsilon=epsilon;
 
     this->parameters.maxIterations=100;
 
@@ -80,7 +79,7 @@ public:
 
   void ODEStep(Eigen::VectorXd &state, double t, double dt)
   {
-      lsoda(getDimension(), state.data()-1, &t, t+dt, 2, rtolwork, atolwork, 1, &istate, 0, 2);
+    lsoda(getDimension(), state.data()-1, &t, t+dt, 2, rtolwork, atolwork, 1, &istate, 0, 2);
   }
 
   virtual void evalODE(double t, double state[], double dx[], int nsize)

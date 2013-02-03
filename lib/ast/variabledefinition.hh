@@ -102,7 +102,7 @@ public:
   /** Retunrs true, if the variable definition has an initial value expression. */
   bool hasValue() const;
 
-  /** Retruns the initial value expression, if present. Otherwise null is returned. */
+  /** Returns the initial value expression, if present. Otherwise null is returned. */
   GiNaC::ex getValue() const;
 
   /** (re-) Sets the initial value expression. */

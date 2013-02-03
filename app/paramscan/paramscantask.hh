@@ -22,7 +22,8 @@ public:
    */
   class Config :
       public GeneralTaskConfig,
-      public ModelSelectionTaskConfig
+      public ModelSelectionTaskConfig,
+      public EngineTaskConfig
   {
 
   public:

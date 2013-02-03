@@ -21,6 +21,7 @@ public:
   typedef enum {
     MODEL_SELECTION_PAGE,
     SPECIES_SELECTION_PAGE,
+    ENGINE_SELECTION_PAGE,
     SCAN_CONFIG_PAGE,
     SUMMARY_PAGE
   } PageId;
@@ -50,12 +51,21 @@ public:
 
 
 
-class SSAParameterScanConfigPage : public QWizardPage
+class SSAParamScanEngineSelectionPage : public EngineWizardPage
 {
   Q_OBJECT
 
 public:
-  explicit SSAParameterScanConfigPage(GeneralTaskWizard *parent);
+  explicit SSAParamScanEngineSelectionPage(GeneralTaskWizard *parent);
+};
+
+
+class SSAParamScanConfigPage : public QWizardPage
+{
+  Q_OBJECT
+
+public:
+  explicit SSAParamScanConfigPage(GeneralTaskWizard *parent);
 
   virtual void initializePage();
   virtual bool validatePage();

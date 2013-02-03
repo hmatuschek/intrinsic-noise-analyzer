@@ -210,7 +210,7 @@ public:
   bool isVariantOf(ScaledBaseUnit::BaseUnit baseUnit, int expo = 1.0) const;
   /** Retunrs true, if the unit contains a variant of the given base-unit with given exponent. */
   bool hasVariantOf(ScaledBaseUnit::BaseUnit baseUnit, int expo = 1.0) const;
-  /** Retruns true, if the unit is a linear scaled substance unit. */
+  /** Returns true, if the unit is a linear scaled substance unit. */
   bool isSubstanceUnit() const;
   /** Returns true, if one of the unit-factors is a linear scaling of a substance unit. */
   bool hasSubstanceUnit() const;

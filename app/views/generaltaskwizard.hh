@@ -22,7 +22,7 @@ public:
   /** Default constructor. */
   explicit GeneralTaskWizard(QWidget *parent = 0);
 
-  /** Retruns a weak reference to the task configuration instance. */
+  /** Returns a weak reference to the task configuration instance. */
   virtual GeneralTaskConfig &getConfig() = 0;
 
   /** Simpler interface to the config object with type-cast. */

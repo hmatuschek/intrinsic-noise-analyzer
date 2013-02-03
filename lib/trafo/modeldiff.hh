@@ -22,7 +22,7 @@ public:
 
   /** Returns true if a diff item can be undone on the given model. */
   virtual bool canUndo(const Ast::Model &model) = 0;
-  /** Retruns true if a diff item can be redone on the given model. */
+  /** Returns true if a diff item can be redone on the given model. */
   virtual bool canRedo(const Ast::Model &model) = 0;
 
   /** Undo the modification on the given model. */
@@ -49,7 +49,7 @@ public:
 
   /** Returns true if a diff item can be undone on the given model. */
   virtual bool canUndo(const Ast::Model &model);
-  /** Retruns true if a diff item can be redone on the given model. */
+  /** returns true if a diff item can be redone on the given model. */
   virtual bool canRedo(const Ast::Model &model);
 
 protected:
@@ -88,7 +88,7 @@ public:
 
   /** Returns true if a diff item can be undone on the given model. */
   virtual bool canUndo(const Ast::Model &model);
-  /** Retruns true if a diff item can be redone on the given model. */
+  /** Returns true if a diff item can be redone on the given model. */
   virtual bool canRedo(const Ast::Model &model);
 
   /** Undoes the identifier modification on the given model. */
@@ -121,7 +121,7 @@ public:
 
   /** Returns true if a diff item can be undone on the given model. */
   virtual bool canUndo(const Ast::Model &model);
-  /** Retruns true if a diff item can be redone on the given model. */
+  /** Returns true if a diff item can be redone on the given model. */
   virtual bool canRedo(const Ast::Model &model);
 
   /** Undoes the name modification on the given model. */
@@ -155,7 +155,7 @@ public:
 
   /** Returns true if a diff item can be undone on the given model. */
   virtual bool canUndo(const Ast::Model &model);
-  /** Retruns true if a diff item can be redone on the given model. */
+  /** Returns true if a diff item can be redone on the given model. */
   virtual bool canRedo(const Ast::Model &model);
 
   /** Undoes the name modification on the given model. */
@@ -190,7 +190,7 @@ public:
 
   /** Returns true if a diff item can be undone on the given model. */
   virtual bool canUndo(const Ast::Model &model);
-  /** Retruns true if a diff item can be redone on the given model. */
+  /** Returns true if a diff item can be redone on the given model. */
   virtual bool canRedo(const Ast::Model &model);
 
   /** Undoes the name modification on the given model. */
@@ -220,7 +220,7 @@ public:
 
   /** Returns true if a diff item can be undone on the given model. */
   virtual bool canUndo(const Ast::Model &model);
-  /** Retruns true if a diff item can be redone on the given model. */
+  /** Returns true if a diff item can be redone on the given model. */
   virtual bool canRedo(const Ast::Model &model);
 
   /** Undoes the name modification on the given model. */
@@ -252,7 +252,7 @@ public:
 
   /** Returns true if a diff item can be undone on the given model. */
   virtual bool canUndo(const Ast::Model &model);
-  /** Retruns true if a diff item can be redone on the given model. */
+  /** Returns true if a diff item can be redone on the given model. */
   virtual bool canRedo(const Ast::Model &model);
 
   /** Undoes the unit modification on the given model. */
@@ -705,7 +705,7 @@ public:
   /** Returns true if the modifications can be undone on the given model.
    * This fuction checks if the last item of the series can be undone. */
   virtual bool canUndo(const Ast::Model &model);
-  /** Retruns true if the modifications can be redone on the given model.
+  /** Returns true if the modifications can be redone on the given model.
    * This function checks if the first item of the series can be redone. */
   virtual bool canRedo(const Ast::Model &model);
 

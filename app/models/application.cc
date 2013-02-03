@@ -145,7 +145,7 @@ Application::Application() :
   _ssaAnalysisAction = new QAction(tr("Stochastic Simulation Algorithm (SSA)"), this);
   _ssaAnalysisAction->setStatusTip(tr("Run a time course analysis using the Stochastic Simulation Algorithm (SSA)."));
 
-  _ssaParameterScanAction = new QAction(tr("Time-averaged Parameter Scan (SSA)"), this);
+  _ssaParameterScanAction = new QAction(tr("Time-Averaged Parameter Scan (SSA)"), this);
   _ssaParameterScanAction->setStatusTip(tr("Run a time-averaged parameter scan using the Stochastic Simulation Algorithm (SSA)."));
 
   _recentModelsMenu = new QMenu("Recent models");

@@ -21,7 +21,8 @@ public:
   /** This class assembles all parameters needed to configure a parameter scan task. */
   class Config :
       public GeneralTaskConfig,
-      public ModelSelectionTaskConfig
+      public ModelSelectionTaskConfig,
+      public EngineTaskConfig
   {
 
   public:

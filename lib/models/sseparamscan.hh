@@ -13,14 +13,17 @@ namespace Models {
 /**
 * Extension of the SteadyStateAnalysis to perform a Parameter scan.
 */
-template <typename M>
-class ParameterScan2
+
+template <class M,
+          class VectorEngine = Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>,
+          class MatrixEngine = Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd> >
+class ParameterScan
         : public SteadyStateAnalysis<M>
 {
 
 public:
 
-    ParameterScan2(M &model)
+    ParameterScan(M &model)
         : SteadyStateAnalysis<M>(model)
     {
 
@@ -31,7 +34,7 @@ public:
     /**
     * Constructor
     */
-    ParameterScan2(M &model, size_t iter, double epsilon, double t_max=1e9, double dt=1e-1)
+    ParameterScan(M &model, size_t iter, double epsilon, double t_max=1e9, double dt=1e-1)
       : SteadyStateAnalysis<M>(model,iter,epsilon,t_max,dt)
 
     {
@@ -44,8 +47,12 @@ public:
      * @param parameterSets: Vector of parameter sets to perform analysis for.
      * @param resultSet: Outputs the steady state concentrations, covariance and EMRE vector in reduced
      *        coordinates. Contents will be overwritten.
+     * @param opt_level: Optimization level for expression evaluation.
      */
-    int parameterScan(std::vector<ParameterSet> &parameterSets, std::vector<Eigen::VectorXd> &resultSet, size_t numThreads=OpenMP::getMaxThreads())
+    int parameterScan(std::vector<ParameterSet> &parameterSets,
+                      std::vector<Eigen::VectorXd> &resultSet,
+                      size_t numThreads = OpenMP::getMaxThreads(),
+                      size_t opt_level = 0)
 
     {
 
@@ -61,8 +68,6 @@ public:
         size_t lnaLength = offset*(offset+1)/2;
         size_t sseLength = this->sseModel.getUpdateVector().size()-this->sseModel.numIndSpecies();
         size_t iosLength = sseLength - lnaLength;
-
-        std::cerr << "size: " << this->sseModel.getUpdateVector().size() << std::endl;
 
         int iter=0;
 
@@ -94,22 +99,22 @@ public:
 
         // Now compile
 
-        Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Code codeODE;
-        Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Code codeJac;
-        compileREs(this->sseModel, index, codeODE, codeJac);
+//        Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Code codeODE;
+//        Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Code codeJac;
+//        compileREs(this->sseModel, index, codeODE, codeJac);
 
-        Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Code LNAcodeA;
-        Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Code LNAcodeB;
-        compileLNA(this->sseModel, index, LNAcodeA, LNAcodeB);
+        typename VectorEngine::Code LNAcodeA;
+        typename MatrixEngine::Code LNAcodeB;
+        compileLNA(this->sseModel, index, LNAcodeA, LNAcodeB, opt_level);
 
-        Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Code IOScodeA;
-        Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Code IOScodeB;
-        compileIOS(this->sseModel, index, IOScodeA, IOScodeB);
+        typename VectorEngine::Code IOScodeA;
+        typename MatrixEngine::Code IOScodeB;
+        compileIOS(this->sseModel, index, IOScodeA, IOScodeB, opt_level);
 
         // ... and setup the interpreter
 
-        Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Interpreter interpreter;
-        Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Interpreter matrix_interpreter;
+        typename VectorEngine::Interpreter interpreter;
+        typename MatrixEngine::Interpreter matrix_interpreter;
 
         // Initialize with initial concentrations
         Eigen::VectorXd x(nstate);
@@ -118,6 +123,9 @@ public:
 
         x.head(offset+sseLength)=init;
         Eigen::VectorXd conc = init.head(offset);
+
+        Eigen::VectorXex REs;
+        Eigen::MatrixXex Jacobian;
 
 //#pragma omp parallel for if(numThreads>1) num_threads(numThreads) schedule(dynamic) firstprivate(iter,x,conc)
         // Iterate over all parameter sets
@@ -141,13 +149,9 @@ public:
                 x((*it).second) = Eigen::ex2double( ICs.apply(parameters.apply(constants.apply((*it).first))) );
             }
 
-            //conc = x.head(this->sseModel.numIndSpecies());
-
             // Fold variable parameters and all the rest
-            Eigen::VectorXex updateVector = ICs.apply(parameters.apply(constants.apply( this->sseModel.getUpdateVector() ) ));
-            Eigen::VectorXex REs = updateVector.head(offset);
-            Eigen::VectorXex sseUpdate = updateVector.segment(offset,sseLength);
-            Eigen::MatrixXex Jacobian = ICs.apply(parameters.apply(constants.apply( this->sseModel.getJacobian()) ));
+            REs = ICs.apply(parameters.apply(constants.apply( this->sseModel.getUpdateVector().head(offset) ) ));
+            Jacobian = ICs.apply(parameters.apply(constants.apply( this->sseModel.getJacobian()) ));
 
             // Setup solver and solve for RE concentrations
             try
@@ -200,19 +204,20 @@ public:
     }
 
     void compileREs(REmodel &model, const std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> &indexTable,
-                    Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Code &codeODE,
-                    Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Code &codeJac)
+                    typename VectorEngine::Code &codeODE,
+                    typename MatrixEngine::Code &codeJac,
+                    size_t opt_level = 0)
 
     {
 
         // Compile ODEs
-        Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Compiler compilerA(indexTable);
+        typename VectorEngine::Compiler compilerA(indexTable);
         compilerA.setCode(&codeODE);
         compilerA.compileVector(model.getUpdateVector().head(model.numIndSpecies()));
         compilerA.finalize(0);
 
         // Compile Jacobian
-        Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Compiler compilerB(indexTable);
+        typename MatrixEngine::Compiler compilerB(indexTable);
         compilerB.setCode(&codeJac);
         compilerB.compileMatrix(model.getJacobian());
         compilerB.finalize(0);
@@ -222,16 +227,18 @@ public:
 
     void
     compileLNA(REmodel &model, const std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> &indexTable,
-               Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Code &codeA,
-               Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Code &codeB)
+               typename VectorEngine::Code &codeA,
+               typename MatrixEngine::Code &codeB,
+               size_t opt_level = 0)
 
     {
         // Pass..
     }
 
     void compileLNA(LNAmodel &model, const std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> &indexTable,
-                    Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Code &codeA,
-                    Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Code &codeB)
+                    typename VectorEngine::Code &codeA,
+                    typename MatrixEngine::Code &codeB,
+                    size_t opt_level = 0)
 
     {
         size_t offset = model.numIndSpecies();
@@ -254,23 +261,24 @@ public:
         }
 
         // Compile A
-        Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Compiler compilerA(indexTable);
+        typename VectorEngine::Compiler compilerA(indexTable);
         compilerA.setCode(&codeA);
         compilerA.compileVector(A);
-        compilerA.finalize(0);
+        compilerA.finalize(opt_level);
 
         // Compile B
-        Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Compiler compilerB(indexTable);
+        typename MatrixEngine::Compiler compilerB(indexTable);
         compilerB.setCode(&codeB);
         compilerB.compileMatrix(B);
-        compilerB.finalize(0);
+        compilerB.finalize(opt_level);
 
     }
 
     void
     compileIOS(REmodel &model, const std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> &indexTable,
-               Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Code &codeA,
-               Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Code &codeB)
+               typename VectorEngine::Code &codeA,
+               typename MatrixEngine::Code &codeB,
+               size_t opt_level = 0)
 
     {
         // Pass..
@@ -278,8 +286,9 @@ public:
 
     void
     compileIOS(LNAmodel &model, const std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> &indexTable,
-               Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Code &codeA,
-               Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Code &codeB)
+               typename VectorEngine::Code &codeA,
+               typename MatrixEngine::Code &codeB,
+               size_t opt_level = 0)
 
     {
         // Pass..
@@ -288,8 +297,9 @@ public:
 
     void
     compileIOS(IOSmodel &model, const std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> &indexTable,
-               Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Code &codeA,
-               Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Code &codeB)
+               typename VectorEngine::Code &codeA,
+               typename MatrixEngine::Code &codeB,
+               size_t opt_level = 0)
 
     {
 
@@ -316,16 +326,16 @@ public:
         }
 
         // Compile A
-        Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Compiler compilerA(indexTable);
+        typename VectorEngine::Compiler compilerA(indexTable);
         compilerA.setCode(&codeA);
         compilerA.compileVector(A);
-        compilerA.finalize(0);
+        compilerA.finalize(opt_level);
 
         // Compile B
-        Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Compiler compilerB(indexTable);
+        typename MatrixEngine::Compiler compilerB(indexTable);
         compilerB.setCode(&codeB);
         compilerB.compileMatrix(B);
-        compilerB.finalize(0);
+        compilerB.finalize(opt_level);
 
     }
 
@@ -340,13 +350,13 @@ public:
 * Extension of the SteadyStateAnalysis to perform a Parameter scan.
 */
 template <typename M>
-class ParameterScan
+class ParameterScanOld
         : public SteadyStateAnalysis<M>
 {
 
 public:
 
-    ParameterScan(M &model)
+    ParameterScanOld(M &model)
         : SteadyStateAnalysis<M>(model)
     {
 
@@ -357,7 +367,7 @@ public:
     /**
     * Constructor
     */
-    ParameterScan(M &model, size_t iter, double epsilon, double t_max=1e9, double dt=1e-1)
+    ParameterScanOld(M &model, size_t iter, double epsilon, double t_max=1e9, double dt=1e-1)
       : SteadyStateAnalysis<M>(model,iter,epsilon,t_max,dt)
 
     {

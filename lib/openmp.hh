@@ -13,7 +13,7 @@ class OpenMP
 {
 public:
   /**
-   * Retruns the number of available threads.
+   * Returns the number of available threads.
    *
    * Returns 1, if OpenMP is disabled.
    */

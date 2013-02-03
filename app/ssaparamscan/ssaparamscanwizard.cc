@@ -19,7 +19,8 @@ SSAParamScanWizard::SSAParamScanWizard(QWidget *parent) :
   this->setWindowTitle("System Size Expansion");
 
   this->setPage(SSAParamScanWizard::MODEL_SELECTION_PAGE, new SSAParamScanModelSelectionPage(this));
-  this->setPage(SSAParamScanWizard::SCAN_CONFIG_PAGE, new SSAParameterScanConfigPage(this));
+  this->setPage(SSAParamScanWizard::SCAN_CONFIG_PAGE, new SSAParamScanConfigPage(this));
+  this->setPage(SSAParamScanWizard::ENGINE_SELECTION_PAGE, new SSAParamScanEngineSelectionPage(this));
   this->setPage(SSAParamScanWizard::SUMMARY_PAGE, new SSAParamScanSummaryPage(this));
   this->page(SSAParamScanWizard::SUMMARY_PAGE)->setFinalPage(true);
 }
@@ -64,9 +65,19 @@ SSAParamScanModelSelectionPage::validatePage()
 
 
 /* ********************************************************************************************* *
+ * Implementation of the engine selection page:
+ * ********************************************************************************************* */
+SSAParamScanEngineSelectionPage::SSAParamScanEngineSelectionPage(GeneralTaskWizard *parent)
+  : EngineWizardPage(parent, false)
+{
+  this->setTitle(tr("Stochastic Simulation Algorithm"));
+  setSubTitle(tr("Select engine for propensity evaluation"));
+}
+
+/* ********************************************************************************************* *
  * Config page
  * ********************************************************************************************* */
-SSAParameterScanConfigPage::SSAParameterScanConfigPage(GeneralTaskWizard *parent)
+SSAParamScanConfigPage::SSAParamScanConfigPage(GeneralTaskWizard *parent)
   : QWizardPage(parent)
 {
   this->setTitle(tr("SSA Parameter scan"));
@@ -153,7 +164,7 @@ SSAParameterScanConfigPage::SSAParameterScanConfigPage(GeneralTaskWizard *parent
 }
 
 void
-SSAParameterScanConfigPage::refreshParamRange(int)
+SSAParamScanConfigPage::refreshParamRange(int)
 {
   // Get the config:
   SSAParamScanWizard *wizard = static_cast<SSAParamScanWizard *>(this->wizard());
@@ -180,7 +191,7 @@ SSAParameterScanConfigPage::refreshParamRange(int)
 }
 
 void
-SSAParameterScanConfigPage::initializePage()
+SSAParamScanConfigPage::initializePage()
 {
   // Get the config:
   SSAParamScanWizard *wizard = static_cast<SSAParamScanWizard *>(this->wizard());
@@ -196,7 +207,7 @@ SSAParameterScanConfigPage::initializePage()
 
 
 bool
-SSAParameterScanConfigPage::validatePage()
+SSAParamScanConfigPage::validatePage()
 {
   // Get the wizard:
   SSAParamScanWizard *wizard = static_cast<SSAParamScanWizard *>(this->wizard());
