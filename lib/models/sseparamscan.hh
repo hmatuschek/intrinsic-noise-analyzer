@@ -18,13 +18,13 @@ template <class M,
           class VectorEngine = Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>,
           class MatrixEngine = Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd> >
 class ParameterScan
-        : public SteadyStateAnalysis<M, VectorEngine, MatrixEngine>
+        : public SteadyStateAnalysis<M>
 {
 
 public:
 
     ParameterScan(M &model)
-        : SteadyStateAnalysis<M, VectorEngine, MatrixEngine>(model)
+        : SteadyStateAnalysis<M>(model)
     {
 
         // Pass...
@@ -35,7 +35,7 @@ public:
     * Constructor
     */
     ParameterScan(M &model, size_t iter, double epsilon, double t_max=1e9, double dt=1e-1)
-      : SteadyStateAnalysis<M, VectorEngine, MatrixEngine>(model,iter,epsilon,t_max,dt)
+      : SteadyStateAnalysis<M>(model,iter,epsilon,t_max,dt)
 
     {
 
@@ -62,16 +62,15 @@ public:
         // First make space
         resultSet.resize(parameterSets.size());
 
-
         // Get the SSE vector
         size_t offset = this->sseModel.numIndSpecies();
-        size_t lnaLength = offset*(offset+1)/2;
         size_t sseLength = this->sseModel.getUpdateVector().size()-this->sseModel.numIndSpecies();
-        size_t iosLength = sseLength - lnaLength;
+        size_t lnaLength = sseLength > 0 ? offset*(offset+1)/2 : 0;
+        size_t iosLength = (sseLength - lnaLength) > 0 ? (sseLength - lnaLength) : 0;
 
         int iter=0;
 
-        std::vector< NLEsolve::HybridSolver<M, VectorEngine, MatrixEngine> > solvers(numThreads,this->solver);
+        std::vector< NLEsolve::HybridSolver<M> > solvers(numThreads,this->solver);
 
         std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> index(this->sseModel.stateIndex);
 
