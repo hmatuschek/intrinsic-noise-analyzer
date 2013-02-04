@@ -556,7 +556,7 @@ MathSup::layout(const MathContext &context, QGraphicsItem *parent)
   qreal base_width = _base->metrics().width();
   qreal upper_height = _upper->metrics().bbHeight();
 
-  QPointF base_pos(0, upper_height/2);
+  QPointF base_pos(0, upper_height/4);
   QPointF upper_pos(base_width, 0);
 
   QRectF base_bb = _base->metrics().bb(); base_bb.translate(base_pos);
@@ -567,12 +567,12 @@ MathSup::layout(const MathContext &context, QGraphicsItem *parent)
 
   // Update metric:
   _metrics.setWidth(_base->metrics().width() + _upper->metrics().width());
-  _metrics.setHeight(_base->metrics().height() + _upper->metrics().height()/2);
-  _metrics.setAscent(_base->metrics().ascent() + _upper->metrics().height()/2);
+  _metrics.setHeight(_base->metrics().height() + _upper->metrics().height()/4);
+  _metrics.setAscent(_base->metrics().ascent() + _upper->metrics().height()/4);
   _metrics.setLeftBearing(_base->metrics().leftBearing());
   _metrics.setRightBearing(_upper->metrics().rightBearing());
   _metrics.setBB(base_bb.unite(upper_bb));
-  _metrics.setCenter(_base->metrics().center() + _upper->metrics().bbHeight()/2);
+  _metrics.setCenter(_base->metrics().center() + _upper->metrics().bbHeight()/4);
 
   return item_group;
 }

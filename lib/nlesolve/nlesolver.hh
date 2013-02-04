@@ -56,32 +56,24 @@ protected:
       */
      typename MatrixEngine::Interpreter jacobian_interpreter;
 
-     /**
-      * The bytecode for the ODE.
-      */
-     typename VectorEngine::Code * ODEcode;
+     /** The bytecode for the ODE. */
+     typename VectorEngine::Code *ODEcode;
 
-     /**
-      * The bytecode for the Jacobian.
-      */
-     typename MatrixEngine::Code * jacobianCode;
+     /** The bytecode for the Jacobian. */
+     typename MatrixEngine::Code *jacobianCode;
 
 public:
 
      NLEsolver(T &model)
-         : dim(model.numIndSpecies()), ODEs(dim), JacobianM(dim,dim)
+       : dim(model.numIndSpecies()), ODEs(dim), JacobianM(dim,dim), ODEcode(0), jacobianCode(0)
      {
-
-       this->ODEcode = new typename VectorEngine::Code();
-       this->jacobianCode = new typename MatrixEngine::Code();
-
-       // Set bytecode for interpreter
-       this->interpreter.setCode(this->ODEcode);
-       this->jacobian_interpreter.setCode(this->jacobianCode);
-
+       // Pass...
      }
 
-     virtual ~NLEsolver(){};
+     virtual ~NLEsolver(){
+       if (0 != ODEcode) { delete ODEcode; }
+       if (0 != jacobianCode) { delete jacobianCode; }
+     }
 
 
      /**
@@ -113,50 +105,47 @@ public:
      void set(std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> &indexTable,
               Eigen::VectorXex &updateVector, Eigen::MatrixXex &Jacobian, size_t opt_level=0)
      {
+       // clean up
+       this->iterations = 0;
+       if (0 != ODEcode) { delete ODEcode; }
+       if (0 != jacobianCode) { delete jacobianCode; }
 
-         // clean up
-         this->iterations = 0;
-         delete this->ODEcode;
-         delete this->jacobianCode;
+       this->ODEcode = new typename VectorEngine::Code();
+       this->jacobianCode = new typename MatrixEngine::Code();
 
-         this->ODEcode = new typename VectorEngine::Code();
-         this->jacobianCode = new typename MatrixEngine::Code();
+       // Set bytecode for interpreter
+       this->interpreter.setCode(this->ODEcode);
+       this->jacobian_interpreter.setCode(this->jacobianCode);
 
-         // Set bytecode for interpreter
-         this->interpreter.setCode(this->ODEcode);
-         this->jacobian_interpreter.setCode(this->jacobianCode);
+       // Compile expressions
+       typename VectorEngine::Compiler compiler(indexTable);
+       compiler.setCode(this->ODEcode);
+       compiler.compileVector(updateVector);
+       compiler.finalize(opt_level);
 
-         // Compile expressions
-         typename VectorEngine::Compiler compiler(indexTable);
-         compiler.setCode(this->ODEcode);
-         compiler.compileVector(updateVector);
-         compiler.finalize(opt_level);
-
-         // Compile jacobian:
-         typename MatrixEngine::Compiler jacobian_compiler(indexTable);
-         jacobian_compiler.setCode(jacobianCode);
-         jacobian_compiler.compileMatrix(Jacobian);
-         jacobian_compiler.finalize(opt_level);
-
+       // Compile jacobian:
+       typename MatrixEngine::Compiler jacobian_compiler(indexTable);
+       jacobian_compiler.setCode(jacobianCode);
+       jacobian_compiler.compileMatrix(Jacobian);
+       jacobian_compiler.finalize(opt_level);
      }
 
      /**
       * Sets the ODE and Jacobian code...
+      * @bug This does not work for the JIT compiler.
       */
-     void set(const typename VectorEngine::Code &ODEcode, const typename MatrixEngine::Code &jacobianCode)
-    {
+     void set(typename VectorEngine::Code &ODEcode, typename MatrixEngine::Code &jacobianCode)
+     {
+       // clean up
+       this->iterations = 0;
 
-         // clean up
-         this->iterations = 0;
+       if (0 != this->ODEcode) { delete this->ODEcode; }
+       if (0 != this->jacobianCode) { delete this->jacobianCode; }
 
-         delete this->ODEcode;
-         delete this->jacobianCode;
-
-         // Set bytecode for interpreter
-         this->interpreter.setCode(&(ODEcode));
-         this->jacobian_interpreter.setCode(&(jacobianCode));
-
-    }
+       // Set bytecode for interpreter
+       interpreter.setCode(&(ODEcode));
+       jacobian_interpreter.setCode(&(jacobianCode));
+     }
 
 
 };
