@@ -22,6 +22,8 @@ class HybridSolver
 
 protected:
 
+  int istate;
+
   double *ywork;
   double *atolwork;
   double *rtolwork;
@@ -34,12 +36,11 @@ public:
    * @param epsilon_abs Specifies the absolute error for the step.
    */
   HybridSolver(Sys &system)
-      : NewtonRaphson<Sys, VectorEngine, MatrixEngine>(system), LSODA()
+      : NewtonRaphson<Sys, VectorEngine, MatrixEngine>(system), LSODA(),
+        istate(1)
   {
 
     this->parameters.maxIterations=100;
-
-    istate=1;
 
     ywork = new double[3 * (getDimension() + 1)];
     atolwork = ywork + getDimension() + 1;
@@ -60,12 +61,11 @@ public:
    * @param epsilon_abs Specifies the absolute error for the step.
    */
   HybridSolver(Sys &system, Eigen::VectorXex &update, Eigen::MatrixXex &Jacobian)
-      : NewtonRaphson<Sys>(system, update, Jacobian), LSODA()
+      : NewtonRaphson<Sys>(system, update, Jacobian), LSODA(),
+        istate(1)
   {
 
     this->parameters.maxIterations=100;
-
-    istate=1;
 
     ywork = new double[3 * (getDimension() + 1)];
     atolwork = ywork + getDimension() + 1;
@@ -83,7 +83,10 @@ public:
 
   void ODEStep(Eigen::VectorXd &state, double t, double dt)
   {
-    lsoda(getDimension(), state.data()-1, &t, t+dt, 2, rtolwork, atolwork, 1, &istate, 0, 2);
+
+      istate = 1;  // force initial call.
+      lsoda(getDimension(), state.data()-1, &t, t+dt, 2, rtolwork, atolwork, 1, &istate, 0, 2);
+
   }
 
   virtual void evalODE(double t, double state[], double dx[], int nsize)

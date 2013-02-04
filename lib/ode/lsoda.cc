@@ -182,7 +182,9 @@ c
 c c. the output from the first call (or any call) is..
 c      y = array of computed values of y(t) vector.
 c      t = corresponding value of independent variable (normally tout).
-c istate = 2  if lsoda was successful, negative otherwise.
+c istate =  1 initial call
+c           3 continuation call with parameter changes ( *istate = 3 ).
+c           2 if lsoda was successful, negative otherwise.
 c          -1 means excess work done on this call (perhaps wrong jt).
 c          -2 means excess accuracy requested (tolerances too small).
 c          -3 means illegal input detected (see printed printf).
