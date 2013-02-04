@@ -158,7 +158,7 @@ public:
 
                 // Solve the deterministic equations
                 //solvers[OpenMP::getThreadNum()].set(codeODE,codeJac);
-                solvers[OpenMP::getThreadNum()].set(index,REs,Jacobian);
+                solvers[OpenMP::getThreadNum()].set(index,REs,Jacobian,opt_level);
 
                 iter = solvers[OpenMP::getThreadNum()].solve(conc, this->max_time, this->min_time_step);
                 x.head(offset) = conc;

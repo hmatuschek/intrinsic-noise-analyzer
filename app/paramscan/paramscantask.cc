@@ -232,14 +232,14 @@ ParamScanTask::process()
       iNA::Models::ParameterScan<iNA::Models::REmodel, iNA::Eval::jit::Engine<Eigen::VectorXd>, iNA::Eval::jit::Engine<Eigen::VectorXd,Eigen::MatrixXd> >
           pscan(dynamic_cast<iNA::Models::REmodel &>(*config.getModel()),
                 config.getMaxIterations(), config.getEpsilon(), config.getMaxTimeStep());
-      pscan.parameterScan(parameterSets,scanResult);
+      pscan.parameterScan(parameterSets,scanResult,config.getOptLevel());
     }
     else
     {
       iNA::Models::ParameterScan<iNA::Models::REmodel>
           pscan(dynamic_cast<iNA::Models::REmodel &>(*config.getModel()),
                 config.getMaxIterations(), config.getEpsilon(), config.getMaxTimeStep());
-      pscan.parameterScan(parameterSets,scanResult);
+      pscan.parameterScan(parameterSets,scanResult,config.getOptLevel());
     }
 
   }
@@ -250,14 +250,14 @@ ParamScanTask::process()
       iNA::Models::ParameterScan<iNA::Models::LNAmodel, iNA::Eval::jit::Engine<Eigen::VectorXd>, iNA::Eval::jit::Engine<Eigen::VectorXd,Eigen::MatrixXd> >
           pscan(dynamic_cast<iNA::Models::LNAmodel &>(*config.getModel()),
                 config.getMaxIterations(), config.getEpsilon(), config.getMaxTimeStep());
-      pscan.parameterScan(parameterSets,scanResult);
+      pscan.parameterScan(parameterSets,scanResult,config.getOptLevel());
     }
     else
     {
       iNA::Models::ParameterScan<iNA::Models::LNAmodel>
           pscan(dynamic_cast<iNA::Models::LNAmodel &>(*config.getModel()),
                 config.getMaxIterations(), config.getEpsilon(), config.getMaxTimeStep());
-      pscan.parameterScan(parameterSets,scanResult);
+      pscan.parameterScan(parameterSets,scanResult,config.getOptLevel());
     }
   }
   if(config.getMethod()==Config::IOS_ANALYSIS)
@@ -267,14 +267,15 @@ ParamScanTask::process()
       iNA::Models::ParameterScan<iNA::Models::IOSmodel, iNA::Eval::jit::Engine<Eigen::VectorXd>, iNA::Eval::jit::Engine<Eigen::VectorXd,Eigen::MatrixXd> >
           pscan(dynamic_cast<iNA::Models::IOSmodel &>(*config.getModel()),
                 config.getMaxIterations(), config.getEpsilon(), config.getMaxTimeStep());
-      pscan.parameterScan(parameterSets,scanResult);
+      pscan.parameterScan(parameterSets,scanResult,config.getOptLevel());
+      std::cerr<<"yes";
     }
     else
     {
       iNA::Models::ParameterScan<iNA::Models::IOSmodel>
           pscan(dynamic_cast<iNA::Models::IOSmodel &>(*config.getModel()),
                 config.getMaxIterations(), config.getEpsilon(), config.getMaxTimeStep());
-      pscan.parameterScan(parameterSets,scanResult);
+      pscan.parameterScan(parameterSets,scanResult,config.getOptLevel());
     }
   }
 
