@@ -81,13 +81,7 @@ public:
 
      }
 
-     virtual ~NLEsolver()
-     {
-
-       delete this->ODEcode;
-       delete this->jacobianCode;
-
-     };
+     virtual ~NLEsolver(){};
 
 
      /**
