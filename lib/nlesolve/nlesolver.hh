@@ -139,8 +139,8 @@ public:
        // clean up
        this->iterations = 0;
 
-       if (0 != this->ODEcode) { delete this->ODEcode; }
-       if (0 != this->jacobianCode) { delete this->jacobianCode; }
+       if (0 != this->ODEcode) { delete this->ODEcode; this->ODEcode = 0; }
+       if (0 != this->jacobianCode) { delete this->jacobianCode; this->jacobianCode = 0; }
 
        // Set bytecode for interpreter
        interpreter.setCode(&(ODEcode));
