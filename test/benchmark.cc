@@ -47,7 +47,7 @@ Benchmark::~Benchmark()
 void
 Benchmark::setUp()
 {
-  sbml_model = Parser::Sbml::importModel("test/regression-tests/coremodel2.xml");
+  sbml_model = Parser::Sbml::importModel("test/regression-tests/core_final.xml");
   lna = new Models::IOSmodel(*sbml_model);
 }
 

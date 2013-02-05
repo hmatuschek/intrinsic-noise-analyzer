@@ -16,6 +16,7 @@
 #include "conservationanalysistest.hh"
 #include "unitparsertest.hh"
 #include "benchmark.hh"
+#include "benchmark_pscan.hh"
 #include "expressionparsertest.hh"
 
 #include "utils/option_parser.hh"
@@ -62,7 +63,7 @@ int main(int argc, char *argv[])
   TestRunner runner(std::cout);
 
   // Add test suites:
-  if (0 == skipped_tests.count("GinacForEigen"))
+  /*if (0 == skipped_tests.count("GinacForEigen"))
     runner.addSuite(GinacForEigenTest::suite());
   if (0 == skipped_tests.count("Interpreter"))
     runner.addSuite(InterpreterTest::suite());
@@ -89,7 +90,9 @@ int main(int argc, char *argv[])
   if (0 == skipped_tests.count("UnitParser"))
     runner.addSuite(UnitParserTest::suite());
   if (0 == skipped_tests.count("Benchmark"))
-    runner.addSuite(Benchmark::suite());
+    runner.addSuite(Benchmark::suite());*/
+  if (0 == skipped_tests.count("BenchmarkPscan"))
+    runner.addSuite(BenchmarkPscan::suite());
 
   // Exec tests:
   runner();

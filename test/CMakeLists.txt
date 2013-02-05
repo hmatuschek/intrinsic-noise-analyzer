@@ -9,13 +9,15 @@ SET(ina_test_SOURCES
     main.cc unittest.cc lnatest.cc interpretertest.cc
     ginacforeigentest.cc regression_test.cc mathtest.cc mersennetwistertest.cc
     sbmlshparsertest.cc optionparsertest.cc odetest.cc modelcopytest.cc benchmark.cc
-    constantfoldertest.cc conservationanalysistest.cc unitparsertest.cc expressionparsertest.cc)
+    constantfoldertest.cc conservationanalysistest.cc unitparsertest.cc expressionparsertest.cc
+    benchmark_pscan.cc)
 
 SET(ina_test_HEADERS
     main.hh unittest.hh lnatest.hh interpretertest.hh
     ginacforeigentest.hh regression_test.hh mathtest.hh mersennewistertest.hh
     sbmlshparsertest.hh optionparsertest.hh odetest.hh modelcopytest.hh benchmark.hh
-    constantfoldertest.hh conservationanalysistest.hh unitparsertest.hh expressionparsertext.hh)
+    constantfoldertest.hh conservationanalysistest.hh unitparsertest.hh expressionparsertext.hh
+    benchmark_pscan.hh)
 
 ADD_EXECUTABLE(ina-test ${ina_test_SOURCES})
 TARGET_LINK_LIBRARIES(ina-test ${LIBS} libina)
