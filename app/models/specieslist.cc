@@ -1,6 +1,5 @@
 #include "specieslist.hh"
 #include "parser/parser.hh"
-#include "parser/expr/writer.hh"
 #include "parser/unit/unitparser.hh"
 #include "exception.hh"
 #include "utils/logger.hh"
