@@ -89,7 +89,7 @@ SSAParamScanConfigPage::SSAParamScanConfigPage(GeneralTaskWizard *parent)
   this->t_transient->setValidator(t_transient_val);
   this->registerField("t_transient", this->t_transient);
 
-  this->timestep = new QLineEdit(); this->timestep->setText("1e-9");
+  this->timestep = new QLineEdit(); this->timestep->setText("0.1");
   this->timestep->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
   QDoubleValidator *timestep_val = new QDoubleValidator(0); timestep_val->setBottom(1);
   this->timestep->setValidator(timestep_val);

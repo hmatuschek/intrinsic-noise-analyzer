@@ -18,26 +18,94 @@ template <class M,
           class VectorEngine = Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>,
           class MatrixEngine = Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd> >
 class ParameterScan
-        : public SteadyStateAnalysis<M>
+        : public SteadyStateAnalysis<M, VectorEngine, MatrixEngine>
 {
+
+protected:
+
+    std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> index;
+
+    size_t opt_level;
 
 public:
 
-    ParameterScan(M &model)
-        : SteadyStateAnalysis<M>(model)
-    {
 
-        // Pass...
 
-    }
+    typename VectorEngine::Interpreter interpreter;
+    typename MatrixEngine::Interpreter matrix_interpreter;
+
+    size_t offset;
+    size_t sseLength;
+    size_t lnaLength;
+    size_t iosLength;
+
+    Eigen::VectorXd A;
+    Eigen::MatrixXd B;
+
+    Eigen::VectorXd Aios;
+    Eigen::MatrixXd Bios;
+
+
+    typename VectorEngine::Code LNAcodeA;
+    typename MatrixEngine::Code LNAcodeB;
+    typename VectorEngine::Code IOScodeA;
+    typename MatrixEngine::Code IOScodeB;
 
     /**
     * Constructor
     */
-    ParameterScan(M &model, size_t iter, double epsilon, double t_max=1e9, double dt=1e-1)
-      : SteadyStateAnalysis<M>(model,iter,epsilon,t_max,dt)
+    ParameterScan(M &model, size_t iter, double epsilon, double t_max=1e9, double dt=1.e-1, size_t opt_level = 0)
+      : SteadyStateAnalysis<M, VectorEngine, MatrixEngine>(model,iter,epsilon,t_max,dt),
+        index(this->sseModel.stateIndex),
+        opt_level(opt_level)
+
 
     {
+
+      // Get the SSE vector
+      offset = this->sseModel.numIndSpecies();
+      sseLength = this->sseModel.getUpdateVector().size()-this->sseModel.numIndSpecies();
+      lnaLength = sseLength > 0 ? offset*(offset+1)/2 : 0;
+      iosLength = (sseLength - lnaLength) > 0 ? (sseLength - lnaLength) : 0;
+
+      A.resize(lnaLength);
+      B.resize(lnaLength,lnaLength);
+
+      Aios.resize(iosLength);
+      Bios.resize(iosLength,iosLength);
+
+      int nstate = index.size();
+
+      // Fetch compartments
+      for(size_t i = 0; i<this->sseModel.numCompartments(); i++)
+          index.insert(std::make_pair(this->sseModel.getCompartment(i)->getSymbol(), nstate++));
+
+      // Fetch global parameters
+      for(size_t i = 0; i<this->sseModel.numParameters(); i++)
+          index.insert(std::make_pair(this->sseModel.getParameter(i)->getSymbol(), nstate++));
+
+      // Fetch local parameters
+      for(size_t i = 0; i<this->sseModel.numReactions(); i++)
+      {
+        Ast::KineticLaw *kin = this->sseModel.getReaction(i)->getKineticLaw();
+        for(size_t j=0; j<kin->numParameters(); j++)
+           index.insert(std::make_pair(kin->getParameter(j)->getSymbol(), nstate++));
+      }
+
+      // Fetch conservation laws
+      for(int i = 0; i<this->sseModel.getConservationConstants().size(); i++)
+          index.insert(std::make_pair<GiNaC::symbol,size_t>(this->sseModel.getConservationConstants()(i), nstate++));
+
+      // Now compile
+
+//        Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Code codeODE;
+//        Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Code codeJac;
+//        compileREs(this->sseModel, index, codeODE, codeJac);
+
+      compileLNA(this->sseModel, index, LNAcodeA, LNAcodeB, opt_level);
+
+      compileIOS(this->sseModel, index, IOScodeA, IOScodeB, opt_level);
+
 
     }
 
@@ -51,8 +119,7 @@ public:
      */
     int parameterScan(std::vector<ParameterSet> &parameterSets,
                       std::vector<Eigen::VectorXd> &resultSet,
-                      size_t numThreads = OpenMP::getMaxThreads(),
-                      size_t opt_level = 0)
+                      size_t numThreads = OpenMP::getMaxThreads())
 
     {
 
@@ -62,61 +129,10 @@ public:
         // First make space
         resultSet.resize(parameterSets.size());
 
-        // Get the SSE vector
-        size_t offset = this->sseModel.numIndSpecies();
-        size_t sseLength = this->sseModel.getUpdateVector().size()-this->sseModel.numIndSpecies();
-        size_t lnaLength = sseLength > 0 ? offset*(offset+1)/2 : 0;
-        size_t iosLength = (sseLength - lnaLength) > 0 ? (sseLength - lnaLength) : 0;
-
         int iter=0;
 
-        std::vector< NLEsolve::HybridSolver<M> > solvers(numThreads,this->solver);
-
-        std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> index(this->sseModel.stateIndex);
-
-        int nstate = index.size();
-
-        // Fetch compartments
-        for(size_t i = 0; i<this->sseModel.numCompartments(); i++)
-            index.insert(std::make_pair(this->sseModel.getCompartment(i)->getSymbol(), nstate++));
-
-        // Fetch global parameters
-        for(size_t i = 0; i<this->sseModel.numParameters(); i++)
-            index.insert(std::make_pair(this->sseModel.getParameter(i)->getSymbol(), nstate++));
-
-        // Fetch local parameters
-        for(size_t i = 0; i<this->sseModel.numReactions(); i++)
-        {
-          Ast::KineticLaw *kin = this->sseModel.getReaction(i)->getKineticLaw();
-          for(size_t j=0; j<kin->numParameters(); j++)
-             index.insert(std::make_pair(kin->getParameter(j)->getSymbol(), nstate++));
-        }
-
-        // Fetch conservation laws
-        for(int i = 0; i<this->sseModel.getConservationConstants().size(); i++)
-            index.insert(std::make_pair<GiNaC::symbol,size_t>(this->sseModel.getConservationConstants()(i), nstate++));
-
-        // Now compile
-
-//        Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Code codeODE;
-//        Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Code codeJac;
-//        compileREs(this->sseModel, index, codeODE, codeJac);
-
-        typename VectorEngine::Code LNAcodeA;
-        typename MatrixEngine::Code LNAcodeB;
-        compileLNA(this->sseModel, index, LNAcodeA, LNAcodeB, opt_level);
-
-        typename VectorEngine::Code IOScodeA;
-        typename MatrixEngine::Code IOScodeB;
-        compileIOS(this->sseModel, index, IOScodeA, IOScodeB, opt_level);
-
-        // ... and setup the interpreter
-
-        typename VectorEngine::Interpreter interpreter;
-        typename MatrixEngine::Interpreter matrix_interpreter;
-
         // Initialize with initial concentrations
-        Eigen::VectorXd x(nstate);
+        Eigen::VectorXd x(index.size());
         Eigen::VectorXd init(sseLength+offset);
         this->sseModel.getInitialState(init);
 
@@ -126,7 +142,6 @@ public:
         Eigen::VectorXex REs;
         Eigen::MatrixXex Jacobian;
 
-//#pragma omp parallel for if(numThreads>1) num_threads(numThreads) schedule(dynamic) firstprivate(iter,x,conc)
         // Iterate over all parameter sets
         for(size_t j = 0; j < parameterSets.size(); j++)
         {
@@ -158,34 +173,16 @@ public:
 
                 // Solve the deterministic equations
                 //solvers[OpenMP::getThreadNum()].set(codeODE,codeJac);
-                solvers[OpenMP::getThreadNum()].set(index,REs,Jacobian,opt_level);
+                this->solver.set(index,REs,Jacobian,opt_level);
 
-                iter = solvers[OpenMP::getThreadNum()].solve(conc, this->max_time, this->min_time_step);
+                iter = this->solver.solve(conc, this->max_time, this->min_time_step);
                 x.head(offset) = conc;
 
                 // Now calculate LNA
-                Eigen::VectorXd A(lnaLength);
-                Eigen::MatrixXd B(lnaLength,lnaLength);
-
-                interpreter.setCode(&LNAcodeA);
-                matrix_interpreter.setCode(&LNAcodeB);
-                interpreter.run(x,A);
-                matrix_interpreter.run(x,B);
-
-                // (needs to go in function to match template)
-                x.segment(offset,lnaLength) = solvers[OpenMP::getThreadNum()].precisionSolve(B,-A);
+                calcLNA(this->sseModel,x);
 
                 // Next calculate IOS
-                A.resize(iosLength);
-                B.resize(iosLength,iosLength);
-
-                interpreter.setCode(&IOScodeA);
-                matrix_interpreter.setCode(&IOScodeB);
-                interpreter.run(x,A);
-                matrix_interpreter.run(x,B);
-
-                // (needs to go in function)
-                x.segment(offset+lnaLength, iosLength) = solvers[OpenMP::getThreadNum()].precisionSolve(B,-A);
+                calcIOS(this->sseModel,x);
 
                 // Store result
                 resultSet[j] = x.head(offset+sseLength);
@@ -200,6 +197,49 @@ public:
         }
 
         return iter;
+    }
+
+protected:
+
+    void calcLNA(REmodel &model, Eigen::VectorXd &x)
+    {
+         // Pass...
+    }
+
+    void calcLNA(LNAmodel &model, Eigen::VectorXd &x)
+
+    {
+        interpreter.setCode(&LNAcodeA);
+        matrix_interpreter.setCode(&LNAcodeB);
+        interpreter.run(x,A);
+        matrix_interpreter.run(x,B);
+
+        // (needs to go in function to match template)
+        x.segment(offset,lnaLength) = this->solver.precisionSolve(B,-A);
+
+    }
+
+
+    void calcIOS(REmodel &model, Eigen::VectorXd &x)
+    {
+        // Pass...
+    }
+
+    void calcIOS(LNAmodel &model, Eigen::VectorXd &x)
+    {
+        // Pass...
+    }
+
+    void calcIOS(IOSmodel &model, Eigen::VectorXd &x)
+    {
+
+      interpreter.setCode(&IOScodeA);
+      matrix_interpreter.setCode(&IOScodeB);
+      interpreter.run(x,Aios);
+      matrix_interpreter.run(x,Bios);
+
+      x.segment(offset+lnaLength, iosLength) = this->solver.precisionSolve(Bios,-Aios);
+
     }
 
     void compileREs(REmodel &model, const std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> &indexTable,

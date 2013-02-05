@@ -71,8 +71,8 @@ public:
      }
 
      virtual ~NLEsolver(){
-       if (0 != ODEcode) { delete ODEcode; }
-       if (0 != jacobianCode) { delete jacobianCode; }
+       //if (0 != ODEcode) { delete ODEcode; }
+       //if (0 != jacobianCode) { delete jacobianCode; }
      }
 
 
