@@ -81,7 +81,10 @@ ReactionView::ReactionView(ReactionItem *reaction, QWidget *parent) :
         _paramTable->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
         this, SLOT(onSelectionChanged(QItemSelection,QItemSelection)));
   QObject::connect(_equation_view, SIGNAL(doubleClicked()), this, SLOT(onReactionEditing()));
-
+  QObject::connect(_reaction->localParameters(), SIGNAL(identifierUpdated()),
+                   this, SLOT(onParametersChanged()));
+  QObject::connect(_reaction->localParameters(), SIGNAL(nameUpdated()),
+                   this, SLOT(onParametersChanged()));
 }
 
 
@@ -199,4 +202,12 @@ ReactionView::onReactionEditing()
   ReactionEquationRenderer *renderer = new ReactionEquationRenderer(_reaction->getReaction());
   _equation_view->setScene(renderer);
   _reaction->localParameters()->updateCompleteTable();
+}
+
+
+void
+ReactionView::onParametersChanged() {
+  // Update reation equation and kinetic law view:
+  ReactionEquationRenderer *renderer = new ReactionEquationRenderer(_reaction->getReaction());
+  _equation_view->setScene(renderer);
 }
