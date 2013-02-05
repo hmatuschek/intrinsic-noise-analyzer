@@ -39,7 +39,7 @@ public:
   /** Yes, there is a reaction view. */
   virtual bool providesView() const;
 
-  /** Retrns a new instance of the view. */
+  /** Returns a new instance of the view. */
   virtual QWidget *createView();
 };
 
