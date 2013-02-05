@@ -14,8 +14,8 @@
  * formulas. This is used to handle @c Ast::VariableDefinition names as tex or to render
  * reaction equations.
  *
- * Although named TeX it is not compatible to TeX, it only handles expressions similar. It only
- * provides super and sup scripts and greek letters and some arrow symbols.
+ * Although named TeX it is not compatible to TeX, it only handles expressions in a similar way.
+ * It only provides super and sup scripts and greek letters and some arrow symbols.
  */
 class TinyTex
 {
@@ -45,6 +45,9 @@ public:
 
   /** Handles quoted strings. */
   static MathItem *parseQuoted(const std::string &source);
+
+  /** Parses a string with inline TeX quotes. */
+  static MathItem *parseInlineQuoted(const std::string &source);
 
   /** Parses the name of a @c Ast::VariableDefinition if set otherwise the
    * identifier. */

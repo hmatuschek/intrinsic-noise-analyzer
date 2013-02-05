@@ -1,0 +1,438 @@
+<?xml version='1.0'?> 
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+  "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">  
+  
+  
+<book>
+
+<refentry id="ina">
+<refmeta>
+  <refentrytitle>ina</refentrytitle>
+  <manvolnum>1</manvolnum>
+  <refmiscinfo class="version">0.4.1</refmiscinfo>
+</refmeta>  
+
+<refnamediv>
+  <refname>ina</refname>
+  <refpurpose>the intrinsic noise analyzer</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+  <cmdsynopsis>
+    <command>ina-cli</command>
+    <arg choice="opt">MODELFILE</arg>
+  </cmdsynopsis>
+</refsynopsisdiv>
+
+<refsect1>
+  <title>Description</title>
+
+  <para>TODO.</para>
+</refsect1>
+</refentry>
+
+
+
+
+<refentry id="ina-cli">
+<refmeta>
+  <refentrytitle>ina-cli</refentrytitle>
+  <manvolnum>1</manvolnum>
+  <refmiscinfo class="manual">intrinsic Noise Anaylzer</refmiscinfo>
+  <refmiscinfo class="version">0.4.1</refmiscinfo>
+</refmeta>  
+
+<refnamediv>
+  <refname>ina-cli</refname>
+  <refpurpose>the command line interface to iNA</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+  <cmdsynopsis>
+    <command>ina-cli</command>
+    <arg choice="plain">--version</arg> 
+  </cmdsynopsis>
+  <cmdsynopsis>
+    <command>ina-cli</command>
+    <arg choice="plain">--help</arg> 
+  </cmdsynopsis>
+  <cmdsynopsis>
+    <command>ina-cli</command>
+    <arg choice="opt">GLOBAL_OPTIONS</arg>
+    <arg choice="plain">COMAND</arg> 
+    <arg choice="opt">COMMAND_OPTIONS</arg>
+    <arg choice="plain">MODEL</arg>
+    <arg choice="plain">OUTPUT</arg>
+  </cmdsynopsis>
+</refsynopsisdiv>
+
+<refsect1>
+  <title>Description</title>
+  
+  <para> <command>ina-cli</command> provides a easy to use command line interface to iNA. This tool
+  is distributed along with the iNA GUI application. It allows to perform analyses from command 
+  line, thus also on remote machines via SSH. </para>
+  
+  <para>This tool implements the following operations and analyses:</para>
+  
+  <itemizedlist>
+    <listitem><para>Steady state analysis,</para></listitem>
+    <listitem><para>Parameter scan in steady state,</para></listitem>
+    <listitem><para>Setting of initial values for parameters, compartments and 
+      species,</para></listitem>
+    <listitem><para>Listing of parameters, species and compartments. 
+      </para></listitem> 
+  </itemizedlist>
+  
+  <para>The analyses results can be exported as either CSV into a file or printed to stdout. 
+  Alternatively, the analyses results might be exported into a Matlat MAT file.</para>
+	<para/>
+</refsect1>
+
+
+<refsect1>
+  <title>Global Options</title>
+  
+  <para> Global parameters specifiy options, that apply globally on all analyses. </para>
+  
+  <cmdsynopsis>
+    <arg choice="plain">--loglevel=LEVEL</arg>
+  </cmdsynopsis>
+  
+  <para>The <option>--loglevel</option> specifies the log-level. The level is specified by name and
+  must be one of debug, info, warn or error. </para>
+	<para/>
+</refsect1>
+
+
+<refsect1>
+  <title>Model specification</title>
+
+  <para>This section decribes how SBML or SBML-sh models are imported. The <option>--model</option>
+  option allows to specify a model file of either SBML or SBLM-sh format. The file-type is 
+  determined by the file extension. Where files with the extensions *.xml and *.sbml are imported as
+  SBML files and files with the extensions *.mod and *.sbmlsh are imported as SBML-sh files. </para>
+
+  <cmdsynopsis>
+    <group choice="plain">
+      <arg choice="plain"><option>--model</option>=<replaceable class="parameter">FILE</replaceable></arg>
+      <arg choice="plain"><option>--model-sbml</option>=<replaceable class="parameter">FILE</replaceable></arg>
+      <arg choice="plain"><option>--model-sbmlsh</option>=<replaceable class="parameter">FILE</replaceable></arg>
+    </group>
+    <arg choice="opt" rep="repeat"><option>--set-value</option>="<replaceable class="parameter">ID</replaceable>=<replaceable class="parameter">VALUE</replaceable>"</arg>
+  </cmdsynopsis>
+
+  <para>If the specified file has non of these extensions, you can use one of the explicit import 
+  options <option>--model-sbml</option> or <option>--model-sbmlsh</option>.</para>
+
+  <para>Optionally a the initial values of variables might by set prior to any analysis using
+  the <option>--set-value</option> option.</para>
+
+  <variablelist>
+    <varlistentry>
+      <term><option>--model</option>=<replaceable class="parameter">FILE</replaceable></term>
+      <listitem><para>specifies the model to import. The type of the model is determined by the 
+      file extension.</para></listitem>
+    </varlistentry>
+
+    <varlistentry>
+      <term><option>--model-sbml</option>=<replaceable class="parameter">FILE</replaceable></term>
+      <listitem><para>import the given file as a SBML file, ignoring the file 
+      extension.</para></listitem>
+    </varlistentry>
+
+    <varlistentry>
+      <term><option>--model-sbmlsh</option>=<replaceable class="parameter">FILE</replaceable></term>
+      <listitem><para>import the given file as a SBML-sh file, ignoring the file 
+      extension.</para></listitem>
+    </varlistentry>
+
+    <varlistentry>
+      <term><option>--set-value</option>="<replaceable class="parameter">ID</replaceable>=<replaceable class="parameter">VALUE</replaceable>"</term>
+      <listitem><para>sets the initial value of the variable (parameter, compartment or species)
+      specified by ID to the given value.</para></listitem>
+    </varlistentry>
+  </variablelist>
+</refsect1>
+
+
+<refsect1>
+  <title>Output specification</title>
+  
+  <para>This section describes how the results of analyses performed by iNA are exported. iNA can
+  export results as comma separated values (CSV) and as Matlab MAT files. </para>
+
+  <cmdsynopsis>
+    <group choice="plain">
+      <arg choice="plain"><option>--output</option>=<replaceable class="parameter">FILE</replaceable></arg>
+      <arg choice="plain"><option>--output-csv</option>=<replaceable class="parameter">FILE</replaceable></arg>
+      <arg choice="plain"><option>--output-stdout</option></arg>
+      <arg choice="plain"><option>--output-mat</option>=<replaceable class="parameter">FILE</replaceable></arg>
+    </group>
+  </cmdsynopsis>
+  
+  <variablelist>
+    <varlistentry>
+      <term><option>--output</option>=<replaceable class="parameter">FILE</replaceable></term>
+      <listitem><para>specifies the file, the results are stored. The file type is determined by
+      the file extension. If the file has the extension *.csv, the results are exported as CSV and
+      if the file extension is *.mat, the results are exported as a Matlab MAT file.
+      </para></listitem>
+    </varlistentry>
+
+    <varlistentry>
+      <term><option>--output-csv</option>=<replaceable class="parameter">FILE</replaceable></term>
+      <listitem><para>exports the results as a CSV file, ignoring the file extension.
+      </para></listitem>
+    </varlistentry>
+
+    <varlistentry>
+      <term><option>--output-stdout</option></term>
+      <listitem><para>prints the results as CSV into stdout.</para></listitem>
+    </varlistentry>
+
+    <varlistentry>
+      <term><option>--output-mat</option>=<replaceable class="parameter">FILE</replaceable></term>
+      <listitem><para>exports the results as a Matlab MAT file, ignoring the file extension.
+      </para></listitem>
+    </varlistentry>
+  </variablelist>
+</refsect1>
+
+
+<refsect1>
+  <title>Steady state analysis</title>
+  
+  <cmdsynopsis>
+    <command>ina-cli</command>
+    <arg choice="opt">GLOBAL_OPTIONS</arg>
+    <arg choice="plain"><option>--steadystate</option></arg> 
+    <arg choice="opt"><option>--max-iter</option>=<replaceable class="parameter">VALUE</replaceable></arg>
+    <arg choice="opt"><option>--eps</option>=<replaceable class="parameter">VALUE</replaceable></arg>
+    <arg choice="opt"><option>--max-df</option>=<replaceable class="parameter">VALUE</replaceable></arg>  
+    <arg choice="opt"><option>--min-df</option>=<replaceable class="parameter">VALUE</replaceable></arg>    
+    <arg choice="plain">MODEL</arg>
+    <arg choice="plain">OUTPUT</arg>
+  </cmdsynopsis>
+  
+  <para> The <option>--steadystate</option> command performs a steady state analysis on a model
+  specified by MODEL. The result is exported as specified by OUTPUT. </para>
+  
+  <variablelist>
+    <varlistentry>
+      <term><option>--max-iter</option>=<replaceable class="parameter">VALUE</replaceable></term>
+      <listitem><para>specifies the maximum number of iterations allowed to reach the steady state.
+      (default: VALUE=100)</para> </listitem>
+    </varlistentry>
+	  
+    <varlistentry>
+      <term><option>--eps</option>=<replaceable class="parameter">VALUE</replaceable></term>
+      <listitem><para>specifies the absolute precision of the steady state. 
+      (default: VALUE=1e-9)</para></listitem>
+    </varlistentry>
+	  
+    <varlistentry>
+      <term><option>--max-df</option>=<replaceable class="parameter">VALUE</replaceable></term>
+      <listitem><para>specifies the maximum time-step size for the intermediate integration to reach the
+      steady state. (default: VALUE=1e9)</para></listitem>
+    </varlistentry>
+
+    <varlistentry>
+      <term><option>--min-df</option>=<replaceable class="parameter">VALUE</replaceable></term>
+      <listitem><para>specifies the minimum time-step size for the intermediate integration to reach the
+      steady state. (default: VALUE=1e-1)</para></listitem>
+    </varlistentry>
+  </variablelist>
+</refsect1>
+
+
+<refsect1>
+  <title>Parameter scan</title>
+  
+  <cmdsynopsis>
+    <command>ina-cli</command>
+    <arg choice="opt">GLOBAL_OPTIONS</arg>
+    <arg choice="plain"><option>--scan</option>=<replaceable class="parameter">PARAMETER</replaceable></arg> 
+    <arg choice="plain"><option>--range</option>=<replaceable class="parameter">RANGE</replaceable></arg>
+    <arg choice="plain">MODEL</arg>
+    <arg choice="plain">OUTPUT</arg>
+  </cmdsynopsis>
+  
+  <para>The <option>--scan</option> command performs a parameter scan for the parameter specified
+  by <replaceable>PARAMETER</replaceable>.</para> 
+  
+  <variablelist>
+    <varlistentry>
+      <term><option>--range</option>=<replaceable class="parameter">RANGE</replaceable></term>
+      <listitem><para>specifies the value range for the scan. RANGE must be of the form 
+      FROM:TO:[STEPS]. This performs a parameters scan from value FROM to value TO with STEPS steps.
+      If STEPS is obmitted, 100 steps are taken.</para></listitem>
+    </varlistentry>
+  </variablelist>
+</refsect1>
+
+
+<refsect1>
+  <title>System size expansion</title>
+  
+  <cmdsynopsis>
+    <command>ina-cli</command>
+    <arg choice="opt">GLOBAL_OPTIONS</arg>
+    <group choice="plain">
+      <arg choice="plain"><option>--re</option></arg> 
+      <arg choice="plain"><option>--lna</option></arg> 
+      <arg choice="plain"><option>--emre</option></arg> 
+    </group>
+    <arg choice="plain"><option>--range</option>=<replaceable class="parameter">RANGE</replaceable></arg>
+    <arg choice="plain">MODEL</arg>
+    <arg choice="plain">OUTPUT</arg>
+  </cmdsynopsis>
+  
+  <para>These commands perform a time-course analysis using the system size expansion. </para> 
+  
+  <variablelist>
+    <varlistentry>
+      <term><option>--re</option></term>
+      <listitem><para>performs a time-course analysis with the rate-equations.</para></listitem>
+    </varlistentry>
+
+    <varlistentry>
+      <term><option>--lna</option></term>
+      <listitem><para>performs a time-course analysis with the linear noise approximation.
+      </para></listitem>
+    </varlistentry>
+
+    <varlistentry>
+      <term><option>--emre</option></term>
+      <listitem><para>performs a time-course analysis with the effective mesoscopic 
+      rate-equations.</para></listitem>
+    </varlistentry>
+
+    <varlistentry>
+      <term><option>--range</option>=<replaceable class="parameter">RANGE</replaceable></term>
+      <listitem><para>specifies the time range for the integration.</para></listitem>
+    </varlistentry>
+  </variablelist>
+</refsect1>
+
+
+<refsect1>
+  <title>Stochastic simulation</title>
+  
+  <cmdsynopsis>
+    <command>ina-cli</command>
+    <arg choice="opt">GLOBAL_OPTIONS</arg>
+    <arg choice="plain"><option>--ssa</option></arg> 
+    <arg choice="plain"><option>--range</option>=<replaceable class="parameter">RANGE</replaceable></arg>
+    <arg choice="plain"><option>--ensemble</option>=<replaceable class="parameter">N</replaceable></arg> 
+    <arg choice="plain">MODEL</arg>
+    <arg choice="plain">OUTPUT</arg>
+  </cmdsynopsis>
+  
+  <para>The <option>--ssa</option> command performs a time-course analysis using the stochastic 
+  simulation algorihtm.</para> 
+  
+  <variablelist>
+    <varlistentry>
+      <term><option>--range</option>=<replaceable class="parameter">RANGE</replaceable></term>
+      <listitem><para>specifies the time range for the integration.</para></listitem>
+    </varlistentry>
+    
+    <varlistentry>
+      <term><option>--ensemble</option>=<replaceable class="parameter">N</replaceable></term>
+      <listitem><para>specifies the ensemble size.</para></listitem>
+    </varlistentry>
+  </variablelist>
+</refsect1>
+
+
+<refsect1>
+  <title>Model introspection and export</title>
+
+  <cmdsynopsis>
+    <command>ina-cli</command>
+    <arg choice="opt">GLOBAL_OPTIONS</arg>
+    <group choice="plain">
+      <arg choice="plain"><option>--list-species</option></arg>
+      <arg choice="plain"><option>--list-compartments</option></arg>
+      <arg choice="plain"><option>--list-parameters</option></arg>
+    </group>
+    <arg choice="plain">MODEL</arg>
+  </cmdsynopsis>
+
+  <cmdsynopsis>
+    <command>ina-cli</command>
+    <arg choice="opt">GLOBAL_OPTIONS</arg>
+    <group choice="plain">
+      <arg choice="plain"><option>--export</option>=<replaceable class="parameter">FILE</replaceable></arg>
+      <arg choice="plain"><option>--export-sbml</option>=<replaceable class="parameter">FILE</replaceable></arg>
+      <arg choice="plain"><option>--export-sbmlsh</option>=<replaceable class="parameter">FILE</replaceable></arg>
+      <arg choice="plain"><option>--update</option></arg>
+    </group>
+    <arg choice="plain">MODEL</arg>
+  </cmdsynopsis>
+
+  <variablelist>
+    <varlistentry>
+      <term><option>--list-species</option></term>
+      <listitem><para>lists all species of the model.</para></listitem>
+    </varlistentry>
+
+    <varlistentry>
+      <term><option>--list-compartments</option></term>
+      <listitem><para>lists all compartments of the model.</para></listitem>
+    </varlistentry>
+
+    <varlistentry>
+      <term><option>--list-parameters</option></term>
+      <listitem><para>lists all global parameters of the model.</para></listitem>
+    </varlistentry>
+
+    <varlistentry>
+      <term><option>--export</option>=<replaceable class="parameter">FILE</replaceable></term>
+      <listitem><para>exports the model into the given file. The file extension specifies the 
+      model format. If the filename has either the *.xml or the *.smbml extension, the model
+      is exported in SBML. If hte filename has either the *.mod or *sbmlsh extension, the model
+      is exported in SBML-sh. </para></listitem>
+    </varlistentry>
+
+    <varlistentry>
+      <term><option>--export-sbml</option>=<replaceable class="parameter">FILE</replaceable></term>
+      <listitem><para>exports the model into the given file as SBML.</para></listitem>
+    </varlistentry>
+
+    <varlistentry>
+      <term><option>--export-sbmlsh</option>=<replaceable class="parameter">FILE</replaceable></term>
+      <listitem><para>exports the model into the given file as SBML-sh.</para></listitem>
+    </varlistentry>
+
+    <varlistentry>
+      <term><option>--update</option>=<replaceable class="parameter">FILE</replaceable></term>
+      <listitem><para>updates the imported model.</para></listitem>
+    </varlistentry>
+  </variablelist>
+</refsect1>
+
+
+<refsect1>
+  <title>Usage</title>
+  <para> TODO: put some examples here. </para>
+  <para><command>ina-cli</command> ... </para>
+</refsect1>
+
+
+<refsect1>
+  <title>See also</title>
+  <para><command>ina</command>(1), <command>screen</command>(1)</para>
+  <para><emphasis remap='I'>iNA manual</emphasis> 
+  <ulink url='http://intrinsic-noise-analyzer.googlecode.com'>http://intrinsic-noise-analyzer.googlecode.com</ulink></para>
+</refsect1>
+
+
+<refsect1>
+  <title>Authors</title>
+  <para><author><firstname>Hannes</firstname><surname>Matuschek</surname></author>, 
+  <author><firstname>Philipp</firstname><surname>Thomas</surname></author></para>
+</refsect1>
+</refentry>
+</book>

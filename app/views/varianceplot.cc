@@ -12,9 +12,9 @@ VariancePlot::addVarianceGraph(const Eigen::VectorXd &x, const Eigen::VectorXd &
                                const Eigen::VectorXd &var, const QString &label)
 {
   // Determins style and create graph:
-  Plot::GraphStyle style = this->getStyle(this->axis->getNumGraphs());
+  Plot::GraphStyle style = this->getStyle(this->_axis->getNumGraphs());
   Plot::VarianceLineGraph *graph = new Plot::VarianceLineGraph(style);
-  this->axis->addGraph(graph);
+  this->_axis->addGraph(graph);
 
   // Add graph to legent if label is given:
   if(0 != label.size()) {
@@ -49,9 +49,9 @@ LinePlot::addVarianceGraph(const Eigen::VectorXd &x, const Eigen::VectorXd &mean
                                const Eigen::VectorXd &var, const QString &label)
 {
   // Determins style and create graph:
-  Plot::GraphStyle style = this->getStyle(this->axis->getNumGraphs());
+  Plot::GraphStyle style = this->getStyle(this->_axis->getNumGraphs());
   Plot::VarianceLineGraph *graph = new Plot::VarianceLineGraph(style);
-  this->axis->addGraph(graph);
+  this->_axis->addGraph(graph);
 
   // Add graph to legent if label is given:
   if(0 != label.size()) {
@@ -76,9 +76,9 @@ void
 LinePlot::addLineGraph(const Eigen::VectorXd &x, const Eigen::VectorXd &mean, const QString &label)
 {
   // Determins style and create graph:
-  Plot::GraphStyle style = this->getStyle(this->axis->getNumGraphs());
+  Plot::GraphStyle style = this->getStyle(this->_axis->getNumGraphs());
   Plot::LineGraph *graph = new Plot::LineGraph(style);
-  this->axis->addGraph(graph);
+  this->_axis->addGraph(graph);
 
   // Add graph to legent if label is given:
   if(0 != label.size()) {

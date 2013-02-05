@@ -261,7 +261,7 @@ public:
   void clearModifier();
 
   /** Returns the kinetic law of the reaction. */
-  KineticLaw *getKineticLaw();
+  KineticLaw *getKineticLaw() const;
 
   /** (Re-) Sets the kinetic law of the reaction.
    * @note The replaced law is not destroyed. */

@@ -3,7 +3,9 @@
 
 #include <parser/unit/unitparser.hh>
 #include <QMessageBox>
-
+#include <QPaintEvent>
+#include <QPainter>
+#include <QDebug>
 
 UnitEditor::UnitEditor(QWidget *parent)
   : QStackedWidget(parent), _unit(), _unitDisplay(0), _unitEditor(0)
@@ -20,13 +22,17 @@ UnitEditor::UnitEditor(const iNA::Ast::Unit &unit, QWidget *parent)
 void UnitEditor::postConstructor()
 {
   // Assemble editor and display
-  _unitDisplay = new QLabel(); _unitDisplay->setPixmap(UnitRenderer::toPixmap(_unit));
+  _unitDisplay = new UnitDisplayWidget(_unit);
   _unitEditor  = new QLineEdit(iNA::Parser::Unit::UnitParser::write(_unit).c_str());
 
   // Assemble stacked widgets
   addWidget(_unitDisplay);
   addWidget(_unitEditor);
   setCurrentIndex(0);
+
+  // Indicate that this lable is editable
+  setCursor(Qt::PointingHandCursor);
+  setToolTip(tr("Double-click the unit to edit."));
 
   // Connect signals:
   QObject::connect(_unitEditor, SIGNAL(editingFinished()), this, SLOT(onEditingFinished()));
@@ -41,7 +47,7 @@ void UnitEditor::setUnit(const iNA::Ast::Unit &unit) {
   // Store unit
   _unit = unit;
   // Update display and editor widgets:
-  _unitDisplay->setPixmap(UnitRenderer::toPixmap(_unit));
+  _unitDisplay->setUnit(_unit);
   _unitEditor->setText(iNA::Parser::Unit::UnitParser::write(_unit).c_str());
 }
 
@@ -73,7 +79,51 @@ UnitEditor::onEditingFinished() {
   }
 
   // Update unit and emit signal
-  _unitDisplay->setPixmap(UnitRenderer::toPixmap(_unit));
+  _unitDisplay->setUnit(_unit);
   setCurrentIndex(0);
   emit unitChanged();
+}
+
+
+
+/* ******************************************************************************************** *
+ * Implementation of UnitDisplayWidget
+ * ******************************************************************************************** */
+UnitDisplayWidget::UnitDisplayWidget(const iNA::Ast::Unit &unit, QWidget *parent)
+  : QLabel(parent), _renderer(unit)
+{
+  // Ensure minimum size.
+  setMinimumSize(_renderer.size());
+}
+
+void
+UnitDisplayWidget::setUnit(const iNA::Ast::Unit &unit)
+{
+  // Update renderer:
+  _renderer.setUnit(unit);
+  // Update size:
+  setMinimumSize(_renderer.size());
+  // Invalidate complete widget -> redraw:
+  update();
+}
+
+void
+UnitDisplayWidget::paintEvent(QPaintEvent *event)
+{
+  QPainter painter;
+  painter.begin(this);
+  painter.setRenderHint(QPainter::Antialiasing);
+
+  // Fill with default background:
+  //painter.fillRect(event->rect(), palette().brush(backgroundRole()));
+
+  // First center unit horizontal
+  QSize unit_size = _renderer.size();
+  int off = (event->rect().height()-unit_size.height())/2;
+  QRect target = QRect(0, off, unit_size.width(), unit_size.height());
+  QRect source = QRect(0,0, unit_size.width(), unit_size.height());
+
+  // Now paint
+  _renderer.renderOn(&painter, target, source);
+  painter.end();
 }

@@ -63,7 +63,7 @@ public:
   const QColor &getFillColor() const;
 
   /**
-   * Retruns the line-color of the graph, this is the color of the pen.
+   * Returns the line-color of the graph, this is the color of the pen.
    */
   QColor getLineColor() const;
 

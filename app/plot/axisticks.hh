@@ -9,6 +9,8 @@
 
 #include "mapping.hh"
 #include "configuration.hh"
+#include "../tinytex/tinytex.hh"
+
 
 
 namespace Plot {
@@ -107,109 +109,72 @@ public slots:
 
 
 
-/**
- * Represents a single axis with ticks and label.
- *
- * @ingroup plot
- */
+/** Represents a single axis with ticks and label.
+ * @ingroup plot */
 class AxisTicks : public QGraphicsItemGroup
 {
-protected:
-  /**
-   * The orientation.
-   */
-  AxisTick::Orientation orientation;
-
-  /**
-   * The Ticks.
-   */
-  QVector<AxisTick *> ticks;
-
-  /**
-   * The axis line.
-   */
-  QGraphicsLineItem *axis_line;
-
-  /**
-   * The axis label as graphics element.
-   */
-  QGraphicsTextItem *label_item;
-
-  /**
-   * The mapping of the axis.
-   */
-  Mapping *mapping;
-
-
 public:
-  /**
-   * Constructs a new axis.
-   */
-  AxisTicks(Mapping *mapping, AxisTick::Orientation orientation, const QString &label = "");
+  /** Constructs a new axis. */
+  AxisTicks(Mapping *_mapping, AxisTick::Orientation _orientation, const QString &label = "");
 
-  /**
-   * (Re-) Sets the label.
-   */
+  /** (Re-) Sets the label. */
   void setLabel(const QString &label);
 
-  /**
-   * Adds a tick.
-   */
+  /** Adds a tick. */
   void addTick(AxisTick *tick);
 
-  /**
-   * Returns the bounding-box.
-   */
+  /** Returns the bounding-box. */
   virtual QRectF boundingRect() const;
 
 
 public slots:
-  /**
-   * Updates the ranges, rearanges ticks.
-   */
+  /** Updates the ranges, rearanges ticks. */
   void updateRange();
 
-  /**
-   * Updates the display-size, rearanges ticks.
-   */
+  /** Updates the display-size, rearanges ticks. */
   void updateSize();
 
-  /**
-   * (Re-) Sets the plot-scheme.
-   */
+  /** (Re-) Sets the plot-scheme. */
   void setScheme(Configuration::Scheme scheme);
 
-protected:
-  /**
-   * Updates the labels.
-   */
-  virtual void updateLables();
 
-  /**
-   * Updates all positions (including positions of ticks).
-   */
+protected:
+  /** Updates the labels. */
+  virtual void updateLables();
+  /** Updates all positions (including positions of ticks). */
   virtual void updatePositions();
+
+protected:
+  /** The orientation. */
+  AxisTick::Orientation _orientation;
+  /** The Ticks. */
+  QVector<AxisTick *> _ticks;
+  /** The axis line. */
+  QGraphicsLineItem *_axis_line;
+  /** The mapping of the axis. */
+  Mapping *_mapping;
+  /** Holds the math context for the axis label rendering. */
+  MathContext _mathcontext;
+  /** Holds the axis label text. */
+  QString _labeltext;
+  /** Holds the extend of the axis. */
+  QSizeF _labelsize;
+  /** The axis label as graphics element. */
+  QGraphicsItem *_labelitem;
 };
 
 
-/**
- * Default AxisTicks class.
- *
- * @ingroup plot
- */
+
+/** Default AxisTicks class.
+ * @ingroup plot */
 class AutoAxisTicks : public AxisTicks
 {
 public:
-  /**
-   * Constructs axis.
-   */
-  AutoAxisTicks(Mapping *mapping, size_t num_ticks, AxisTick::Orientation orientation, const QString &label = "");
-
+  /** Constructs axis. */
+  AutoAxisTicks(Mapping *_mapping, size_t num_ticks, AxisTick::Orientation _orientation, const QString &label = "");
 
 protected:
-  /**
-   * Determines tick labels from values.
-   */
+  /** Determines tick labels from values. */
   virtual void updateLables();
 };
 

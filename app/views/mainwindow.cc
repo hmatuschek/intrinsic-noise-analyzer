@@ -112,7 +112,7 @@ MainWindow::_createMenus()
   _fileMenu->addSeparator();
   _fileMenu->addAction(_quitAct);
 
-  this->_modelMenu = this->menuBar()->addMenu(tr("&Edit")); //< or name "Model"
+  this->_modelMenu = this->menuBar()->addMenu(tr("&Edit"));
 
   this->_modelMenu->addAction(Application::getApp()->expandRevReacAction());
   this->_modelMenu->addAction(Application::getApp()->combineIrrevReacAction());
@@ -122,14 +122,16 @@ MainWindow::_createMenus()
   this->_analysisMenu = this->menuBar()->addMenu(tr("&Analysis"));
   this->_analysisMenu->addAction(Application::getApp()->configSteadyStateAction());
   this->_analysisMenu->addAction(Application::getApp()->configParameterScanAction());
+  this->_analysisMenu->addAction(Application::getApp()->configSSAParameterScanAction());
+  this->_analysisMenu->addSeparator();
   this->_analysisMenu->addAction(Application::getApp()->configTimeCourseAction());
   this->_analysisMenu->addAction(Application::getApp()->configSSAAnalysisAction());
 
   this->_helpMenu = this->menuBar()->addMenu(tr("&Help"));
   this->_helpMenu->addAction(this->_onlineHelp);
-  this->_helpMenu->addAction(this->_aboutAct);
   this->_helpMenu->addAction(this->_showLogsAct);
   this->_helpMenu->addAction(this->_checkForUpdatesAct);
+  this->_helpMenu->addAction(this->_aboutAct);
 }
 
 

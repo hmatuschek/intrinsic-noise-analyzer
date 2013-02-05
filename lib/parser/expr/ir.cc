@@ -83,7 +83,7 @@ public:
   /** Handles function calls. */
   void visit(const GiNaC::function &function) {
     // Process function arguments:
-    std::vector< SmartPtr<Node> > arguments;
+    std::vector< SmartPtr<Node> > arguments(function.nops());
     for (size_t i=0; i<function.nops(); i++) {
       function.op(i).accept(*this);
       arguments[i] = _stack.back(); _stack.pop_back();

@@ -8,7 +8,7 @@
  * Basic interface for all wrappers, holding some data organized in the tree-like structure of the
  * application.
  *
- * This class provides a much simpler interface as the @c TreeItem class, aderived class has only
+ * This class provides a much simpler interface as the @c TreeItem class, a derived class has only
  * to implement the @c getLabel method.
  *
  * @ingroup gui

@@ -67,6 +67,9 @@ public:
   /** Resets the display-name of the definition. */
   void setName(const std::string &_name);
 
+  /** Returns the name of the definition or identifier if missing. */
+  const std::string &getLabel() const;
+
   /** Handles a visitor for a definition. */
   virtual void accept(Ast::Visitor &visitor) const;
 

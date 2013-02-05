@@ -1,10 +1,11 @@
-#ifndef REACTIONEQUATIONRENDERER_HH
-#define REACTIONEQUATIONRENDERER_HH
+#ifndef __INA_APP_VIEW_REACTIONEQUATIONRENDERER_HH__
+#define __INA_APP_VIEW_REACTIONEQUATIONRENDERER_HH__
 
 #include <QGraphicsScene>
 #include "ast/scope.hh"
 #include "ast/species.hh"
 #include "../tinytex/formula.hh"
+
 
 /** Implements a simple reaction-equation renderer using tinyTeX. */
 class ReactionEquationRenderer : public QGraphicsScene
@@ -35,4 +36,4 @@ protected:
   static MathItem *assembleReaction(iNA::Ast::Reaction *reaction);
 };
 
-#endif // REACTIONEQUATIONRENDERER_HH
+#endif // __INA_APP_VIEW_REACTIONEQUATIONRENDERER_HH__

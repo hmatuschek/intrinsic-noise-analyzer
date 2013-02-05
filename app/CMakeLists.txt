@@ -48,6 +48,13 @@ SET(ina_app_paramscan_HEADERS
     paramscan/paramscantask.hh paramscan/paramscanwizard.hh paramscan/paramscantaskview.hh
     paramscan/paramscantaskwrapper.hh paramscan/paramscanplot.hh)
 
+SET(ina_app_ssaparamscan_SOURCES
+    ssaparamscan/ssaparamscantask.cc ssaparamscan/ssaparamscanwizard.cc ssaparamscan/ssaparamscantaskview.cc
+    ssaparamscan/ssaparamscantaskwrapper.cc ssaparamscan/ssaparamscanplot.cc)
+SET(ina_app_ssaparamscan_HEADERS
+    ssaparamscan/ssaparamscantask.hh ssaparamscan/ssaparamscanwizard.hh ssaparamscan/ssaparamscantaskview.hh
+    ssaparamscan/ssaparamscantaskwrapper.hh ssaparamscan/ssaparamscanplot.hh)
+
 SET(ina_app_doctree_SOURCES doctree/documenttreeitem.cc doctree/treeitem.cc
     doctree/compartmentsitem.cc doctree/documenttree.cc doctree/speciesitem.cc
     doctree/parametersitem.cc doctree/reactionitem.cc doctree/reactionsitem.cc
@@ -85,7 +92,7 @@ SET(ina_app_views_SOURCES
     views/variableruleeditor.cc views/expressioneditor.cc views/unitrenderer.cc
     views/sbmlsheditordialog.cc views/modelview.cc views/uniteditor.cc views/reactionlistview.cc
     views/reactioneditor.cc views/genericplotdialog.cc views/speciesselectiondialog.cc
-    views/newversiondialog.cc views/mainwindow.cc)
+    views/newversiondialog.cc views/mainwindow.cc views/downloaddialog.cc)
 SET(ina_app_views_HEADERS
     views/documentsview.hh views/parameterview.hh views/reactionview.hh
     views/reactionequationrenderer.hh views/compartmentview.hh views/speciesview.hh
@@ -95,7 +102,7 @@ SET(ina_app_views_HEADERS
     views/variableruleeditor.hh views/expressioneditor.hh views/unitrenderer.hh
     views/sbmlsheditordialog.hh views/modelview.hh views/uniteditor.hh views/reactionlistview.hh
     views/reactioneditor.hh views/genericplotdialog.hh  views/speciesselectiondialog.hh
-    views/newversiondialog.hh views/mainwindow.hh)
+    views/newversiondialog.hh views/mainwindow.hh views/downloaddialog.hh)
 
 SET(ina_app_tinytex_SOURCES
     tinytex/tinytex.cc tinytex/formula.cc tinytex/ginac2formula.cc)
@@ -111,7 +118,8 @@ SET(ina_app_SOURCES
     ${ina_app_sse_SOURCES}
     ${ina_app_steadystate_SOURCES}
     ${ina_app_ssa_SOURCES}
-    ${ina_app_paramscan_SOURCES})
+    ${ina_app_paramscan_SOURCES}
+    ${ina_app_ssaparamscan_SOURCES})
 SET(ina_app_HEADERS
     ${ina_app_base_HEADERS}
     ${ina_app_doctree_HEADERS}
@@ -122,6 +130,7 @@ SET(ina_app_HEADERS
     ${ina_app_sse_HEADERS}
     ${ina_app_steadystate_HEADERS}
     ${ina_app_ssa_HEADERS}
+    ${ina_app_ssaparamscan_HEADERS}
     ${ina_app_paramscan_HEADERS})
 
 

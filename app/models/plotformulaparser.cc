@@ -1,5 +1,6 @@
 #include "plotformulaparser.hh"
 #include <utils/logger.hh>
+#include <eval/bci/bci.hh>
 
 using namespace iNA;
 
@@ -544,7 +545,31 @@ PlotFormulaParser::Context::getColumnIdx(GiNaC::symbol symbol) {
 double
 PlotFormulaParser::Context::operator ()(size_t row, GiNaC::ex expression)
 {
-  GiNaC::exmap values;
+  // Generate symbol table for compiler:
+  std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> symbol_table;
+  for (size_t i=0; i<_table->getNumColumns(); i++) {
+    symbol_table[_symbols[i]] = i;
+  }
+  // Create compiler, code and interpreter
+  Eval::bci::Compiler<Eigen::VectorXd> compiler(symbol_table);
+  Eval::bci::Code code; compiler.setCode(&code);
+  Eval::bci::Interpreter<Eigen::VectorXd> interpreter;
+  // Compile expression:
+  try { compiler.compileExpressionAndStore(expression, 0); }
+  catch (Exception &err) {
+    Utils::Message message = LOG_MESSAGE(Utils::Message::ERROR);
+    message << "Can not compile expression \""
+            << expression << "\" to byte code: " << err.what();
+    Utils::Logger::get().log(message);
+    return std::numeric_limits<double>::quiet_NaN();
+  }
+  compiler.finalize(0); interpreter.setCode(&code);
+  // Evaluate expression
+  Eigen::VectorXd output(1);
+  interpreter.run(_table->getRow(row), output);
+  return output(0);
+
+  /*GiNaC::exmap values;
   for (size_t i=0; i<_table->getNumColumns(); i++) {
     values[_symbols[i]] = (*_table)(row, i);
   }
@@ -574,7 +599,7 @@ PlotFormulaParser::Context::operator ()(size_t row, GiNaC::ex expression)
     iNA::Utils::Logger::get().log(message);
     return std::numeric_limits<double>::quiet_NaN();
   }
-  return GiNaC::ex_to<GiNaC::numeric>(value).to_double();
+  return GiNaC::ex_to<GiNaC::numeric>(value).to_double();*/
 }
 
 

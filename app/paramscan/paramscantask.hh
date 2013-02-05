@@ -8,6 +8,8 @@
 #include <models/IOSmodel.hh>
 #include <models/steadystateanalysis.hh>
 
+#include <models/sseparamscan.hh>
+
 
 /** A task to perform a paramter scan. */
 class ParamScanTask : public Task
@@ -20,7 +22,8 @@ public:
    */
   class Config :
       public GeneralTaskConfig,
-      public ModelSelectionTaskConfig
+      public ModelSelectionTaskConfig,
+      public EngineTaskConfig
   {
 
   public:

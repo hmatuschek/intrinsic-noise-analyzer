@@ -93,9 +93,9 @@ IOSEMREComparePlot::IOSEMREComparePlot(const QStringList &selected_species, IOST
     style.setLineColor(line_color);
     re_graphs[i] = new Plot::LineGraph(style);
 
-    this->axis->addGraph(ios_graphs[i]);
-    this->axis->addGraph(emre_graphs[i]);
-    this->axis->addGraph(re_graphs[i]);
+    this->_axis->addGraph(ios_graphs[i]);
+    this->_axis->addGraph(emre_graphs[i]);
+    this->_axis->addGraph(re_graphs[i]);
 
     this->addToLegend(series->getColumnName(species_idx+off_ios),  ios_graphs[i]);
     this->addToLegend(series->getColumnName(species_idx+off_emre), emre_graphs[i]);
@@ -174,7 +174,7 @@ IOSEMRECorrelationPlot::IOSEMRECorrelationPlot(const QStringList &selected_speci
 
       Plot::GraphStyle style = this->getStyle(graph_idx);
       graphs[graph_idx] = new Plot::LineGraph(style);
-      this->axis->addGraph(graphs[graph_idx]);
+      this->_axis->addGraph(graphs[graph_idx]);
       this->addToLegend(
             QString("corr(%1, %2)").arg(species_name_i).arg(species_name_j), graphs[graph_idx]);
     }

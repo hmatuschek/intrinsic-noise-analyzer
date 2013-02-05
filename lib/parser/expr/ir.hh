@@ -179,7 +179,7 @@ protected:
 
 
 /** Translates any a^-(b) -> 1/a^b.
- * Move to operation normalization pass. */
+ * @todo Move to operation normalization pass. */
 class PowerToDivisionPass : public Pass
 {
 public:

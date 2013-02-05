@@ -395,6 +395,41 @@ TinyTex::parseQuoted(const std::string &source) {
   return new MathText(source.c_str());
 }
 
+
+bool
+__tinytex_find_quoted_pair(const std::string &source, size_t offset, size_t &qstart, size_t &qend)
+{
+  if (source.size() <= offset) { return false; }
+  if (source.npos == (qstart = source.find_first_of('$', offset))) { return false; }
+  if (source.size() == (qstart+1)) { return false; }
+  if (source.npos == (qend = source.find_first_of('$', qstart+1))) { return false; }
+  return true;
+}
+
+MathItem *
+TinyTex::parseInlineQuoted(const std::string &source) {
+  size_t offset = 0, qstart, qend;
+  MathFormula *formula = new MathFormula();
+
+  // Search for one or more quoted tex strings in source
+  while (__tinytex_find_quoted_pair(source, offset, qstart, qend)) {
+    // Handle plain text before next quoted string
+    if (0 != (qstart-offset)) {
+      formula->appendItem(new MathText(source.substr(offset, qstart-offset).c_str()));
+    }
+    // handle quoted string:
+    formula->appendItem(parseQuoted(source.substr(qstart, (qend-qstart+1))));
+    offset = qend+1;
+  }
+  // handle remaining text:
+  if (offset != source.size()) {
+    formula->appendItem(new MathText(source.substr(offset).c_str()));
+  }
+
+  return formula;
+}
+
+
 MathItem *
 TinyTex::parseVariable(const iNA::Ast::VariableDefinition *var)
 {

@@ -28,8 +28,8 @@ CompartmentList::flags(const QModelIndex &index) const
   if (columnCount() <= index.column()) return Qt::NoItemFlags;
   if (rowCount() <= index.row()) return Qt::NoItemFlags;
 
-  // Mark only column 0, 1, 2 & 3 editable
-  if ( (0 == index.column()) || (1 == index.column()) || (2 == index.column()) || (3 == index.column()) )
+  // Mark only column 0, 1 & 2 editable (id, name, volume)
+  if ( (0 == index.column()) || (1 == index.column()) || (2 == index.column()) )
     item_flags |= Qt::ItemIsEditable;
 
   return item_flags;
@@ -76,8 +76,6 @@ CompartmentList::setData(const QModelIndex &index, const QVariant &value, int ro
   case 0: success = _updateIndentifier(comp, value); break;
   case 1: success = _updateName(comp, value); break;
   case 2: success = _updateInitValue(comp, value); break;
-  case 3: success = _updateUnit(comp, value); break;
-  case 4: success = _updateConstFlag(comp, value); break;
   default: break;
   }
 
@@ -136,14 +134,27 @@ CompartmentList::_updateIndentifier(iNA::Ast::Compartment *compartment, const QV
   // Get ID
   QString qid = value.toString();
   std::string id = qid.toStdString();
+
   // If nothing changed -> done.
   if (id == compartment->getIdentifier()) { return true; }
+
   // Check ID format
-  if (! QRegExp("[a-zA-Z_][a-zA-Z0-9_]*").exactMatch(qid)) { return false; }
+  if (! QRegExp("[a-zA-Z_][a-zA-Z0-9_]*").exactMatch(qid)) {
+    QMessageBox::warning(0, tr("Can not set identifier"),
+                         tr("The identifier can not be set to \"%1\", invalid format").arg(qid));
+    return false;
+  }
+
   // Check if id is not assigned allready:
-  if (_model->hasDefinition(id)) { return false; }
+  if (_model->hasDefinition(id)) {
+    QMessageBox::warning(0, tr("Can not set identifier"),
+                         tr("The identifier \"%1\" is already in use.").arg(qid));
+    return false;
+  }
+
   // Ok, assign identifier:
   _model->resetIdentifier(compartment->getIdentifier(), id);
+
   return true;
 }
 
@@ -196,15 +207,22 @@ CompartmentList::_updateInitValue(iNA::Ast::Compartment *compartment, const QVar
 {
   // If the initial value was changed: get expression
   std::string expression = value.toString().toStdString();
+
   // parse expression
   GiNaC::ex new_value;
   try { new_value = iNA::Parser::Expr::parseExpression(expression, _model); }
   catch (iNA::Exception &err) {
+    // Log error:
     iNA::Utils::Message msg = LOG_MESSAGE(iNA::Utils::Message::INFO);
-    msg << "Can not parse expression: " << expression << ": " << err.what();
+    msg << "Can not parse expression: \"" << expression << "\": " << err.what();
     iNA::Utils::Logger::get().log(msg);
+    // Show message:
+    QMessageBox::warning(
+          0, tr("Can not set volume"),
+          tr("Can not parse expression \"%1\": %2").arg(value.toString(), err.what()));
     return false;
   }
+
   // Set new "value"
   compartment->setValue(new_value);
   return true;

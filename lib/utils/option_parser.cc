@@ -332,7 +332,7 @@ Parser::Parser(RuleInterface &rule)
 
 Parser::~Parser()
 {
-  delete this->rule;
+  //delete this->rule;
 }
 
 

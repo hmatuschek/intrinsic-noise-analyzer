@@ -6,6 +6,7 @@ PROJECT(intrinsic-noise-analyzer)
 # Register own CMake extensions:
 #
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
+include(InstallHeadersWithDirectory)
 
 #
 # Define some options
@@ -62,8 +63,8 @@ ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 # Make sure libina can be found
 #
 LINK_DIRECTORIES(${PROJECT_BINARY_DIR}/lib)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/lib)
-
+#INCLUDE_DIRECTORIES("${PROJECT_BINARY_DIR}/lib/include/libina")
+INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/lib")
 
 #
 # Used libaries:
@@ -153,6 +154,8 @@ INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/unsupported)
 #
 add_subdirectory(lib)
 add_subdirectory(app)
+#add_subdirectory(cli)
+#add_subdirectory(unsupported)
 
 #
 # Exclude unit tests requiring glibc which is not available under Windows!
@@ -166,7 +169,7 @@ ENDIF(NOT WIN32)
 #
 set(CPACK_PACKAGE_VERSION_MAJOR "0")
 set(CPACK_PACKAGE_VERSION_MINOR "4")
-set(CPACK_PACKAGE_VERSION_PATCH "0")
+set(CPACK_PACKAGE_VERSION_PATCH "1")
 set(CPACK_SOURCE_GENERATOR "TGZ")
 set(CPACK_SOURCE_PACKAGE_FILE_NAME
   "${CMAKE_PROJECT_NAME}-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")

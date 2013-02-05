@@ -3,6 +3,9 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QToolButton>
+#include <QDragEnterEvent>
+#include <QDropEvent>
+#include "downloaddialog.hh"
 
 
 
@@ -19,6 +22,9 @@ DocumentsView::DocumentsView(QWidget *parent) :
   this->setContextMenuPolicy(Qt::CustomContextMenu);
   QObject::connect(this, SIGNAL(customContextMenuRequested(QPoint)),
                    this, SLOT(conextMenuRequested(QPoint)));
+
+  // Enable drop events:
+  setAcceptDrops(true);
 }
 
 
@@ -55,19 +61,81 @@ DocumentsView::conextMenuRequested(const QPoint &pos)
 }
 
 
-
-/* ********************************************************************************************* *
- * Implementation of SBML Models View, A QTreeView with some nice functionality
- * ********************************************************************************************* */
-DocumentsSidePanel::DocumentsSidePanel(QWidget *parent)
-  : QWidget(parent)
+void
+DocumentsView::dragEnterEvent(QDragEnterEvent *event)
 {
-  QVBoxLayout *layout = new QVBoxLayout();
-  layout->setContentsMargins(0,0,0,0);
+  // Check possible actions:
+  if (0 == (event->possibleActions() & Qt::CopyAction)) {
+    return;
+  }
 
-  this->documents_view = new DocumentsView();
-  this->documents_view->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
-  layout->addWidget(this->documents_view);
+  // Check text, if text is an url -> handle
+  if (event->mimeData()->hasText()) {
+    // Try to parse text as URL
+    QUrl url(event->mimeData()->text(), QUrl::StrictMode);
+    if (! url.isValid()) { return; }
+    // Of successful -> accept
+    event->setDropAction(Qt::CopyAction);
+    event->accept();
+    return;
+  }
 
-  this->setLayout(layout);
+  // We only accept one URL:
+  if (event->mimeData()->hasUrls() && (1 ==  event->mimeData()->urls().size()) ) {
+    event->setDropAction(Qt::CopyAction);
+    event->accept();
+    return;
+  }
+}
+
+
+void
+DocumentsView::dragMoveEvent(QDragMoveEvent *event)
+{
+  event->acceptProposedAction();
+}
+
+void
+DocumentsView::dragLeaveEvent(QDragLeaveEvent *event)
+{
+  event->accept();
+}
+
+
+void
+DocumentsView::dropEvent(QDropEvent *event)
+{
+  // Check action
+  if (0 == (event->possibleActions() & Qt::CopyAction)) { return; }
+
+  // Will hold the URL of the local or remote file to open:
+  QUrl url;
+
+  // Check if drop event is list of URLs or a string with an url:
+  if (event->mimeData()->hasUrls() && (1 == event->mimeData()->urls().size())) {
+    url = event->mimeData()->urls().front();
+    event->setDropAction(Qt::CopyAction);
+    event->accept();
+  } else if (event->mimeData()->hasText()) {
+    url = QUrl(event->mimeData()->text(), QUrl::StrictMode);
+    if (! url.isValid()) { return; }
+    event->setDropAction(Qt::CopyAction);
+    event->accept();
+  } else {
+    return;
+  }
+
+  // First, handle local files:
+  if (url.isLocalFile()) {
+    Application::getApp()->importModel(url.toLocalFile(), false);
+    return;
+  }
+
+  // Handle remote files:
+  DownloadDialog dialog(url);
+  if (QDialog::Accepted != dialog.exec()) { return; }
+
+  // Open downloaded file
+  QString local_file = dialog.localFileName();
+  Application::getApp()->importModel(local_file, true);
 }

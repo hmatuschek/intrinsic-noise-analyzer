@@ -229,7 +229,8 @@ public:
 class Lexer
 {
 public:
-  /** Simple class to hold the lexer state. */
+  /** Simple class to hold the lexer state. These states are used for backtracking in
+   * the parsers. */
   class State {
   public:
     /** Holds the index of the current token. */
@@ -294,7 +295,7 @@ public:
   /** Sets the current state as terminal. */
   void setTerminal(bool terminal);
 
-  /** Retruns true if the current state is terminal. */
+  /** Returns true if the current state is terminal. */
   bool isTerminal() const;
 
   /** Saves the current state on the stack. */

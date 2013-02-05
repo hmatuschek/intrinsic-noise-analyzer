@@ -37,7 +37,7 @@ public:
   size_t getNumThreads();
 
   /**
-   * Retruns the code for the i-th thread.
+   * Returns the code for the i-th thread.
    */
   bci::Code &getCode(size_t i);
 };

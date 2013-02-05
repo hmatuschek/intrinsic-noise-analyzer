@@ -17,10 +17,11 @@ class ParamScanWizard : public GeneralTaskWizard
   Q_OBJECT
 
 public:
-  /** This enumarates the available wizard pages. */
+  /** This enumerates the available wizard pages. */
   typedef enum {
     MODEL_SELECTION_PAGE,
     SPECIES_SELECTION_PAGE,
+    ENGINE_SELECTION_PAGE,
     SCAN_CONFIG_PAGE,
     SUMMARY_PAGE
   } PageId;
@@ -52,6 +53,14 @@ private:
   QRadioButton *_ios_button;
 };
 
+
+class ParamScanEngineSelectionPage : public EngineWizardPage
+{
+  Q_OBJECT
+
+public:
+  explicit ParamScanEngineSelectionPage(GeneralTaskWizard *parent);
+};
 
 
 class ParameterScanConfigPage : public QWizardPage

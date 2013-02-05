@@ -117,7 +117,14 @@ Reaction::getReactantStoichiometry(GiNaC::symbol id)
 void
 Reaction::setReactantStoichiometry(Species *species, GiNaC::ex st)
 {
-  this->_reactants[species] = st;
+  // Setting stoichiometry to 0 means removing it from the reaction.
+  if (0 == st) {
+    if (this->hasReactant(species)) {
+      _reactants.erase(species);
+    }
+  } else {
+    this->_reactants[species] = st;
+  }
 }
 
 
@@ -207,7 +214,13 @@ Reaction::getProductStoichiometry(GiNaC::symbol id)
 void
 Reaction::setProductStoichiometry(Species *species, GiNaC::ex st)
 {
-  this->_products[species] = st;
+  if (0 == st) {
+    if (hasProduct(species)) {
+      _products.erase(species);
+    }
+  } else {
+    this->_products[species] = st;
+  }
 }
 
 
@@ -287,7 +300,7 @@ Reaction::clearModifier() {
 }
 
 KineticLaw *
-Reaction::getKineticLaw()
+Reaction::getKineticLaw() const
 {
   return this->_kinetic_law;
 }

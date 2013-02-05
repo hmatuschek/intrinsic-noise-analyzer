@@ -379,7 +379,7 @@ Writer::processKineticLaw(Ast::KineticLaw *law, LIBSBML_CPP_NAMESPACE_QUALIFIER 
         ExportError err;
         err << "Non-numeric intial value of local parameter "
             << param->getIdentifier()
-            << "encountered. Feature is not supported by SBML.";
+            << "encountered. SBML does not support this feature.";
         throw err;
       }
       sbml_param->setValue(GiNaC::ex_to<GiNaC::numeric>(param->getValue()).to_double());

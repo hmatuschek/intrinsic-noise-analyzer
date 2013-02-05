@@ -36,7 +36,7 @@ protected:
     /**
     * Holds symbols of constants arising from conservation laws
     */
-    Eigen::VectorXex conservationConstants;
+    Eigen::Matrix<GiNaC::symbol,Eigen::Dynamic,1> conservationConstants;
 
     /**
     * Expression for Link zero matrix linking independent and dependent concentrations.
@@ -110,6 +110,8 @@ public:
         for (int j=0; j<vec.cols(); j++)
                 vec(i,j) = vec(i,j).subs(this->substitutions);
     }
+
+    const Eigen::Matrix<GiNaC::symbol,Eigen::Dynamic,1> &getConservationConstants();
 
 };
 

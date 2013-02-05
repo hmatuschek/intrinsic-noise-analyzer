@@ -94,7 +94,7 @@ Plot::ConfigScheme::ticksFont() const
 
 
 const QFont &
-Plot::ConfigScheme::legentFont() const
+Plot::ConfigScheme::legendFont() const
 {
   return this->legent_font;
 }

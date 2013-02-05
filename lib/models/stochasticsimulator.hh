@@ -106,6 +106,11 @@ public:
   void getState(Eigen::MatrixXd &state);
 
   /**
+  * Returns the observation matrix of concentrations
+  **/
+  Eigen::MatrixXd getState() const;
+
+  /**
   *  Performs the ensemble average of concentration statistics.
   *
   *  @param mean the vector of mean concentrations

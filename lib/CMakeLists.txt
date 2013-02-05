@@ -11,7 +11,7 @@ SET(libina_SOURCES
     exception.cc erf.cc incompletegamma.cc
     ginacsupportforeigen.cc math.cc openmp.cc mersennetwister.cc)
 
-SET(libina_HEADERS ina.hh smartptr.hh linkedlist.hh
+SET(libina_HEADERS ina.hh smartptr.hh
     exception.hh erf.hh incompletegamma.hh
     ginacsupportforeigen.hh math.hh openmp.hh mersennetwister.hh)
 
@@ -32,12 +32,12 @@ SET(libina_trafo_SOURCES
     trafo/assertions.cc trafo/substitution.cc trafo/constantfolder.cc
     trafo/partialmodel.cc trafo/assignmentruleinliner.cc
     trafo/conservationanalysis.cc trafo/reversiblereactionconverter.cc trafo/variablescaling.cc
-    trafo/consistencycheck.cc)
+    trafo/consistencycheck.cc trafo/modeldiff.cc trafo/referencecounter.cc trafo/makeparamglobal.cc)
 SET(libina_trafo_HEADERS trafo/trafo.hh trafo/filterflags.hh
     trafo/assertions.hh trafo/substitution.hh trafo/constantfolder.hh
     trafo/partialmodel.hh trafo/assignmentruleinliner.hh
     trafo/conservationanalysis.hh trafo/reversiblereactionconverter.hh trafo/variablescaling.hh
-    trafo/consistencycheck.hh)
+    trafo/consistencycheck.hh trafo/modeldiff.hh trafo/referencecounter.hh trafo/makeparamglobal.hh)
 
 SET(libina_sbmlsh_parser_SOURCES
     parser/sbmlsh/lexer.cc parser/sbmlsh/parser.cc parser/sbmlsh/productions.cc
@@ -53,10 +53,10 @@ SET(libina_sbml_parser_HEADERS
 
 SET(libina_expr_parser_SOURCES
     parser/expr/lexer.cc parser/expr/parser.cc parser/expr/productions.cc parser/expr/assembler.cc
-    parser/expr/writer.cc parser/expr/ir.cc)
+    parser/expr/ir.cc)
 SET(libina_expr_parser_HEADERS parser/expr/expr.hh
     parser/expr/lexer.hh parser/expr/parser.hh parser/expr/productions.hh parser/expr/assembler.hh
-    parser/expr/writer.hh parser/expr/ir.hh)
+    parser/expr/ir.hh)
 
 SET(libina_unit_parser_SOURCES
     parser/unit/unitparser.cc)
@@ -109,6 +109,8 @@ SET(libina_models_SOURCES
     models/sseinterpreter.cc
     models/steadystateanalysis.cc
     models/initialconditions.cc
+    models/ssaparamscan.cc
+    models/sseparamscan.cc
 )
 
 SET(libina_models_HEADERS models/models.hh
@@ -126,27 +128,27 @@ SET(libina_models_HEADERS models/models.hh
     models/histogram.hh
     models/gillespieSSA.hh
     models/optimizedSSA.hh
-    models/partialsumSSA.hh
-    models/optimizedSSAginac.hh
-    models/gillespieSSAginac.hh
-    models/gillespieCLE.hh
     models/assertnoconstantspeciesmixin.hh
     models/assertconstantparametermixin.hh
     models/assertnoassignmentrule.hh models/assertnoraterule.hh
     models/assertirreversiblereactions.hh
     models/reasonablemodelmixin.hh
-    models/baseunitmin.hh
+    models/baseunitmixin.hh
     models/particlenumbersmixin.hh
     models/sseinterpreter.hh
     models/steadystateanalysis.hh
     models/initialconditions.hh
+    models/ssaparamscan.hh
+    models/sseparamscan.hh
 )
 
 # Add source for nonlinear solvers
 SET(libina_nlesolve_SOURCES
+   nlesolve/nlesolver.cc
    nlesolve/newtonraphson.cc
    nlesolve/hybridsolver.cc)
 SET(libina_nlesolve_HEADERS
+   nlesolve/nlesolver.hh
    nlesolve/newtonraphson.hh
    nlesolve/hybridsolver.hh)
 
@@ -232,6 +234,12 @@ SET(libina_HEADERS
     ${libina_ode_HEADERS}
     ${libina_eval_HEADERS})
 
+
+#
+# Recursive copy header files to ${CMAKE_BINARY_DIR}/include/libina
+#
+COPY_HEADERS_WITH_DIRECTORY("${libina_HEADERS}" "${CMAKE_CURRENT_BINARY_DIR}/include/libina")
+
 #
 # Compile library
 #
@@ -240,5 +248,9 @@ SET_TARGET_PROPERTIES(libina PROPERTIES OUTPUT_NAME "ina")
 TARGET_LINK_LIBRARIES(libina ${LIBS})
 
 
+# Install library files
 INSTALL(TARGETS libina
         DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
+# Install header files
+INSTALL_HEADERS_WITH_DIRECTORY("${libina_HEADERS}" "${CMAKE_INSTALL_INCLUDEDIR}/libina")

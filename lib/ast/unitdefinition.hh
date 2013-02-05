@@ -190,6 +190,8 @@ public:
   const Unit &operator =(const Unit &other);
   /** Returns true if units are equal. */
   bool operator ==(const Unit &other) const;
+  /** Returns true if units are not equal. */
+  bool operator !=(const Unit &other) const;
   /** Implements simple unit manipulations. */
   Unit operator *(const Unit &other) const;
   /** Implements simple unit manipulations. */
@@ -208,7 +210,7 @@ public:
   bool isVariantOf(ScaledBaseUnit::BaseUnit baseUnit, int expo = 1.0) const;
   /** Retunrs true, if the unit contains a variant of the given base-unit with given exponent. */
   bool hasVariantOf(ScaledBaseUnit::BaseUnit baseUnit, int expo = 1.0) const;
-  /** Retruns true, if the unit is a linear scaled substance unit. */
+  /** Returns true, if the unit is a linear scaled substance unit. */
   bool isSubstanceUnit() const;
   /** Returns true, if one of the unit-factors is a linear scaling of a substance unit. */
   bool hasSubstanceUnit() const;
@@ -229,7 +231,7 @@ public:
   bool isExactlyDimensionless() const;
 
   /** Dumps the unit into the given stream. */
-  void dump(std::ostream &str, bool html=false) const;
+  void dump(std::ostream &str, bool tex=false) const;
   /** Dumps the unit as a string. */
   std::string dump(bool html=false) const;
 

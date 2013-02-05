@@ -75,7 +75,7 @@ public:
   /**
    * Returns the legend-item font.
    */
-  const QFont &legentFont() const;
+  const QFont &legendFont() const;
 
   /**
    * Returns the default pen.

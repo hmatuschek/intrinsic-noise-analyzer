@@ -200,65 +200,71 @@ AxisTick::setScheme(Configuration::Scheme scheme)
  * Axis ticks
  * ********************************************************************************************* */
 AxisTicks::AxisTicks(Mapping *mapping, AxisTick::Orientation orientation, const QString &label)
-  : QGraphicsItemGroup(), orientation(orientation), ticks(), mapping(mapping)
+  : QGraphicsItemGroup(), _orientation(orientation), _ticks(), _mapping(mapping), _labeltext(label),
+    _labelitem(0)
 {
-  this->label_item = new QGraphicsTextItem(label);
-  this->label_item->setFont(
+  // Render label:
+  _mathcontext = MathContext(
         Configuration::getConfig()->getScheme(Configuration::DISPLAY_SCHEME).axisLabelFont());
-  this->label_item->setPos(0,0);
-  this->addToGroup(this->label_item);
-
-  // Rotate label by orientation:
-  switch (this->orientation)
-  {
-  case AxisTick::LEFT:
-  case AxisTick::RIGHT:
-    this->label_item->setRotation(-90.0);
-    break;
-
-  case AxisTick::TOP:
-  case AxisTick::BOTTOM:
-    this->label_item->setRotation(0.0);
-    break;
-  }
 
   // Draw axis line:
-  this->axis_line = new QGraphicsLineItem(0, 0, 0, 0);
-  this->axis_line->setPen(
+  _axis_line = new QGraphicsLineItem(0, 0, 0, 0);
+  _axis_line->setPen(
         Configuration::getConfig()->getScheme(Configuration::DISPLAY_SCHEME).defaultPen());
-  this->addToGroup(this->axis_line);
+  addToGroup(_axis_line);
 
-  this->updateRange();
+  // Layout all
+  updateRange();
 }
 
 
 void
-AxisTicks::addTick(AxisTick *tick)
-{
-  this->ticks.append(tick);
-  this->addToGroup(this->ticks.back());
+AxisTicks::addTick(AxisTick *tick) {
+  _ticks.append(tick);
+  addToGroup(_ticks.back());
 }
 
 
 void
-AxisTicks::updateRange()
-{
-  this->updateLables();
-  this->updatePositions();
+AxisTicks::updateRange() {
+  updateLables();
+  updatePositions();
 }
 
 
 void
-AxisTicks::updateSize()
-{
-  this->updatePositions();
+AxisTicks::updateSize() {
+  updatePositions();
 }
 
 
 void
 AxisTicks::updateLables()
 {
-  // Pass...
+  // remove old label:
+  if (0 != _labelitem) {
+    removeFromGroup(_labelitem); delete _labelitem;
+  }
+
+  // Render label:
+  MathItem *label_item = TinyTex::parseInlineQuoted(_labeltext.toStdString());
+  _labelitem = label_item->layout(_mathcontext); _labelsize = label_item->metrics().size();
+  _labelitem->setPos(0,0); delete label_item;
+  addToGroup(_labelitem);
+
+  // Rotate label by orientation:
+  switch (this->_orientation)
+  {
+  case AxisTick::LEFT:
+  case AxisTick::RIGHT:
+    _labelitem->setRotation(-90.0);
+    break;
+
+  case AxisTick::TOP:
+  case AxisTick::BOTTOM:
+    _labelitem->setRotation(0.0);
+    break;
+  }
 }
 
 
@@ -267,24 +273,24 @@ AxisTicks::updatePositions()
 {
   double max_width = 0.0;
   double max_height = 0.0;
-  for (int i=0; i<this->ticks.size(); i++)
+  for (int i=0; i<this->_ticks.size(); i++)
   {
-    max_width  = std::max(max_width, this->ticks[i]->boundingRect().width());
-    max_height = std::max(max_height, this->ticks[i]->boundingRect().height());
+    max_width  = std::max(max_width, this->_ticks[i]->boundingRect().width());
+    max_height = std::max(max_height, this->_ticks[i]->boundingRect().height());
   }
 
   // Update label position of left or above ticks:
   double margin = 0;
-  switch (this->orientation)
+  switch (this->_orientation)
   {
   case AxisTick::LEFT:
-    this->label_item->setPos(0, this->mapping->size().height()/2 + this->label_item->boundingRect().width()/2);
-    margin += this->label_item->boundingRect().height();
+    this->_labelitem->setPos(0, _mapping->size().height()/2 + _labelsize.width()/2);
+    margin += _labelsize.height();
     break;
 
   case AxisTick::TOP:
-    this->label_item->setPos(this->mapping->size().width()/2 - this->label_item->boundingRect().width()/2, 0);
-    margin += this->label_item->boundingRect().height();
+    this->_labelitem->setPos(this->_mapping->size().width()/2 - this->_labelsize.width()/2, 0);
+    margin += _labelsize.height();
     break;
 
   default:
@@ -292,47 +298,47 @@ AxisTicks::updatePositions()
   }
 
   // Update position of ticks:
-  for (int i=0; i<this->ticks.size(); i++)
+  for (int i=0; i<this->_ticks.size(); i++)
   {
-    double width  = this->ticks[i]->boundingRect().width();
-    double height = this->ticks[i]->boundingRect().height();
+    double width  = _ticks[i]->boundingRect().width();
+    double height = _ticks[i]->boundingRect().height();
 
     double x = 0; double y = 0;
-    switch (this->orientation)
+    switch (_orientation)
     {
     case AxisTick::LEFT:
       x = max_width - width + margin;
-      y = (*(this->mapping))(QPointF(0, this->ticks[i]->getValue())).y() - height/2;
+      y = (*(_mapping))(QPointF(0, _ticks[i]->getValue())).y() - height/2;
       break;
 
     case AxisTick::RIGHT:
       x = 0;
-      y = (*(this->mapping))(QPointF(0, this->ticks[i]->getValue())).y() - height/2;
+      y = (*(_mapping))(QPointF(0, _ticks[i]->getValue())).y() - height/2;
       break;
 
     case AxisTick::TOP:
-      x = (*(this->mapping))(QPointF(this->ticks[i]->getValue(), 0)).x() - width/2;
+      x = (*(_mapping))(QPointF(_ticks[i]->getValue(), 0)).x() - width/2;
       y = max_height-height + margin;
       break;
 
     case AxisTick::BOTTOM:
-      x = (*(this->mapping))(QPointF(this->ticks[i]->getValue(), 0)).x() - width/2;
+      x = (*(_mapping))(QPointF(_ticks[i]->getValue(), 0)).x() - width/2;
       y = 0;
       break;
     }
 
-    this->ticks[i]->setPos(x,y);
+    _ticks[i]->setPos(x,y);
   }
 
   // Update label position if right or below ticks:
-  switch (this->orientation)
+  switch (_orientation)
   {
   case AxisTick::RIGHT:
-    this->label_item->setPos(max_width, this->mapping->size().height()/2+this->label_item->boundingRect().width()/2);
+    _labelitem->setPos(max_width, _mapping->size().height()/2+_labelsize.width()/2);
     break;
 
   case AxisTick::BOTTOM:
-    this->label_item->setPos(this->mapping->size().width()/2 - this->label_item->boundingRect().width()/2, max_height);
+    _labelitem->setPos(_mapping->size().width()/2 - _labelsize.width()/2, max_height);
     break;
 
   default:
@@ -340,22 +346,22 @@ AxisTicks::updatePositions()
   }
 
   // Update axis-line:
-  switch (this->orientation)
+  switch (this->_orientation)
   {
   case AxisTick::LEFT:
-    this->axis_line->setLine(max_width+margin, 0, max_width+margin, this->mapping->size().height());
+    _axis_line->setLine(max_width+margin, 0, max_width+margin, _mapping->size().height());
     break;
 
   case AxisTick::RIGHT:
-    this->axis_line->setLine(0, 0, 0, this->mapping->size().height());
+    _axis_line->setLine(0, 0, 0, _mapping->size().height());
     break;
 
   case AxisTick::TOP:
-    this->axis_line->setLine(0, max_height+margin, this->mapping->size().width(), max_height+margin);
+    _axis_line->setLine(0, max_height+margin, _mapping->size().width(), max_height+margin);
     break;
 
   case AxisTick::BOTTOM:
-    this->axis_line->setLine(0,0,this->mapping->size().width(),0);
+    _axis_line->setLine(0,0, _mapping->size().width(),0);
     break;
   }
 }
@@ -364,23 +370,29 @@ AxisTicks::updatePositions()
 void
 AxisTicks::setScheme(Configuration::Scheme scheme)
 {
-  // Update axis-label scheme:
-  this->label_item->setFont(Configuration::getConfig()->getScheme(scheme).axisLabelFont());
+  // Update math context & label
+  _mathcontext = MathContext(Configuration::getConfig()->getScheme(scheme).axisLabelFont());
+
   // Update axis-line pen:
-  this->axis_line->setPen(Configuration::getConfig()->getScheme(scheme).defaultPen());
+  _axis_line->setPen(Configuration::getConfig()->getScheme(scheme).defaultPen());
 
   // Update Ticks:
-  for (int i=0; i<this->ticks.size(); i++) {
-    this->ticks[i]->setScheme(scheme);
+  for (int i=0; i<_ticks.size(); i++) {
+    _ticks[i]->setScheme(scheme);
   }
+
+  updateLables();
+  updatePositions();
 }
 
 
 void
 AxisTicks::setLabel(const QString &label)
 {
-  this->label_item->setHtml(label);
-  /// Update label-font.
+  // Set label
+  _labeltext = label;
+  updateLables();
+  updatePositions();
 }
 
 
@@ -390,42 +402,38 @@ AxisTicks::boundingRect() const
   QRectF box(0,0,0,0);
 
   // Update bounding box by orientation:
-  switch (this->orientation)
+  switch (_orientation)
   {
   case AxisTick::LEFT:
   case AxisTick::RIGHT:
     box = box.united(
-          QRectF(this->label_item->boundingRect().x() + this->label_item->pos().x(),
-                 this->label_item->boundingRect().y() + this->label_item->pos().y(),
-                 this->label_item->boundingRect().height(),
-                 this->label_item->boundingRect().width()));
+          QRectF(_labelitem->pos().x(), _labelitem->pos().y(),
+                 _labelsize.height(), _labelsize.width()));
     break;
 
   case AxisTick::TOP:
   case AxisTick::BOTTOM:
     box = box.united(
-          QRectF(this->label_item->boundingRect().x() + this->label_item->pos().x(),
-                 this->label_item->boundingRect().y() + this->label_item->pos().y(),
-                 this->label_item->boundingRect().width(),
-                 this->label_item->boundingRect().height()));
+          QRectF(_labelitem->pos().x(), _labelitem->pos().y(),
+                 _labelsize.width(), _labelsize.height()));
   }
 
   // unify box with all bounding boxes of all ticks:
-  for (int i=0; i<this->ticks.size(); i++)
+  for (int i=0; i<_ticks.size(); i++)
   {
     box = box.united(
-          QRectF(this->ticks[i]->boundingRect().x() + this->ticks[i]->pos().x(),
-                 this->ticks[i]->boundingRect().y() + this->ticks[i]->pos().y(),
-                 this->ticks[i]->boundingRect().width(),
-                 this->ticks[i]->boundingRect().height()));
+          QRectF(_ticks[i]->boundingRect().x() + _ticks[i]->pos().x(),
+                 _ticks[i]->boundingRect().y() + _ticks[i]->pos().y(),
+                 _ticks[i]->boundingRect().width(),
+                 _ticks[i]->boundingRect().height()));
   }
 
   // Finally unify with axis line:
   return box.united(
-        QRectF(this->axis_line->boundingRect().x() + this->axis_line->pos().x(),
-               this->axis_line->boundingRect().y() + this->axis_line->pos().y(),
-               this->axis_line->boundingRect().width(),
-               this->axis_line->boundingRect().height()));
+        QRectF(_axis_line->boundingRect().x() + _axis_line->pos().x(),
+               _axis_line->boundingRect().y() + _axis_line->pos().y(),
+               _axis_line->boundingRect().width(),
+               _axis_line->boundingRect().height()));
 }
 
 
@@ -439,26 +447,26 @@ AutoAxisTicks::AutoAxisTicks(Mapping *mapping, size_t num_ticks,
   : AxisTicks(mapping, orientation, label)
 {
   Eigen::VectorXd values(num_ticks);
-  switch (this->orientation)
+  switch (this->_orientation)
   {
     case AxisTick::LEFT:
     case AxisTick::RIGHT:
-      this->mapping->sampleY(values);
+      this->_mapping->sampleY(values);
       break;
 
     case AxisTick::BOTTOM:
     case AxisTick::TOP:
-      this->mapping->sampleX(values);
+      this->_mapping->sampleX(values);
       break;
   }
 
   // Allocate space for ticks:
-  this->ticks.resize(num_ticks);
+  this->_ticks.resize(num_ticks);
 
   for (size_t i=0; i<num_ticks; i++)
   {
-    this->ticks[i] = new AxisTick(values(i), this->orientation);
-    this->addToGroup(this->ticks[i]);
+    this->_ticks[i] = new AxisTick(values(i), this->_orientation);
+    this->addToGroup(this->_ticks[i]);
   }
 
   // Update
@@ -469,25 +477,28 @@ AutoAxisTicks::AutoAxisTicks(Mapping *mapping, size_t num_ticks,
 void
 AutoAxisTicks::updateLables()
 {
+  // Call default handler...
+  AxisTicks::updateLables();
+
   // Update labels of ticks:
-  Eigen::VectorXd values(this->ticks.size());
-  switch (this->orientation)
+  Eigen::VectorXd values(_ticks.size());
+  switch (_orientation)
   {
   case AxisTick::LEFT:
   case AxisTick::RIGHT:
-    this->mapping->sampleY(values);
+    _mapping->sampleY(values);
     break;
 
   case AxisTick::TOP:
   case AxisTick::BOTTOM:
-    this->mapping->sampleX(values);
+    _mapping->sampleX(values);
     break;
   }
 
-  for (int i=0; i<this->ticks.size(); i++)
+  for (int i=0; i<this->_ticks.size(); i++)
   {
     // Update value and label of all ticks:
-    this->ticks[i]->setValue(values(i), true);
+    _ticks[i]->setValue(values(i), true);
   }
 }
 

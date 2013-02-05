@@ -10,14 +10,15 @@
 #include "../doctree/reactionsitem.hh"
 
 
-
+/** Trivial graphics view class that emits a signal on a double-click event. */
 class ReactionGraphic
     : public QGraphicsView
 {
   Q_OBJECT
 
 public:
-  ReactionGraphic() : QGraphicsView() {
+  ReactionGraphic(QWidget *parent=0) :
+    QGraphicsView(parent) {
     // Pass...
   }
 
@@ -48,11 +49,15 @@ private slots:
   void onAddParamClicked();
   /** Will be called if "rem param" is clicked. */
   void onRemParamClicked();
+  /** Will move a selected parameter into the global scope. */
+  void onMakeParamGlobalClicked();
   /** Will be called if the selection of the parameterlist is changed, is used to enable/disable
    * the "rem param" button. */
   void onSelectionChanged(const QItemSelection &selected,const QItemSelection &unselected);
   /** Will be called for double click on kinetic law. */
   void onReactionEditing();
+  /** Callback for parameter list changes. */
+  void onParametersChanged();
 
 private:
   /** Holds a weak reference to the reaction item being shown. */
@@ -63,6 +68,8 @@ private:
   QPushButton *_addParamButton;
   /** The "rem param" button. */
   QPushButton *_remParamButton;
+  /** The "make global" button. */
+  QPushButton *_makeGlobalButton;
   /** Holds the table view of local parameters. */
   QTableView *_paramTable;
 };

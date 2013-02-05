@@ -1,8 +1,9 @@
-#ifndef __FLUC_MODELS_NEWTONRAPHSON_HH
-#define __FLUC_MODELS_NEWTONRAPHSON_HH
+#ifndef __INA_NLESOLVE_NEWTONRAPHSON_HH
+#define __INA_NLESOLVE_NEWTONRAPHSON_HH
 
 #include "eval/eval.hh"
 #include "trafo/constantfolder.hh"
+#include "nlesolver.hh"
 
 namespace iNA {
 namespace NLEsolve {
@@ -16,138 +17,15 @@ maxNorm(const Eigen::VectorXd &vector)
 }
 
 
-    enum LineSearchMethod {
-        NoLineSearch = 0,
-        Damped = 1,
-        Optimization = 2,
-    };
-
-    enum Status {
-        Success = 1,
-        MaxIterationsReached = 0,
-        IterationFailed = -1,
-        NegativeValues = -2,
-    };
-
-    enum LineSearchStatus {
-        Done = 1,
-        Converged = 2,
-        LineSearchFailed = 0,
-        RoundOffProblem = -1,
-    };
-
-
-template<typename T>
-class NLEsolver
-{
-
-
-
-protected:
-
-    size_t dim;
-
-    Eigen::VectorXd ODEs;
-    Eigen::MatrixXd JacobianM;
-
-     /**
-     * The bytecode interpreter instance to evaluate the ODEs.
-     */
-     size_t iterations;
-
-     /**
-      * The bytecode interpreter instance to evaluate the ODEs.
-      */
-     Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Interpreter interpreter;
-
-     /**
-      * Holds the interpreter to evaluate the Jacobian.
-      */
-     Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Interpreter jacobian_interpreter;
-
-     /**
-      * The bytecode for the ODE.
-      */
-     Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Code ODEcode;
-
-     /**
-      * The bytecode for the Jacobian.
-      */
-     Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Code jacobianCode;
-
-public:
-
-     NLEsolver(T &model)
-         : dim(model.numIndSpecies()), ODEs(dim), JacobianM(dim,dim)
-     {
-
-     }
-
-
-     /**
-      * Returns the reduced dimension of the ODE system.
-      */
-     inline size_t
-     getDimension()
-     {
-        return this->dim;
-     }
-
-     /**
-      * Returns no. of iterations...
-      */
-     int getIterations()
-     {
-         return this->iterations;
-     }
-
-     /**
-      * Every solver has to implement its own method...
-      */
-     virtual Status solve(Eigen::VectorXd &state)=0;
-
-     /**
-      * Sets the ODE and Jacobian code...
-      */
-
-     void set(std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> &indexTable,
-              Eigen::VectorXex &updateVector, Eigen::MatrixXex &Jacobian)
-     {
-
-         // clean up
-         this->iterations = 0;
-         this->ODEcode.clear();
-         this->jacobianCode.clear();
-
-         // Compile expressions
-         Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Compiler compiler(indexTable);
-         compiler.setCode(&this->ODEcode);
-         compiler.compileVector(updateVector);
-         //std::cerr << updateVector;
-         compiler.finalize(0);
-
-         // Set bytecode for interpreter
-         this->interpreter.setCode(&(this->ODEcode));
-         this->jacobian_interpreter.setCode(&(this->jacobianCode));
-
-         // Compile jacobian:
-         Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Compiler jacobian_compiler(indexTable);
-         jacobian_compiler.setCode(&jacobianCode);
-         jacobian_compiler.compileMatrix(Jacobian);
-         jacobian_compiler.finalize(0);
-
-     }
-
-
-};
-
 /**
  * Nonlinear algebraic equation solver using the Newton-Raphson method with linesearch.
  * @ingroup nlesolve
  */
-template<typename T>
+template<class T,
+         class VectorEngine=Eval::bci::Engine<Eigen::VectorXd>,
+         class MatrixEngine=Eval::bci::Engine<Eigen::VectorXd,Eigen::MatrixXd> >
 class NewtonRaphson
-    : public NLEsolver<T>
+    : public NLEsolver<T, VectorEngine, MatrixEngine>
 {
 protected:
 
@@ -175,7 +53,7 @@ public:
    */
 
   NewtonRaphson(T &model)
-      : NLEsolver<T>(model),
+      : NLEsolver<T, VectorEngine, MatrixEngine>(model),
         parameters(model.numIndSpecies())
 
   {
@@ -196,6 +74,8 @@ public:
       this->set(model.stateIndex, updateVector, Jacobian);
   }
 
+  virtual ~NewtonRaphson(){ };
+
   const Eigen::MatrixXd&
   getJacobianM()
 
@@ -215,52 +95,44 @@ public:
       Eigen::VectorXd nablaf;
       Eigen::VectorXd dx;
 
-      // Evaluate ODEs
-      this->interpreter.run(conc,this->ODEs);
+      // Calculate maximum step size heuristic
+      const double stpmax=this->parameters.STPMX*std::max(conc.head(this->dim).norm(),double(this->dim));
 
-      // Dimension
-      size_t dim = conc.size();
-
-      // Calc max step
-      const double stpmax=this->parameters.STPMX*std::max(conc.norm(),double(dim));
-
-
+      // Do Newton iteration
       for(this->iterations=1;this->iterations<parameters.maxIterations;this->iterations++)
       {
-
-          // evaluate rate equations
-          this->interpreter.run(conc,this->ODEs);
 
           conc_old = conc;
 
           LineSearchStatus lcheck = newtonStep(conc_old,conc,stpmax);
 
-          if (!(conc.array()>0).all())
+          if ((conc.head(this->dim).array()<0).any())
           {
               conc = conc_old;
               return NegativeValues;
           }
 
-          // test for convergence of REs
+          // Test for convergence of ODEs
           if ( maxNorm(this->ODEs) < this->parameters.TOLF )
           {
              return Success;
           }
 
-          // check linesearch
+          // Check linesearch
           switch(lcheck)
           {
             case Converged:
               return Success;
             case RoundOffProblem:
             case LineSearchFailed:
-              conc = conc_old; return IterationFailed;
+              conc = conc_old;
+              return IterationFailed;
             default: break;
           }
 
-          // test for convergence of dx
+          // Test for convergence of update vector dx
           test = 0.;
-          for(size_t i=0;i<dim;i++)
+          for(size_t i=0;i<this->dim;i++)
           {
               temp = (std::abs(conc(i)-conc_old(i)))/std::max(conc(i),1.);
               if (temp > test) test = temp;
@@ -286,28 +158,28 @@ public:
 
       double test,temp,den;
 
-      size_t dim = inState.size();
+      //size_t dim = inState.size();
 
       Eigen::VectorXd nablaf;
       Eigen::VectorXd dx;
 
-      // construct Jacobian matrix
+      // Construct Jacobian matrix
       this->interpreter.run(inState,this->ODEs);
       this->jacobian_interpreter.run(inState,this->JacobianM);
 
-      // compute f to minimize
+      // Evaluate objective function f
       f = .5*(this->ODEs.squaredNorm());
-      // calculate steepest descent direction
+      // Calculate steepest descent direction
       nablaf = this->JacobianM.transpose()*this->ODEs;
 
-      // store also old f
+      // Store also old value of objective function f
       fold = f;
 
-      // solve JacobianM*dx=-REs
+      // Solve JacobianM*dx=-REs to obtain the update vector
       dx = precisionSolve(this->JacobianM, -this->ODEs);
 
+      // Perform linesearch
       LineSearchStatus lcheck;
-
       switch(parameters.linesearch)
       {
           case Optimization:
@@ -318,20 +190,26 @@ public:
           default: return Done;
 
       }
-      //< returns new outState and f, also updates REs
+      //< returns new outState and f, also updates ODEs
 
-      // check for spurious convergence of nablaf = 0
+      // Check for NaNs
+      for(size_t i=0; i<this->dim; i++)
+        if(std::isnan(outState(i))) return LineSearchFailed;
+
+      // Check for spurious convergence of nablaf = 0
       if (lcheck==LineSearchFailed) {
          test = 0.0;
-         den = std::max(f,0.5*double(dim));
-         for(size_t i=0; i<dim;i++)
+         den = std::max(f,0.5*double(this->dim));
+         for(size_t i=0; i<this->dim;i++)
          {
              temp = std::abs(nablaf(i))*std::max(std::abs(outState(i)),1.)/den;
              if (temp > test) test = temp;
          }
 
          if(test < this->parameters.TOLMIN)
+         {
              return LineSearchFailed;
+         }
          else
          {
              return Converged;
@@ -383,7 +261,7 @@ public:
                                       const double &stpmax)
   {
 
-      size_t dim = xold.size();
+      //size_t dim = xold.size();
 
       double temp=0., test=0.;
       double rhs1=0., rhs2=0.;
@@ -398,7 +276,7 @@ public:
 
       if (slope >= 0.) return RoundOffProblem;
       test = 0.0;
-      for (size_t i=0;i<dim;i++)
+      for (size_t i=0;i<this->dim;i++)
       {
           temp=std::abs(dx(i))/std::max(abs(i),1);
           if (temp > test) test = temp;
@@ -408,9 +286,9 @@ public:
 
       // first do newton step
       lambda   = 1.0;
-      for(;;){
+      for(int it=0;;it++){
 
-          x = xold+lambda*dx;
+          x.head(this->dim) = xold.head(this->dim)+lambda*dx;
 
           // evaluate rate equations
           this->interpreter.run(x,this->ODEs);
@@ -450,6 +328,8 @@ public:
           lambda2 = lambda;
           f2 = f;
           lambda = std::max(tmplambda,0.1*lambda);
+
+          if(it>100000)return LineSearchFailed;
 
       }
 

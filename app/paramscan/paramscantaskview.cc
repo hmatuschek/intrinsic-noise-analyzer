@@ -107,7 +107,13 @@ ParamScanResultWidget::plotButtonPressed()
       Application::getApp()->docTree()->addPlot(
             this->paramscan_task_wrapper,
             new PlotItem(
-              new ParameterScanCovPlot(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
+              new ParameterScanCVPlot(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
+
+      // Add Fano COV plot
+      Application::getApp()->docTree()->addPlot(
+            this->paramscan_task_wrapper,
+            new PlotItem(
+              new ParameterScanFanoPlot(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
 
       break;
   case ParamScanTask::Config::IOS_ANALYSIS:
@@ -121,7 +127,14 @@ ParamScanResultWidget::plotButtonPressed()
       Application::getApp()->docTree()->addPlot(
             this->paramscan_task_wrapper,
             new PlotItem(
-              new ParameterScanCovIOSPlot(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
+              new ParameterScanCVIOSPlot(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
+
+      // Add IOS Fano plot
+      Application::getApp()->docTree()->addPlot(
+            this->paramscan_task_wrapper,
+            new PlotItem(
+              new ParameterScanFanoIOSPlot(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
+
       break;
   default:
       break;
@@ -143,7 +156,9 @@ ParamScanResultWidget::customPlotButtonPressed()
 
   // Iterate over all graphs of the configured plot:
   for (size_t i=0; i<dialog.numGraphs(); i++) {
-    figure->getAxis()->addGraph(dialog.graph(i).create(figure->getStyle(i)));
+    Plot::Graph *graph = dialog.graph(i).create(figure->getStyle(i));
+    figure->getAxis()->addGraph(graph);
+    figure->addToLegend(dialog.graph(i).label(), graph);
   }
 
   // Add timeseries plot:

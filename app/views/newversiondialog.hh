@@ -23,4 +23,4 @@ private:
   QCheckBox *_checkEnabled;
 };
 
-#endif // NEWVERSIONDIALOG_HH
+#endif

@@ -32,8 +32,8 @@ ReactionParameterList::flags(const QModelIndex &index) const
   if (columnCount() <= index.column()) return Qt::NoItemFlags;
   if (rowCount() <= index.row()) return Qt::NoItemFlags;
 
-  // Mark only column 0, 1 & 2 editable
-  if ( (0 == index.column()) || (1 == index.column()) || (2 == index.column()) ) {
+  // Mark only column 0, 1, 2 & 3 editable
+  if ( (0 == index.column()) || (1 == index.column()) || (2 == index.column()) || (3 == index.column()) ) {
     item_flags |= Qt::ItemIsEditable;
   }
 
@@ -80,6 +80,7 @@ ReactionParameterList::setData(const QModelIndex &index, const QVariant &value, 
   case 0: success = _updateIdentifier(param, value); break;
   case 1: success = _updateName(param, value); break;
   case 2: success = _updateInitialValue(param, value); break;
+  case 3: success = _updateUnit(param, value); break;
   default: break;
   }
 
@@ -186,14 +187,28 @@ ReactionParameterList::_updateIdentifier(iNA::Ast::Parameter *param, const QVari
   // Get ID
   QString qid = value.toString();
   std::string id = qid.toStdString();
+
   // If nothing changed -> done.
   if (id == param->getIdentifier()) { return true; }
+
   // Check ID format
-  if (! QRegExp("[a-zA-Z_][a-zA-Z0-9_]*").exactMatch(qid)) { return false; }
+  if (! QRegExp("[a-zA-Z_][a-zA-Z0-9_]*").exactMatch(qid)) {
+    QMessageBox::warning(0, tr("Can not set identifier"),
+                         tr("Identifier \"%1\" has invalid format.").arg(qid));
+    return false;
+  }
+
   // Check if id is not assigned allready:
-  if (_kinetic_law->hasDefinition(id)) { return false; }
+  if (_kinetic_law->hasDefinition(id)) {
+    QMessageBox::warning(0, tr("Can not set identifier"),
+                         tr("Identifier \"%1\" already in use.").arg(qid));
+    return false;
+  }
+
   // Ok, assign identifier:
   _kinetic_law->resetIdentifier(param->getIdentifier(), id);
+  // Signal update
+  emit this->identifierUpdated();
   return true;
 }
 
@@ -224,6 +239,8 @@ bool
 ReactionParameterList::_updateName(iNA::Ast::Parameter *param, const QVariant &value)
 {
   param->setName(value.toString().toStdString());
+  // Signal update
+  emit this->nameUpdated();
   return true;
 }
 
@@ -253,15 +270,22 @@ ReactionParameterList::_updateInitialValue(iNA::Ast::Parameter *param, const QVa
 {
   // If the initial value was changed: get expression
   std::string expression = value.toString().toStdString();
+
   // parse expression
   GiNaC::ex new_value;
   try { new_value = iNA::Parser::Expr::parseExpression(expression, _kinetic_law); }
   catch (iNA::Exception &err) {
+    // Log message:
     iNA::Utils::Message msg = LOG_MESSAGE(iNA::Utils::Message::INFO);
     msg << "Can not parse expression: " << expression << ": " << err.what();
     iNA::Utils::Logger::get().log(msg);
+    // Show message:
+    QMessageBox::warning(
+          0, tr("Can not parse expression"),
+          tr("Can not parse expression \"%1\": %2").arg(value.toString(), err.what()));
     return false;
   }
+
   // Set new "value"
   param->setValue(new_value);
   return true;
@@ -271,12 +295,46 @@ ReactionParameterList::_updateInitialValue(iNA::Ast::Parameter *param, const QVa
 QVariant
 ReactionParameterList::_getUnit(iNA::Ast::Parameter *param, int role) const
 {
-  if ((Qt::DecorationRole != role)) { return QVariant(); }
+  if (Qt::DecorationRole == role) {
+    // Render unit as pixmap
+    UnitRenderer renderer(param->getUnit());
+    return renderer.toPixmap();
+  } else if (Qt::EditRole == role) {
+    // Serialize unit to string:
+    return QString(iNA::Parser::Unit::UnitParser::write(param->getUnit()).c_str());
+  }
 
-  UnitRenderer renderer(param->getUnit());
-  return renderer.toPixmap();
+  return QVariant();
 }
 
+bool
+ReactionParameterList::_updateUnit(iNA::Ast::Parameter *param, const QVariant &value)
+{
+  // If unit expression is empty -> set to dimensionless:
+  if (0 == value.toString().size()) {
+    param->setUnit(iNA::Ast::Unit::dimensionless());
+    return true;
+  }
+
+  // Parse Unit;
+  iNA::Ast::Unit unit;
+  try {
+    unit = iNA::Parser::Unit::UnitParser::parse(value.toString().toStdString());
+  } catch (iNA::Exception &err) {
+    // Log message
+    iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::WARN);
+    message << "Can not parse unit expression: " << err.what();
+    iNA::Utils::Logger::get().log(message);
+    // Show message
+    QMessageBox::warning(
+          0, tr("Can not parse unit expression"),
+          tr("Can not parse unit expression \"%1\": %2").arg(value.toString(), err.what()));
+    return false;
+  }
+  // Set parsed unit and signal success:
+  param->setUnit(unit);
+  return true;
+}
 
 QVariant
 ReactionParameterList::_getConstFlag(iNA::Ast::Parameter *param, int role) const

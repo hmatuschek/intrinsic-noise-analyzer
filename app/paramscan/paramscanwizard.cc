@@ -19,6 +19,7 @@ ParamScanWizard::ParamScanWizard(QWidget *parent) :
   this->setWindowTitle("System Size Expansion");
 
   this->setPage(ParamScanWizard::MODEL_SELECTION_PAGE, new ParamScanModelSelectionPage(this));
+  this->setPage(ParamScanWizard::ENGINE_SELECTION_PAGE, new ParamScanEngineSelectionPage(this));
   this->setPage(ParamScanWizard::SCAN_CONFIG_PAGE, new ParameterScanConfigPage(this));
   this->setPage(ParamScanWizard::SUMMARY_PAGE, new ParamScanSummaryPage(this));
   this->page(ParamScanWizard::SUMMARY_PAGE)->setFinalPage(true);
@@ -253,6 +254,16 @@ ParameterScanConfigPage::validatePage()
 
 
 
+/* ********************************************************************************************* *
+ * Implementation of the engine selection page:
+ * ********************************************************************************************* */
+ParamScanEngineSelectionPage::ParamScanEngineSelectionPage(GeneralTaskWizard *parent)
+  : EngineWizardPage(parent, false)
+{
+
+  this->setTitle(tr("Parameter scan"));
+  this->setSubTitle(tr("Select engine for model evaluation"));
+}
 
 
 /* ********************************************************************************************* *

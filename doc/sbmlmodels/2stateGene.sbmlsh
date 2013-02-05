@@ -1,0 +1,56 @@
+@model:3.1.1 = Model_2 "Gene Expression"
+
+@units
+ substance = item
+ volume = litre
+ area = metre: e=2
+ length = metre
+ time = second
+
+@compartments
+ compartment = Omega "Cell"
+
+@species
+ compartment: Gene  = 1 s "Gene"
+ compartment: mRNA  = 0 s "mRNA"
+ compartment: Protein  = 0 s "Protein"
+ compartment: GeneOff  = 0 s
+
+@parameters
+ kdm=10 "kdm"
+ ks=10 "ks"
+ kon=0.5 "kon"
+ koff=0.5 "koff"
+ kdp=10 "kdp"
+ kTon=200 "kTon"
+ kToff=100
+ Omega=5
+
+@reactions
+ @r= reaction_2 "Translation"
+  mRNA -> mRNA + Protein
+  ks*mRNA
+
+ @r= reaction_10 "mRNA degradation"
+  mRNA -> 
+  kdm*mRNA
+
+ @r= reaction_1 "Transcription"
+  Gene -> mRNA + Gene
+  kTon*Gene
+
+ @r= reaction "OFF"
+  Gene -> GeneOff
+  koff*Gene
+
+ @r= reactionReverse "ON"
+  GeneOff -> Gene
+  GeneOff*kon
+
+ @r= reaction_3 "Protein degradation"
+  Protein -> 
+  kdp*Protein
+
+ @r= Transcription2 "Transcription2"
+  GeneOff -> mRNA + GeneOff
+  kToff*GeneOff

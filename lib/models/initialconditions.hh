@@ -58,6 +58,14 @@ public:
 
     }
 
+
+    const GiNaC::exmap &
+    getSubstitutions()
+    {
+        return _substitutions;
+    }
+
+
 };
 
 /**
@@ -89,6 +97,8 @@ protected:
     Eigen::VectorXd ICs;
 
     SSEBaseModel &model;
+
+    Trafo::InitialValueFolder evICs;
 
 public:
 
@@ -142,6 +152,12 @@ public:
 
     {
         return this->LinkCMatrixNumeric;
+    }
+
+    const GiNaC::exmap &
+    getSubstitutions()
+    {
+        return substitutions;
     }
 
 };

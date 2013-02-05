@@ -37,7 +37,7 @@ IOSmodel::postConstructor()
     // ... and add them to index table
     for(size_t i = dimold; i<this->dim; i++)
     {
-        stateVariables.push_back( GiNaC::symbol() );
+        stateVariables.push_back( GiNaC::symbol("IOS") );
         this->stateIndex.insert(std::make_pair(this->stateVariables[i-this->numIndSpecies()],i));
     }
 
@@ -470,7 +470,7 @@ IOSmodel::getCentralMoments(const Eigen::VectorXd &state, Eigen::VectorXd &first
     for(size_t i=0; i<this->numSpecies(); i++)
        fourth(i) = 3.*second(i,i)*second(i,i);
 
-    first+=emre;
+    first+=emre+iosemre;
     second+=iosCov;
 
 }

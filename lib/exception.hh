@@ -1,5 +1,5 @@
-#ifndef __FLUC_EXCEPTION_HH__
-#define __FLUC_EXCEPTION_HH__
+#ifndef __INA_EXCEPTION_HH__
+#define __INA_EXCEPTION_HH__
 
 #include <exception>
 #include <sstream>
