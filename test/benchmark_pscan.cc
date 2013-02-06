@@ -255,14 +255,14 @@ BenchmarkPscan::suite()
 {
   UnitTest::TestSuite *s = new UnitTest::TestSuite("Engine benchmark PScan");
 
-  /*s->addTest(new UnitTest::TestCaller<BenchmarkPscan>(
+  s->addTest(new UnitTest::TestCaller<BenchmarkPscan>(
                "Coremodel (SSE, GiNaC)", &BenchmarkPscan::testCoremodelGiNaC));
 
   s->addTest(new UnitTest::TestCaller<BenchmarkPscan>(
                "Coremodel (SSE, BCI)", &BenchmarkPscan::testCoremodelBCI));
 
   s->addTest(new UnitTest::TestCaller<BenchmarkPscan>(
-               "Coremodel (SSE, JIT)", &BenchmarkPscan::testCoremodelJIT));*/
+               "Coremodel (SSE, JIT)", &BenchmarkPscan::testCoremodelJIT));
 
   s->addTest(new UnitTest::TestCaller<BenchmarkPscan>(
                "Coremodel (SSA)", &BenchmarkPscan::testCoremodelSSA));
