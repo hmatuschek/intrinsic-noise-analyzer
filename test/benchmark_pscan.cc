@@ -52,12 +52,11 @@ typedef Models::SSAparamScan< Eval::bci::Engine<Eigen::VectorXd> > SSA_PSCan_BCI
 typedef Models::SSAparamScan< Eval::jit::Engine<Eigen::VectorXd> > SSA_PSCan_JIT;
 
 
-double BenchmarkPscan::p_start = 0.0;
+double BenchmarkPscan::p_start = 0.02;
 double BenchmarkPscan::p_end   = 0.5;
-size_t BenchmarkPscan::ensemble_size = 300; // 3000
 size_t BenchmarkPscan::Nstep = 100;
 double BenchmarkPscan::transient_time = 5.0;
-double BenchmarkPscan::ssa_time = 100;
+double BenchmarkPscan::ssa_time = 10;
 
 
 BenchmarkPscan::~BenchmarkPscan()
@@ -223,9 +222,9 @@ BenchmarkPscan::testCoremodelSSA()
   // Perform actual benchmark
   cpu_clock.start(); real_clock.start();
   for (size_t i=0; i<Nstep; i++) {
-    pscan_ginac.run(dt);
+    pscan_jit.run(dt);
   }
-  std::cout << "Precise execution time (SSA, GiNaC): " << std::endl
+  std::cout << "Precise execution time (SSA, JIT): " << std::endl
             << "  cpu: " << cpu_clock.stop() << "s." << std::endl
             << " real: " << real_clock.stop() << "s." << std::endl;
 
@@ -241,9 +240,9 @@ BenchmarkPscan::testCoremodelSSA()
   // Perform actual benchmark
   cpu_clock.start(); real_clock.start();
   for (size_t i=0; i<Nstep; i++) {
-    pscan_jit.run(dt);
+    pscan_ginac.run(dt);
   }
-  std::cout << "Precise execution time (SSA, JIT): " << std::endl
+  std::cout << "Precise execution time (SSA, GiNaC): " << std::endl
             << "  cpu: " << cpu_clock.stop() << "s." << std::endl
             << " real: " << real_clock.stop() << "s." << std::endl;
 }
