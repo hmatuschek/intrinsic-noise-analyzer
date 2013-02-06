@@ -23,6 +23,22 @@ public:
 
   const Eigen::VectorXd &solve(const Eigen::MatrixXd &B, const Eigen::VectorXd &A, double epsilon=1.e-9);
 
+  static inline Eigen::VectorXd precisionSolve(const Eigen::MatrixXd &B, const Eigen::VectorXd &A, double epsilon=1.e-9)
+
+  {
+
+      // this is fast
+      Eigen::VectorXd x = B.lu().solve(A);
+      if((B*x).isApprox(A,epsilon))
+      {
+         // this is rather slow
+         Eigen::FullPivLU<Eigen::MatrixXd> LU(B);
+         x = LU.solve(A);
+      }
+
+      return x;
+
+  }
 
 };
 

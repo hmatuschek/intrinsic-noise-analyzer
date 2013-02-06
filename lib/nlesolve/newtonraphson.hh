@@ -4,6 +4,7 @@
 #include "eval/eval.hh"
 #include "trafo/constantfolder.hh"
 #include "nlesolver.hh"
+#include "precisionsolve.hh"
 
 namespace iNA {
 namespace NLEsolve {
@@ -27,7 +28,10 @@ template<class T,
 class NewtonRaphson
     : public NLEsolver<T, VectorEngine, MatrixEngine>
 {
+
 protected:
+
+   PrecisionSolve LinSolver;
 
 public:
 
@@ -54,6 +58,7 @@ public:
 
   NewtonRaphson(T &model)
       : NLEsolver<T, VectorEngine, MatrixEngine>(model),
+        LinSolver(model.numIndSpecies()),
         parameters(model.numIndSpecies())
 
   {
@@ -162,7 +167,7 @@ public:
       fold = f;
 
       // Solve JacobianM*dx=-REs to obtain the update vector
-      dx = precisionSolve(this->JacobianM, -this->ODEs);
+      dx = LinSolver.solve(this->JacobianM, -this->ODEs);
 
       // Perform linesearch
       LineSearchStatus lcheck;
@@ -206,25 +211,7 @@ public:
 
   }
 
-  /**
-   * Simple inline function that attempts to find a solution within the precision of the NLE solver (advantageous for stiff systems).
-   */
 
-  inline Eigen::VectorXd precisionSolve(const Eigen::MatrixXd &B, const Eigen::VectorXd &A)
-  {
-
-      // this is fast
-      Eigen::VectorXd x = B.lu().solve(A);
-      if((B*x).isApprox(A,parameters.epsilon))
-      {
-         // this is rather slow
-         Eigen::FullPivLU<Eigen::MatrixXd> LU(B);
-         x = LU.solve(A);
-      }
-
-      return x;
-
-  }
 
 
   /**

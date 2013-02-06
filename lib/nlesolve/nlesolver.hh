@@ -59,23 +59,22 @@ protected:
      typename MatrixEngine::Interpreter jacobian_interpreter;
 
      /** The bytecode for the ODE. */
-     typename VectorEngine::Code *ODEcode;
+     typename VectorEngine::Code ODEcode;
 
      /** The bytecode for the Jacobian. */
-     typename MatrixEngine::Code *jacobianCode;
+     typename MatrixEngine::Code jacobianCode;
 
 public:
 
      NLEsolver(T &model)
-       : model(model), dim(model.numIndSpecies()), ODEs(dim), JacobianM(dim,dim), ODEcode(0), jacobianCode(0)
+       : model(model), dim(model.numIndSpecies()), ODEs(dim), JacobianM(dim,dim)
      {
        // Pass...
      }
 
      virtual ~NLEsolver()
      {
-       if (0 != this->ODEcode) { delete this->ODEcode; }
-       if (0 != this->jacobianCode) { delete this->jacobianCode; }
+
      }
 
 
@@ -105,16 +104,14 @@ public:
      /**
       * Set ode and Jacobian code...
       */
-     void set(typename MatrixEngine::Code *odeC, typename MatrixEngine::Code *jacC)
+     void set(typename MatrixEngine::Code &odeC, typename MatrixEngine::Code &jacC)
      {
        // clean up
        this->iterations = 0;
-       if (0 != ODEcode) { delete ODEcode; }
-       if (0 != jacobianCode) { delete jacobianCode; }
 
        // Set bytecode for interpreter
-       this->interpreter.setCode(odeC);
-       this->jacobian_interpreter.setCode(jacC);
+       this->interpreter.setCode(&odeC);
+       this->jacobian_interpreter.setCode(&jacC);
 
      }
 

@@ -104,15 +104,12 @@ public:
           index.insert(std::make_pair<GiNaC::symbol,size_t>(this->sseModel.getConservationConstants()(i), nstate++));
 
       // Now compile
-
       compileREs(this->sseModel, index, codeODE, codeJac, opt_level);
-
       compileLNA(this->sseModel, index, LNAcodeA, LNAcodeB, opt_level);
-
       compileIOS(this->sseModel, index, IOScodeA, IOScodeB, opt_level);
 
       // Set ode code
-      this->solver.set(&codeODE, &codeJac);
+      this->solver.set(codeODE, codeJac);
 
     }
 

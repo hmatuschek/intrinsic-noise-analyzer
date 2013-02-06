@@ -30,7 +30,6 @@ protected:
     /**
      * An instance of a nonlinear solver.
      */
-    //NLEsolve::NewtonRaphson<M> solver;
     NLEsolve::HybridSolver<M, VectorEngine, MatrixEngine> solver;
 
     /**
@@ -72,7 +71,7 @@ public:
         compilerB.compileMatrix(Jac);
         compilerB.finalize(0);
 
-        solver.set(&codeODE,&codeJac);
+        solver.set(codeODE, codeJac);
 
     }
 
@@ -103,7 +102,7 @@ public:
         compilerB.compileMatrix(Jac);
         compilerB.finalize(0);
 
-        solver.set(&codeODE,&codeJac);
+        solver.set(codeODE, codeJac);
 
         this->setPrecision(epsilon);
         this->setMaxIterations(iter);
@@ -193,7 +192,7 @@ public:
         }
 
 
-        x.segment(offset,lnaLength) = solver.precisionSolve(B,-A);
+        x.segment(offset,lnaLength) = NLEsolve::PrecisionSolve::precisionSolve(B, -A, solver.parameters.epsilon);
 
 
         // substitute LNA
@@ -314,7 +313,7 @@ public:
             }
         }
 
-        x.tail(sseLength-lnaLength) = solver.precisionSolve(B,-A);
+        x.tail(sseLength-lnaLength) = NLEsolve::PrecisionSolve::precisionSolve(B,-A,solver.parameters.epsilon);
 
     }
 
