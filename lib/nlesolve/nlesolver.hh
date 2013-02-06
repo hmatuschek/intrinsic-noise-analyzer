@@ -133,6 +133,19 @@ public:
        jacobian_compiler.finalize(opt_level);
      }
 
+     void set(typename MatrixEngine::Code *odeC, typename MatrixEngine::Code *jacC)
+     {
+       // clean up
+       this->iterations = 0;
+       if (0 != ODEcode) { delete ODEcode; }
+       if (0 != jacobianCode) { delete jacobianCode; }
+
+       // Set bytecode for interpreter
+       this->interpreter.setCode(odeC);
+       this->jacobian_interpreter.setCode(jacC);
+
+     }
+
 
 };
 

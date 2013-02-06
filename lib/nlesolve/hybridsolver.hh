@@ -63,30 +63,6 @@ public:
 
  }
 
-  /**
-   * Constructor.
-   *
-   * @param system Specifies the ODE system to integrate.
-   * @param epsilon_abs Specifies the absolute error for the step.
-   */
-  HybridSolver(Sys &system, Eigen::VectorXex &update, Eigen::MatrixXex &Jacobian)
-      : NewtonRaphson<Sys>(system, update, Jacobian), LSODA(),
-        istate(1)
-  {
-
-    this->parameters.maxIterations=100;
-
-    ywork = new double[3 * (getDimension() + 1)];
-    atolwork = ywork + getDimension() + 1;
-    rtolwork = atolwork + getDimension() + 1;
-
-    for (size_t i = 1; i <= getDimension(); ++i)
-    {
-        rtolwork[i] = this->parameters.epsilon;
-        atolwork[i] = this->parameters.epsilon;
-    }
-  }
-
   virtual ~HybridSolver(){ };
 
 
@@ -119,7 +95,7 @@ public:
    * Runs the solver.
    */
   Status
-  solve(Eigen::VectorXd &conc, double maxTime=1.e9, double dt=0.1, const Models::ParameterSet &parameters=Models::ParameterSet())
+  solve(Eigen::VectorXd &state, double maxTime=1.e9, double dt=0.1, const Models::ParameterSet &parameters=Models::ParameterSet())
   {
 
       if(maxTime<dt) maxTime=dt;
@@ -130,7 +106,7 @@ public:
           Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
           message << "Try Newton step ... ";
 
-          Status lcheck = NewtonRaphson<Sys, VectorEngine, MatrixEngine>::solve(conc);
+          Status lcheck = NewtonRaphson<Sys, VectorEngine, MatrixEngine>::solve(state);
 
           switch(lcheck)
           {
@@ -159,7 +135,7 @@ public:
               if(t==0) this->setupLSODA(parameters);
 
               // Do ODE step of length dt
-              ODEStep(conc,0,dt);
+              ODEStep(state,0,dt);
 
           }
 

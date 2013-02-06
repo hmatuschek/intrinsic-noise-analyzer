@@ -62,18 +62,6 @@ public:
 
   }
 
-  /**
-   * Constructor...
-   */
-
-  NewtonRaphson(T &model, Eigen::VectorXex &updateVector, Eigen::MatrixXex &Jacobian)
-      : NLEsolver<T>(model),
-        parameters(model.numIndSpecies())
-
-  {
-      this->set(model.stateIndex, updateVector, Jacobian);
-  }
-
   virtual ~NewtonRaphson(){ };
 
   const Eigen::MatrixXd&
@@ -157,8 +145,6 @@ public:
       double f,fold;
 
       double test,temp,den;
-
-      //size_t dim = inState.size();
 
       Eigen::VectorXd nablaf;
       Eigen::VectorXd dx;

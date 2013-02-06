@@ -39,10 +39,11 @@ protected:
     size_t iosLength;
     size_t sseLength;
 
-
     typename VectorEngine::Interpreter interpreter;
     typename MatrixEngine::Interpreter matrix_interpreter;
 
+    typename VectorEngine::Code codeODE;
+    typename MatrixEngine::Code codeJac;
     typename VectorEngine::Code LNAcodeA;
     typename MatrixEngine::Code LNAcodeB;
     typename VectorEngine::Code IOScodeA;
@@ -104,9 +105,7 @@ public:
 
       // Now compile
 
-//        Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Code codeODE;
-//        Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Code codeJac;
-//        compileREs(this->sseModel, index, codeODE, codeJac);
+      compileREs(this->sseModel, index, codeODE, codeJac, opt_level);
 
       compileLNA(this->sseModel, index, LNAcodeA, LNAcodeB, opt_level);
 
@@ -148,6 +147,8 @@ public:
         Eigen::VectorXex REs;
         Eigen::MatrixXex Jacobian;
 
+        this->solver.set(&codeODE, &codeJac);
+
         // Iterate over all parameter sets
         for(size_t j = 0; j < parameterSets.size(); j++)
         {
@@ -178,11 +179,10 @@ public:
             {
 
                 // Solve the deterministic equations
-                //solvers[OpenMP::getThreadNum()].set(codeODE,codeJac);
-                this->solver.set(index,REs,Jacobian,opt_level);
+                //this->solver.set(index,REs,Jacobian,opt_level);
 
-                iter = this->solver.solve(conc, this->max_time, this->min_time_step, parameterSets[j]);
-                x.head(offset) = conc;
+                iter = this->solver.solve(x, this->max_time, this->min_time_step, parameterSets[j]);
+                //x.head(offset) = conc;
 
                 // Now calculate LNA
                 calcLNA(this->sseModel,x);
@@ -262,7 +262,7 @@ protected:
         // Compile ODEs
         typename VectorEngine::Compiler compilerA(indexTable);
         compilerA.setCode(&codeODE);
-        compilerA.compileVector(model.getUpdateVector().head(model.numIndSpecies()));
+        compilerA.compileVector( model.getUpdateVector().head(model.numIndSpecies()) );
         compilerA.finalize(0);
 
         // Compile Jacobian

@@ -24,6 +24,9 @@ protected:
 
     M &sseModel;
 
+    typename VectorEngine::Code codeODE;
+    typename MatrixEngine::Code codeJac;
+
     /**
      * An instance of a nonlinear solver.
      */
@@ -57,7 +60,19 @@ public:
         Eigen::VectorXex REs = ICs.apply(constants.apply( model.getUpdateVector().head(model.numIndSpecies())) );
         Eigen::MatrixXex Jac = ICs.apply(constants.apply( model.getJacobian() ));
 
-        solver.set(model.stateIndex, REs, Jac);
+        // Compile ODEs
+        typename VectorEngine::Compiler compilerA(model.stateIndex);
+        compilerA.setCode(&codeODE);
+        compilerA.compileVector(REs);
+        compilerA.finalize(0);
+
+        // Compile Jacobian
+        typename MatrixEngine::Compiler compilerB(model.stateIndex);
+        compilerB.setCode(&codeJac);
+        compilerB.compileMatrix(Jac);
+        compilerB.finalize(0);
+
+        solver.set(&codeODE,&codeJac);
 
     }
 
@@ -76,7 +91,19 @@ public:
         Eigen::VectorXex REs = ICs.apply(constants.apply( model.getUpdateVector().head(model.numIndSpecies())) );
         Eigen::MatrixXex Jac = ICs.apply(constants.apply( model.getJacobian() ));
 
-        solver.set(model.stateIndex, REs, Jac);
+        // Compile ODEs
+        typename VectorEngine::Compiler compilerA(model.stateIndex);
+        compilerA.setCode(&codeODE);
+        compilerA.compileVector(REs);
+        compilerA.finalize(0);
+
+        // Compile Jacobian
+        typename MatrixEngine::Compiler compilerB(model.stateIndex);
+        compilerB.setCode(&codeJac);
+        compilerB.compileMatrix(Jac);
+        compilerB.finalize(0);
+
+        solver.set(&codeODE,&codeJac);
 
         this->setPrecision(epsilon);
         this->setMaxIterations(iter);
