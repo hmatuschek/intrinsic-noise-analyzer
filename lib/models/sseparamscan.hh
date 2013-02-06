@@ -99,10 +99,8 @@ public:
     */
     ParameterScan(M &model, size_t iter, double epsilon, double t_max=1e9, double dt=1.e-1, size_t opt_level = 0)
       : SteadyStateAnalysis<M, VectorEngine, MatrixEngine>(model,iter,epsilon,t_max,dt),
-        computeLNA(model.lnaLength()), computeIOS(model.iosLength()),
-        index(this->sseModel.stateIndex),
-        opt_level(opt_level)
-
+        index(this->sseModel.stateIndex), opt_level(opt_level),
+        computeLNA(model.lnaLength()), computeIOS(model.iosLength())
 
     {
 
@@ -256,7 +254,7 @@ protected:
         matrix_interpreter.run(x,B);
 
         // (needs to go in function to match template)
-        x.segment(offset,lnaLength) = computeLNA(B,-A);
+        x.segment(offset,lnaLength) = computeLNA.solve(B,-A);
 
     }
 
