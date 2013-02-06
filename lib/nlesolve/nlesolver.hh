@@ -101,38 +101,10 @@ public:
       */
      virtual Status solve(Eigen::VectorXd &state)=0;
 
+
      /**
-      * Sets the ODE and Jacobian code...
+      * Set ode and Jacobian code...
       */
-
-     void set(std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> &indexTable,
-              Eigen::VectorXex &updateVector, Eigen::MatrixXex &Jacobian, size_t opt_level=0)
-     {
-       // clean up
-       this->iterations = 0;
-       if (0 != ODEcode) { delete ODEcode; }
-       if (0 != jacobianCode) { delete jacobianCode; }
-
-       this->ODEcode = new typename VectorEngine::Code();
-       this->jacobianCode = new typename MatrixEngine::Code();
-
-       // Set bytecode for interpreter
-       this->interpreter.setCode(this->ODEcode);
-       this->jacobian_interpreter.setCode(this->jacobianCode);
-
-       // Compile expressions
-       typename VectorEngine::Compiler compiler(indexTable);
-       compiler.setCode(this->ODEcode);
-       compiler.compileVector(updateVector);
-       compiler.finalize(opt_level);
-
-       // Compile jacobian:
-       typename MatrixEngine::Compiler jacobian_compiler(indexTable);
-       jacobian_compiler.setCode(jacobianCode);
-       jacobian_compiler.compileMatrix(Jacobian);
-       jacobian_compiler.finalize(opt_level);
-     }
-
      void set(typename MatrixEngine::Code *odeC, typename MatrixEngine::Code *jacC)
      {
        // clean up

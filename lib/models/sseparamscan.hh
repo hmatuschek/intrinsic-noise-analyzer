@@ -111,6 +111,8 @@ public:
 
       compileIOS(this->sseModel, index, IOScodeA, IOScodeB, opt_level);
 
+      // Set ode code
+      this->solver.set(&codeODE, &codeJac);
 
     }
 
@@ -142,12 +144,6 @@ public:
         this->sseModel.getInitialState(init);
 
         x.head(offset+sseLength)=init;
-        Eigen::VectorXd conc = init.head(offset);
-
-        Eigen::VectorXex REs;
-        Eigen::MatrixXex Jacobian;
-
-        this->solver.set(&codeODE, &codeJac);
 
         // Iterate over all parameter sets
         for(size_t j = 0; j < parameterSets.size(); j++)
@@ -169,10 +165,6 @@ public:
               if((*it).second>=(unsigned)this->sseModel.getUpdateVector().size())
                 x((*it).second) = Eigen::ex2double( ICs.apply(parameters.apply(constants.apply((*it).first))) );
             }
-
-            // Fold variable parameters and all the rest
-            REs = ICs.apply(parameters.apply(constants.apply( this->sseModel.getUpdateVector().head(offset) ) ));
-            Jacobian = ICs.apply(parameters.apply(constants.apply( this->sseModel.getJacobian()) ));
 
             // Setup solver and solve for RE concentrations
             try
