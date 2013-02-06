@@ -71,7 +71,6 @@ public:
         A(lnaLength), B(lnaLength,lnaLength),
         Aios(iosLength), Bios(iosLength,iosLength)
 
-
     {
 
       int nstate = index.size();

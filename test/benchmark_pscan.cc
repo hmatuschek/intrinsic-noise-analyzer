@@ -211,16 +211,13 @@ BenchmarkPscan::testCoremodelSSA()
     parameter_sets[i]["feedback"] = p_value;
   }
 
-  SSA_PSCan_GiNaC  pscan_ginac(*_sbml_model, parameter_sets, transient_time, 1, 0);
-  SSA_PSCan_BCI    pscan_bci(*_sbml_model, parameter_sets, transient_time, 1, 0);
-  SSA_PSCan_JIT    pscan_jit(*_sbml_model, parameter_sets, transient_time, 1, 0);
-
   Utils::CpuTime  cpu_clock;
   Utils::RealTime real_clock;
   double dt = ssa_time/Nstep;
 
   // Perform actual benchmark
   cpu_clock.start(); real_clock.start();
+  SSA_PSCan_JIT    pscan_jit(*_sbml_model, parameter_sets, transient_time, 1, 0);
   for (size_t i=0; i<Nstep; i++) {
     pscan_jit.run(dt);
   }
@@ -230,6 +227,7 @@ BenchmarkPscan::testCoremodelSSA()
 
   // Perform actual benchmark
   cpu_clock.start(); real_clock.start();
+  SSA_PSCan_BCI    pscan_bci(*_sbml_model, parameter_sets, transient_time, 1, 0);
   for (size_t i=0; i<Nstep; i++) {
     pscan_bci.run(dt);
   }
@@ -239,6 +237,7 @@ BenchmarkPscan::testCoremodelSSA()
 
   // Perform actual benchmark
   cpu_clock.start(); real_clock.start();
+  SSA_PSCan_GiNaC  pscan_ginac(*_sbml_model, parameter_sets, transient_time, 1, 0);
   for (size_t i=0; i<Nstep; i++) {
     pscan_ginac.run(dt);
   }
