@@ -10,6 +10,46 @@
 namespace iNA {
 namespace Models {
 
+
+class PrecisionSolve
+{
+
+  Eigen::PartialPivLU<Eigen::MatrixXd> luPP;
+  Eigen::FullPivLU<Eigen::MatrixXd> luFP;
+  Eigen::VectorXd x;
+
+
+public:
+
+  PrecisionSolve(size_t size) :
+    luPP(size), luFP(size,size), x(size)
+
+  {
+    // Pass...
+  }
+
+  const Eigen::VectorXd &solve(const Eigen::MatrixXd &B, const Eigen::VectorXd &A, double epsilon=1.e-9)
+
+  {
+
+    // this is fast
+    luPP.compute(B);
+    x = luPP.solve(A);
+
+    if((B*x).isApprox(A, epsilon))
+    {
+       // this is slower
+      luFP.compute(B);
+      x = luFP.solve(A);
+    }
+
+    return x;
+
+  }
+
+
+};
+
 /**
 * Extension of the SteadyStateAnalysis to perform a Parameter scan.
 */
@@ -23,21 +63,21 @@ class ParameterScan
 
 protected:
 
-    std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> index;
-
-    size_t opt_level;
-
-public:
-
-
-
-    typename VectorEngine::Interpreter interpreter;
-    typename MatrixEngine::Interpreter matrix_interpreter;
-
     size_t offset;
     size_t sseLength;
     size_t lnaLength;
     size_t iosLength;
+
+    std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> index;
+
+    size_t opt_level;
+
+
+    PrecisionSolve computeLNA;
+    PrecisionSolve computeIOS;
+
+    typename VectorEngine::Interpreter interpreter;
+    typename MatrixEngine::Interpreter matrix_interpreter;
 
     Eigen::VectorXd A;
     Eigen::MatrixXd B;
@@ -51,11 +91,15 @@ public:
     typename VectorEngine::Code IOScodeA;
     typename MatrixEngine::Code IOScodeB;
 
+
+public:
+
     /**
     * Constructor
     */
     ParameterScan(M &model, size_t iter, double epsilon, double t_max=1e9, double dt=1.e-1, size_t opt_level = 0)
       : SteadyStateAnalysis<M, VectorEngine, MatrixEngine>(model,iter,epsilon,t_max,dt),
+        computeLNA(model.lnaLength()), computeIOS(model.iosLength),
         index(this->sseModel.stateIndex),
         opt_level(opt_level)
 
@@ -64,9 +108,6 @@ public:
 
       // Get the SSE vector
       offset = this->sseModel.numIndSpecies();
-      sseLength = this->sseModel.getUpdateVector().size()-this->sseModel.numIndSpecies();
-      lnaLength = sseLength > 0 ? offset*(offset+1)/2 : 0;
-      iosLength = (sseLength - lnaLength) > 0 ? (sseLength - lnaLength) : 0;
 
       A.resize(lnaLength);
       B.resize(lnaLength,lnaLength);
@@ -215,7 +256,7 @@ protected:
         matrix_interpreter.run(x,B);
 
         // (needs to go in function to match template)
-        x.segment(offset,lnaLength) = this->solver.precisionSolve(B,-A);
+        x.segment(offset,lnaLength) = computeLNA(B,-A);
 
     }
 
@@ -238,7 +279,7 @@ protected:
       interpreter.run(x,Aios);
       matrix_interpreter.run(x,Bios);
 
-      x.segment(offset+lnaLength, iosLength) = this->solver.precisionSolve(Bios,-Aios);
+      x.segment(offset+lnaLength, iosLength) = computeIOS.solve(Bios,-Aios);
 
     }
 
@@ -380,8 +421,11 @@ protected:
 
 
 
-
 };
+
+
+
+
 
 
 

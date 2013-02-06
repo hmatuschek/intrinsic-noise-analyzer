@@ -5,7 +5,8 @@ using namespace iNA;
 using namespace iNA::Models;
 
 REmodel::REmodel(const Ast::Model &model)
-  : SSEBaseModel(model)
+  : SSEBaseModel(model),
+    _sseLength(this->numSpecies()),_lnaLength(0), _iosLength(0)
 {
     // set dimension
     dim = this->numIndSpecies();
