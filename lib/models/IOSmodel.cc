@@ -27,7 +27,7 @@ IOSmodel::postConstructor()
     // add dimension of EMRE
     dim += this->numIndSpecies();
 
-    _iosLength=(dimold-dim);
+    _iosLength=(dim-dimold)+this->numIndSpecies();
 
     // reserve some space
 
