@@ -11,44 +11,6 @@ namespace iNA {
 namespace Models {
 
 
-class PrecisionSolve
-{
-
-  Eigen::PartialPivLU<Eigen::MatrixXd> luPP;
-  Eigen::FullPivLU<Eigen::MatrixXd> luFP;
-  Eigen::VectorXd x;
-
-
-public:
-
-  PrecisionSolve(size_t size) :
-    luPP(size), luFP(size,size), x(size)
-
-  {
-    // Pass...
-  }
-
-  const Eigen::VectorXd &solve(const Eigen::MatrixXd &B, const Eigen::VectorXd &A, double epsilon=1.e-9)
-
-  {
-
-    // this is fast
-    luPP.compute(B);
-    x = luPP.solve(A);
-
-    if((B*x).isApprox(A, epsilon))
-    {
-       // this is slower
-      luFP.compute(B);
-      x = luFP.solve(A);
-    }
-
-    return x;
-
-  }
-
-
-};
 
 /**
 * Extension of the SteadyStateAnalysis to perform a Parameter scan.
@@ -65,8 +27,8 @@ protected:
 
 
 
-    PrecisionSolve computeLNA;
-    PrecisionSolve computeIOS;
+    NLEsolve::PrecisionSolve computeLNA;
+    NLEsolve::PrecisionSolve computeIOS;
 
     std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> index;
 
@@ -219,7 +181,7 @@ public:
                 //solvers[OpenMP::getThreadNum()].set(codeODE,codeJac);
                 this->solver.set(index,REs,Jacobian,opt_level);
 
-                iter = this->solver.solve(conc, this->max_time, this->min_time_step);
+                iter = this->solver.solve(conc, this->max_time, this->min_time_step, parameterSets[j]);
                 x.head(offset) = conc;
 
                 // Now calculate LNA
@@ -246,6 +208,7 @@ public:
 protected:
 
     void calcLNA(REmodel &model, Eigen::VectorXd &x)
+
     {
          // Pass...
     }
@@ -265,16 +228,19 @@ protected:
 
 
     void calcIOS(REmodel &model, Eigen::VectorXd &x)
+
     {
         // Pass...
     }
 
     void calcIOS(LNAmodel &model, Eigen::VectorXd &x)
+
     {
         // Pass...
     }
 
     void calcIOS(IOSmodel &model, Eigen::VectorXd &x)
+
     {
 
       interpreter.setCode(&IOScodeA);

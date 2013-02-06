@@ -11,5 +11,6 @@
 
 #include "newtonraphson.hh"
 #include "hybridsolver.hh"
+#include "precisionsolve.hh"
 
 #endif // NLESOLVE_HH

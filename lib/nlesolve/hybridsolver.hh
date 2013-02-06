@@ -4,6 +4,9 @@
 #include "nlesolve/newtonraphson.hh"
 #include "ode/lsoda.hh"
 
+#include "models/ssebasemodel.hh"
+#include "models/initialconditions.hh"
+
 namespace iNA{
 namespace NLEsolve{
 
@@ -27,6 +30,11 @@ protected:
   double *ywork;
   double *atolwork;
   double *rtolwork;
+
+  typedef Eval::bci::Engine<Eigen::VectorXd> LSODAengine;
+
+  LSODAengine::Code LSODAcode;
+  LSODAengine::Interpreter LSODAint;
 
 public:
   /**
@@ -52,6 +60,7 @@ public:
         rtolwork[i] = this->parameters.epsilon;
         atolwork[i] = this->parameters.epsilon;
     }
+
  }
 
   /**
@@ -91,7 +100,7 @@ public:
 
   virtual void evalODE(double t, double state[], double dx[], int nsize)
   {
-      this->interpreter.run(state,dx);
+      this->LSODAint.run(state,dx);
   }
 
   virtual void evalJac(double t, double *y, double **jac, int nsize)
@@ -110,7 +119,7 @@ public:
    * Runs the solver.
    */
   Status
-  solve(Eigen::VectorXd &conc, double maxTime=1.e9, double dt=0.1)
+  solve(Eigen::VectorXd &conc, double maxTime=1.e9, double dt=0.1, const Models::ParameterSet &parameters=Models::ParameterSet())
   {
 
       if(maxTime<dt) maxTime=dt;
@@ -137,16 +146,17 @@ public:
 
           Utils::Logger::get().log(message);
 
-          if(lcheck==Success)
+          if(lcheck == Success)
           {
             return Success;
-
           }
           else
           {
               Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
               message << "Use integration of duration "<< dt << ".";
               Utils::Logger::get().log(message);
+
+              if(t==0) this->setupLSODA(parameters);
 
               // Do ODE step of length dt
               ODEStep(conc,0,dt);
@@ -157,7 +167,32 @@ public:
       } // Next Newton iteration
 
       return MaxIterationsReached;
-}
+  }
+
+  void setupLSODA(const Models::ParameterSet &params)
+
+  {
+
+      // Generate parameter substitution table
+      Trafo::excludeType ptab = this->model.makeExclusionTable(params);
+
+      // Collect all the values of constant parameters except variable parameters
+      Trafo::ConstantFolder constants(this->model, Trafo::Filter::ALL_CONST, ptab);
+      Models::InitialConditions ICs(this->model,ptab);
+
+      // Translate identifier to parameters collect variable parameters
+      Models::ParameterFolder parameters(ptab);
+
+      // Set bytecode for interpreter
+      this->LSODAint.setCode(&this->LSODAcode);
+
+      // Compile expressions
+      LSODAengine::Compiler compiler(this->model.stateIndex);
+      compiler.setCode(&this->LSODAcode);
+      compiler.compileVector( ICs.apply(parameters.apply(constants.apply( this->model.getUpdateVector().head(this->dim) ) )) );
+      compiler.finalize(0); // no need to optimize anything here.
+
+  }
 
 };
 

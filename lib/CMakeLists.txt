@@ -146,11 +146,13 @@ SET(libina_models_HEADERS models/models.hh
 SET(libina_nlesolve_SOURCES
    nlesolve/nlesolver.cc
    nlesolve/newtonraphson.cc
-   nlesolve/hybridsolver.cc)
+   nlesolve/hybridsolver.cc
+   nlesolve/precisionsolve.cc)
 SET(libina_nlesolve_HEADERS
    nlesolve/nlesolver.hh
    nlesolve/newtonraphson.hh
-   nlesolve/hybridsolver.hh)
+   nlesolve/hybridsolver.hh
+   nlesolve/precisionsolve.hh)
 
 
 # Add sources for ODE solvers etc.

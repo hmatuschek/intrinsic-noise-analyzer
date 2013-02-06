@@ -36,6 +36,8 @@ class NLEsolver
 
 protected:
 
+    T &model;
+
     size_t dim;
 
     Eigen::VectorXd ODEs;
@@ -65,7 +67,7 @@ protected:
 public:
 
      NLEsolver(T &model)
-       : dim(model.numIndSpecies()), ODEs(dim), JacobianM(dim,dim), ODEcode(0), jacobianCode(0)
+       : model(model), dim(model.numIndSpecies()), ODEs(dim), JacobianM(dim,dim), ODEcode(0), jacobianCode(0)
      {
        // Pass...
      }
