@@ -95,7 +95,6 @@ public:
   size_t _iosLength;
 
   size_t sseLength();
-
   size_t lnaLength();
   size_t iosLength();
 

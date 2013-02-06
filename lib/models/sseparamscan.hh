@@ -63,33 +63,34 @@ class ParameterScan
 
 protected:
 
-    size_t offset;
-    size_t sseLength;
-    size_t lnaLength;
-    size_t iosLength;
-
-    std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> index;
-
-    size_t opt_level;
 
 
     PrecisionSolve computeLNA;
     PrecisionSolve computeIOS;
 
+    std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> index;
+
+    size_t opt_level;
+
+    size_t offset;
+    size_t lnaLength;
+    size_t iosLength;
+    size_t sseLength;
+
+
     typename VectorEngine::Interpreter interpreter;
     typename MatrixEngine::Interpreter matrix_interpreter;
+
+    typename VectorEngine::Code LNAcodeA;
+    typename MatrixEngine::Code LNAcodeB;
+    typename VectorEngine::Code IOScodeA;
+    typename MatrixEngine::Code IOScodeB;
 
     Eigen::VectorXd A;
     Eigen::MatrixXd B;
 
     Eigen::VectorXd Aios;
     Eigen::MatrixXd Bios;
-
-
-    typename VectorEngine::Code LNAcodeA;
-    typename MatrixEngine::Code LNAcodeB;
-    typename VectorEngine::Code IOScodeA;
-    typename MatrixEngine::Code IOScodeB;
 
 
 public:
@@ -99,9 +100,11 @@ public:
     */
     ParameterScan(M &model, size_t iter, double epsilon, double t_max=1e9, double dt=1.e-1, size_t opt_level = 0)
       : SteadyStateAnalysis<M, VectorEngine, MatrixEngine>(model,iter,epsilon,t_max,dt),
-        computeLNA(model.lnaLength()), computeIOS(model.iosLength),
+        computeLNA(model.lnaLength()), computeIOS(model.iosLength()),
         index(this->sseModel.stateIndex),
-        opt_level(opt_level)
+        opt_level(opt_level),
+        offset(model.numIndSpecies()), lnaLength(model.lnaLength()),
+        iosLength(model.iosLength()), sseLength(model.getUpdateVector().size()-offset)
 
 
     {
@@ -256,7 +259,7 @@ protected:
         matrix_interpreter.run(x,B);
 
         // (needs to go in function to match template)
-        x.segment(offset,lnaLength) = computeLNA(B,-A);
+        x.segment(offset,lnaLength) = computeLNA.solve(B,-A);
 
     }
 
@@ -321,20 +324,18 @@ protected:
                     size_t opt_level = 0)
 
     {
-        size_t offset = model.numIndSpecies();
-        size_t lnaLength = offset*(offset+1)/2;
 
-        Eigen::VectorXex A(lnaLength);
-        Eigen::MatrixXex B(lnaLength,lnaLength);
+        Eigen::VectorXex A(model.lnaLength());
+        Eigen::MatrixXex B(model.lnaLength(),model.lnaLength());
 
         // Calculate coefficent matrices
         GiNaC::exmap subs_table;
-        for (size_t i=0; i<lnaLength; i++)
+        for (size_t i=0; i<model.lnaLength(); i++)
             subs_table.insert( std::pair<GiNaC::ex,GiNaC::ex>( model.getSSEvar(i), 0 ) );
-        for(size_t i=0; i<lnaLength; i++)
+        for(size_t i=0; i<model.lnaLength(); i++)
         {
             A(i) =  model.getUpdateVector()(offset+i).subs(subs_table);
-            for(size_t j=0; j<lnaLength; j++)
+            for(size_t j=0; j<model.lnaLength(); j++)
             {
                B(i,j) = model.getUpdateVector()(offset+i).diff(model.getSSEvar(j));
             }
@@ -382,12 +383,6 @@ protected:
                size_t opt_level = 0)
 
     {
-
-        // Get the SSE vector
-        size_t offset = model.numIndSpecies();
-        size_t lnaLength = offset*(offset+1)/2;
-        size_t sseLength = model.getUpdateVector().size()-model.numIndSpecies();
-        size_t iosLength = sseLength - lnaLength;
 
         // Calc coefficient matrices
         Eigen::VectorXex A(iosLength);

@@ -132,3 +132,29 @@ REmodel::getJacobian() const {
     return this->JacobianM;
 }
 
+size_t
+REmodel::lnaLength()
+{
+
+    return _lnaLength;
+
+}
+
+
+size_t
+REmodel::iosLength()
+{
+
+    return _iosLength;
+
+}
+
+
+size_t
+REmodel::sseLength()
+{
+
+    return _iosLength+_lnaLength;
+
+}
+
