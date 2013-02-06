@@ -67,19 +67,12 @@ public:
         index(this->sseModel.stateIndex),
         opt_level(opt_level),
         offset(model.numIndSpecies()), lnaLength(model.lnaLength()),
-        iosLength(model.iosLength()), sseLength(model.getUpdateVector().size()-offset)
+        iosLength(model.iosLength()), sseLength(model.getUpdateVector().size()-offset),
+        A(lnaLength), B(lnaLength,lnaLength),
+        Aios(iosLength), Bios(iosLength,iosLength)
 
 
     {
-
-      // Get the SSE vector
-      offset = this->sseModel.numIndSpecies();
-
-      A.resize(lnaLength);
-      B.resize(lnaLength,lnaLength);
-
-      Aios.resize(iosLength);
-      Bios.resize(iosLength,iosLength);
 
       int nstate = index.size();
 

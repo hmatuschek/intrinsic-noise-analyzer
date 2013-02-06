@@ -209,9 +209,7 @@ public:
     void calcLNA(REmodel &model,Eigen::VectorXd &x, Eigen::VectorXex &sseUpdate)
 
     {
-
            // Pass...nothing to do.
-
     }
 
     void calcLNA(Eigen::VectorXd &x, Eigen::VectorXex &sseUpdate)
@@ -264,21 +262,6 @@ public:
         calcLNA(x,sseUpdate);
         // Calc IOS
         calcIOS(x,sseUpdate);
-
-//        // calc coeff-matrices
-//        Eigen::VectorXd A(sseLength-lnaLength);
-//        Eigen::MatrixXd B(sseLength-lnaLength,sseLength-lnaLength);
-//        subs_table.clear();
-//        for (size_t i=lnaLength; i<sseLength; i++)
-//            subs_table.insert( std::pair<GiNaC::ex,GiNaC::ex>( sseModel.getSSEvar(i), 0 ) );
-//        for(size_t i=lnaLength; i<sseLength; i++)
-//        {
-//            A(i-lnaLength) = GiNaC::ex_to<GiNaC::numeric>( sseUpdate(i).subs(subs_table) ).to_double();
-//            for(size_t j=lnaLength; j<sseLength; j++)
-//            {
-//               B(i-lnaLength,j-lnaLength) = GiNaC::ex_to<GiNaC::numeric>( sseUpdate(i).diff(sseModel.getSSEvar(j)) ).to_double();
-//            }
-//        }
 
         x.head(offset) = conc;
 //        x.tail(sseLength-lnaLength) = solver.precisionSolve(B,-A);
