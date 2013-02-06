@@ -207,6 +207,8 @@ ReactionParameterList::_updateIdentifier(iNA::Ast::Parameter *param, const QVari
 
   // Ok, assign identifier:
   _kinetic_law->resetIdentifier(param->getIdentifier(), id);
+  // Signal update
+  emit this->identifierUpdated();
   return true;
 }
 
@@ -237,6 +239,8 @@ bool
 ReactionParameterList::_updateName(iNA::Ast::Parameter *param, const QVariant &value)
 {
   param->setName(value.toString().toStdString());
+  // Signal update
+  emit this->nameUpdated();
   return true;
 }
 

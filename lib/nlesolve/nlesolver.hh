@@ -70,9 +70,10 @@ public:
        // Pass...
      }
 
-     virtual ~NLEsolver(){
-       //if (0 != ODEcode) { delete ODEcode; }
-       //if (0 != jacobianCode) { delete jacobianCode; }
+     virtual ~NLEsolver()
+     {
+       if (0 != this->ODEcode) { delete this->ODEcode; }
+       if (0 != this->jacobianCode) { delete this->jacobianCode; }
      }
 
 
@@ -128,23 +129,6 @@ public:
        jacobian_compiler.setCode(jacobianCode);
        jacobian_compiler.compileMatrix(Jacobian);
        jacobian_compiler.finalize(opt_level);
-     }
-
-     /**
-      * Sets the ODE and Jacobian code...
-      * @bug This does not work for the JIT compiler.
-      */
-     void set(typename VectorEngine::Code &ODEcode, typename MatrixEngine::Code &jacobianCode)
-     {
-       // clean up
-       this->iterations = 0;
-
-       if (0 != this->ODEcode) { delete this->ODEcode; }
-       if (0 != this->jacobianCode) { delete this->jacobianCode; }
-
-       // Set bytecode for interpreter
-       interpreter.setCode(&(ODEcode));
-       jacobian_interpreter.setCode(&(jacobianCode));
      }
 
 

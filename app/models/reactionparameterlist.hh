@@ -50,6 +50,12 @@ public:
   /** Signals the view that the complete model may have changed. */
   void updateCompleteTable();
 
+signals:
+  /** Will be emmitted if the identifier of a local parameter is changed. */
+  void identifierUpdated();
+  /** Will be emmitted if the display-name of a local parameter is changed. */
+  void nameUpdated();
+
 private:
   /** Returns the identifier of the local paramter. */
   QVariant _getIdentifier(iNA::Ast::Parameter *param, int role) const;

@@ -53,10 +53,10 @@ SET(libina_sbml_parser_HEADERS
 
 SET(libina_expr_parser_SOURCES
     parser/expr/lexer.cc parser/expr/parser.cc parser/expr/productions.cc parser/expr/assembler.cc
-    parser/expr/writer.cc parser/expr/ir.cc)
+    parser/expr/ir.cc)
 SET(libina_expr_parser_HEADERS parser/expr/expr.hh
     parser/expr/lexer.hh parser/expr/parser.hh parser/expr/productions.hh parser/expr/assembler.hh
-    parser/expr/writer.hh parser/expr/ir.hh)
+    parser/expr/ir.hh)
 
 SET(libina_unit_parser_SOURCES
     parser/unit/unitparser.cc)
