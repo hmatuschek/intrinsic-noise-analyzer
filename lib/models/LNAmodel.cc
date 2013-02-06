@@ -18,6 +18,8 @@ LNAmodel::postConstructor()
 
     dimCOV = this->numIndSpecies()*(this->numIndSpecies()+1)/2;
 
+    _lnaLength = dimCOV;
+
     // add dimension of covariances
     dim+= dimCOV;
     // add dimension of EMRE

@@ -27,6 +27,8 @@ IOSmodel::postConstructor()
     // add dimension of EMRE
     dim += this->numIndSpecies();
 
+    _iosLength=(dimold-dim);
+
     // reserve some space
 
     Eigen::VectorXex LNAupdate = updateVector;
