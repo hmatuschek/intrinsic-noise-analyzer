@@ -100,17 +100,11 @@ public:
     */
     ParameterScan(M &model, size_t iter, double epsilon, double t_max=1e9, double dt=1.e-1, size_t opt_level = 0)
       : SteadyStateAnalysis<M, VectorEngine, MatrixEngine>(model,iter,epsilon,t_max,dt),
-<<<<<<< HEAD
-        index(this->sseModel.stateIndex), opt_level(opt_level),
-        computeLNA(model.lnaLength()), computeIOS(model.iosLength())
-=======
         computeLNA(model.lnaLength()), computeIOS(model.iosLength()),
         index(this->sseModel.stateIndex),
         opt_level(opt_level),
         offset(model.numIndSpecies()), lnaLength(model.lnaLength()),
         iosLength(model.iosLength()), sseLength(model.getUpdateVector().size()-offset)
-
->>>>>>> 567bf3191a86b5cdcb9cad6f983924d2c86c19b2
 
     {
 
