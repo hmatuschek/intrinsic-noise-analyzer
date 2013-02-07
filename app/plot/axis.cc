@@ -173,7 +173,6 @@ void
 Axis::setAxisSize(const QSizeF &size)
 {
   this->axis_size = size;
-
   this->updatePlotSize();
 }
 
@@ -255,10 +254,16 @@ Axis::setYMapFunction(MapFunction *func)
 
 
 Mapping *
-Axis::getMapping()
-{
+Axis::getMapping() {
   return this->mapping;
 }
+
+QRectF
+Axis::getPlotArea() const {
+  return QRectF(this->yticks->boundingRect().width(), 0,
+                this->mapping->size().width(), this->mapping->size().height());
+}
+
 
 void
 Axis::showMeasure(const QPointF &point)

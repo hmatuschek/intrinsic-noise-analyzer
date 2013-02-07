@@ -101,6 +101,7 @@ Figure::updateAxes()
   double margin_right  = 20;
   double margin_top    = 10;
   double margin_bottom = 10;
+  double title_y = margin_top;
 
   // Adds title height to top-margin:
   margin_top += _titlesize.height() + 10;
@@ -112,6 +113,14 @@ Figure::updateAxes()
   // Update Axis:
   this->_axis->setAxisSize(QSizeF(effective_width, effective_height));
   this->_axis->setPos(margin_left, margin_top);
+
+  // Move title to proper position:
+  if (_titlesize.width() > _axis->getPlotArea().width())
+    _title->setPos(width()/2-_titlesize.width()/2, margin_top);
+  else {
+    double offset = margin_left + _axis->getPlotArea().x();
+    _title->setPos(offset + _axis->getPlotArea().width()/2-_titlesize.width()/2, title_y);
+  }
 
   // Update legend position:
   switch (this->_legend_pos)
@@ -135,12 +144,6 @@ Figure::updateAxes()
                           margin_top+effective_height-10-this->_legend->boundingRect().height());
     break;
   }
-
-  // Move title to proper position:
-  if (_titlesize.width() > effective_width)
-    _title->setPos(width()/2-_titlesize.width()/2, margin_top);
-  else
-    _title->setPos(margin_left + effective_width/2-_titlesize.width()/2, margin_top);
 
   // Update Axis:
   this->_axis->updatePlotSize();
