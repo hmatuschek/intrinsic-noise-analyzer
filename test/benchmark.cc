@@ -533,13 +533,25 @@ Benchmark::suite()
                "Coremodel 1 (LSODA, JIT)", &Benchmark::testCoremodelJITLSODANoOpt));
 
   s->addTest(new UnitTest::TestCaller<Benchmark>(
+               "Coremodel 1 (LSODA, JIT, Opt)", &Benchmark::testCoremodelJITLSODAOpt));
+
+  s->addTest(new UnitTest::TestCaller<Benchmark>(
                "Coremodel 1 (LSODA, BCI)", &Benchmark::testCoremodelBCILSODANoOpt));
+
+  s->addTest(new UnitTest::TestCaller<Benchmark>(
+               "Coremodel 1 (LSODA, BCI, Opt)", &Benchmark::testCoremodelBCILSODAOpt));
 
   s->addTest(new UnitTest::TestCaller<Benchmark>(
                "Coremodel 1 (Rosen4, JIT)", &Benchmark::testCoremodelJITRosen4NoOpt));
 
   s->addTest(new UnitTest::TestCaller<Benchmark>(
+               "Coremodel 1 (Rosen4, JIT, Opt)", &Benchmark::testCoremodelJITRosen4Opt));
+
+  s->addTest(new UnitTest::TestCaller<Benchmark>(
                "Coremodel 1 (Rosen4, BCI)", &Benchmark::testCoremodelBCIRosen4NoOpt));
+
+  s->addTest(new UnitTest::TestCaller<Benchmark>(
+               "Coremodel 1 (Rosen4, BCI, Opt)", &Benchmark::testCoremodelBCIRosen4Opt));
 
   s->addTest(new UnitTest::TestCaller<Benchmark>(
                "Coremodel 1 (OptSSA, JIT)", &Benchmark::testCoremodelJITOptSSANoOpt));
@@ -564,16 +576,7 @@ Benchmark::suite()
                "Coremodel 1 (LSODA, BCIMP, Opt)", &Benchmark::testCoremodelBCIMPLSODAOpt));
 
   s->addTest(new UnitTest::TestCaller<Benchmark>(
-               "Coremodel 1 (LSODA, LLVM, Opt)", &Benchmark::testCoremodelJITLSODAOpt));
-
-  s->addTest(new UnitTest::TestCaller<Benchmark>(
                "Coremodel 1 (LSODA, BCIMP)", &Benchmark::testCoremodelBCIMPLSODANoOpt));
-
-  s->addTest(new UnitTest::TestCaller<Benchmark>(
-               "Coremodel 1 (Rosen4, BCI, Opt)", &Benchmark::testCoremodelBCIRosen4Opt));
-
-  s->addTest(new UnitTest::TestCaller<Benchmark>(
-               "Coremodel 1 (Rosen4, LLVM, Opt)", &Benchmark::testCoremodelJITRosen4Opt));
 
   s->addTest(new UnitTest::TestCaller<Benchmark>(
                "Coremodel 1 (Rosen4, BCIMP, Opt)", &Benchmark::testCoremodelBCIMPRosen4Opt));
