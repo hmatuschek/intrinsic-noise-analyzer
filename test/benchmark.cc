@@ -318,7 +318,7 @@ Benchmark::simulate_GiNaC_gillespie(Ast::Model *model, double t, size_t opt_leve
 void
 Benchmark::simulate_BCI_optSSA(Ast::Model *model, double t, size_t opt_level)
 {
-  OptSSABCI simulator(*model, ensemble_size, 1234, opt_level, OpenMP::getMaxThreads());
+  OptSSABCI simulator(*model, ensemble_size, 1234, opt_level, 1);
   double dt=t/N_steps;
 
   Utils::CpuTime  cpu_clock; cpu_clock.start();
@@ -337,7 +337,7 @@ Benchmark::simulate_BCI_optSSA(Ast::Model *model, double t, size_t opt_level)
 void
 Benchmark::simulate_JIT_optSSA(Ast::Model *model, double t, size_t opt_level)
 {
-  OptSSAJIT simulator(*model, ensemble_size, 1234, opt_level, OpenMP::getMaxThreads());
+  OptSSAJIT simulator(*model, ensemble_size, 1234, opt_level, 1);
   double dt=t/N_steps;
 
   Utils::CpuTime  cpu_clock; cpu_clock.start();
