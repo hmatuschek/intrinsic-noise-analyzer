@@ -102,8 +102,6 @@ Figure::updateAxes()
   double margin_top    = 10;
   double margin_bottom = 10;
 
-  // Move title to proper position:
-  _title->setPos(width()/2-_titlesize.width()/2, margin_top);
   // Adds title height to top-margin:
   margin_top += _titlesize.height() + 10;
 
@@ -124,19 +122,25 @@ Figure::updateAxes()
 
   case TOP_RIGHT:
     this->_legend->setPos(margin_left+effective_width-10-this->_legend->boundingRect().width(),
-                         margin_top+10);
+                          margin_top+10);
     break;
 
   case BOTTOM_LEFT:
     this->_legend->setPos(margin_left+10,
-                         margin_top+effective_height-10-this->_legend->boundingRect().height());
+                          margin_top+effective_height-10-this->_legend->boundingRect().height());
     break;
 
   case BOTTOM_RIGHT:
     this->_legend->setPos(margin_left+effective_width-10-this->_legend->boundingRect().width(),
-                         margin_top+effective_height-10-this->_legend->boundingRect().height());
+                          margin_top+effective_height-10-this->_legend->boundingRect().height());
     break;
   }
+
+  // Move title to proper position:
+  if (_titlesize.width() > effective_width)
+    _title->setPos(width()/2-_titlesize.width()/2, margin_top);
+  else
+    _title->setPos(margin_left + effective_width/2-_titlesize.width()/2, margin_top);
 
   // Update Axis:
   this->_axis->updatePlotSize();
