@@ -54,18 +54,41 @@ signals:
 };
 
 
-/** A simple log-window widget. */
-class LogWindow : public QTableWidget
+/** A simple log-table widget. */
+class LogTable : public QTableWidget
 {
   Q_OBJECT
 
 public:
   /** Constructor. */
-  explicit LogWindow(QWidget *parent = 0);
+  explicit LogTable(QWidget *parent = 0);
+
+public slots:
+  /** Saves the log messages into the given file.
+   * Returns true on success. */
+  bool saveLog(const QString &filename);
 
 private slots:
   /** Receives messages from LogWindowMessageHandler. */
   void onMessage(MessageWrapper *message);
+};
+
+
+/** The log window. */
+class LogWindow : public QWidget
+{
+  Q_OBJECT
+
+public:
+  /** Constructor. */
+  LogWindow(QWidget *parent=0);
+
+private slots:
+  void onSaveLog();
+
+private:
+  /** Holds the logtable instance. */
+  LogTable *_logtable;
 };
 
 #endif

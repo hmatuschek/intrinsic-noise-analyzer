@@ -1,6 +1,12 @@
 #include "logwindow.hh"
 #include <QDateTime>
 #include <QHeaderView>
+#include <QFile>
+#include <QMessageBox>
+#include <QTextStream>
+#include <QVBoxLayout>
+#include <QPushButton>
+#include <QFileDialog>
 
 
 MessageWrapper::MessageWrapper(const iNA::Utils::Message &message, QObject *parent)
@@ -70,7 +76,7 @@ LogWindowMessageHandler::handleMessage(const iNA::Utils::Message &message)
 
 
 
-LogWindow::LogWindow(QWidget *parent) :
+LogTable::LogTable(QWidget *parent) :
     QTableWidget(parent)
 {
   this->setWindowTitle("log");
@@ -89,8 +95,31 @@ LogWindow::LogWindow(QWidget *parent) :
 }
 
 
+bool
+LogTable::saveLog(const QString &filename)
+{
+  QFile file(filename);
+  if (! file.open(QFile::WriteOnly)) {
+    QMessageBox::critical(
+          0, tr("Can not create/open file"),
+          tr("Can not write log to file %1: Can not be opened for writing.").arg(filename));
+    return false;
+  }
+
+  {
+    QTextStream stream(&file);
+    for (int i=0; i<this->rowCount(); i++) {
+      stream << this->item(i,0)->text()
+             << ": " << this->item(i,1)->text() << "\n";
+    }
+  }
+  file.close();
+  return true;
+}
+
+
 void
-LogWindow::onMessage(MessageWrapper *message)
+LogTable::onMessage(MessageWrapper *message)
 {
   size_t i=this->rowCount(); this->setRowCount(i+1);
   QTableWidgetItem *time_item  = new QTableWidgetItem(message->getTime().time().toString());
@@ -121,4 +150,28 @@ LogWindow::onMessage(MessageWrapper *message)
   }
 
   this->scrollToItem(time_item, QAbstractItemView::PositionAtBottom);
+}
+
+
+
+LogWindow::LogWindow(QWidget *parent)
+  : QWidget(parent)
+{
+  _logtable = new LogTable();
+  QPushButton *button = new QPushButton(tr("save"));
+
+  QVBoxLayout *layout = new QVBoxLayout();
+  layout->addWidget(_logtable);
+  layout->addWidget(button,0, Qt::AlignRight);
+  setLayout(layout);
+
+  QObject::connect(button, SIGNAL(clicked()), this, SLOT(onSaveLog()));
+}
+
+void
+LogWindow::onSaveLog() {
+  QString filename = QFileDialog::getSaveFileName(
+        0, tr("Save log to"), "", tr("Text files (*.txt)"));
+  if (0 == filename.size()) { return; }
+  _logtable->saveLog(filename);
 }
