@@ -327,4 +327,4 @@ public:
 
 }} // Close namespaces
 
-#endif // __FLUC_MODELS_STEADYSTATEANALYSIS_HH
+#endif // __INA_MODELS_STEADYSTATEANALYSIS_HH

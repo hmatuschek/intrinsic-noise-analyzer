@@ -259,4 +259,4 @@ typedef SSEinterpreter<REmodel> REinterpreter;
 }
 }
 
-#endif // __FLUC_MODELS_LNAWRAPPER_HH
+#endif // __INA_MODELS_LNAWRAPPER_HH
