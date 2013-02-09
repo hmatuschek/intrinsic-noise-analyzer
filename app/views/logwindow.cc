@@ -158,7 +158,7 @@ LogWindow::LogWindow(QWidget *parent)
   : QWidget(parent)
 {
   _logtable = new LogTable();
-  QPushButton *button = new QPushButton(tr("save"));
+  QPushButton *button = new QPushButton(tr("Save"));
 
   QVBoxLayout *layout = new QVBoxLayout();
   layout->addWidget(_logtable);

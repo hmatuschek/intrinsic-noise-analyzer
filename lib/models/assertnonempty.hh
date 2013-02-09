@@ -1,5 +1,5 @@
-#ifndef __INA_MODELS_ASSERTNORATERULE_HH__
-#define __INA_MODELS_ASSERTNORATERULE_HH__
+#ifndef __INA_MODELS_ASSERTNONEMPTY_HH__
+#define __INA_MODELS_ASSERTNONEMPTY_HH__
 
 #include "basemodel.hh"
 
@@ -9,11 +9,11 @@ namespace Models {
 
 
 /**
- * Simple assertion to test if the model as any rate-rule defined.
+ * Simple assertion to test if the model is empty.
  *
  * @ingroup models
  */
-class AssertNoRateRule
+class AssertNonEmpty
 {
 public:
   /**
@@ -21,7 +21,7 @@ public:
    *
    * @throws SBMLFeatureNotSupported If the model has a rate-rule.
    */
-  AssertNoRateRule(BaseModel &model);
+  AssertNonEmpty(BaseModel &model);
 };
 
 

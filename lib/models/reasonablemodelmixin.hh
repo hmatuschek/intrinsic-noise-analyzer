@@ -2,6 +2,7 @@
 #define __INA_MODELS_REASONABLEMODELMIXIN_HH__
 
 #include "basemodel.hh"
+#include "assertnonempty.hh"
 #include "assertnoconstantspeciesmixin.hh"
 #include "assertconstantparametermixin.hh"
 #include "assertnoassignmentrule.hh"
@@ -32,6 +33,7 @@ namespace Models {
  * @ingroup models
  */
 class ReasonableModelMixin :
+    public AssertNonEmpty,
     public AssertConstantParameterMixin,
     public AssertNoAssignmentRule,
     public AssertNoRateRule,

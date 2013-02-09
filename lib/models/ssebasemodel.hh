@@ -134,4 +134,4 @@ public:
 }
 }
 
-#endif // __FLUC_MODELS_SSEBASEMODEL_HH
+#endif // __INA_MODELS_SSEBASEMODEL_HH
