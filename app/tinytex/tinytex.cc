@@ -333,7 +333,7 @@ TinyTex::processSymbol(const std::string &symbol)
   std::map<std::string, QString>::iterator item=_symbol_table.find(symbol);
 
   if (_symbol_table.end() == item) {
-    // Return just the text if symbol is not found
+    // Simply return the text if symbol has not been found
     return new MathText(symbol.c_str());
 
     // No need to throw an exception here!
