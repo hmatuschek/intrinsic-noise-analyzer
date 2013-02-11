@@ -40,6 +40,22 @@ public:
       state+=delta;
   }
 
+   /**
+   * Resets the status.
+   */
+   virtual  void reset()
+   {
+        // ...pass by default
+   }
+
+   /**
+   * Signals a parameter change.
+   */
+   virtual void parameterChanged()
+   {
+      // ...pass by default
+   }
+
 };
 
 

@@ -105,6 +105,22 @@ public:
   {
     return this->system.getDimension();
   }
+
+  /**
+   * Resets the status.
+   */
+  void reset()
+  {
+    istate = 1;
+  }
+
+  /**
+   * Resets the status.
+   */
+  void parameterChanged()
+  {
+    istate = 3;
+  }
 };
 
 

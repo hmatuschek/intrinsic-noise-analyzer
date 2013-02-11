@@ -10,5 +10,6 @@
 
 #include "models/maximumentropy.hh"
 #include "models/spectrumrecorder.hh"
+#include "models/tcparamscan.hh"
 
 #endif // __FLUC_MODELS_UNSUPPORTED_HH

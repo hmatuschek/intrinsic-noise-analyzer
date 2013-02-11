@@ -39,6 +39,11 @@ protected:
    Sys &sseModel;
 
    /**
+   * Holds a reference to the lookup table.
+   */
+   std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> lookup;
+
+   /**
    * Holds the initial conditions.
    */
    InitialConditions ICs;
@@ -92,9 +97,9 @@ public:
    *        be compiled on demand.
    */
 
-  GenericSSEinterpreter(Sys &model, size_t opt_level,
+  GenericSSEinterpreter(Sys &model, size_t opt_level=0,
                  size_t num_threads=OpenMP::getMaxThreads(), bool compileJac = false)
-    : sseModel(model), ICs(model), bytecode(num_threads), jacobianCode(num_threads),
+      : sseModel(model), lookup(model.stateIndex), ICs(model), bytecode(num_threads), jacobianCode(num_threads),
       hasJacobian(false), opt_level(opt_level)
 
   {
@@ -108,6 +113,39 @@ public:
 
     // Compile expressions
     typename SysEngine::Compiler compiler(sseModel.stateIndex);
+    compiler.setCode(&this->bytecode);
+    compiler.compileVector(updateVector);
+    compiler.finalize(opt_level);
+
+    // Set bytecode for interpreter
+    this->interpreter.setCode(&(this->bytecode));
+    this->jacobian_interpreter.setCode(&(this->jacobianCode));
+
+    if (compileJac)
+      this->compileJacobian();
+  }
+
+  /**
+   * Alternative constructor with custom lookup table.
+   *
+   * @param model Specifies the SSE model to integrate.
+   * @param opt_level Specifies the code-optimization level.
+   * @param num_threads Specifies the (optional) number of threads to use to evaluate the
+   *        system. By default, @c OpenMP::getMaxThreads will be used.
+   * @param compileJac Specifies if the Jacobian should be compiled immediately. If false, it will
+   *        be compiled on demand.
+   */
+
+  GenericSSEinterpreter(Sys &model, std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> &index,
+                 size_t opt_level=0,
+                 size_t num_threads=OpenMP::getMaxThreads(), bool compileJac = false)
+      : sseModel(model), lookup(index), ICs(model), bytecode(num_threads), jacobianCode(num_threads),
+      hasJacobian(false), opt_level(opt_level)
+
+  {
+
+    // Compile expressions
+    typename SysEngine::Compiler compiler(lookup);
     compiler.setCode(&this->bytecode);
     compiler.compileVector(updateVector);
     compiler.finalize(opt_level);
@@ -143,7 +181,7 @@ public:
     }
 
     // Compile jacobian:
-    typename JacEngine::Compiler jacobian_compiler(sseModel.stateIndex);
+    typename JacEngine::Compiler jacobian_compiler(lookup);
     jacobian_compiler.setCode(&jacobianCode);
     jacobian_compiler.compileMatrix(jacobian);
     jacobian_compiler.finalize(opt_level);

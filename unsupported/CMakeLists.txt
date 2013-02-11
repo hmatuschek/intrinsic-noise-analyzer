@@ -2,12 +2,14 @@
 SET(libina_unsupported_SOURCES
    nlesolve/minpack.cc
    models/maximumentropy.cc
-   models/spectrumrecorder.cc)
+   models/spectrumrecorder.cc
+   models/tcparamscan.cc)
 
 SET(libina_unsupported_HEADERS
    nlesolve/minpack.hh
    models/maximumentropy.hh
-   models/spectrumrecorder.hh)
+   models/spectrumrecorder.hh
+   models/tcparamscan.hh)
 
 #
 # Compile library
