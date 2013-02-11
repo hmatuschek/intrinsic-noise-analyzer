@@ -518,8 +518,12 @@ Application::configSteadyState()
     task = new SteadyStateTask(wizard.getConfigCast<SteadyStateTask::Config>());
   } catch (iNA::Exception &err) {
     QMessageBox::warning(
-          0, tr("Can not construct stochastic simulation analysis from model: "), err.what());
+          0, tr("Can not construct steady state analysis from model: "), err.what());
     return;
+  } catch (std::exception &err)
+  {
+     QMessageBox::warning(0, "Error: " ,err.what());
+     return;
   }
 
   // Add task to application and run it:
@@ -544,6 +548,10 @@ Application::configParameterScan()
     QMessageBox::warning(
           0, tr("Cannot construct parameter scan from model: "), err.what());
     return;
+  }  catch (std::exception &err)
+  {
+     QMessageBox::warning(0, "Error: " ,err.what());
+     return;
   }
 
   // Add task to application and run it:
@@ -568,6 +576,10 @@ Application::configSSAParameterScan()
     QMessageBox::warning(
           0, tr("Cannot construct parameter scan from model: "), err.what());
     return;
+  } catch (std::exception &err)
+  {
+     QMessageBox::warning(0, "Error: " ,err.what());
+     return;
   }
 
   // Add task to application and run it:
@@ -616,6 +628,10 @@ Application::configTimeCourseAnalysis() {
     QMessageBox::warning(
           0, tr("Can not construct time course analysis (SEE) from model: "), err.what());
     return;
+  } catch (std::exception &err)
+  {
+     QMessageBox::warning(0, "Error: " ,err.what());
+     return;
   }
 
   // Add task to application and run it:
@@ -659,8 +675,12 @@ Application::configSSAAnalysis()
     task = new SSATask(wizard.getConfigCast<SSATaskConfig>());
   } catch (iNA::Exception err) {
     QMessageBox::warning(
-          0, tr("Can not construct steady state anlysis from model: "), err.what());
+          0, tr("Can not construct stochastic simulation from model: "), err.what());
     return;
+  } catch (std::exception &err)
+  {
+     QMessageBox::warning(0, "Error: " ,err.what());
+     return;
   }
 
 
