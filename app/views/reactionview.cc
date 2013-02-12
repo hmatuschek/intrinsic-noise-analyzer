@@ -112,7 +112,7 @@ ReactionView::onRemParamClicked()
     return;
   }
   QModelIndex index = indices.front();
-  if (0 != index.column()) {
+  if (0 > index.column()) {
     _remParamButton->setEnabled(false);
     _makeGlobalButton->setEnabled(false);
     return;
@@ -127,11 +127,12 @@ void
 ReactionView::onMakeParamGlobalClicked()
 {
   // Check if an identifier of a parameter is selected:
-  if (! _paramTable->selectionModel()->hasSelection()) {
-    _remParamButton->setEnabled(false);
-    _makeGlobalButton->setEnabled(false);
-    return;
-  }
+//  if (! _paramTable->selectionModel()->hasSelection()) {
+//    _remParamButton->setEnabled(false);
+//    _makeGlobalButton->setEnabled(false);
+//    return;
+//  }
+
   QModelIndexList indices = _paramTable->selectionModel()->selectedIndexes();
   if (1 != indices.size()) {
     _remParamButton->setEnabled(false);
@@ -139,7 +140,7 @@ ReactionView::onMakeParamGlobalClicked()
     return;
   }
   QModelIndex index = indices.front();
-  if (0 != index.column()) {
+  if (0 > index.column()) {
     _remParamButton->setEnabled(false);
     _makeGlobalButton->setEnabled(false);
     return;
@@ -178,7 +179,7 @@ ReactionView::onSelectionChanged(const QItemSelection &selected, const QItemSele
     return;
   }
   QModelIndex index = indices.front();
-  if (0 != index.column()) {
+  if (0 > index.column()) {
     _remParamButton->setEnabled(false);
     _makeGlobalButton->setEnabled(false);
     return;

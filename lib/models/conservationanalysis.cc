@@ -28,7 +28,7 @@ ConservationAnalysis::ConservationAnalysis(const Ast::Model &model)
     // construct Link zero matrix for concentrations
     this->Link0CMatrix = this->Omega_dep.asDiagonal().inverse()*this->link_zero_matrix.cast<GiNaC::ex>()*this->Omega_ind.asDiagonal();
 
-    // construct Link zero matrix for concentrations
+    // construct Link matrix for concentrations
     Omega = this->PermutationM.cast<GiNaC::ex>()*this->volumes;
     this->LinkCMatrix = Omega.asDiagonal().inverse()*this->link_matrix.cast<GiNaC::ex>()*this->Omega_ind.asDiagonal();
 

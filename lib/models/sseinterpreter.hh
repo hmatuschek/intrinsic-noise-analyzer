@@ -100,16 +100,14 @@ public:
   GenericSSEinterpreter(Sys &model, size_t opt_level=0,
                  size_t num_threads=OpenMP::getMaxThreads(), bool compileJac = false)
       : sseModel(model), lookup(model.stateIndex), ICs(model), bytecode(num_threads), jacobianCode(num_threads),
-      hasJacobian(false), opt_level(opt_level)
+        hasJacobian(false), opt_level(opt_level),
+        updateVector(sseModel.getUpdateVector())
 
   {
 
     // Fold constants and get update vector
     Trafo::ConstantFolder constants(sseModel);
-    updateVector = constants.apply(sseModel.getUpdateVector());
-
-    // Account for conservation laws
-    updateVector = ICs.apply(updateVector);
+    updateVector = ICs.apply(constants.apply(updateVector));
 
     // Compile expressions
     typename SysEngine::Compiler compiler(sseModel.stateIndex);
@@ -139,15 +137,16 @@ public:
   GenericSSEinterpreter(Sys &model, std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> &index,
                  size_t opt_level=0,
                  size_t num_threads=OpenMP::getMaxThreads(), bool compileJac = false)
-      : sseModel(model), lookup(index), ICs(model), bytecode(num_threads), jacobianCode(num_threads),
-      hasJacobian(false), opt_level(opt_level)
+      : sseModel(model), lookup(index), ICs(model),
+        bytecode(num_threads), jacobianCode(num_threads),
+        hasJacobian(false), opt_level(opt_level)
 
   {
 
     // Compile expressions
     typename SysEngine::Compiler compiler(lookup);
     compiler.setCode(&this->bytecode);
-    compiler.compileVector(updateVector);
+    compiler.compileVector(sseModel.getUpdateVector());
     compiler.finalize(opt_level);
 
     // Set bytecode for interpreter

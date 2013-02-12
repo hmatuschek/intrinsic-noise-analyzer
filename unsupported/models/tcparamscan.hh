@@ -172,21 +172,21 @@ public:
                 std::cout << std::endl;
                 for(double t=0; t<=t_final; t+=timestep)
                 {
-                    ODEint.step(x,timestep);
+                    ODEint.step(x,t);
 
                     model.fullState(ICs, x, concentrations, lna_covariances, emre_corrections,
                                     ios_covariances, thirdOrder, iosemre_corrections);
                     std::cout << t << "\t" << concentrations.transpose();
 
-                    //for(int i=0; i<lna_covariances.rows(); i++)
-                    //    for(int j=0; j<=i; j++)
-                    //        std::cout << lna_covariances(i,j) << "\t";
+                    for(int i=0; i<lna_covariances.rows(); i++)
+                        for(int j=0; j<=i; j++)
+                            std::cout << lna_covariances(i,j) << "\t";
 
-                    //std::cout << (concentrations+emre_corrections).transpose() << "\t";
+                    std::cout << (concentrations+emre_corrections).transpose() << "\t";
 
-                    //for(int i=0; i<lna_covariances.rows(); i++)
-                    //    for(int j=0; j<=i; j++)
-                    //        std::cout << lna_covariances(i,j)+ios_covariances(i,j) << "\t";
+                    for(int i=0; i<lna_covariances.rows(); i++)
+                        for(int j=0; j<=i; j++)
+                            std::cout << lna_covariances(i,j)+ios_covariances(i,j) << "\t";
                     std::cout<<std::endl;
                 }
 

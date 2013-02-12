@@ -104,11 +104,6 @@ public:
   friend class AssertNoExplicitTimeDependenceMixin;
 
 
-protected:
-  /**
-   * Performs all constant and assignment rule substitutions.
-   */
-  GiNaC::ex foldConstants(GiNaC::ex expression);
 };
 
 

@@ -10,10 +10,6 @@ BaseModel::BaseModel(const Ast::Model &model)
     species(numSpecies()), reactions(numReactions()),
     propensities(numReactions())
 {
-  // Collect all constants and assignment rules, that are needed to be substituted
-  // before evaluation:
-  Trafo::SubstitutionCollector collector(this->constant_substitution_table);
-  this->accept(collector); this->constant_substitution_table.normalize();
 
   // Iterate over all species in SBML model:
   for (size_t i=0; i<this->numSpecies(); i++)
@@ -35,11 +31,3 @@ BaseModel::~BaseModel()
 {
   // Pass...
 }
-
-
-GiNaC::ex
-BaseModel::foldConstants(GiNaC::ex expression)
-{
-  return expression.subs(this->constant_substitution_table.getTable());
-}
-

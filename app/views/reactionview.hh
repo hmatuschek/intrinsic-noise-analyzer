@@ -52,7 +52,7 @@ private slots:
   /** Will move a selected parameter into the global scope. */
   void onMakeParamGlobalClicked();
   /** Will be called if the selection of the parameterlist is changed, is used to enable/disable
-   * the "rem param" button. */
+   * the "remove parameter" button. */
   void onSelectionChanged(const QItemSelection &selected,const QItemSelection &unselected);
   /** Will be called for double click on kinetic law. */
   void onReactionEditing();

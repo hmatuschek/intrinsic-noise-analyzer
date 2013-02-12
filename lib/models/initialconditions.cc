@@ -24,7 +24,7 @@ InitialConditions::InitialConditions(SSEBaseModel &model, Trafo::excludeType exc
     this->ICsPermuted = (model.getPermutationMatrix()*ICs).head(model.numIndSpecies());
 
     Trafo::ConstantFolder constants(model, Trafo::Filter::ALL_CONST, excludes);
-    // Evaluate the link matrices
+    // Evaluate the link matrices (note these must include the excluded parameters to yield proper reconstruction)
     Link0CMatrixNumeric = Eigen::ex2double( params.apply(constants.apply( model.getLink0CMatrix()) ) );
     LinkCMatrixNumeric  = Eigen::ex2double( params.apply(constants.apply( model.getLinkCMatrix())  ) );
 

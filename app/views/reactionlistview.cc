@@ -82,7 +82,7 @@ ReactionListView::onRemReaction()
   // Get selected model index
   QModelIndex idx = selected_items.at(0);
   // If not the name/identifier column is selected -> quit
-  if (0 != idx.column()) { return; }
+  //if (0 != idx.column()) { return; }
   // Get the selected reaction
   iNA::Ast::Reaction *reaction = _reactions->getModel().getReaction(idx.row());
 
@@ -103,7 +103,7 @@ ReactionListView::onSelectionChanged(const QItemSelection &selected, const QItem
   QModelIndexList indices = selected.indexes();
   if (1 != indices.size()) { _remReacButton->setEnabled(false); return; }
   QModelIndex index = indices.at(0);
-  if (0 != index.column()) { _remReacButton->setEnabled(false); return; }
+  if (0 > index.column()) { _remReacButton->setEnabled(false); return; }
   _remReacButton->setEnabled(true);
 }
 
