@@ -1,6 +1,7 @@
 #include "logmessagemodel.hh"
 #include <QDateTime>
 #include <QTextStream>
+#include <QBrush>
 
 
 
@@ -104,16 +105,37 @@ QVariant
 LogMessageModel::data(const QModelIndex &index, int role) const {
   if (index.row() >= _messages.size()) { return QVariant(); }
   if (index.column() >= 3) { return QVariant(); }
-  if (role != Qt::DisplayRole) { return QVariant(); }
 
-  if (0 == index.column()) {
-    return QDateTime::fromTime_t(_messages.at(index.row()).getTime()).toString();
-  } else if (1 == index.column()) {
-    return QString(_messages.at(index.row()).getText().c_str());
+  // Select color by level:
+  if (role == Qt::ForegroundRole) {
+    // Get level:
+    iNA::Utils::Message::Level level = _messages.at(index.row()).getLevel();
+    // Select color by level:
+    QBrush brush(QColor(0x00, 0x00, 0x00));
+    switch (level) {
+    case iNA::Utils::Message::DEBUG:
+      brush.setColor(QColor(0xa0, 0xa0, 0xa0)); break;
+    case iNA::Utils::Message::INFO:
+      brush.setColor(QColor(0x00, 0x00, 0x00)); break;
+    case iNA::Utils::Message::WARN:
+      brush.setColor(QColor(0x00, 0x00, 0xff)); break;
+    case iNA::Utils::Message::ERROR:
+      brush.setColor(QColor(0xff, 0x00, 0x00)); break;
+    }
+    return QVariant(brush);
+  }
+
+  if (role == Qt::DisplayRole) {
+    if (0 == index.column()) {
+      return QDateTime::fromTime_t(_messages.at(index.row()).getTime()).toString();
+    } else if (1 == index.column()) {
+      return QString(_messages.at(index.row()).getText().c_str());
+    }
   }
 
   return QVariant();
 }
+
 
 QVariant
 LogMessageModel::headerData(int section, Qt::Orientation orientation, int role) const {
