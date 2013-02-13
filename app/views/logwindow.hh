@@ -25,6 +25,10 @@ public slots:
   /** Sets the filter level. */
   void setFilterLevel(iNA::Utils::Message::Level level);
 
+protected slots:
+  /** Will be called on new messages being visible, scrolles to bottom. */
+  virtual void rowsInserted(const QModelIndex &parent, int start, int end);
+
 private:
   /** Holds the message model. */
   FilteredLogMessageModel *_model;

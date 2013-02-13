@@ -74,6 +74,16 @@ LogTable::setFilterLevel(iNA::Utils::Message::Level level) {
 }
 
 
+void
+LogTable::rowsInserted(const QModelIndex &parent, int start, int end) {
+  QTableView::rowsInserted(parent, start, end);
+  scrollToBottom();
+}
+
+
+/* ******************************************************************************************** *
+ * Implementation of LogWindow.
+ * ******************************************************************************************** */
 LogWindow::LogWindow(QWidget *parent)
   : QWidget(parent)
 {
