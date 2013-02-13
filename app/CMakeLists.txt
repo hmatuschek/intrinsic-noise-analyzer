@@ -73,7 +73,7 @@ SET(ina_app_models_SOURCES models/configuration.cc
     models/variableruledata.cc models/referencecounter.cc models/scopeitemmodel.cc
     models/expressiondelegate.cc models/sbmlshhighlighter.cc models/reactionlist.cc
     models/pixmapdelegate.cc models/plotformulaparser.cc models/versioncheck.cc models/task.cc
-    models/timeseries.cc models/application.cc)
+    models/timeseries.cc models/application.cc models/logmessagemodel.cc)
 SET(ina_app_models_HEADERS
     models/parameterlist.hh models/specieslist.hh models/compartmentlist.hh
     models/reactionparameterlist.hh models/taskerror.hh models/tablewrapper.hh
@@ -81,7 +81,7 @@ SET(ina_app_models_HEADERS
     models/variableruledata.hh models/referencecounter.hh models/scopeitemmodel.hh
     models/expressiondelegate.hh models/sbmlshhighlighter.hh models/reactionlist.hh
     models/pixmapdelegate.hh models/plotformulaparser.hh models/versioncheck.hh models/task.hh
-    models/timeseries.hh models/application.hh)
+    models/timeseries.hh models/application.hh models/logmessagemodel.hh)
 
 SET(ina_app_views_SOURCES
     views/documentsview.cc views/parameterview.cc views/reactionview.cc

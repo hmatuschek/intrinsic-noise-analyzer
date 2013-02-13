@@ -7,91 +7,22 @@
 #include <QVBoxLayout>
 #include <QPushButton>
 #include <QFileDialog>
+#include "../models/logmessagemodel.hh"
 
 
-MessageWrapper::MessageWrapper(const iNA::Utils::Message &message, QObject *parent)
-  : QObject(parent), _message(message)
+
+
+LogTable::LogTable(QWidget *parent)
+  : QTableView(parent), _model(0)
 {
-  // Pass...
-}
+  verticalHeader()->setVisible(false);
+  horizontalHeader()->setStretchLastSection(true);
+  setShowGrid(false);
+  setMinimumSize(640, 100);
 
-QString
-MessageWrapper::getText() const
-{
-  return QString::fromStdString(_message.getText());
-}
-
-QString
-MessageWrapper::getFile() const
-{
-  return QString::fromStdString(_message.getFileName());
-}
-
-size_t
-MessageWrapper::getLine() const
-{
-  return _message.getLevel();
-}
-
-iNA::Utils::Message::Level
-MessageWrapper::getLevel() const
-{
-  return _message.getLevel();
-}
-
-QDateTime
-MessageWrapper::getTime() const
-{
-  return QDateTime::fromTime_t(_message.getTime());
-}
-
-QString
-MessageWrapper::getLevelName() const
-{
-  switch (_message.getLevel()) {
-  case iNA::Utils::Message::DEBUG:
-    return "debug";
-  case iNA::Utils::Message::INFO:
-    return "info";
-  case iNA::Utils::Message::WARN:
-    return "warn";
-  case iNA::Utils::Message::ERROR:
-    return "error";
-  }
-  return "";
-}
-
-
-LogWindowMessageHandler::LogWindowMessageHandler()
-  : QObject(0)
-{
-  // Pass...
-}
-
-void
-LogWindowMessageHandler::handleMessage(const iNA::Utils::Message &message)
-{
-  emit newMessage(new MessageWrapper(message));
-}
-
-
-
-LogTable::LogTable(QWidget *parent) :
-    QTableWidget(parent)
-{
-  this->setWindowTitle("log");
-  this->setColumnCount(2);
-  QStringList labels; labels.append("time"); labels.append("message");
-  this->setHorizontalHeaderLabels(labels);
-  this->horizontalHeader()->setStretchLastSection(true);
-
-  this->setShowGrid(false); this->verticalHeader()->setVisible(false);
-  this->setMinimumSize(640, 100);
-
-  // Install message handler:
-  LogWindowMessageHandler *handler = new LogWindowMessageHandler();
-  QObject::connect(handler, SIGNAL(newMessage(MessageWrapper*)), SLOT(onMessage(MessageWrapper*)));
-  iNA::Utils::Logger::get().addHandler(handler);
+  // Install message model:
+  _model = new FilteredLogMessageModel(this);
+  setModel(_model);
 }
 
 
@@ -106,29 +37,13 @@ LogTable::saveLog(const QString &filename)
     return false;
   }
 
-  {
-    QTextStream stream(&file);
-    for (int i=0; i<this->rowCount(); i++) {
-      stream << this->item(i,0)->text()
-             << ": " << this->item(i,1)->text() << "\n";
-    }
-  }
+  _model->saveLog(file);
   file.close();
   return true;
 }
 
 
-void
-LogTable::onMessage(MessageWrapper *message)
-{
-  size_t i=this->rowCount(); this->setRowCount(i+1);
-  QTableWidgetItem *time_item  = new QTableWidgetItem(message->getTime().time().toString());
-  QTableWidgetItem *text_item  = new QTableWidgetItem(message->getText());
-  this->setItem(i, 0, time_item); this->setItem(i, 1, text_item);
-  time_item->setFlags(Qt::NoItemFlags); text_item->setFlags(Qt::NoItemFlags);
-
-  switch(message->getLevel()) {
-  case iNA::Utils::Message::DEBUG:
+/*  case iNA::Utils::Message::DEBUG:
     time_item->setTextColor(QColor::fromRgb(0xa0, 0xa0, 0xa0));
     text_item->setTextColor(QColor::fromRgb(0xa0, 0xa0, 0xa0));
     break;
@@ -150,22 +65,48 @@ LogTable::onMessage(MessageWrapper *message)
   }
 
   this->scrollToItem(time_item, QAbstractItemView::PositionAtBottom);
-}
+*/
 
+
+void
+LogTable::setFilterLevel(iNA::Utils::Message::Level level) {
+  _model->setFilterLevel(level);
+}
 
 
 LogWindow::LogWindow(QWidget *parent)
   : QWidget(parent)
 {
-  _logtable = new LogTable();
-  QPushButton *button = new QPushButton(tr("Save"));
+  setWindowTitle(tr("Log Messages"));
 
+  // Create log view:
+  _logtable = new LogTable();
+  // Save button:
+  QPushButton *save_button = new QPushButton(tr("Save"));
+  save_button->setToolTip(tr("Saves the log into a file."));
+  // level selector
+  _level_selector = new QComboBox();
+  _level_selector->setToolTip(tr("Selects the log-level to filter messages."));
+  _level_selector->addItem(tr("Debug"));
+  _level_selector->addItem(tr("Info"));
+  _level_selector->addItem(tr("Warning"));
+  _level_selector->addItem(tr("Error"));
+  _level_selector->setCurrentIndex(0);
+
+  // Assemble layout
+  QHBoxLayout *buttons = new QHBoxLayout();
+  buttons->addStretch(1);
+  buttons->addWidget(_level_selector);
+  buttons->addWidget(save_button);
   QVBoxLayout *layout = new QVBoxLayout();
+  layout->setMargin(0);
   layout->addWidget(_logtable);
-  layout->addWidget(button,0, Qt::AlignRight);
+  layout->addLayout(buttons);
   setLayout(layout);
 
-  QObject::connect(button, SIGNAL(clicked()), this, SLOT(onSaveLog()));
+  QObject::connect(save_button, SIGNAL(clicked()), this, SLOT(onSaveLog()));
+  QObject::connect(_level_selector, SIGNAL(currentIndexChanged(int)),
+                   this, SLOT(onLevelSelected(int)));
 }
 
 void
@@ -174,4 +115,15 @@ LogWindow::onSaveLog() {
         0, tr("Save log to"), "", tr("Text files (*.txt)"));
   if (0 == filename.size()) { return; }
   _logtable->saveLog(filename);
+}
+
+void
+LogWindow::onLevelSelected(int index) {
+  switch (index) {
+  case 0: _logtable->setFilterLevel(iNA::Utils::Message::DEBUG); break;
+  case 1: _logtable->setFilterLevel(iNA::Utils::Message::INFO); break;
+  case 2: _logtable->setFilterLevel(iNA::Utils::Message::WARN); break;
+  case 3: _logtable->setFilterLevel(iNA::Utils::Message::ERROR); break;
+  default: break;
+  }
 }

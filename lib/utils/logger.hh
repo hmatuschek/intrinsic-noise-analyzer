@@ -39,10 +39,10 @@ class Message : public std::stringstream
 public:
   /** Lists all levels of messages. */
   typedef enum {
-    DEBUG,  ///< Debug message.
-    INFO,   ///< Status updates.
-    WARN,   ///< Warnings.
-    ERROR   ///< Errors.
+    DEBUG = 0,  ///< Debug message.
+    INFO  = 1,   ///< Status updates.
+    WARN  = 2,   ///< Warnings.
+    ERROR = 3   ///< Errors.
   } Level;
 
 
@@ -109,8 +109,7 @@ public:
   /** Sends a message. */
   void log(const Message &message);
   /** Adds a message handler to the logger.
-   * @note The logger takes the ownership of the handler.
-   */
+   * @note The logger takes the ownership of the handler. */
   void addHandler(MessageHandler *handler);
 
 public:
