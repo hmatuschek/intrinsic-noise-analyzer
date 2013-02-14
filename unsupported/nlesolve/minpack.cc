@@ -1383,7 +1383,7 @@ int MinPack::hybrd1 ( int n,
   int ml;
   int mode;
   int mu;
-  int nfev;
+  int nfev=0;
   int nprint;
   double xtol;
 

@@ -154,6 +154,9 @@ ParameterScanFanoPlot::ParameterScanFanoPlot(const QStringList &selected_species
     size_t mean_idx = offset + species_idx;
     size_t var_idx  = offset+Ntot + species_idx*(Ntot+1) - (species_idx*(species_idx+1))/2;
 
+    // Check if we can evaluate the volume
+    if(!model->getSpecies(species_idx)->getCompartment()->getValue().is_a<GiNaC::numeric>) continue;
+
     // Needs multiplier to obtain correct nondimensional quantity
     double multiplier = Eigen::ex2double(model->getSpecies(species_idx)->getCompartment()->getValue());
     multiplier *= Eigen::ex2double(model->getSpeciesUnit().getMultiplier()*std::pow(10.,model->getSpeciesUnit().getScale()));
@@ -242,6 +245,10 @@ ParameterScanFanoIOSPlot::ParameterScanFanoIOSPlot(const QStringList &selected_s
     size_t species_idx = task->getConfig().getModel()->getSpeciesIdx(selected_species.at(i).toStdString());
     size_t mean_idx = offset + species_idx;
     size_t var_idx  = offset+Ntot + species_idx*(Ntot+1) - (species_idx*(species_idx+1))/2;
+
+
+    // Check if we can evaluate the volume
+    if(!model->getSpecies(species_idx)->getCompartment()->getValue().is_a< GiNaC::numeric >) continue;
 
     // Needs multiplier to obtain correct nondimensional quantity
     double multiplier = Eigen::ex2double(model->getSpecies(species_idx)->getCompartment()->getValue());
