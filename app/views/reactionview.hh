@@ -5,8 +5,9 @@
 #include <QItemSelection>
 #include <QPushButton>
 #include <QTableView>
-
+#include <QLabel>
 #include <QGraphicsView>
+
 #include "../doctree/reactionsitem.hh"
 
 
@@ -72,6 +73,8 @@ private:
   QPushButton *_makeGlobalButton;
   /** Holds the table view of local parameters. */
   QTableView *_paramTable;
+  /** Holds the label/title of the view. */
+  QLabel *_label;
 };
 
 

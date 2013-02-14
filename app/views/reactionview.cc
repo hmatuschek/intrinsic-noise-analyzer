@@ -25,9 +25,9 @@ ReactionView::ReactionView(ReactionItem *reaction, QWidget *parent) :
   setBackgroundRole(QPalette::Window);
 
   // Assemble label
-  QLabel *label = new QLabel(tr("Reaction") + " " + _reaction->getDisplayName());
-  label->setFont(Application::getApp()->getH1Font());
-  label->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
+  _label = new QLabel(tr("Reaction") + " " + _reaction->getDisplayName());
+  _label->setFont(Application::getApp()->getH1Font());
+  _label->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
 
   // Assemble reaction equation renderer:
   _equation_view = new ReactionGraphic();
@@ -66,7 +66,7 @@ ReactionView::ReactionView(ReactionItem *reaction, QWidget *parent) :
   head_layout->addWidget(param_label, 1, Qt::AlignRight);
 
   QVBoxLayout *layout = new QVBoxLayout();
-  layout->addWidget(label, 0, Qt::AlignRight);
+  layout->addWidget(_label, 0, Qt::AlignRight);
   layout->addWidget(_equation_view);
   layout->addLayout(head_layout);
   layout->addWidget(_paramTable);
@@ -189,6 +189,7 @@ ReactionView::onSelectionChanged(const QItemSelection &selected, const QItemSele
   _makeGlobalButton->setEnabled(true);
 }
 
+
 void
 ReactionView::onReactionEditing()
 {
@@ -202,7 +203,12 @@ ReactionView::onReactionEditing()
   // Update complete view (reaction equation view and paramter list):
   ReactionEquationRenderer *renderer = new ReactionEquationRenderer(_reaction->getReaction());
   _equation_view->setScene(renderer);
+  // Update local parameter list
   _reaction->localParameters()->updateCompleteTable();
+  // Update reaction label:
+  _label->setText(tr("Reaction") + " " + _reaction->getDisplayName());
+  // Update tree model
+  Application::getApp()->docTree()->resetCompleteTree();
 }
 
 
