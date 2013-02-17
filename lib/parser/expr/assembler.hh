@@ -55,7 +55,7 @@ public:
     std::stringstream buffer(string);
     if (! (buffer>>value) ) {
       SBMLParserError err;
-      err << "Can not parse \"" << string << "\" as " << typeid(T).name();
+      err << "Cannot parse \"" << string << "\" as " << typeid(T).name();
       throw err;
     }
 

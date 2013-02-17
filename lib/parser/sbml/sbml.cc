@@ -18,7 +18,7 @@ Parser::Sbml::importModel(Ast::Model &model, const std::string &filename)
   // Check for errors:
   if (0 != document->getNumErrors()) {
     SBMLParserError err;
-    err << "Can not parse SBML file " << filename << ": " << document->getError(0)->getMessage();
+    err << "Cannot parse SBML file " << filename << ": " << document->getError(0)->getMessage();
     throw err;
   }
 

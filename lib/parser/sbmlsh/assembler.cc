@@ -132,7 +132,7 @@ Assembler::processModel(Parser::ConcreteSyntaxTree &model)
 
   // Do not process event definitions...
   if (model[7].matched()) {
-    throw SBMLFeatureNotSupported("Can not parse SBML SH: Event definitions are not supported yet.");
+    throw SBMLFeatureNotSupported("Cannot parse SBML-SH: Event definitions are not supported yet.");
   }
 
   // Once the model was created, link all expressions of the model
@@ -221,7 +221,7 @@ Assembler::processDefaultUnitDefinitions(Parser::ConcreteSyntaxTree &def_units)
   std::map<std::string, Ast::ScaledBaseUnit::BaseUnit>::iterator item = _base_unit_map.find(unit_id);
   if (_base_unit_map.end() == item) {
     SBMLParserError err;
-    err << "Can not parse SBML SH: Unknown unit name: " << unit_id;
+    err << "Cannot parse SBML-SH: Unknown unit name: " << unit_id;
     throw err;
   }
   Ast::ScaledBaseUnit base_unit(item->second, 1,0,1);
@@ -313,7 +313,7 @@ Assembler::processScaledUnitList(Parser::ConcreteSyntaxTree &unit,
 
   if (_base_unit_map.end() == item) {
     SBMLParserError err;
-    err << "Can not parse SBML SH @ line "
+    err << "Cannot parse SBML-SH @ line "
         << uid_token.getLine() << ": Unknown unit: " << base_unit_id;
     throw err;
   }
@@ -589,7 +589,7 @@ Assembler::processSpeciesModifierList(Parser::ConcreteSyntaxTree &spec_mod,
       break;
     default: {
       SBMLParserError err;
-      err << "Can not parse SBML SH @ line " << token.getLine()
+      err << "Cannot parse SBML-SH @ line " << token.getLine()
           << ": Invalid species modifier " << modifier << ", expected s, b or c";
       throw err;
     }
