@@ -149,7 +149,7 @@ int main(int argc, char *argv[])
     Ast::Model sbml_model; Parser::Sbml::importModel(sbml_model, modelFile);
 
     Models::IOSmodel model(sbml_model);
-    Models::TimeCourseParameterScan<Models::IOSmodel,Eval::jit::Engine<Eigen::VectorXd>, Eval::jit::Engine<Eigen::MatrixXd> > pscan(model);
+    Models::TimeCourseParameterScan<Models::IOSmodel,Eval::bci::Engine<Eigen::VectorXd>, Eval::bci::Engine<Eigen::MatrixXd> > pscan(model);
 
     // perform the parameter scan
     std::vector<Eigen::VectorXd> result;

@@ -18,7 +18,7 @@ PrecisionSolve::solve(const Eigen::MatrixXd &B, const Eigen::VectorXd &A, double
     luPP.compute(B);
     x = luPP.solve(A);
 
-    if((B*x).isApprox(A, epsilon))
+    if(!(B*x).isApprox(A, epsilon))
     {
        // this is slower
       luFP.compute(B);

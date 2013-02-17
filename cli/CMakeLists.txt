@@ -8,8 +8,8 @@ SET(ina_CLI_HEADERS
     ina_cli_listmodel.hh ina_cli_paramscan.hh ina_cli_savetable.hh ina_cli_ssetimecourse.hh
     ina_cli_utils.hh ina_cli_ssa.hh)
 
-ADD_EXECUTABLE(ina-cli ${ina_CLI_SOURCES})
-TARGET_LINK_LIBRARIES(ina-cli ${LIBS} libina)
+#ADD_EXECUTABLE(ina-cli ${ina_CLI_SOURCES})
+#TARGET_LINK_LIBRARIES(ina-cli ${LIBS} libina)
  
 #
 # Central build-script for all the tiny CLI programs
@@ -55,18 +55,18 @@ SET(sbml_fft_SOURCES
 SET(sbml_fft_HEADERS
     sbml_fft.hh)
 
-ADD_EXECUTABLE(sbml_lna ${sbml_lna_SOURCES})
+#ADD_EXECUTABLE(sbml_lna ${sbml_lna_SOURCES})
 ADD_EXECUTABLE(sbml_pscan ${sbml_pscan_SOURCES})
-ADD_EXECUTABLE(sbml_ssa ${sbml_ssa_SOURCES})
-ADD_EXECUTABLE(sbml_ssacov ${sbml_ssacov_SOURCES})
-ADD_EXECUTABLE(sbml_dist ${sbml_dist_SOURCES})
+#ADD_EXECUTABLE(sbml_ssa ${sbml_ssa_SOURCES})
+#ADD_EXECUTABLE(sbml_ssacov ${sbml_ssacov_SOURCES})
+#ADD_EXECUTABLE(sbml_dist ${sbml_dist_SOURCES})
 #ADD_EXECUTABLE(sbml_med ${sbml_med_SOURCES})
-ADD_EXECUTABLE(sbml_fft ${sbml_fft_SOURCES})
+#ADD_EXECUTABLE(sbml_fft ${sbml_fft_SOURCES})
 
-TARGET_LINK_LIBRARIES(sbml_lna ${LIBS} libina)
+#TARGET_LINK_LIBRARIES(sbml_lna ${LIBS} libina)
 TARGET_LINK_LIBRARIES(sbml_pscan ${LIBS} libina)
-TARGET_LINK_LIBRARIES(sbml_ssacov ${LIBS} libina)
-TARGET_LINK_LIBRARIES(sbml_ssa ${LIBS} libina libunsupported)
+#TARGET_LINK_LIBRARIES(sbml_ssacov ${LIBS} libina)
+#TARGET_LINK_LIBRARIES(sbml_ssa ${LIBS} libina libunsupported)
 #TARGET_LINK_LIBRARIES(sbml_med ${LIBS} libina libunsupported)
-TARGET_LINK_LIBRARIES(sbml_dist ${LIBS} libina libunsupported)
-TARGET_LINK_LIBRARIES(sbml_fft ${LIBS} libina libunsupported)
+#TARGET_LINK_LIBRARIES(sbml_dist ${LIBS} libina libunsupported)
+#TARGET_LINK_LIBRARIES(sbml_fft ${LIBS} libina libunsupported)
