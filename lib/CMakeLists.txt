@@ -75,6 +75,8 @@ SET(libina_parser_HEADERS
     ${libina_sbml_parser_HEADERS}
     ${libina_expr_parser_HEADERS}
     ${libina_unit_parser_HEADERS})
+SET(libina_parser_EXTRA
+    parser/expr/lexer.l parser/expr/parser.y)
 
 SET(libina_utils_SOURCES
     utils/exception.cc utils/unittest.cc utils/option_parser.cc utils/cputime.cc utils/logger.cc
@@ -235,6 +237,11 @@ SET(libina_HEADERS
     ${libina_nlesolve_HEADERS}
     ${libina_ode_HEADERS}
     ${libina_eval_HEADERS})
+
+
+# Declare user defined target to collect all non-code files:
+SET(libina_EXTRA ${libina_parser_EXTRA})
+ADD_CUSTOM_TARGET(libinaextra SOURCES ${libina_EXTRA})
 
 
 #
