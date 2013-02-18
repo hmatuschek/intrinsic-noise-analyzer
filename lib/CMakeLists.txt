@@ -149,6 +149,7 @@ SET(libina_nlesolve_SOURCES
    nlesolve/hybridsolver.cc
    nlesolve/precisionsolve.cc)
 SET(libina_nlesolve_HEADERS
+   nlesolve/nlesolve.hh
    nlesolve/nlesolver.hh
    nlesolve/newtonraphson.hh
    nlesolve/hybridsolver.hh
