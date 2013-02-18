@@ -114,7 +114,7 @@ SSAParameterScanFanoPlot::SSAParameterScanFanoPlot(const QStringList &selected_s
     size_t var_idx  = offset + Ntot + species_idx + (species_idx*(species_idx+1))/2;
 
     // Check if we can evaluate the volume
-    if(!model->getSpecies(species_idx)->getCompartment()->getValue().is_a<GiNaC::numeric>) continue;
+    if(!GiNaC::is_a<GiNaC::numeric>(model->getSpecies(species_idx)->getCompartment()->getValue())) continue;
 
     // Needs multiplier to obtain correct nondimensional quantity
     double multiplier = Eigen::ex2double(model->getSpecies(species_idx)->getCompartment()->getValue());

@@ -43,7 +43,7 @@ void
 LineGraph::addPoint(double x, double y)
 {
   if (x != x || y != y) {
-    iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::INFO);
+    iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::WARN);
     message <<  __FILE__ << ": " << __LINE__ << ": NaN occured during plot: Ignore.";
     iNA::Utils::Logger::get().log(message);
     return;

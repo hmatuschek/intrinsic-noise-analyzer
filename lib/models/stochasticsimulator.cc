@@ -69,7 +69,7 @@ StochasticSimulator::StochasticSimulator(const Ast::Model &model, int size, int 
      this->Omega(i)=evICs.evaluate(this->volumes(i));
   }
 
-  Utils::Message msg = LOG_MESSAGE(Utils::Message::DEBUG);
+  Utils::Message msg = LOG_MESSAGE(Utils::Message::INFO);
   msg << "SSA initial copy numbers: ";
   for(size_t i=0; i<numSpecies(); i++)
   {
