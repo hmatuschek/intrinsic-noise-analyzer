@@ -49,7 +49,7 @@ SSAParameterScanPlot::SSAParameterScanPlot(const QStringList &selected_species, 
 
 SSAParameterScanCVPlot::SSAParameterScanCVPlot(const QStringList &selected_species, SSAParamScanTask *task,
                                            QObject *parent)
-    : LinePlot("Coefficient of Variation (SSA)", parent)
+    : LinePlot("Coefficient of variation (SSA)", parent)
 {
   // Get species units:
   QString parameter_unit("a.u.");

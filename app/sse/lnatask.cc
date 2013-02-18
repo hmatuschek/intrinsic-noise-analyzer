@@ -88,6 +88,12 @@ LNATask::process()
   // get full initial concentrations and covariance
   _config.getModelAs<iNA::Models::LNAmodel>()->fullState(x, concentrations, cov, emre);
 
+  {
+    Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
+    message << "Starting LNA time course analysis.";
+    Utils::Logger::get().log(message);
+  }
+
   setState(Task::RUNNING, "Run analysis...");
   setProgress(0.0);
 
@@ -159,6 +165,12 @@ LNATask::process()
     }
 
     this->_timeseries.append(output_vector);
+  }
+
+  {
+    Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
+    message << "Finished LNA time course analysis.";
+    Utils::Logger::get().log(message);
   }
 
   // Finally send last progress event:

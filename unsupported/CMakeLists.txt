@@ -14,7 +14,7 @@ SET(libina_unsupported_HEADERS
 #
 # Compile library
 #
-ADD_LIBRARY(libunsupported SHARED ${libina_unsupported_SOURCES})
+ADD_LIBRARY(libunsupported STATIC ${libina_unsupported_SOURCES})
 SET_TARGET_PROPERTIES(libunsupported PROPERTIES OUTPUT_NAME "inaunsupported")
 TARGET_LINK_LIBRARIES(libunsupported ${LIBS})
 
