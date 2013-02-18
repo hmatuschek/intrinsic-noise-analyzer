@@ -20,11 +20,13 @@ typedef void* yyscan_t;
  
 }
  
+//%require "2.6"
 %output  "expr_parser.cc"
 %defines "expr_parser.hh"
  
-%define api.prefix ina_parser_expr_
-%define api.pure
+%skeleton "lalr1.cc"
+%define namespace "iNA::Parser::Expr"
+
 %lex-param   { yyscan_t scanner }
 %parse-param { SExpression **expression }
 %parse-param { yyscan_t scanner }
