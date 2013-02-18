@@ -491,7 +491,7 @@ LSODA::lsoda (int neq, double *y, double *t, double tout,
                 mused = 0;
                 miter = 0;
                 ccmax = 0.3;
-                maxcor = 3;
+                maxcor = 3;  // this is constant...move to static.
                 msbp = 20;
                 mxncf = 10;
                 /*
@@ -1089,9 +1089,11 @@ LSODA::stoda(int neq, double *y)
                 */
                 jcur = 0;
                 if (m == 0)
-                        dsm = del / tesco[nq][2];
-                if (m > 0)
-                        dsm = vmnorm(n, acor, ewt) / tesco[nq][2];
+                    dsm = del / tesco[nq][2];
+                else // since m>0
+                    dsm = vmnorm(n, acor, ewt) / tesco[nq][2];
+
+
                 if (dsm <= 1.) {
                         /*
                         After a successful step, update the yh array.

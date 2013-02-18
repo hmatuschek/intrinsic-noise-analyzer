@@ -276,13 +276,13 @@ ReactionParameterList::_updateInitialValue(iNA::Ast::Parameter *param, const QVa
   try { new_value = iNA::Parser::Expr::parseExpression(expression, _kinetic_law); }
   catch (iNA::Exception &err) {
     // Log message:
-    iNA::Utils::Message msg = LOG_MESSAGE(iNA::Utils::Message::INFO);
-    msg << "Can not parse expression: " << expression << ": " << err.what();
+    iNA::Utils::Message msg = LOG_MESSAGE(iNA::Utils::Message::ERROR);
+    msg << "Cannot parse expression: " << expression << ": " << err.what();
     iNA::Utils::Logger::get().log(msg);
     // Show message:
     QMessageBox::warning(
-          0, tr("Can not parse expression"),
-          tr("Can not parse expression \"%1\": %2").arg(value.toString(), err.what()));
+          0, tr("Cannot parse expression"),
+          tr("Cannot parse expression \"%1\": %2").arg(value.toString(), err.what()));
     return false;
   }
 

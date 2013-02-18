@@ -176,7 +176,7 @@ public:
 
                     model.fullState(ICs, x, concentrations, lna_covariances, emre_corrections,
                                     ios_covariances, thirdOrder, iosemre_corrections);
-                    std::cout << t << "\t" << concentrations.transpose();
+                    std::cout << t << "\t" << concentrations.transpose() << "\t";
 
                     for(int i=0; i<lna_covariances.rows(); i++)
                         for(int j=0; j<=i; j++)
@@ -187,6 +187,7 @@ public:
                     for(int i=0; i<lna_covariances.rows(); i++)
                         for(int j=0; j<=i; j++)
                             std::cout << lna_covariances(i,j)+ios_covariances(i,j) << "\t";
+
                     std::cout<<std::endl;
                 }
 

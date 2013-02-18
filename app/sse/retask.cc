@@ -367,6 +367,12 @@ RETask::process()
   // get full initial concentrations and covariance
   config.getModelAs<iNA::Models::REmodel>()->fullState(x, concentrations);
 
+  {
+    Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
+    message << "Starting RE time course analysis.";
+    Utils::Logger::get().log(message);
+  }
+
   this->setState(Task::RUNNING);
 
   /*
@@ -416,6 +422,12 @@ RETask::process()
     }
 
     this->timeseries.append(output_vector);
+  }
+
+  {
+    Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
+    message << "Finished RE time course analysis.";
+    Utils::Logger::get().log(message);
   }
 
   // Finally send last progress event:

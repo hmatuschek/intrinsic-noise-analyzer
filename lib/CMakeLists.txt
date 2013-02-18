@@ -75,6 +75,8 @@ SET(libina_parser_HEADERS
     ${libina_sbml_parser_HEADERS}
     ${libina_expr_parser_HEADERS}
     ${libina_unit_parser_HEADERS})
+SET(libina_parser_EXTRA
+    parser/expr/lexer.l parser/expr/parser.y)
 
 SET(libina_utils_SOURCES
     utils/exception.cc utils/unittest.cc utils/option_parser.cc utils/cputime.cc utils/logger.cc
@@ -238,6 +240,11 @@ SET(libina_HEADERS
     ${libina_eval_HEADERS})
 
 
+# Declare user defined target to collect all non-code files:
+SET(libina_EXTRA ${libina_parser_EXTRA})
+ADD_CUSTOM_TARGET(libinaextra SOURCES ${libina_EXTRA})
+
+
 #
 # Recursive copy header files to ${CMAKE_BINARY_DIR}/include/libina
 #
@@ -257,5 +264,5 @@ INSTALL(TARGETS libina
 
 # Install header files
 IF(UNIX AND APPLE)
-INSTALL_HEADERS_WITH_DIRECTORY("${libina_HEADERS}" "${CMAKE_INSTALL_FULL_INCLUDEDIR}/libina")
+INSTALL_HEADERS_WITH_DIRECTORY("${libina_HEADERS}" "${CMAKE_INSTALL_INCLUDEDIR}/libina")
 ENDIF(UNIX AND APPLE)
