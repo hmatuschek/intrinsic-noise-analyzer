@@ -23,14 +23,15 @@ typedef void* yyscan_t;
 %output  "expr_parser.cc"
 %defines "expr_parser.hh"
  
+%define api.prefix ina_parser_expr_
 %define api.pure
 %lex-param   { yyscan_t scanner }
 %parse-param { SExpression **expression }
 %parse-param { yyscan_t scanner }
  
 %union {
-    int value;
-    SExpression *expression;
+  int value;
+  SExpression *expression;
 }
  
 %left '+' TOKEN_PLUS

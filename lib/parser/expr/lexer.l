@@ -13,13 +13,10 @@
 %option outfile="expr_lexer.cc" header-file="expr_lexer.hh"
 %option warn nodefault
  
-%option reentrant 
 %option noyywrap 
 %option never-interactive 
 %option nounistd
-%option bison-bridge
 %option prefix="ina_parser_expr_"
-
  
 LPAREN      "("
 RPAREN      ")"
@@ -44,7 +41,7 @@ WS          [ \r\n\t]*
  
 /** Signals an lexer error. */
 int ina_parser_expr_error(const char *msg) {
-    /** @todo Thow lexer exception here! */
-    fprintf(stderr,"Error:%s\n",msg); return 0;
+  /** @todo Throw lexer exception here! */
+  printf("Lexer error: %s", msg); return 0;
 }
 
