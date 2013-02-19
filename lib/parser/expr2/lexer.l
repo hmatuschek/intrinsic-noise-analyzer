@@ -97,6 +97,8 @@ WS          [ \r\n\t]*
   ina_parser_expr_error("Unexpected char.");
 }
  
+
+
 %%
  
 /** Signals an lexer error. */
