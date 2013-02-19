@@ -202,9 +202,9 @@ Assembler::processNumber(Parser::ConcreteSyntaxTree &num)
   // On integer
   if (0 == num[1].getAltIdx()) {
     if (num[0].matched()) {
-      return -toNumber<int>(_lexer[num[1][0].getTokenIdx()].getValue());
+      return -toNumber<long>(_lexer[num[1][0].getTokenIdx()].getValue());
     }
-    return toNumber<int>(_lexer[num[1][0].getTokenIdx()].getValue());
+    return toNumber<long>(_lexer[num[1][0].getTokenIdx()].getValue());
   }
 
   // On double:

@@ -151,6 +151,7 @@ SET(libina_nlesolve_SOURCES
    nlesolve/hybridsolver.cc
    nlesolve/precisionsolve.cc)
 SET(libina_nlesolve_HEADERS
+   nlesolve/nlesolve.hh
    nlesolve/nlesolver.hh
    nlesolve/newtonraphson.hh
    nlesolve/hybridsolver.hh
@@ -263,5 +264,5 @@ INSTALL(TARGETS libina
 
 # Install header files
 IF(UNIX AND APPLE)
-INSTALL_HEADERS_WITH_DIRECTORY("${libina_HEADERS}" "${CMAKE_INSTALL_FULL_INCLUDEDIR}/libina")
+INSTALL_HEADERS_WITH_DIRECTORY("${libina_HEADERS}" "${CMAKE_INSTALL_INCLUDEDIR}/libina")
 ENDIF(UNIX AND APPLE)

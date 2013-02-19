@@ -37,6 +37,7 @@ protected:
   LSODAengine::Interpreter LSODAint;
 
 public:
+
   /**
    * Constructor.
    *
@@ -132,7 +133,10 @@ public:
               message << "Use integration of duration "<< dt << ".";
               Utils::Logger::get().log(message);
 
-              if(t==0) this->setupLSODA(parameters);
+              if(t==0) {
+                  //#pragma omp critical(ginac)
+                  this->setupLSODA(parameters);
+              }
 
               // Do ODE step of length dt
               ODEStep(state,0,dt);

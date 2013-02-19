@@ -188,7 +188,7 @@ public:
         if(std::isnan(outState(i))) return LineSearchFailed;
 
       // Check for spurious convergence of nablaf = 0
-      if (lcheck==LineSearchFailed) {
+      if (lcheck == LineSearchFailed) {
          test = 0.0;
          den = std::max(f,0.5*double(this->dim));
          for(size_t i=0; i<this->dim;i++)
