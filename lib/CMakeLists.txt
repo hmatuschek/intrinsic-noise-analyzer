@@ -59,9 +59,11 @@ SET(libina_expr_parser_HEADERS parser/expr/expr.hh
     parser/expr/ir.hh)
 
 SET(libina_expr2_parser_SOURCES
-    parser/expr2/tokens.cc parser/expr2/astnode.cc) # parser/expr2/expr_lexer.cc parser/expr2/expr_parser.cc)
+    parser/expr2/tokens.cc parser/expr2/astnode.cc)
+    #parser/expr2/internal_lexer.cc parser/expr2/internal_parser.cc)
 SET(libina_expr2_parser_HEADERS
-    parser/expr2/tokens.hh parser/expr2/astnode.hh) # parser/expr2/expr_lexer.hh parser/expr2/expr_parser.hh)
+    parser/expr2/tokens.hh parser/expr2/astnode.hh)
+    #parser/expr2/internal_lexer.hh parser/expr2/internal_parser.hh)
 
 SET(libina_unit_parser_SOURCES
     parser/unit/unitparser.cc)

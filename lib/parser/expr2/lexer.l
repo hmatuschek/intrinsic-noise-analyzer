@@ -11,16 +11,22 @@
 #include <stdio.h>
 #include <math.h>
 #include "astnode.hh"
-#include "expr_parser.hh"
+#include "internal_parser.hh"
+// Forwad declaration:
+int ina_parser_expr_error(const char *msg);
+#define YYSTYPE iNA::Parser::Expr2::AstNode*
 %}
  
-%option outfile="expr_lexer.cc" header-file="expr_lexer.hh"
-%option warn nodefault
-
-%option noyywrap 
+%option outfile="internal_lexer.cc" header-file="internal_lexer.hh"
+%option reentrant
 %option never-interactive 
 %option bison-bridge
 %option nounistd
+%option nodefault
+%option noinput
+%option nounput
+%option noyywrap
+%option warn
 %option prefix="ina_parser_expr_"
 
 
@@ -43,54 +49,54 @@ WS          [ \r\n\t]*
 }
 
 {NUMBER} {
-  long value; sscanf(yytext, "%d", &value);
-  yylvalue->expression = iNA::Parser::Expr2::AstNode::newInteger(value);
-  return TOKEN_INTEGER;
+  long value; sscanf(yytext, "%ld", &value);
+  (*yylval_param) = iNA::Parser::Expr2::AstNode::newInteger(value);
+  return _INA_PARSER_EXPR_TOKEN_INTEGER;
 }
 
 {NUMBER}"."{NUMBER}? {
   double value; sscanf(yytext, "%lf", &value);
-  yylvalue->expression = iNA::Parser::Expr2::AstNode::newFloat(value);
-  return TOKEN_FLOAT;
+  (*yylval_param) = iNA::Parser::Expr2::AstNode::newFloat(value);
+  return _INA_PARSER_EXPR_TOKEN_FLOAT;
 }
 
 {NUMBER}("."{NUMBER}?)?([eE]([\-])?{NUMBER}) {
-    double value; sscanf(yytext, "%lf", &value;);
-    yylvalue->expression = iNA::Parser::Expr2::AstNode::newFloat(value);
-    return TOKEN_FLOAT;
+    double value; sscanf(yytext, "%lf", &value);
+    (*yylval_param) = iNA::Parser::Expr2::AstNode::newFloat(value);
+    return _INA_PARSER_EXPR_TOKEN_FLOAT;
 }
 
 {IDENTIFIER} {
-  yylvalue->expression = iNA::Parser::Expr2::AstNode::newSymbol(yytext);
-  return TOKEN_IDENTIFIER;
+  (*yylval_param) = iNA::Parser::Expr2::AstNode::newSymbol(yytext);
+  return _INA_PARSER_EXPR_TOKEN_IDENTIFIER;
 }
 
 {POWER} {
-  return TOKEN_POWER;
+  return _INA_PARSER_EXPR_TOKEN_POWER;
 }
 
 {MULTIPLY} {
-  return TOKEN_MULTIPLY;
+  return _INA_PARSER_EXPR_TOKEN_MULTIPLY;
 }
 
 {DIVIDE} {
-  return TOKEN_DIVIDE;
+  return _INA_PARSER_EXPR_TOKEN_DIVIDE;
 }
 
 {PLUS} {
-  return TOKEN_PLUS;
+  return _INA_PARSER_EXPR_TOKEN_PLUS;
 }
 
 {MINUS} {
-  return TOKEN_MINUS;
+  return _INA_PARSER_EXPR_TOKEN_MINUS;
 }
 
 {LPAREN} {
-  return TOKEN_LPAREN;
+  return _INA_PARSER_EXPR_TOKEN_LPAREN;
 }
 
 {RPAREN} {
-  return TOKEN_RPAREN;
+  return _INA_PARSER_EXPR_TOKEN_RPAREN;
 }
 
 . {

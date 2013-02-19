@@ -28,26 +28,67 @@ protected:
   AstNode(long value);
   AstNode(double value);
   AstNode(const std::complex<double> &value);
+  AstNode(const std::string &name);
   AstNode(Type type, AstNode *lhs, AstNode *rhs);
   AstNode(Function function, AstNode *arg1);
+  ~AstNode();
 
 public:
-  static AstNode *newInteger(long value);
-  static AstNode *newFloat(double value);
-  static AstNode *newComplex(double real, double imag);
-  static AstNode *newComplex(const std::complex<double> &value);
-  static AstNode *newSymbol(const std::string &name);
-  static AstNode *newAdd(AstNode *lhs, AstNode *rhs);
-  static AstNode *newSub(AstNode *lhs, AstNode *rhs);
-  static AstNode *newMul(AstNode *lhs, AstNode *rhs);
-  static AstNode *newDiv(AstNode *lhs, AstNode *rhs);
-  static AstNode *newPow(AstNode *lhs, AstNode *rhs);
+  /** Factory method. */
+  static inline AstNode *newInteger(long value) {
+    return new AstNode(value);
+  }
+  /** Factory method. */
+  static inline AstNode *newFloat(double value) {
+    return new AstNode(value);
+  }
+  /** Factory method. */
+  static inline AstNode *newComplex(double real, double imag) {
+    return new AstNode(std::complex<double>(real, imag));
+  }
+  /** Factory method. */
+  static inline AstNode *newComplex(const std::complex<double> &value) {
+    return new AstNode(value);
+  }
+  /** Factory method. */
+  static inline AstNode *newSymbol(const std::string &name) {
+    return new AstNode(name);
+  }
+  /** Factory method. */
+  static inline AstNode *newAdd(AstNode *lhs, AstNode *rhs) {
+    return new AstNode(TYPE_ADD, lhs, rhs);
+  }
+  /** Factory method. */
+  static inline AstNode *newSub(AstNode *lhs, AstNode *rhs) {
+    return new AstNode(TYPE_SUB, lhs, rhs);
+  }
+  /** Factory method. */
+  static inline AstNode *newMul(AstNode *lhs, AstNode *rhs) {
+    return new AstNode(TYPE_MUL, lhs, rhs);
+  }
+  /** Factory method. */
+  static inline AstNode *newDiv(AstNode *lhs, AstNode *rhs) {
+    return new AstNode(TYPE_DIV, lhs, rhs);
+  }
+  /** Factory method. */
+  static inline AstNode *newPow(AstNode *base, AstNode *expo) {
+    return new AstNode(TYPE_POW, base, expo);
+  }
+  /** Factory method. */
+  static inline AstNode *newExp(AstNode *arg) {
+    return new AstNode(FUNCTION_EXP, arg);
+  }
+  /** Factory method. */
+  static inline AstNode *newLog(AstNode *arg) {
+    return new AstNode(FUNCTION_LOG, arg);
+  }
 
 private:
   Type _type;
   long _integer;
   double _float;
   std::complex<double> _complex;
+  std::string _identifier;
 
   Function _function_id;
   std::vector<AstNode *> _arguments;
