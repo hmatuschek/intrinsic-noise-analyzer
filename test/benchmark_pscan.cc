@@ -67,7 +67,7 @@ BenchmarkPscan::~BenchmarkPscan()
 void
 BenchmarkPscan::setUp()
 {
-  _sbml_model = Parser::Sbml::importModel("test/regression-tests/core_final.xml");
+  _sbml_model = Parser::Sbml::importModel("test/regression-tests/core_phos2.xml");
 }
 
 
