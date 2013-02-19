@@ -1,0 +1,1106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" version="4">
+  <model id="Core_Model" name="Core model for circadian rhythms">
+    <listOfUnitDefinitions>
+      <unitDefinition id="substance">
+        <listOfUnits>
+          <unit kind="mole" exponent="1" scale="-6" multiplier="1"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="volume">
+        <listOfUnits>
+          <unit kind="litre" exponent="1" scale="0" multiplier="1"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="area">
+        <listOfUnits>
+          <unit kind="metre" exponent="2" scale="0" multiplier="1"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="length">
+        <listOfUnits>
+          <unit kind="metre" exponent="1" scale="0" multiplier="1"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="time">
+        <listOfUnits>
+          <unit kind="second" exponent="1" scale="0" multiplier="86399.9999999999"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="compartment" name="cytosol" spatialDimensions="3" constant="true"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="M" name="M" compartment="compartment" hasOnlySubstanceUnits="false" constant="false"/>
+      <species id="P" name="P" compartment="compartment" hasOnlySubstanceUnits="false" constant="false"/>
+      <species id="Pstar" name="$P^*$" compartment="compartment" hasOnlySubstanceUnits="false" constant="false"/>
+      <species id="G" name="G" compartment="compartment" hasOnlySubstanceUnits="false" constant="false"/>
+      <species id="GP" name="GPN" compartment="compartment" hasOnlySubstanceUnits="false" constant="false"/>
+      <species id="GPN2" name="GPN2" compartment="compartment" hasOnlySubstanceUnits="false" constant="false"/>
+      <species id="E" name="E" compartment="compartment" hasOnlySubstanceUnits="false" constant="false"/>
+      <species id="EP" name="EP" compartment="compartment" hasOnlySubstanceUnits="false" constant="false"/>
+      <species id="D" name="D" compartment="compartment" hasOnlySubstanceUnits="false" constant="false"/>
+      <species id="DP" name="DP" compartment="compartment" hasOnlySubstanceUnits="false" constant="false"/>
+      <species id="R" compartment="compartment" hasOnlySubstanceUnits="false" constant="false"/>
+      <species id="RPC" compartment="compartment" hasOnlySubstanceUnits="false" constant="false"/>
+      <species id="S" compartment="compartment" hasOnlySubstanceUnits="false" constant="false"/>
+      <species id="SPN" compartment="compartment" hasOnlySubstanceUnits="false" constant="false"/>
+    </listOfSpecies>
+    <listOfParameters>
+      <parameter id="parameter_1" name="k2" constant="true"/>
+      <parameter id="parameter_2" name="km2" constant="true"/>
+      <parameter id="transcription" name="k0" constant="true"/>
+      <parameter id="parameter_4" name="k3" constant="true"/>
+      <parameter id="parameter_5" name="Omega" constant="true"/>
+      <parameter id="feedback" constant="true"/>
+      <parameter id="bind" constant="true"/>
+      <parameter id="unbind" constant="true"/>
+      <parameter id="kcat" constant="true"/>
+    </listOfParameters>
+    <listOfInitialAssignments>
+      <initialAssignment symbol="parameter_1">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <apply>
+            <times/>
+            <ci> parameter_5 </ci>
+            <ci> feedback </ci>
+            <cn> 0.5 </cn>
+          </apply>
+        </math>
+      </initialAssignment>
+      <initialAssignment symbol="parameter_2">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <apply>
+            <times/>
+            <ci> parameter_5 </ci>
+            <cn> 0.5 </cn>
+          </apply>
+        </math>
+      </initialAssignment>
+      <initialAssignment symbol="transcription">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <apply>
+            <times/>
+            <ci> parameter_5 </ci>
+            <cn> 500 </cn>
+          </apply>
+        </math>
+      </initialAssignment>
+      <initialAssignment symbol="parameter_4">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <apply>
+            <times/>
+            <ci> parameter_1 </ci>
+            <cn> 50 </cn>
+          </apply>
+        </math>
+      </initialAssignment>
+      <initialAssignment symbol="parameter_5">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <apply>
+            <times/>
+            <ci> compartment </ci>
+            <cn type="e-notation"> 6 <sep/> 17 </cn>
+          </apply>
+        </math>
+      </initialAssignment>
+      <initialAssignment symbol="feedback">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <cn> 10 </cn>
+        </math>
+      </initialAssignment>
+      <initialAssignment symbol="bind">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <cn> 10 </cn>
+        </math>
+      </initialAssignment>
+      <initialAssignment symbol="unbind">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <cn> 1 </cn>
+        </math>
+      </initialAssignment>
+      <initialAssignment symbol="kcat">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <cn> 1 </cn>
+        </math>
+      </initialAssignment>
+      <initialAssignment symbol="compartment">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <cn type="e-notation"> 1 <sep/> -15 </cn>
+        </math>
+      </initialAssignment>
+      <initialAssignment symbol="M">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <cn> 0 </cn>
+        </math>
+      </initialAssignment>
+      <initialAssignment symbol="P">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <cn> 0 </cn>
+        </math>
+      </initialAssignment>
+      <initialAssignment symbol="Pstar">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <cn> 0 </cn>
+        </math>
+      </initialAssignment>
+      <initialAssignment symbol="G">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <apply>
+            <power/>
+            <ci> parameter_5 </ci>
+            <cn> -1 </cn>
+          </apply>
+        </math>
+      </initialAssignment>
+      <initialAssignment symbol="GP">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <cn> 0 </cn>
+        </math>
+      </initialAssignment>
+      <initialAssignment symbol="GPN2">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <cn> 0 </cn>
+        </math>
+      </initialAssignment>
+      <initialAssignment symbol="E">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <cn> 10 </cn>
+        </math>
+      </initialAssignment>
+      <initialAssignment symbol="EP">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <cn> 0 </cn>
+        </math>
+      </initialAssignment>
+      <initialAssignment symbol="D">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <cn> 1 </cn>
+        </math>
+      </initialAssignment>
+      <initialAssignment symbol="DP">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <cn> 0 </cn>
+        </math>
+      </initialAssignment>
+      <initialAssignment symbol="R">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <cn> 1 </cn>
+        </math>
+      </initialAssignment>
+      <initialAssignment symbol="RPC">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <cn> 0 </cn>
+        </math>
+      </initialAssignment>
+      <initialAssignment symbol="S">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <cn> 1 </cn>
+        </math>
+      </initialAssignment>
+      <initialAssignment symbol="SPN">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <cn> 0 </cn>
+        </math>
+      </initialAssignment>
+    </listOfInitialAssignments>
+    <listOfReactions>
+      <reaction id="reaction_1" name="transscription" reversible="false">
+        <listOfReactants>
+          <speciesReference species="G">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="G">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+          <speciesReference species="M">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> G </ci>
+              <ci> transcription </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_2" name="translate" reversible="false">
+        <listOfReactants>
+          <speciesReference species="M">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="P">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+          <speciesReference species="M">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> M </ci>
+              <ci> ks </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="ks" name="ks" value="5"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_5" name="pg unbind" reversible="false">
+        <listOfReactants>
+          <speciesReference species="GP">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="G">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+          <speciesReference species="Pstar">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> parameter_2 </ci>
+              <ci> GP </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_9" name="enzyme2bindP" reversible="false">
+        <listOfReactants>
+          <speciesReference species="E">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+          <speciesReference species="Pstar">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="EP">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> Pstar </ci>
+              <ci> k4 </ci>
+              <ci> compartment </ci>
+              <ci> E </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k4" name="k4" value="10"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_10" name="enzyme2unbindP" reversible="false">
+        <listOfReactants>
+          <speciesReference species="EP">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="E">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+          <speciesReference species="Pstar">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> km4 </ci>
+              <ci> EP </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="km4" name="km4" value="5"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_11" name="enzyme2cat" reversible="false">
+        <listOfReactants>
+          <speciesReference species="EP">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="E">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> EP </ci>
+              <ci> kcat4 </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="kcat4" name="kcat4" value="10"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_6" name="p degrad" reversible="false">
+        <listOfReactants>
+          <speciesReference species="P">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfReactants>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> P </ci>
+              <ci> kdp </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="kdp" name="kdp" value="0.5"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_7" name="m degrad" reversible="false">
+        <listOfReactants>
+          <speciesReference species="M">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfReactants>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> kdm </ci>
+              <ci> M </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="kdm" name="kdm" value="5"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_8" name="pg bind" reversible="false">
+        <listOfReactants>
+          <speciesReference species="G">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+          <speciesReference species="Pstar">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="GP">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> Pstar </ci>
+              <ci> compartment </ci>
+              <ci> G </ci>
+              <ci> parameter_1 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_13" name="transport in" reversible="false">
+        <listOfReactants>
+          <speciesReference species="P">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Pstar">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> kin </ci>
+              <ci> P </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="kin" name="kin" value="0"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_14" name="transport out" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Pstar">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="P">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> Pstar </ci>
+              <ci> compartment </ci>
+              <ci> kout </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="kout" name="kout" value="0"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_3" name="pg bind2" reversible="false">
+        <listOfReactants>
+          <speciesReference species="GP">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+          <speciesReference species="Pstar">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="GPN2">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> Pstar </ci>
+              <ci> compartment </ci>
+              <ci> GP </ci>
+              <ci> parameter_4 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_4" name="pg unbind2" reversible="false">
+        <listOfReactants>
+          <speciesReference species="GPN2">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="GP">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+          <speciesReference species="Pstar">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> parameter_2 </ci>
+              <ci> GPN2 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_12" name="enzyme1bind" reversible="false">
+        <listOfReactants>
+          <speciesReference species="P">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+          <speciesReference species="D">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="DP">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> k3 </ci>
+              <ci> P </ci>
+              <ci> D </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k3" name="k3" value="0.5"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_15" name="enzyme1unbind" reversible="false">
+        <listOfReactants>
+          <speciesReference species="DP">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="P">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+          <speciesReference species="D">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> DP </ci>
+              <ci> km3 </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="km3" name="km3" value="0.5"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_16" name="enzyme1cat" reversible="false">
+        <listOfReactants>
+          <speciesReference species="DP">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="D">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> DP </ci>
+              <ci> kcat3 </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="kcat3" name="kcat3" value="0.5"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reactionReverse" name="unbindR (Reverse)" reversible="false">
+        <listOfReactants>
+          <speciesReference species="RPC">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="P">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+          <speciesReference species="R">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> k_rev </ci>
+              <ci> RPC </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k_rev" name="$k_rev$" value="5"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction" name="bindR" reversible="false">
+        <listOfReactants>
+          <speciesReference species="P">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+          <speciesReference species="R">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="RPC">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> k </ci>
+              <ci> R </ci>
+              <ci> P </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k" name="k" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_18" name="bindS" reversible="false">
+        <listOfReactants>
+          <speciesReference species="S">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+          <speciesReference species="Pstar">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="SPN">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> Pstar </ci>
+              <ci> compartment </ci>
+              <ci> S </ci>
+              <ci> k </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k" name="k" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_18Reverse" name="unbindS" reversible="false">
+        <listOfReactants>
+          <speciesReference species="SPN">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="S">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+          <speciesReference species="Pstar">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> k_1 </ci>
+              <ci> compartment </ci>
+              <ci> SPN </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k_1" name="k" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_17Reverse" name="reverseR" reversible="false">
+        <listOfReactants>
+          <speciesReference species="R">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+          <speciesReference species="Pstar">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="RPC">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> Pstar </ci>
+              <ci> compartment </ci>
+              <ci> k </ci>
+              <ci> R </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k" name="k" value="0"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_17" name="Rcat" reversible="false">
+        <listOfReactants>
+          <speciesReference species="RPC">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="R">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+          <speciesReference species="Pstar">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> k </ci>
+              <ci> RPC </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k" name="k" value="500"/>
+            <parameter id="k_fwd" name="$k_fwd$" value="5"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_19" name="Scat" reversible="false">
+        <listOfReactants>
+          <speciesReference species="SPN">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="P">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+          <speciesReference species="S">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> k </ci>
+              <ci> SPN </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k" name="k" value="500"/>
+            <parameter id="k_fwd" name="$k_fwd$" value="5"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_19Reverse" name="reverseS" reversible="false">
+        <listOfReactants>
+          <speciesReference species="P">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+          <speciesReference species="S">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="SPN">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> S </ci>
+              <ci> P </ci>
+              <ci> k </ci>
+            </apply>
+          </math>
+          <listOfParameters>
+            <parameter id="k" name="k" value="0"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>
