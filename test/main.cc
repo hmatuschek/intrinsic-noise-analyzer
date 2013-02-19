@@ -88,11 +88,11 @@ int main(int argc, char *argv[])
   if (0 == skipped_tests.count("ConservationAnalysis"))
     runner.addSuite(ConservationAnalysisTest::suite());
   if (0 == skipped_tests.count("UnitParser"))
-    runner.addSuite(UnitParserTest::suite());*/
+    runner.addSuite(UnitParserTest::suite());
   if (0 == skipped_tests.count("Benchmark"))
-    runner.addSuite(Benchmark::suite());
-  /*if (0 == skipped_tests.count("BenchmarkPscan"))
-    runner.addSuite(BenchmarkPscan::suite());*/
+    runner.addSuite(Benchmark::suite());*/
+  if (0 == skipped_tests.count("BenchmarkPscan"))
+    runner.addSuite(BenchmarkPscan::suite());
 
   // Exec tests:
   runner();
