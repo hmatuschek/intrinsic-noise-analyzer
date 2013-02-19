@@ -19,7 +19,7 @@
 
 %option noyywrap 
 %option never-interactive 
-%option bisonbridge
+%option bison-bridge
 %option nounistd
 %option prefix="ina_parser_expr_"
 
@@ -38,20 +38,64 @@ WS          [ \r\n\t]*
  
 %%
  
-{WS}            { /* Skip blanks. */ }
-{NUMBER}        { sscanf(yytext, "%d", &yylval->integer_value); return TOKEN_INTEGER; }
-{NUMBER}"."{NUMBER}? { sscanf(yytext, "%lf", &yylval->double_value); return TOKEN_FLOAT; }
-{NUMBER}("."{NUMBER}?)?([eE]([\-])?{NUMBER}) {
-                  sscanf(yytext, "%lf", &yylval->double_value;); return TOKEN_FLOAT; }
-{IDENTIFIER}    { yylval->string = yytext; return TOKEN_IDENTIFIER; }
-{POWER}         { return TOKEN_POWER; }
-{MULTIPLY}      { return TOKEN_MULTIPLY; }
-{DIVIDE}        { return TOKEN_DIVIDE; }
-{PLUS}          { return TOKEN_PLUS; }
-{MINUS}         { return TOKEN_MINUS; }
-{LPAREN}        { return TOKEN_LPAREN; }
-{RPAREN}        { return TOKEN_RPAREN; }
+{WS} {
+  /* Skip blanks. */
+}
 
+{NUMBER} {
+  long value; sscanf(yytext, "%d", &value);
+  yylvalue->expression = iNA::Parser::Expr2::AstNode::newInteger(value);
+  return TOKEN_INTEGER;
+}
+
+{NUMBER}"."{NUMBER}? {
+  double value; sscanf(yytext, "%lf", &value);
+  yylvalue->expression = iNA::Parser::Expr2::AstNode::newFloat(value);
+  return TOKEN_FLOAT;
+}
+
+{NUMBER}("."{NUMBER}?)?([eE]([\-])?{NUMBER}) {
+    double value; sscanf(yytext, "%lf", &value;);
+    yylvalue->expression = iNA::Parser::Expr2::AstNode::newFloat(value);
+    return TOKEN_FLOAT;
+}
+
+{IDENTIFIER} {
+  yylvalue->expression = iNA::Parser::Expr2::AstNode::newSymbol(yytext);
+  return TOKEN_IDENTIFIER;
+}
+
+{POWER} {
+  return TOKEN_POWER;
+}
+
+{MULTIPLY} {
+  return TOKEN_MULTIPLY;
+}
+
+{DIVIDE} {
+  return TOKEN_DIVIDE;
+}
+
+{PLUS} {
+  return TOKEN_PLUS;
+}
+
+{MINUS} {
+  return TOKEN_MINUS;
+}
+
+{LPAREN} {
+  return TOKEN_LPAREN;
+}
+
+{RPAREN} {
+  return TOKEN_RPAREN;
+}
+
+. {
+  ina_parser_expr_error("Unexpected char.");
+}
  
 %%
  
