@@ -58,32 +58,23 @@ SET(libina_expr_parser_HEADERS parser/expr/expr.hh
     parser/expr/lexer.hh parser/expr/parser.hh parser/expr/productions.hh parser/expr/assembler.hh
     parser/expr/ir.hh)
 
-SET(libina_expr2_parser_SOURCES
-    parser/expr2/tokens.cc parser/expr2/astnode.cc) # parser/expr2/expr_lexer.cc parser/expr2/expr_parser.cc)
-SET(libina_expr2_parser_HEADERS
-    parser/expr2/tokens.hh parser/expr2/astnode.hh) # parser/expr2/expr_lexer.hh parser/expr2/expr_parser.hh)
-
 SET(libina_unit_parser_SOURCES
     parser/unit/unitparser.cc)
 SET(libina_unit_parser_HEADERS
     parser/unit/unitparser.hh)
 
 SET(libina_parser_SOURCES
-    parser/automata.cc parser/lexer.cc parser/production.cc parser/exception.cc
+    parser/automata.cc parser/lexer.cc parser/production.cc parser/exception.cc parser/ll1.cc
     ${libina_sbmlsh_parser_SOURCES}
     ${libina_sbml_parser_SOURCES}
     ${libina_expr_parser_SOURCES}
-    ${libina_expr2_parser_SOURCES}
     ${libina_unit_parser_SOURCES})
 SET(libina_parser_HEADERS
-    parser/automata.hh parser/lexer.hh parser/production.hh parser/exception.hh
+    parser/automata.hh parser/lexer.hh parser/production.hh parser/exception.hh  parser/ll1.hh
     ${libina_sbmlsh_parser_HEADERS}
     ${libina_sbml_parser_HEADERS}
     ${libina_expr_parser_HEADERS}
-    ${libina_expr2_parser_HEADERS}
     ${libina_unit_parser_HEADERS})
-SET(libina_parser_EXTRA
-    parser/expr2/lexer.l parser/expr2/parser.y)
 
 SET(libina_utils_SOURCES
     utils/exception.cc utils/unittest.cc utils/option_parser.cc utils/cputime.cc utils/logger.cc
