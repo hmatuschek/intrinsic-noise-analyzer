@@ -63,18 +63,18 @@ int main(int argc, char *argv[])
   TestRunner runner(std::cout);
 
   // Add test suites:
-  /*if (0 == skipped_tests.count("GinacForEigen"))
+  if (0 == skipped_tests.count("GinacForEigen"))
     runner.addSuite(GinacForEigenTest::suite());
   if (0 == skipped_tests.count("Interpreter"))
     runner.addSuite(InterpreterTest::suite());
   if (0 == skipped_tests.count("Math"))
     runner.addSuite(MathTest::suite());
-  if (0 == skipped_tests.count("ODE"))
-    runner.addSuite(ODETest::suite());
+  /*if (0 == skipped_tests.count("ODE"))
+    runner.addSuite(ODETest::suite());*/
   if (0 == skipped_tests.count("ModelCopy"))
     runner.addSuite(ModelCopyTest::suite());
-  if (0 == skipped_tests.count("RNG"))
-    runner.addSuite(MersenneTwisterTest::suite());
+  /*if (0 == skipped_tests.count("RNG"))
+    runner.addSuite(MersenneTwisterTest::suite());*/
   if (0 == skipped_tests.count("Regression"))
     runner.addSuite(RegressionTest::suite());
   if (0 == skipped_tests.count("ExpressionParser"))
@@ -88,10 +88,10 @@ int main(int argc, char *argv[])
   if (0 == skipped_tests.count("ConservationAnalysis"))
     runner.addSuite(ConservationAnalysisTest::suite());
   if (0 == skipped_tests.count("UnitParser"))
-    runner.addSuite(UnitParserTest::suite());*/
-  if (0 == skipped_tests.count("Benchmark"))
+    runner.addSuite(UnitParserTest::suite());
+  /*if (0 == skipped_tests.count("Benchmark"))
     runner.addSuite(Benchmark::suite());
-  /*if (0 == skipped_tests.count("BenchmarkPscan"))
+  if (0 == skipped_tests.count("BenchmarkPscan"))
     runner.addSuite(BenchmarkPscan::suite());*/
 
   // Exec tests:

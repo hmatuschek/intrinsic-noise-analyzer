@@ -132,11 +132,15 @@ public:
         Eigen::VectorXd init(sseLength+offset);
         this->sseModel.getInitialState(init);
 
-        x.head(offset+sseLength)=init;
+        x.head(offset+sseLength).noalias()=init;
 
         // Iterate over all parameter sets
         for(size_t j = 0; j < parameterSets.size(); j++)
         {
+
+            Utils::Message message(LOG_MESSAGE(Utils::Message::INFO));
+            message << "Parameter Scan (" << j+1 << "/" << parameterSets.size() << ")";
+            Utils::Logger::get().log(message);
 
             // Generate parameter substitution table
             Trafo::excludeType ptab = this->sseModel.makeExclusionTable(parameterSets[j]);
@@ -160,10 +164,7 @@ public:
             {
 
                 // Solve the deterministic equations
-                //this->solver.set(index,REs,Jacobian,opt_level);
-
                 iter = this->solver.solve(x, this->max_time, this->min_time_step, parameterSets[j]);
-                //x.head(offset) = conc;
 
                 // Now calculate LNA
                 calcLNA(this->sseModel,x);
@@ -203,7 +204,7 @@ protected:
         matrix_interpreter.run(x,B);
 
         // (needs to go in function to match template)
-        x.segment(offset,lnaLength) = computeLNA.solve(B,-A);
+        x.segment(offset,lnaLength).noalias() = computeLNA.solve(B,-A);
 
     }
 
@@ -229,7 +230,7 @@ protected:
       interpreter.run(x,Aios);
       matrix_interpreter.run(x,Bios);
 
-      x.segment(offset+lnaLength, iosLength) = computeIOS.solve(Bios,-Aios);
+      x.segment(offset+lnaLength, iosLength).noalias() = computeIOS.solve(Bios,-Aios);
 
     }
 

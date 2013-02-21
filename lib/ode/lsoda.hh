@@ -99,9 +99,8 @@ public:
 private:
 
  void     stoda(int neq, double *y);
- void     correction(int neq, double *y, 
-						   int *corflag, double pnorm, double *del, double *delp, double *told,
-                                                   int *ncf, double *rh, int *m);
+ void     correction(int neq, double *y, int *corflag, double pnorm, double *del, double *delp, double *told,
+                     int *ncf, double *rh, int *m);
  void     prja(int neq, double *y);
  void     terminate(int *istate);
  void     terminate2(double *y, double *t);

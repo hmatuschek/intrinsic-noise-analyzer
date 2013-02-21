@@ -64,13 +64,13 @@ SET(libina_unit_parser_HEADERS
     parser/unit/unitparser.hh)
 
 SET(libina_parser_SOURCES
-    parser/automata.cc parser/lexer.cc parser/production.cc parser/exception.cc
+    parser/automata.cc parser/lexer.cc parser/production.cc parser/exception.cc parser/ll1.cc
     ${libina_sbmlsh_parser_SOURCES}
     ${libina_sbml_parser_SOURCES}
     ${libina_expr_parser_SOURCES}
     ${libina_unit_parser_SOURCES})
 SET(libina_parser_HEADERS
-    parser/automata.hh parser/lexer.hh parser/production.hh parser/exception.hh
+    parser/automata.hh parser/lexer.hh parser/production.hh parser/exception.hh  parser/ll1.hh
     ${libina_sbmlsh_parser_HEADERS}
     ${libina_sbml_parser_HEADERS}
     ${libina_expr_parser_HEADERS}
@@ -149,6 +149,7 @@ SET(libina_nlesolve_SOURCES
    nlesolve/hybridsolver.cc
    nlesolve/precisionsolve.cc)
 SET(libina_nlesolve_HEADERS
+   nlesolve/nlesolve.hh
    nlesolve/nlesolver.hh
    nlesolve/newtonraphson.hh
    nlesolve/hybridsolver.hh
@@ -237,6 +238,11 @@ SET(libina_HEADERS
     ${libina_eval_HEADERS})
 
 
+# Declare user defined target to collect all non-code files:
+SET(libina_EXTRA ${libina_parser_EXTRA})
+ADD_CUSTOM_TARGET(libinaextra SOURCES ${libina_EXTRA})
+
+
 #
 # Recursive copy header files to ${CMAKE_BINARY_DIR}/include/libina
 #
@@ -256,5 +262,5 @@ INSTALL(TARGETS libina
 
 # Install header files
 IF(UNIX AND APPLE)
-INSTALL_HEADERS_WITH_DIRECTORY("${libina_HEADERS}" "${CMAKE_INSTALL_FULL_INCLUDEDIR}/libina")
+INSTALL_HEADERS_WITH_DIRECTORY("${libina_HEADERS}" "${CMAKE_INSTALL_INCLUDEDIR}/libina")
 ENDIF(UNIX AND APPLE)

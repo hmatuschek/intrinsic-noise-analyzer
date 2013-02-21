@@ -63,7 +63,7 @@ ExpressionEditor::keyPressEvent(QKeyEvent *event)
 
   // Complete anyway if there are at least 3 chars under the cursor:
   QString prefix; idUnderCursor(prefix);
-  if (3 <= prefix.length()) {
+  if (1 <= prefix.length()) {
     _completer->setCompletionPrefix(prefix);
     _completer->complete();
   }
