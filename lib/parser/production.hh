@@ -244,11 +244,11 @@ public:
 };
 
 
-/** An optional list production, the child production migt match zero or more times.
- * The typical application of this production are associative operators or list. This production
+/** An optional list production, the child production might match zero or more times.
+ * The typical application of this production are associative operators or lists. This production
  * allows to specifiy these grammars as non-recursive lists. I.e.:
  *
- *   Expression ::= Product {['+'|'-'] Product}
+ *   Expression ::= Product {('+'|'-') Product}
  *
  * @ingroup parser */
 class ListProduction : public Production

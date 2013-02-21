@@ -44,23 +44,21 @@ NumberProduction::get()
  * Implementation of ExpressionProduction:
  *
  * Expression =
- *   (ProductExpression ("+"|"-") Expression) | ProductExpression;
+ *   ProductExpression {("+"|"-") ProductExpression};
  * ******************************************************************************************** */
 ExpressionProduction::ExpressionProduction()
-  : AltProduction()
+  : Production()
 {
   ExpressionProduction::instance = this;
 
-  this->alternatives.resize(2);
+  elements.push_back(ProductExpressionProduction::get());
+  elements.push_back(
+      new iNA::Parser::ListProduction(
+        new iNA::Parser::Production(
+          2,new Parser::AltProduction(
+            2, new Parser::TokenProduction(T_PLUS), new Parser::TokenProduction(T_MINUS)),
+          ProductExpressionProduction::get())));
 
-  this->alternatives[0] =
-      new iNA::Parser::Production(
-        3, ProductExpressionProduction::get(),
-        new Parser::AltProduction(
-          2, new Parser::TokenProduction(T_PLUS), new Parser::TokenProduction(T_MINUS)),
-        ExpressionProduction::get());
-
-  this->alternatives[1] = ProductExpressionProduction::get();
 }
 
 ExpressionProduction *ExpressionProduction::instance = 0;

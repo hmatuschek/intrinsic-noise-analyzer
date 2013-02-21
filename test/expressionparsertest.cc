@@ -5,6 +5,69 @@ using namespace iNA;
 
 
 void
+ExpressionParserTest::testParserSum() {
+  Parser::Expr::TableContext ctx; GiNaC::symbol a("a"), b("b"), c("c"), d("d");
+  ctx.addSymbol("a", a); ctx.addSymbol("b", b); ctx.addSymbol("c", c); ctx.addSymbol("d", d);
+
+  { // Test a-b
+    GiNaC::ex true_expr = a-b;
+    std::stringstream buffer; buffer << "a-b";
+    GiNaC::ex expr = Parser::Expr::parseExpression(buffer.str(), ctx);
+    UT_ASSERT_EQUAL(expr.expand(), true_expr.expand());
+  }
+
+  { // Test a-b-c
+    GiNaC::ex true_expr = a-b-c;
+    std::stringstream buffer; buffer << "a-b-c";
+    GiNaC::ex expr = Parser::Expr::parseExpression(buffer.str(), ctx);
+    UT_ASSERT_EQUAL(expr.expand(), true_expr.expand());
+  }
+
+  { // Test a-b+c-d
+    GiNaC::ex true_expr = a-b+c-d;
+    std::stringstream buffer; buffer << "a-b+c-d";
+    GiNaC::ex expr = Parser::Expr::parseExpression(buffer.str(), ctx);
+    UT_ASSERT_EQUAL(expr.expand(), true_expr.expand());
+  }
+
+  { // Test a+-b
+    GiNaC::ex true_expr = a+-b;
+    std::stringstream buffer; buffer << "a+-b";
+    GiNaC::ex expr = Parser::Expr::parseExpression(buffer.str(), ctx);
+    UT_ASSERT_EQUAL(expr.expand(), true_expr.expand());
+  }
+
+  { // Test a-(b+c)
+    GiNaC::ex true_expr = a-(b+c);
+    std::stringstream buffer; buffer << "a-(b+c)";
+    GiNaC::ex expr = Parser::Expr::parseExpression(buffer.str(), ctx);
+    UT_ASSERT_EQUAL(expr.expand(), true_expr.expand());
+  }
+}
+
+
+void
+ExpressionParserTest::testParserProd() {
+  Parser::Expr::TableContext ctx; GiNaC::symbol a("a"), b("b"), c("c"), d("d");
+  ctx.addSymbol("a", a); ctx.addSymbol("b", b); ctx.addSymbol("c", c); ctx.addSymbol("d", d);
+
+  { // Test a*b
+    GiNaC::ex true_expr = a*b;
+    std::stringstream buffer; buffer << "a*b";
+    GiNaC::ex expr = Parser::Expr::parseExpression(buffer.str(), ctx);
+    UT_ASSERT_EQUAL(expr.expand(), true_expr.expand());
+  }
+
+  { // Test a/b/c
+    GiNaC::ex true_expr = a/b/c;
+    std::stringstream buffer; buffer << "a/b/c";
+    GiNaC::ex expr = Parser::Expr::parseExpression(buffer.str(), ctx);
+    UT_ASSERT_EQUAL(expr.expand(), true_expr.expand());
+  }
+}
+
+
+void
 ExpressionParserTest::testParser() {
   Parser::Expr::TableContext ctx;
   ctx.addSymbol("a", GiNaC::symbol("a"));
@@ -75,7 +138,13 @@ ExpressionParserTest::suite()
   UnitTest::TestSuite *s = new UnitTest::TestSuite("Tests for expresion parser.");
 
   s->addTest(new UnitTest::TestCaller<ExpressionParserTest>(
-               "simple parser", &ExpressionParserTest::testParser));
+               "simple parser: sums", &ExpressionParserTest::testParserSum));
+
+  s->addTest(new UnitTest::TestCaller<ExpressionParserTest>(
+               "simple parser: products", &ExpressionParserTest::testParserProd));
+
+  s->addTest(new UnitTest::TestCaller<ExpressionParserTest>(
+               "simple serialization", &ExpressionParserTest::testParser));
 
   s->addTest(new UnitTest::TestCaller<ExpressionParserTest>(
                "pretty serialization", &ExpressionParserTest::testPrettySerialization));

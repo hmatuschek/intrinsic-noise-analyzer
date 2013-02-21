@@ -136,7 +136,7 @@ private:
  * Expression =
  *   (ProductExpression ("+"|"-") Expression) | ProductExpression;
  */
-class ExpressionProduction : public Parser::AltProduction
+class ExpressionProduction : public Parser::Production
 {
 protected:
   /** Hidden constructor. */

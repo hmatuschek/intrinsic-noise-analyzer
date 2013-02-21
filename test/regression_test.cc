@@ -66,12 +66,8 @@ RegressionTest::testNonConstantCompartment()
 void
 RegressionTest::testNoAlgebraicConstraint()
 {
-  Ast::Model *model = Parser::Sbml::importModel("test/regression-tests/algebraicrules.xml");
-
-  UT_ASSERT_THROW(Models::REmodel re_model(*model),
+  UT_ASSERT_THROW(Parser::Sbml::importModel("test/regression-tests/algebraicrules.xml"),
                   iNA::SBMLFeatureNotSupported);
-
-  delete model;
 }
 
 

@@ -377,8 +377,8 @@ ListProduction::parse(Lexer &lexer, ConcreteSyntaxTree &element)
   ConcreteSyntaxTree::asListNode(element);
 
   // Try to parse as much as possible list elements:
-  bool parse_success = true; size_t idx = 0;
-  while (parse_success) {
+  size_t idx = 0;
+  while (true) {
     lexer.push_state();
     try {
       element.addChild();
