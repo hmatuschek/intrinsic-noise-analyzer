@@ -64,7 +64,22 @@ ExpressionParserTest::testParserProd() {
     GiNaC::ex expr = Parser::Expr::parseExpression(buffer.str(), ctx);
     UT_ASSERT_EQUAL(expr.expand(), true_expr.expand());
   }
+
+  { // Test a+b*c
+    GiNaC::ex true_expr = a+b*c;
+    std::stringstream buffer; buffer << "a+b*c";
+    GiNaC::ex expr = Parser::Expr::parseExpression(buffer.str(), ctx);
+    UT_ASSERT_EQUAL(expr.expand(), true_expr.expand());
+  }
+
+  { // Test a*-b
+    GiNaC::ex true_expr = a*-b;
+    std::stringstream buffer; buffer << "a*-b";
+    GiNaC::ex expr = Parser::Expr::parseExpression(buffer.str(), ctx);
+    UT_ASSERT_EQUAL(expr.expand(), true_expr.expand());
+  }
 }
+
 
 
 void
