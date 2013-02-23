@@ -248,7 +248,8 @@ SBMLSHParserTest::testParserModel()
          << "    cytosol*k1*ES: k1=1" << std::endl;   //
 
     Sbmlsh::Parser parser(text);
-    parser.parse();
+    Ast::Model *model = parser.parse();
+    delete model;
   }
 }
 
@@ -277,7 +278,9 @@ SBMLSHParserTest::testVarDefOrder()
        << "    cytosol*k1*ES: k1=1" << std::endl;   //
 
   Sbmlsh::Parser parser(text);
-  UT_ASSERT_NOTHROW(parser.parse());
+  Ast::Model *model = 0;
+  UT_ASSERT_NOTHROW(model = parser.parse());
+  if (0 != model) { delete model; }
 }
 
 
