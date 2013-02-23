@@ -49,7 +49,7 @@ public:
    */
   LsodaDriver(Sys &system, double dt, double epsilon_abs, double epsilon_rel)
       : system(system), step_size(dt), err_abs(epsilon_abs), err_rel(epsilon_rel),
-        ywork(0), rtolwork(0), atolwork(0)
+        ywork(0), atolwork(0), rtolwork(0)
   {
     istate=1;
     // allocate working memory:
