@@ -2,6 +2,7 @@
 #include <iostream>
 
 #include "unittest.hh"
+#include "retest.hh"
 #include "lnatest.hh"
 #include "iostest.hh"
 #include "interpretertest.hh"
@@ -91,6 +92,8 @@ int main(int argc, char *argv[])
     runner.addSuite(ConservationAnalysisTest::suite());
   if (0 == skipped_tests.count("UnitParser"))
     runner.addSuite(UnitParserTest::suite());
+  if (0 == skipped_tests.count("RETest"))
+    runner.addSuite(RETest::suite());
   if (0 == skipped_tests.count("LNATest"))
     runner.addSuite(LNATest::suite());
   if (0 == skipped_tests.count("IOSTest"))
