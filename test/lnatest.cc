@@ -15,21 +15,9 @@ LNATest::~LNATest()
 }
 
 void
-LNATest::testEnzymeKineticsOpen()
+LNATest::testCoreOSC()
 {
-  this->compareIntegrators("doc/sbmlmodels/enzymekinetics_open.xml", 1.0);
-}
-
-void
-LNATest::testDimerization()
-{
-  this->compareIntegrators("doc/sbmlmodels/dimerization.xml", 0.10);
-}
-
-void
-LNATest::testDimerization2()
-{
-  this->compareIntegrators("doc/sbmlmodels/dimerization2.xml", 1.0);
+  this->compareIntegrators("test/regression-tests/core_osc.xml", 1.0);
 }
 
 
@@ -64,15 +52,14 @@ LNATest::integrateViaByteCode(Models::LNAmodel &model,
   double dt=final_time/N;
 
   Models::LNAinterpreter interpreter(model, 1);
-  ODE::RKF45<Models::LNAinterpreter> integrator(interpreter, dt, err_abs, err_rel);
+  ODE::LsodaDriver<Models::LNAinterpreter> integrator(interpreter, dt, err_abs, err_rel);
 
-  // state vector (deterministic concentrations + covariances)
+  // state vector
   Eigen::VectorXd x(init_state);
   Eigen::VectorXd dx(integrator.getDimension());
 
   double t = 0.0;
-  for(size_t i=0; i<N; i++,t+=dt)
-  {
+  for(size_t i=0; i<N; i++,t+=dt) {
     integrator.step(x,t,dx);
     x += dx; t += dt;
   }
@@ -89,10 +76,7 @@ LNATest::suite()
   UnitTest::TestSuite *s = new UnitTest::TestSuite("Linear Noise Approximation Tests");
 
   s->addTest(new UnitTest::TestCaller<LNATest>(
-               "EnzymeKineticsOpen.", &LNATest::testEnzymeKineticsOpen));
-
-  s->addTest(new UnitTest::TestCaller<LNATest>(
-               "Dimerization 2.", &LNATest::testDimerization2));
+               "Core Model OSC", &LNATest::testCoreOSC));
 
   return s;
 }
