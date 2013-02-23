@@ -3,7 +3,7 @@
 #include <sstream>
 #include "parser/sbmlsh/lexer.hh"
 #include "parser/sbmlsh/parser.hh"
-
+#include <ast/model.hh>
 
 using namespace iNA;
 using namespace iNA::Parser;
