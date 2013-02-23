@@ -78,23 +78,21 @@ ExpressionProduction::get()
  * Implementation of ProductExpressionProduction:
  *
  * ProductExpression =
- *   (PowerExpression ("*" | "/") ProductExpression) | PowerExpression;
+ *   PowerExpression {("*" | "/") PowerExpression};
  * ******************************************************************************************** */
 ProductExpressionProduction::ProductExpressionProduction()
-  : AltProduction()
+  : Production()
 {
   ProductExpressionProduction::instance = this;
 
-  this->alternatives.resize(2);
-
-  this->alternatives[0] =
-      new Parser::Production(
-        3, PowerExpressionProduction::get(),
-        new Parser::AltProduction(
-          2, new Parser::TokenProduction(T_TIMES), new Parser::TokenProduction(T_DIVIDE)),
-        ProductExpressionProduction::get());
-
-  this->alternatives[1] = PowerExpressionProduction::get();
+  this->elements.push_back( PowerExpressionProduction::get() );
+  this->elements.push_back(
+        new Parser::ListProduction(
+          new Parser::Production(
+            2,
+            new Parser::AltProduction(
+              2, new Parser::TokenProduction(T_TIMES), new Parser::TokenProduction(T_DIVIDE)),
+            PowerExpressionProduction::get())));
 }
 
 ProductExpressionProduction *ProductExpressionProduction::instance = 0;
