@@ -69,7 +69,7 @@ public:
   virtual ~LsodaDriver() {
     // Free working memory:
     if (0 != this->ywork) {
-      delete this->ywork;
+      delete[] this->ywork;
     }
   }
 
