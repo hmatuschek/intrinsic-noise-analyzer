@@ -21,6 +21,10 @@ LSODA::LSODA()
     mxstp0 = 500; mxhnl0 = 10;
     // pass...
 
+    // Set pointer vars to zero
+    yh = 0; wm = 0;
+    ewt = 0; savf = 0; acor = 0; ipvt = 0;
+
 }
 
 size_t
@@ -2089,14 +2093,48 @@ LSODA::successreturn (double *y, double *t, int itask, int ihit, double tcrit, i
 void
 LSODA::freevectors(void)
 {
+
 }
 
 
 void
 LSODA::_freevectors(void)
 {
-        g_nyh = g_lenyh = 0;
-        yh = 0; wm = 0;
-        ewt = 0; savf = 0; acor = 0; ipvt = 0;
+
+  if(0 != this->yh)
+  {
+    for (int i = 1; i <= g_lenyh; i++)
+    {
+      if(0 != this->yh[i]) {
+        delete[] this->yh[i];
+      }
+    }
+    delete[] this->yh;
+  }
+  if(0 != this->wm)
+  {
+    for (int i = 1; i <= g_nyh; i++)
+    {
+      if(0 != this->wm[i]) {
+        delete[] this->wm[i];
+      }
+    }
+    delete[] this->wm;
+  }
+
+  if(0 != this->ewt)  delete[] this->ewt;
+  if(0 != this->savf) delete[] this->savf;
+  if(0 != this->acor) delete[] this->acor;
+  if(0 != this->ipvt) delete[] this->ipvt;
+
+  yh = 0; wm = 0;
+  ewt = 0; savf = 0; acor = 0; ipvt = 0;
+
 }
 
+LSODA::~LSODA()
+{
+
+  _freevectors();
+
+}

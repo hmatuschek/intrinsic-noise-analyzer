@@ -66,7 +66,7 @@ public:
 
   virtual ~HybridSolver(){
 
-    if(this->ywork!= 0) delete this->ywork;
+    if(this->ywork!= 0) delete[] this->ywork;
     this->ywork = 0; this->atolwork = 0; this->rtolwork = 0;
 
   };
