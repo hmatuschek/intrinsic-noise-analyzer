@@ -12,18 +12,20 @@ public:
   /** Destructor, does nothing. */
   virtual ~IOSTest();
 
-  /** Performs a short IOS analysis on the regression-tests/core_osc.xml model. */
-  void testCoreModel();
+  /** Performs a short IOS analysis on the regression-tests/enzymekinetics1.xml model. */
+  void testEnzymeKineticsBCI();
+  /** Performs a short IOS analysis on the regression-tests/enzymekinetics1.xml model. */
+  void testEnzymeKineticsJIT();
 
 public:
   /** Assembles the test-suite. */
   static UnitTest::TestSuite *suite();
 
 private:
-  // Performs the integration on the given model:
-  void integrateViaByteCode(Models::IOSmodel &model,
-                            const Eigen::VectorXd &init_state, Eigen::VectorXd &final_state,
-                            double final_time, double err_abs, double err_rel);
+  // Performs the integration on the given model using the BCI
+  void integrateViaByteCode(Models::IOSmodel &model);
+  // Performs the integration on the given model using the JIT
+  void integrateViaJIT(Models::IOSmodel &model);
 };
 
 
