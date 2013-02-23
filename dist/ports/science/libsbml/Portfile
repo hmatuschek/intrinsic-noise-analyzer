@@ -4,7 +4,7 @@
 PortSystem          1.0
 
 name                libsbml
-version             5.6.0
+version             5.7.0
 categories          science
 platforms           darwin
 maintainers         nomaintainer
@@ -23,9 +23,9 @@ master_sites        sourceforge:sbml
 distname            libsbml-${version}-src
 worksrcdir          libsbml-${version}
 
-checksums           md5     1fdf26a38f4f984145b6b14f0972416f \
-                    sha1    4aa6c5e498edec822a9cc1ad0ef8ec5d508c6816 \
-                    rmd160  036f55a6cf10bdeff6a896ba3353869a6ef56e01
+checksums           md5     ec6d3cc98a8eb4f57969884157d0071f \
+                    sha1    6d163257ee55ef06bc8277d8650d08f4e8c1d9dd \
+                    rmd160  a4953389f4e7d9259fe13559042e781c4e5742e9
 
 depends_lib         port:libxml2 \
                     port:bzip2

@@ -31,9 +31,9 @@ using namespace iNA::UnitTest;
 int main(int argc, char *argv[])
 {
   // Assemble option-grammar:
-  Utils::Opt::Parser parser(
-        ( Utils::Opt::Parser::zeroOrMore( Utils::Opt::Parser::Option("skip") ) |
-          Utils::Opt::Parser::Flag("help")) );
+  Utils::Opt::Parser parser;
+  parser.setGrammar(
+        ( parser.zeroOrMore(parser.Option("skip")) | parser.Flag("help") ) );
 
   // Parse flags.
   if (! parser.parse((const char **)argv, argc)) {
