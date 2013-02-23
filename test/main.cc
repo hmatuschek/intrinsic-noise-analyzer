@@ -5,6 +5,7 @@
 #include "retest.hh"
 #include "lnatest.hh"
 #include "iostest.hh"
+#include "steadystatetest.hh"
 #include "interpretertest.hh"
 #include "ginacforeigentest.hh"
 #include "regression_test.hh"
@@ -98,6 +99,8 @@ int main(int argc, char *argv[])
     runner.addSuite(LNATest::suite());
   if (0 == skipped_tests.count("IOSTest"))
     runner.addSuite(IOSTest::suite());
+  if (0 == skipped_tests.count("SteadyState"))
+    runner.addSuite(SteadyStateTest::suite());
   if (0 == skipped_tests.count("ODE"))
     runner.addSuite(ODETest::suite());
   if (0 == skipped_tests.count("RNG"))
