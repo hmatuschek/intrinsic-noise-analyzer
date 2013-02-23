@@ -48,10 +48,11 @@ public:
    * @param epsilon_rel Specifies the relative error for the step.
    */
   LsodaDriver(Sys &system, double dt, double epsilon_abs, double epsilon_rel)
-      : system(system), step_size(dt), err_abs(epsilon_abs), err_rel(epsilon_rel)
+      : system(system), step_size(dt), err_abs(epsilon_abs), err_rel(epsilon_rel),
+        ywork(0), rtolwork(0), atolwork(0)
   {
     istate=1;
-
+    // allocate working memory:
     ywork = new double[3 * (getDimension() + 1)];
     atolwork = ywork + getDimension() + 1;
     rtolwork = atolwork + getDimension() + 1;
@@ -62,7 +63,15 @@ public:
         rtolwork[i] = err_rel;
         atolwork[i] = err_abs;
     }
- }
+  }
+
+  /** Destructor, frees working memory. */
+  virtual ~LsodaDriver() {
+    // Free working memory:
+    if (0 != this->ywork) {
+      delete this->ywork;
+    }
+  }
 
   /**
    * Performs the step t -> t+dt.
