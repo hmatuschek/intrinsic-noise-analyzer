@@ -15,9 +15,9 @@ LNATest::~LNATest()
 }
 
 void
-LNATest::testCoreOSC()
+LNATest::testCoreEnzymeKinetics()
 {
-  this->compareIntegrators("test/regression-tests/core_osc.xml", 1.0);
+  this->compareIntegrators("test/regression-tests/enzymekinetics1.xml", 1.0);
 }
 
 
@@ -76,7 +76,7 @@ LNATest::suite()
   UnitTest::TestSuite *s = new UnitTest::TestSuite("Linear Noise Approximation Tests");
 
   s->addTest(new UnitTest::TestCaller<LNATest>(
-               "Core Model OSC", &LNATest::testCoreOSC));
+               "EnzymeKinetics Model", &LNATest::testCoreEnzymeKinetics));
 
   return s;
 }

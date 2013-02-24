@@ -15,7 +15,7 @@ public:
   /** Destructor. */
   virtual ~LNATest();
   /** Integrates "regression-tests/core_osc.xml" model. */
-  void testCoreOSC();
+  void testCoreEnzymeKinetics();
 
 public:
   /** Assembles the test suite. */
