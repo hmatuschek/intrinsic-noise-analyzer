@@ -6,7 +6,7 @@
 #include "lnatest.hh"
 #include "iostest.hh"
 #include "steadystatetest.hh"
-#include "paramscantest.hh"
+#include "sseparamscantest.hh"
 #include "ssatest.hh"
 #include "interpretertest.hh"
 #include "ginacforeigentest.hh"
@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
   if (0 == skipped_tests.count("SteadyState"))
     runner.addSuite(SteadyStateTest::suite());
   if (0 == skipped_tests.count("SSEParamScan"))
-    runner.addSuite(ParamScanTest::suite());
+    runner.addSuite(SSEParamScanTest::suite());
   if (0 == skipped_tests.count("SSA"))
     runner.addSuite(SSATest::suite());
   if (0 == skipped_tests.count("ODE"))

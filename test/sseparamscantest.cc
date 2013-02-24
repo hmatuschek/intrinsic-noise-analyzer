@@ -1,4 +1,4 @@
-#include "paramscantest.hh"
+#include "sseparamscantest.hh"
 #include <models/IOSmodel.hh>
 #include <parser/sbml/sbml.hh>
 #include <models/sseparamscan.hh>
@@ -7,7 +7,7 @@ using namespace iNA;
 
 
 void
-ParamScanTest::testEnzymeKinetics() {
+SSEParamScanTest::testEnzymeKinetics() {
   // Read doc and check for errors:
   Ast::Model sbml_model;
   Parser::Sbml::importModel(sbml_model, "test/regression-tests/enzymekinetics1.xml");
@@ -29,11 +29,11 @@ ParamScanTest::testEnzymeKinetics() {
 
 
 UnitTest::TestSuite *
-ParamScanTest::suite() {
+SSEParamScanTest::suite() {
   UnitTest::TestSuite *s = new UnitTest::TestSuite("SSE Parameter Scan Tests");
 
-  s->addTest(new UnitTest::TestCaller<ParamScanTest>(
-               "EnzymeKinetics Model", &ParamScanTest::testEnzymeKinetics));
+  s->addTest(new UnitTest::TestCaller<SSEParamScanTest>(
+               "EnzymeKinetics Model", &SSEParamScanTest::testEnzymeKinetics));
 
   return s;
 }

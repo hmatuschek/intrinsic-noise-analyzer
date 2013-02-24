@@ -1,6 +1,7 @@
 #include "tinytex.hh"
 #include "exception.hh"
 #include "formula.hh"
+#include "utils/logger.hh"
 
 #include <sstream>
 #include <QGraphicsScene>
@@ -256,7 +257,12 @@ TinyTex::parse(const std::string &source)
     TinyTex parser(lexer);
     item = parser.parseFormula(cst[0]);
   } catch (iNA::Parser::ParserError &err) {
-    throw TinyTex::Error(err);
+    // On error -> log message
+    iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::ERROR);
+    message << "TinyTex: Can not parse " << source << ": " << err.what();
+    iNA::Utils::Logger::get().log(message);
+    // and return unrendered source:
+    item = new MathText(source);
   }
 
   return item;
