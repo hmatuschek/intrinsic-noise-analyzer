@@ -20,7 +20,7 @@ long_description    LibSBML is a free, open-source programming library to \
 homepage            http://sbml.org/Software/libSBML
 master_sites        sourceforge:sbml
 
-distname            libsbml-${version}-src
+distname            libSBML-${version}-core-src
 worksrcdir          libsbml-${version}
 
 checksums           md5     ec6d3cc98a8eb4f57969884157d0071f \

@@ -262,7 +262,7 @@ TinyTex::parse(const std::string &source)
     message << "TinyTex: Can not parse " << source << ": " << err.what();
     iNA::Utils::Logger::get().log(message);
     // and return unrendered source:
-    item = new MathText(source);
+    item = new MathText(source.c_str());
   }
 
   return item;
