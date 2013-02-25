@@ -223,3 +223,12 @@ SSEBaseModel::vertex(std::list<size_t> &lower, std::list<size_t> &upper, size_t 
     return vertex;
 
 }
+
+Eigen::MatrixXex &
+SSEBaseModel::getDiffusionMatrix()
+
+{
+
+    return DiffusionMatrix;
+
+}

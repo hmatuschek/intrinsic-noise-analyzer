@@ -54,7 +54,7 @@ InitialConditions::getInitialState()
 GiNaC::ex
 InitialConditions::apply(const GiNaC::ex &exIn)
 {
-    return evICs.apply(exIn.subs(substitutions));
+    return (exIn.subs(substitutions));
 }
 
 

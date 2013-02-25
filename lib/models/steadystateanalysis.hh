@@ -194,7 +194,6 @@ public:
 
         x.segment(offset,lnaLength) = NLEsolve::PrecisionSolve::precisionSolve(B, -A, solver.parameters.epsilon);
 
-
         // substitute LNA
         subs_table.clear();
         for (size_t i=0; i<lnaLength; i++)

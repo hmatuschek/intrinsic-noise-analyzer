@@ -129,6 +129,9 @@ public:
      */
     GiNaC::exmap makeExclusionTable(const ParameterSet &parameters);
 
+
+    Eigen::MatrixXex &getDiffusionMatrix();
+
 };
 
 }

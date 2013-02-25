@@ -18,23 +18,33 @@ int main(int argc, char *argv[])
   // Construct LNA model from SBML model
   Ast::Model sbml_model; Parser::Sbml::importModel(sbml_model, argv[1]);
 
+  iNA::Models::LNAmodel mod(sbml_model);
+
+  iNA::Models::LNASpec LNA(mod);
+
+
   // Do the work:
 
 
-    size_t steps = 500;
+    size_t steps = 5000;
 
-    double transientTime = 500;//goodwin 50;//brussel500;
+    double transientTime = 20;//goodwin 50;//brussel500;
     size_t realizations=4;
     // Construct SSA model from SBML model
 
-    const double fMax   = 50*10/(2*3.14);//goodwin 10*50/(2*3.14); //brusselator20*0.75/(3.14);
-    const double deltaf = 0.00025;
+    const double fMax   = 10;//goodwin 10*50/(2*3.14); //brusselator20*0.75/(3.14);
+    const double deltaf = 0.005;
 
     Models::SpectrumRecorder<Models::OptimizedSSA> specEval(sbml_model,realizations,fMax,deltaf,realizations);
 
     Eigen::VectorXd x;
 
     Eigen::VectorXd freq = specEval.getFrequencies();
+
+
+    // Calc LNA
+    Eigen::MatrixXd LNAspec = LNA.getSpectrum(freq);
+
 
     specEval.advance(transientTime);
     std::cerr << "Transients passed..." << std::endl;
@@ -49,19 +59,20 @@ int main(int argc, char *argv[])
         if(m%1==0){
 
 
-        for(size_t specId=0; specId<sbml_model.numSpecies();specId++)
+        for(size_t idx=0; idx<sbml_model.numSpecies();idx++)
         {
             std::stringstream fileName;
-            fileName << "spectrum" << sbml_model.getSpecies(specId)->getName() << ".dat";
+            fileName << "spectrum" << sbml_model.getSpecies(idx)->getIdentifier() << ".dat";
 
-            spec = specEval.getSpectrum(specId);
+            spec = specEval.getSpectrum(idx);
 
             // output spectrum
             myfile.open(fileName.str().c_str(),std::ios_base::trunc);
             for(int fs=0;fs<freq.size()/2;fs++)
             {
                 myfile << freq(fs) << "\t"
-                       << spec(fs) << "\n";
+                       << spec(fs) << "\t"
+                       << LNAspec(fs,idx) << "\n";
             }
             myfile.close();
 

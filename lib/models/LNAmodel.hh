@@ -73,7 +73,6 @@ public:
   void fullState(InitialConditions &context,
                  const Eigen::VectorXd &state, Eigen::VectorXd &concentrations, Eigen::MatrixXd &cov, Eigen::VectorXd &emre);
 
-
   void fullState(InitialConditions &context,
                  const Eigen::VectorXd &state, Eigen::VectorXd &concentrations, Eigen::MatrixXd &cov);
 
