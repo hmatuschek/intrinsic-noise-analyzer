@@ -64,7 +64,12 @@ public:
 
  }
 
-  virtual ~HybridSolver(){ };
+  virtual ~HybridSolver(){
+
+    if(this->ywork!= 0) delete[] this->ywork;
+    this->ywork = 0; this->atolwork = 0; this->rtolwork = 0;
+
+  };
 
 
   void ODEStep(Eigen::VectorXd &state, double t, double dt)

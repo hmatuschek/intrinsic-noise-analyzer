@@ -367,7 +367,7 @@ ScaledUnitListProduction::get()
  *   ("mole" | "litre" | "second" | ...);
  * ******************************************************************************************** */
 ScaledUnitIdentifierProduction::ScaledUnitIdentifierProduction()
-  : TokenProduction(T_IDENTIFIER)
+  : TokenProduction(T_IDENTIFIER), valid_units()
 {
   ScaledUnitIdentifierProduction::instance = this;
 
@@ -384,6 +384,9 @@ ScaledUnitIdentifierProduction::ScaledUnitIdentifierProduction()
   valid_units.insert("tesla"); valid_units.insert("volt");
 }
 
+ScaledUnitIdentifierProduction::~ScaledUnitIdentifierProduction() {
+  // pass...
+}
 
 void
 ScaledUnitIdentifierProduction::parse(iNA::Parser::Lexer &lexer, iNA::Parser::ConcreteSyntaxTree &element)
@@ -394,8 +397,6 @@ ScaledUnitIdentifierProduction::parse(iNA::Parser::Lexer &lexer, iNA::Parser::Co
 
   // Parse identifier:
   TokenProduction::parse(lexer, element);
-
-  //std::cerr << "Parsed ScaledUnitIdentifier: " << id << std::endl;
 
   // Check if identifier not matches:
   if (this->valid_units.end() == this->valid_units.find(id))

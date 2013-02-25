@@ -26,26 +26,9 @@ public:
     EMPTY_NODE,       ///< An empty production.
     TOKEN_NODE,       ///< A token-production.
     PRODUCTION_NODE,  ///< A list-production.
-    ALTERNATIVE_NODE  ///< An alternative-production.
+    ALTERNATIVE_NODE, ///< An alternative-production.
+    LIST_NODE         ///< An optional list of productions.
   } Type;
-
-
-protected:
-  /** Holds the type of the node, see @c Type for the possible node types. */
-  Type   type;
-
-  /** If the node is a token-production, this index is the token-index. If the node is an
-   * alternative-production, the index is the index of the alternative. */
-  size_t index;
-
-  /** Holds the vector of child-productions.
-   *
-   * If the node is a @c PRODUCTION_NODE, the vector contains the child elements. Note, if the
-   * production was an @c OptionalProduction, that generated this node, @c childen[0] contains the
-   * child of the optional production if it matched. If the production was an
-   * @c AlternativeProduction that generated this node, @c children[0] contains the alternative,
-   * that matched. A @c TokenProduction and @c EmptyProduction has no child nodes. */
-  std::vector<ConcreteSyntaxTree> children;
 
 
 public:
@@ -81,6 +64,13 @@ public:
   /** Returns the i-th child node. */
   ConcreteSyntaxTree &operator[] (size_t idx);
 
+  /** Appends a new child to the list of child nodes. */
+  void addChild();
+  /** Removes the last child from the list of child nodes. */
+  void removeChild();
+  /** Returns the number of child nodes. */
+  size_t size() const;
+
 
 public:
   /** Configures the given node as an empty node. */
@@ -97,6 +87,27 @@ public:
 
   /** Configures the given node as an optional node. */
   static void asOptNode(ConcreteSyntaxTree &node);
+
+  /** Configures the given node as an empty list node. */
+  static void asListNode(ConcreteSyntaxTree &node);
+
+
+protected:
+  /** Holds the type of the node, see @c Type for the possible node types. */
+  Type   type;
+
+  /** If the node is a token-production, this index is the token-index. If the node is an
+   * alternative-production, the index is the index of the alternative. */
+  size_t index;
+
+  /** Holds the vector of child-productions.
+   *
+   * If the node is a @c PRODUCTION_NODE, the vector contains the child elements. Note, if the
+   * production was an @c OptionalProduction, that generated this node, @c childen[0] contains the
+   * child of the optional production if it matched. If the production was an
+   * @c AlternativeProduction that generated this node, @c children[0] contains the alternative,
+   * that matched. A @c TokenProduction and @c EmptyProduction has no child nodes. */
+  std::vector<ConcreteSyntaxTree> children;
 };
 
 
@@ -232,6 +243,26 @@ public:
   virtual void parse(Lexer &lexer, ConcreteSyntaxTree &element);
 };
 
+
+/** An optional list production, the child production might match zero or more times.
+ * The typical application of this production are associative operators or lists. This production
+ * allows to specifiy these grammars as non-recursive lists. I.e.:
+ *
+ *   Expression ::= Product {('+'|'-') Product}
+ *
+ * @ingroup parser */
+class ListProduction : public Production
+{
+public:
+  /** Constructor. */
+  ListProduction(Production *production);
+  /** Parses a list production. */
+  virtual void parse(Lexer &lexer, ConcreteSyntaxTree &element);
+
+protected:
+  /** Holds the optional production of the list elements. */
+  Production *_production;
+};
 
 }
 }

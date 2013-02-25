@@ -78,6 +78,8 @@ class LSODA : public LsodaConstants {
 public:
  LSODA();
 
+ virtual ~LSODA();
+
  int istate;
 
  virtual void evalODE (double x, double y[], double yd[],
@@ -119,6 +121,7 @@ private:
  void     cfode(int meth);
  void     scaleh(double *rh, double *pdh);
 
+ /* stores the allocated size of yh and wm */
  int      g_nyh, g_lenyh;
 
 /* newly added static variables */

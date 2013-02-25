@@ -99,10 +99,14 @@ public:
     T *instance = new T();
 
     // Call test
-    instance->setUp();
-    (instance->*function)();
-    instance->tearDown();
-
+    try {
+      instance->setUp();
+      (instance->*function)();
+      instance->tearDown();
+    } catch(...) {
+      delete instance;
+      throw;
+    }
     // free test:
     delete instance;
   }

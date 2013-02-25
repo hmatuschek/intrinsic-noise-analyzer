@@ -370,7 +370,7 @@ public:
   /** Destructor, also frees the owned DFAs. */
   ~NFA() {
     for (iterator item = _automata.begin(); item != _automata.end(); item++) {
-      //delete *item;
+      delete *item;
     }
   }
 

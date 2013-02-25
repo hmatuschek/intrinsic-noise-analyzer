@@ -10,8 +10,9 @@ void
 OptionParserTest::testOptionParser()
 {
   {
-    Parser parser(
-          Parser::opt( (Parser::Flag("help") | Parser::Flag("version")) ) );
+    Parser parser;
+    parser.setGrammar(
+          parser.opt( (parser.Flag("help") | parser.Flag("version")) ) );
 
     const char *argv_1[2] = {"program", "--version"};
     const char *argv_2[2] = {"program", "--help"};
@@ -25,9 +26,10 @@ OptionParserTest::testOptionParser()
   }
 
   {
-    Parser parser(
-          ( Parser::opt( (Parser::Flag("help") | Parser::Flag("version")) ),
-            Parser::Value() ) );
+    Parser parser;
+    parser.setGrammar(
+          ( parser.opt( (parser.Flag("help") | parser.Flag("version")) ),
+            parser.Value() ) );
 
     const char *argv_1[2] = {"program", "value"};
     const char *argv_2[3] = {"program", "--help", "value"};

@@ -83,6 +83,22 @@ ConcreteSyntaxTree::operator[] (size_t idx)
 
 
 void
+ConcreteSyntaxTree::addChild() {
+  this->children.push_back(ConcreteSyntaxTree());
+}
+
+void
+ConcreteSyntaxTree::removeChild() {
+  this->children.pop_back();
+}
+
+size_t
+ConcreteSyntaxTree::size() const {
+  return this->children.size();
+}
+
+
+void
 ConcreteSyntaxTree::asEmptyNode(ConcreteSyntaxTree &node)
 {
   node.type = EMPTY_NODE;
@@ -122,6 +138,13 @@ ConcreteSyntaxTree::asOptNode(ConcreteSyntaxTree &node)
   node.index = 0;
 }
 
+void
+ConcreteSyntaxTree::asListNode(ConcreteSyntaxTree &node)
+{
+  node.type = LIST_NODE;
+  node.children.clear();
+  node.index = 0;
+}
 
 
 /* ******************************************************************************************** *
@@ -332,12 +355,39 @@ OptionalProduction::parse(Lexer &lexer, ConcreteSyntaxTree &element)
     lexer.drop_state();
     element.setMatched(true);
   } catch (SyntaxError &err) {
-    // If lexer is in terminal state -> forward error
-    if (lexer.isTerminal()) {
-      throw err;
-    }
     // otherwise ignore error;
     lexer.restore_state();
     element.setMatched(false);
+  }
+}
+
+
+/* ******************************************************************************************** *
+ * Implementation of ListProduction:
+ * ******************************************************************************************** */
+ListProduction::ListProduction(Production *production)
+  : Production(), _production(production)
+{
+  // pass...
+}
+
+void
+ListProduction::parse(Lexer &lexer, ConcreteSyntaxTree &element)
+{
+  ConcreteSyntaxTree::asListNode(element);
+
+  // Try to parse as much as possible list elements:
+  size_t idx = 0;
+  while (true) {
+    lexer.push_state();
+    try {
+      element.addChild();
+      this->_production->parse(lexer, element[idx]);
+      lexer.drop_state(); idx++;
+    } catch (SyntaxError &err) {
+      lexer.restore_state();
+      element.removeChild();
+      return;
+    }
   }
 }
