@@ -68,16 +68,11 @@ class SBMLExpressionAssembler :
     public GiNaC::function::visitor, public GiNaC::basic::visitor
 {
 protected:
-  /** A stack of sub-expressions. */
-  std::list<LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *> _stack;
-  /** The Ast::Model, used to identify special symbols. */
-  Ast::Model &_model;
-  Ast::Scope &_scope;
-
-protected:
   /** Hidden constructor, use factory method below. */
-  SBMLExpressionAssembler(Ast::Model &model,Ast::Scope &scope);
+  SBMLExpressionAssembler(Ast::Model &model, Ast::Scope &scope);
 
+  /** (Re-) Sets the current variable scope of the writer. All symboles are resolved using this
+   * scope. */
   void setScope(Ast::Scope &scope);
 
 public:
@@ -99,6 +94,14 @@ public:
 public:
   /** Translates a GiNaC expression into an SBML expression. */
   static LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *process(GiNaC::ex expression, Ast::Model &model, Ast::Scope &scope);
+
+protected:
+  /** A stack of sub-expressions. */
+  std::list<LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *> _stack;
+  /** The Ast::Model, used to identify special symbols. */
+  Ast::Model &_model;
+  /** Holds a weak reference to the current scope used to resolve variables. */
+  Ast::Scope &_scope;
 };
 
 

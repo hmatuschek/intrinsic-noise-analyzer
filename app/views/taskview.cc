@@ -181,12 +181,9 @@ TaskProgressWidget::taskProgress()
   this->progress_bar->setValue(100 * p);
   this->time_elapsed->setText(tr("Time elapsed: %1").arg(this->formatTime(dt)));
 
-  if (0 == dt || 0 == p)
-  {
+  if (0 == dt || 0 == p) {
     this->time_remain->setText(tr("Time remaining: unknown"));
-  }
-  else
-  {
+  }else {
     double time_r = (1. - p) * dt/p;
     this->time_remain->setText(tr("Time remaining: %1").arg(this->formatTime(time_r)));
   }

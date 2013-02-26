@@ -7,7 +7,7 @@
 
 
 Task::Task(QObject *parent)
-  : QThread(parent), progress(0.0), state(Task::INITIALIZED), error_message()
+  : QThread(parent), _progress(0.0), _state(Task::INITIALIZED), _error_message()
 {
   // Connect signals:
   QObject::connect(this, SIGNAL(terminated()), this, SLOT(taskTerminated()));
@@ -29,20 +29,21 @@ Task::run()
   // Try to catch all Fluc::Exception instances, avoids a crash of the application if an error
   // occures.
   try {
-    start_time = clock();
+    _start_time = time(0);
+    _current_time = time(0);
     process();
   } catch (iNA::Exception &err) {
     iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::INFO);
     message << "Task: Caught exception: " << err.what();
     iNA::Utils::Logger::get().log(message);
-    error_message.setTitle("Exception during analysis.");
-    error_message.setDetails(err.what());
+    _error_message.setTitle("Exception during analysis.");
+    _error_message.setDetails(err.what());
     setState(Task::ERROR);
   } catch (std::runtime_error &err) {
     iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::ERROR);
     message << "Task:: Caught std::runtime_error: " << err.what();
-    error_message.setTitle("Runtime exception during analysis.");
-    error_message.setDetails(err.what());
+    _error_message.setTitle("Runtime exception during analysis.");
+    _error_message.setDetails(err.what());
     setState(Task::ERROR);
   }
 }
@@ -51,8 +52,8 @@ Task::run()
 void
 Task::setProgress(double progress)
 {
-  this->progress = progress;
-
+  this->_progress = progress;
+  _current_time = time(0);
   emit this->updateProgress();
 }
 
@@ -60,15 +61,14 @@ Task::setProgress(double progress)
 double
 Task::getProgress() const
 {
-  return this->progress;
+  return this->_progress;
 }
 
 
 void
 Task::setState(State state)
 {
-  this->state = state;
-
+  this->_state = state;
   emit this->stateChanged();
 }
 
@@ -76,7 +76,7 @@ Task::setState(State state)
 void
 Task::setState(State state, const QString &message)
 {
-  this->error_message.setDetails(message);
+  this->_error_message.setDetails(message);
   this->setState(state);
 }
 
@@ -84,25 +84,21 @@ Task::setState(State state, const QString &message)
 Task::State
 Task::getState() const
 {
-  return this->state;
+  return this->_state;
 }
 
 
 const TaskError &
 Task::getErrorMessage() const
 {
-  return this->error_message;
+  return this->_error_message;
 }
 
 
 double
 Task::getElapsedTime()
 {
-  clock_t end = clock();
-
-  double dt = end-this->start_time;
-  dt /= CLOCKS_PER_SEC;
-
+  double dt = difftime(this->_current_time, this->_start_time);
   return dt;
 }
 

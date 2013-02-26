@@ -35,13 +35,15 @@ public:
 
 protected:
   /** Represents the progress of the task, a value between 0 and 1. */
-  double progress;
+  double _progress;
   /** Holds the current state of the task. */
-  State state;
+  State _state;
   /** Holds an optional error message if the analysis fails. */
-  TaskError error_message;
+  TaskError _error_message;
   /** Holds the clock measureing the elapsed time. */
-  clock_t start_time;
+  time_t _start_time;
+  /** Holds time of last progress update. */
+  time_t _current_time;
 
 protected:
   /** Constructs a task, is hidden to avoid direct instantiation. */
@@ -62,7 +64,7 @@ public:
   State getState() const;
 
   /** Updates the state of the task and emmits the updateState signal. */
-  void setState(State state);
+  void setState(State _state);
 
   /** Get the time in seconds since process start. */
   double getElapsedTime();
@@ -76,10 +78,10 @@ public:
 
 protected:
   /** Sets the progress of the state and emmits the updateProgress signal. */
-  void setProgress(double progress);
+  void setProgress(double _progress);
 
   /** Updates the state of the task/analysis and sets an error-message. */
-  void setState(State state, const QString &message);
+  void setState(State _state, const QString &message);
 
   /** Needs to be implemented to perform the actual analysis task. */
   virtual void process() = 0;

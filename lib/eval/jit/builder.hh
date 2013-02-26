@@ -21,7 +21,7 @@ template <typename Scalar>
 class Builder
 {
 public:
-  static llvm::Value *createIndex(size_t index);
+  static llvm::Value *createIndex(Code *code, size_t index);
   static llvm::Value *createConstant(Code *code, const GiNaC::numeric &value);
   static void createStore(Code *code, llvm::Value *value, size_t index);
   static llvm::Value *createLoad(Code *code, size_t index);
