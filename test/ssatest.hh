@@ -9,6 +9,8 @@ namespace iNA {
 class SSATest : public UnitTest::TestCase
 {
 public:
+  virtual ~SSATest();
+
   void testEnzymeKinetics();
 
 public:

@@ -20,6 +20,7 @@ AxisTick::AxisTick(double value, Orientation orientation)
   this->label->setFont(
         Configuration::getConfig()->getScheme(Configuration::DISPLAY_SCHEME).ticksFont());
   this->label->setTextInteractionFlags(Qt::NoTextInteraction);
+  this->label->setDefaultTextColor(QColor(Qt::black));
   this->addToGroup(this->label);
 
   this->tick = new QGraphicsLineItem(0,0,0,0);
@@ -65,6 +66,7 @@ AxisTick::AxisTick(double value, const QString &label, Orientation orientation)
   this->label->setFont(
         Configuration::getConfig()->getScheme(Configuration::DISPLAY_SCHEME).ticksFont());
   this->label->setTextInteractionFlags(Qt::NoTextInteraction);
+  this->label->setDefaultTextColor(QColor(Qt::black));
   this->addToGroup(this->label);
 
   this->tick = new QGraphicsLineItem(0,0,0,0);

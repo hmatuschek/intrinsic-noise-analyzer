@@ -8,6 +8,8 @@ namespace iNA {
 class SSEParamScanTest : public UnitTest::TestCase
 {
 public:
+  virtual ~SSEParamScanTest();
+
   void testEnzymeKinetics();
 
 public:

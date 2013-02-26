@@ -10,6 +10,8 @@ namespace iNA {
 class SteadyStateTest : public UnitTest::TestCase
 {
 public:
+  virtual ~SteadyStateTest();
+
   void testEnzymeKineticsRE();
   void testEnzymeKineticsLNA();
   void testEnzymeKineticsIOS();
