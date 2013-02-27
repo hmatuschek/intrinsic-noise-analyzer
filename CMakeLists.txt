@@ -13,6 +13,7 @@ include(InstallHeadersWithDirectory)
 #
 OPTION(INA_DISABLE_NEW_VERSION_CHECK "Disables the periodic check about a new version of iNA" OFF)
 OPTION(INA_DISABLE_OPENMP "Disables OpenMP support" OFF)
+OPTION(INA_ENABLE_STATIC "Enables static compilation" OFF)
 
 # Disable version check on debug builds:
 IF(CMAKE_BUILD_TYPE MATCHES DEBUG)
@@ -48,13 +49,14 @@ INCLUDE(${QT_USE_FILE})
 ADD_DEFINITIONS(${QT_DEFINITIONS})
 INCLUDE_DIRECTORIES(${QT_QTCORE_INCLUDE_DIR} ${QT_QTGUI_INCLUDE_DIR})
 
+IF(NOT INA_ENABLE_STATIC)
 FIND_PACKAGE(Ginac REQUIRED)
 FIND_PACKAGE(LibSBML REQUIRED)
 IF(NOT INA_DISABLE_OPENMP)
   FIND_PACKAGE(OpenMP)
 ENDIF(NOT INA_DISABLE_OPENMP)
 FIND_PACKAGE(LLVM REQUIRED)
-
+ENDIF(NOT INA_ENABLE_STATIC)
 
 #
 # Disable OpenMP on MacOSX.
@@ -75,8 +77,13 @@ INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/lib")
 #
 # Used libaries:
 #
+IF(INA_ENABLE_STATIC)
+# make sure you have them
+LINK_DIRECTORIES("/opt/lib")
+set(LIBS ${LIBS} ginac cln gmp sbml xml2 z bz2 m pthread gomp)
+ELSE()
 set(LIBS ${LIBS} ${GINAC_LIBRARIES} ${LIBSBML_LIBRARIES} m pthread gomp)
-
+ENDIF()
 #
 # Used headers:
 #
@@ -85,6 +92,7 @@ INCLUDE_DIRECTORIES(${EIGEN3_INCLUDE_DIRS} ${GINAC_INCLUDE_DIRS} ${LIBSBML_INCLU
 #
 # Compiler flags:
 #
+
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -Wall -frtti -fexceptions -Wno-unknown-pragmas")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${OpenMP_CXX_FLAGS} -O0 -ggdb")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${OpenMP_CXX_FLAGS} -O2")
@@ -93,6 +101,11 @@ set(CMAKE_EXE_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS_INIT} ${OpenMP_CXX_FLAGS}
 set(CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS_INIT} ${OpenMP_CXX_FLAGS})
 set(CMAKE_MODULE_LINKER_FLAGS ${CMAKE_MODULE_LINKER_FLAGS_INIT} ${OpenMP_CXX_FLAGS})
 
+IF(INA_ENABLE_STATIC)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static -fopenmp")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -static -fopenmp")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -static -fopenmp")
+ENDIF()
 
 # Let application start in its own window
 IF(WIN32)
@@ -117,7 +130,7 @@ ENDIF(WIN32 AND WINGW)
 #
 # Define flags, libs etc if LLVM is present:
 #
-IF(LLVM_FOUND)
+IF(LLVM_FOUND AND NOT INA_ENABLE_STATIC)
 MESSAGE(STATUS "LLVM support: yes, version: ${LLVM_VERSION}" )
 SET(WITH_EXECUTION_ENGINE_LLVM ON)
 SET(LIBS ${LIBS} ${LLVM_LIBRARIES})
@@ -138,10 +151,10 @@ set(INA_LLVM_VERSION_IS_2X OFF)
 set(INA_LLVM_VERSION_IS_3X ON)
 endif(LLVM_VERSION VERSION_GREATER 3.0 OR LLVM_VERSION VERSION_EQUAL 3.0)
 
-else(LLVM_FOUND)
+else()
 MESSAGE(STATUS "LLVM support: no")
 SET(WITH_EXECUTION_ENGINE_LLVM OFF)
-ENDIF(LLVM_FOUND)
+ENDIF()
 
 
 #
@@ -158,17 +171,22 @@ INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/unsupported)
 #
 # Traverse into source tree:
 #
+IF(INA_ENABLE_STATIC)
+add_subdirectory(lib)
+add_subdirectory(cli)
+add_subdirectory(unsupported)
+ELSE()
 add_subdirectory(lib)
 add_subdirectory(app)
 add_subdirectory(cli)
 add_subdirectory(unsupported)
-
 #
 # Exclude unit tests requiring glibc which is not available under Windows!
 #
 IF(NOT WIN32)
   add_subdirectory(test)
 ENDIF(NOT WIN32)
+ENDIF()
 
 #
 # Source distribution packages:

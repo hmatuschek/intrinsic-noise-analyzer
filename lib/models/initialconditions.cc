@@ -8,11 +8,8 @@ using namespace iNA::Models;
 */
 
 InitialConditions::InitialConditions(SSEBaseModel &model, Trafo::excludeType excludes)
-    : model(model), evICs(model,Trafo::Filter::ALL,excludes)
+    : model(model), params(excludes),evICs(model,Trafo::Filter::ALL,excludes)
 {
-
-
-    ParameterFolder params(excludes);
 
     // Evaluate initial concentrations and evaluate volumes:
     Eigen::VectorXd ICs(model.numSpecies());
@@ -54,7 +51,13 @@ InitialConditions::getInitialState()
 GiNaC::ex
 InitialConditions::apply(const GiNaC::ex &exIn)
 {
-    return (exIn.subs(substitutions));
+    return exIn.subs(substitutions);
+}
+
+GiNaC::ex
+InitialConditions::applyAll(const GiNaC::ex &exIn)
+{
+    return params.apply(evICs.apply(exIn.subs(substitutions)));
 }
 
 
