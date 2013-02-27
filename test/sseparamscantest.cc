@@ -6,6 +6,10 @@
 using namespace iNA;
 
 
+SSEParamScanTest::~SSEParamScanTest() {
+  // pass...
+}
+
 void
 SSEParamScanTest::testEnzymeKinetics() {
   // Read doc and check for errors:

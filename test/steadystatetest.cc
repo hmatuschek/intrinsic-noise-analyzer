@@ -11,6 +11,11 @@
 using namespace iNA;
 
 
+SteadyStateTest::~SteadyStateTest() {
+  // pass...
+}
+
+
 void
 SteadyStateTest::testEnzymeKineticsRE() {
   // Read doc and check for errors:

@@ -5,6 +5,11 @@
 
 using namespace iNA;
 
+SSATest::~SSATest() {
+  // pass...
+}
+
+
 void
 SSATest::testEnzymeKinetics()
 {
