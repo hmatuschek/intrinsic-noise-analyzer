@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
     iNA::Models::ParamScanInterface *_pscan=0;
 
     // Construct analysis:
-    _pscan = new iNA::Models::SSAparamScan< iNA::Eval::bci::Engine<Eigen::VectorXd> >
+    _pscan = new iNA::Models::SSAparamScan< iNA::Eval::jit::Engine<Eigen::VectorXd> >
                  (sbml_model,
                   _parameterSets, transients, OpenMP::getMaxThreads(),2);
 
