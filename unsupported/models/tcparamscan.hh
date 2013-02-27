@@ -154,10 +154,10 @@ public:
             {
 
               if((*it).second<(unsigned)model.numIndSpecies())
-                  x((*it).second) = Eigen::ex2double( ICs.apply(parameters.apply(constants.apply((*it).first))) );
+                  x((*it).second) = Eigen::ex2double(ICs.applyAll(parameters.apply(constants.apply((*it).first))) );
 
               if((*it).second>=(unsigned)model.getUpdateVector().size())
-                x((*it).second) = Eigen::ex2double( ICs.apply(parameters.apply(constants.apply((*it).first))) );
+                x((*it).second) = Eigen::ex2double( ICs.applyAll(parameters.apply(constants.apply((*it).first))) );
             }
 
             // Do ode step

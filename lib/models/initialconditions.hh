@@ -98,6 +98,8 @@ protected:
 
     SSEBaseModel &model;
 
+
+    ParameterFolder params;
     Trafo::InitialValueFolder evICs;
 
 public:
@@ -116,6 +118,11 @@ public:
     * A method that folds conservation constants in an expression.
     */
     GiNaC::ex apply(const GiNaC::ex &exIn);
+
+    /**
+    * A method that folds conservation constants & initial conditions in an expression.
+    */
+    GiNaC::ex applyAll(const GiNaC::ex &exIn);
 
     /**
     * A method that folds all conservation constants in a vector or matrix.
