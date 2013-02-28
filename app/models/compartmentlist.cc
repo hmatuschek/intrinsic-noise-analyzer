@@ -213,13 +213,13 @@ CompartmentList::_updateInitValue(iNA::Ast::Compartment *compartment, const QVar
   try { new_value = iNA::Parser::Expr::parseExpression(expression, _model); }
   catch (iNA::Exception &err) {
     // Log error:
-    iNA::Utils::Message msg = LOG_MESSAGE(iNA::Utils::Message::INFO);
-    msg << "Can not parse expression: \"" << expression << "\": " << err.what();
+    iNA::Utils::Message msg = LOG_MESSAGE(iNA::Utils::Message::ERROR);
+    msg << "Cannot parse expression: \"" << expression << "\": " << err.what();
     iNA::Utils::Logger::get().log(msg);
     // Show message:
     QMessageBox::warning(
-          0, tr("Can not set volume"),
-          tr("Can not parse expression \"%1\": %2").arg(value.toString(), err.what()));
+          0, tr("Cannot set volume"),
+          tr("Cannot parse expression \"%1\": %2").arg(value.toString(), err.what()));
     return false;
   }
 

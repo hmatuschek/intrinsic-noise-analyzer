@@ -9,6 +9,15 @@ namespace iNA {
 class ExpressionParserTest : public UnitTest::TestCase
 {
 public:
+  /** Simple test for expression parser on sums. */
+  void testParserSum();
+
+  /** Simple test for expression parser on products. */
+  void testParserProd();
+
+  /** Simple test for expression parser on powers. */
+  void testParserPow();
+
   /** Simply tests parser and assembler w/o any passes. */
   void testParser();
 

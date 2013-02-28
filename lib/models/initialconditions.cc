@@ -8,11 +8,8 @@ using namespace iNA::Models;
 */
 
 InitialConditions::InitialConditions(SSEBaseModel &model, Trafo::excludeType excludes)
-    : model(model), evICs(model,Trafo::Filter::ALL,excludes)
+    : model(model), params(excludes),evICs(model,Trafo::Filter::ALL,excludes)
 {
-
-
-    ParameterFolder params(excludes);
 
     // Evaluate initial concentrations and evaluate volumes:
     Eigen::VectorXd ICs(model.numSpecies());
@@ -24,7 +21,7 @@ InitialConditions::InitialConditions(SSEBaseModel &model, Trafo::excludeType exc
     this->ICsPermuted = (model.getPermutationMatrix()*ICs).head(model.numIndSpecies());
 
     Trafo::ConstantFolder constants(model, Trafo::Filter::ALL_CONST, excludes);
-    // Evaluate the link matrices
+    // Evaluate the link matrices (note these must include the excluded parameters to yield proper reconstruction)
     Link0CMatrixNumeric = Eigen::ex2double( params.apply(constants.apply( model.getLink0CMatrix()) ) );
     LinkCMatrixNumeric  = Eigen::ex2double( params.apply(constants.apply( model.getLinkCMatrix())  ) );
 
@@ -54,7 +51,13 @@ InitialConditions::getInitialState()
 GiNaC::ex
 InitialConditions::apply(const GiNaC::ex &exIn)
 {
-    return evICs.apply(exIn.subs(substitutions));
+    return exIn.subs(substitutions);
+}
+
+GiNaC::ex
+InitialConditions::applyAll(const GiNaC::ex &exIn)
+{
+    return params.apply(evICs.apply(exIn.subs(substitutions)));
 }
 
 

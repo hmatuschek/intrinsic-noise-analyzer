@@ -49,7 +49,7 @@ SSAParameterScanPlot::SSAParameterScanPlot(const QStringList &selected_species, 
 
 SSAParameterScanCVPlot::SSAParameterScanCVPlot(const QStringList &selected_species, SSAParamScanTask *task,
                                            QObject *parent)
-    : LinePlot("Coefficient of Variation (SSA)", parent)
+    : LinePlot("Coefficient of variation (SSA)", parent)
 {
   // Get species units:
   QString parameter_unit("a.u.");
@@ -112,6 +112,9 @@ SSAParameterScanFanoPlot::SSAParameterScanFanoPlot(const QStringList &selected_s
     size_t species_idx = model->getSpeciesIdx(selected_species.at(i).toStdString());
     size_t mean_idx = offset + species_idx;
     size_t var_idx  = offset + Ntot + species_idx + (species_idx*(species_idx+1))/2;
+
+    // Check if we can evaluate the volume
+    if(!GiNaC::is_a<GiNaC::numeric>(model->getSpecies(species_idx)->getCompartment()->getValue())) continue;
 
     // Needs multiplier to obtain correct nondimensional quantity
     double multiplier = Eigen::ex2double(model->getSpecies(species_idx)->getCompartment()->getValue());

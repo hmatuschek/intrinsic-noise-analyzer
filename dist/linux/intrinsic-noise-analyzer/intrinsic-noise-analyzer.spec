@@ -1,6 +1,6 @@
 Summary: An analysis tool for biochemical reaction networks
 
-%define version 0.4.0
+%define version 0.4.1
 
 License: GPLv2
 Group: Productivity/Scientific/Chemistry
@@ -54,7 +54,7 @@ Provides the runtime library for the intrinsic Noise Analyzer.
 %setup -q
 
 %build
-cmake -DCMAKE_BUILD_TYPE=RELEASE -DINA_DISABLE_NEW_VERSION_CHECK -DCMAKE_INSTALL_PREFIX=$RPM_BUILD_ROOT/usr
+cmake -DCMAKE_BUILD_TYPE=RELEASE -DINA_DISABLE_NEW_VERSION_CHECK=ON -DCMAKE_INSTALL_PREFIX=$RPM_BUILD_ROOT/usr
 make
 
 %install

@@ -27,23 +27,23 @@ GiNaC::ex
 Assembler::processExpression(Parser::ConcreteSyntaxTree &expr)
 {
   /* Expression =               : expr
-   *   (                          : expr[0]
-   *     ProductExpression          : expr[0][0]
-   *     ("+"|"-")                  : expr[0][1]
-   *     Expression) |              : expr[0][2]
-   *   ProductExpression);        : expr[0] */
+   *   ProductExpression        : expr[0]
+   *   {                        : expr[1]
+   *     ("+"|"-")              : expr[1][i][0]
+   *     ProductExpression      : expr[1][i][1]
+   *   }                                     */
 
-  if (0 == expr.getAltIdx()) {
-    GiNaC::ex lhs = processProduct(expr[0][0]);
-    GiNaC::ex rhs = processExpression(expr[0][2]);
-    if (0 == expr[0][1].getAltIdx()) {
-      return lhs + rhs;
+  GiNaC::ex lhs = processProduct(expr[0]);
+  for (size_t i=0; i<expr[1].size(); i++) {
+    GiNaC::ex rhs = processProduct(expr[1][i][1]);
+    if (0 == expr[1][i][0].getAltIdx()) {
+      lhs = lhs + rhs;
     } else {
-      return lhs - rhs;
+      lhs = lhs - rhs;
     }
   }
 
-  return processProduct(expr[0]);
+  return lhs;
 }
 
 
@@ -51,23 +51,25 @@ GiNaC::ex
 Assembler::processProduct(Parser::ConcreteSyntaxTree &expr)
 {
   /* ProductExpression =         : expr
-   *   (                         : expr[0]
-   *     PowerExpression          : expr[0][0]
-   *     ("*" | "/")               : expr[0][1]
-   *     ProductExpression) |      : expr[0][2]
-   *   PowerExpression;         : expr[0]   */
+   *   PowerExpression           : expr[0]
+   *   {                         : expr[1]
+   *     ("*" | "/")             : expr[1][i][0]
+   *     PowerExpression         : expr[1][i][1]
+   *   } */
 
-   if (0 == expr.getAltIdx()) {
-     GiNaC::ex lhs = processPower(expr[0][0]);
-     GiNaC::ex rhs = processProduct(expr[0][2]);
-     if (0 == expr[0][1].getAltIdx()) {
-       return lhs * rhs;
-     } else {
-       return lhs / rhs;
-     }
-   }
-
-   return processPower(expr[0]);
+  GiNaC::ex lhs = processPower(expr[0]);
+  // iterate over remaining factors of product (if present)
+  for (size_t i=0; i<expr[1].size(); i++) {
+    GiNaC::ex rhs = processPower(expr[1][i][1]);
+    // Switch operator:
+    if (0 == expr[1][i][0].getAltIdx()) {
+      lhs = lhs * rhs;
+    } else {
+      lhs = lhs / rhs;
+    }
+  }
+  // Return result:
+  return lhs;
 }
 
 
@@ -202,9 +204,9 @@ Assembler::processNumber(Parser::ConcreteSyntaxTree &num)
   // On integer
   if (0 == num[1].getAltIdx()) {
     if (num[0].matched()) {
-      return -toNumber<int>(_lexer[num[1][0].getTokenIdx()].getValue());
+      return -toNumber<long>(_lexer[num[1][0].getTokenIdx()].getValue());
     }
-    return toNumber<int>(_lexer[num[1][0].getTokenIdx()].getValue());
+    return toNumber<long>(_lexer[num[1][0].getTokenIdx()].getValue());
   }
 
   // On double:

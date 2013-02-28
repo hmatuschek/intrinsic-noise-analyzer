@@ -70,7 +70,11 @@ public:
   /** Handles numeric values. */
   void visit(const GiNaC::numeric &value) {
     if (value.is_integer()) {
-      _stack.push_back(Node::createValue(value.to_long()));
+      if (GiNaC::abs(value) > 1e6) { // big integer
+        _stack.push_back(Node::createValue(value.to_double()));
+      } else { // small integer
+        _stack.push_back(Node::createValue(value.to_long()));
+      }
     } else if (value.is_real()) {
       _stack.push_back(Node::createValue(value.to_double()));
     } else {

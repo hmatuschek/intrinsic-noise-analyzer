@@ -64,13 +64,13 @@ SET(libina_unit_parser_HEADERS
     parser/unit/unitparser.hh)
 
 SET(libina_parser_SOURCES
-    parser/automata.cc parser/lexer.cc parser/production.cc parser/exception.cc
+    parser/automata.cc parser/lexer.cc parser/production.cc parser/exception.cc parser/ll1.cc
     ${libina_sbmlsh_parser_SOURCES}
     ${libina_sbml_parser_SOURCES}
     ${libina_expr_parser_SOURCES}
     ${libina_unit_parser_SOURCES})
 SET(libina_parser_HEADERS
-    parser/automata.hh parser/lexer.hh parser/production.hh parser/exception.hh
+    parser/automata.hh parser/lexer.hh parser/production.hh parser/exception.hh  parser/ll1.hh
     ${libina_sbmlsh_parser_HEADERS}
     ${libina_sbml_parser_HEADERS}
     ${libina_expr_parser_HEADERS}
@@ -102,7 +102,7 @@ SET(libina_models_SOURCES
     models/assertnoconstantspeciesmixin.cc
     models/assertconstantparametermixin.cc
     models/assertnoassignmentrule.cc models/assertnoraterule.cc
-    models/assertirreversiblereactions.cc
+    models/assertirreversiblereactions.cc models/assertnonempty.cc
     models/reasonablemodelmixin.cc
     models/baseunitmixin.cc
     models/particlenumbersmixin.cc
@@ -131,7 +131,7 @@ SET(libina_models_HEADERS models/models.hh
     models/assertnoconstantspeciesmixin.hh
     models/assertconstantparametermixin.hh
     models/assertnoassignmentrule.hh models/assertnoraterule.hh
-    models/assertirreversiblereactions.hh
+    models/assertirreversiblereactions.hh models/assertnonempty.hh
     models/reasonablemodelmixin.hh
     models/baseunitmixin.hh
     models/particlenumbersmixin.hh
@@ -146,11 +146,14 @@ SET(libina_models_HEADERS models/models.hh
 SET(libina_nlesolve_SOURCES
    nlesolve/nlesolver.cc
    nlesolve/newtonraphson.cc
-   nlesolve/hybridsolver.cc)
+   nlesolve/hybridsolver.cc
+   nlesolve/precisionsolve.cc)
 SET(libina_nlesolve_HEADERS
+   nlesolve/nlesolve.hh
    nlesolve/nlesolver.hh
    nlesolve/newtonraphson.hh
-   nlesolve/hybridsolver.hh)
+   nlesolve/hybridsolver.hh
+   nlesolve/precisionsolve.hh)
 
 
 # Add sources for ODE solvers etc.
@@ -243,7 +246,12 @@ COPY_HEADERS_WITH_DIRECTORY("${libina_HEADERS}" "${CMAKE_CURRENT_BINARY_DIR}/inc
 #
 # Compile library
 #
+IF(INA_ENABLE_STATIC)
+ADD_LIBRARY(libina STATIC ${libina_SOURCES})
+ELSE()
 ADD_LIBRARY(libina SHARED ${libina_SOURCES})
+ENDIF()
+
 SET_TARGET_PROPERTIES(libina PROPERTIES OUTPUT_NAME "ina")
 TARGET_LINK_LIBRARIES(libina ${LIBS})
 
@@ -253,4 +261,7 @@ INSTALL(TARGETS libina
         DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 # Install header files
+IF(UNIX AND APPLE)
 INSTALL_HEADERS_WITH_DIRECTORY("${libina_HEADERS}" "${CMAKE_INSTALL_INCLUDEDIR}/libina")
+INSTALL(FILES "${CMAKE_CURRENT_BINARY_DIR}/config.hh" DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/libina")
+ENDIF(UNIX AND APPLE)

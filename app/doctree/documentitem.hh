@@ -55,7 +55,7 @@ public:
   explicit DocumentItem(iNA::Ast::Model *_model, const QString &path=QString(), QObject *parent=0);
 
   /** Destructor. */
-  ~DocumentItem();
+  virtual ~DocumentItem();
 
   /** Returns the @c Ast::Model instance associated with this document. */
   iNA::Ast::Model &getModel();

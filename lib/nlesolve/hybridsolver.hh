@@ -4,6 +4,9 @@
 #include "nlesolve/newtonraphson.hh"
 #include "ode/lsoda.hh"
 
+#include "models/ssebasemodel.hh"
+#include "models/initialconditions.hh"
+
 namespace iNA{
 namespace NLEsolve{
 
@@ -28,7 +31,13 @@ protected:
   double *atolwork;
   double *rtolwork;
 
+  typedef Eval::bci::Engine<Eigen::VectorXd> LSODAengine;
+
+  LSODAengine::Code LSODAcode;
+  LSODAengine::Interpreter LSODAint;
+
 public:
+
   /**
    * Constructor.
    *
@@ -52,33 +61,15 @@ public:
         rtolwork[i] = this->parameters.epsilon;
         atolwork[i] = this->parameters.epsilon;
     }
+
  }
 
-  /**
-   * Constructor.
-   *
-   * @param system Specifies the ODE system to integrate.
-   * @param epsilon_abs Specifies the absolute error for the step.
-   */
-  HybridSolver(Sys &system, Eigen::VectorXex &update, Eigen::MatrixXex &Jacobian)
-      : NewtonRaphson<Sys>(system, update, Jacobian), LSODA(),
-        istate(1)
-  {
+  virtual ~HybridSolver(){
 
-    this->parameters.maxIterations=100;
+    if(this->ywork!= 0) delete[] this->ywork;
+    this->ywork = 0; this->atolwork = 0; this->rtolwork = 0;
 
-    ywork = new double[3 * (getDimension() + 1)];
-    atolwork = ywork + getDimension() + 1;
-    rtolwork = atolwork + getDimension() + 1;
-
-    for (size_t i = 1; i <= getDimension(); ++i)
-    {
-        rtolwork[i] = this->parameters.epsilon;
-        atolwork[i] = this->parameters.epsilon;
-    }
-  }
-
-  virtual ~HybridSolver(){ };
+  };
 
 
   void ODEStep(Eigen::VectorXd &state, double t, double dt)
@@ -91,7 +82,7 @@ public:
 
   virtual void evalODE(double t, double state[], double dx[], int nsize)
   {
-      this->interpreter.run(state,dx);
+      this->LSODAint.run(state,dx);
   }
 
   virtual void evalJac(double t, double *y, double **jac, int nsize)
@@ -110,7 +101,7 @@ public:
    * Runs the solver.
    */
   Status
-  solve(Eigen::VectorXd &conc, double maxTime=1.e9, double dt=0.1)
+  solve(Eigen::VectorXd &state, double maxTime=1.e9, double dt=0.1, const Models::ParameterSet &parameters=Models::ParameterSet())
   {
 
       if(maxTime<dt) maxTime=dt;
@@ -121,7 +112,7 @@ public:
           Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
           message << "Try Newton step ... ";
 
-          Status lcheck = NewtonRaphson<Sys, VectorEngine, MatrixEngine>::solve(conc);
+          Status lcheck = NewtonRaphson<Sys, VectorEngine, MatrixEngine>::solve(state);
 
           switch(lcheck)
           {
@@ -137,10 +128,9 @@ public:
 
           Utils::Logger::get().log(message);
 
-          if(lcheck==Success)
+          if(lcheck == Success)
           {
             return Success;
-
           }
           else
           {
@@ -148,8 +138,13 @@ public:
               message << "Use integration of duration "<< dt << ".";
               Utils::Logger::get().log(message);
 
+              if(t==0) {
+                  //#pragma omp critical(ginac)
+                  this->setupLSODA(parameters);
+              }
+
               // Do ODE step of length dt
-              ODEStep(conc,0,dt);
+              ODEStep(state,0,dt);
 
           }
 
@@ -157,7 +152,32 @@ public:
       } // Next Newton iteration
 
       return MaxIterationsReached;
-}
+  }
+
+  void setupLSODA(const Models::ParameterSet &params)
+
+  {
+
+      // Generate parameter substitution table
+      Trafo::excludeType ptab = this->model.makeExclusionTable(params);
+
+      // Collect all the values of constant parameters except variable parameters
+      Trafo::ConstantFolder constants(this->model, Trafo::Filter::ALL_CONST, ptab);
+      Models::InitialConditions ICs(this->model,ptab);
+
+      // Translate identifier to parameters collect variable parameters
+      Models::ParameterFolder parameters(ptab);
+
+      // Set bytecode for interpreter
+      this->LSODAint.setCode(&this->LSODAcode);
+
+      // Compile expressions
+      LSODAengine::Compiler compiler(this->model.stateIndex);
+      compiler.setCode(&this->LSODAcode);
+      compiler.compileVector( ICs.apply(parameters.apply(constants.apply( this->model.getUpdateVector().head(this->dim) ) )) );
+      compiler.finalize(0); // no need to optimize anything here.
+
+  }
 
 };
 

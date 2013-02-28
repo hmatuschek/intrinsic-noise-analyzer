@@ -24,10 +24,12 @@ protected:
 
     M &sseModel;
 
+    typename VectorEngine::Code codeODE;
+    typename MatrixEngine::Code codeJac;
+
     /**
      * An instance of a nonlinear solver.
      */
-    //NLEsolve::NewtonRaphson<M> solver;
     NLEsolve::HybridSolver<M, VectorEngine, MatrixEngine> solver;
 
     /**
@@ -57,7 +59,19 @@ public:
         Eigen::VectorXex REs = ICs.apply(constants.apply( model.getUpdateVector().head(model.numIndSpecies())) );
         Eigen::MatrixXex Jac = ICs.apply(constants.apply( model.getJacobian() ));
 
-        solver.set(model.stateIndex, REs, Jac);
+        // Compile ODEs
+        typename VectorEngine::Compiler compilerA(model.stateIndex);
+        compilerA.setCode(&codeODE);
+        compilerA.compileVector(REs);
+        compilerA.finalize(0);
+
+        // Compile Jacobian
+        typename MatrixEngine::Compiler compilerB(model.stateIndex);
+        compilerB.setCode(&codeJac);
+        compilerB.compileMatrix(Jac);
+        compilerB.finalize(0);
+
+        solver.set(codeODE, codeJac);
 
     }
 
@@ -76,7 +90,19 @@ public:
         Eigen::VectorXex REs = ICs.apply(constants.apply( model.getUpdateVector().head(model.numIndSpecies())) );
         Eigen::MatrixXex Jac = ICs.apply(constants.apply( model.getJacobian() ));
 
-        solver.set(model.stateIndex, REs, Jac);
+        // Compile ODEs
+        typename VectorEngine::Compiler compilerA(model.stateIndex);
+        compilerA.setCode(&codeODE);
+        compilerA.compileVector(REs);
+        compilerA.finalize(0);
+
+        // Compile Jacobian
+        typename MatrixEngine::Compiler compilerB(model.stateIndex);
+        compilerB.setCode(&codeJac);
+        compilerB.compileMatrix(Jac);
+        compilerB.finalize(0);
+
+        solver.set(codeODE, codeJac);
 
         this->setPrecision(epsilon);
         this->setMaxIterations(iter);
@@ -166,8 +192,7 @@ public:
         }
 
 
-        x.segment(offset,lnaLength) = solver.precisionSolve(B,-A);
-
+        x.segment(offset,lnaLength) = NLEsolve::PrecisionSolve::precisionSolve(B, -A, solver.parameters.epsilon);
 
         // substitute LNA
         subs_table.clear();
@@ -183,9 +208,7 @@ public:
     void calcLNA(REmodel &model,Eigen::VectorXd &x, Eigen::VectorXex &sseUpdate)
 
     {
-
            // Pass...nothing to do.
-
     }
 
     void calcLNA(Eigen::VectorXd &x, Eigen::VectorXex &sseUpdate)
@@ -239,21 +262,6 @@ public:
         // Calc IOS
         calcIOS(x,sseUpdate);
 
-//        // calc coeff-matrices
-//        Eigen::VectorXd A(sseLength-lnaLength);
-//        Eigen::MatrixXd B(sseLength-lnaLength,sseLength-lnaLength);
-//        subs_table.clear();
-//        for (size_t i=lnaLength; i<sseLength; i++)
-//            subs_table.insert( std::pair<GiNaC::ex,GiNaC::ex>( sseModel.getSSEvar(i), 0 ) );
-//        for(size_t i=lnaLength; i<sseLength; i++)
-//        {
-//            A(i-lnaLength) = GiNaC::ex_to<GiNaC::numeric>( sseUpdate(i).subs(subs_table) ).to_double();
-//            for(size_t j=lnaLength; j<sseLength; j++)
-//            {
-//               B(i-lnaLength,j-lnaLength) = GiNaC::ex_to<GiNaC::numeric>( sseUpdate(i).diff(sseModel.getSSEvar(j)) ).to_double();
-//            }
-//        }
-
         x.head(offset) = conc;
 //        x.tail(sseLength-lnaLength) = solver.precisionSolve(B,-A);
 
@@ -287,7 +295,7 @@ public:
             }
         }
 
-        x.tail(sseLength-lnaLength) = solver.precisionSolve(B,-A);
+        x.tail(sseLength-lnaLength) = NLEsolve::PrecisionSolve::precisionSolve(B,-A,solver.parameters.epsilon);
 
     }
 
@@ -318,4 +326,4 @@ public:
 
 }} // Close namespaces
 
-#endif // __FLUC_MODELS_STEADYSTATEANALYSIS_HH
+#endif // __INA_MODELS_STEADYSTATEANALYSIS_HH

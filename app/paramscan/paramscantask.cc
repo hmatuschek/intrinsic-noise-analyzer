@@ -158,7 +158,7 @@ ParamScanTask::ParamScanTask(const Config &config, QObject *parent)
         case Config::LNA_ANALYSIS:
             parameterScan.resize(1+_Ns+_Ns*(_Ns+1)/2, config.getSteps()+1); break;
         case Config::IOS_ANALYSIS:
-            parameterScan.resize(1+2*_Ns+_Ns*(_Ns+1), config.getSteps()+1); break;
+            parameterScan.resize(1+3*_Ns+_Ns*(_Ns+1), config.getSteps()+1); break;
         default:
             break;
     }
@@ -201,6 +201,10 @@ ParamScanTask::ParamScanTask(const Config &config, QObject *parent)
           for (size_t j=i; j<_Ns; j++, column++)
             this->parameterScan.setColumnName(
                   column,QString("IOS cov(%1,%2)").arg(species_name[i]).arg(species_name[j]));
+
+        for (size_t i=0; i<_Ns; i++, column++)
+          this->parameterScan.setColumnName(
+                column, QString("IOS mean(%1)").arg(species_name[i]));
 
 }
 
@@ -340,6 +344,9 @@ ParamScanTask::process()
       for (size_t i=0; i<_Ns; i++)
         for (size_t j=i; j<_Ns; j++)
             parameterScan(pid,col++) = lna_covariances(i,j)+ios_covariances(i,j);
+
+      for (size_t i=0; i<_Ns; i++)
+        parameterScan(pid,col++) = concentrations(i)+emre_corrections(i)+iosemre_corrections(i);
   }
 
   // Done...

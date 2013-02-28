@@ -1,71 +1,60 @@
 #ifndef __INA_APP_VIEWS_LOGWINDOW_HH__
 #define __INA_APP_VIEWS_LOGWINDOW_HH__
 
-#include <QTableWidget>
+#include <QTableView>
 #include <QString>
+#include <QComboBox>
 
 #include "utils/logger.hh"
+#include "../models/logmessagemodel.hh"
 
 
-/** Wraps a @c Fluc::Utils::Message to be passed around with Qt signals. */
-class MessageWrapper : public QObject
+/** A simple log-table widget. */
+class LogTable : public QTableView
 {
   Q_OBJECT
 
 public:
   /** Constructor. */
-  MessageWrapper(const iNA::Utils::Message &message, QObject *parent=0);
+  explicit LogTable(QWidget *parent = 0);
 
-  /** Returns the message text as a QString. */
-  QString getText() const;
-  /** Returns the source file location. */
-  QString getFile() const;
-  /** Returns the line of the source file locaiton. */
-  size_t getLine() const;
-  /** Returns the time-stamp. */
-  QDateTime getTime() const;
-  /** Retunrs the log level. */
-  iNA::Utils::Message::Level getLevel() const;
-  /** Returns the level name. */
-  QString getLevelName() const;
+public slots:
+  /** Saves the log messages into the given file.
+   * Returns true on success. */
+  bool saveLog(const QString &filename);
+  /** Sets the filter level. */
+  void setFilterLevel(iNA::Utils::Message::Level level);
+
+protected slots:
+  /** Will be called on new messages being visible, scrolles to bottom. */
+  virtual void rowsInserted(const QModelIndex &parent, int start, int end);
 
 private:
-  /** The message passed. */
-  iNA::Utils::Message _message;
+  /** Holds the message model. */
+  FilteredLogMessageModel *_model;
 };
 
 
-/** The handler that receives the messages from @c Fluc::Utils::Logger and emmits a
- * signal with that message. */
-class LogWindowMessageHandler : public QObject, public iNA::Utils::MessageHandler
+/** The log window. */
+class LogWindow : public QWidget
 {
   Q_OBJECT
 
 public:
   /** Constructor. */
-  explicit LogWindowMessageHandler();
-
-  /** A callback that receives the log message. */
-  virtual void handleMessage(const iNA::Utils::Message &message);
-
-signals:
-  /** Emmits the received log message. */
-  void newMessage(MessageWrapper *message);
-};
-
-
-/** A simple log-window widget. */
-class LogWindow : public QTableWidget
-{
-  Q_OBJECT
-
-public:
-  /** Constructor. */
-  explicit LogWindow(QWidget *parent = 0);
+  LogWindow(QWidget *parent=0);
 
 private slots:
-  /** Receives messages from LogWindowMessageHandler. */
-  void onMessage(MessageWrapper *message);
+  /** Callback for the save button. */
+  void onSaveLog();
+  /** Callback for the level selector. */
+  void onLevelSelected(int index);
+
+private:
+  /** Holds the logtable instance. */
+  LogTable *_logtable;
+  /** Holds the log level selector. */
+  QComboBox *_level_selector;
 };
 
 #endif

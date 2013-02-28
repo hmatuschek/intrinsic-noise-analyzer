@@ -147,20 +147,23 @@ private:
 class ScaledUnitIdentifierProduction : public iNA::Parser::TokenProduction
 {
 protected:
-  /** Holds all valid unit identifiers.
-   * \todo Try to make this set static. */
-  std::set<std::string> valid_units;
-
-protected:
   /** Hidden constructor. */
   ScaledUnitIdentifierProduction();
 
 public:
+  /** Destructor. */
+  virtual ~ScaledUnitIdentifierProduction();
+
   /** Checks if unit identifier is valid. */
   virtual void parse(iNA::Parser::Lexer &lexer, iNA::Parser::ConcreteSyntaxTree &element);
 
   /** Factory method. */
   static iNA::Parser::Production *get();
+
+protected:
+  /** Holds all valid unit identifiers.
+   * \todo Try to make this set static. */
+  std::set<std::string> valid_units;
 
 private:
   /** Singleton instance. */

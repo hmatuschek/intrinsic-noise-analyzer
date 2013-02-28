@@ -95,14 +95,14 @@ IOSTask::process()
 
   {
     Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
-    message << "Compiling IOS analysis.";
+    message << "Compiling IOS time course analysis.";
     Utils::Logger::get().log(message);
   }
   instantiateInterpreter();
 
   {
     Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
-    message << "Starting IOS analysis.";
+    message << "Starting IOS time course analysis.";
     Utils::Logger::get().log(message);
   }
 
@@ -205,7 +205,7 @@ IOSTask::process()
 
   {
     Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
-    message << "IOS analysis successful.";
+    message << "Finished IOS time course analysis.";
     Utils::Logger::get().log(message);
   }
 }

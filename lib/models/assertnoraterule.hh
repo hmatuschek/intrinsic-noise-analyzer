@@ -1,5 +1,5 @@
-#ifndef __FLUC_MODELS_ASSERTNORATERULE_HH__
-#define __FLUC_MODELS_ASSERTNORATERULE_HH__
+#ifndef __INA_MODELS_ASSERTNORATERULE_HH__
+#define __INA_MODELS_ASSERTNORATERULE_HH__
 
 #include "basemodel.hh"
 
@@ -28,4 +28,4 @@ public:
 }
 }
 
-#endif // __FLUC_MODELS_ASSERTNORATERULE_HH__
+#endif // __INA_MODELS_ASSERTNORATERULE_HH__

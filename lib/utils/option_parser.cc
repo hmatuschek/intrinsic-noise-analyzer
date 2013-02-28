@@ -8,6 +8,13 @@ using namespace std;
 using namespace iNA::Utils::Opt;
 
 
+RuleInterface::RuleInterface(Parser *parser)
+  : _parser(parser)
+{
+  // Self-register the rule to the parser...
+  _parser->addRule(this);
+}
+
 RuleInterface::~RuleInterface()
 {
 }
@@ -16,22 +23,28 @@ RuleInterface::~RuleInterface()
 RuleInterface &
 RuleInterface::operator |(RuleInterface &other)
 {
-  return *(new OneOfRule(2, this, &other));
+  RuleInterface *rule = new OneOfRule(this->_parser, 2, this, &other);
+  return *(rule);
 }
 
 
 RuleInterface &
 RuleInterface::operator ,(RuleInterface &other)
 {
-  return *(new ListRule(2, this, &other));
+  RuleInterface *rule = new ListRule(this->_parser, 2, this, &other);
+  _parser->addRule(rule);
+  return *(rule);
 }
 
 
-OptionRule::OptionRule(std::string long_name, bool is_flag, char short_name)
-  : short_name(short_name), long_name(long_name), is_flag(is_flag)
+OptionRule::OptionRule(Parser *parser, std::string long_name, bool is_flag, char short_name)
+  : RuleInterface(parser), short_name(short_name), long_name(long_name), is_flag(is_flag)
 {
 }
 
+OptionRule::~OptionRule() {
+  // Pass...
+}
 
 bool
 OptionRule::operator()(const char *argv[], int argc, size_t &idx, Parser &parser)
@@ -136,17 +149,19 @@ OptionRule::dump()
 }
 
 
-OneOfRule::OneOfRule()
+OneOfRule::OneOfRule(Parser *parser)
+  : RuleInterface(parser)
 {
 }
 
-OneOfRule::OneOfRule(std::list<RuleInterface *> &opts)
-  : options(opts)
+OneOfRule::OneOfRule(Parser *parser, std::list<RuleInterface *> &opts)
+  : RuleInterface(parser), options(opts)
 {
 }
 
 
-OneOfRule::OneOfRule(size_t n, ...)
+OneOfRule::OneOfRule(Parser *parser, size_t n, ...)
+  : RuleInterface(parser)
 {
   va_list args; va_start(args, n);
   for (size_t i=0; i<n; i++)
@@ -159,11 +174,6 @@ OneOfRule::OneOfRule(size_t n, ...)
 
 OneOfRule::~OneOfRule()
 {
-  for(list<RuleInterface *>::iterator it=this->options.begin();
-      it != this->options.end(); it++)
-    {
-      delete *it;
-    }
 }
 
 
@@ -206,6 +216,17 @@ OneOfRule::dump()
 }
 
 
+ValueRule::ValueRule(Parser *parser)
+  : RuleInterface(parser)
+{
+  // Pass...
+}
+
+
+ValueRule::~ValueRule() {
+  // pass...
+}
+
 bool
 ValueRule::operator()(const char *argv[], int argc, size_t &idx, Parser &parser)
 {
@@ -226,13 +247,14 @@ ValueRule::dump()
 }
 
 
-ListRule::ListRule(std::list<RuleInterface *> &opts)
-  : options(opts)
+ListRule::ListRule(Parser *parser, std::list<RuleInterface *> &opts)
+  : RuleInterface(parser), options(opts)
 {
 }
 
 
-ListRule::ListRule(size_t n, ...)
+ListRule::ListRule(Parser *parser, size_t n, ...)
+  : RuleInterface(parser), options()
 {
   va_list args; va_start(args, n);
   for (size_t i=0; i<n; i++)
@@ -243,13 +265,8 @@ ListRule::ListRule(size_t n, ...)
 }
 
 
-ListRule::~ListRule()
-{
-  for(list<RuleInterface *>::iterator it=this->options.begin();
-      it != this->options.end(); it++)
-    {
-      delete *it;
-    }
+ListRule::~ListRule() {
+  // Pass...
 }
 
 bool
@@ -290,14 +307,15 @@ ListRule::dump()
 }
 
 
-OptionalRule::OptionalRule(RuleInterface *rule)
-  : rule(rule)
+OptionalRule::OptionalRule(Parser *parser, RuleInterface *rule)
+  : RuleInterface(parser), rule(rule)
 {
+  // Pass...
 }
 
 OptionalRule::~OptionalRule()
 {
-  delete this->rule;
+  // pass...
 }
 
 bool
@@ -325,14 +343,33 @@ OptionalRule::dump()
   return out.str();
 }
 
-Parser::Parser(RuleInterface &rule)
-  : rule(&rule)
+
+/* ******************************************************************************************* *
+ * Implementation of Option Parser:
+ * ******************************************************************************************* */
+Parser::Parser()
+  : _rule(0)
 {
+  // Pass...
 }
 
 Parser::~Parser()
 {
-  //delete this->rule;
+  // Free all associated rules.
+  for (std::set<RuleInterface *>::iterator item = _rules.begin(); item!=_rules.end(); item++) {
+    delete *item;
+  }
+}
+
+
+void
+Parser::setGrammar(RuleInterface &rule) {
+  _rule = &rule;
+}
+
+void
+Parser::addRule(RuleInterface *rule) {
+  _rules.insert(rule);
 }
 
 
@@ -341,13 +378,13 @@ Parser::parse(const char *argv[], int argc)
 {
   size_t idx = 1;
 
-  if(not (*(this->rule))(argv, argc, idx, *this))
+  if(not (*(this->_rule))(argv, argc, idx, *this)) {
     return false;
+  }
 
-  if(idx != (size_t)argc)
-    {
-      return false;
-    }
+  if(idx != (size_t)argc) {
+    return false;
+  }
 
   return true;
 }
@@ -356,7 +393,7 @@ std::string
 Parser::format_help(std::string prg_name)
 {
   stringstream out;
-  out << "Usage: " << prg_name << " " << this->rule->dump() << endl;
+  out << "Usage: " << prg_name << " " << this->_rule->dump() << endl;
 
   return out.str();
 }
@@ -364,59 +401,58 @@ Parser::format_help(std::string prg_name)
 void
 Parser::set_flag(std::string name)
 {
-  this->present_flags.insert(name);
+  this->_present_flags.insert(name);
 }
 
 bool
 Parser::has_flag(std::string name)
 {
-  return 0 != this->present_flags.count(name);
+  return 0 != this->_present_flags.count(name);
 }
 
 
 void
 Parser::set_option(std::string name, std::string value)
 {
-  if (0 == this->present_options.count(name)) {
-    this->present_options[name] = std::list<std::string>();
+  if (0 == this->_present_options.count(name)) {
+    this->_present_options[name] = std::list<std::string>();
   }
-  this->present_options[name].push_back(value);
+  this->_present_options[name].push_back(value);
 }
 
 bool
 Parser::has_option(std::string name)
 {
-  return 0 != this->present_options.count(name);
+  return 0 != this->_present_options.count(name);
 }
 
 const std::list<std::string> &
 Parser::get_option(std::string name)
 {
-  return this->present_options[name];
+  return this->_present_options[name];
 }
 
 const std::list<string> &
 Parser::get_values()
 {
-  return this->given_values;
+  return this->_given_values;
 }
 
 void
 Parser::add_value(std::string value)
 {
-  this->given_values.push_back(value);
+  this->_given_values.push_back(value);
 }
 
 
 
-ZeroOrMoreRule::ZeroOrMoreRule(RuleInterface *rule)
-: rule(rule)
+ZeroOrMoreRule::ZeroOrMoreRule(Parser *parser, RuleInterface *rule)
+: RuleInterface(parser), rule(rule)
 {
 }
 
 ZeroOrMoreRule::~ZeroOrMoreRule()
 {
-  delete this->rule;
 }
 
 bool

@@ -18,12 +18,16 @@ LNAmodel::postConstructor()
 
     dimCOV = this->numIndSpecies()*(this->numIndSpecies()+1)/2;
 
+
+
     // add dimension of covariances
     dim+= dimCOV;
     // add dimension of EMRE
     dim+= this->numIndSpecies();
     // reserve some space
     updateVector.resize(dim);
+
+    _lnaLength = dimCOV;
 
     // assign a set of new symbols
     // ... and add them to index table

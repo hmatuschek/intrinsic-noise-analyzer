@@ -129,9 +129,12 @@ public:
      */
     GiNaC::exmap makeExclusionTable(const ParameterSet &parameters);
 
+
+    Eigen::MatrixXex &getDiffusionMatrix();
+
 };
 
 }
 }
 
-#endif // __FLUC_MODELS_SSEBASEMODEL_HH
+#endif // __INA_MODELS_SSEBASEMODEL_HH

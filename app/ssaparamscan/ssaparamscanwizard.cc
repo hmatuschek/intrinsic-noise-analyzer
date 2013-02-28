@@ -280,6 +280,8 @@ SSAParamScanSummaryPage::initializePage()
 
   this->param->setText(QString((config.getParameter().hasName() ? config.getParameter().getName() : config.getParameter().getIdentifier()).c_str()));
 
+  this->method->setText("SSA");
+
   QString mem_str("%1 MB");
   int N = config.getModel()->numSpecies();
   this->memory->setText(mem_str.arg(double(8*(2*N+N*(N-1)))/126976.));

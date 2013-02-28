@@ -44,7 +44,7 @@ propensityExpansion::propensityExpansion(BaseModel &base):
             taylor = temp.series(inverseVolume==0,1);
             principalPart = series_to_poly(temp.series(inverseVolume==0,-1));
 
-        } catch (std::runtime_error err) {
+        } catch (std::exception &err) {
 
             // must set to zero if expansion fails
             taylor = 0;

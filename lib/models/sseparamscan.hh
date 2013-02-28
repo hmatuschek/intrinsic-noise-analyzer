@@ -10,6 +10,8 @@
 namespace iNA {
 namespace Models {
 
+
+
 /**
 * Extension of the SteadyStateAnalysis to perform a Parameter scan.
 */
@@ -23,21 +25,29 @@ class ParameterScan
 
 protected:
 
+
+
+    NLEsolve::PrecisionSolve computeLNA;
+    NLEsolve::PrecisionSolve computeIOS;
+
     std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> index;
 
     size_t opt_level;
 
-public:
-
-
+    size_t offset;
+    size_t lnaLength;
+    size_t iosLength;
+    size_t sseLength;
 
     typename VectorEngine::Interpreter interpreter;
     typename MatrixEngine::Interpreter matrix_interpreter;
 
-    size_t offset;
-    size_t sseLength;
-    size_t lnaLength;
-    size_t iosLength;
+    typename VectorEngine::Code codeODE;
+    typename MatrixEngine::Code codeJac;
+    typename VectorEngine::Code LNAcodeA;
+    typename MatrixEngine::Code LNAcodeB;
+    typename VectorEngine::Code IOScodeA;
+    typename MatrixEngine::Code IOScodeB;
 
     Eigen::VectorXd A;
     Eigen::MatrixXd B;
@@ -46,33 +56,22 @@ public:
     Eigen::MatrixXd Bios;
 
 
-    typename VectorEngine::Code LNAcodeA;
-    typename MatrixEngine::Code LNAcodeB;
-    typename VectorEngine::Code IOScodeA;
-    typename MatrixEngine::Code IOScodeB;
+public:
 
     /**
     * Constructor
     */
-    ParameterScan(M &model, size_t iter, double epsilon, double t_max=1e9, double dt=1.e-1, size_t opt_level = 0)
+    ParameterScan(M &model, size_t iter=100, double epsilon=1.e-9, double t_max=1e9, double dt=1.e-1, size_t opt_level = 0)
       : SteadyStateAnalysis<M, VectorEngine, MatrixEngine>(model,iter,epsilon,t_max,dt),
+        computeLNA(model.lnaLength()), computeIOS(model.iosLength()),
         index(this->sseModel.stateIndex),
-        opt_level(opt_level)
-
+        opt_level(opt_level),
+        offset(model.numIndSpecies()), lnaLength(model.lnaLength()),
+        iosLength(model.iosLength()), sseLength(model.getUpdateVector().size()-offset),
+        A(lnaLength), B(lnaLength,lnaLength),
+        Aios(iosLength), Bios(iosLength,iosLength)
 
     {
-
-      // Get the SSE vector
-      offset = this->sseModel.numIndSpecies();
-      sseLength = this->sseModel.getUpdateVector().size()-this->sseModel.numIndSpecies();
-      lnaLength = sseLength > 0 ? offset*(offset+1)/2 : 0;
-      iosLength = (sseLength - lnaLength) > 0 ? (sseLength - lnaLength) : 0;
-
-      A.resize(lnaLength);
-      B.resize(lnaLength,lnaLength);
-
-      Aios.resize(iosLength);
-      Bios.resize(iosLength,iosLength);
 
       int nstate = index.size();
 
@@ -97,15 +96,12 @@ public:
           index.insert(std::make_pair<GiNaC::symbol,size_t>(this->sseModel.getConservationConstants()(i), nstate++));
 
       // Now compile
-
-//        Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>::Code codeODE;
-//        Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd>::Code codeJac;
-//        compileREs(this->sseModel, index, codeODE, codeJac);
-
+      compileREs(this->sseModel, index, codeODE, codeJac, opt_level);
       compileLNA(this->sseModel, index, LNAcodeA, LNAcodeB, opt_level);
-
       compileIOS(this->sseModel, index, IOScodeA, IOScodeB, opt_level);
 
+      // Set ode code
+      this->solver.set(codeODE, codeJac);
 
     }
 
@@ -136,15 +132,15 @@ public:
         Eigen::VectorXd init(sseLength+offset);
         this->sseModel.getInitialState(init);
 
-        x.head(offset+sseLength)=init;
-        Eigen::VectorXd conc = init.head(offset);
-
-        Eigen::VectorXex REs;
-        Eigen::MatrixXex Jacobian;
+        x.head(offset+sseLength).noalias()=init;
 
         // Iterate over all parameter sets
         for(size_t j = 0; j < parameterSets.size(); j++)
         {
+
+            Utils::Message message(LOG_MESSAGE(Utils::Message::INFO));
+            message << "Parameter Scan (" << j+1 << "/" << parameterSets.size() << ")";
+            Utils::Logger::get().log(message);
 
             // Generate parameter substitution table
             Trafo::excludeType ptab = this->sseModel.makeExclusionTable(parameterSets[j]);
@@ -163,20 +159,12 @@ public:
                 x((*it).second) = Eigen::ex2double( ICs.apply(parameters.apply(constants.apply((*it).first))) );
             }
 
-            // Fold variable parameters and all the rest
-            REs = ICs.apply(parameters.apply(constants.apply( this->sseModel.getUpdateVector().head(offset) ) ));
-            Jacobian = ICs.apply(parameters.apply(constants.apply( this->sseModel.getJacobian()) ));
-
             // Setup solver and solve for RE concentrations
             try
             {
 
                 // Solve the deterministic equations
-                //solvers[OpenMP::getThreadNum()].set(codeODE,codeJac);
-                this->solver.set(index,REs,Jacobian,opt_level);
-
-                iter = this->solver.solve(conc, this->max_time, this->min_time_step);
-                x.head(offset) = conc;
+                iter = this->solver.solve(x, this->max_time, this->min_time_step, parameterSets[j]);
 
                 // Now calculate LNA
                 calcLNA(this->sseModel,x);
@@ -202,6 +190,7 @@ public:
 protected:
 
     void calcLNA(REmodel &model, Eigen::VectorXd &x)
+
     {
          // Pass...
     }
@@ -215,22 +204,25 @@ protected:
         matrix_interpreter.run(x,B);
 
         // (needs to go in function to match template)
-        x.segment(offset,lnaLength) = this->solver.precisionSolve(B,-A);
+        x.segment(offset,lnaLength).noalias() = computeLNA.solve(B,-A);
 
     }
 
 
     void calcIOS(REmodel &model, Eigen::VectorXd &x)
+
     {
         // Pass...
     }
 
     void calcIOS(LNAmodel &model, Eigen::VectorXd &x)
+
     {
         // Pass...
     }
 
     void calcIOS(IOSmodel &model, Eigen::VectorXd &x)
+
     {
 
       interpreter.setCode(&IOScodeA);
@@ -238,7 +230,7 @@ protected:
       interpreter.run(x,Aios);
       matrix_interpreter.run(x,Bios);
 
-      x.segment(offset+lnaLength, iosLength) = this->solver.precisionSolve(Bios,-Aios);
+      x.segment(offset+lnaLength, iosLength).noalias() = computeIOS.solve(Bios,-Aios);
 
     }
 
@@ -252,7 +244,7 @@ protected:
         // Compile ODEs
         typename VectorEngine::Compiler compilerA(indexTable);
         compilerA.setCode(&codeODE);
-        compilerA.compileVector(model.getUpdateVector().head(model.numIndSpecies()));
+        compilerA.compileVector( model.getUpdateVector().head(model.numIndSpecies()) );
         compilerA.finalize(0);
 
         // Compile Jacobian
@@ -280,20 +272,18 @@ protected:
                     size_t opt_level = 0)
 
     {
-        size_t offset = model.numIndSpecies();
-        size_t lnaLength = offset*(offset+1)/2;
 
-        Eigen::VectorXex A(lnaLength);
-        Eigen::MatrixXex B(lnaLength,lnaLength);
+        Eigen::VectorXex A(model.lnaLength());
+        Eigen::MatrixXex B(model.lnaLength(),model.lnaLength());
 
         // Calculate coefficent matrices
         GiNaC::exmap subs_table;
-        for (size_t i=0; i<lnaLength; i++)
+        for (size_t i=0; i<model.lnaLength(); i++)
             subs_table.insert( std::pair<GiNaC::ex,GiNaC::ex>( model.getSSEvar(i), 0 ) );
-        for(size_t i=0; i<lnaLength; i++)
+        for(size_t i=0; i<model.lnaLength(); i++)
         {
             A(i) =  model.getUpdateVector()(offset+i).subs(subs_table);
-            for(size_t j=0; j<lnaLength; j++)
+            for(size_t j=0; j<model.lnaLength(); j++)
             {
                B(i,j) = model.getUpdateVector()(offset+i).diff(model.getSSEvar(j));
             }
@@ -342,12 +332,6 @@ protected:
 
     {
 
-        // Get the SSE vector
-        size_t offset = model.numIndSpecies();
-        size_t lnaLength = offset*(offset+1)/2;
-        size_t sseLength = model.getUpdateVector().size()-model.numIndSpecies();
-        size_t iosLength = sseLength - lnaLength;
-
         // Calc coefficient matrices
         Eigen::VectorXex A(iosLength);
         Eigen::MatrixXex B(iosLength,iosLength);
@@ -380,8 +364,11 @@ protected:
 
 
 
-
 };
+
+
+
+
 
 
 

@@ -3,7 +3,7 @@
 
 #include <exception>
 #include <sstream>
-#include <ginac.h>
+#include <ginac/ginac.h>
 
 
 namespace iNA

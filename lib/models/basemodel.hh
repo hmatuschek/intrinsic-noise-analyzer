@@ -1,5 +1,5 @@
-#ifndef __FLUC_MODELS_BASEMODEL_HH__
-#define __FLUC_MODELS_BASEMODEL_HH__
+#ifndef __INA_MODELS_BASEMODEL_HH__
+#define __INA_MODELS_BASEMODEL_HH__
 
 
 #include <sbml/SBMLTypes.h>
@@ -104,11 +104,6 @@ public:
   friend class AssertNoExplicitTimeDependenceMixin;
 
 
-protected:
-  /**
-   * Performs all constant and assignment rule substitutions.
-   */
-  GiNaC::ex foldConstants(GiNaC::ex expression);
 };
 
 

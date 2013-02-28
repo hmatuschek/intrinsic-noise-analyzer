@@ -5,8 +5,9 @@
 #include <QItemSelection>
 #include <QPushButton>
 #include <QTableView>
-
+#include <QLabel>
 #include <QGraphicsView>
+
 #include "../doctree/reactionsitem.hh"
 
 
@@ -52,7 +53,7 @@ private slots:
   /** Will move a selected parameter into the global scope. */
   void onMakeParamGlobalClicked();
   /** Will be called if the selection of the parameterlist is changed, is used to enable/disable
-   * the "rem param" button. */
+   * the "remove parameter" button. */
   void onSelectionChanged(const QItemSelection &selected,const QItemSelection &unselected);
   /** Will be called for double click on kinetic law. */
   void onReactionEditing();
@@ -72,6 +73,8 @@ private:
   QPushButton *_makeGlobalButton;
   /** Holds the table view of local parameters. */
   QTableView *_paramTable;
+  /** Holds the label/title of the view. */
+  QLabel *_label;
 };
 
 

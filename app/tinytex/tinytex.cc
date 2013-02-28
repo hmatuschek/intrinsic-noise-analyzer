@@ -1,6 +1,7 @@
 #include "tinytex.hh"
 #include "exception.hh"
 #include "formula.hh"
+#include "utils/logger.hh"
 
 #include <sstream>
 #include <QGraphicsScene>
@@ -256,7 +257,12 @@ TinyTex::parse(const std::string &source)
     TinyTex parser(lexer);
     item = parser.parseFormula(cst[0]);
   } catch (iNA::Parser::ParserError &err) {
-    throw TinyTex::Error(err);
+    // On error -> log message
+    iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::ERROR);
+    message << "TinyTex: Can not parse " << source << ": " << err.what();
+    iNA::Utils::Logger::get().log(message);
+    // and return unrendered source:
+    item = new MathText(source.c_str());
   }
 
   return item;
@@ -333,9 +339,13 @@ TinyTex::processSymbol(const std::string &symbol)
   std::map<std::string, QString>::iterator item=_symbol_table.find(symbol);
 
   if (_symbol_table.end() == item) {
-    TinyTex::Error err;
-    err << "Can not parse expression: Unknown TinyTeX symbol " << symbol;
-    throw err;
+    // Simply return the text if symbol has not been found
+    return new MathText(symbol.c_str());
+
+    // No need to throw an exception here!
+    //TinyTex::Error err;
+    //err << "Can not parse expression: Unknown TinyTeX symbol " << symbol;
+    //throw err;
   }
 
   return new MathText(item->second);

@@ -39,7 +39,6 @@ GiNaC::exmap SSEBaseModel::makeExclusionTable(const ParameterSet & parameters)
 void
 SSEBaseModel::postConstructor()
 {
-  /* @todo remove conservationConstants */
 
 
     // get gradient/hessian of rates
@@ -176,7 +175,6 @@ SSEBaseModel::postConstructor()
        } // end idx
 
 
-
 }
 
 
@@ -223,5 +221,14 @@ SSEBaseModel::vertex(std::list<size_t> &lower, std::list<size_t> &upper, size_t 
         vertex = GiNaC::diff(vertex, indSpecies[*i]);
 
     return vertex;
+
+}
+
+Eigen::MatrixXex &
+SSEBaseModel::getDiffusionMatrix()
+
+{
+
+    return DiffusionMatrix;
 
 }

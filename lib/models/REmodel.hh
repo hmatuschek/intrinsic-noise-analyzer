@@ -89,6 +89,15 @@ public:
 
   virtual void getInitial(InitialConditions &ICs, Eigen::VectorXd &x);
 
+
+  size_t _sseLength;
+  size_t _lnaLength;
+  size_t _iosLength;
+
+  size_t sseLength();
+  size_t lnaLength();
+  size_t iosLength();
+
 };
 
 

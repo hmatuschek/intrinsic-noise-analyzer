@@ -116,7 +116,7 @@ protected:
  * ProductExpression =
  *   (PowerExpression ("*" | "/") ProductExpression) | PowerExpression;
  */
-class ProductExpressionProduction : public Parser::AltProduction
+class ProductExpressionProduction : public Parser::Production
 {
 protected:
   /** Hidden constructor. */
@@ -136,7 +136,7 @@ private:
  * Expression =
  *   (ProductExpression ("+"|"-") Expression) | ProductExpression;
  */
-class ExpressionProduction : public Parser::AltProduction
+class ExpressionProduction : public Parser::Production
 {
 protected:
   /** Hidden constructor. */

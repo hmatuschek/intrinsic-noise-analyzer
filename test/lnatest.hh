@@ -7,34 +7,29 @@
 
 namespace iNA {
 
-/**
- * This class integrates some systems for some time and compares the result
- * of the GiNaC direct evaluation and the bytecode interpreter.
- */
+/** This class integrates some systems for some time and compares the result
+ * of the GiNaC direct evaluation and the bytecode interpreter. */
 class LNATest : public UnitTest::TestCase
 {
 public:
-
+  /** Destructor. */
   virtual ~LNATest();
-  void testEnzymeKineticsOpen();
-  void testDimerization();
-  void testDimerization2();
-
-
-
+  /** Integrates "regression-tests/core_osc.xml" model. */
+  void testCoreEnzymeKinetics();
 
 public:
+  /** Assembles the test suite. */
   static UnitTest::TestSuite *suite();
 
 
 private:
   void compareIntegrators(const std::string &file, double final_time);
 
+  /** Performs the actual integration. */
   void integrateViaByteCode(Models::LNAmodel &model,
                             const Eigen::VectorXd &init_state, Eigen::VectorXd &final_state,
                             double final_time, double err_abs, double err_rel);
 };
-
 
 }
 

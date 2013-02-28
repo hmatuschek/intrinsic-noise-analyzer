@@ -666,8 +666,6 @@ PlotFormulaParser::parse(const QString &formula, Context &context)
   lexer.addRule(new Parser::KeyWordTokenRule(T_RPAR, ")"));
   lexer.addIgnoredToken(T_WHITESPACE);
 
-  Parser::ConcreteSyntaxTree cts;
-
   Parser::ConcreteSyntaxTree cst;
   PlotFormulaGrammar::get()->parse(lexer, cst);
   return __plot_formula_process_expression(cst[0], lexer, context);

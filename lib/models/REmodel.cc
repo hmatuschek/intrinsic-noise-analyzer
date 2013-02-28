@@ -5,7 +5,8 @@ using namespace iNA;
 using namespace iNA::Models;
 
 REmodel::REmodel(const Ast::Model &model)
-  : SSEBaseModel(model)
+  : SSEBaseModel(model),
+    _sseLength(this->numSpecies()),_lnaLength(0), _iosLength(0)
 {
     // set dimension
     dim = this->numIndSpecies();
@@ -129,5 +130,31 @@ REmodel::getSSEvar(size_t index) const {
 const Eigen::MatrixXex &
 REmodel::getJacobian() const {
     return this->JacobianM;
+}
+
+size_t
+REmodel::lnaLength()
+{
+
+    return _lnaLength;
+
+}
+
+
+size_t
+REmodel::iosLength()
+{
+
+    return _iosLength;
+
+}
+
+
+size_t
+REmodel::sseLength()
+{
+
+    return _iosLength+_lnaLength;
+
 }
 
