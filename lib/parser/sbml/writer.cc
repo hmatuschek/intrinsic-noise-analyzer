@@ -539,6 +539,10 @@ SBMLExpressionAssembler::visit(const GiNaC::power &pow)
 void
 SBMLExpressionAssembler::visit(const GiNaC::function &function)
 {
+  // First, process function arguments:
+  for (size_t i=0; i<function.nops(); i++) { function.op(i).accept(*this); }
+
+  // Then, dispatch by function serial:
   if (function.get_serial() == GiNaC::abs_SERIAL::serial) {
     LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *arg = _stack.back(); _stack.pop_back();
     _stack.push_back(new LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode(LIBSBML_CPP_NAMESPACE_QUALIFIER AST_FUNCTION_ABS));
