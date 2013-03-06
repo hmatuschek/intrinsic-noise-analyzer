@@ -9,6 +9,8 @@
 #cmakedefine INA_LLVM_VERSION_IS_2X 1
 // If LLVM version is  >= 3.0:
 #cmakedefine INA_LLVM_VERSION_IS_3X 1
+// If LLVM version is >= 3.2
+#cmakedefine INA_LLVM_VERSION_IS_32 1
 
 // This flag will be set on all binary distributed iNA version that are updated via
 // a package manager i.e. on linux distributions and MacPorts etc. It is not set

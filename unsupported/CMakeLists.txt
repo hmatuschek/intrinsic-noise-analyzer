@@ -24,6 +24,6 @@ SET_TARGET_PROPERTIES(libunsupported PROPERTIES OUTPUT_NAME "inaunsupported")
 TARGET_LINK_LIBRARIES(libunsupported ${LIBS})
 
 
-# Install library files
-INSTALL(TARGETS libunsupported
-        DESTINATION ${CMAKE_INSTALL_LIBDIR})
+# No installation needed or?
+#INSTALL(TARGETS libunsupported
+#        DESTINATION ${CMAKE_INSTALL_LIBDIR})
