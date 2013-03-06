@@ -11,6 +11,8 @@ namespace iNA {
 class RETest : public UnitTest::TestCase
 {
 public:
+  virtual ~RETest() { }
+
   /** Using byte-code interpreter. */
   void testEnzymeKineticsBCI();
   /** Using JIT compiler. */
