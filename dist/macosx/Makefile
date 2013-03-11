@@ -7,7 +7,7 @@ QTSVG_FRAMEWORK = /opt/local/Library/Frameworks/QtSvg.framework/Versions/4/QtSvg
 QTNET_FRAMEWORK = /opt/local/Library/Frameworks/QtNetwork.framework/Versions/4/QtNetwork
 APP_LIBRARY_DIR = IntrinsicNoiseAnalyzer.app/Contents/Frameworks
 APP_BINARY_DIR  = IntrinsicNoiseAnalyzer.app/Contents/MacOS
-VERSION = 0.4.0
+VERSION = 0.4.1
 
 app: dmg
 
