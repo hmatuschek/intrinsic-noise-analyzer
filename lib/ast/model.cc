@@ -1052,9 +1052,6 @@ Model::addDefinition(Definition *def, Definition *after)
 void
 Model::remDefinition(Definition *def)
 {
-  // First, call parent method:
-  Scope::remDefinition(def);
-
   // Remove definition from index vectors.
   switch(def->getNodeType()) {
   case Node::COMPARTMENT_DEFINITION:
@@ -1080,6 +1077,9 @@ Model::remDefinition(Definition *def)
   default:
     break;
   }
+
+  // First, call parent method:
+  Scope::remDefinition(def);
 }
 
 

@@ -249,6 +249,7 @@ ReactionEditorPage::_updateKineticLaw()
   QList< QPair<int, QString> > reactants;
   QList< QPair<int, QString> > products;
   bool is_reversible = false;
+
   // Try to parse the expression
   if (! _parseEquation(_equation->text(), reactants, products, is_reversible)) {
     QPalette equation_palette = _equation->palette();
@@ -1036,6 +1037,7 @@ ReactionEditorPage::validatePage()
     ReactionEditorContext ctx(&_model);
     try {
       // Try to parse the expression
+      /// @bug Does not allow for a reference of new species and compartments
       iNA::Parser::Expr::parseExpression(_kineticLawEditor->text().toStdString(), ctx);
       // On success, reset formula background color
       QPalette palette = _kineticLawEditor->palette();

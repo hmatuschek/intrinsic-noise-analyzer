@@ -10,14 +10,21 @@ void ReversibleReactionConverter::apply(Ast::Model &model)
 {
   size_t count=0;
 
-  // Iterate over all reactions:
-  for (Ast::Model::ReactionIterator it=model.reactionsBegin(); it!=model.reactionsEnd(); it++)
+  // Collect reversible reactions:
+  std::vector<Ast::Reaction *> reactions;
+  for (size_t i=0; i<model.numReactions(); i++ )
   {
     // Get reaction:
-    Ast::Reaction *reaction = (*it);
+    Ast::Reaction *reaction = model.getReaction(i);
+    // Check if reaction is reversible then add to list of reversible reactions:
+    if (reaction->isReversible()) { reactions.push_back(reaction); }
+  }
 
-    // Check if reaction is reversible:
-    if (! reaction->isReversible()) { continue; }
+  // Iterate over all reversible reactions:
+  for (size_t i=0; i<reactions.size(); i++ )
+  {
+    // Get reaction:
+    Ast::Reaction *reaction = reactions[i];
 
     GiNaC::ex numerator = reaction->getKineticLaw()->getRateLaw().numer().expand();
     GiNaC::ex denominator = reaction->getKineticLaw()->getRateLaw().denom();
@@ -93,7 +100,7 @@ void ReversibleReactionConverter::apply(Ast::Model &model)
     reverseReaction->getKineticLaw()->cleanUpParameters();
 
     // Add reverse reaction after original one
-    model.addDefinition(reverseReaction,reaction);
+    model.addDefinition(reverseReaction, reaction);
 
     count++;
 
@@ -114,16 +121,17 @@ void ReversibleReactionConverter::apply(Ast::Model &model)
 }
 
 
+
 void IrreversibleReactionCollapser::apply(Ast::Model &model)
 {
   size_t count=0;
+  std::set<Ast::Reaction *>  burned_reactions;
 
   // Iterate over all reactions:
   for (Ast::Model::ReactionIterator it=model.reactionsBegin(); it!=model.reactionsEnd(); it++)
   {
     // Get reaction
     Ast::Reaction *forward = (*it);
-
     // Skip if reaction is reversible:
     if (forward->isReversible()) { continue; }
 
@@ -133,14 +141,14 @@ void IrreversibleReactionCollapser::apply(Ast::Model &model)
       Ast::Reaction *reverse = (*other);
 
       // Do comparison
-      if(forward->isReverseOf(reverse))
+      if(forward->isReverseOf(reverse) && (0 == burned_reactions.count(reverse)))
       {
         // Make reversible
         forward->setReversible(true);
         Ast::ModelCopyist::mergeReversibleKineticLaw(forward->getKineticLaw(),reverse->getKineticLaw());
 
         // and remove reverse reaction
-        model.remDefinition(reverse);
+        burned_reactions.insert(reverse);
 
         // Create a log message.
         {
@@ -153,6 +161,14 @@ void IrreversibleReactionCollapser::apply(Ast::Model &model)
         count++; break;
       }
     }
+  }
+
+  // Finally remove all reverse reactions that are "burned"
+  for (std::set<Ast::Reaction *>::iterator item=burned_reactions.begin();
+       item!=burned_reactions.end(); item++)
+  {
+    model.remDefinition(*item);
+    delete *item;
   }
 
   // Create final log message.
