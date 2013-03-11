@@ -238,11 +238,6 @@ SET(libina_HEADERS
     ${libina_eval_HEADERS})
 
 
-# Declare user defined target to collect all non-code files:
-SET(libina_EXTRA ${libina_parser_EXTRA})
-ADD_CUSTOM_TARGET(libinaextra SOURCES ${libina_EXTRA})
-
-
 #
 # Recursive copy header files to ${CMAKE_BINARY_DIR}/include/libina
 #
@@ -268,4 +263,5 @@ INSTALL(TARGETS libina
 # Install header files
 IF(UNIX AND APPLE)
 INSTALL_HEADERS_WITH_DIRECTORY("${libina_HEADERS}" "${CMAKE_INSTALL_INCLUDEDIR}/libina")
+INSTALL(FILES "${CMAKE_CURRENT_BINARY_DIR}/config.hh" DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/libina")
 ENDIF(UNIX AND APPLE)

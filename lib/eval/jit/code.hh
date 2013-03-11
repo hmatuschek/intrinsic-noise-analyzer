@@ -26,11 +26,8 @@ namespace iNA {
 namespace Eval {
 namespace jit {
 
-/**
- * Holds the LLVM IR implementing the expressions.
- *
- * @ingroup jit
- */
+/** Holds the LLVM IR implementing the expressions.
+ * @ingroup jit */
 class Code
 {
 protected:
@@ -52,6 +49,7 @@ protected:
   llvm::Type *complex_t;
   /** Holds a reference to libm's pow() function. */
   llvm::Function *real_pow;
+  /** Holds a reference to libm's cpow() function. */
   llvm::Function *complex_pow;
   /** Holds a reference to libm's fabs() function. */
   llvm::Function *real_abs;
@@ -69,27 +67,38 @@ protected:
 
 
 public:
+  /** Constructor, allocates some empty code. */
   Code(size_t num_treads=1);
-
+  /** Destructor. */
   ~Code();
 
+  /** Returns a reference to the LLVM IR builder. */
   llvm::IRBuilder<> &getBuilder();
-
+  /** Returns the current LLVM context, usually the global context. */
   llvm::LLVMContext &getContext();
 
+  /** Retunrs the pointer to the function once the code was compliled. */
   void *getFunctionPtr();
+  /** (Re-) Sets the pointer to the compiled function. */
   void setFunctionPtr(void *ptr);
-
+  /** Sets the execution engine. */
   void setEngine(llvm::ExecutionEngine *engine);
 
+  /** Returns the LLVM IR function. */
   llvm::Function *getSystem();
+  /** Returns the LLVM IR module (holding the function). */
   llvm::Module *getModule();
 
+  /** Returns the LLVM IR input value. */
   llvm::Value *getInput();
+  /** Returns the LLVM IR output value. */
   llvm::Value *getOutput();
 
+  /** The complex data type (defined in the module). */
   llvm::Type     *getComplexTy();
+  /** A reference to the real valued pow() function (INA RUNTIME). */
   llvm::Function *getRealPowFunction();
+  /** A reference to the complex valued pow() function (INA RUNTIME). */
   llvm::Function *getComplexPowFunction();
   llvm::Function *getRealAbsFunction();
   llvm::Function *getRealLogFunction();

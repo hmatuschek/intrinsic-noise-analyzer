@@ -17,11 +17,11 @@ class Parser;
 
 /**
  * Interface class for all option rules.
- * @ingroup optionparser
- */
+ * @ingroup optionparser */
 class RuleInterface
 {
 public:
+  /** Constructor, @c parser specifies the parser. */
   RuleInterface(Parser *parser);
 
   /** Destructor. */
@@ -168,13 +168,14 @@ protected:
   std::string value;
 
 protected:
+  /** Hidden constructor, use @c Parser::Value to obtain an instance. */
   ValueRule(Parser *parser);
 
 public:
+  /** Destructor. */
   virtual ~ValueRule();
 
   virtual bool operator()(const char *argv[], int argc, size_t &idx, Parser &parser);
-
   virtual std::string dump();
 
   friend class Parser;
