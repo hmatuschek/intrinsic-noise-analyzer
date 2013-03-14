@@ -34,7 +34,7 @@ checksums md5    ba03696db7ac7af1b4123408e476381d \
 depends_lib  port:libsbml \
              port:qt4-mac \
              port:GiNaC \
-             port:llvm-3.1
+             port:llvm-3.2
 
 depends_build port:cmake
 
