@@ -7,6 +7,7 @@
 #include <llvm/DataLayout.h>
 #else
 #include <llvm/Target/TargetData.h>
+#include <llvm/Target/TargetSelect.h>
 #endif
 #include <llvm/Analysis/AliasAnalysis.h>
 #include <llvm/Analysis/Passes.h>
