@@ -4,7 +4,7 @@
 #include <llvm/DerivedTypes.h>
 #include <llvm/PassManager.h>
 #ifdef INA_LLVM_VERSION_IS_32
-#include <llvm/Target/DataLayout.h>
+#include <llvm/DataLayout.h>
 #else
 #include <llvm/Target/TargetData.h>
 #endif

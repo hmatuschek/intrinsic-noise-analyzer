@@ -1,6 +1,10 @@
 #include "compiler.hh"
 #include <llvm/PassManager.h>
+#ifdef INA_LLVM_VERSION_IS_32
+#include <llvm/DataLayout.h>
+#else
 #include <llvm/Target/TargetData.h>
+#endif
 #include <llvm/Analysis/AliasAnalysis.h>
 #include <llvm/Analysis/Passes.h>
 #include <llvm/Analysis/Verifier.h>
@@ -72,7 +76,11 @@ CompilerCore::finalize(size_t level)
   llvm::FunctionPassManager fpm(code->getModule());
   // Set up the optimizer pipeline.  Start with registering info about how the
   // target lays out data structures.
+#ifdef INA_LLVM_VERSION_IS_32
+  fpm.add(new llvm::DataLayout(*engine->getDataLayout()));
+#else
   fpm.add(new llvm::TargetData(*engine->getTargetData()));
+#endif
   // Provide basic AliasAnalysis support for GVN.
   fpm.add(llvm::createBasicAliasAnalysisPass());
   if (0 < level) {
