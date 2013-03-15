@@ -7,6 +7,8 @@
 #include <llvm/DataLayout.h>
 #else
 #include <llvm/Target/TargetData.h>
+#endif
+#ifdef INA_LLVM_VERSION_IS_2X
 #include <llvm/Target/TargetSelect.h>
 #endif
 #include <llvm/Analysis/AliasAnalysis.h>
