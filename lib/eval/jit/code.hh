@@ -15,7 +15,11 @@
 #elif INA_LLVM_VERSION_IS_3X
 #include <llvm/Support/TargetSelect.h>
 #endif
+#if INA_LLVM_VERSION_IS_32
+#include <llvm/IRBuilder.h>
+#else
 #include <llvm/Support/IRBuilder.h>
+#endif
 
 
 namespace iNA {

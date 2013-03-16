@@ -16,7 +16,7 @@ using namespace iNA;
 SSAParamScanWizard::SSAParamScanWizard(QWidget *parent) :
   GeneralTaskWizard(parent), config()
 {
-  this->setWindowTitle("System Size Expansion");
+  this->setWindowTitle("Parameter Scan (SSA)");
 
   this->setPage(SSAParamScanWizard::MODEL_SELECTION_PAGE, new SSAParamScanModelSelectionPage(this));
   this->setPage(SSAParamScanWizard::SCAN_CONFIG_PAGE, new SSAParamScanConfigPage(this));
@@ -39,7 +39,7 @@ SSAParamScanWizard::getConfig()
 SSAParamScanModelSelectionPage::SSAParamScanModelSelectionPage(GeneralTaskWizard *parent)
   : ModelSelectionWizardPage(parent)
 {
-  this->setTitle(tr("SSA Parameter scan"));
+  this->setTitle(tr("Time-averaged Parameter Scan (SSA)"));
   this->setSubTitle(tr("Select a model for parameter scan"));
 
 }
@@ -70,7 +70,7 @@ SSAParamScanModelSelectionPage::validatePage()
 SSAParamScanEngineSelectionPage::SSAParamScanEngineSelectionPage(GeneralTaskWizard *parent)
   : EngineWizardPage(parent, false)
 {
-  this->setTitle(tr("Stochastic Simulation Algorithm"));
+  this->setTitle(tr("Time-averaged Parameter Scan (SSA)"));
   setSubTitle(tr("Select engine for propensity evaluation"));
 }
 
@@ -80,7 +80,7 @@ SSAParamScanEngineSelectionPage::SSAParamScanEngineSelectionPage(GeneralTaskWiza
 SSAParamScanConfigPage::SSAParamScanConfigPage(GeneralTaskWizard *parent)
   : QWizardPage(parent)
 {
-  this->setTitle(tr("SSA Parameter scan"));
+  this->setTitle(tr("Time-averaged Parameter Scan (SSA)"));
   this->setSubTitle(tr("Configure parameter scan"));
 
   this->t_transient = new QLineEdit(); this->t_transient->setText("1");
@@ -100,9 +100,9 @@ SSAParamScanConfigPage::SSAParamScanConfigPage(GeneralTaskWizard *parent)
   QDoubleValidator *t_max_val = new QDoubleValidator(0); t_max_val->setBottom(0);
   t_max->setValidator(t_max_val);
 
-  this->t_transient->setToolTip("...");
-  this->t_max->setToolTip("...");
-  this->timestep->setToolTip("...");
+  this->t_transient->setToolTip("Estimated simulation time to reach steady state.");
+  this->t_max->setToolTip("Maximum simulation time.");
+  this->timestep->setToolTip("Time step of trajectory sampling.");
 
   p_select = new QComboBox();
   p_select->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
@@ -119,18 +119,21 @@ SSAParamScanConfigPage::SSAParamScanConfigPage(GeneralTaskWizard *parent)
   p_max->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
   QDoubleValidator *p_max_val = new QDoubleValidator();
   p_max->setValidator(p_max_val);
+  p_max->setToolTip("Maximum parameter value.");
   registerField("p_max", p_max);
 
   p_num = new QLineEdit("100");
   p_num->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
   QIntValidator *p_num_val = new QIntValidator(); p_num_val->setBottom(1);
   p_num->setValidator(p_num_val);
+  p_num->setToolTip("Number of intermediate steps.");
   registerField("p_num", p_num);
 
   thread_count = new QSpinBox();
   thread_count->setMinimum(1);
   thread_count->setMaximum(OpenMP::getMaxThreads());
   thread_count->setValue(OpenMP::getMaxThreads());
+  thread_count->setToolTip("Number of threads used for parallel stochastic simulation.");
   this->registerField("thread_count", thread_count);
   if (1 == OpenMP::getMaxThreads())
     thread_count->setEnabled(false);
@@ -242,7 +245,7 @@ SSAParamScanSummaryPage::SSAParamScanSummaryPage(QWidget *parent)
   : QWizardPage(parent)
 {
 
-  this->setTitle("Parameter scan");
+  this->setTitle("Time-averaged Parameter Scan (SSA)");
   this->setSubTitle("Summary");
 
   this->model_name = new QLabel();

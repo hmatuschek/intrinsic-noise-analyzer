@@ -39,7 +39,7 @@ ParamScanWizard::getConfig()
 ParamScanModelSelectionPage::ParamScanModelSelectionPage(GeneralTaskWizard *parent)
   : ModelSelectionWizardPage(parent)
 {
-  this->setTitle(tr("Parameter scan"));
+  this->setTitle(tr("Parameter scan (SSE)"));
   this->setSubTitle(tr("Select a model for parameter scan"));
 
 
@@ -101,7 +101,7 @@ ParamScanModelSelectionPage::validatePage()
 ParameterScanConfigPage::ParameterScanConfigPage(GeneralTaskWizard *parent)
   : QWizardPage(parent)
 {
-  this->setTitle(tr("Parameter scan"));
+  this->setTitle(tr("Parameter scan (SSE)"));
   this->setSubTitle(tr("Configure parameter scan"));
 
   this->n_iter = new QLineEdit(); this->n_iter->setText("100");
@@ -135,18 +135,21 @@ ParameterScanConfigPage::ParameterScanConfigPage(GeneralTaskWizard *parent)
   p_min->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
   QDoubleValidator *p_min_val = new QDoubleValidator();
   p_min->setValidator(p_min_val);
+  p_min->setToolTip("Minimum parameter value.");
   registerField("p_min", p_min);
 
   p_max = new QLineEdit("1.0");
   p_max->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
   QDoubleValidator *p_max_val = new QDoubleValidator();
   p_max->setValidator(p_max_val);
+  p_max->setToolTip("Maximum parameter value.");
   registerField("p_max", p_max);
 
   p_num = new QLineEdit("100");
   p_num->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
   QIntValidator *p_num_val = new QIntValidator(); p_num_val->setBottom(1);
   p_num->setValidator(p_num_val);
+  p_num->setToolTip("Number of steps taken from minimum to maximum parameter value.");
   registerField("p_num", p_num);
 
   QSpinBox *thread_count = new QSpinBox();
@@ -261,7 +264,7 @@ ParamScanEngineSelectionPage::ParamScanEngineSelectionPage(GeneralTaskWizard *pa
   : EngineWizardPage(parent, false)
 {
 
-  this->setTitle(tr("Parameter scan"));
+  this->setTitle(tr("Parameter scan (SSE)"));
   this->setSubTitle(tr("Select engine for model evaluation"));
 }
 
@@ -273,7 +276,7 @@ ParamScanSummaryPage::ParamScanSummaryPage(QWidget *parent)
   : QWizardPage(parent)
 {
 
-  this->setTitle("Parameter scan");
+  this->setTitle("Parameter scan (SSE)");
   this->setSubTitle("Summary");
 
   this->model_name = new QLabel();

@@ -3,7 +3,14 @@
 #include <iostream>
 #include <llvm/DerivedTypes.h>
 #include <llvm/PassManager.h>
+#ifdef INA_LLVM_VERSION_IS_32
+#include <llvm/DataLayout.h>
+#else
 #include <llvm/Target/TargetData.h>
+#endif
+#ifdef INA_LLVM_VERSION_IS_2X
+#include <llvm/Target/TargetSelect.h>
+#endif
 #include <llvm/Analysis/AliasAnalysis.h>
 #include <llvm/Analysis/Passes.h>
 #include <llvm/Analysis/Verifier.h>

@@ -17,7 +17,7 @@ namespace Ast {
 /**
  * Represents the kinetic law of a reaction.
  *
- * A KinetciLaw implements a a @c Scope since it may have some local @c Parameter defined that
+ * A KineticLaw implements a a @c Scope since it may have some local @c Parameter defined that
  * are used in the kinetic-law expression.
  *
  * @ingroup ast
