@@ -141,11 +141,11 @@ set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS_INIT} ${LLVM_LD_FLAGS
 set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS_INIT} ${LLVM_LD_FLAGS}")
 
 # Handle LLVM version:
-if((LLVM_VERSION VERSION_GREATER 2.9 OR LLVM_VERSION VERSION_EQUAL 2.8) AND (LLVM_VERSION VERSION_LESS 3.0))
+if((LLVM_VERSION VERSION_GREATER 2.8 OR LLVM_VERSION VERSION_EQUAL 2.8) AND (LLVM_VERSION VERSION_LESS 3.0))
 set(INA_LLVM_VERSION_IS_2X ON)
 set(INA_LLVM_VERSION_IS_3X OFF)
 SET(INA_LLVM_VERSION_IS_32 OFF)
-endif((LLVM_VERSION VERSION_GREATER 2.9 OR LLVM_VERSION VERSION_EQUAL 2.8) AND (LLVM_VERSION VERSION_LESS 3.0))
+endif((LLVM_VERSION VERSION_GREATER 2.8 OR LLVM_VERSION VERSION_EQUAL 2.8) AND (LLVM_VERSION VERSION_LESS 3.0))
 
 if(LLVM_VERSION VERSION_GREATER 3.0 OR LLVM_VERSION VERSION_EQUAL 3.0)
 set(INA_LLVM_VERSION_IS_2X OFF)
@@ -181,13 +181,13 @@ INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/unsupported)
 #
 IF(INA_ENABLE_STATIC)
 add_subdirectory(lib)
-add_subdirectory(cli)
-add_subdirectory(unsupported)
+#add_subdirectory(cli)
+#add_subdirectory(unsupported)
 ELSE()
 add_subdirectory(lib)
 add_subdirectory(app)
-add_subdirectory(cli)
-add_subdirectory(unsupported)
+#add_subdirectory(cli)
+#add_subdirectory(unsupported)
 #
 # Exclude unit tests requiring glibc which is not available under Windows!
 #
