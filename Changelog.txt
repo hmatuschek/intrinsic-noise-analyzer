@@ -1,31 +1,32 @@
-iNA (0.4.0);
+intrinsic-noise-analyzer (0.4.1-1) unstable; urgency=low
 
-  * A parameter scan of the steady state, allowing to analyze the dependence of the steady state
-    from model parameters.
-  * Improved usability of iNA, including an improved equation rendering and ploting.
-  * Model editing capabilities.
+  * Added Parameter scan for steady state analysis (SSA).
+  * A lot of minor impovements and bugfixes.
 
- -- ???, ?? ??? 2012
+ -- Hannes Matuschek <hmatuschek@gmail.com>  Mon, 16 Mar 2013 00:00:00 +0000
 
+intrinsic-noise-analyzer (0.4.0-1) unstable; urgency=low
 
-iNA (0.3.1);
+  * Added Parameter scan for steady state analysis (SSE).
+  * A lot of GUI improvements (better equation rendering, ...).
+  * Direct model editing.
 
-  * The Inverse Omega Squared analysis (IOS) which yields more accurate noise estimates than the
-    Linear Noise Approximation. At the same time it predicts the average concentrations more
-    accurate than the EMREs.
-  * Just-in-time compilation based on the LLVM framework delivering high performance to iNA's
-    analyses.
-  * Support for the efficient ODE integrator LSODA for our time course analysis.
-  * A very robust steady state solver which uses a combination of the fast Newton-Raphson method
-    and the reliable ODE integrator LSODA.
-  * Support for even more SBML features such as constant species and automatic conversion of
-    reversible reactions into irreversible ones.
+ -- Hannes Matuschek <hmatuschek@gmail.com>  Mon, 07 Nov 2012 00:00:00 +0000
 
- -- Sun, 1 Jul 2012
+intrinsic-noise-analyzer (0.3.1-1) unstable; urgency=low
 
+  * The bugfix release
 
-iNA (0.2.0);
+ -- Hannes Matuschek <hmatuschek@gmail.com>  Mon, 02 Jul 2012 00:00:00 +0000
 
-  * Initial release of iNA.
+intrinsic-noise-analyzer (0.3.0-1) unstable; urgency=low
 
- -- Thu, 12 Apr 2012
+  * The new release
+
+ -- Hannes Matuschek <hmatuschek@gmail.com>  Fri, 21 Jun 2012 00:00:00 +0000
+
+intrinsic-noise-analyzer (0.2.0-1) unstable; urgency=low
+
+  * Initial release 
+
+ -- Hannes Matuschek <hmatuschek@gmail.com>  Tue, 07 Feb 2012 18:03:03 +0100
