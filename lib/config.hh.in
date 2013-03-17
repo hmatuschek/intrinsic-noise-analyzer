@@ -12,10 +12,8 @@
 // If LLVM version is >= 3.2
 #cmakedefine INA_LLVM_VERSION_IS_32 1
 
-// This flag will be set on all binary distributed iNA version that are updated via
-// a package manager i.e. on linux distributions and MacPorts etc. It is not set
-// (enableing version check) on all source and binary distributions w/o update mechanism.
-#cmakedefine INA_DISABLE_NEW_VERSION_CHECK 1
+#cmakedefine INA_ENABLE_OPENMP 1
+#cmakedefine INA_ENABLE_NEW_VERSION_CHECK 1
 
 
 #define INA_VERSION_MAJOR 0

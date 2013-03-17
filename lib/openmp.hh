@@ -2,7 +2,9 @@
 #define __FLUC_OPENMP_WRAPPER_HH__
 
 #include <cstdlib>
+#ifdef INA_ENABLE_OPENMP
 #include <omp.h>
+#endif
 
 /**
  * Simple wrapper class to encapsulate OpenMP.
