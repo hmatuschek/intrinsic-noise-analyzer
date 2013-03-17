@@ -23,13 +23,11 @@ long_description iNA is a computational tool for quantitative analysis of fluctu
 license GPL-2
 
 homepage http://code.google.com/p/intrinsic-noise-analyzer
+master_sites http://intrinsic-noise-analyzer.googlecode.com/files/
 
-master_sites http://intrinsic-noise-analyzer.googlecode.com/files/ \
-             http://dl.dropbox.com/u/17326152/
-
-checksums md5    ba03696db7ac7af1b4123408e476381d \
-          sha1   2d23f1718faf971a75579e63ee3be788d08e4ab4 \
-          rmd160 0a3c169a4d98643e05cb8ce52eb4d9cbdf4f9470
+checksums md5    b45e3e0b2ac26b2dc6d3025f3b34acea \
+          sha1   359cbb9847b7b0ba6ea9038b97ea70303120818c \
+          rmd160 a441f30ea8d32e0788e00615e531094e011e2895
 
 depends_lib  port:libsbml \
              port:qt4-mac \
@@ -48,11 +46,6 @@ configure.args      -DCMAKE_VERBOSE_MAKEFILE=ON \
                     -DCMAKE_SYSTEM_PREFIX_PATH=\"${prefix}\;/usr\" 
 
 configure.args-append ../ina_src
-
-if {${configure.compiler} == "clang"} {
-    configure.compiler llvm-gcc-4.2
-}
-
 
 # Phase modifications
 # Move source into ina_src; configure & build (out-of-source) in ${workpath}
