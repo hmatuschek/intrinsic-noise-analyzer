@@ -15,6 +15,7 @@ OPTION(INA_ENABLE_VERSION_CHECK "Enables the periodic check about a new version 
 OPTION(INA_ENABLE_OPENMP "Enables OpenMP support" ON)
 OPTION(INA_ENABLE_STATIC "Enables static compilation" OFF)
 OPTION(INA_BUILD_UNITTEST "Enables build of unit tests explicitly." OFF)
+OPTION(WITH_LLVM_CONFIG "Specifies the LLVM config executable to be used (needed for MacPorts)" OFF)
 
 # Disable version check on debug builds:
 IF(CMAKE_BUILD_TYPE MATCHES DEBUG)
