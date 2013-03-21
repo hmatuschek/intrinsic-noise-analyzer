@@ -4,7 +4,7 @@
 PortSystem          1.0
 
 name                libsbml
-version             5.7.0
+version             5.8.0
 categories          science
 platforms           darwin
 maintainers         nomaintainer
@@ -20,12 +20,12 @@ long_description    LibSBML is a free, open-source programming library to \
 homepage            http://sbml.org/Software/libSBML
 master_sites        sourceforge:sbml
 
-distname            libSBML-${version}-core-src
+distname            libSBML-${version}-src
 worksrcdir          libsbml-${version}
 
-checksums           md5     ec6d3cc98a8eb4f57969884157d0071f \
-                    sha1    6d163257ee55ef06bc8277d8650d08f4e8c1d9dd \
-                    rmd160  a4953389f4e7d9259fe13559042e781c4e5742e9
+checksums           md5     7271de66294169c0e728d2e7706e2941 \
+                    sha1    ca931f75962f3bb4397f96259c338185014ff091 \
+                    rmd160  185beb54cdda53e5a74958c77964ea3015c7b533
 
 depends_lib         port:libxml2 \
                     port:bzip2
@@ -33,5 +33,11 @@ depends_lib         port:libxml2 \
 configure.pre_args  --prefix=${prefix} \
                     --with-libxml=${prefix}
 
+variant python description {Add Python binding} {
+   depends_lib port:swig-python
+   configure.args-append --with-python
+}
+
+configure.universal_args-delete --disable-dependency-tracking
 
 use_parallel_build  no

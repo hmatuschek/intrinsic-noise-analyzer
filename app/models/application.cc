@@ -620,13 +620,13 @@ Application::configTimeCourseAnalysis() {
 
     default:
       QMessageBox::warning(
-            0, tr("Can not construct time course analysis (SEE) from model: "),
+            0, tr("Cannot construct time course analysis (SEE) from model: "),
             "No method was selected.");
       return;
     }
   } catch (iNA::Exception err) {
     QMessageBox::warning(
-          0, tr("Can not construct time course analysis (SEE) from model: "), err.what());
+          0, tr("Cannot construct time course analysis (SEE) from model: "), err.what());
     return;
   } catch (std::exception &err)
   {

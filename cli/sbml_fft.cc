@@ -28,11 +28,11 @@ int main(int argc, char *argv[])
 
     size_t steps = 5000;
 
-    double transientTime = 200;//goodwin 50;//brussel500;
+    double transientTime = 20;//goodwin 50;//brussel500;
     size_t realizations=4;
     // Construct SSA model from SBML model
 
-    const double fMax   = 100;//10//goodwin 10*50/(2*3.14); //brusselator20*0.75/(3.14);
+    const double fMax   = 10;//goodwin 10*50/(2*3.14); //brusselator20*0.75/(3.14);
     const double deltaf = 0.005;
 
     Models::SpectrumRecorder<Models::OptimizedSSA> specEval(sbml_model,realizations,fMax,deltaf,realizations);
