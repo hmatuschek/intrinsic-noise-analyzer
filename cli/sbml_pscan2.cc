@@ -75,7 +75,6 @@ int main(int argc, char *argv[])
         file << sbml_model.getSpecies(i)->getIdentifier() << "\t";
 
       // label covariances
-      int idx = 0;
       for (size_t i=0; i<_Ns; i++)
         for (size_t j=0; j<=i; j++)
           file << "COV(" << sbml_model.getSpecies(i)->getIdentifier() << "," << sbml_model.getSpecies(i)->getIdentifier() << ")\t";
@@ -105,8 +104,6 @@ int main(int argc, char *argv[])
       {
         file << GiNaC::ex_to<GiNaC::numeric>(
                   _parameterSets[pid][id]).to_double() << "\t";
-
-        int col=1;
 
         // output means
         for (size_t i=0; i<_Ns; i++)
