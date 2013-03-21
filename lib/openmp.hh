@@ -2,6 +2,7 @@
 #define __FLUC_OPENMP_WRAPPER_HH__
 
 #include <cstdlib>
+#include "config.hh"
 #ifdef INA_ENABLE_OPENMP
 #include <omp.h>
 #endif

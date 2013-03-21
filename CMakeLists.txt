@@ -111,7 +111,6 @@ ENDIF(WIN32)
 # eigen + mingw weirdness, see
 # http://eigen.tuxfamily.org/dox/TopicWrongStackAlignment.html
 #
-
 IF(WIN32 AND WINGW)
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mincoming-stack-boundary=2")
     SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -mincoming-stack-boundary=2")
@@ -183,12 +182,10 @@ add_subdirectory(lib)
 add_subdirectory(app)
 #add_subdirectory(cli)
 #add_subdirectory(unsupported)
-#
 # Exclude unit tests requiring glibc which is not available under Windows!
-#
-IF(INA_ENABLE_UNTITEST AND NOT WIN32)
+IF(INA_BUILD_UNITTEST AND NOT WIN32)
   add_subdirectory(test)
-ENDIF(INA_ENABLE_UNTITEST AND NOT WIN32)
+ENDIF(INA_BUILD_UNITTEST AND NOT WIN32)
 ENDIF(INA_ENABLE_STATIC)
 
 #
