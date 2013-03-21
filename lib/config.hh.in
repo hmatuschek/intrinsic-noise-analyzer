@@ -5,7 +5,7 @@
 // Whether there is LLVM support.
 #cmakedefine WITH_EXECUTION_ENGINE_LLVM 1
 
-// If LLVM version is >= 2.9 and < 3.0:
+// If LLVM version is >= 2.8 and < 3.0:
 #cmakedefine INA_LLVM_VERSION_IS_2X 1
 // If LLVM version is  >= 3.0:
 #cmakedefine INA_LLVM_VERSION_IS_3X 1
