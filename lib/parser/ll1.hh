@@ -5,9 +5,11 @@
 
 namespace iNA {
 namespace Parser {
+
 /** This namespace collects all classes forming the LL(1) parsers of iNA. These parsers will
  * replace the currently used recusive descending parsers and allow for a proper error discovery. */
 namespace LL1 {
+
 
 /** Abstract base class of all productions. */
 class AbstractProduction

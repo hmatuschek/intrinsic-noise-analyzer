@@ -126,7 +126,7 @@ DocumentsView::dropEvent(QDropEvent *event)
   }
 
   // First, handle local files:
-  if ("file"==url.scheme() || ""==url.scheme()) { //url.isLocalFile()) { <-- needs 4.8
+  if ("file"==url.scheme() || ""==url.scheme()) {
     Application::getApp()->importModel(url.path(), false);
     return;
   }

@@ -1,7 +1,7 @@
 #!/usr/bin/make -f
 
 # Disable version check, will be updated by package manager.
-DEB_CMAKE_EXTRA_FLAGS = -DINA_DISABLE_NEW_VERSION_CHECK=ON
+DEB_CMAKE_EXTRA_FLAGS = -DINA_ENABLE_NEW_VERSION_CHECK=OFF -DCMAKE_BUILD_TYPE=RELEASE
 
 include /usr/share/cdbs/1/rules/debhelper.mk
 include /usr/share/cdbs/1/class/cmake.mk

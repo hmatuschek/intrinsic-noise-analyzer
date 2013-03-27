@@ -11,13 +11,16 @@ include(InstallHeadersWithDirectory)
 #
 # Define some options
 #
-OPTION(INA_DISABLE_NEW_VERSION_CHECK "Disables the periodic check about a new version of iNA" OFF)
-OPTION(INA_DISABLE_OPENMP "Disables OpenMP support" OFF)
+OPTION(INA_ENABLE_VERSION_CHECK "Enables the periodic check about a new version of iNA" OFF)
+OPTION(INA_ENABLE_OPENMP "Enables OpenMP support" ON)
 OPTION(INA_ENABLE_STATIC "Enables static compilation" OFF)
+OPTION(INA_BUILD_UNITTEST "Enables build of unit tests explicitly." OFF)
+OPTION(WITH_LLVM_CONFIG "Specifies the LLVM config executable to be used (needed for MacPorts)" OFF)
 
 # Disable version check on debug builds:
 IF(CMAKE_BUILD_TYPE MATCHES DEBUG)
-SET(INA_DISABLE_NEW_VERSION_CHECK ON)
+ SET(INA_ENABLE_NEW_VERSION_CHECK OFF)
+ SET(INA_BUILD_UNITTEST ON)
 ENDIF(CMAKE_BUILD_TYPE MATCHES DEBUG)
 
 
@@ -35,8 +38,8 @@ ENDIF(UNIX AND NOT APPLE)
 
 # Ok we need this to avoid clang compiler on MacOSX 10.8+
 IF(APPLE)
-SET(CMAKE_C_COMPILER "gcc")
-SET(CMAKE_CXX_COMPILER "g++")
+ SET(CMAKE_C_COMPILER "gcc")
+ SET(CMAKE_CXX_COMPILER "g++")
 ENDIF(APPLE)
 
 #
@@ -52,20 +55,11 @@ INCLUDE_DIRECTORIES(${QT_QTCORE_INCLUDE_DIR} ${QT_QTGUI_INCLUDE_DIR})
 IF(NOT INA_ENABLE_STATIC)
 FIND_PACKAGE(Ginac REQUIRED)
 FIND_PACKAGE(LibSBML REQUIRED)
-IF(NOT INA_DISABLE_OPENMP)
-  FIND_PACKAGE(OpenMP)
-ENDIF(NOT INA_DISABLE_OPENMP)
 FIND_PACKAGE(LLVM REQUIRED)
+IF(INA_ENABLE_OPENMP)
+  FIND_PACKAGE(OpenMP REQUIRED)
+ENDIF(INA_ENABLE_OPENMP)
 ENDIF(NOT INA_ENABLE_STATIC)
-
-#
-# Disable OpenMP on MacOSX.
-#
-IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-SET(OpenMP_CXX_FLAGS "")
-SET(OpenMP_C_FLAGS "")
-ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-
 
 #
 # Make sure libina can be found
@@ -78,12 +72,13 @@ INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/lib")
 # Used libaries:
 #
 IF(INA_ENABLE_STATIC)
-# make sure you have them
-LINK_DIRECTORIES("/opt/lib")
-set(LIBS ${LIBS} ginac cln gmp sbml xml2 z bz2 m pthread gomp)
+ # make sure you have them
+ LINK_DIRECTORIES("/opt/lib")
+ set(LIBS ${LIBS} ginac cln gmp sbml xml2 z bz2 m pthread gomp)
 ELSE()
-set(LIBS ${LIBS} ${GINAC_LIBRARIES} ${LIBSBML_LIBRARIES} m pthread gomp)
-ENDIF()
+ set(LIBS ${LIBS} ${GINAC_LIBRARIES} ${LIBSBML_LIBRARIES} m pthread gomp)
+ENDIF(INA_ENABLE_STATIC)
+
 #
 # Used headers:
 #
@@ -116,7 +111,6 @@ ENDIF(WIN32)
 # eigen + mingw weirdness, see
 # http://eigen.tuxfamily.org/dox/TopicWrongStackAlignment.html
 #
-
 IF(WIN32 AND WINGW)
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mincoming-stack-boundary=2")
     SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -mincoming-stack-boundary=2")
@@ -186,15 +180,19 @@ add_subdirectory(lib)
 ELSE()
 add_subdirectory(lib)
 add_subdirectory(app)
+<<<<<<< HEAD
 add_subdirectory(cli)
 add_subdirectory(unsupported)
 #
+=======
+#add_subdirectory(cli)
+#add_subdirectory(unsupported)
+>>>>>>> 0facdc360c63a659574503f34eddcca13c8fd925
 # Exclude unit tests requiring glibc which is not available under Windows!
-#
-IF(NOT WIN32)
+IF(INA_BUILD_UNITTEST AND NOT WIN32)
   add_subdirectory(test)
-ENDIF(NOT WIN32)
-ENDIF()
+ENDIF(INA_BUILD_UNITTEST AND NOT WIN32)
+ENDIF(INA_ENABLE_STATIC)
 
 #
 # Source distribution packages:
