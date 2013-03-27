@@ -180,14 +180,8 @@ add_subdirectory(lib)
 ELSE()
 add_subdirectory(lib)
 add_subdirectory(app)
-<<<<<<< HEAD
 add_subdirectory(cli)
 add_subdirectory(unsupported)
-#
-=======
-#add_subdirectory(cli)
-#add_subdirectory(unsupported)
->>>>>>> 0facdc360c63a659574503f34eddcca13c8fd925
 # Exclude unit tests requiring glibc which is not available under Windows!
 IF(INA_BUILD_UNITTEST AND NOT WIN32)
   add_subdirectory(test)
