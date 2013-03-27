@@ -19,38 +19,45 @@ int main(int argc, char *argv[])
 
     // Construct SSA model from SBML model
     Ast::Model sbml_model; Parser::Sbml::importModel(sbml_model, argv[1]);
-    Models::OptimizedSSA model(sbml_model, 30, 1024,1);
+    Models::GenericOptimizedSSA< Eval::jit::Engine<Eigen::VectorXd> > model(sbml_model, 30, 1024,16);
 
-    double dt=1;
+    double dt=0.1;
 
-
-    int idx = 1;
-    double tMax = 10000;
+    int idx = 2;
+    double tMax = 1e10;
 
     std::cout << "Selected: " << sbml_model.getSpecies(idx)->getIdentifier() << std::endl;
 
     std::cout << "Start SSA" << std::endl;
-    model.run(30);
+    model.run(50);
     std::cout << "Transients passed..." << std::endl;
 
 
-    Models::Histogram<double> hist;
+    std::vector<Models::Histogram<double> > hist(model.numSpecies());
     std::ofstream histfile;
 
-    for(double t=0.; t<tMax; t+=dt)
+    int step=0;
+
+    for(double t=0.; t<tMax; t+=dt, step++)
     {
 
-      //if (t%(tMax/10)) std::cout << "t=" << t <<std::endl;
+       if (step%(10)==0) std::cout << "t=" << t <<std::endl;
 
        model.run(dt);
-       model.getHistogram(idx,hist);
 
-       histfile.open ("histogram.dat");
-       std::map<double,double> temp=hist.getDensity();
-       for(std::map<double,double>::iterator it=temp.begin();it!=temp.end();it++)
-           histfile << it->first << "\t" << it->second << "\t"<<std::endl;
-       histfile.close();
+       for(int idx=0; idx<model.numSpecies(); idx++)
+       {
 
+           model.getHistogram(idx,hist[idx]);
+
+           std::string file;
+           histfile.open ("histogram.dat");
+           std::map<double,double> temp = hist[idx].getDensity();
+           for(std::map<double,double>::iterator it=temp.begin();it!=temp.end();it++)
+               histfile << it->first << "\t" << it->second << "\t"<<std::endl;
+           histfile.close();
+
+       }
     }
 
 

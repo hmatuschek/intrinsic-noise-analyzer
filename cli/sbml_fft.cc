@@ -20,20 +20,20 @@ int main(int argc, char *argv[])
 
   iNA::Models::LNAmodel mod(sbml_model);
 
-  iNA::Models::LNASpec LNA(mod);
+//  iNA::Models::LNASpec LNA(mod);
 
 
   // Do the work:
 
 
-    size_t steps = 5000;
+    size_t steps = 5e10;
 
     double transientTime = 20;//goodwin 50;//brussel500;
     size_t realizations=4;
     // Construct SSA model from SBML model
 
     const double fMax   = 10;//goodwin 10*50/(2*3.14); //brusselator20*0.75/(3.14);
-    const double deltaf = 0.005;
+    const double deltaf = 0.001;
 
     Models::SpectrumRecorder<Models::OptimizedSSA> specEval(sbml_model,realizations,fMax,deltaf,realizations);
 
@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
 
 
     // Calc LNA
-    Eigen::MatrixXd LNAspec = LNA.getSpectrum(freq);
+//    Eigen::MatrixXd LNAspec = LNA.getSpectrum(freq);
 
 
     specEval.advance(transientTime);
@@ -72,7 +72,8 @@ int main(int argc, char *argv[])
             {
                 myfile << freq(fs) << "\t"
                        << spec(fs) << "\t"
-                       << LNAspec(fs,idx) << "\n";
+//                       << LNAspec(fs,idx)
+                       << "\n";
             }
             myfile.close();
 
