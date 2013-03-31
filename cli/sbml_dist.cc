@@ -23,10 +23,7 @@ int main(int argc, char *argv[])
 
     double dt=0.1;
 
-    int idx = 2;
     double tMax = 1e10;
-
-    std::cout << "Selected: " << sbml_model.getSpecies(idx)->getIdentifier() << std::endl;
 
     std::cout << "Start SSA" << std::endl;
     model.run(50);
@@ -50,8 +47,11 @@ int main(int argc, char *argv[])
 
            model.getHistogram(idx,hist[idx]);
 
-           std::string file;
-           histfile.open ("histogram.dat");
+           // output histogram
+           std::stringstream fileName;
+           fileName << "histogram" << sbml_model.getSpecies(idx)->getIdentifier() << ".dat";
+           histfile.open(fileName.str().c_str(),std::ios_base::trunc);
+
            std::map<double,double> temp = hist[idx].getDensity();
            for(std::map<double,double>::iterator it=temp.begin();it!=temp.end();it++)
                histfile << it->first << "\t" << it->second << "\t"<<std::endl;
