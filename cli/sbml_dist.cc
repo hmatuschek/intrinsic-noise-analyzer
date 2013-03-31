@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
 
     // Construct SSA model from SBML model
     Ast::Model sbml_model; Parser::Sbml::importModel(sbml_model, argv[1]);
-    Models::GenericOptimizedSSA< Eval::jit::Engine<Eigen::VectorXd> > model(sbml_model, 30, 1024,16);
+    Models::GenericOptimizedSSA< Eval::jit::Engine<Eigen::VectorXd> > model(sbml_model, 1, std::time(0));
 
     double dt=0.1;
 
@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
 
        model.run(dt);
 
-       for(int idx=0; idx<model.numSpecies(); idx++)
+       for(size_t idx=0; idx<model.numSpecies(); idx++)
        {
 
            model.getHistogram(idx,hist[idx]);

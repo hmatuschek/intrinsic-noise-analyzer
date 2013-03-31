@@ -126,7 +126,7 @@ SSAParamScanConfigPage::SSAParamScanConfigPage(GeneralTaskWizard *parent)
   p_num->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
   QIntValidator *p_num_val = new QIntValidator(); p_num_val->setBottom(1);
   p_num->setValidator(p_num_val);
-  p_num->setToolTip("Number of intermediate steps.");
+  p_num->setToolTip("Number of steps taken between minimum and maximum parameter value.");
   registerField("p_num", p_num);
 
   thread_count = new QSpinBox();
