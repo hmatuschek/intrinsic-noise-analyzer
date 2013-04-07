@@ -153,6 +153,7 @@ set(INA_LLVM_VERSION_IS_3X ON)
 set(INA_LLVM_VERSION_IS_32 ON)
 endif(LLVM_VERSION VERSION_GREATER 3.2 OR LLVM_VERSION VERSION_EQUAL 3.2)
 
+
 else()
 MESSAGE(STATUS "LLVM support: no")
 SET(WITH_EXECUTION_ENGINE_LLVM OFF)
@@ -180,8 +181,8 @@ add_subdirectory(lib)
 ELSE()
 add_subdirectory(lib)
 add_subdirectory(app)
-#add_subdirectory(cli)
-#add_subdirectory(unsupported)
+add_subdirectory(cli)
+add_subdirectory(unsupported)
 # Exclude unit tests requiring glibc which is not available under Windows!
 IF(INA_BUILD_UNITTEST AND NOT WIN32)
   add_subdirectory(test)

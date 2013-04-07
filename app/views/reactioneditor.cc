@@ -763,7 +763,9 @@ ReactionEditorPage::_createReaction(const QString &name, QList<QPair<int, QStrin
                                     iNA::Ast::Scope *scope)
 {
   // Create unique identifier for reaction:
-  std::string identifier = name.simplified().toStdString();
+  // And remove all white spaces
+  std::string identifier = name.simplified().replace(" ","").toStdString();
+
   if (0 == identifier.length()) { identifier = "reaction"; }
   identifier = scope->getRootScope()->getNewIdentifier(identifier);
 

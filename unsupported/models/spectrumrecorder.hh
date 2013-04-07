@@ -190,6 +190,7 @@ public:
         //get time window
         for(size_t j=0.; j<windowSize; j++)
         {
+            // run simulator
             Simulator.run(timestep);
             Simulator.getState(temp);
 
@@ -234,6 +235,11 @@ public:
     Eigen::VectorXd getFrequencies()
     {
         return spectrum.getFrequencies();
+    }
+
+    T& getSimulator()
+    {
+      return Simulator;
     }
 
 
