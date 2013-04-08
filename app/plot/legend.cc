@@ -2,6 +2,7 @@
 #include "plot.hh"
 #include "configuration.hh"
 #include "../tinytex/tinytex.hh"
+#include <QDebug>
 
 using namespace Plot;
 
@@ -14,8 +15,6 @@ LegendItem::LegendItem(const QString &label, Graph *graph, QObject *parent)
   : QObject(parent), QGraphicsItemGroup(), _graph(graph), _label_text(label),
     _space(5), _sample_length(20)
 {
-  this->setPos(0,0);
-
   _line = new QGraphicsLineItem(0,0, _sample_length, 0);
   _line->setPen(_graph->getStyle().getPen());
   _line->setPos(0,0); addToGroup(_line);
@@ -24,7 +23,7 @@ LegendItem::LegendItem(const QString &label, Graph *graph, QObject *parent)
   MathContext context(Configuration::getConfig()->getScheme(Configuration::DISPLAY_SCHEME).legendFont());
   _label = label_item->layout(context);
   _label_size = label_item->metrics().size(); delete label_item;
-  addToGroup(_label); _label->setPos(0,0);
+  _label->setPos(0,0); addToGroup(_label);
 
   updateLayout();
 }
@@ -86,7 +85,6 @@ Legend::Legend(QObject *parent)
   this->_margin_top    = 5;
   this->_line_spacing  = 3;
 
-  this->setPos(0,0);
   this->_background = new QGraphicsPathItem();
   this->_background->setPos(0,0);
   this->_background->setPen(QColor(Qt::transparent));
@@ -142,6 +140,7 @@ void
 Legend::updateLayout() {
   double x = this->_margin_left, y = this->_margin_top;
   for (QList<LegendItem *>::Iterator item=_items.begin(); item!=_items.end(); item++) {
+    qDebug() << "Legend: move item to " << x << ", " << y;
     (*item)->setPos(x,y); (*item)->updateLayout();
     y += (*item)->boundingRect().y() + (*item)->boundingRect().height() + _line_spacing;
   }

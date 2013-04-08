@@ -213,11 +213,11 @@ PlotConfigDialog::onEditGraph(const QModelIndex &index) {
   // get graph config and edit it:
   AbstractGraphConfig *graph_config = _config->graph(index.row());
   // Dispatch by type:
-  if (LineGraphConfig *line_config = dynamic_cast<LineGraphConfig *>(graph_config)) {
-    LineGraphDialog graph_dialog(line_config);
-    if (QDialog::Rejected == graph_dialog.exec()) { return; }
-  } else if (VarianceLineGraphConfig *var_config = dynamic_cast<VarianceLineGraphConfig *>(graph_config)) {
+  if (VarianceLineGraphConfig *var_config = dynamic_cast<VarianceLineGraphConfig *>(graph_config)) {
     VarianceLineGraphDialog graph_dialog(var_config);
+    if (QDialog::Rejected == graph_dialog.exec()) { return; }
+  } else if (LineGraphConfig *line_config = dynamic_cast<LineGraphConfig *>(graph_config)) {
+    LineGraphDialog graph_dialog(line_config);
     if (QDialog::Rejected == graph_dialog.exec()) { return; }
   }
   onUpdatePlot();
