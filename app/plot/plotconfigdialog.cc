@@ -47,17 +47,23 @@ GraphConfigList::graph(int idx) {
 
 void
 GraphConfigList::addGraph(AbstractGraphConfig *graph) {
+  beginInsertRows(QModelIndex(), _config->numGraphs(), _config->numGraphs());
   _config->addGraph(graph);
+  endInsertRows();
 }
 
 void
 GraphConfigList::removeGraph(int idx) {
+  beginRemoveRows(QModelIndex(), idx, idx);
   _config->removeGraph(idx);
+  endRemoveRows();
 }
 
 void
 GraphConfigList::updateGraph(int idx, AbstractGraphConfig *graph) {
+  beginResetModel();
   _config->replaceGraph(idx, graph);
+  endResetModel();
 }
 
 
@@ -167,7 +173,7 @@ PlotConfigDialog::onAddLineGraph() {
   LineGraphConfig *graph_config = new LineGraphConfig(_config->data(), numGraphs());
   LineGraphDialog add_graph_dialog(graph_config);
   if (QDialog::Rejected == add_graph_dialog.exec()) { delete graph_config; return; }
-  _config->addGraph(graph_config);
+  _graph_list.addGraph(graph_config);
   onUpdatePlot();
 }
 
@@ -176,7 +182,7 @@ PlotConfigDialog::onAddVarLineGraph() {
   VarianceLineGraphConfig *graph_config = new VarianceLineGraphConfig(_config->data(), numGraphs());
   VarianceLineGraphDialog add_graph_dialog(graph_config);
   if (QDialog::Rejected == add_graph_dialog.exec()) { delete graph_config; return; }
-  _config->addGraph(graph_config);
+  _graph_list.addGraph(graph_config);
   onUpdatePlot();
 }
 
@@ -223,14 +229,13 @@ PlotConfigDialog::onRemoveGraph() {
   QModelIndexList selected_items =_graph_list_view->selectionModel()->selectedIndexes();
   if (1 != selected_items.count()) { return; }
 
-  _config->removeGraph(selected_items.at(0).row());
+  _graph_list.removeGraph(selected_items.at(0).row());
   onUpdatePlot();
 }
 
 void
 PlotConfigDialog::onUpdatePlot()
 {
-
   // Assemble new plot & add plot
   Plot::Figure *plot = _config->createFigure();
   _plotview->setPlot(plot);
