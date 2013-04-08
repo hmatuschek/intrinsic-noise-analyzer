@@ -124,8 +124,8 @@ PlotConfigDialog::PlotConfigDialog(PlotConfig *config, QWidget *parent)
   side_box->setMargin(0); side_box->setSpacing(0);
   side_box->addWidget(_graph_list_view);
   side_box->addLayout(button_box);
-  main_layout->addWidget(_stack);
-  main_layout->addLayout(side_box);
+  main_layout->addWidget(_stack, 1);
+  main_layout->addLayout(side_box, 0);
   layout->addLayout(main_layout);
   layout->addWidget(buttons);
   setLayout(layout);
