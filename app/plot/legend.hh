@@ -68,12 +68,16 @@ public:
   void addGraph(const QString &label, Graph *graph);
   /** Returns the bounding-box of the legend. */
   virtual QRectF boundingRect() const;
-  /** Updates the Layout of the legend. */
-  void updateLayout();
 
 public slots:
+  /** Updates the layout of the legend. */
+  void updateLayout();
   /** Updates the scheme of all legend-items: */
   void setScheme(Configuration::Scheme scheme);
+
+protected slots:
+  /** Updates the Layout of the legend. */
+  void updateBB();
 
 protected:
   /** Holds the list of legend-items. */

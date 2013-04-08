@@ -84,7 +84,7 @@ PlotConfigDialog::PlotConfigDialog(PlotConfig *config, QWidget *parent)
   _plotview->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
 
   _graph_list_view = new QListView();
-  _graph_list_view->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+  _graph_list_view->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::MinimumExpanding);
   _graph_list_view->setModel(&_graph_list);
 
   QPushButton *add_graph  = new QPushButton(tr("+"));

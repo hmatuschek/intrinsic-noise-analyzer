@@ -118,7 +118,7 @@ Legend::addGraph(const QString &label, Graph *graph)
   this->addToGroup(item);
   item->setPos(x,y);
   // Update bounding box:
-  this->updateLayout();
+  this->updateBB();
 }
 
 
@@ -130,18 +130,27 @@ Legend::boundingRect() const
 
 
 void
-Legend::setScheme(Configuration::Scheme scheme)
-{
-  for(QList<LegendItem *>::iterator item = this->_items.begin();
-      item != this->_items.end(); item++)
-  {
+Legend::setScheme(Configuration::Scheme scheme) {
+  for(QList<LegendItem *>::iterator item = this->_items.begin(); item != this->_items.end(); item++) {
     (*item)->setScheme(scheme);
   }
+  updateLayout();
 }
 
 
 void
-Legend::updateLayout()
+Legend::updateLayout() {
+  double x = this->_margin_left, y = this->_margin_top;
+  for (QList<LegendItem *>::Iterator item=_items.begin(); item!=_items.end(); item++) {
+    (*item)->setPos(x,y); (*item)->updateLayout();
+    y += (*item)->boundingRect().y() + (*item)->boundingRect().height() + _line_spacing;
+  }
+  updateBB();
+}
+
+
+void
+Legend::updateBB()
 {
   QRectF box(0,0,0,0);
 
