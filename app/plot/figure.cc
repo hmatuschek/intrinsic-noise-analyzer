@@ -123,6 +123,7 @@ Figure::updateAxes()
   }
 
   // Update legend position:
+  this->_legend->updateLayout();
   switch (this->_legend_pos)
   {
   case TOP_LEFT:

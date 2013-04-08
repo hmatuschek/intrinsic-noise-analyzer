@@ -80,19 +80,19 @@ LegendItem::updateLayout()
 Legend::Legend(QObject *parent)
   : QObject(parent), QGraphicsItemGroup()
 {
-  this->margin_left   = 10;
-  this->margin_bottom = 5;
-  this->margin_right  = 10;
-  this->margin_top    = 5;
-  this->line_spacing  = 3;
+  this->_margin_left   = 10;
+  this->_margin_bottom = 5;
+  this->_margin_right  = 10;
+  this->_margin_top    = 5;
+  this->_line_spacing  = 3;
 
   this->setPos(0,0);
-  this->background = new QGraphicsPathItem();
-  this->background->setPos(0,0);
-  this->background->setPen(QColor(Qt::transparent));
-  this->background->setBrush(QColor(255,255,255, 200));
+  this->_background = new QGraphicsPathItem();
+  this->_background->setPos(0,0);
+  this->_background->setPen(QColor(Qt::transparent));
+  this->_background->setBrush(QColor(255,255,255, 200));
 
-  this->addToGroup(this->background);
+  this->addToGroup(this->_background);
 }
 
 
@@ -103,37 +103,37 @@ Legend::addGraph(const QString &label, Graph *graph)
   LegendItem *item = new LegendItem(label, graph);
   item->setPos(0,0);
 
-  double x = this->margin_left;
-  double y = this->margin_top;
+  double x = this->_margin_left;
+  double y = this->_margin_top;
 
-  if (0 < this->items.size())
+  if (0 < this->_items.size())
   {
-    y = this->items.last()->boundingRect().y() +
-        this->items.last()->boundingRect().height() +
-        this->items.last()->pos().y() +
-        this->line_spacing;
+    y = this->_items.last()->boundingRect().y() +
+        this->_items.last()->boundingRect().height() +
+        this->_items.last()->pos().y() +
+        this->_line_spacing;
   }
 
-  this->items.append(item);
+  this->_items.append(item);
   this->addToGroup(item);
   item->setPos(x,y);
   // Update bounding box:
-  this->updateBB();
+  this->updateLayout();
 }
 
 
 QRectF
 Legend::boundingRect() const
 {
-  return this->bb;
+  return this->_bb;
 }
 
 
 void
 Legend::setScheme(Configuration::Scheme scheme)
 {
-  for(QList<LegendItem *>::iterator item = this->items.begin();
-      item != this->items.end(); item++)
+  for(QList<LegendItem *>::iterator item = this->_items.begin();
+      item != this->_items.end(); item++)
   {
     (*item)->setScheme(scheme);
   }
@@ -141,24 +141,24 @@ Legend::setScheme(Configuration::Scheme scheme)
 
 
 void
-Legend::updateBB()
+Legend::updateLayout()
 {
   QRectF box(0,0,0,0);
 
-  for (QList<LegendItem *>::iterator item = this->items.begin();
-       item != this->items.end(); item++)
+  for (QList<LegendItem *>::iterator item = this->_items.begin();
+       item != this->_items.end(); item++)
   {
     (*item)->updateLayout();
     box = box.united(
           QRectF((*item)->boundingRect().x() + (*item)->pos().x(),
                  (*item)->boundingRect().y() + (*item)->pos().y(),
-                 (*item)->boundingRect().width() + this->margin_right,
-                 (*item)->boundingRect().height() + this->margin_bottom));
+                 (*item)->boundingRect().width() + this->_margin_right,
+                 (*item)->boundingRect().height() + this->_margin_bottom));
   }
 
-  this->bb = box;
+  this->_bb = box;
 
   // Update path
   QPainterPath path; path.addRect(0,0, box.width(), box.height());
-  this->background->setPath(path);
+  this->_background->setPath(path);
 }
