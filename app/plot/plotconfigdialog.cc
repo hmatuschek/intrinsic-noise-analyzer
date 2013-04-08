@@ -2,6 +2,7 @@
 #include "configuration.hh"
 #include "canvas.hh"
 #include "figure.hh"
+#include "plotrangedialog.hh"
 
 #include <QDialogButtonBox>
 #include <QAbstractProxyModel>
@@ -12,6 +13,7 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QLabel>
+#include <QMenu>
 
 using namespace Plot;
 
@@ -63,35 +65,43 @@ GraphConfigList::updateGraph(int idx, AbstractGraphConfig *graph) {
 /* ****************************************************************************************** *
  * Implementation of PlotConfigDialog
  * ****************************************************************************************** */
-PlotConfigDialog::PlotConfigDialog(Table *table, PlotConfig *config, QWidget *parent)
-  : QDialog(parent), _data(table), _config(config), _graph_list(_config)
+PlotConfigDialog::PlotConfigDialog(PlotConfig *config, QWidget *parent)
+  : QDialog(parent), _config(config), _graph_list(_config)
 {
   setWindowTitle("Plot-o-mat");
 
   // Assemble view:
-  _plot = new Plot::Figure();
+  Plot::Figure *plot = _config->createFigure();
   _plotview = new Plot::Canvas();
   _plotview->setMinimumSize(320,240);
-  _plotview->setPlot(_plot);
+  _plotview->setPlot(plot);
   _plotview->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
 
   _graph_list_view = new QListView();
   _graph_list_view->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
   _graph_list_view->setModel(&_graph_list);
 
-  _add_graph  = new QPushButton(tr("+"));
-  _add_graph->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+  QPushButton *add_graph  = new QPushButton(tr("+"));
+  add_graph->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+  QMenu *add_graph_menu = new QMenu();
+  QAction *add_line_graph = add_graph_menu->addAction(tr("Add line graph"));
+  QAction *add_var_graph = add_graph_menu->addAction(tr("Add variance graph"));
+  add_graph->setMenu(add_graph_menu);
 
-  _rem_graph  = new QPushButton(tr("-"));
-  _rem_graph->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+  QPushButton *rem_graph  = new QPushButton(tr("-"));
+  rem_graph->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
-  _edit_labels = new QPushButton(tr("Edit labels"));
-  _edit_labels->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+  QPushButton *edit_labels = new QPushButton(tr("Edit labels"));
+  edit_labels->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+
+  QPushButton *set_plot_range = new QPushButton(tr("Set plot range"));
+  set_plot_range->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
   _stack = new QStackedWidget();
   _stack->addWidget(_plotview);
   _stack->addWidget(new QLabel(tr("Add a graph to the plot by pressing '+'")));
-  _stack->setCurrentIndex(1);
+  if (0 == _config->numGraphs()) { _stack->setCurrentIndex(1); }
+  else { _stack->setCurrentIndex(0); }
 
   QDialogButtonBox *buttons = new QDialogButtonBox(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
 
@@ -101,9 +111,10 @@ PlotConfigDialog::PlotConfigDialog(Table *table, PlotConfig *config, QWidget *pa
   QHBoxLayout *button_box = new QHBoxLayout();
 
   button_box->setMargin(0);
-  button_box->addWidget(_add_graph);
-  button_box->addWidget(_rem_graph);
-  button_box->addWidget(_edit_labels);
+  button_box->addWidget(add_graph);
+  button_box->addWidget(rem_graph);
+  button_box->addWidget(edit_labels);
+  button_box->addWidget(set_plot_range);
   side_box->setMargin(0); side_box->setSpacing(0);
   side_box->addWidget(_graph_list_view);
   side_box->addLayout(button_box);
@@ -113,9 +124,11 @@ PlotConfigDialog::PlotConfigDialog(Table *table, PlotConfig *config, QWidget *pa
   layout->addWidget(buttons);
   setLayout(layout);
 
-  QObject::connect(_add_graph, SIGNAL(clicked()), this, SLOT(onAddLineGraph()));
-  QObject::connect(_rem_graph, SIGNAL(clicked()), this, SLOT(onRemoveGraph()));
-  QObject::connect(_edit_labels, SIGNAL(clicked()), this, SLOT(onEditLabels()));
+  QObject::connect(add_line_graph, SIGNAL(triggered()), this, SLOT(onAddLineGraph()));
+  QObject::connect(add_var_graph, SIGNAL(triggered()), this, SLOT(onAddVarLineGraph()));
+  QObject::connect(rem_graph, SIGNAL(clicked()), this, SLOT(onRemoveGraph()));
+  QObject::connect(edit_labels, SIGNAL(clicked()), this, SLOT(onEditLabels()));
+  QObject::connect(set_plot_range, SIGNAL(clicked()), this, SLOT(onSetPlotRange()));
   QObject::connect(buttons, SIGNAL(rejected()), this, SLOT(reject()));
   QObject::connect(buttons, SIGNAL(accepted()), this, SLOT(onAccepted()));
   QObject::connect(_graph_list_view, SIGNAL(doubleClicked(QModelIndex)),
@@ -151,21 +164,19 @@ PlotConfigDialog::yLabel() const {
 
 void
 PlotConfigDialog::onAddLineGraph() {
-  LineGraphConfig *graph_config = new LineGraphConfig(*_data, numGraphs());
+  LineGraphConfig *graph_config = new LineGraphConfig(_config->data(), numGraphs());
   LineGraphDialog add_graph_dialog(graph_config);
   if (QDialog::Rejected == add_graph_dialog.exec()) { delete graph_config; return; }
   _config->addGraph(graph_config);
-  _stack->setCurrentIndex(0);
   onUpdatePlot();
 }
 
 void
 PlotConfigDialog::onAddVarLineGraph() {
-  VarianceLineGraphConfig *graph_config = new VarianceLineGraphConfig(*_data, numGraphs());
+  VarianceLineGraphConfig *graph_config = new VarianceLineGraphConfig(_config->data(), numGraphs());
   VarianceLineGraphDialog add_graph_dialog(graph_config);
   if (QDialog::Rejected == add_graph_dialog.exec()) { delete graph_config; return; }
   _config->addGraph(graph_config);
-  _stack->setCurrentIndex(0);
   onUpdatePlot();
 }
 
@@ -174,6 +185,21 @@ PlotConfigDialog::onEditLabels() {
   /*PlotConfigLabelDialog label_dialog(_config);
   if (QDialog::Accepted != label_dialog.exec()) { return; }
   onUpdatePlot();*/
+}
+
+void
+PlotConfigDialog::onSetPlotRange() {
+  // Construct dialog & exec
+  Plot::PlotRangeDialog dialog(_config->xRange(), _config->xRangePolicy(),
+                               _config->yRange(), _config->yRangePolicy(), this);
+  dialog.setModal(true);
+  if (QDialog::Accepted != dialog.exec()) { return; }
+
+  _config->setXRangePolicy(dialog.getXRangePolicy());
+  _config->setYRangePolicy(dialog.getYRangePolicy());
+  _config->setXRange(dialog.getXRange());
+  _config->setYRange(dialog.getYRange());
+  onUpdatePlot();
 }
 
 void
@@ -198,21 +224,21 @@ PlotConfigDialog::onRemoveGraph() {
   if (1 != selected_items.count()) { return; }
 
   _config->removeGraph(selected_items.at(0).row());
-  if (0 == _graph_list.rowCount(QModelIndex())) { _stack->setCurrentIndex(1); return; }
   onUpdatePlot();
 }
 
 void
 PlotConfigDialog::onUpdatePlot()
 {
-  // Free old plot
-  if (0 != _plot) { delete _plot; }
 
   // Assemble new plot & add plot
-  _plot = _config->createFigure();
-  _plotview->setPlot(_plot);
-  _plot->updateAxes();
+  Plot::Figure *plot = _config->createFigure();
+  _plotview->setPlot(plot);
+  plot->updateAxes();
   _plotview->update();
+
+  if (0 == _graph_list.rowCount(QModelIndex())) { _stack->setCurrentIndex(1); }
+  else { _stack->setCurrentIndex(0); }
 }
 
 void

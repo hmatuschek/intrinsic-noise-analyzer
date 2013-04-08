@@ -26,7 +26,7 @@ PlotItem::PlotItem(Plot::Figure *plot, QObject *parent)
 
 
 PlotItem::PlotItem(Plot::PlotConfig *config, QObject *parent)
-  : QObject(parent), DocumentTreeItem(), _plot(0), _config(config), _itemLabel(_plot->getTitle())
+  : QObject(parent), DocumentTreeItem(), _plot(0), _config(config), _itemLabel(_config->title())
 {
   // Take ownership of plot:
   this->_plot = config->createFigure();

@@ -8,20 +8,27 @@
 #include <QFileInfo>
 #include <QMessageBox>
 
+#include "../doctree/documenttree.hh"
+#include "../doctree/plotitem.hh"
+#include "../plot/canvas.hh"
+#include "../plot/plotrangedialog.hh"
+#include "../plot/configuration.hh"
+#include "../plot/plotconfigdialog.hh"
 
-PlotView::PlotView(PlotItem *plot_wrapper, QWidget *parent) :
-    QWidget(parent)
+
+PlotView::PlotView(PlotItem *plot_item, QWidget *parent) :
+  QWidget(parent), _plotitem(plot_item), _canvas(0), _schemeBox(0)
 {
   // Get figure
-  Plot::Figure *plot = plot_wrapper->getPlot();
+  Plot::Figure *plot = _plotitem->getPlot();
 
   // Set proper background style:
   this->setBackgroundRole(QPalette::Window);
 
   // Constuct canvas:
-  this->canvas = new Plot::Canvas(this);
-  this->canvas->setPlot(plot);
-  this->canvas->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
+  this->_canvas = new Plot::Canvas(this);
+  this->_canvas->setPlot(plot);
+  this->_canvas->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
 
   // Save button:
   QPushButton *save_button = new QPushButton(tr("Save to file"));
@@ -34,26 +41,33 @@ PlotView::PlotView(PlotItem *plot_wrapper, QWidget *parent) :
   QObject::connect(range_button, SIGNAL(clicked()), this, SLOT(onSetPlotRange()));
 
   // Plot Scheme selection:
-  this->schemeBox = new QComboBox();
-  this->schemeBox->addItem(tr("Display"), QVariant(0));
-  this->schemeBox->addItem(tr("Print"), QVariant(1));
+  this->_schemeBox = new QComboBox();
+  this->_schemeBox->addItem(tr("Display"), QVariant(0));
+  this->_schemeBox->addItem(tr("Print"), QVariant(1));
+
+  // Configure plot button:
+  QPushButton *config_plot = new QPushButton(tr("Configure plot"));
+  config_plot->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+  if (! _plotitem->hasConfig()) { config_plot->setEnabled(false); }
+  QObject::connect(config_plot, SIGNAL(clicked()), this, SLOT(onConfigPlot()));
 
   // Assemble panel:
   QVBoxLayout *layout = new QVBoxLayout();
-  layout->addWidget(this->canvas);
+  layout->addWidget(this->_canvas);
 
   QHBoxLayout *button_box = new QHBoxLayout();
   button_box->addWidget(save_button);
   button_box->addWidget(range_button);
-  button_box->addWidget(this->schemeBox);
+  button_box->addWidget(this->_schemeBox);
+  button_box->addWidget(config_plot);
   layout->addLayout(button_box);
   this->setLayout(layout);
 
   // If the plot-wrapper gest destroyed -> close the plot-view:
-  QObject::connect(plot_wrapper, SIGNAL(destroyed()), this, SLOT(onPlotDestroy()));
+  QObject::connect(_plotitem, SIGNAL(destroyed()), this, SLOT(onPlotDestroy()));
 
   // If new scheme is selected:
-  QObject::connect(this->schemeBox, SIGNAL(currentIndexChanged(int)),
+  QObject::connect(this->_schemeBox, SIGNAL(currentIndexChanged(int)),
                    this, SLOT(onSchemeSelected(int)));
 }
 
@@ -85,7 +99,7 @@ PlotView::onSavePlot()
   }
 
   // Save plot in file...
-  this->canvas->saveAs(fileName, type);
+  this->_canvas->saveAs(fileName, type);
 }
 
 
@@ -93,10 +107,10 @@ void
 PlotView::onSetPlotRange()
 {
   // Construct dialog
-  Plot::PlotRangeDialog dialog(this->canvas->getPlot()->getAxis()->getXRange(),
-                               this->canvas->getPlot()->getAxis()->getXRangePolicy(),
-                               this->canvas->getPlot()->getAxis()->getYRange(),
-                               this->canvas->getPlot()->getAxis()->getYRangePolicy(),
+  Plot::PlotRangeDialog dialog(this->_canvas->getPlot()->getAxis()->getXRange(),
+                               this->_canvas->getPlot()->getAxis()->getXRangePolicy(),
+                               this->_canvas->getPlot()->getAxis()->getYRange(),
+                               this->_canvas->getPlot()->getAxis()->getYRangePolicy(),
                                this);
   dialog.setModal(true);
 
@@ -104,14 +118,14 @@ PlotView::onSetPlotRange()
   if (QDialog::Rejected == dialog.exec())
     return;
 
-  this->canvas->getPlot()->getAxis()->setXRangePolicy(dialog.getXRangePolicy());
-  this->canvas->getPlot()->getAxis()->setYRangePolicy(dialog.getYRangePolicy());
-  this->canvas->getPlot()->getAxis()->setXRange(dialog.getXRange().min(), dialog.getXRange().max());
-  this->canvas->getPlot()->getAxis()->setYRange(dialog.getYRange().min(), dialog.getYRange().max());
+  this->_canvas->getPlot()->getAxis()->setXRangePolicy(dialog.getXRangePolicy());
+  this->_canvas->getPlot()->getAxis()->setYRangePolicy(dialog.getYRangePolicy());
+  this->_canvas->getPlot()->getAxis()->setXRange(dialog.getXRange().min(), dialog.getXRange().max());
+  this->_canvas->getPlot()->getAxis()->setYRange(dialog.getYRange().min(), dialog.getYRange().max());
 
-  this->canvas->getPlot()->updateAxes();
-  this->canvas->getPlot()->updateAxes();
-  this->canvas->update();
+  this->_canvas->getPlot()->updateAxes();
+  this->_canvas->getPlot()->updateAxes();
+  this->_canvas->update();
 }
 
 
@@ -128,14 +142,27 @@ PlotView::onSchemeSelected(int idx)
 {
   switch (idx) {
   case 0:
-    this->canvas->setScheme(Plot::Configuration::DISPLAY_SCHEME);
+    this->_canvas->setScheme(Plot::Configuration::DISPLAY_SCHEME);
     break;
 
   case 1:
-    this->canvas->setScheme(Plot::Configuration::PRINT_SCHEME);
+    this->_canvas->setScheme(Plot::Configuration::PRINT_SCHEME);
     break;
 
   default:
     break;
   }
+}
+
+
+void
+PlotView::onConfigPlot() {
+  if (! _plotitem->hasConfig()) { return; }
+  Plot::PlotConfigDialog dialog(_plotitem->config());
+  if (QDialog::Accepted != dialog.exec()) { return; }
+  _plotitem->updatePlot();
+  _canvas->setPlot(_plotitem->getPlot());
+  _canvas->getPlot()->updateAxes();
+  _canvas->getPlot()->updateAxes();
+  _canvas->update();
 }

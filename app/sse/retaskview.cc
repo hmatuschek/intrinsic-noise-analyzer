@@ -83,9 +83,9 @@ REResultWidget::quickPlotButtonPressed()
   QList<QString> selected_species = re_dialog.getSelectedSpecies();
 
   // Create and add timeseries plot:
-  Plot::Figure *figure = createRETimeSeriesPlot(selected_species, re_task_wrapper->getRETask());
-  Application::getApp()->docTree()->addPlot(this->re_task_wrapper, new PlotItem(figure));
-  figure->updateAxes();
+  Plot::PlotConfig *config = createRETimeSeriesPlotConfig(
+        selected_species, re_task_wrapper->getRETask());
+  Application::getApp()->docTree()->addPlot(this->re_task_wrapper, new PlotItem(config));
 }
 
 

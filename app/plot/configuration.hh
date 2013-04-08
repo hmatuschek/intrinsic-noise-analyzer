@@ -15,7 +15,7 @@ namespace Plot {
 // Forward declaration
 class Graph;
 class Figure;
-
+class PlotConfig;
 
 /** Represents a plot-scheme.
  * A plot-scheme is a collection of settings that can be applied at once to some @c Figure.
@@ -101,7 +101,7 @@ public:
   virtual ~AbstractGraphConfig();
 
   /** Copies the graph configuration. */
-  virtual AbstractGraphConfig *copy() const = 0;
+  virtual AbstractGraphConfig *copy(PlotConfig *config) const = 0;
   virtual Graph *createGraph() = 0;
 
   /** Returns true, if the graph is shown in the legend (false if no lable is set). */
@@ -139,7 +139,7 @@ public:
 
 public:
   /** Constructs a default plot config. */
-  PlotConfig();
+  PlotConfig(Table &data);
   /** Copy constructor. */
   PlotConfig(const PlotConfig &other);
   /** Destroys the plot config an all graphs. */
@@ -147,6 +147,9 @@ public:
 
   /** Assembles a @c Plot::Figure from the configuration. */
   Figure *createFigure();
+
+  /** Returns a weak reference to the data. */
+  Table *data();
 
   /** Returns true if a plot title is set. */
   bool hasTitle() const;
@@ -228,6 +231,8 @@ protected:
   Range _yRange;
   /** Holds the graph configurations. */
   QList<AbstractGraphConfig *> _graphs;
+  /** Holds the data for the graphs. */
+  Table _data;
 };
 
 
@@ -237,14 +242,14 @@ class LineGraphConfig : public AbstractGraphConfig
 {
 public:
   /** Empty constructor. */
-  LineGraphConfig(Table &data, size_t colorIdx);
+  LineGraphConfig(Table *data, size_t colorIdx);
   /** Copy constructor. */
-  LineGraphConfig(const LineGraphConfig &other);
+  LineGraphConfig(const LineGraphConfig &other, Table *data);
   /** Destructor. */
   ~LineGraphConfig();
 
   /** Implements the AbstractGraphConfig interface. */
-  virtual AbstractGraphConfig *copy() const;
+  virtual AbstractGraphConfig *copy(PlotConfig *config) const;
   /** Creates the graph from this config. */
   virtual Graph *createGraph();
 
@@ -273,8 +278,8 @@ public:
   const QPen &linePen() const;
 
 protected:
-  /** Holds the data to be used for plotting. */
-  Table _data;
+  /** Holds a weak reference to the data to be used for plotting. */
+  Table *_data;
   /** Holds the list of column names. */
   QStringList _columnNames;
   /** Holds the parser context for plot formulas. */
@@ -296,9 +301,9 @@ class VarianceLineGraphConfig: public LineGraphConfig
 {
 public:
   /** Default constructor. */
-  VarianceLineGraphConfig(Table &data, size_t colorIdx);
+  VarianceLineGraphConfig(Table *data, size_t colorIdx);
   /** Copy constructor. */
-  VarianceLineGraphConfig(const VarianceLineGraphConfig &other);
+  VarianceLineGraphConfig(const VarianceLineGraphConfig &other, Table *data);
   /** Destructor. */
   virtual ~VarianceLineGraphConfig();
 

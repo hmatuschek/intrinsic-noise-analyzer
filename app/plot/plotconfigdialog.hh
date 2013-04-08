@@ -59,7 +59,7 @@ class PlotConfigDialog : public QDialog
 
 public:
   /** Constructor, table species the data table to create graphs for. */
-  explicit PlotConfigDialog(Table *table, PlotConfig *config, QWidget *parent = 0);
+  explicit PlotConfigDialog(PlotConfig *config, QWidget *parent = 0);
 
   /** Returns the number of currently configured graphs. */
   size_t numGraphs() const;
@@ -81,16 +81,16 @@ private slots:
   void onAddVarLineGraph();
   /** Callback to edit figure labels & title. */
   void onEditLabels();
-  /** Callbeck to edit a existing graph. */
+  /** Callback to edit a existing graph. */
   void onEditGraph(const QModelIndex &index);
+  /** Callback to set the plot ranges. */
+  void onSetPlotRange();
   /** Updates the plot-preview window. */
   void onUpdatePlot();
   /** Checks if the configuration is valid. */
   void onAccepted();
 
 private:
-  /** Holds the selected data-table for the plots. */
-  Table *_data;
   /** Holds a ListModel of the graphs. */
   PlotConfig *_config;
   /** Holds the configured graphs as a list model. */
@@ -101,14 +101,6 @@ private:
   QStackedWidget *_stack;
   /** The preview plot view. */
   Plot::Canvas *_plotview;
-  /** The plot current instance. */
-  Plot::Figure *_plot;
-  /** Add graph button. */
-  QPushButton *_add_graph;
-  /** Remove graph button. */
-  QPushButton *_rem_graph;
-  /** Edit figure labels. */
-  QPushButton *_edit_labels;
 };
 
 

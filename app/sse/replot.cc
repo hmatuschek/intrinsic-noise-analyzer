@@ -46,7 +46,16 @@ RETimeSeriesPlot::RETimeSeriesPlot(QList<QString> &selected_species, RETask *tas
 Plot::ConfiguredPlot *
 createRETimeSeriesPlot(QList<QString> &selected_species, RETask *task)
 {
-  Plot::PlotConfig *config = new Plot::PlotConfig();
+  // Create plot:
+  return new Plot::ConfiguredPlot(createRETimeSeriesPlotConfig(selected_species, task));
+}
+
+
+Plot::PlotConfig *
+createRETimeSeriesPlotConfig(QList<QString> &selected_species, RETask *task)
+{
+  Table *series = task->getTimeSeries();
+  Plot::PlotConfig *config = new Plot::PlotConfig(*series);
   config->setTile("Mean concentrations (RE)");
 
   // Get species unit
@@ -66,12 +75,11 @@ createRETimeSeriesPlot(QList<QString> &selected_species, RETask *task)
   }
 
   /* Assemble plot. */
-  Table *series = task->getTimeSeries();
   for (int i=0; i<selected_species.size(); i++) {
     iNA::Ast::Species *species =
         task->getConfig().getModel()->getSpecies(selected_species.at(i).toStdString());
     size_t species_idx = task->getConfig().getModel()->getSpeciesIdx(species);
-    Plot::LineGraphConfig *graph_config = new Plot::LineGraphConfig(*series, size_t(i));
+    Plot::LineGraphConfig *graph_config = new Plot::LineGraphConfig(config->data(), size_t(i));
     graph_config->setLabel(series->getColumnName(1+species_idx));
     graph_config->setXExpression("$0");
     graph_config->setYExpression(QString("$%1").arg(1+species_idx));
@@ -84,5 +92,5 @@ createRETimeSeriesPlot(QList<QString> &selected_species, RETask *task)
   config->setYRange(Plot::Range(0, 1));
 
   // Create plot:
-  return new Plot::ConfiguredPlot(config);
+  return config;
 }

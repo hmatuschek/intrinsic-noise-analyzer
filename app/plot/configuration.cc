@@ -106,10 +106,11 @@ Plot::ConfigScheme::defaultPen() const {
 /* ********************************************************************************************* *
  * Implementation of PlotConfig
  * ********************************************************************************************* */
-PlotConfig::PlotConfig()
+PlotConfig::PlotConfig(Table &data)
   : _title(""), _xlabel(""), _ylabel(""), _show_legend(true),
     _xRangePolicy(RangePolicy::AUTOMATIC, RangePolicy::AUTOMATIC), _xRange(0,1),
-    _yRangePolicy(RangePolicy::AUTOMATIC, RangePolicy::AUTOMATIC), _yRange(0,1), _graphs()
+    _yRangePolicy(RangePolicy::AUTOMATIC, RangePolicy::AUTOMATIC), _yRange(0,1), _graphs(),
+    _data(data)
 {
   // Pass...
 }
@@ -117,11 +118,11 @@ PlotConfig::PlotConfig()
 PlotConfig::PlotConfig(const PlotConfig &other)
   : _title(other._title), _xlabel(other._xlabel), _ylabel(other._ylabel),
     _show_legend(other._show_legend), _xRangePolicy(other._xRangePolicy), _xRange(other._xRange),
-    _yRangePolicy(other._yRangePolicy), _yRange(other._yRange), _graphs()
+    _yRangePolicy(other._yRangePolicy), _yRange(other._yRange), _graphs(), _data(other._data)
 {
   QList<AbstractGraphConfig *>::ConstIterator item=other._graphs.constBegin();
   for(; item!=other._graphs.constEnd(); item++) {
-    _graphs.append((*item)->copy());
+    _graphs.append((*item)->copy(this));
   }
 }
 
@@ -155,9 +156,13 @@ PlotConfig::createFigure() {
   plot->getAxis()->setYRangePolicy(yRangePolicy());
   plot->getAxis()->setYRange(yRange());
 
-  // Layout figure
-  plot->updateAxes();
   return plot;
+}
+
+
+Table *
+PlotConfig::data() {
+  return &_data;
 }
 
 bool
@@ -361,15 +366,15 @@ QList<QColor> AbstractGraphConfig::defaultColors = QList<QColor>()
 /* ********************************************************************************************* *
  * Implementation of LineGraphConfig
  * ********************************************************************************************* */
-LineGraphConfig::LineGraphConfig(Table &data, size_t colorIdx)
-  : AbstractGraphConfig(), _data(data), _columnNames(), _parserContext(&_data), _symbolTable(),
+LineGraphConfig::LineGraphConfig(Table *data, size_t colorIdx)
+  : AbstractGraphConfig(), _data(data), _columnNames(), _parserContext(_data), _symbolTable(),
     _xExpression(0), _yExpression(0), _linePen()
 {
-  for (size_t i=0; i<_data.getNumColumns(); i++) {
-    _columnNames.append(_data.getColumnName(i));
+  for (size_t i=0; i<_data->getNumColumns(); i++) {
+    _columnNames.append(_data->getColumnName(i));
     _symbolTable[_parserContext.getColumnSymbol(i)] = i;
   }
-  if (0 < _data.getNumColumns()) {
+  if (0 < _data->getNumColumns()) {
     _xExpression = _parserContext.getColumnSymbol(0);
   }
 
@@ -380,12 +385,12 @@ LineGraphConfig::LineGraphConfig(Table &data, size_t colorIdx)
   _linePen.setJoinStyle(Qt::MiterJoin); _linePen.setCapStyle(Qt::SquareCap);
 }
 
-LineGraphConfig::LineGraphConfig(const LineGraphConfig &other)
-  : AbstractGraphConfig(other), _data(other._data), _columnNames(other._columnNames),
-    _parserContext(&_data), _symbolTable(), _xExpression(0), _yExpression(0),
+LineGraphConfig::LineGraphConfig(const LineGraphConfig &other, Table *data)
+  : AbstractGraphConfig(other), _data(data), _columnNames(other._columnNames),
+    _parserContext(_data), _symbolTable(), _xExpression(0), _yExpression(0),
     _linePen(other._linePen)
 {
-  for (size_t i=0; i<_data.getNumColumns(); i++) {
+  for (size_t i=0; i<_data->getNumColumns(); i++) {
     _symbolTable[_parserContext.getColumnSymbol(i)] = i;
   }
   // Serialize & parse plot formulas:
@@ -402,8 +407,8 @@ LineGraphConfig::~LineGraphConfig() {
 }
 
 AbstractGraphConfig *
-LineGraphConfig::copy() const {
-  return new LineGraphConfig(*this);
+LineGraphConfig::copy(PlotConfig *config) const {
+  return new LineGraphConfig(*this, config->data());
 }
 
 const QStringList &
@@ -446,7 +451,7 @@ LineGraphConfig::createGraph() {
   /// @bug This implementation is f***ing slow!!!
 
   // Evaluate y & x expressions on data:
-  for (size_t i=0; i<_data.getNumRows(); i++) {
+  for (size_t i=0; i<_data->getNumRows(); i++) {
     double x = _parserContext(i, _xExpression);
     double y = _parserContext(i, _yExpression);
     graph->addPoint(x,y);
@@ -478,15 +483,15 @@ LineGraphConfig::linePen() const {
 /* ********************************************************************************************* *
  * Implementation of VarianceLineGraphConfig
  * ********************************************************************************************* */
-VarianceLineGraphConfig::VarianceLineGraphConfig(Table &data, size_t colorIdx)
+VarianceLineGraphConfig::VarianceLineGraphConfig(Table *data, size_t colorIdx)
   : LineGraphConfig(data, colorIdx), _varExpression(0), _fillPen()
 {
   QColor fill_color = _linePen.brush().color(); fill_color.setAlpha(32);
   _fillPen.setBrush(QBrush(fill_color));
 }
 
-VarianceLineGraphConfig::VarianceLineGraphConfig(const VarianceLineGraphConfig &other)
-  : LineGraphConfig(other), _varExpression(0), _fillPen(other._fillPen)
+VarianceLineGraphConfig::VarianceLineGraphConfig(const VarianceLineGraphConfig &other, Table *data)
+  : LineGraphConfig(other, data), _varExpression(0), _fillPen(other._fillPen)
 {
   std::stringstream buffer;
   PlotFormulaParser::serialize(other._varExpression, buffer, other._parserContext);
@@ -510,7 +515,7 @@ VarianceLineGraphConfig::createGraph() {
   /// @bug This implementation is f***ing slow!!!
 
   // Evaluate y & x expressions on data:
-  for (size_t i=0; i<_data.getNumRows(); i++) {
+  for (size_t i=0; i<_data->getNumRows(); i++) {
     double x = _parserContext(i, _xExpression);
     double y = _parserContext(i, _yExpression);
     double v = _parserContext(i, _varExpression);
