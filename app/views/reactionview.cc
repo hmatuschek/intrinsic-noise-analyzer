@@ -10,6 +10,7 @@
 
 #include "reactioneditor.hh"
 #include "../doctree/modelitem.hh"
+#include "../doctree/documenttree.hh"
 #include "reactionequationrenderer.hh"
 #include "../models/expressiondelegate.hh"
 #include <utils/logger.hh>

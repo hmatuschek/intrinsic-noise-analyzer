@@ -5,6 +5,7 @@
 #include <QHeaderView>
 #include <QMessageBox>
 #include "../models/application.hh"
+#include "../doctree/documenttree.hh"
 #include "reactioneditor.hh"
 
 

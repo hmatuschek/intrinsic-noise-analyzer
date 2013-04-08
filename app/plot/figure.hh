@@ -114,6 +114,23 @@ protected:
 };
 
 
+/** A Figure class that uses a PlotConfig instance to assmeble the plot. */
+class ConfiguredPlot: public Figure
+{
+  Q_OBJECT
+
+public:
+  /** Constructs a new plot from the given config. */
+  ConfiguredPlot(PlotConfig *config, QObject *parent=0);
+
+  /** Returns a weak reference to the plot config. */
+  PlotConfig *config();
+
+protected:
+  /** Holds the plot config item (owned). */
+  PlotConfig *_config;
+};
+
 }
 
 #endif // PLOT_HH

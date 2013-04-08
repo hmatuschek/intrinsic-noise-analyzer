@@ -13,6 +13,10 @@
 #include "../views/taskerrorwidget.hh"
 #include "../views/taskview.hh"
 
+// Forward declarations
+namespace Plot {
+class Canvas;
+}
 
 /** General view object for @c SSAParamScanTask instances. */
 class SSAParamScanTaskView : public TaskView

@@ -8,6 +8,7 @@
 #include <QMessageBox>
 
 #include "../models/application.hh"
+#include "../doctree/documenttree.hh"
 #include "../doctree/plotitem.hh"
 #include "replot.hh"
 #include "../views/speciesselectiondialog.hh"
@@ -82,8 +83,9 @@ REResultWidget::quickPlotButtonPressed()
   QList<QString> selected_species = re_dialog.getSelectedSpecies();
 
   // Create and add timeseries plot:
-  Plot::Figure *figure = new RETimeSeriesPlot(selected_species, re_task_wrapper->getRETask());
+  Plot::Figure *figure = createRETimeSeriesPlot(selected_species, re_task_wrapper->getRETask());
   Application::getApp()->docTree()->addPlot(this->re_task_wrapper, new PlotItem(figure));
+  figure->updateAxes();
 }
 
 

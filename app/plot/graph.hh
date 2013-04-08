@@ -25,9 +25,7 @@ namespace Plot {
 class GraphStyle
 {
 protected:
-  /**
-   * The pen used to draw the graph.
-   */
+  /** The pen used to draw the graph. */
   QPen pen;
 
   /**

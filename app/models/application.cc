@@ -1,5 +1,8 @@
 #include "application.hh"
 
+#include "../doctree/documenttree.hh"
+#include "../doctree/documenttreeitem.hh"
+
 #include "../views/mainwindow.hh"
 #include "../views/importmodeldialog.hh"
 #include "../views/sbmlsheditordialog.hh"

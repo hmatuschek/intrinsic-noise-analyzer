@@ -8,7 +8,7 @@
 #include "iostask.hh"
 
 
-class IOSEMRETimeSeriesPlot : public VariancePlot
+class IOSEMRETimeSeriesPlot : public LinePlot
 {
   Q_OBJECT
 

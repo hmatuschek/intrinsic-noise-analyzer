@@ -1,4 +1,5 @@
 #include "documentsview.hh"
+#include "../doctree/documenttree.hh"
 #include "../models/application.hh"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -12,8 +13,8 @@
 /* ********************************************************************************************* *
  * Implementation of SBML Models View, A QTreeView with some nice functionality
  * ********************************************************************************************* */
-DocumentsView::DocumentsView(QWidget *parent) :
-    QTreeView(parent)
+DocumentsView::DocumentsView(QWidget *parent)
+  : QTreeView(parent)
 {
   // The QAbstractItemModel holding all the data is the application singleton:
   this->setModel(Application::getApp()->docTree());

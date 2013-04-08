@@ -25,7 +25,7 @@ public:
  * Collects data from a @c Table and updates the
  * @c VarianceLinesGraph instance.
  */
-class SSAParameterScanPlot : public VariancePlot
+class SSAParameterScanPlot : public LinePlot
 {
   Q_OBJECT
 

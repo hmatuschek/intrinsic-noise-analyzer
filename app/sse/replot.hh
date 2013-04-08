@@ -12,8 +12,10 @@ class RETimeSeriesPlot : public LinePlot
   Q_OBJECT
 
 public:
-  explicit RETimeSeriesPlot(QList<QString> &selected_species, RETask *data, QObject *parent=0);
+  explicit RETimeSeriesPlot(QList<QString> &selected_species, RETask *task, QObject *parent=0);
 };
 
+/** Assembles the configuration of a RE Timeseries plot and creates the figure from it. */
+Plot::ConfiguredPlot *createRETimeSeriesPlot(QList<QString> &selected_species, RETask *task);
 
 #endif // LINESGRAPHADAPTOR_HH

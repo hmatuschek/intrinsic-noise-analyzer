@@ -1,4 +1,8 @@
 #include "documenttree.hh"
+#include "documentitem.hh"
+#include "taskitem.hh"
+#include "plotitem.hh"
+
 
 
 DocumentTree::DocumentTree(QObject *parent)

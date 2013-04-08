@@ -263,3 +263,31 @@ Figure::showMeasure(const QPointF &point)
 }
 
 
+
+/* ******************************************************************************************** *
+ * Implementation of ConfiguredPlot
+ * ******************************************************************************************** */
+ConfiguredPlot::ConfiguredPlot(PlotConfig *config, QObject *parent)
+  : Figure("", parent), _config(config)
+{
+  // Set title and lables:
+  setTitle(_config->title());
+  if (_config->hasXLabel()) { setXLabel(_config->xLabel()); }
+  if (_config->hasYLabel()) { setYLabel(_config->yLabel()); }
+
+  // Add graphs:
+  for(PlotConfig::iterator item=_config->begin(); item!=_config->end(); item++) {
+    Graph *graph = (*item)->createGraph();
+    getAxis()->addGraph(graph);
+    if ((*item)->showInLegend()) { addToLegend((*item)->label(), graph); }
+  }
+
+  // set ranges and range policies:
+  this->getAxis()->setXRangePolicy(_config->xRangePolicy());
+  this->getAxis()->setXRange(_config->xRange());
+  this->getAxis()->setYRangePolicy(_config->yRangePolicy());
+  this->getAxis()->setYRange(_config->yRange());
+
+  // Layout figure
+  this->updateAxes();
+}

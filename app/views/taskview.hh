@@ -12,42 +12,24 @@
 #include "taskerrorwidget.hh"
 
 
-/**
- * Common view of a task.
- *
+/** Common view of a task.
  * This view provides some basic widgets for any task: A progress-view, showing the progress of
  * the task. A error view, showing some details of an error occurred during the calculations. The
  * user must just provide a 'result-view', showing the results of a task, once it is completed.
- *
  * The @c TaskView listens for the state and progress event of the task and switches between the
  * different views on task-state changes.
- *
- * @ingroup gui
- */
+ * @ingroup gui */
 class TaskView : public QWidget
 {
   Q_OBJECT
 
 protected:
-  /**
-   * A weak reference to the task-item.
-   */
-  TaskItem *task_item;
-
-
-protected:
-  /**
-   * Constructs a basic-task view for the given task-item.
-   */
+  /** Constructs a basic-task view for the given task-item. */
   TaskView(TaskItem *task_item, QWidget *parent = 0);
 
-
 public:
-  /**
-   * Destructor.
-   */
+  /** Destructor. */
   virtual ~TaskView();
-
 
 protected:
   /** Can be overridden by specialized classes to return a specialized progress widget for the
@@ -66,33 +48,24 @@ protected:
    * task. */
   virtual QWidget *createTerminatingWidget(TaskItem *task_item);
 
-
 protected:
   /** Replaces the main widget. */
   void setMainWidget(QWidget *widget);
 
-
 protected slots:
-  /**
-   * Processes a state-change of the task, replaces the main widget.
-   */
+  /** Processes a state-change of the task, replaces the main widget. */
   void taskStateChanged();
-
-  /**
-   * Callback, if the task gets deleted.
-   */
+  /** Callback, if the task gets deleted. */
   void taskDestroyed();
 
+protected:
+  /** A weak reference to the task-item. */
+  TaskItem *task_item;
 
 private:
-  /**
-   * Title widget.
-   */
+  /** Title widget. */
   QLabel *title;
-
-  /**
-   * Layout holding all widets.
-   */
+  /** Layout holding all widets. */
   QWidget *current_main_widget;
 };
 

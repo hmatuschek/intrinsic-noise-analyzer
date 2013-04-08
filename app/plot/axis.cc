@@ -48,14 +48,14 @@ GraphGroup::GraphGroup(QObject *parent)
 void
 GraphGroup::setClipping(const QRectF &rect)
 {
-  this->clipping = rect;
+  this->_clipping = rect;
 }
 
 
 QRectF
 GraphGroup::boundingRect() const
 {
-  return this->clipping;
+  return this->_clipping;
 }
 
 
@@ -178,6 +178,11 @@ Axis::setAxisSize(const QSizeF &size)
 
 
 void
+Axis::setXRange(const Range &range) {
+  setXRange(range.min(), range.max());
+}
+
+void
 Axis::setXRange(double min, double max)
 {
   Extent old_extent = this->mapping->plotRange();
@@ -215,6 +220,10 @@ Axis::getYRange()
   return Range(extent.minY(), extent.maxY());
 }
 
+void
+Axis::setYRange(const Range &range) {
+  setYRange(range.min(), range.max());
+}
 
 void
 Axis::setYRange(double min, double max)

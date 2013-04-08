@@ -3,6 +3,8 @@
 #include "unitrenderer.hh"
 #include "uniteditor.hh"
 #include "../models/application.hh"
+#include "../doctree/documenttree.hh"
+#include "../doctree/documentitem.hh"
 #include <utils/logger.hh>
 
 #include <QLabel>

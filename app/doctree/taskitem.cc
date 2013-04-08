@@ -2,6 +2,7 @@
 #include <iostream>
 
 #include "../models/application.hh"
+#include "documenttree.hh"
 #include "analysesitem.hh"
 
 

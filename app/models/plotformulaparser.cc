@@ -274,14 +274,16 @@ PlotFormulaGrammar::PlotFormulaGrammar()
 /* ******************************************************************************************** *
  * Implementation of assembler:
  * ******************************************************************************************** */
-void __plot_formula_process_function_arguments(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, PlotFormulaParser::Context &ctx, std::vector<GiNaC::ex> &args);
-GiNaC::ex __plot_formula_process_function(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, PlotFormulaParser::Context &ctx);
-GiNaC::ex __plot_formula_process_atomic(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, PlotFormulaParser::Context &ctx);
-GiNaC::ex __plot_formula_process_power(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, PlotFormulaParser::Context &ctx);
-GiNaC::ex __plot_formula_process_product(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, PlotFormulaParser::Context &ctx);
-GiNaC::ex __plot_formula_process_expression(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, PlotFormulaParser::Context &ctx);
+void __plot_formula_process_function_arguments(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, const PlotFormulaParser::Context &ctx, std::vector<GiNaC::ex> &args);
+GiNaC::ex __plot_formula_process_function(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, const PlotFormulaParser::Context &ctx);
+GiNaC::ex __plot_formula_process_atomic(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, const PlotFormulaParser::Context &ctx);
+GiNaC::ex __plot_formula_process_power(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, const PlotFormulaParser::Context &ctx);
+GiNaC::ex __plot_formula_process_product(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, const PlotFormulaParser::Context &ctx);
+GiNaC::ex __plot_formula_process_expression(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, const PlotFormulaParser::Context &ctx);
 
-void __plot_formula_process_function_arguments(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, PlotFormulaParser::Context &ctx, std::vector<GiNaC::ex> &args)
+void
+__plot_formula_process_function_arguments(
+    Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, const PlotFormulaParser::Context &ctx, std::vector<GiNaC::ex> &args)
 {
   args.push_back(__plot_formula_process_expression(node[0], lexer, ctx));
 
@@ -290,7 +292,9 @@ void __plot_formula_process_function_arguments(Parser::ConcreteSyntaxTree &node,
   }
 }
 
-GiNaC::ex __plot_formula_process_function(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, PlotFormulaParser::Context &ctx)
+GiNaC::ex
+__plot_formula_process_function(
+    Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, const PlotFormulaParser::Context &ctx)
 {
   std::string function_name = lexer[node[0].getTokenIdx()].getValue();
   std::vector<GiNaC::ex> arguments;
@@ -327,7 +331,9 @@ GiNaC::ex __plot_formula_process_function(Parser::ConcreteSyntaxTree &node, Pars
   throw err;
 }
 
-GiNaC::ex __plot_formula_process_atomic(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, PlotFormulaParser::Context &ctx)
+GiNaC::ex
+__plot_formula_process_atomic(
+    Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, const PlotFormulaParser::Context &ctx)
 {
   switch (node.getAltIdx()) {
   // On integer | float
@@ -368,7 +374,9 @@ GiNaC::ex __plot_formula_process_atomic(Parser::ConcreteSyntaxTree &node, Parser
   throw InternalError(__FILE__ ": Invalid CST node!");
 }
 
-GiNaC::ex __plot_formula_process_power(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, PlotFormulaParser::Context &ctx) {
+GiNaC::ex
+__plot_formula_process_power(
+    Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, const PlotFormulaParser::Context &ctx) {
   if (0 == node.getAltIdx()) {
     GiNaC::ex lhs = __plot_formula_process_atomic(node[0][0], lexer, ctx);
     GiNaC::ex rhs = __plot_formula_process_power(node[0][2], lexer, ctx);
@@ -377,7 +385,10 @@ GiNaC::ex __plot_formula_process_power(Parser::ConcreteSyntaxTree &node, Parser:
   return __plot_formula_process_atomic(node[0], lexer, ctx);
 }
 
-GiNaC::ex __plot_formula_process_product(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, PlotFormulaParser::Context &ctx) {
+GiNaC::ex
+__plot_formula_process_product(
+    Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, const PlotFormulaParser::Context &ctx)
+{
   if (0 == node.getAltIdx()) {
     GiNaC::ex lhs = __plot_formula_process_power(node[0][0], lexer, ctx);
     GiNaC::ex rhs = __plot_formula_process_product(node[0][2], lexer, ctx);
@@ -389,7 +400,10 @@ GiNaC::ex __plot_formula_process_product(Parser::ConcreteSyntaxTree &node, Parse
   return __plot_formula_process_power(node[0], lexer, ctx);
 }
 
-GiNaC::ex __plot_formula_process_expression(Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, PlotFormulaParser::Context &ctx) {
+GiNaC::ex
+__plot_formula_process_expression(
+    Parser::ConcreteSyntaxTree &node, Parser::Lexer &lexer, const PlotFormulaParser::Context &ctx)
+{
   if (0 == node.getAltIdx()) {
     GiNaC::ex lhs = __plot_formula_process_product(node[0][0], lexer, ctx);
     GiNaC::ex rhs = __plot_formula_process_expression(node[0][2], lexer, ctx);
@@ -412,12 +426,12 @@ class PlotFormulaSerializer
     public GiNaC::symbol::visitor, public GiNaC::numeric::visitor
 {
 protected:
-  PlotFormulaParser::Context &_context;
+  const PlotFormulaParser::Context &_context;
   int _current_precedence;
   std::ostream &_stream;
 
 public:
-  PlotFormulaSerializer(std::ostream &stream, PlotFormulaParser::Context &context)
+  PlotFormulaSerializer(std::ostream &stream, const PlotFormulaParser::Context &context)
     : _context(context), _stream(stream) {
     // pass...
   }
@@ -527,12 +541,12 @@ PlotFormulaParser::Context::Context(const Context &other)
 
 
 GiNaC::symbol
-PlotFormulaParser::Context::getColumnSymbol(size_t column) {
+PlotFormulaParser::Context::getColumnSymbol(size_t column) const {
   return _symbols[column];
 }
 
 size_t
-PlotFormulaParser::Context::getColumnIdx(GiNaC::symbol symbol) {
+PlotFormulaParser::Context::getColumnIdx(GiNaC::symbol symbol) const {
   for (size_t i=0; i<_symbols.size(); i++) {
     if (_symbols[i] == symbol) { return i; }
   }
@@ -543,7 +557,7 @@ PlotFormulaParser::Context::getColumnIdx(GiNaC::symbol symbol) {
 }
 
 double
-PlotFormulaParser::Context::operator ()(size_t row, GiNaC::ex expression)
+PlotFormulaParser::Context::operator ()(size_t row, GiNaC::ex expression) const
 {
   // Generate symbol table for compiler:
   std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> symbol_table;
@@ -568,43 +582,11 @@ PlotFormulaParser::Context::operator ()(size_t row, GiNaC::ex expression)
   Eigen::VectorXd output(1);
   interpreter.run(_table->getRow(row), output);
   return output(0);
-
-  /*GiNaC::exmap values;
-  for (size_t i=0; i<_table->getNumColumns(); i++) {
-    values[_symbols[i]] = (*_table)(row, i);
-  }
-
-  GiNaC::ex value;
-  try {
-    value = GiNaC::evalf(expression.subs(values));
-  } catch (std::exception &err) {
-    iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::ERROR);
-    message << "Can not evaluate expression " << expression
-            << ". Got: " << err.what();
-    iNA::Utils::Logger::get().log(message);
-    return std::numeric_limits<double>::quiet_NaN();
-  } catch (...) {
-    // Catch all...
-    iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::ERROR);
-    message << "Can not evaluate expression " << expression
-            << ". An unknown exception class was caught!";
-    iNA::Utils::Logger::get().log(message);
-    return std::numeric_limits<double>::quiet_NaN();
-  }
-
-  if (! GiNaC::is_a<GiNaC::numeric>(value)) {
-    iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::ERROR);
-    message << "Can not evaluate expression " << expression
-            << ". Value not numeric: " << value;
-    iNA::Utils::Logger::get().log(message);
-    return std::numeric_limits<double>::quiet_NaN();
-  }
-  return GiNaC::ex_to<GiNaC::numeric>(value).to_double();*/
 }
 
 
 bool
-PlotFormulaParser::check(const QString &formula, Context &context)
+PlotFormulaParser::check(const QString &formula, const Context &context)
 {
   std::stringstream buffer; buffer << formula.toStdString();
 
@@ -645,7 +627,7 @@ PlotFormulaParser::check(const QString &formula, Context &context)
 
 
 GiNaC::ex
-PlotFormulaParser::parse(const QString &formula, Context &context)
+PlotFormulaParser::parse(const QString &formula, const Context &context)
 {
   std::stringstream buffer; buffer << formula.toStdString();
 
@@ -673,7 +655,7 @@ PlotFormulaParser::parse(const QString &formula, Context &context)
 
 
 void
-PlotFormulaParser::serialize(GiNaC::ex formula, std::ostream &stream, Context &context)
+PlotFormulaParser::serialize(GiNaC::ex formula, std::ostream &stream, const Context &context)
 {
   PlotFormulaSerializer serializer(stream, context);
   formula.accept(serializer);

@@ -1,10 +1,12 @@
 #include "generaltaskwizard.hh"
+#include "../doctree/documenttree.hh"
 #include "../models/application.hh"
 #include "../models/generaltaskconfig.hh"
 #include "openmp.hh"
 
 #include <QVBoxLayout>
 #include <QFormLayout>
+#include <QLineEdit>
 
 
 /* ******************************************************************************************* *

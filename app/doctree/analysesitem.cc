@@ -1,20 +1,20 @@
 #include "analysesitem.hh"
 #include "exception.hh"
+#include "taskitem.hh"
 #include "../models/application.hh"
 
 using namespace iNA;
 
 AnalysesItem::AnalysesItem(QObject *parent) :
-  QObject(parent), DocumentTreeItem(), itemLabel("Analyses")
+  QObject(parent), DocumentTreeItem(), _itemLabel("Analyses")
 {
   // pass...
 }
 
 
 const QString &
-AnalysesItem::getLabel() const
-{
-  return this->itemLabel;
+AnalysesItem::getLabel() const {
+  return this->_itemLabel;
 }
 
 
@@ -41,8 +41,7 @@ AnalysesItem::tasksRunning()
 
 
 void
-AnalysesItem::addTask(TaskItem *task)
-{
+AnalysesItem::addTask(TaskItem *task) {
   task->setParent(this);
   task->setTreeParent(this);
   this->_children.append(task);

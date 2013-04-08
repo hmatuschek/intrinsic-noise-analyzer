@@ -8,7 +8,7 @@
 
 SSAParameterScanPlot::SSAParameterScanPlot(const QStringList &selected_species, SSAParamScanTask *task,
                                      QObject *parent)
-    : VariancePlot("Mean concentrations (SSA)", parent)
+    : LinePlot("Mean concentrations (SSA)", parent)
 {
   // Get species units:
   std::stringstream unit_str;

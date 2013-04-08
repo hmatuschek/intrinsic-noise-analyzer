@@ -8,6 +8,7 @@
 #include <QMessageBox>
 
 #include "../models/application.hh"
+#include "../doctree/documenttree.hh"
 #include "../doctree/plotitem.hh"
 #include "iosplot.hh"
 #include "../views/speciesselectiondialog.hh"

@@ -6,7 +6,7 @@
 
 IOSEMRETimeSeriesPlot::IOSEMRETimeSeriesPlot(const QStringList &selected_species,
                                              IOSTask *task, QObject *parent)
-  : VariancePlot("Mean concentrations (EMRE & IOS Var.)", parent)
+  : LinePlot("Mean concentrations (EMRE & IOS Var.)", parent)
 {
   // Get time & species units and assemble axis labels
   std::stringstream unit_str;

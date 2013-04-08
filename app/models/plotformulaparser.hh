@@ -23,12 +23,12 @@ public:
     /** Copy constructor. */
     Context(const Context &other);
     /** Resolves a column number to the corresponding GiNaC::symbol. */
-    GiNaC::symbol getColumnSymbol(size_t column);
+    GiNaC::symbol getColumnSymbol(size_t column) const;
     /** Resolves the given symbol to the corresponding column index. */
-    size_t getColumnIdx(GiNaC::symbol symbol);
+    size_t getColumnIdx(GiNaC::symbol symbol) const;
     /** Evaluates the given expression (plot formula) for the given row of the table given to the
      * constructor. */
-    double operator()(size_t row, GiNaC::ex expression);
+    double operator()(size_t row, GiNaC::ex expression) const;
 
   private:
     /** Holds the data table. */
@@ -39,12 +39,12 @@ public:
 
 public:
   /** Checks if the given expression is valid in the given context (data table). */
-  static bool check(const QString &formula, Context &context);
+  static bool check(const QString &formula, const Context &context);
   /** Parses and returns the expression for the given formula in the given context.
    * You can use the context to evaluate the constructed expression. */
-  static GiNaC::ex parse(const QString &formula, Context &context);
+  static GiNaC::ex parse(const QString &formula, const Context &context);
   /** Serializes a given plot formula into its textual representation. */
-  static void serialize(GiNaC::ex formula, std::ostream &stream, Context &context);
+  static void serialize(GiNaC::ex formula, std::ostream &stream, const Context &context);
 };
 
 #endif // PLOTFORMULAPARSER_HH

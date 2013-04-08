@@ -6,7 +6,7 @@
 
 ParameterScanPlot::ParameterScanPlot(const QStringList &selected_species, ParamScanTask *task,
                                      QObject *parent)
-    : VariancePlot("Mean concentrations (RE & LNA)", parent)
+    : LinePlot("Mean concentrations (RE & LNA)", parent)
 {
   // Get species units:
   std::stringstream unit_str;
@@ -47,7 +47,7 @@ ParameterScanPlot::ParameterScanPlot(const QStringList &selected_species, ParamS
 
 ParameterScanIOSPlot::ParameterScanIOSPlot(const QStringList &selected_species, ParamScanTask *task,
                                      QObject *parent)
-    : VariancePlot("Mean concentrations (EMRE & IOS var)", parent)
+    : LinePlot("Mean concentrations (EMRE & IOS var)", parent)
 {
   // Get species units:
   std::stringstream unit_str;

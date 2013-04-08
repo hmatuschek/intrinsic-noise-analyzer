@@ -10,6 +10,7 @@
 
 
 #include "../models/application.hh"
+#include "../doctree/documenttree.hh"
 #include "../doctree/plotitem.hh"
 #include "steadystatespectrumplot.hh"
 #include "../views/speciesselectiondialog.hh"

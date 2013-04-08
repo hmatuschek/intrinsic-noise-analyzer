@@ -1,7 +1,8 @@
 #include "documentitem.hh"
+#include "documenttree.hh"
 #include "exception.hh"
-#include "../doctree/modelitem.hh"
-#include "../doctree/analysesitem.hh"
+#include "modelitem.hh"
+#include "analysesitem.hh"
 #include "../models/application.hh"
 
 #include <QMessageBox>

@@ -4,9 +4,10 @@
 #include <QAbstractItemModel>
 #include "../doctree/treeitem.hh"
 
-#include "documentitem.hh"
-#include "taskitem.hh"
-#include "plotitem.hh"
+// Forward declaraions:
+class DocumentItem;
+class TaskItem;
+class PlotItem;
 
 
 class DocumentTree :  public QAbstractItemModel, public TreeItem
@@ -19,17 +20,11 @@ public:
   void resetCompleteTree();
 
   virtual void addDocument(DocumentItem *document);
-
   virtual void addTask(DocumentItem *document, TaskItem *task);
-
   virtual void addPlot(TaskItem *task, PlotItem *plot);
-
   virtual void removeTask(TaskItem *task);
-
   virtual void removeDocument(DocumentItem *document);
-
   virtual void removePlot(PlotItem *plot);
-
   virtual void markForUpdate(TreeItem *item);
 
   /* ******************************************************************************************* *

@@ -7,14 +7,17 @@
 
 #include <QApplication>
 #include <QObject>
+#include <QAction>
+#include <QModelIndex>
 
 #include "configuration.hh"
-#include "../doctree/documenttree.hh"
 #include "versioncheck.hh"
 
 
 /* Forward declarations... */
 class MainWindow;
+class DocumentTree;
+class DocumentTreeItem;
 
 
 /**
