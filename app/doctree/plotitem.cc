@@ -6,6 +6,7 @@
 #include "../plot/configuration.hh"
 #include <iostream>
 
+static QString _empty_plot_title = "<No Plot Title>";
 
 PlotItem::PlotItem(Plot::Figure *plot, QObject *parent)
   : QObject(parent), DocumentTreeItem(), _plot(plot), _config(0), _itemLabel(plot->getTitle())
@@ -67,6 +68,7 @@ PlotItem::updatePlot() {
 
 const QString &
 PlotItem::getLabel() const {
+  if (0 == _itemLabel.size()) { return _empty_plot_title; }
   return _itemLabel;
 }
 
