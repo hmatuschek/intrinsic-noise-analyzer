@@ -13,6 +13,7 @@
 #include "replot.hh"
 #include "../views/speciesselectiondialog.hh"
 #include "../views/genericplotdialog.hh"
+#include "../plot/plotconfigdialog.hh"
 
 
 /* ********************************************************************************************* *
@@ -71,17 +72,14 @@ REResultWidget::REResultWidget(RETaskWrapper *task_wrapper, QWidget *parent):
 
 
 void
-REResultWidget::quickPlotButtonPressed()
-{
+REResultWidget::quickPlotButtonPressed() {
   // Create SSE quick plot dialog
   SpeciesSelectionDialog re_dialog(re_task_wrapper->getRETask()->getConfig().getModel());
   re_dialog.setWindowTitle(tr("RE quick plot"));
   re_dialog.setTitle(tr("Select the species to plot."));
-
   // Exec & get selected species
   if (QDialog::Rejected == re_dialog.exec()) { return; }
-  QList<QString> selected_species = re_dialog.getSelectedSpecies();
-
+  QStringList selected_species = re_dialog.getSelectedSpecies();
   // Create and add timeseries plot:
   Plot::PlotConfig *config = createRETimeSeriesPlotConfig(
         selected_species, re_task_wrapper->getRETask());
@@ -90,26 +88,14 @@ REResultWidget::quickPlotButtonPressed()
 
 
 void
-REResultWidget::genericPlotButtonPressed()
-{
+REResultWidget::genericPlotButtonPressed() {
+  // Create empty config:
+  Plot::PlotConfig *config = new Plot::PlotConfig(*(re_task_wrapper->getRETask()->getTimeSeries()));
   // Show dialog
-  GenericPlotDialog dialog(re_task_wrapper->getRETask()->getTimeSeries());
-  if (QDialog::Rejected == dialog.exec()) { return; }
-
-  // Create plot figure with labels.
-  Plot::Figure *figure = new Plot::Figure(dialog.figureTitle());
-  figure->getAxis()->setXLabel(dialog.xLabel());
-  figure->getAxis()->setYLabel(dialog.yLabel());
-
-  // Iterate over all graphs of the configured plot:
-  for (size_t i=0; i<dialog.numGraphs(); i++) {
-    Plot::Graph *graph = dialog.graph(i).create(figure->getStyle(i));
-    figure->getAxis()->addGraph(graph);
-    figure->addToLegend(dialog.graph(i).label(), graph);
-  }
-
-  // Add timeseries plot:
-  Application::getApp()->docTree()->addPlot(re_task_wrapper, new PlotItem(figure));
+  Plot::PlotConfigDialog dialog(config);
+  if (QDialog::Accepted != dialog.exec()) { delete config; return; }
+  // Add plot:
+  Application::getApp()->docTree()->addPlot(re_task_wrapper, new PlotItem(config));
 }
 
 
@@ -118,16 +104,10 @@ REResultWidget::saveButtonPressed()
 {
   QString filename = QFileDialog::getSaveFileName(
         this, tr("Save as text..."), "", tr("Text Files (*.txt *.csv)"));
-
-  if ("" == filename)
-  {
-    return;
-  }
-
+  if ("" == filename) { return; }
   QFile file(filename);
 
-  if (!file.open(QIODevice::WriteOnly| QIODevice::Text))
-  {
+  if (!file.open(QIODevice::WriteOnly| QIODevice::Text)) {
     QMessageBox box;
     box.setWindowTitle(tr("Can not open file"));
     box.setText(tr("Can not open file %1 for writing").arg(filename));

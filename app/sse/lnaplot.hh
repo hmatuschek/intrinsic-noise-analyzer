@@ -28,5 +28,10 @@ public:
   explicit LNACorrelationPlot(QList<QString> &selected_species, LNATask *task, QObject *parent=0);
 };
 
+Plot::PlotConfig *
+createLNATimeSeriesPlotConfig(QStringList &selected_species, LNATask *task);
+
+Plot::PlotConfig *
+createLNACorrelationPlotConfig(QStringList &selected_species, LNATask *task);
 
 #endif // LINESGRAPHADAPTOR_HH

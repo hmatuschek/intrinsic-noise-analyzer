@@ -38,18 +38,17 @@ PlotView::PlotView(PlotItem *plot_item, QWidget *parent) :
   // Set plot range button:
   QPushButton *range_button = new QPushButton(tr("Set plot range"));
   range_button->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
-  QObject::connect(range_button, SIGNAL(clicked()), this, SLOT(onSetPlotRange()));
+  if (_plotitem->hasConfig()) { range_button->setVisible(false); }
+
+  // Configure plot button:
+  QPushButton *config_plot = new QPushButton(tr("Configure plot"));
+  config_plot->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+  if (! _plotitem->hasConfig()) { config_plot->setVisible(false); }
 
   // Plot Scheme selection:
   this->_schemeBox = new QComboBox();
   this->_schemeBox->addItem(tr("Display"), QVariant(0));
   this->_schemeBox->addItem(tr("Print"), QVariant(1));
-
-  // Configure plot button:
-  QPushButton *config_plot = new QPushButton(tr("Configure plot"));
-  config_plot->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
-  if (! _plotitem->hasConfig()) { config_plot->setEnabled(false); }
-  QObject::connect(config_plot, SIGNAL(clicked()), this, SLOT(onConfigPlot()));
 
   // Assemble panel:
   QVBoxLayout *layout = new QVBoxLayout();
@@ -58,17 +57,19 @@ PlotView::PlotView(PlotItem *plot_item, QWidget *parent) :
   QHBoxLayout *button_box = new QHBoxLayout();
   button_box->addWidget(save_button);
   button_box->addWidget(range_button);
-  button_box->addWidget(this->_schemeBox);
   button_box->addWidget(config_plot);
+  button_box->addWidget(this->_schemeBox);
   layout->addLayout(button_box);
   this->setLayout(layout);
 
   // If the plot-wrapper gest destroyed -> close the plot-view:
   QObject::connect(_plotitem, SIGNAL(destroyed()), this, SLOT(onPlotDestroy()));
-
   // If new scheme is selected:
   QObject::connect(this->_schemeBox, SIGNAL(currentIndexChanged(int)),
                    this, SLOT(onSchemeSelected(int)));
+  QObject::connect(range_button, SIGNAL(clicked()), this, SLOT(onSetPlotRange()));
+  QObject::connect(config_plot, SIGNAL(clicked()), this, SLOT(onConfigPlot()));
+
 }
 
 

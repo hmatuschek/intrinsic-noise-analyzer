@@ -70,7 +70,7 @@ LegendItem::updateLayout()
   _bb.setX(0); _bb.setY(0);
   _bb = _bb.united(QRectF(_sample_length+_space, 0, _label_size.width(), _label_size.height()));
 
-  qDebug() << "Legend Item @ " << _bb;
+  //qDebug() << "Legend Item @ " << _bb;
 }
 
 
