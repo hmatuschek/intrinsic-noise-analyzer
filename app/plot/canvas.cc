@@ -23,14 +23,11 @@ Canvas::setPlot(Plot::Figure *plot)
 {
   // Store plot
   this->_plot = plot;
-
   // Resize plot to this size:
   QSize size = this->size();
   this->_plot->setSceneRect(0,0, size.width(), size.height());
-
   // Signal plot to update axes:
   this->_plot->updateAxes();
-
   // Update widget:
   this->update();
 }

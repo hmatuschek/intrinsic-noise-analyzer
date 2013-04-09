@@ -6,6 +6,8 @@
 #include <QStackedWidget>
 #include <QListView>
 #include <QComboBox>
+#include <QPushButton>
+#include <QTimer>
 
 
 // Forward declarations:
@@ -79,14 +81,32 @@ private slots:
   void onAddLineGraph();
   /** Callback to create a new variance line graph. */
   void onAddVarLineGraph();
-  /** Callback to edit figure labels & title. */
-  void onEditLabels();
   /** Callback to edit a existing graph. */
   void onEditGraph(const QModelIndex &index);
-  /** Callback to set the plot ranges. */
-  void onSetPlotRange();
   /** Updates the plot-preview window. */
   void onUpdatePlot();
+  /** If the plot title is changed. */
+  void onTitleChanged(QString title);
+  /** If the x label is changed. */
+  void onXLabelChanged(QString label);
+  /** If the y label is changed. */
+  void onYLabelChanged(QString label);
+  /** If the min x range policy has changed. */
+  void onMinXRangePolicyChanged(bool fixed);
+  /** If the min x range has changed. */
+  void onMinXRangeChanged(QString value);
+  /** If the min x range policy has changed. */
+  void onMaxXRangePolicyChanged(bool fixed);
+  /** If the max x range has changed. */
+  void onMaxXRangeChanged(QString value);
+  /** If the min y range policy has changed. */
+  void onMinYRangePolicyChanged(bool fixed);
+  /** If the min y range has changed. */
+  void onMinYRangeChanged(QString value);
+  /** If the min y range policy has changed. */
+  void onMaxYRangePolicyChanged(bool fixed);
+  /** If the max y range has changed. */
+  void onMaxYRangeChanged(QString value);
   /** Checks if the configuration is valid. */
   void onAccepted();
 
@@ -101,6 +121,18 @@ private:
   QStackedWidget *_stack;
   /** The preview plot view. */
   Plot::Canvas *_plotview;
+  /** A Tab view allowing to switch between graph-list and labels&ranges */
+  QTabWidget *_tabwidget;
+  /** Text field for the x range min. */
+  QLineEdit *_minXRange;
+  /** Text field for the x range max. */
+  QLineEdit *_maxXRange;
+  /** Text field for the y range min. */
+  QLineEdit *_minYRange;
+  /** Text field for the y range max. */
+  QLineEdit *_maxYRange;
+  /** Replot timer, avoid the immediate replot on changes to the configuration. */
+  QTimer _replotTimer;
 };
 
 
@@ -135,6 +167,35 @@ private:
 };
 
 
+/** A trivial button that shows a colored field and displays a QColorDialog on
+ * click. */
+class ColorButton: public QPushButton
+{
+  Q_OBJECT
+
+public:
+  /** Shows the given color. */
+  explicit ColorButton(const QColor &color, QWidget *parent=0);
+  /** Returns the currently selected color. */
+  const QColor &selectedColor() const;
+
+signals:
+  /** Gets emitted if a new color was selected. */
+  void colorSelected(QColor);
+
+private slots:
+  /** Internal callback to show color picker dialog. */
+  void onSelectColor();
+
+protected:
+  virtual void paintEvent(QPaintEvent *event);
+
+private:
+  /** The currently selected color. */
+  QColor _color;
+};
+
+
 /** A simple dialog to create a new line graph from the given config. */
 class LineGraphDialog : public QDialog
 {
@@ -147,6 +208,8 @@ public:
 private slots:
   /** Validates the plot formulas and calls accepted() if they are valid. */
   void checkInputAndExit();
+  /** If the color select button was pressed. */
+  void onSelectColor(QColor color);
 
 private:
   /** Internal used post-constructor to setup the GUI elements of the dialog. */
@@ -161,6 +224,8 @@ private:
   LinePlotFormulaEditor *_formula_x;
   /** Holds the formula editor for the mean formula. */
   LinePlotFormulaEditor *_formula_y;
+  /** Holds the line color selection button. */
+  ColorButton *_line_color;
 };
 
 
@@ -176,6 +241,10 @@ public:
 private slots:
   /** Validates the plot formulas and calls accepted() if they are valid. */
   void checkInputAndExit();
+  /** Gets called if a line color is selected. */
+  void onSelectLineColor(QColor color);
+  /** Gets called if a fill color is selected. */
+  void onSelectFillColor(QColor color);
 
 private:
   /** Internal used post-constructor to setup the GUI elements of the dialog. */

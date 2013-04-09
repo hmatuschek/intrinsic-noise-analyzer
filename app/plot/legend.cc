@@ -58,6 +58,7 @@ void
 LegendItem::updateLayout()
 {
   // Reset positions
+  prepareGeometryChange();
   _line->setPos(0,0); _label->setPos(0,0);
 
   // Update positions:
@@ -66,9 +67,10 @@ LegendItem::updateLayout()
 
   // update BB:
   _bb = _line->boundingRect();
-  _bb.setX(_bb.x() + _line->pos().x());
-  _bb.setY(_bb.y() + _line->pos().y());
+  _bb.setX(0); _bb.setY(0);
   _bb = _bb.united(QRectF(_sample_length+_space, 0, _label_size.width(), _label_size.height()));
+
+  qDebug() << "Legend Item @ " << _bb;
 }
 
 
@@ -89,7 +91,6 @@ Legend::Legend(QObject *parent)
   this->_background->setPos(0,0);
   this->_background->setPen(QColor(Qt::transparent));
   this->_background->setBrush(QColor(255,255,255, 200));
-
   this->addToGroup(this->_background);
 }
 
@@ -99,7 +100,6 @@ void
 Legend::addGraph(const QString &label, Graph *graph)
 {
   LegendItem *item = new LegendItem(label, graph);
-  item->setPos(0,0);
 
   double x = this->_margin_left;
   double y = this->_margin_top;
@@ -115,14 +115,14 @@ Legend::addGraph(const QString &label, Graph *graph)
   this->_items.append(item);
   this->addToGroup(item);
   item->setPos(x,y);
-  // Update bounding box:
+  qDebug() << "Created legend item @ " << x << ", " << y;
+  item->updateLayout();
   this->updateBB();
 }
 
 
 QRectF
-Legend::boundingRect() const
-{
+Legend::boundingRect() const {
   return this->_bb;
 }
 
@@ -142,7 +142,7 @@ Legend::updateLayout() {
   for (QList<LegendItem *>::Iterator item=_items.begin(); item!=_items.end(); item++) {
     qDebug() << "Legend: move item to " << x << ", " << y;
     (*item)->setPos(x,y); (*item)->updateLayout();
-    y += (*item)->boundingRect().y() + (*item)->boundingRect().height() + _line_spacing;
+    y = (*item)->pos().y() + (*item)->boundingRect().y() + (*item)->boundingRect().height() + _line_spacing;
   }
   updateBB();
 }
@@ -156,7 +156,6 @@ Legend::updateBB()
   for (QList<LegendItem *>::iterator item = this->_items.begin();
        item != this->_items.end(); item++)
   {
-    (*item)->updateLayout();
     box = box.united(
           QRectF((*item)->boundingRect().x() + (*item)->pos().x(),
                  (*item)->boundingRect().y() + (*item)->pos().y(),
@@ -166,7 +165,7 @@ Legend::updateBB()
 
   this->_bb = box;
 
-  // Update path
+  // Update background
   QPainterPath path; path.addRect(0,0, box.width(), box.height());
   this->_background->setPath(path);
 }

@@ -181,6 +181,7 @@ void
 Figure::addToLegend(const QString &label, Graph *graph)
 {
   _legend->addGraph(label, graph);
+  updateAxes();
 }
 
 

@@ -16,12 +16,16 @@ class PlotFormulaParser : public QObject
 
 public:
   /** Implements the symbol -> column translation for plot formulas. */
-  class Context {
+  class Context: public iNA::Parser::Expr::Context {
   public:
     /** Constructor. */
     Context(Table *table);
     /** Copy constructor. */
     Context(const Context &other);
+    /** Implements the Context interface, resolves the given identifier to a @c GiNaC::symbol */
+    virtual GiNaC::symbol resolve(const std::string &identifier);
+    /** Implements the Context interface, returns the identifier for the given symbol. */
+    virtual std::string identifier(GiNaC::symbol symbol) const;
     /** Resolves a column number to the corresponding GiNaC::symbol. */
     GiNaC::symbol getColumnSymbol(size_t column) const;
     /** Resolves the given symbol to the corresponding column index. */
@@ -35,6 +39,8 @@ public:
     Table *_table;
     /** Holds a vector of GiNaC::symbols for each column of the data table. */
     std::vector<GiNaC::symbol> _symbols;
+    /** Maps symbols to column indices. */
+    std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> _symbol_table;
   };
 
 public:

@@ -25,7 +25,7 @@ ModelExpressionContext::resolve(const std::string &identifier) {
 }
 
 std::string
-ModelExpressionContext::identifier(GiNaC::symbol symbol)
+ModelExpressionContext::identifier(GiNaC::symbol symbol) const
 {
   iNA::Ast::VariableDefinition *var = _scope.getVariable(symbol);
   if (var->hasName()) { return var->getName(); }

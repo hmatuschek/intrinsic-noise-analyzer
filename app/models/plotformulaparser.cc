@@ -521,7 +521,7 @@ public:
 
 
 /* ******************************************************************************************** *
- * Implementation of PlotFormulaParser
+ * Implementation of PlotFormulaParser::Context
  * ******************************************************************************************** */
 PlotFormulaParser::Context::Context(Table *table)
   : _table(table)
@@ -530,15 +530,39 @@ PlotFormulaParser::Context::Context(Table *table)
   _symbols.resize(_table->getNumColumns());
   for (size_t i=0; i<_table->getNumColumns(); i++) {
     _symbols[i] = GiNaC::symbol(table->getColumnName(i).toStdString());
+    _symbol_table[_symbols[i]] = i;
   }
 }
 
 PlotFormulaParser::Context::Context(const Context &other)
-  : _table(other._table), _symbols(other._symbols)
+  : _table(other._table), _symbols(other._symbols), _symbol_table(other._symbol_table)
 {
   // pass...
 }
 
+
+GiNaC::symbol
+PlotFormulaParser::Context::resolve(const std::string &identifier) {
+  if (0 == identifier.size()) {
+    SymbolError err; err << "Can not resolve symbol '" << identifier << "'."; throw err;
+  }
+  if ('$' != identifier[0]) {
+    SymbolError err; err << "Can not resolve symbol '" << identifier << "'."; throw err;
+  }
+  char *end_ptr=0;
+  unsigned long column = ::strtoul(identifier.c_str()+1, &end_ptr, 10);
+  if (size_t(end_ptr-identifier.c_str()) != identifier.size()) {
+    SymbolError err; err << "Can not resolve symbol '" << identifier << "'."; throw err;
+  }
+  return getColumnSymbol(size_t(column));
+}
+
+std::string
+PlotFormulaParser::Context::identifier(GiNaC::symbol symbol) const {
+  size_t column = getColumnIdx(symbol);
+  std::stringstream buffer; buffer << "$" << column;
+  return buffer.str();
+}
 
 GiNaC::symbol
 PlotFormulaParser::Context::getColumnSymbol(size_t column) const {
@@ -546,26 +570,26 @@ PlotFormulaParser::Context::getColumnSymbol(size_t column) const {
 }
 
 size_t
-PlotFormulaParser::Context::getColumnIdx(GiNaC::symbol symbol) const {
-  for (size_t i=0; i<_symbols.size(); i++) {
-    if (_symbols[i] == symbol) { return i; }
+PlotFormulaParser::Context::getColumnIdx(GiNaC::symbol symbol) const
+{
+  // Search for symbol in map
+  std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less>::const_iterator item
+      = _symbol_table.find(symbol);
+  // If not found
+  if (_symbol_table.end() == item) {
+    SymbolError err;
+    err << "Can not resolve symbol " << symbol << ": Unknown symbol.";
+    throw err;
   }
-
-  SymbolError err;
-  err << "Can not resolve symbol " << symbol << ": Unknown symbol.";
-  throw err;
+  // otherwise, return index
+  return item->second;
 }
 
 double
 PlotFormulaParser::Context::operator ()(size_t row, GiNaC::ex expression) const
 {
-  // Generate symbol table for compiler:
-  std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> symbol_table;
-  for (size_t i=0; i<_table->getNumColumns(); i++) {
-    symbol_table[_symbols[i]] = i;
-  }
   // Create compiler, code and interpreter
-  Eval::bci::Compiler<Eigen::VectorXd> compiler(symbol_table);
+  Eval::bci::Compiler<Eigen::VectorXd> compiler(_symbol_table);
   Eval::bci::Code code; compiler.setCode(&code);
   Eval::bci::Interpreter<Eigen::VectorXd> interpreter;
   // Compile expression:
@@ -585,6 +609,9 @@ PlotFormulaParser::Context::operator ()(size_t row, GiNaC::ex expression) const
 }
 
 
+/* ******************************************************************************************** *
+ * Implementation of PlotFormulaParser
+ * ******************************************************************************************** */
 bool
 PlotFormulaParser::check(const QString &formula, const Context &context)
 {
@@ -608,7 +635,7 @@ PlotFormulaParser::check(const QString &formula, const Context &context)
   lexer.addIgnoredToken(T_WHITESPACE);
 
   Parser::ConcreteSyntaxTree cts;
-
+  /// @todo Use the iNA::Parser::Expr::Parser here!
   try {
     Parser::ConcreteSyntaxTree cst;
     PlotFormulaGrammar::get()->parse(lexer, cst);
@@ -648,6 +675,8 @@ PlotFormulaParser::parse(const QString &formula, const Context &context)
   lexer.addRule(new Parser::KeyWordTokenRule(T_RPAR, ")"));
   lexer.addIgnoredToken(T_WHITESPACE);
 
+  /// @todo Use the iNA::Parser::Expr::Parser here!
+
   Parser::ConcreteSyntaxTree cst;
   PlotFormulaGrammar::get()->parse(lexer, cst);
   return __plot_formula_process_expression(cst[0], lexer, context);
@@ -655,8 +684,6 @@ PlotFormulaParser::parse(const QString &formula, const Context &context)
 
 
 void
-PlotFormulaParser::serialize(GiNaC::ex formula, std::ostream &stream, const Context &context)
-{
-  PlotFormulaSerializer serializer(stream, context);
-  formula.accept(serializer);
+PlotFormulaParser::serialize(GiNaC::ex formula, std::ostream &stream, const Context &context) {
+  iNA::Parser::Expr::serializeExpression(formula, stream, context);
 }

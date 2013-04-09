@@ -13,50 +13,32 @@
 namespace Plot {
 
 
-/**
- * Provides a 1D range/interval [min, max].
- *
- * @ingroup plot
- */
+/** Provides a 1D range/interval [min, max].
+ * @ingroup plot */
 class Range
 {
-protected:
-  /**
-   * Holds the minimum value of the interval.
-   */
-  double _min;
-
-  /**
-   * Holds the maximum value of the interval.
-   */
-  double _max;
-
-
 public:
-  /**
-   * Costructs a range from given minimum and maximum.
-   */
+  /** Costructs a range from given minimum and maximum. */
   Range(double min, double max);
-
-  /**
-   * Copy constructor.
-   */
+  /** Copy constructor. */
   Range(const Range &other);
 
-  /**
-   * Returns the minimum of the interval.
-   */
+  /** Returns the minimum of the interval. */
   inline double min() const { return this->_min; }
-
-  /**
-   * Returns the maximum of the interval.
-   */
+  /** Sets the minimum of the interval. */
+  inline void setMin(double value) { this->_min = value; }
+  /** Returns the maximum of the interval. */
   inline double max() const { return this->_max; }
-
-  /**
-   * Returns the interval size (maximum - minimum).
-   */
+  /** Sets the maximum of the interval. */
+  inline void setMax(double value) { this->_max = value; }
+  /** Returns the interval size (maximum - minimum). */
   inline double delta() const { return this->_max - this->_min; }
+
+protected:
+  /** Holds the minimum value of the interval. */
+  double _min;
+  /** Holds the maximum value of the interval. */
+  double _max;
 };
 
 
