@@ -8,10 +8,31 @@
 #include "paramscantask.hh"
 #include "../views/varianceplot.hh"
 
-/**
- * Collects data from a @c Table and updates the
- * @c VarianceLinesGraph instance.
- */
+
+Plot::PlotConfig *
+createParameterScanREPlotConfig(const QStringList &selected_species, ParamScanTask *task);
+
+Plot::PlotConfig *
+createParameterScanLNAPlotConfig(const QStringList &selected_species, ParamScanTask *task);
+
+Plot::PlotConfig *
+createParameterScanIOSPlotConfig(const QStringList &selected_species, ParamScanTask *task);
+
+Plot::PlotConfig *
+createParameterScanLNACVPlotConfig(const QStringList &selected_species, ParamScanTask *task);
+
+Plot::PlotConfig *
+createParameterScanLNAFanoPlotConfig(const QStringList &selected_species, ParamScanTask *task);
+
+Plot::PlotConfig *
+createParameterScanIOSCVPlotConfig(const QStringList &selected_species, ParamScanTask *task);
+
+Plot::PlotConfig *
+createParameterScanIOSFanoPlotConfig(const QStringList &selected_species, ParamScanTask *task);
+
+
+/** Collects data from a @c Table and updates the
+ * @c VarianceLinesGraph instance. */
 class SimpleParameterScanPlot : public LinePlot
 {
   Q_OBJECT
@@ -21,10 +42,8 @@ public:
 };
 
 
-/**
- * Collects data from a @c Table and updates the
- * @c VarianceLinesGraph instance.
- */
+/** Collects data from a @c Table and updates the
+ * @c VarianceLinesGraph instance. */
 class ParameterScanPlot : public LinePlot
 {
   Q_OBJECT
