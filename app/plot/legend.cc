@@ -115,7 +115,7 @@ Legend::addGraph(const QString &label, Graph *graph)
   this->_items.append(item);
   this->addToGroup(item);
   item->setPos(x,y);
-  qDebug() << "Created legend item @ " << x << ", " << y;
+  //qDebug() << "Created legend item @ " << x << ", " << y;
   item->updateLayout();
   this->updateBB();
 }
@@ -140,7 +140,7 @@ void
 Legend::updateLayout() {
   double x = this->_margin_left, y = this->_margin_top;
   for (QList<LegendItem *>::Iterator item=_items.begin(); item!=_items.end(); item++) {
-    qDebug() << "Legend: move item to " << x << ", " << y;
+    //qDebug() << "Legend: move item to " << x << ", " << y;
     (*item)->setPos(x,y); (*item)->updateLayout();
     y = (*item)->pos().y() + (*item)->boundingRect().y() + (*item)->boundingRect().height() + _line_spacing;
   }

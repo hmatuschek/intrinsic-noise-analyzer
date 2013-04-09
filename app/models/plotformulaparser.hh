@@ -45,10 +45,10 @@ public:
 
 public:
   /** Checks if the given expression is valid in the given context (data table). */
-  static bool check(const QString &formula, const Context &context);
+  static bool check(const QString &formula, Context &context);
   /** Parses and returns the expression for the given formula in the given context.
    * You can use the context to evaluate the constructed expression. */
-  static GiNaC::ex parse(const QString &formula, const Context &context);
+  static GiNaC::ex parse(const QString &formula, Context &context);
   /** Serializes a given plot formula into its textual representation. */
   static void serialize(GiNaC::ex formula, std::ostream &stream, const Context &context);
 };
