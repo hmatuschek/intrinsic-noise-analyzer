@@ -7,12 +7,13 @@
 #include <QFile>
 #include <QMessageBox>
 
+#include "iosplot.hh"
 #include "../models/application.hh"
 #include "../doctree/documenttree.hh"
 #include "../doctree/plotitem.hh"
-#include "iosplot.hh"
 #include "../views/speciesselectiondialog.hh"
-#include "../views/genericplotdialog.hh"
+#include "../plot/configuration.hh"
+#include "../plot/plotconfigdialog.hh"
 
 
 /* ********************************************************************************************* *
@@ -83,19 +84,19 @@ IOSResultWidget::_onPlotButtonPressed()
   Application::getApp()->docTree()->addPlot(
         this->_ios_task_wrapper,
         new PlotItem(
-          new IOSEMRETimeSeriesPlot(selected_species, _ios_task_wrapper->getIOSTask())));
+          createIOSEMRETimeSeriesPlotConfig(selected_species, _ios_task_wrapper->getIOSTask())));
 
   if (0 < selected_species.size()) {
     Application::getApp()->docTree()->addPlot(
           this->_ios_task_wrapper,
           new PlotItem(
-            new IOSEMRECorrelationPlot(selected_species, _ios_task_wrapper->getIOSTask())));
+            createIOSEMRECorrelationPlotConfig(selected_species, _ios_task_wrapper->getIOSTask())));
   }
 
   Application::getApp()->docTree()->addPlot(
         this->_ios_task_wrapper,
         new PlotItem(
-          new IOSEMREComparePlot(selected_species,_ios_task_wrapper->getIOSTask())));
+          createIOSEMREComparePlotConfig(selected_species,_ios_task_wrapper->getIOSTask())));
 }
 
 
@@ -103,23 +104,12 @@ void
 IOSResultWidget::_onGenericPlotButtonPressed()
 {
   // Show dialog
-  GenericPlotDialog dialog(_ios_task_wrapper->getIOSTask()->getTimeSeries());
-  if (QDialog::Rejected == dialog.exec()) { return; }
-
-  // Create plot figure with labels.
-  Plot::Figure *figure = new Plot::Figure(dialog.figureTitle());
-  figure->getAxis()->setXLabel(dialog.xLabel());
-  figure->getAxis()->setYLabel(dialog.yLabel());
-
-  // Iterate over all graphs of the configured plot:
-  for (size_t i=0; i<dialog.numGraphs(); i++) {
-    Plot::Graph *graph = dialog.graph(i).create(figure->getStyle(i));
-    figure->getAxis()->addGraph(graph);
-    figure->addToLegend(dialog.graph(i).label(), graph);
-  }
+  Plot::PlotConfig *config = new Plot::PlotConfig(*(_ios_task_wrapper->getIOSTask()->getTimeSeries()));
+  Plot::PlotConfigDialog dialog(config);
+  if (QDialog::Accepted == dialog.exec()) { return; }
 
   // Add timeseries plot:
-  Application::getApp()->docTree()->addPlot(_ios_task_wrapper, new PlotItem(figure));
+  Application::getApp()->docTree()->addPlot(_ios_task_wrapper, new PlotItem(config));
 }
 
 
@@ -129,15 +119,10 @@ IOSResultWidget::_onSaveButtonPressed()
   QString filename = QFileDialog::getSaveFileName(
         this, tr("Save as text..."), "", tr("Text Files (*.txt *.csv)"));
 
-  if ("" == filename)
-  {
-    return;
-  }
-
+  if ("" == filename) { return; }
   QFile file(filename);
 
-  if (!file.open(QIODevice::WriteOnly| QIODevice::Text))
-  {
+  if (!file.open(QIODevice::WriteOnly| QIODevice::Text)) {
     QMessageBox box;
     box.setWindowTitle(tr("Can not open file"));
     box.setText(tr("Can not open file %1 for writing").arg(filename));

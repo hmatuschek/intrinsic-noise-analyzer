@@ -7,12 +7,12 @@
 #include <QFile>
 #include <QMessageBox>
 
+#include "lnaplot.hh"
 #include "../models/application.hh"
 #include "../doctree/documenttree.hh"
 #include "../doctree/plotitem.hh"
-#include "lnaplot.hh"
 #include "../views/speciesselectiondialog.hh"
-#include "../views/genericplotdialog.hh"
+#include "../plot/configuration.hh"
 #include "../plot/plotconfigdialog.hh"
 
 

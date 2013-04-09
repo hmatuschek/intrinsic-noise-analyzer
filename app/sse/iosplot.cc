@@ -1,13 +1,19 @@
 #include "iosplot.hh"
+#include "iostask.hh"
 #include "../plot/plot.hh"
+#include "../plot/graph.hh"
 #include "../plot/linegraph.hh"
+#include "../models/timeseries.hh"
+#include "../views/varianceplot.hh"
 #include <QVector>
 
 
-IOSEMRETimeSeriesPlot::IOSEMRETimeSeriesPlot(const QStringList &selected_species,
-                                             IOSTask *task, QObject *parent)
-  : LinePlot("Mean concentrations (EMRE & IOS Var.)", parent)
+Plot::PlotConfig *
+createIOSEMRETimeSeriesPlotConfig(const QStringList &selected_species, IOSTask *task)
 {
+  Table *series = task->getTimeSeries();
+  Plot::PlotConfig *config = new Plot::PlotConfig(*series);
+
   // Get time & species units and assemble axis labels
   std::stringstream unit_str;
   task->getSpeciesUnit().dump(unit_str, true);
@@ -15,11 +21,12 @@ IOSEMRETimeSeriesPlot::IOSEMRETimeSeriesPlot(const QStringList &selected_species
   unit_str.str("");
   task->getTimeUnit().dump(unit_str, true);
   QString time_unit(unit_str.str().c_str());
-  setXLabel(tr("time [%1]").arg(time_unit));
+  config->setTile(QObject::tr("Mean concentrations (EMRE & IOS Var.)"));
+  config->setXLabel(QObject::tr("time [%1]").arg(time_unit));
   if (task->getSpeciesUnit().isConcentrationUnit()) {
-    setYLabel(tr("concentrations [%1]").arg(species_unit));
+    config->setYLabel(QObject::tr("concentrations [%1]").arg(species_unit));
   } else {
-    setYLabel(tr("amount [%1]").arg(species_unit));
+    config->setYLabel(QObject::tr("amount [%1]").arg(species_unit));
   }
 
   // Determine some numbers
@@ -27,30 +34,35 @@ IOSEMRETimeSeriesPlot::IOSEMRETimeSeriesPlot(const QStringList &selected_species
   size_t Nss = selected_species.size();
   size_t Ns = model->numSpecies();    // Number of species in model
   size_t offset = 1+Ns+(Ns*(Ns+1))/2; // skip time, RE & LNA
-  Table *series = task->getTimeSeries();
 
   // Assemble plots
   for (size_t i=0; i<Nss; i++) {
     size_t species_idx = model->getSpeciesIdx(selected_species.at(i).toStdString());
     size_t mean_idx = offset + species_idx;
     size_t var_idx  = offset+Ns + species_idx*(Ns+1) - (species_idx*(species_idx+1))/2;
-    this->addVarianceGraph(series->getColumn(0), series->getColumn(mean_idx),
-                           series->getColumn(var_idx), series->getColumnName(mean_idx));
+    Plot::VarianceLineGraphConfig *var_config = new Plot::VarianceLineGraphConfig(series, i);
+    var_config->setLabel(series->getColumnName(mean_idx));
+    var_config->setXExpression("$0");
+    var_config->setYExpression(QString("$%1").arg(mean_idx));
+    var_config->setVarExpression(QString("$%1").arg(var_idx));
+    config->addGraph(var_config);
   }
 
   // Force y plot-range to be [0, AUTO]:
-  this->getAxis()->setYRangePolicy(
+  config->setYRangePolicy(
         Plot::RangePolicy(Plot::RangePolicy::FIXED, Plot::RangePolicy::AUTOMATIC));
-  this->getAxis()->setYRange(0, 1);
-  this->updateAxes();
+  config->setYRange(Plot::Range(0, 1));
+
+  return config;
 }
 
 
-
-IOSEMREComparePlot::IOSEMREComparePlot(const QStringList &selected_species, IOSTask *task,
-                                       QObject *parent)
-  : LinePlot("Mean concentrations (RE, EMRE & IOS)", parent)
+Plot::PlotConfig *
+createIOSEMREComparePlotConfig(const QStringList &selected_species, IOSTask *task)
 {
+  Table *series = task->getTimeSeries();
+  Plot::PlotConfig *config = new Plot::PlotConfig(*series);
+
   // Get time & species units and assemble axis labels
   std::stringstream unit_str;
   task->getSpeciesUnit().dump(unit_str, true);
@@ -58,100 +70,71 @@ IOSEMREComparePlot::IOSEMREComparePlot(const QStringList &selected_species, IOST
   unit_str.str("");
   task->getTimeUnit().dump(unit_str, true);
   QString time_unit(unit_str.str().c_str());
-  setXLabel(tr("time [%1]").arg(time_unit));
+  config->setTile(QObject::tr("Mean concentrations (RE, EMRE & IOS)"));
+  config->setXLabel(QObject::tr("time [%1]").arg(time_unit));
   if (task->getSpeciesUnit().isConcentrationUnit()) {
-    setYLabel(tr("concentrations [%1]").arg(species_unit));
+    config->setYLabel(QObject::tr("concentrations [%1]").arg(species_unit));
   } else {
-    setYLabel(tr("amount [%1]").arg(species_unit));
+    config->setYLabel(QObject::tr("amount [%1]").arg(species_unit));
   }
 
   iNA::Ast::Model *model = task->getConfig().getModel();
-  Table *series = task->getTimeSeries();
   size_t Ntot  = model->numSpecies();
   size_t Nsel = selected_species.size();
   size_t off_re   = 1;
   size_t off_emre = 1 + Ntot + (Ntot*(Ntot+1))/2;
   size_t off_ios  = off_emre + Ntot + (Ntot*(Ntot+1))/2;
 
-  QVector<Plot::LineGraph *> re_graphs(Nsel);
-  QVector<Plot::LineGraph *> emre_graphs(Nsel);
-  QVector<Plot::LineGraph *> ios_graphs(Nsel);
-
   // Allocate a graph for each colum in time-series:
   for (size_t i=0; i<Nsel; i++)
   {
+    Plot::LineGraphConfig *ios_graph = new Plot::LineGraphConfig(series, i);
+    Plot::LineGraphConfig *emre_graph = new Plot::LineGraphConfig(series, i);
+    Plot::LineGraphConfig *re_graph = new Plot::LineGraphConfig(series, i);
+    QColor line_color = ios_graph->lineColor();
+    line_color.setAlpha(128); emre_graph->setLineColor(line_color);
+    line_color.setAlpha(64);  re_graph->setLineColor(line_color);
+
     size_t species_idx = model->getSpeciesIdx(selected_species.at(i).toStdString());
-
-    Plot::GraphStyle style = this->getStyle(i);
-    ios_graphs[i]  = new Plot::LineGraph(style);
-
-    QColor line_color = style.getLineColor(); line_color.setAlpha(128);
-    style.setLineColor(line_color);
-    emre_graphs[i] = new Plot::LineGraph(style);
-
-    line_color.setAlpha(64);
-    style.setLineColor(line_color);
-    re_graphs[i] = new Plot::LineGraph(style);
-
-    this->_axis->addGraph(ios_graphs[i]);
-    this->_axis->addGraph(emre_graphs[i]);
-    this->_axis->addGraph(re_graphs[i]);
-
-    this->addToLegend(series->getColumnName(species_idx+off_ios),  ios_graphs[i]);
-    this->addToLegend(series->getColumnName(species_idx+off_emre), emre_graphs[i]);
-    this->addToLegend(series->getColumnName(species_idx+off_re), re_graphs[i]);
-  }
-
-  // Do not plot all
-  int idx_incr = 0;
-  if (0 == (idx_incr = series->getNumRows()/100)) {
-    idx_incr = 1;
-  }
-
-  // Plot time-series:
-  for (size_t j=0; j<series->getNumRows(); j+=idx_incr) {
-    for (size_t i=0; i<Nsel; i++) {
-      size_t species_idx = model->getSpeciesIdx(selected_species.at(i).toStdString());
-      re_graphs[i]->addPoint((*series)(j,0), (*series)(j, species_idx+off_re));
-      emre_graphs[i]->addPoint((*series)(j, 0), (*series)(j, species_idx+off_emre));
-      ios_graphs[i]->addPoint((*series)(j, 0), (*series)(j, species_idx+off_ios));
-    }
+    ios_graph->setLabel(series->getColumnName(off_ios+species_idx));
+    ios_graph->setXExpression("$0");
+    ios_graph->setYExpression(QString("$%1").arg(off_ios+species_idx));
+    config->addGraph(ios_graph);
+    emre_graph->setLabel(series->getColumnName(off_emre+species_idx));
+    emre_graph->setXExpression("$0");
+    emre_graph->setYExpression(QString("$%1").arg(off_emre+species_idx));
+    config->addGraph(emre_graph);
+    re_graph->setLabel(series->getColumnName(off_re+species_idx));
+    re_graph->setXExpression("$0");
+    re_graph->setYExpression(QString("$%1").arg(off_re+species_idx));
+    config->addGraph(re_graph);
   }
 
   // Force y plot-range to be [0, AUTO]:
-  this->getAxis()->setYRangePolicy(
+  config->setYRangePolicy(
         Plot::RangePolicy(Plot::RangePolicy::FIXED, Plot::RangePolicy::AUTOMATIC));
-  this->getAxis()->setYRange(0, 1);
+  config->setYRange(Plot::Range(0, 1));
 
-  for (size_t i=0; i<Nsel; i++) {
-    re_graphs[i]->commit();
-    emre_graphs[i]->commit();
-    ios_graphs[i]->commit();
-  }
-
-  this->updateAxes();
+  return config;
 }
 
 
-
-/* ********************************************************************************************* *
- * Implementation of correlation plot.
- * ********************************************************************************************* */
-IOSEMRECorrelationPlot::IOSEMRECorrelationPlot(const QStringList &selected_species, IOSTask *task, QObject *parent)
-  : Figure("Correlation Coefficients (IOS)", parent)
+Plot::PlotConfig *
+createIOSEMRECorrelationPlotConfig(const QStringList &selected_species, IOSTask *task)
 {
+  Table *series = task->getTimeSeries();
+  Plot::PlotConfig *config = new Plot::PlotConfig(*series);
+
   std::stringstream unit_str;
   task->getTimeUnit().dump(unit_str, true);
   QString time_unit(unit_str.str().c_str());
-  this->setXLabel(tr("time [%1]").arg(time_unit));
-  this->setYLabel(tr("correlation coefficient"));
+  config->setTile(QObject::tr("Correlation Coefficients (IOS)"));
+  config->setXLabel(QObject::tr("time [%1]").arg(time_unit));
+  config->setYLabel(QObject::tr("correlation coefficient"));
 
   iNA::Ast::Model *model = task->getConfig().getModel();
-  Table *series = task->getTimeSeries();
   size_t Nss = selected_species.size();
   size_t Ns = model->numSpecies();
-  size_t Ncov = (Nss*(Nss-1))/2;
-  QVector<Plot::LineGraph *> graphs(Ncov);
 
   // Allocate a graph for each colum in time-series:
   Eigen::MatrixXi index_table(Nss, Nss); size_t graph_idx=0;
@@ -172,43 +155,19 @@ IOSEMRECorrelationPlot::IOSEMRECorrelationPlot(const QStringList &selected_speci
       QString species_name_j = species_j->getIdentifier().c_str();
       if (species_j->hasName()) { species_name_j = species_j->getName().c_str(); }
 
-      Plot::GraphStyle style = this->getStyle(graph_idx);
-      graphs[graph_idx] = new Plot::LineGraph(style);
-      this->_axis->addGraph(graphs[graph_idx]);
-      this->addToLegend(
-            QString("corr(%1, %2)").arg(species_name_i).arg(species_name_j), graphs[graph_idx]);
-    }
-  }
-
-  // Do not plot all
-  int idx_incr ;
-  if (0 == (idx_incr = series->getNumRows()/100)) { idx_incr = 1; }
-
-  // Plot time-series:
-  for (size_t k=0; k<series->getNumRows(); k+=idx_incr) {
-    size_t idx = 0;
-    for (size_t i=0; i<Nss; i++) {
-      for (size_t j=i+1; j<Nss; j++, idx++) {
-        double x = (*series)(k, 0);
-        double y = 0.0;
-        if ((0.0 != (*series)(k, index_table(i,i))) && (0.0 != (*series)(k, index_table(j,j)))) {
-          y = (*series)(k, index_table(i,j)) /
-              (std::sqrt((*series)(k, index_table(i,i))) *
-               std::sqrt((*series)(k, index_table(j,j))));
-        }
-        graphs[idx]->addPoint(x, y);
-      }
+      Plot::LineGraphConfig *cor_config = new Plot::LineGraphConfig(series, graph_idx);
+      cor_config->setLabel(QString("corr(%1, %2)").arg(species_name_i).arg(species_name_j));
+      cor_config->setXExpression("$0");
+      cor_config->setYExpression(
+            QString("$%1/sqrt($%2*$%3)").arg(index_table(i,j)).arg(index_table(i,i)).arg(index_table(j,j)));
+      config->addGraph(cor_config);
     }
   }
 
   // Force y plot-range to be [-1, 1]:
-  this->getAxis()->setYRangePolicy(
+  config->setYRangePolicy(
         Plot::RangePolicy(Plot::RangePolicy::FIXED, Plot::RangePolicy::FIXED));
-  this->getAxis()->setYRange(-1.1, 1.1);
+  config->setYRange(Plot::Range(-1.1, 1.1));
 
-  // Finally commit changes:
-  for (size_t i=0; i<Ncov; i++) {
-    graphs[i]->commit();
-  }
-  this->updateAxes();
+  return config;
 }
