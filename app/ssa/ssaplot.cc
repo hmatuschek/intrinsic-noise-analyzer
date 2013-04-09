@@ -1,76 +1,77 @@
 #include "ssaplot.hh"
+#include "ssatask.hh"
 #include "../plot/graph.hh"
-#include "../plot/variancelinegraph.hh"
+#include "../plot/configuration.hh"
 
 
 
-/* ******************************************************************************************** *
- * SSA Timeseries Plot
- * ******************************************************************************************** */
-SSAPlot::SSAPlot(const QStringList &selected_species, SSATask *task, QObject *parent)
-  : LinePlot("Stochastic Simulation Algorithm", parent)
+Plot::PlotConfig *
+createSSAPlotConfig(const QStringList &selected_species, SSATask *task)
 {
+  Table &series = task->getTimeSeries();
+  Plot::PlotConfig *config = new Plot::PlotConfig(series);
+
   size_t Ntot = task->getModel()->numSpecies();
   size_t Nsel = selected_species.size();
 
   // Serialize unit of species:
   std::stringstream unit_str;
   task->getModel()->getConcentrationUnit().dump(unit_str,true);
-  QString concentration_unit = unit_str.str().c_str();
-
-  unit_str.str("");
+  QString concentration_unit = unit_str.str().c_str(); unit_str.str("");
   task->getModel()->getTimeUnit().dump(unit_str,true);
   QString time_unit  = unit_str.str().c_str();
 
   // Set axis labels:
-  this->setXLabel(tr("time [%1]").arg(time_unit));
-  this->setYLabel(tr("concentrations [%1]").arg(concentration_unit));
+  config->setTile(QObject::tr("Stochastic Simulation Algorithm"));
+  config->setXLabel(QObject::tr("time [%1]").arg(time_unit));
+  config->setYLabel(QObject::tr("concentrations [%1]").arg(concentration_unit));
 
   size_t offset = 1;
-  for (size_t i=0; i<Nsel; i++)
-  {
+  for (size_t i=0; i<Nsel; i++) {
     size_t species_idx = task->getModel()->getSpeciesIdx(selected_species.at(i).toStdString());
     size_t mean_idx = offset + species_idx;
     size_t var_idx  = offset+Ntot + species_idx*(Ntot+1) - (species_idx*(species_idx+1))/2;
-    addVarianceGraph(task->getTimeSeries().getColumn(0),
-                     task->getTimeSeries().getColumn(mean_idx),
-                     task->getTimeSeries().getColumn(var_idx),
-                     task->getTimeSeries().getColumnName(mean_idx));
+    Plot::VarianceLineGraphConfig *var_config = new Plot::VarianceLineGraphConfig(config->data(), i);
+    var_config->setLabel(task->getTimeSeries().getColumnName(mean_idx));
+    var_config->setXExpression("$0");
+    var_config->setYExpression(QString("$%1").arg(mean_idx));
+    var_config->setVarExpression(QString("$%1").arg(var_idx));
+    config->addGraph(var_config);
   }
 
   // Force y plot-range to be [0, AUTO]:
-  this->getAxis()->setYRangePolicy(
+  config->setYRangePolicy(
         Plot::RangePolicy(Plot::RangePolicy::FIXED, Plot::RangePolicy::AUTOMATIC));
-  this->getAxis()->setYRange(0, 1);
+  config->setYRange(Plot::Range(0, 1));
 
-  this->getAxis()->setXRangePolicy(
+  config->setXRangePolicy(
         Plot::RangePolicy(Plot::RangePolicy::FIXED, Plot::RangePolicy::AUTOMATIC));
-  this->getAxis()->setXRange(0, 1);
+  config->setXRange(Plot::Range(0, 1));
 
-  updateAxes();
+  return config;
 }
 
 
-
-/* ******************************************************************************************** *
- * SSA Correlation Plot
- * ******************************************************************************************** */
-SSACorrelationPlot::SSACorrelationPlot(const QStringList &selected_species, SSATask *task, QObject *parent)
-  : LinePlot("Correlation Coefficients (SSA)", parent)
+Plot::PlotConfig *
+createSSACorrelationPlotConfig(const QStringList &selected_species, SSATask *task)
 {
+  Table &series = task->getTimeSeries();
+  Plot::PlotConfig *config = new Plot::PlotConfig(series);
+
   // Serialize unit of species:
   std::stringstream unit_str;
   task->getModel()->getTimeUnit().dump(unit_str,true);
   QString time_unit  = unit_str.str().c_str();
 
-  this->setXLabel(tr("time [%1]").arg(time_unit));
-  this->setYLabel(tr("correlation coefficient"));
+  config->setTile("Correlation Coefficients (SSA)");
+  config->setXLabel(QObject::tr("time [%1]").arg(time_unit));
+  config->setYLabel(QObject::tr("correlation coefficient"));
 
   size_t Ntot = task->getModel()->numSpecies();
   size_t Nsel = selected_species.size();
 
   // Allocate a graph for each colum in time-series:
-  size_t offset = 1;
+  size_t offset = 1, graph_idx=0;
   for (size_t i=0; i<Nsel; i++) {
     // Get species index for i-th selected species
     size_t species_idx_i = task->getModel()->getSpeciesIdx(selected_species.at(i).toStdString());
@@ -82,7 +83,7 @@ SSACorrelationPlot::SSACorrelationPlot(const QStringList &selected_species, SSAT
       species_name_i = task->getModel()->getSpecies(species_idx_i)->getName().c_str();
     }
 
-    for (size_t j=i+1; j<Nsel; j++) {
+    for (size_t j=i+1; j<Nsel; j++, graph_idx++) {
       // Get species index for the j-th selected species
       size_t species_idx_j = task->getModel()->getSpeciesIdx(selected_species.at(j).toStdString());
       // Its variance index
@@ -95,16 +96,20 @@ SSACorrelationPlot::SSACorrelationPlot(const QStringList &selected_species, SSAT
       // The index for the covariance of i & j:
       size_t cov_index_ij = std::min(var_idx_i, var_idx_j) +
           (std::max(species_idx_i, species_idx_j) - std::min(species_idx_i, species_idx_j));
-      // Calc correlation coefficients
-      Eigen::VectorXd var_i = task->getTimeSeries().getColumn(var_idx_i);
-      Eigen::VectorXd var_j = task->getTimeSeries().getColumn(var_idx_j);
-      Eigen::VectorXd cov_ij = task->getTimeSeries().getColumn(cov_index_ij);
-      Eigen::VectorXd corr = cov_ij.array()/(var_i.array()*var_j.array()).sqrt();
-      // Add correlation function plot
-      addLineGraph(task->getTimeSeries().getColumn(0), corr,
-                   QString("corr(%1, %2)").arg(species_name_i).arg(species_name_j));
+
+      Plot::LineGraphConfig *cor_config = new Plot::LineGraphConfig(config->data(), graph_idx);
+      cor_config->setLabel(QObject::tr("corr(%1, %2)").arg(species_name_i).arg(species_name_j));
+      cor_config->setXExpression("$0");
+      cor_config->setYExpression(
+            QString("$%1/sqrt($%2*$%3)").arg(cov_index_ij).arg(var_idx_i).arg(var_idx_j));
+      config->addGraph(cor_config);
     }
   }
 
-  updateAxes();
+  // Force y plot-range to be [0, AUTO]:
+  config->setYRangePolicy(
+        Plot::RangePolicy(Plot::RangePolicy::FIXED, Plot::RangePolicy::FIXED));
+  config->setYRange(Plot::Range(-1.1, 1.1));
+
+  return config;
 }
