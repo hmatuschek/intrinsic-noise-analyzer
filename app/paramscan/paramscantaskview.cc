@@ -7,12 +7,13 @@
 #include <QFile>
 #include <QMessageBox>
 
+#include "paramscanplot.hh"
 #include "../models/application.hh"
 #include "../doctree/documenttree.hh"
 #include "../doctree/plotitem.hh"
 #include "../views/genericplotdialog.hh"
-#include "paramscanplot.hh"
 #include "../views/speciesselectiondialog.hh"
+#include "../plot/plotconfigdialog.hh"
 
 
 
@@ -93,8 +94,7 @@ ParamScanResultWidget::plotButtonPressed()
       Application::getApp()->docTree()->addPlot(
             this->paramscan_task_wrapper,
             new PlotItem(
-              new SimpleParameterScanPlot(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
-
+              createParameterScanREPlotConfig(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
       break;
 
   case ParamScanTask::Config::LNA_ANALYSIS:
@@ -102,41 +102,37 @@ ParamScanResultWidget::plotButtonPressed()
       Application::getApp()->docTree()->addPlot(
             this->paramscan_task_wrapper,
             new PlotItem(
-              new ParameterScanPlot(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
-
+              createParameterScanLNAPlotConfig(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
       // Add LNA COV plot
       Application::getApp()->docTree()->addPlot(
             this->paramscan_task_wrapper,
             new PlotItem(
-              new ParameterScanCVPlot(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
-
+              createParameterScanLNACVPlotConfig(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
       // Add Fano COV plot
       Application::getApp()->docTree()->addPlot(
             this->paramscan_task_wrapper,
             new PlotItem(
-              new ParameterScanFanoPlot(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
-
+              createParameterScanLNAFanoPlotConfig(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
       break;
+
   case ParamScanTask::Config::IOS_ANALYSIS:
       // Add IOS parameter plot
       Application::getApp()->docTree()->addPlot(
             this->paramscan_task_wrapper,
             new PlotItem(
-              new ParameterScanIOSPlot(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
-
+              createParameterScanIOSPlotConfig(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
       // Add IOS COV plot
       Application::getApp()->docTree()->addPlot(
             this->paramscan_task_wrapper,
             new PlotItem(
-              new ParameterScanCVIOSPlot(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
-
+              createParameterScanIOSCVPlotConfig(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
       // Add IOS Fano plot
       Application::getApp()->docTree()->addPlot(
             this->paramscan_task_wrapper,
             new PlotItem(
-              new ParameterScanFanoIOSPlot(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
-
+              createParameterScanIOSFanoPlotConfig(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
       break;
+
   default:
       break;
   }
@@ -147,23 +143,13 @@ void
 ParamScanResultWidget::customPlotButtonPressed()
 {
   // Show dialog
-  GenericPlotDialog dialog(&this->paramscan_task_wrapper->getParamScanTask()->getParameterScan());
-  if (QDialog::Rejected == dialog.exec()) { return; }
-
-  // Create plot figure with labels.
-  Plot::Figure *figure = new Plot::Figure(dialog.figureTitle());
-  figure->getAxis()->setXLabel(dialog.xLabel());
-  figure->getAxis()->setYLabel(dialog.yLabel());
-
-  // Iterate over all graphs of the configured plot:
-  for (size_t i=0; i<dialog.numGraphs(); i++) {
-    Plot::Graph *graph = dialog.graph(i).create(figure->getStyle(i));
-    figure->getAxis()->addGraph(graph);
-    figure->addToLegend(dialog.graph(i).label(), graph);
-  }
-
+  Plot::PlotConfig *config = new Plot::PlotConfig(
+        this->paramscan_task_wrapper->getParamScanTask()->getParameterScan());
+  Plot::PlotConfigDialog dialog(config);
+  if (QDialog::Accepted != dialog.exec()) { return; }
   // Add timeseries plot:
-  Application::getApp()->docTree()->addPlot(this->paramscan_task_wrapper, new PlotItem(figure));
+  Application::getApp()->docTree()->addPlot(
+        this->paramscan_task_wrapper, new PlotItem(config));
 }
 
 void

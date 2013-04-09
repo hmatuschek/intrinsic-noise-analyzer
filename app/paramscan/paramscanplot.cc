@@ -310,7 +310,7 @@ SimpleParameterScanPlot::SimpleParameterScanPlot(const QStringList &selected_spe
 
 
 Plot::PlotConfig *
-createParameterScanREPlot(const QStringList &selected_species, ParamScanTask *task)
+createParameterScanREPlotConfig(const QStringList &selected_species, ParamScanTask *task)
 {
   // Get parameter scan table:
   Table &data = task->getParameterScan();
