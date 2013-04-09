@@ -64,6 +64,8 @@ void
 PlotItem::updatePlot() {
   _plot->deleteLater();
   _plot = _config->createFigure();
+  _itemLabel = _plot->getTitle();
+  Application::getApp()->docTree()->markForUpdate(this);
 }
 
 const QString &

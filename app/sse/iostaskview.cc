@@ -78,7 +78,7 @@ IOSResultWidget::_onPlotButtonPressed()
   SpeciesSelectionDialog dialog(_ios_task_wrapper->getIOSTask()->getConfig().getModel());
   dialog.setWindowTitle(tr("IOS quick plot"));
   dialog.setTitle(tr("Select the species to plot."));
-  if (QDialog::Rejected == dialog.exec()) { return; }
+  if (QDialog::Accepted != dialog.exec()) { return; }
   QStringList selected_species = dialog.getSelectedSpecies();
 
   Application::getApp()->docTree()->addPlot(
@@ -86,7 +86,7 @@ IOSResultWidget::_onPlotButtonPressed()
         new PlotItem(
           createIOSEMRETimeSeriesPlotConfig(selected_species, _ios_task_wrapper->getIOSTask())));
 
-  if (0 < selected_species.size()) {
+  if (1 < selected_species.size()) {
     Application::getApp()->docTree()->addPlot(
           this->_ios_task_wrapper,
           new PlotItem(
@@ -106,7 +106,7 @@ IOSResultWidget::_onGenericPlotButtonPressed()
   // Show dialog
   Plot::PlotConfig *config = new Plot::PlotConfig(*(_ios_task_wrapper->getIOSTask()->getTimeSeries()));
   Plot::PlotConfigDialog dialog(config);
-  if (QDialog::Accepted == dialog.exec()) { return; }
+  if (QDialog::Accepted != dialog.exec()) { return; }
 
   // Add timeseries plot:
   Application::getApp()->docTree()->addPlot(_ios_task_wrapper, new PlotItem(config));

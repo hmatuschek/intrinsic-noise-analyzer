@@ -141,25 +141,26 @@ createIOSEMRECorrelationPlotConfig(const QStringList &selected_species, IOSTask 
   for (size_t i=0; i<Nss; i++)
   {
     iNA::Ast::Species *species_i = model->getSpecies(selected_species.at(i).toStdString());
-    QString species_name_i = species_i->getIdentifier().c_str();
-    if (species_i->hasName()) { species_name_i = species_i->getName().c_str(); }
-
-    size_t species_idx = model->getSpeciesIdx(species_i);
-    index_table(i,i) = 1+2*Ns+(Ns*(Ns+1))/2; // offset to first cov column
-    index_table(i,i) += species_idx*(model->numSpecies()+1) - (species_idx*(species_idx+1))/2;
+    QString species_i_name = species_i->getIdentifier().c_str();
+    if (species_i->hasName()) { species_i_name = species_i->getName().c_str(); }
+    size_t species_i_idx = model->getSpeciesIdx(species_i);
+    size_t cov_offset = 1+2*Ns+(Ns*(Ns+1))/2; // offset to first cov column;
+    size_t cov_ii_idx = cov_offset + species_i_idx*(Ns+1) - (species_i_idx*(species_i_idx+1))/2;
     for (size_t j=i+1; j<Nss; j++, graph_idx++)
     {
-      index_table(i,j) = index_table(j,i) = index_table(i,i)+j-i;
-
       iNA::Ast::Species *species_j = model->getSpecies(selected_species.at(j).toStdString());
-      QString species_name_j = species_j->getIdentifier().c_str();
-      if (species_j->hasName()) { species_name_j = species_j->getName().c_str(); }
+      QString species_j_name = species_j->getIdentifier().c_str();
+      if (species_j->hasName()) { species_j_name = species_j->getName().c_str(); }
+      size_t species_j_idx = model->getSpeciesIdx(species_j);
+      size_t cov_jj_idx = cov_offset + species_j_idx*(Ns+1) - (species_j_idx*(species_j_idx+1))/2;
+      size_t cov_ij_idx = std::min(cov_ii_idx, cov_jj_idx) +
+          (std::max(species_i_idx, species_j_idx) - std::min(species_i_idx, species_i_idx));
 
       Plot::LineGraphConfig *cor_config = new Plot::LineGraphConfig(series, graph_idx);
-      cor_config->setLabel(QString("corr(%1, %2)").arg(species_name_i).arg(species_name_j));
+      cor_config->setLabel(QString("corr(%1, %2)").arg(species_i_name).arg(species_j_name));
       cor_config->setXExpression("$0");
       cor_config->setYExpression(
-            QString("$%1/sqrt($%2*$%3)").arg(index_table(i,j)).arg(index_table(i,i)).arg(index_table(j,j)));
+            QString("$%1/sqrt($%2*$%3)").arg(cov_ij_idx).arg(cov_ii_idx).arg(cov_jj_idx));
       config->addGraph(cor_config);
     }
   }
