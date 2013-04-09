@@ -304,8 +304,9 @@ Axis::updatePlotSize()
   this->yticks->setPos(0,0);
   this->yticks->updateSize();
 
-  this->xticks->setPos(this->yticks->boundingRect().width(),
-                       this->axis_size.height()-this->xticks->boundingRect().height());
+  this->xticks->setPos(
+        this->yticks->boundingRect().width()-this->yticks->lineWidth()/2,
+        this->axis_size.height()-this->xticks->boundingRect().height());
   this->xticks->updateSize();
 
   this->graph_group->setPos(this->yticks->boundingRect().width(), 0);
