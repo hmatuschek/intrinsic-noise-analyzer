@@ -16,13 +16,10 @@ DocumentItem::DocumentItem(const QString &path, QObject *parent)
   : QObject(parent), DocumentTreeItem(), _file_path(path)
 {
   _model = new ModelItem(_file_path, this);
-  _model->setTreeParent(this);
+  addChild(_model);
 
   _analyses = new AnalysesItem(this);
-  _analyses->setTreeParent(this);
-
-  _children.append(this->_model);
-  _children.append(this->_analyses);
+  addChild(_analyses);
 
   // Construct context menu:
   _closeAct = new QAction(tr("Close document"), this);
@@ -40,13 +37,10 @@ DocumentItem::DocumentItem(iNA::Ast::Model *model, const QString &path, QObject 
   : QObject(parent), DocumentTreeItem(), _file_path(path)
 {
   _model = new ModelItem(model, this);
-  _model->setTreeParent(this);
+  addChild(_model);
 
   _analyses = new AnalysesItem(this);
-  _analyses->setTreeParent(this);
-
-  _children.append(this->_model);
-  _children.append(this->_analyses);
+  addChild(_analyses);
 
   // Construct context menu:
   _closeAct = new QAction(tr("Close document"), this);
@@ -77,6 +71,21 @@ DocumentItem::getModel() const {
   return _model->getModel();
 }
 
+
+QModelIndex
+DocumentItem::indexOfAnalysesItem() const {
+  return Application::getApp()->docTree()->getIndexOf(this->_analyses);
+}
+
+AnalysesItem *
+DocumentItem::analysesItem() {
+  return _analyses;
+}
+
+size_t
+DocumentItem::numAnalyses() const {
+  return _analyses->getTreeChildCount();
+}
 
 void
 DocumentItem::addTask(TaskItem *task) {
@@ -129,19 +138,16 @@ DocumentItem::updateItemData() {
  * Implementation of event callbacks:
  * ******************************************************************************************** */
 void
-DocumentItem::closeDocument()
-{
-  if (this->_analyses->tasksRunning())
-  {
+DocumentItem::closeDocument() {
+  if (this->_analyses->tasksRunning()) {
     QMessageBox::warning(0, tr("Cannot close document"), tr("Analysis in progress."));
     return;
   }
 
-  // Remove document from tree:
-  Application::getApp()->docTree()->removeDocument(this);
   // Reset selected item:
   Application::getApp()->resetSelectedItem();
-
+  // Remove document from tree:
+  Application::getApp()->docTree()->removeDocument(this);
   // Mark document for deletion:
   this->deleteLater();
 }

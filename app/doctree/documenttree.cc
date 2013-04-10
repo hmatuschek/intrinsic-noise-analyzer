@@ -1,7 +1,9 @@
 #include "documenttree.hh"
 #include "documentitem.hh"
+#include "analysesitem.hh"
 #include "taskitem.hh"
 #include "plotitem.hh"
+#include <QDebug>
 
 
 
@@ -41,10 +43,21 @@ DocumentTree::addDocument(DocumentItem *document)
 void
 DocumentTree::addTask(DocumentItem *document, TaskItem *task)
 {
-  emit this->layoutAboutToBeChanged();
   // Add task to document (document takes ownership of task):
+  QModelIndex analyses_index = document->indexOfAnalysesItem();
+  size_t num_analyses = document->numAnalyses();
+
+  qDebug() << "Add Task to: " << analyses_index.parent().row()
+           << " -> " << analyses_index.row()
+           << " -> " << num_analyses
+           << " @ " << analyses_index;
+
+  AnalysesItem *item = document->analysesItem();
+  analyses_index = getIndexOf(item);
+
+  beginInsertRows(analyses_index, num_analyses, num_analyses);
   document->addTask(task);
-  emit this->layoutChanged();
+  endInsertRows();
 }
 
 
@@ -68,7 +81,9 @@ DocumentTree::removeTask(TaskItem *task)
 void
 DocumentTree::removeDocument(DocumentItem *document)
 {
-  this->removeItem(document);
+  beginRemoveRows(QModelIndex(), document->getTreeRow(), document->getTreeRow());
+  removeChild(document);
+  endRemoveRows();
 }
 
 
@@ -106,16 +121,9 @@ DocumentTree::markForUpdate(TreeItem *item)
 QModelIndex
 DocumentTree::index(int row, int column, const QModelIndex &parent) const
 {
-  if (! this->hasIndex(row, column, parent)) {
-    return QModelIndex();
-  }
-
   const TreeItem *parentItem = 0;
-  if (! parent.isValid()) {
-    parentItem = this;
-  } else {
-    parentItem = static_cast<TreeItem *>(parent.internalPointer());
-  }
+  if (! parent.isValid()) { parentItem = this; }
+  else { parentItem = static_cast<TreeItem *>(parent.internalPointer()); }
 
   TreeItem *childItem = 0;
   if (0 != (childItem = parentItem->getTreeChild(row))) {
@@ -135,8 +143,9 @@ DocumentTree::parent(const QModelIndex &index) const
   TreeItem *childItem = static_cast<TreeItem*>(index.internalPointer());
   TreeItem *parentItem = childItem->getTreeParent();
 
-  if (parentItem == this)
+  if (parentItem == this) {
     return QModelIndex();
+  }
 
   return createIndex(parentItem->getTreeRow(), 0, (void *)parentItem);
 }
@@ -209,13 +218,13 @@ QModelIndex
 DocumentTree::getIndexOf(TreeItem *item) const
 {
   QModelIndex parent;
+  if (item == this) { return QModelIndex(); }
 
-  if (0 != item->getTreeParent())
-  {
+  if (0 != item->getTreeParent()) {
     parent = this->getIndexOf(item->getTreeParent());
   }
-
-  return this->index(item->getTreeRow(), 0, parent);
+  int row = item->getTreeRow();
+  return DocumentTree::index(row, 0, parent);
 }
 
 

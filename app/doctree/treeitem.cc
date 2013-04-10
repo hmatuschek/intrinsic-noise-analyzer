@@ -4,39 +4,34 @@
 
 
 TreeItem::TreeItem()
-  : _tree_parent(0)
+  : _tree_parent(0), _children()
 {
   // Pass...
 }
 
 
 TreeItem *
-TreeItem::getTreeChild(int row) const
-{
+TreeItem::getTreeChild(int row) const {
   return this->_children.value(row);
 }
 
 
 void
-TreeItem::setTreeParent(TreeItem *parent)
-{
+TreeItem::setTreeParent(TreeItem *parent) {
   this->_tree_parent = parent;
 }
 
 
 TreeItem *
-TreeItem::getTreeParent() const
-{
+TreeItem::getTreeParent() const {
   return this->_tree_parent;
 }
 
 
 int
-TreeItem::getTreeRow() const
-{
+TreeItem::getTreeRow() const {
   if (0 == this->_tree_parent)
-    return 0;
-
+    return -1;
   return this->_tree_parent->indexOfTreeChild(this);
 }
 
