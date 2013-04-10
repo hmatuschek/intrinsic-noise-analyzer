@@ -7,13 +7,14 @@
 #include <QFile>
 #include <QMessageBox>
 
+#include "ssaparamscanplot.hh"
 #include "../models/application.hh"
 #include "../doctree/documenttree.hh"
 #include "../doctree/plotitem.hh"
 #include "../views/genericplotdialog.hh"
-#include "ssaparamscanplot.hh"
 #include "../views/speciesselectiondialog.hh"
 #include "../plot/canvas.hh"
+#include "../plot/plotconfigdialog.hh"
 
 
 /* ********************************************************************************************* *
@@ -90,8 +91,9 @@ void
 SSAParamScanResultWidget::plotButtonPressed()
 {
 
-  // Get the task config
-  const SSAParamScanTask::Config &config = paramscan_task_wrapper->getParamScanTask()->getConfig();
+  // Get the task & config
+  SSAParamScanTask *task = this->paramscan_task_wrapper->getParamScanTask();
+  const SSAParamScanTask::Config &config = task->getConfig();
 
   // Ask user for species to plot.
   SpeciesSelectionDialog dialog(config.getModel());
@@ -102,21 +104,18 @@ SSAParamScanResultWidget::plotButtonPressed()
 
   // Add SSA variance plot
   Application::getApp()->docTree()->addPlot(
-            this->paramscan_task_wrapper,
-            new PlotItem(
-              new SSAParameterScanPlot(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
+        this->paramscan_task_wrapper,
+        new PlotItem(createSSAParameterScanPlotConfig(selected_species, task)));
 
   // Add SSA CV plot
   Application::getApp()->docTree()->addPlot(
-            this->paramscan_task_wrapper,
-            new PlotItem(
-              new SSAParameterScanCVPlot(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
+        this->paramscan_task_wrapper,
+        new PlotItem(createSSAParameterScanCVPlotConfig(selected_species, task)));
 
   // Add SSA Fano plot
   Application::getApp()->docTree()->addPlot(
-            this->paramscan_task_wrapper,
-            new PlotItem(
-              new SSAParameterScanFanoPlot(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
+        this->paramscan_task_wrapper,
+        new PlotItem(createSSAParameterScanFanoPlotConfig(selected_species, task)));
 
 
 }
@@ -125,23 +124,13 @@ void
 SSAParamScanResultWidget::customPlotButtonPressed()
 {
   // Show dialog
-  GenericPlotDialog dialog(&this->paramscan_task_wrapper->getParamScanTask()->getParameterScan());
-  if (QDialog::Rejected == dialog.exec()) { return; }
-
-  // Create plot figure with labels.
-  Plot::Figure *figure = new Plot::Figure(dialog.figureTitle());
-  figure->getAxis()->setXLabel(dialog.xLabel());
-  figure->getAxis()->setYLabel(dialog.yLabel());
-
-  // Iterate over all graphs of the configured plot:
-  for (size_t i=0; i<dialog.numGraphs(); i++) {
-    Plot::Graph *graph = dialog.graph(i).create(figure->getStyle(i));
-    figure->getAxis()->addGraph(graph);
-    figure->addToLegend(dialog.graph(i).label(), graph);
-  }
+  Plot::PlotConfig *config = new Plot::PlotConfig(
+        this->paramscan_task_wrapper->getParamScanTask()->getParameterScan());
+  Plot::PlotConfigDialog dialog(config);
+  if (QDialog::Accepted != dialog.exec()) { delete config; return; }
 
   // Add timeseries plot:
-  Application::getApp()->docTree()->addPlot(this->paramscan_task_wrapper, new PlotItem(figure));
+  Application::getApp()->docTree()->addPlot(this->paramscan_task_wrapper, new PlotItem(config));
 }
 
 void
@@ -300,12 +289,12 @@ SSAParamScanPreviewWidget::updatePlot()
   // Update plot
   switch(_plottype)
   {
-      case CONCENTRATION_PLOT:
-        _plot_canvas->setPlot(new SSAParameterScanPlot(selected_species, task)); break;
-      case FANO_PLOT:
-        _plot_canvas->setPlot(new SSAParameterScanFanoPlot(selected_species, task)); break;
-      case COEFVAR_PLOT:
-        _plot_canvas->setPlot(new SSAParameterScanCVPlot(selected_species, task)); break;
+  case CONCENTRATION_PLOT:
+    _plot_canvas->setPlot(createSSAParameterScanPlot(selected_species, task)); break;
+  case FANO_PLOT:
+    _plot_canvas->setPlot(createSSAParameterScanFanoPlot(selected_species, task)); break;
+  case COEFVAR_PLOT:
+    _plot_canvas->setPlot(createSSAParameterScanCVPlot(selected_species, task)); break;
   }
 
 }

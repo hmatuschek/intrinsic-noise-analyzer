@@ -58,4 +58,23 @@ public:
   explicit SSAParameterScanFanoPlot(const QStringList &selected_species, SSAParamScanTask *task, QObject *parent=0);
 };
 
+
+Plot::PlotConfig *
+createSSAParameterScanPlotConfig(const QStringList &selected_species, SSAParamScanTask *task);
+
+Plot::Figure *
+createSSAParameterScanPlot(const QStringList &selected_species, SSAParamScanTask *task);
+
+Plot::PlotConfig *
+createSSAParameterScanCVPlotConfig(const QStringList &selected_species, SSAParamScanTask *task);
+
+Plot::Figure *
+createSSAParameterScanCVPlot(const QStringList &selected_species, SSAParamScanTask *task);
+
+Plot::PlotConfig *
+createSSAParameterScanFanoPlotConfig(const QStringList &selected_species, SSAParamScanTask *task);
+
+Plot::Figure *
+createSSAParameterScanFanoPlot(const QStringList &selected_species, SSAParamScanTask *task);
+
 #endif
