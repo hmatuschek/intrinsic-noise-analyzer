@@ -58,19 +58,14 @@ void
 LegendItem::updateLayout()
 {
   // Reset positions
-  prepareGeometryChange();
   _line->setPos(0,0); _label->setPos(0,0);
 
   // Update positions:
-  _line->setPos(0, _label_size.height()/2);
+  _line->setPos(0, _label_size.height()/2+_line->pen().widthF()/2);
   _label->setPos(_sample_length+_space, 0);
 
   // update BB:
-  _bb = _line->boundingRect();
-  _bb.setX(0); _bb.setY(0);
-  _bb = _bb.united(QRectF(_sample_length+_space, 0, _label_size.width(), _label_size.height()));
-
-  //qDebug() << "Legend Item @ " << _bb;
+  _bb = QRectF(0, 0, _sample_length+_space+_label_size.width(), _label_size.height());
 }
 
 
@@ -113,10 +108,9 @@ Legend::addGraph(const QString &label, Graph *graph)
   }
 
   this->_items.append(item);
-  this->addToGroup(item);
-  item->setPos(x,y);
-  //qDebug() << "Created legend item @ " << x << ", " << y;
   item->updateLayout();
+  item->setPos(x,y);
+  this->addToGroup(item);
   this->updateBB();
 }
 
@@ -140,8 +134,7 @@ void
 Legend::updateLayout() {
   double x = this->_margin_left, y = this->_margin_top;
   for (QList<LegendItem *>::Iterator item=_items.begin(); item!=_items.end(); item++) {
-    //qDebug() << "Legend: move item to " << x << ", " << y;
-    (*item)->setPos(x,y); (*item)->updateLayout();
+    (*item)->updateLayout(); (*item)->setPos(x,y);
     y = (*item)->pos().y() + (*item)->boundingRect().y() + (*item)->boundingRect().height() + _line_spacing;
   }
   updateBB();
@@ -166,6 +159,6 @@ Legend::updateBB()
   this->_bb = box;
 
   // Update background
-  QPainterPath path; path.addRect(0,0, box.width(), box.height());
+  QPainterPath path; path.addRect(0,0, box.width()+_margin_left, box.height()+_margin_top);
   this->_background->setPath(path);
 }

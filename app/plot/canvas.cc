@@ -28,6 +28,8 @@ Canvas::setPlot(Plot::Figure *plot)
   this->_plot->setSceneRect(0,0, size.width(), size.height());
   // Signal plot to update axes:
   this->_plot->updateAxes();
+  // Signal plot to update axes:
+  this->_plot->updateAxes();
   // Update widget:
   this->update();
 }
@@ -71,6 +73,7 @@ Canvas::resizeEvent(QResizeEvent *event)
   this->_plot->setSceneRect(0,0, size.width(), size.height());
 
   // Signal plot to update axes:
+  this->_plot->updateAxes();
   this->_plot->updateAxes();
 }
 

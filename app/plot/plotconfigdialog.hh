@@ -188,6 +188,7 @@ private slots:
   void onSelectColor();
 
 protected:
+  /** Draws the button content. */
   virtual void paintEvent(QPaintEvent *event);
 
 private:

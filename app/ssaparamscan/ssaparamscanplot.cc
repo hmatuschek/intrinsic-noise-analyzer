@@ -308,7 +308,7 @@ createSSAParameterScanFanoPlotConfig(const QStringList &selected_species, SSAPar
     Plot::LineGraphConfig *fano_config = new Plot::LineGraphConfig(config->data(), i);
     fano_config->setLabel(data.getColumnName(mean_idx));
     fano_config->setXExpression("$0");
-    fano_config->setYExpression(QString("%1*$%2/$%3").arg(multiplier, var_idx, mean_idx));
+    fano_config->setYExpression(QString("%1*$%2/$%3").arg(multiplier).arg(var_idx).arg(mean_idx));
     config->addGraph(fano_config);
   }
 

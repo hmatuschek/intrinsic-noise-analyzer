@@ -103,7 +103,6 @@ PlotItem::showContextMenu(const QPoint &global_pos)
 void
 PlotItem::removePlot()
 {
-
   // Remove item from document tree:
   Application::getApp()->docTree()->removePlot(this);
 
