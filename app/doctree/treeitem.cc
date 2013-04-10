@@ -44,31 +44,28 @@ TreeItem::getTreeRow() const
 int
 TreeItem::indexOfTreeChild(const TreeItem *node) const
 {
-  return this->_children.indexOf(const_cast<TreeItem *>(node));
+  return _children.indexOf(const_cast<TreeItem *>(node));
 }
 
 
 int
-TreeItem::getTreeChildCount() const
-{
-  return this->_children.size();
+TreeItem::getTreeChildCount() const {
+  return _children.size();
 }
 
 
 void
-TreeItem::addChild(TreeItem *node)
-{
+TreeItem::addChild(TreeItem *node) {
   node->setTreeParent(this);
-  this->_children.append(node);
+  _children.append(node);
 }
 
 
 void
-TreeItem::removeChild(TreeItem *node)
-{
+TreeItem::removeChild(TreeItem *node) {
   if (! this->_children.removeOne(node)) {
     iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::ERROR);
-    message << "OOps can not remove tree-item " << node << " not in list?";
+    message << "Oops can not remove tree-item " << node << " not in list?";
     iNA::Utils::Logger::get().log(message);
   }
 }

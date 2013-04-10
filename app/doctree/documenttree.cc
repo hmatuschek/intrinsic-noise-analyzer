@@ -24,19 +24,17 @@ void
 DocumentTree::addDocument(DocumentItem *document)
 {
   // Check if model is allready in list of open models:
-  if (this->_children.contains(document))
-  {
-    document->deleteLater();
-    return;
+  if (this->_children.contains(document)) {
+    document->deleteLater(); return;
   }
 
   // Take ownership of document:
   document->setParent(this);
 
   // Add document to _children:
-  emit this->layoutAboutToBeChanged();
-  this->addChild(document);
-  emit this->layoutChanged();
+  beginInsertRows(QModelIndex(), getTreeChildCount(), getTreeChildCount());
+  addChild(document);
+  endInsertRows();
 }
 
 
@@ -83,20 +81,13 @@ DocumentTree::removeItem(TreeItem *item)
   TreeItem *parent_item = item->getTreeParent();
 
   // Remove from model:
-  emit this->layoutAboutToBeChanged();
   this->beginRemoveRows(parent_index, item->getTreeRow(), item->getTreeRow());
   parent_item->removeChild(item);
   this->endRemoveRows();
-  emit this->layoutChanged();
-
-  /// \todo This complete reset of the QAbstractItemModel should be replaced by a more
-  ///       selective event.
-  this->reset();
 }
 
 void
-DocumentTree::removePlot(PlotItem *plot)
-{
+DocumentTree::removePlot(PlotItem *plot) {
   this->removeItem(plot);
 }
 
@@ -115,8 +106,7 @@ DocumentTree::markForUpdate(TreeItem *item)
 QModelIndex
 DocumentTree::index(int row, int column, const QModelIndex &parent) const
 {
-  if (! this->hasIndex(row, column, parent))
-  {
+  if (! this->hasIndex(row, column, parent)) {
     return QModelIndex();
   }
 
@@ -128,9 +118,8 @@ DocumentTree::index(int row, int column, const QModelIndex &parent) const
   }
 
   TreeItem *childItem = 0;
-  if (0 != (childItem = parentItem->getTreeChild(row)))
-  {
-    return this->createIndex(row, column, childItem);
+  if (0 != (childItem = parentItem->getTreeChild(row))) {
+    return createIndex(row, column, (void *)childItem);
   }
 
   return QModelIndex();
@@ -149,15 +138,14 @@ DocumentTree::parent(const QModelIndex &index) const
   if (parentItem == this)
     return QModelIndex();
 
-  return createIndex(parentItem->getTreeRow(), 0, parentItem);
+  return createIndex(parentItem->getTreeRow(), 0, (void *)parentItem);
 }
 
 
 int
 DocumentTree::columnCount(const QModelIndex &parent) const
 {
-  if (parent.isValid())
-  {
+  if (parent.isValid()) {
     return static_cast<TreeItem *>(parent.internalPointer())->getTreeColumnCount();
   }
 
@@ -256,10 +244,8 @@ DocumentTree::getTreeColumnCount() const
 
 
 QVariant
-DocumentTree::getTreeData(int column) const
-{
-  if (0 == column)
-  {
+DocumentTree::getTreeData(int column) const {
+  if (0 == column) {
     return QVariant("Models");
   }
 

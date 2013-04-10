@@ -291,9 +291,7 @@ QMenu   *Application::recentModelsMenu() { return _recentModelsMenu; }
  * ******************************************************************************************** */
 void Application::onNewModel()
 {
-
-  iNA::Ast::Model *new_model = new iNA::Ast::Model(
-              "New_model", "New model");
+  iNA::Ast::Model *new_model = new iNA::Ast::Model("New_model", "New model");
   docTree()->addDocument(new DocumentItem(new_model));
 
 }
