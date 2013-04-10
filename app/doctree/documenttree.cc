@@ -23,17 +23,7 @@ DocumentTree::resetCompleteTree()
 
 
 void
-DocumentTree::addDocument(DocumentItem *document)
-{
-  // Check if model is allready in list of open models:
-  if (this->_children.contains(document)) {
-    document->deleteLater(); return;
-  }
-
-  // Take ownership of document:
-  document->setParent(this);
-
-  // Add document to _children:
+DocumentTree::addDocument(DocumentItem *document) {
   beginInsertRows(QModelIndex(), getTreeChildCount(), getTreeChildCount());
   addChild(document);
   endInsertRows();
@@ -41,20 +31,10 @@ DocumentTree::addDocument(DocumentItem *document)
 
 
 void
-DocumentTree::addTask(DocumentItem *document, TaskItem *task)
-{
+DocumentTree::addTask(DocumentItem *document, TaskItem *task) {
   // Add task to document (document takes ownership of task):
   QModelIndex analyses_index = document->indexOfAnalysesItem();
   size_t num_analyses = document->numAnalyses();
-
-  qDebug() << "Add Task to: " << analyses_index.parent().row()
-           << " -> " << analyses_index.row()
-           << " -> " << num_analyses
-           << " @ " << analyses_index;
-
-  AnalysesItem *item = document->analysesItem();
-  analyses_index = getIndexOf(item);
-
   beginInsertRows(analyses_index, num_analyses, num_analyses);
   document->addTask(task);
   endInsertRows();
@@ -62,25 +42,24 @@ DocumentTree::addTask(DocumentItem *document, TaskItem *task)
 
 
 void
-DocumentTree::addPlot(TaskItem *task, PlotItem *plot)
-{
-  emit this->layoutAboutToBeChanged();
+DocumentTree::addPlot(TaskItem *task, PlotItem *plot) {
   // Add plot to analysis:
+  QModelIndex task_index = getIndexOf(task);
+  size_t num_plots = task->getTreeChildCount();
+  beginInsertRows(task_index, num_plots, num_plots);
   task->addPlot(plot);
-  emit this->layoutChanged();
+  endInsertRows();
 }
 
 
 void
-DocumentTree::removeTask(TaskItem *task)
-{
+DocumentTree::removeTask(TaskItem *task) {
   this->removeItem(task);
 }
 
 
 void
-DocumentTree::removeDocument(DocumentItem *document)
-{
+DocumentTree::removeDocument(DocumentItem *document) {
   beginRemoveRows(QModelIndex(), document->getTreeRow(), document->getTreeRow());
   removeChild(document);
   endRemoveRows();
@@ -135,46 +114,30 @@ DocumentTree::index(int row, int column, const QModelIndex &parent) const
 
 
 QModelIndex
-DocumentTree::parent(const QModelIndex &index) const
-{
-  if (!index.isValid())
-    return QModelIndex();
-
+DocumentTree::parent(const QModelIndex &index) const {
+  if (!index.isValid()) { return QModelIndex(); }
   TreeItem *childItem = static_cast<TreeItem*>(index.internalPointer());
   TreeItem *parentItem = childItem->getTreeParent();
-
-  if (parentItem == this) {
-    return QModelIndex();
-  }
-
+  if (parentItem == this) { return QModelIndex(); }
   return createIndex(parentItem->getTreeRow(), 0, (void *)parentItem);
 }
 
 
 int
-DocumentTree::columnCount(const QModelIndex &parent) const
-{
+DocumentTree::columnCount(const QModelIndex &parent) const {
   if (parent.isValid()) {
     return static_cast<TreeItem *>(parent.internalPointer())->getTreeColumnCount();
   }
-
   return this->getTreeColumnCount();
 }
 
 
 int
-DocumentTree::rowCount(const QModelIndex &parent) const
-{
+DocumentTree::rowCount(const QModelIndex &parent) const {
   TreeItem const *parentItem = 0;
-
-  if (parent.column() > 0)
-    return 0;
-
-  if (!parent.isValid())
-    parentItem = this;
-  else
-    parentItem = static_cast<TreeItem*>(parent.internalPointer());
-
+  if (parent.column() > 0) { return 0; }
+  if (!parent.isValid()) { parentItem = this; }
+  else { parentItem = static_cast<TreeItem*>(parent.internalPointer()); }
   return parentItem->getTreeChildCount();
 }
 
@@ -233,31 +196,25 @@ DocumentTree::getIndexOf(TreeItem *item) const
  * Implementation of TreeItem interface
  * ********************************************************************************************* */
 TreeItem *
-DocumentTree::getTreeParent() const
-{
+DocumentTree::getTreeParent() const{
   return 0;
 }
 
 
 int
-DocumentTree::getTreeRow() const
-{
+DocumentTree::getTreeRow() const {
   return 0;
 }
 
 int
-DocumentTree::getTreeColumnCount() const
-{
+DocumentTree::getTreeColumnCount() const {
   return 1;
 }
 
 
 QVariant
 DocumentTree::getTreeData(int column) const {
-  if (0 == column) {
-    return QVariant("Models");
-  }
-
+  if (0 == column) { return QVariant(tr("Models")); }
   return QVariant();
 }
 

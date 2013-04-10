@@ -6,7 +6,7 @@
 using namespace iNA;
 
 AnalysesItem::AnalysesItem(QObject *parent) :
-  QObject(parent), DocumentTreeItem(), _itemLabel("Analyses")
+  QObject(parent), DocumentTreeItem(), _itemLabel(tr("Analyses"))
 {
   // pass...
 }
