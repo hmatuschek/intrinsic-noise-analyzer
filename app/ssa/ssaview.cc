@@ -6,13 +6,13 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
+#include "ssaplot.hh"
 #include "../models/application.hh"
 #include "../doctree/documenttree.hh"
 #include "../doctree/plotitem.hh"
-#include "../views/genericplotdialog.hh"
+#include "../plot/configuration.hh"
 #include "../plot/plotconfigdialog.hh"
 #include "../views/speciesselectiondialog.hh"
-#include "ssaplot.hh"
 
 
 

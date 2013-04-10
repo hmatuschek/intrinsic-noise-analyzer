@@ -11,8 +11,8 @@
 #include "../models/application.hh"
 #include "../doctree/documenttree.hh"
 #include "../doctree/plotitem.hh"
-#include "../views/genericplotdialog.hh"
 #include "../views/speciesselectiondialog.hh"
+#include "../plot/configuration.hh"
 #include "../plot/plotconfigdialog.hh"
 
 
