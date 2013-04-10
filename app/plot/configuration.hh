@@ -4,8 +4,9 @@
 #include <QFont>
 #include <QPen>
 #include "../models/timeseries.hh"
-#include "../models/plotformulaparser.hh"
+#include "formulaparser.hh"
 #include <ginac/ginac.h>
+#include <eval/bci/bci.hh>
 #include <parser/exception.hh>
 #include "mapping.hh"
 
@@ -278,6 +279,10 @@ public:
   const QPen &linePen() const;
 
 protected:
+  /** Internal used method to compile the stored expressions. */
+  virtual void compileExpressions();
+
+protected:
   /** Holds a weak reference to the data to be used for plotting. */
   Table *_data;
   /** Holds the list of column names. */
@@ -288,8 +293,16 @@ protected:
   std::map<GiNaC::symbol, size_t> _symbolTable;
   /** Holds the expression for the X values. */
   GiNaC::ex _xExpression;
+  /** Holds the compiled expression for the X values. */
+  iNA::Eval::bci::Code _xCode;
+  /** Holds the interpreter instance for the X values. */
+  iNA::Eval::bci::Interpreter<Eigen::VectorXd> _xInterpreter;
   /** Holds the expression for the Y values. */
   GiNaC::ex _yExpression;
+  /** Holds the compiled expression for the Y values. */
+  iNA::Eval::bci::Code _yCode;
+  /** Holds the interpreter instance for the Y values. */
+  iNA::Eval::bci::Interpreter<Eigen::VectorXd> _yInterpreter;
   /** Holds the pen used to draw the line graph. */
   QPen _linePen;
 };
@@ -327,8 +340,16 @@ public:
   const QPen &fillPen() const;
 
 protected:
+  /** Internal used method to compile plot formulas. */
+  virtual void compileExpressions();
+
+protected:
   /** Holds the variance expression. */
   GiNaC::ex _varExpression;
+  /** Holds the compiled expression for the var values. */
+  iNA::Eval::bci::Code _varCode;
+  /** Holds the interpreter instance for the var values. */
+  iNA::Eval::bci::Interpreter<Eigen::VectorXd> _varInterpreter;
   /** Holds the pen used to draw the confidence intervals. */
   QPen _fillPen;
 };

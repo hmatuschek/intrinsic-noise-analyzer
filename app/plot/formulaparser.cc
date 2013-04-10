@@ -1,4 +1,4 @@
-#include "plotformulaparser.hh"
+#include "formulaparser.hh"
 #include <utils/logger.hh>
 #include <eval/bci/bci.hh>
 #include <parser/expr/lexer.hh>
@@ -6,6 +6,7 @@
 #include <parser/expr/assembler.hh>
 
 using namespace iNA;
+using namespace Plot;
 
 
 /* ******************************************************************************************** *
@@ -93,28 +94,11 @@ PlotFormulaParser::Context::getColumnIdx(GiNaC::symbol symbol) const
   return item->second;
 }
 
-double
-PlotFormulaParser::Context::operator ()(size_t row, GiNaC::ex expression) const
-{
-  // Create compiler, code and interpreter
-  Eval::bci::Compiler<Eigen::VectorXd> compiler(_symbol_table);
-  Eval::bci::Code code; compiler.setCode(&code);
-  Eval::bci::Interpreter<Eigen::VectorXd> interpreter;
-  // Compile expression:
-  try { compiler.compileExpressionAndStore(expression, 0); }
-  catch (Exception &err) {
-    Utils::Message message = LOG_MESSAGE(Utils::Message::ERROR);
-    message << "Can not compile expression \""
-            << expression << "\" to byte code: " << err.what();
-    Utils::Logger::get().log(message);
-    return std::numeric_limits<double>::quiet_NaN();
-  }
-  compiler.finalize(0); interpreter.setCode(&code);
-  // Evaluate expression
-  Eigen::VectorXd output(1);
-  interpreter.run(_table->getRow(row), output);
-  return output(0);
+const std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> &
+PlotFormulaParser::Context::symbolTable() const {
+  return _symbol_table;
 }
+
 
 
 /* ******************************************************************************************** *

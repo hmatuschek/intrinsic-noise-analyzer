@@ -8,11 +8,11 @@ SET(ina_app_base_HEADERS )
 SET(ina_app_plot_SOURCES plot/axisticks.cc plot/extent.cc plot/configuration.cc
     plot/canvas.cc plot/axis.cc plot/graph.cc plot/legend.cc
     plot/variancelinegraph.cc plot/mapping.cc plot/figure.cc plot/linegraph.cc plot/savedialog.cc
-    plot/boxplot.cc plot/plotrangedialog.cc plot/plotconfigdialog.cc)
+    plot/boxplot.cc plot/plotrangedialog.cc plot/plotconfigdialog.cc plot/formulaparser.cc)
 SET(ina_app_plot_HEADERS
     plot/canvas.hh plot/axis.hh plot/graph.hh plot/legend.hh
     plot/variancelinegraph.hh plot/mapping.hh plot/figure.hh plot/linegraph.hh plot/savedialog.hh
-    plot/boxplot.hh plot/plotrangedialog.hh plot/plotconfigdialog.hh)
+    plot/boxplot.hh plot/plotrangedialog.hh plot/plotconfigdialog.hh plot/formulaparser.hh)
 
 SET(ina_app_sse_SOURCES sse/ssetaskconfig.cc sse/iosplot.cc sse/lnaplot.cc sse/replot.cc
     sse/ssewizard.cc sse/iostask.cc sse/iostaskwrapper.cc sse/iostaskview.cc
@@ -70,7 +70,7 @@ SET(ina_app_models_SOURCES models/configuration.cc
     models/generaltaskconfig.cc models/compartmentdelegate.cc models/variableruledelegate.cc
     models/variableruledata.cc models/referencecounter.cc models/scopeitemmodel.cc
     models/expressiondelegate.cc models/sbmlshhighlighter.cc models/reactionlist.cc
-    models/pixmapdelegate.cc models/plotformulaparser.cc models/versioncheck.cc models/task.cc
+    models/pixmapdelegate.cc models/versioncheck.cc models/task.cc
     models/timeseries.cc models/application.cc models/logmessagemodel.cc)
 SET(ina_app_models_HEADERS
     models/parameterlist.hh models/specieslist.hh models/compartmentlist.hh
@@ -78,7 +78,7 @@ SET(ina_app_models_HEADERS
     models/generaltaskconfig.hh models/compartmentdelegate.hh models/variableruledelegate.hh
     models/variableruledata.hh models/referencecounter.hh models/scopeitemmodel.hh
     models/expressiondelegate.hh models/sbmlshhighlighter.hh models/reactionlist.hh
-    models/pixmapdelegate.hh models/plotformulaparser.hh models/versioncheck.hh models/task.hh
+    models/pixmapdelegate.hh models/versioncheck.hh models/task.hh
     models/timeseries.hh models/application.hh models/logmessagemodel.hh)
 
 SET(ina_app_views_SOURCES

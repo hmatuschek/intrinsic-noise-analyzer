@@ -1,6 +1,6 @@
 #include "configuration.hh"
 #include "../models/application.hh"
-#include "../models/plotformulaparser.hh"
+#include "formulaparser.hh"
 #include "graph.hh"
 #include "figure.hh"
 #include "linegraph.hh"
@@ -368,7 +368,8 @@ QList<QColor> AbstractGraphConfig::defaultColors = QList<QColor>()
  * ********************************************************************************************* */
 LineGraphConfig::LineGraphConfig(Table *data, size_t colorIdx)
   : AbstractGraphConfig(), _data(data), _columnNames(), _parserContext(_data), _symbolTable(),
-    _xExpression(0), _yExpression(0), _linePen()
+    _xExpression(0), _xCode(), _xInterpreter(),
+    _yExpression(0), _yCode(), _yInterpreter(), _linePen()
 {
   for (size_t i=0; i<_data->getNumColumns(); i++) {
     _columnNames.append(_data->getColumnName(i));
@@ -383,6 +384,8 @@ LineGraphConfig::LineGraphConfig(Table *data, size_t colorIdx)
   _linePen.setBrush(QBrush(defaultColors[(colorIdx%defaultColors.size())]));
   _linePen.setWidth(2); _linePen.setCosmetic(true);
   _linePen.setJoinStyle(Qt::MiterJoin); _linePen.setCapStyle(Qt::SquareCap);
+
+  LineGraphConfig::compileExpressions();
 }
 
 LineGraphConfig::LineGraphConfig(const LineGraphConfig &other, Table *data)
@@ -400,10 +403,24 @@ LineGraphConfig::LineGraphConfig(const LineGraphConfig &other, Table *data)
   buffer.str("");
   PlotFormulaParser::serialize(other._yExpression, buffer, other._parserContext);
   _yExpression = PlotFormulaParser::parse(buffer.str().c_str(), _parserContext);
+  // Compile plot formulas:
+  LineGraphConfig::compileExpressions();
 }
 
 LineGraphConfig::~LineGraphConfig() {
   // pass...
+}
+
+void
+LineGraphConfig::compileExpressions() {
+  // Clear code instances:
+  _xCode.clear(); _yCode.clear();
+  // Compile expressions:
+  iNA::Eval::bci::Compiler<Eigen::VectorXd> compiler(_parserContext.symbolTable());
+  compiler.setCode(&_xCode); compiler.compileExpressionAndStore(_xExpression, 0);
+  compiler.finalize(0); _xInterpreter.setCode(&_xCode);
+  compiler.setCode(&_yCode); compiler.compileExpressionAndStore(_yExpression, 0);
+  compiler.finalize(0); _yInterpreter.setCode(&_yCode);
 }
 
 AbstractGraphConfig *
@@ -430,6 +447,7 @@ LineGraphConfig::xExpression() {
 void
 LineGraphConfig::setXExpression(const QString &expression) throw (iNA::Parser::ParserError) {
   _xExpression = PlotFormulaParser::parse(expression, _parserContext);
+  compileExpressions();
 }
 
 QString
@@ -441,6 +459,7 @@ LineGraphConfig::yExpression() {
 void
 LineGraphConfig::setYExpression(const QString &expression) throw (iNA::Parser::ParserError) {
   _yExpression = PlotFormulaParser::parse(expression, _parserContext);
+  compileExpressions();
 }
 
 Graph *
@@ -449,11 +468,12 @@ LineGraphConfig::createGraph() {
   LineGraph *graph = new LineGraph(style);
 
   /// @bug This implementation is f***ing slow!!!
-
+  Eigen::VectorXd output(1);
   // Evaluate y & x expressions on data:
+  double x,y;
   for (size_t i=0; i<_data->getNumRows(); i++) {
-    double x = _parserContext(i, _xExpression);
-    double y = _parserContext(i, _yExpression);
+    _xInterpreter.run(_data->getRow(i), output); x = output(0);
+    _yInterpreter.run(_data->getRow(i), output); y = output(0);
     graph->addPoint(x,y);
   }
   graph->commit();
@@ -488,6 +508,7 @@ VarianceLineGraphConfig::VarianceLineGraphConfig(Table *data, size_t colorIdx)
 {
   QColor fill_color = _linePen.brush().color(); fill_color.setAlpha(32);
   _fillPen.setBrush(QBrush(fill_color));
+  VarianceLineGraphConfig::compileExpressions();
 }
 
 VarianceLineGraphConfig::VarianceLineGraphConfig(const VarianceLineGraphConfig &other, Table *data)
@@ -496,10 +517,21 @@ VarianceLineGraphConfig::VarianceLineGraphConfig(const VarianceLineGraphConfig &
   std::stringstream buffer;
   PlotFormulaParser::serialize(other._varExpression, buffer, other._parserContext);
   _varExpression = PlotFormulaParser::parse(buffer.str().c_str(), _parserContext);
+  VarianceLineGraphConfig::compileExpressions();
 }
 
 VarianceLineGraphConfig::~VarianceLineGraphConfig() {
   // Pass...
+}
+
+void
+VarianceLineGraphConfig::compileExpressions() {
+  // First, compile expressions of line graph:
+  LineGraphConfig::compileExpressions();
+  _varCode.clear();
+  iNA::Eval::bci::Compiler<Eigen::VectorXd> compiler(_parserContext.symbolTable());
+  compiler.setCode(&_varCode); compiler.compileExpressionAndStore(_varExpression, 0);
+  compiler.finalize(0); _varInterpreter.setCode(&_varCode);
 }
 
 AbstractGraphConfig *
@@ -512,13 +544,12 @@ VarianceLineGraphConfig::createGraph() {
   GraphStyle style(_linePen.style(), _linePen.brush().color(), _linePen.width());
   VarianceLineGraph *graph = new VarianceLineGraph(style);
 
-  /// @bug This implementation is f***ing slow!!!
-
-  // Evaluate y & x expressions on data:
+  // Evaluate y, x and var expressions on data:
+  double x,y,v; Eigen::VectorXd output(1);
   for (size_t i=0; i<_data->getNumRows(); i++) {
-    double x = _parserContext(i, _xExpression);
-    double y = _parserContext(i, _yExpression);
-    double v = _parserContext(i, _varExpression);
+    _xInterpreter.run(_data->getRow(i), output); x = output(0);
+    _yInterpreter.run(_data->getRow(i), output); y = output(0);
+    _varInterpreter.run(_data->getRow(i), output); v = output(0);
     graph->addPoint(x,y, std::sqrt(v));
   }
   graph->commit();
@@ -536,6 +567,7 @@ VarianceLineGraphConfig::varExpression() {
 void
 VarianceLineGraphConfig::setVarExpression(const QString &expression) throw (iNA::Parser::ParserError) {
   _varExpression = PlotFormulaParser::parse(expression, _parserContext);
+  this->compileExpressions();
 }
 
 const QColor &

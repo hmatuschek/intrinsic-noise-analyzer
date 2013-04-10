@@ -6,8 +6,9 @@
 #include <parser/lexer.hh>
 #include <parser/parser.hh>
 #include <parser/production.hh>
-#include "timeseries.hh"
+#include "../models/timeseries.hh"
 
+namespace Plot {
 
 /** Implements a simple parser to parse formula expressions for data tables. */
 class PlotFormulaParser : public QObject
@@ -30,9 +31,8 @@ public:
     GiNaC::symbol getColumnSymbol(size_t column) const;
     /** Resolves the given symbol to the corresponding column index. */
     size_t getColumnIdx(GiNaC::symbol symbol) const;
-    /** Evaluates the given expression (plot formula) for the given row of the table given to the
-     * constructor. */
-    double operator()(size_t row, GiNaC::ex expression) const;
+    /** Returns the symbol->column index table. */
+    const std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> &symbolTable() const;
 
   private:
     /** Holds the data table. */
@@ -52,5 +52,7 @@ public:
   /** Serializes a given plot formula into its textual representation. */
   static void serialize(GiNaC::ex formula, std::ostream &stream, const Context &context);
 };
+
+}
 
 #endif // PLOTFORMULAPARSER_HH
