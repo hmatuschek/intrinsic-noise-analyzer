@@ -32,7 +32,7 @@ public:
 /* ******************************************************************************************** *
  * Implementation of PlotFormulaParser::Context
  * ******************************************************************************************** */
-PlotFormulaParser::Context::Context(Table *table)
+FormulaParser::Context::Context(Table *table)
   : _table(table)
 {
   // Assign for each column a symbol.
@@ -43,7 +43,7 @@ PlotFormulaParser::Context::Context(Table *table)
   }
 }
 
-PlotFormulaParser::Context::Context(const Context &other)
+FormulaParser::Context::Context(const Context &other)
   : _table(other._table), _symbols(other._symbols), _symbol_table(other._symbol_table)
 {
   // pass...
@@ -51,7 +51,7 @@ PlotFormulaParser::Context::Context(const Context &other)
 
 
 GiNaC::symbol
-PlotFormulaParser::Context::resolve(const std::string &identifier) {
+FormulaParser::Context::resolve(const std::string &identifier) {
   if (0 == identifier.size()) {
     SymbolError err; err << "Can not resolve symbol '" << identifier << "'."; throw err;
   }
@@ -67,35 +67,35 @@ PlotFormulaParser::Context::resolve(const std::string &identifier) {
 }
 
 std::string
-PlotFormulaParser::Context::identifier(GiNaC::symbol symbol) const {
+FormulaParser::Context::identifier(GiNaC::symbol symbol) const {
   size_t column = getColumnIdx(symbol);
   std::stringstream buffer; buffer << "$" << column;
   return buffer.str();
 }
 
 GiNaC::symbol
-PlotFormulaParser::Context::getColumnSymbol(size_t column) const {
+FormulaParser::Context::getColumnSymbol(size_t column) const {
   return _symbols[column];
 }
 
 size_t
-PlotFormulaParser::Context::getColumnIdx(GiNaC::symbol symbol) const
+FormulaParser::Context::getColumnIdx(GiNaC::symbol symbol) const
 {
   // Search for symbol in map
   std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less>::const_iterator item
       = _symbol_table.find(symbol);
+
   // If not found
   if (_symbol_table.end() == item) {
-    SymbolError err;
-    err << "Can not resolve symbol " << symbol << ": Unknown symbol.";
-    throw err;
+    SymbolError err; err << "Can not resolve symbol " << symbol << ": Unknown symbol."; throw err;
   }
+
   // otherwise, return index
   return item->second;
 }
 
 const std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> &
-PlotFormulaParser::Context::symbolTable() const {
+FormulaParser::Context::symbolTable() const {
   return _symbol_table;
 }
 
@@ -105,7 +105,7 @@ PlotFormulaParser::Context::symbolTable() const {
  * Implementation of PlotFormulaParser
  * ******************************************************************************************** */
 bool
-PlotFormulaParser::check(const QString &formula, Context &context)
+FormulaParser::check(const QString &formula, Context &context)
 {
   std::stringstream buffer; buffer << formula.toStdString();
 
@@ -144,7 +144,7 @@ PlotFormulaParser::check(const QString &formula, Context &context)
 
 
 GiNaC::ex
-PlotFormulaParser::parse(const QString &formula, Context &context)
+FormulaParser::parse(const QString &formula, Context &context)
 {
   std::stringstream buffer; buffer << formula.toStdString();
 
@@ -172,6 +172,6 @@ PlotFormulaParser::parse(const QString &formula, Context &context)
 
 
 void
-PlotFormulaParser::serialize(GiNaC::ex formula, std::ostream &stream, const Context &context) {
+FormulaParser::serialize(GiNaC::ex formula, std::ostream &stream, const Context &context) {
   iNA::Parser::Expr::serializeExpression(formula, stream, context);
 }

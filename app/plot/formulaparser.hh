@@ -11,7 +11,7 @@
 namespace Plot {
 
 /** Implements a simple parser to parse formula expressions for data tables. */
-class PlotFormulaParser : public QObject
+class FormulaParser : public QObject
 {
   Q_OBJECT
 

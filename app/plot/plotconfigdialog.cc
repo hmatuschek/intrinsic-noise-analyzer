@@ -17,6 +17,7 @@
 #include <QColorDialog>
 #include <QTabWidget>
 #include <QPaintEvent>
+#include <QMessageBox>
 
 using namespace Plot;
 
@@ -397,7 +398,15 @@ PlotConfigDialog::onMaxYRangePolicyChanged(bool fixed) {
 
 void
 PlotConfigDialog::onAccepted() {
-  if (0 == _graph_list.rowCount(QModelIndex())) { return; }
+  // Ask user if he wants to create an empty plot.
+  if (0 == _graph_list.rowCount(QModelIndex())) {
+    QMessageBox::StandardButton button = QMessageBox::question(
+          0, tr("Create empty plot?"),
+          tr("There are no graphs defined for this plot. "
+             "Do you like to create an empty plot?"),
+          QMessageBox::Yes|QMessageBox::Abort, QMessageBox::Abort);
+    if (button != QMessageBox::Yes) { return; }
+  }
   accept();
 }
 
@@ -486,10 +495,12 @@ ColorButton::onSelectColor() {
 
 void
 ColorButton::paintEvent(QPaintEvent *event) {
+  // Draw button
   QPushButton::paintEvent(event);
+  // Draw upon it...
+  double w=width(), h=height();
   QPainter painter(this);
   painter.save();
-  double w = width(), h=height();
   painter.setPen(_color);
   painter.setBrush(QBrush(_color));
   painter.drawRect(8,8,w-16,h-16);

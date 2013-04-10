@@ -398,11 +398,11 @@ LineGraphConfig::LineGraphConfig(const LineGraphConfig &other, Table *data)
   }
   // Serialize & parse plot formulas:
   std::stringstream buffer;
-  PlotFormulaParser::serialize(other._xExpression, buffer, other._parserContext);
-  _xExpression = PlotFormulaParser::parse(buffer.str().c_str(), _parserContext);
+  FormulaParser::serialize(other._xExpression, buffer, other._parserContext);
+  _xExpression = FormulaParser::parse(buffer.str().c_str(), _parserContext);
   buffer.str("");
-  PlotFormulaParser::serialize(other._yExpression, buffer, other._parserContext);
-  _yExpression = PlotFormulaParser::parse(buffer.str().c_str(), _parserContext);
+  FormulaParser::serialize(other._yExpression, buffer, other._parserContext);
+  _yExpression = FormulaParser::parse(buffer.str().c_str(), _parserContext);
   // Compile plot formulas:
   LineGraphConfig::compileExpressions();
 }
@@ -435,30 +435,30 @@ LineGraphConfig::columnNames() const {
 
 bool
 LineGraphConfig::checkExpression(const QString &expression) {
-  return PlotFormulaParser::check(expression, _parserContext);
+  return FormulaParser::check(expression, _parserContext);
 }
 
 QString
 LineGraphConfig::xExpression() {
-  std::stringstream buffer; PlotFormulaParser::serialize(_xExpression, buffer, _parserContext);
+  std::stringstream buffer; FormulaParser::serialize(_xExpression, buffer, _parserContext);
   return QString(buffer.str().c_str());
 }
 
 void
 LineGraphConfig::setXExpression(const QString &expression) throw (iNA::Parser::ParserError) {
-  _xExpression = PlotFormulaParser::parse(expression, _parserContext);
+  _xExpression = FormulaParser::parse(expression, _parserContext);
   compileExpressions();
 }
 
 QString
 LineGraphConfig::yExpression() {
-  std::stringstream buffer; PlotFormulaParser::serialize(_yExpression, buffer, _parserContext);
+  std::stringstream buffer; FormulaParser::serialize(_yExpression, buffer, _parserContext);
   return QString(buffer.str().c_str());
 }
 
 void
 LineGraphConfig::setYExpression(const QString &expression) throw (iNA::Parser::ParserError) {
-  _yExpression = PlotFormulaParser::parse(expression, _parserContext);
+  _yExpression = FormulaParser::parse(expression, _parserContext);
   compileExpressions();
 }
 
@@ -515,8 +515,8 @@ VarianceLineGraphConfig::VarianceLineGraphConfig(const VarianceLineGraphConfig &
   : LineGraphConfig(other, data), _varExpression(0), _fillPen(other._fillPen)
 {
   std::stringstream buffer;
-  PlotFormulaParser::serialize(other._varExpression, buffer, other._parserContext);
-  _varExpression = PlotFormulaParser::parse(buffer.str().c_str(), _parserContext);
+  FormulaParser::serialize(other._varExpression, buffer, other._parserContext);
+  _varExpression = FormulaParser::parse(buffer.str().c_str(), _parserContext);
   VarianceLineGraphConfig::compileExpressions();
 }
 
@@ -560,13 +560,13 @@ VarianceLineGraphConfig::createGraph() {
 
 QString
 VarianceLineGraphConfig::varExpression() {
-  std::stringstream buffer; PlotFormulaParser::serialize(_varExpression, buffer, _parserContext);
+  std::stringstream buffer; FormulaParser::serialize(_varExpression, buffer, _parserContext);
   return QString(buffer.str().c_str());
 }
 
 void
 VarianceLineGraphConfig::setVarExpression(const QString &expression) throw (iNA::Parser::ParserError) {
-  _varExpression = PlotFormulaParser::parse(expression, _parserContext);
+  _varExpression = FormulaParser::parse(expression, _parserContext);
   this->compileExpressions();
 }
 

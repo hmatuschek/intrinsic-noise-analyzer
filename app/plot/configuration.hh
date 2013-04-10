@@ -288,7 +288,7 @@ protected:
   /** Holds the list of column names. */
   QStringList _columnNames;
   /** Holds the parser context for plot formulas. */
-  PlotFormulaParser::Context _parserContext;
+  FormulaParser::Context _parserContext;
   /** Maps the column symbols back to column indices. */
   std::map<GiNaC::symbol, size_t> _symbolTable;
   /** Holds the expression for the X values. */
