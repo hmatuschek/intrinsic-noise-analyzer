@@ -1,4 +1,6 @@
 #include "reactionsitem.hh"
+#include "../models/application.hh"
+#include "../doctree/documenttree.hh"
 #include "../views/reactionlistview.hh"
 
 

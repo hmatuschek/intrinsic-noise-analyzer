@@ -10,7 +10,7 @@
 
 
 ReactionListView::ReactionListView(ReactionsItem *reactions, QWidget *parent)
-  : QWidget(parent), _reactions(reactions->reactionList())
+  : QWidget(parent), _reactions(reactions->reactionList()), _reactions_item(reactions)
 {
   // Basic layout
   setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
@@ -36,8 +36,8 @@ ReactionListView::ReactionListView(ReactionsItem *reactions, QWidget *parent)
   // Assemble list view:
   _reactionList = new QTableView();
   _reactionList->setModel(_reactions);
-  _reactionList->horizontalHeader()->setStretchLastSection(true);
   _reactionList->setSelectionMode(QAbstractItemView::SingleSelection);
+  _reactionList->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 
   QHBoxLayout *header_layout = new QHBoxLayout();
   header_layout->addWidget(_newReacButton, 0, Qt::AlignLeft);
@@ -68,6 +68,7 @@ ReactionListView::onNewReaction()
 
   // Add reaction and new species to the model
   editor.commitReactionScope();
+
   // Update document tree
   Application::getApp()->docTree()->resetCompleteTree();
 }

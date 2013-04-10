@@ -15,8 +15,7 @@ DocumentTree::DocumentTree(QObject *parent)
 
 
 void
-DocumentTree::resetCompleteTree()
-{
+DocumentTree::resetCompleteTree() {
   resetTree();
   this->reset();
 }
@@ -86,8 +85,7 @@ DocumentTree::removePlot(PlotItem *plot) {
 }
 
 void
-DocumentTree::markForUpdate(TreeItem *item)
-{
+DocumentTree::markForUpdate(TreeItem *item) {
   QModelIndex idx = this->getIndexOf(item);
   emit this->dataChanged(idx, idx);
 }

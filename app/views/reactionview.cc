@@ -6,6 +6,7 @@
 #include <QGraphicsView>
 #include <QGraphicsItem>
 #include <QTableView>
+#include <QHeaderView>
 #include <QMessageBox>
 
 #include "reactioneditor.hh"
@@ -58,6 +59,7 @@ ReactionView::ReactionView(ReactionItem *reaction, QWidget *parent) :
   _paramTable->setItemDelegateForColumn(1, new PixmapDelegate(_paramTable));
   _paramTable->setItemDelegateForColumn(
         2, new ExpressionDelegate(_reaction->localParameters()->kineticLaw(), _paramTable));
+  _paramTable->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 
   // Do layout
   QHBoxLayout *head_layout = new QHBoxLayout();
@@ -198,7 +200,8 @@ ReactionView::onReactionEditing()
   ReactionEditor editor(((ModelItem *)(_reaction->parent()->parent()))->getModel(), _reaction->getReaction());
   if (QDialog::Rejected == editor.exec()) { return; }
 
-  // Add new reaction and new species to the model
+  // Update reaction, unfortunately, the reaction gets removed and added again, such that
+  // at least the reaction node needs to be resetted.
   editor.commitReactionScope();
 
   // Update complete view (reaction equation view and paramter list):
@@ -208,6 +211,7 @@ ReactionView::onReactionEditing()
   _reaction->localParameters()->updateCompleteTable();
   // Update reaction label:
   _label->setText(tr("Reaction") + " " + _reaction->getDisplayName());
+
   // Update tree model
   Application::getApp()->docTree()->resetCompleteTree();
 }
