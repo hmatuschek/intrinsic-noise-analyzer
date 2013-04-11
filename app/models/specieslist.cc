@@ -164,10 +164,10 @@ SpeciesList::_getName(iNA::Ast::Species *species, int role) const
   if ( (Qt::DisplayRole != role) && (Qt::EditRole != role) ) { return QVariant(); }
 
   if (Qt::EditRole == role) {
-    return species->getName().c_str();
+    return QString::fromStdString(species->getName());
   } else {
     if (species->hasName()) {
-      return TinyTex::toPixmap(species->getName().c_str());
+      return TinyTex::toPixmap(species->getName());
     } else {
       return TinyTex::toPixmap("<none>");
     }

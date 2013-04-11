@@ -77,7 +77,7 @@ LNAResultWidget::_plotButtonPressed() {
   dialog.setTitle(tr("Select the species to plot."));
 
   if (QDialog::Rejected == dialog.exec()) { return; }
-  QStringList selected_species = dialog.getSelectedSpecies();
+  QStringList selected_species = dialog.selectedSpecies();
 
   // Add timeseries plot:
   Application::getApp()->docTree()->addPlot(

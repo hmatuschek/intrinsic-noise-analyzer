@@ -81,7 +81,7 @@ SSAResultWidget::showPlot()
   dialog.setWindowTitle(tr("SSA quick plot"));
   dialog.setTitle(tr("Select the species to plot."));
   if (QDialog::Accepted != dialog.exec()) { return; }
-  QStringList selected_species = dialog.getSelectedSpecies();
+  QStringList selected_species = dialog.selectedSpecies();
 
   // Simply construct and add plot to task:
   Application::getApp()->docTree()->addPlot(

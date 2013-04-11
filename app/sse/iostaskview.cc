@@ -79,7 +79,7 @@ IOSResultWidget::_onPlotButtonPressed()
   dialog.setWindowTitle(tr("IOS quick plot"));
   dialog.setTitle(tr("Select the species to plot."));
   if (QDialog::Accepted != dialog.exec()) { return; }
-  QStringList selected_species = dialog.getSelectedSpecies();
+  QStringList selected_species = dialog.selectedSpecies();
 
   Application::getApp()->docTree()->addPlot(
         this->_ios_task_wrapper,

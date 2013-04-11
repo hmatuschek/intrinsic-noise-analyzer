@@ -79,7 +79,7 @@ REResultWidget::quickPlotButtonPressed() {
   re_dialog.setTitle(tr("Select the species to plot."));
   // Exec & get selected species
   if (QDialog::Rejected == re_dialog.exec()) { return; }
-  QStringList selected_species = re_dialog.getSelectedSpecies();
+  QStringList selected_species = re_dialog.selectedSpecies();
   // Create and add timeseries plot:
   Plot::PlotConfig *config = createRETimeSeriesPlotConfig(
         selected_species, re_task_wrapper->getRETask());

@@ -4,7 +4,33 @@
 #include <QDialog>
 #include <QListWidget>
 #include <QLabel>
-#include <ast/model.hh>
+
+
+// Forward declarations:
+namespace iNA { namespace Ast { class Model; } }
+class SpeciesSelectionModel;
+
+/** A simple widget that constist of a drop-down selection and a list view. */
+class SpeciesSelectionWidget: public QWidget
+{
+  Q_OBJECT
+
+public:
+  /** Constructs the species selection widget. */
+  SpeciesSelectionWidget(iNA::Ast::Model *model, QWidget *parent=0);
+
+  /** Returns the selected species. */
+  QStringList selectedSpecies();
+
+signals:
+  /** Signals that the species selection has changed. */
+  void selectionChanged();
+
+private:
+  /** The selection model. */
+  SpeciesSelectionModel *_model;
+};
+
 
 /** Simple plot to select some species from the model.
  * Mostly used by the quick plots. */
@@ -17,7 +43,7 @@ public:
   explicit SpeciesSelectionDialog(iNA::Ast::Model *model, QWidget *parent = 0);
   
   /** Retunrs the list of selected species. */
-  QList<QString> getSelectedSpecies() const;
+  QList<QString> selectedSpecies() const;
 
   /** Set title text. */
   void setTitle(const QString &text);
@@ -25,20 +51,12 @@ public:
 private slots:
   /** Calcback on "ok", checks if the configuration is valid. */
   void _onAccepted();
-  /** Callback to select all species. */
-  void _onSelectAllSpecies();
-  /** Callback to select no species. */
-  void _onSelectNoSpecies();
-  /** Callback to invert selection. */
-  void _onInvertSelection();
 
 private:
-  /** A weak reference to the model to create list of species. */
-  iNA::Ast::Model *_model;
   /** A label placed over the species list. */
   QLabel *_head_label;
-  /** The list widget for species selection. */
-  QListWidget *_species_list;
+  /** The selection list. */
+  SpeciesSelectionWidget *_species_list;
 };
 
 #endif

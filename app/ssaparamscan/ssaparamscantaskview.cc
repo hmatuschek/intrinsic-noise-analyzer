@@ -99,7 +99,7 @@ SSAParamScanResultWidget::plotButtonPressed()
   dialog.setWindowTitle(tr("Parameter scan quick plot"));
   dialog.setTitle(tr("Select the species to plot."));
   if (QDialog::Accepted != dialog.exec()) { return; }
-  QStringList selected_species = dialog.getSelectedSpecies();
+  QStringList selected_species = dialog.selectedSpecies();
 
   // Add SSA variance plot
   Application::getApp()->docTree()->addPlot(
