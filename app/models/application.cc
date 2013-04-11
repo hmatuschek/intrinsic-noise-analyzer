@@ -300,11 +300,11 @@ void Application::onNewModel()
 void Application::onImportModel()
 {
   // Show a file-dialog for files:
-  QString fileName = QFileDialog::getOpenFileName(
-        0, tr("Import model"), "",
-        tr("All Models (*.xml *.sbml *.mod *.sbmlsh);;SBML Models (*.xml *.sbml);;SBML-sh Models (*.mod *.sbmlsh);;All Files (*.*"));
+  QString fileFilters = tr(
+        "All Models (*.xml *.sbml *.mod *.sbmlsh);;SBML Models (*.xml *.sbml);;"
+        "SBML-sh Models (*.mod *.sbmlsh);;All Files (*.*");
+  QString fileName = QFileDialog::getOpenFileName(0, tr("Import model"), "", fileFilters);
   if (0 == fileName.size()) { return; }
-
   onImportModel(fileName);
 }
 
@@ -314,8 +314,9 @@ void Application::onImportModel(const QString &fileName, bool anonymous)
   QFileInfo info(fileName);
   // Check if file is readable:
   if (! info.isReadable()) {
-    QMessageBox::critical(0, tr("Can not import model"),
-                          tr("Can not import model from file %1: File not readable.").arg(info.fileName()));
+    QMessageBox::critical(
+          0, tr("Can not import model"),
+          tr("Can not import model from file %1: File not readable.").arg(info.fileName()));
     return;
   }
 
@@ -343,8 +344,7 @@ void Application::onImportModel(const QString &fileName, bool anonymous)
       return;
     }
   } catch (iNA::Parser::ParserError &err) {
-    QMessageBox::warning(
-          0, tr("Can not open model"), err.what());
+    QMessageBox::warning(0, tr("Can not open model"), err.what());
     return;
   } catch (iNA::Exception &err) {
     QMessageBox::warning(0, tr("Can not open model"), err.what());
