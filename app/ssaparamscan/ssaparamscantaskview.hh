@@ -17,6 +17,8 @@
 namespace Plot {
 class Canvas;
 }
+class SpeciesSelectionWidget;
+
 
 /** General view object for @c SSAParamScanTask instances. */
 class SSAParamScanTaskView : public TaskView
@@ -58,18 +60,10 @@ private slots:
   void onDone();
   /** Callback for the "reset" button. Clears statistics during simulation task. */
   void onReset();
-  /** Whenever the list of selected species was altered. */
-  void onItemChanged(QListWidgetItem *item);
   /** When the simulation statistics where updated. */
   void onScheduleUpdatePlot();
   /** Actually updates the plot. */
   void updatePlot();
-  /** Selects all species in the list. */
-  void onSelectAllSpecies();
-  /** Unselects all species in the list. */
-  void onSelectNoSpecies();
-  /** Inverts the current species selection. */
-  void onInvertSelection();
   /** If a concentration plot is selected. */
   void onConcentrationPlotSelected();
   /** If a CoV plot is selected. */
@@ -83,7 +77,7 @@ private:
   /** Shows a parameter scan plot for the selected species. */
   Plot::Canvas *_plot_canvas;
   /** The list widget for species selection. */
-  QListWidget *_species_list;
+  SpeciesSelectionWidget *_species_list;
   /** Timer event to update the plot. This timer is used to slowdown the updating to once a second. */
   QTimer _updateTimer;
   /** Shows the current iteration. */

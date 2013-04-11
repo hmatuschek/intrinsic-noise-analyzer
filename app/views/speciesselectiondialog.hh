@@ -22,6 +22,14 @@ public:
   /** Returns the selected species. */
   QStringList selectedSpecies();
 
+public slots:
+  /** Selects all species in the list. */
+  void selectAllSpecies();
+  /** Selects unselect all species in the list. */
+  void selectNoSpecies();
+  /** Inverts the selection of species. */
+  void invertSelection();
+
 signals:
   /** Signals that the species selection has changed. */
   void selectionChanged();

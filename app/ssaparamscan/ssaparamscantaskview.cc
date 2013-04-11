@@ -8,6 +8,7 @@
 #include <QMessageBox>
 
 #include "ssaparamscanplot.hh"
+#include "ssaparamscantask.hh"
 #include "../models/application.hh"
 #include "../doctree/documenttree.hh"
 #include "../doctree/plotitem.hh"
@@ -135,28 +136,20 @@ SSAParamScanResultWidget::customPlotButtonPressed()
 void
 SSAParamScanResultWidget::saveButtonPressed()
 {
+  QString filename = QFileDialog::getSaveFileName(
+        this, tr("Save as text..."), "", tr("Text Files (*.txt *.csv)"));
+  if ("" == filename) { return; }
 
-    QString filename = QFileDialog::getSaveFileName(
-          this, tr("Save as text..."), "", tr("Text Files (*.txt *.csv)"));
+  QFile file(filename);
+  if (!file.open(QIODevice::WriteOnly| QIODevice::Text)) {
+    QMessageBox box;
+    box.setWindowTitle(tr("Can not open file"));
+    box.setText(tr("Can not open file %1 for writing").arg(filename));
+    box.exec();
+  }
 
-    if ("" == filename)
-    {
-      return;
-    }
-
-    QFile file(filename);
-
-    if (!file.open(QIODevice::WriteOnly| QIODevice::Text))
-    {
-      QMessageBox box;
-      box.setWindowTitle(tr("Can not open file"));
-      box.setText(tr("Can not open file %1 for writing").arg(filename));
-      box.exec();
-    }
-
-    this->paramscan_task_wrapper->getParamScanTask()->getParameterScan().saveAsText(file);
-    file.close();
-
+  this->paramscan_task_wrapper->getParamScanTask()->getParameterScan().saveAsText(file);
+  file.close();
 }
 
 
@@ -170,6 +163,8 @@ SSAParamScanPreviewWidget::SSAParamScanPreviewWidget(SSAParamScanTaskWrapper *ta
 {
   this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
   this->setBackgroundRole(QPalette::Window);
+
+  SSAParamScanTask *task = dynamic_cast<SSAParamScanTask *>(task_wrapper->getTask());
 
   // Preview
   _plot_canvas = new Plot::Canvas();
@@ -185,34 +180,12 @@ SSAParamScanPreviewWidget::SSAParamScanPreviewWidget(SSAParamScanTaskWrapper *ta
   _iteration_label = new QLabel("");
   _iteration_label->setTextFormat(Qt::LogText);
   // List of species
-  _species_list = new QListWidget();
+  _species_list = new SpeciesSelectionWidget(task->getConfig().getModel());
+  _species_list->selectAllSpecies();
   _species_list->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
-  // Button to select species
-  QPushButton *selection_button = new QPushButton("Select species");
-  QMenu *selection_menu = new QMenu();
-  selection_menu->addAction(tr("Select all species"), this, SLOT(onSelectAllSpecies()));
-  selection_menu->addAction(tr("Unselect all species"), this, SLOT(onSelectNoSpecies()));
-  selection_menu->addAction(tr("Invert selection"), this, SLOT(onInvertSelection()));
-  selection_button->setMenu(selection_menu);
   // Button to stop simulation
   QPushButton *done_button = new QPushButton(tr("Done"));
   QPushButton *reset_button = new QPushButton(tr("Reset Statistics"));
-
-  // Populate species list
-  SSAParamScanTask *task = dynamic_cast<SSAParamScanTask *>(task_wrapper->getTask());
-  for (size_t i=0; i<task->getConfig().getModel()->numSpecies(); i++) {
-    // Get name & id
-    iNA::Ast::Species *species = task->getConfig().getModel()->getSpecies(i);
-    QString id   = species->getIdentifier().c_str();
-    QString name = id;
-    if (species->hasName()) { name = species->getName().c_str(); }
-    // Assemble item
-    QListWidgetItem *item = new QListWidgetItem(name, _species_list);
-    item->setData(Qt::UserRole, id);
-    item->setCheckState(Qt::Checked);
-    item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable);
-    _species_list->addItem(item);
-  }
 
   // Assemble layout
   QHBoxLayout *layout = new QHBoxLayout();
@@ -223,7 +196,6 @@ SSAParamScanPreviewWidget::SSAParamScanPreviewWidget(SSAParamScanTaskWrapper *ta
   plot_layout->addWidget(_plot_canvas, 1);
   plot_layout->addLayout(plot_header);
   QVBoxLayout *species_list_layout = new QVBoxLayout();
-  species_list_layout->addWidget(selection_button, 0);
   species_list_layout->addWidget(_species_list, 1);
   species_list_layout->addWidget(reset_button);
   species_list_layout->addWidget(done_button);
@@ -232,8 +204,7 @@ SSAParamScanPreviewWidget::SSAParamScanPreviewWidget(SSAParamScanTaskWrapper *ta
   setLayout(layout);
 
   // Connect some signals
-  QObject::connect(_species_list, SIGNAL(itemChanged(QListWidgetItem*)),
-                   this, SLOT(onItemChanged(QListWidgetItem*)));
+  QObject::connect(_species_list, SIGNAL(selectionChanged()), this, SLOT(onScheduleUpdatePlot()));
   QObject::connect(done_button, SIGNAL(clicked()), this, SLOT(onDone()));
   QObject::connect(reset_button, SIGNAL(clicked()), this, SLOT(onReset()));
   QObject::connect(task, SIGNAL(stepPerformed()), this, SLOT(onScheduleUpdatePlot()));
@@ -241,13 +212,6 @@ SSAParamScanPreviewWidget::SSAParamScanPreviewWidget(SSAParamScanTaskWrapper *ta
 
   // update plot...
   updatePlot();
-}
-
-
-void
-SSAParamScanPreviewWidget::onItemChanged(QListWidgetItem *item)
-{
-  onScheduleUpdatePlot();
 }
 
 
@@ -265,15 +229,7 @@ void
 SSAParamScanPreviewWidget::updatePlot()
 {
   // Get selected species list
-  QStringList selected_species;
-  for (int i=0; i<_species_list->count(); i++) {
-    QListWidgetItem *item = _species_list->item(i);
-    if (Qt::Checked == item->checkState()) {
-      selected_species.append(item->data(Qt::UserRole).toString());
-    }
-  }
-
-  // Get task instance...
+  QStringList selected_species = _species_list->selectedSpecies();
   SSAParamScanTask *task = dynamic_cast<SSAParamScanTask *>(_task_item->getTask());
 
   // Update label:
@@ -311,36 +267,6 @@ SSAParamScanPreviewWidget::onReset()
 {
   SSAParamScanTask *task = dynamic_cast<SSAParamScanTask *>(_task_item->getTask());
   task->resetStatistics();
-}
-
-void
-SSAParamScanPreviewWidget::onSelectAllSpecies()
-{
-  for (int i=0; i<_species_list->count(); i++) {
-    QListWidgetItem *item = _species_list->item(i);
-    item->setCheckState(Qt::Checked);
-  }
-}
-
-void
-SSAParamScanPreviewWidget::onSelectNoSpecies()
-{
-  for (int i=0; i<_species_list->count(); i++) {
-    QListWidgetItem *item = _species_list->item(i);
-    item->setCheckState(Qt::Unchecked);
-  }
-}
-
-void
-SSAParamScanPreviewWidget::onInvertSelection()
-{
-  for (int i=0; i<_species_list->count(); i++) {
-    QListWidgetItem *item =_species_list->item(i);
-    if (Qt::Checked == item->checkState())
-      item->setCheckState(Qt::Unchecked);
-    else
-      item->setCheckState(Qt::Checked);
-  }
 }
 
 void

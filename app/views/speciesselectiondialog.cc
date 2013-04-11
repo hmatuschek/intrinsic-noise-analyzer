@@ -28,6 +28,7 @@ SpeciesSelectionWidget::SpeciesSelectionWidget(Ast::Model *model, QWidget *paren
   menu->addAction(tr("Select all species"), _model, SLOT(selectAllSpecies()));
   menu->addAction(tr("Select no species"), _model, SLOT(selectNoSpecies()));
   menu->addAction(tr("Invert selection"), _model, SLOT(invertSelection()));
+  select_button->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
   select_button->setMenu(menu);
 
   QTableView *species_list = new QTableView();
@@ -35,7 +36,7 @@ SpeciesSelectionWidget::SpeciesSelectionWidget(Ast::Model *model, QWidget *paren
   species_list->horizontalHeader()->setVisible(false);
   species_list->verticalHeader()->setVisible(false);
   species_list->setModel(_model);
-
+  species_list->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
   // Layout
   QVBoxLayout *layout = new QVBoxLayout();
   layout->setMargin(0); layout->setSpacing(2);
@@ -52,6 +53,20 @@ SpeciesSelectionWidget::selectedSpecies() {
   return _model->selectedSpecies();
 }
 
+void
+SpeciesSelectionWidget::selectAllSpecies() {
+  _model->selectAllSpecies();
+}
+
+void
+SpeciesSelectionWidget::selectNoSpecies() {
+  _model->selectNoSpecies();
+}
+
+void
+SpeciesSelectionWidget::invertSelection() {
+  _model->invertSelection();
+}
 
 
 /* ******************************************************************************************* *
