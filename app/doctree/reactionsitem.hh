@@ -28,11 +28,17 @@ public:
   /** Returns a weak reference to the list of reactions. */
   ReactionList *reactionList();
 
+  /** Removes the specifies item from the list of reactions, also modifies the underlaying
+   * @c iNA::Ast::Model and frees the item and reaction instance. */
+  virtual void removeChild(TreeItem *node);
+
 protected:
   /** Updates the reaction list (children) from model. */
   virtual void resetTree();
 
 private:
+  /** Holds a weak reference to the model instance. */
+  iNA::Ast::Model *_model;
   /** Holds the item label ("Reactions"). */
   QString _itemLabel;
   /** Holds the list model of all reactions. */

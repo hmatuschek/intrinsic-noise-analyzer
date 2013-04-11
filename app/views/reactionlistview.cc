@@ -7,6 +7,7 @@
 #include "../models/application.hh"
 #include "../doctree/documenttree.hh"
 #include "reactioneditor.hh"
+#include <utils/logger.hh>
 
 
 ReactionListView::ReactionListView(ReactionsItem *reactions, QWidget *parent)
@@ -83,10 +84,15 @@ ReactionListView::onRemReaction()
   if (1 != selected_items.size()) { return; }
   // Get selected model index
   QModelIndex idx = selected_items.at(0);
-  // If not the name/identifier column is selected -> quit
-  //if (0 != idx.column()) { return; }
-  // Get the selected reaction
-  iNA::Ast::Reaction *reaction = _reactions->getModel().getReaction(idx.row());
+
+  // Get ReactionItem for that reaction:
+  ReactionItem *reac_item = dynamic_cast<ReactionItem *>(_reactions_item->getTreeChild(idx.row()));
+  if (0 == reac_item) {
+    iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::WARN);
+    message << "Can not remove selected item: it is not a reaction!";
+    iNA::Utils::Logger::get().log(message);
+    return;
+  }
 
   // Last chance to quit
   if (QMessageBox::Yes != QMessageBox::question(
@@ -94,8 +100,9 @@ ReactionListView::onRemReaction()
         tr("Are you sure to delete the reaction, this can not be undone."),
         QMessageBox::Yes, QMessageBox::No)) { return; }
 
-  _reactions->getModel().remDefinition(reaction);
-  Application::getApp()->docTree()->resetCompleteTree();
+  // Remove selected reaction
+  Application::getApp()->docTree()->removeReaction(reac_item);
+  _reactions->updateTable();
 }
 
 

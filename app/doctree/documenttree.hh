@@ -8,6 +8,7 @@
 class DocumentItem;
 class TaskItem;
 class PlotItem;
+class ReactionItem;
 
 
 class DocumentTree :  public QAbstractItemModel, public TreeItem
@@ -25,6 +26,7 @@ public:
   virtual void removeTask(TaskItem *task);
   virtual void removeDocument(DocumentItem *document);
   virtual void removePlot(PlotItem *plot);
+  virtual void removeReaction(ReactionItem *item);
   virtual void markForUpdate(TreeItem *item);
 
   /* ******************************************************************************************* *

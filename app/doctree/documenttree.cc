@@ -3,6 +3,7 @@
 #include "analysesitem.hh"
 #include "taskitem.hh"
 #include "plotitem.hh"
+#include "reactionitem.hh"
 #include <QDebug>
 
 
@@ -74,14 +75,19 @@ DocumentTree::removeItem(TreeItem *item)
   TreeItem *parent_item = item->getTreeParent();
 
   // Remove from model:
-  this->beginRemoveRows(parent_index, item->getTreeRow(), item->getTreeRow());
+  beginRemoveRows(parent_index, item->getTreeRow(), item->getTreeRow());
   parent_item->removeChild(item);
-  this->endRemoveRows();
+  endRemoveRows();
 }
 
 void
 DocumentTree::removePlot(PlotItem *plot) {
-  this->removeItem(plot);
+  removeItem(plot);
+}
+
+void
+DocumentTree::removeReaction(ReactionItem *item) {
+  removeItem(item);
 }
 
 void
