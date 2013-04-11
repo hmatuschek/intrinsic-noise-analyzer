@@ -84,7 +84,7 @@ MainWindow::_createActions()
   this->_checkForUpdatesAct->setChecked(Application::getApp()->checkNewVersionAvailable());
 
   // If update check is disabled at compile time -> disable menu entry:
-#ifdef INA_DISABLE_NEW_VERSION_CHECK
+#ifndef INA_ENABLE_VERSION_CHECK
   this->_checkForUpdatesAct->setEnabled(false);
   this->_checkForUpdatesAct->setChecked(false);
   this->_checkForUpdatesAct->setVisible(false);

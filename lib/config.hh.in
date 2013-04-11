@@ -13,7 +13,7 @@
 #cmakedefine INA_LLVM_VERSION_IS_32 1
 
 #cmakedefine INA_ENABLE_OPENMP 1
-#cmakedefine INA_ENABLE_NEW_VERSION_CHECK 1
+#cmakedefine INA_ENABLE_VERSION_CHECK 1
 
 
 #define INA_VERSION_MAJOR 0

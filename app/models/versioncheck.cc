@@ -36,7 +36,7 @@ void
 VersionCheck::startCheck()
 {
   // Skip if periodic check is disabled by compiler flag;
-#ifndef INA_ENABLE_NEW_VERSION_CHECK
+#ifndef INA_ENABLE_VERSION_CHECK
   return;
 #endif
 

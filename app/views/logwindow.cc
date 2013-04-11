@@ -43,31 +43,6 @@ LogTable::saveLog(const QString &filename)
 }
 
 
-/*  case iNA::Utils::Message::DEBUG:
-    time_item->setTextColor(QColor::fromRgb(0xa0, 0xa0, 0xa0));
-    text_item->setTextColor(QColor::fromRgb(0xa0, 0xa0, 0xa0));
-    break;
-
-  case iNA::Utils::Message::INFO:
-    time_item->setBackgroundColor(QColor::fromRgb(0xff, 0xff, 0xff));
-    text_item->setBackgroundColor(QColor::fromRgb(0xff, 0xff, 0xff));
-    break;
-
-  case iNA::Utils::Message::WARN:
-    time_item->setBackgroundColor(QColor::fromRgb(0xff, 0xf0, 0xc0));
-    text_item->setBackgroundColor(QColor::fromRgb(0xff, 0xf0, 0xc0));
-    break;
-
-  case iNA::Utils::Message::ERROR:
-    time_item->setBackgroundColor(QColor::fromRgb(0xff, 0xc0, 0xc0));
-    text_item->setBackgroundColor(QColor::fromRgb(0xff, 0xc0, 0xc0));
-    break;
-  }
-
-  this->scrollToItem(time_item, QAbstractItemView::PositionAtBottom);
-*/
-
-
 void
 LogTable::setFilterLevel(iNA::Utils::Message::Level level) {
   _model->setFilterLevel(level);
