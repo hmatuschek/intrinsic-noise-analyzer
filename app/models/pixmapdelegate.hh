@@ -14,6 +14,9 @@ public:
   /** Trivial constructor. */
   explicit PixmapDelegate(QObject *parent = 0);
 
+  /** Returns the pixmap size. */
+  virtual QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const;
+
   /** Implements the rendering of the pixmap. */
   virtual void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
 };
