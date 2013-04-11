@@ -29,7 +29,16 @@ QWidget *ReactionsItem::createView() { return new ReactionListView(this); }
 
 const QString & ReactionsItem::getLabel() const { return _itemLabel; }
 
-ReactionList *ReactionsItem::reactionList() { return &_reactionList; }
+ReactionList *
+ReactionsItem::reactionList() {
+  return &_reactionList;
+}
+
+void
+ReactionsItem::addReaction(ReactionItem *reaction_item) {
+  _model->addDefinition(reaction_item->getReaction());
+  addChild(reaction_item);
+}
 
 void
 ReactionsItem::removeChild(TreeItem *item) {

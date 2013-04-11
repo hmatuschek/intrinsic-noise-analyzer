@@ -28,6 +28,9 @@ public:
   /** Returns a weak reference to the list of reactions. */
   ReactionList *reactionList();
 
+  /** Adds a reaction to the list of reactions and also updates the underlaying @c iNA::Ast::Model */
+  void addReaction(ReactionItem *reaction_item);
+
   /** Removes the specifies item from the list of reactions, also modifies the underlaying
    * @c iNA::Ast::Model and frees the item and reaction instance. */
   virtual void removeChild(TreeItem *node);

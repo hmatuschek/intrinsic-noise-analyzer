@@ -72,14 +72,14 @@ DocumentItem::getModel() const {
 }
 
 
-QModelIndex
-DocumentItem::indexOfAnalysesItem() const {
-  return Application::getApp()->docTree()->getIndexOf(this->_analyses);
-}
-
 AnalysesItem *
 DocumentItem::analysesItem() {
   return _analyses;
+}
+
+ReactionsItem *
+DocumentItem::reactionsItem() {
+  return _model->reactionsItem();
 }
 
 size_t

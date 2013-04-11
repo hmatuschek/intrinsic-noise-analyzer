@@ -4,6 +4,8 @@
 #include "taskitem.hh"
 #include "plotitem.hh"
 #include "reactionitem.hh"
+#include "reactionsitem.hh"
+
 #include <QDebug>
 
 
@@ -33,7 +35,7 @@ DocumentTree::addDocument(DocumentItem *document) {
 void
 DocumentTree::addTask(DocumentItem *document, TaskItem *task) {
   // Add task to document (document takes ownership of task):
-  QModelIndex analyses_index = document->indexOfAnalysesItem();
+  QModelIndex analyses_index = getIndexOf(document->analysesItem());
   size_t num_analyses = document->numAnalyses();
   beginInsertRows(analyses_index, num_analyses, num_analyses);
   document->addTask(task);
@@ -51,6 +53,16 @@ DocumentTree::addPlot(TaskItem *task, PlotItem *plot) {
   endInsertRows();
 }
 
+void
+DocumentTree::addReaction(DocumentItem *document, ReactionItem *reaction) {
+  // Add a reaction to the model addressed by the given document:
+  ReactionsItem *reac_item = document->reactionsItem();
+  QModelIndex reactions_index = getIndexOf(reac_item);
+  size_t num_reacts = reac_item->getTreeChildCount();
+  beginInsertRows(reactions_index, num_reacts, num_reacts);
+  reac_item->addReaction(reaction);
+  endInsertRows();
+}
 
 void
 DocumentTree::removeTask(TaskItem *task) {

@@ -11,6 +11,7 @@
 class TaskItem;
 class ModelItem;
 class AnalysesItem;
+class ReactionsItem;
 
 
 /**
@@ -62,8 +63,8 @@ public:
   /** Returns the @c Ast::Model instance associated with this document. */
   const iNA::Ast::Model &getModel() const;
 
-  QModelIndex indexOfAnalysesItem() const;
   AnalysesItem *analysesItem();
+  ReactionsItem *reactionsItem();
   size_t numAnalyses() const;
 
   /** Adds a task to the document.
