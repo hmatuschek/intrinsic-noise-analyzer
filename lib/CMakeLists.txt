@@ -181,7 +181,7 @@ SET(libina_eval_direct_HEADERS
 SET(libina_eval_bytecode_SOURCES
     eval/bci/code.cc eval/bci/compiler.cc eval/bci/assembler.cc eval/bci/interpreter.cc
     eval/bci/dependencetree.cc eval/bci/pass.cc eval/bci/engine.cc)
-SET(libina_eval_direct_HEADERS
+SET(libina_eval_bytecode_HEADERS
     eval/bci/code.hh eval/bci/compiler.hh eval/bci/assembler.hh eval/bci/interpreter.hh
     eval/bci/dependencetree.hh eval/bci/pass.hh eval/bci/engine.hh)
 

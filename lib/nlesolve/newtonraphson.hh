@@ -1,8 +1,8 @@
 #ifndef __INA_NLESOLVE_NEWTONRAPHSON_HH
 #define __INA_NLESOLVE_NEWTONRAPHSON_HH
 
-#include "eval/eval.hh"
-#include "trafo/constantfolder.hh"
+#include "../eval/eval.hh"
+#include "../trafo/constantfolder.hh"
 #include "nlesolver.hh"
 #include "precisionsolve.hh"
 
