@@ -181,7 +181,7 @@ SET(libina_eval_direct_HEADERS
 SET(libina_eval_bytecode_SOURCES
     eval/bci/code.cc eval/bci/compiler.cc eval/bci/assembler.cc eval/bci/interpreter.cc
     eval/bci/dependencetree.cc eval/bci/pass.cc eval/bci/engine.cc)
-SET(libina_eval_direct_HEADERS
+SET(libina_eval_bytecode_HEADERS
     eval/bci/code.hh eval/bci/compiler.hh eval/bci/assembler.hh eval/bci/interpreter.hh
     eval/bci/dependencetree.hh eval/bci/pass.hh eval/bci/engine.hh)
 
@@ -252,7 +252,9 @@ ELSE()
 ADD_LIBRARY(libina SHARED ${libina_SOURCES})
 ENDIF()
 
-SET_TARGET_PROPERTIES(libina PROPERTIES OUTPUT_NAME "ina")
+SET_TARGET_PROPERTIES(libina PROPERTIES
+ OUTPUT_NAME "ina"
+ VERSION "0.4.3" SOVERION "0")
 TARGET_LINK_LIBRARIES(libina ${LIBS})
 
 
@@ -261,7 +263,5 @@ INSTALL(TARGETS libina
         DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 # Install header files
-IF(UNIX AND APPLE)
 INSTALL_HEADERS_WITH_DIRECTORY("${libina_HEADERS}" "${CMAKE_INSTALL_INCLUDEDIR}/libina")
 INSTALL(FILES "${CMAKE_CURRENT_BINARY_DIR}/config.hh" DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/libina")
-ENDIF(UNIX AND APPLE)
