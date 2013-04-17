@@ -1,7 +1,7 @@
 #ifndef __INA_PARSER_SBML_SBML_HH__
 #define __INA_PARSER_SBML_SBML_HH__
 
-#include <ast/model.hh>
+#include "../../ast/model.hh"
 
 
 namespace iNA {
