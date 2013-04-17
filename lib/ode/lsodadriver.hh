@@ -22,22 +22,6 @@ template <class Sys>
 class LsodaDriver
     : public Stepper, protected LSODA
 {
-protected:
-  /** Holds a weak reference to the system of ODEs. */
-  Sys &system;
-  /** Holds the initial step-size (dt). */
-  double step_size;
-  /** Holds the maximum absolute error. */
-  double err_abs;
-  /** Holds the maximum relative error. */
-  double err_rel;
-
-  //Eigen::VectorXd dx;
-
-  double *ywork;
-  double *atolwork;
-  double *rtolwork;
-
 public:
   /**
    * Constructs a new LSODA stepper.
@@ -58,8 +42,7 @@ public:
     rtolwork = atolwork + getDimension() + 1;
 
     /* @todo use to define staged errors using the system size */
-    for (size_t i = 1; i <= getDimension(); ++i)
-    {
+    for (size_t i = 1; i <= getDimension(); ++i) {
         rtolwork[i] = err_rel;
         atolwork[i] = err_abs;
     }
@@ -73,63 +56,61 @@ public:
     }
   }
 
-  /**
-   * Performs the step t -> t+dt.
-   */
-  virtual void step(const Eigen::VectorXd &state, double t, Eigen::VectorXd &delta)
-  {
-      for (size_t i = 1; i <= getDimension(); ++i) ywork[i] = state[i-1];
-      lsoda(getDimension(), ywork, &t, t+step_size, 2, rtolwork, atolwork, 1, &istate, 0, 2);
-      for (size_t i = 1; i <= getDimension(); ++i) delta[i-1] = ywork[i]-state[i-1];
+  /** Performs the step t -> t+dt. */
+  virtual void step(const Eigen::VectorXd &state, double t, Eigen::VectorXd &delta) {
+    for (size_t i = 1; i <= getDimension(); ++i) { ywork[i] = state[i-1]; }
+    lsoda(getDimension(), ywork, &t, t+step_size, 2, rtolwork, atolwork, 1, &istate, 0, 2);
+    for (size_t i = 1; i <= getDimension(); ++i) { delta[i-1] = ywork[i]-state[i-1]; }
   }
 
-  virtual void step(Eigen::VectorXd &state, double t)
-  {
-      lsoda(getDimension(), state.data()-1, &t, t+step_size, 2, rtolwork, atolwork, 1, &istate, 0, 2);
+  virtual void step(Eigen::VectorXd &state, double t) {
+    lsoda(getDimension(), state.data()-1, &t, t+step_size, 2, rtolwork, atolwork, 1, &istate, 0, 2);
   }
 
-  virtual void evalODE(double t, double y[], double yd[], int nsize)
-  {
-      system.evaluate(y, t, yd);
+  virtual void evalODE(double t, double y[], double yd[], int nsize) {
+    system.evaluate(y, t, yd);
   }
 
-  virtual void evalJac(double t, double *y, double **jac, int nsize)
-  {
-      // @todo implement.
+  virtual void evalJac(double t, double *y, double **jac, int nsize) {
+    // @todo implement.
   }
 
 public:
-  /**
-   * Returns the step-size used to integrate.
-   */
-  inline double getStepSize()
-  {
+  /** Returns the step-size used to integrate. */
+  inline double getStepSize() {
     return this->step_size;
   }
 
-  /**
-   * Returns the dimension of the system.
-   */
-  inline size_t getDimension()
-  {
+  /** Returns the dimension of the system. */
+  inline size_t getDimension() {
     return this->system.getDimension();
   }
 
-  /**
-   * Resets the status.
-   */
-  void reset()
-  {
+  /** Resets the status. */
+  void reset() {
     istate = 1;
   }
 
-  /**
-   * Resets the status.
-   */
-  void parameterChanged()
-  {
+  /** Resets the status. */
+  void parameterChanged() {
     istate = 3;
   }
+
+protected:
+  /** Holds a weak reference to the system of ODEs. */
+  Sys &system;
+  /** Holds the initial step-size (dt). */
+  double step_size;
+  /** Holds the maximum absolute error. */
+  double err_abs;
+  /** Holds the maximum relative error. */
+  double err_rel;
+  /** Allocated working memory for LSODA. */
+  double *ywork;
+  /** Pointer to the absolute error vector (part of ywork). */
+  double *atolwork;
+  /** Pointer to the relative error vector (part of ywork). */
+  double *rtolwork;
 };
 
 

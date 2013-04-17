@@ -35,13 +35,15 @@ depends_lib  port:libsbml \
 
 depends_build port:cmake
 
-default_variants    +llvm32
+default_variants    +llvm32 +gcc45
 
 configure.cmd       cmake
 configure.pre_args  -DCMAKE_INSTALL_PREFIX=${prefix}
 configure.args      -DCMAKE_VERBOSE_MAKEFILE=ON \
                     -DCMAKE_COLOR_MAKEFILE=OFF \
-                    -DCMAKE_BUILD_TYPE=Release \
+                    -DCMAKE_BUILD_TYPE=RELEASE \
+                    -DINA_ENABLE_VERSION_CHECK=ON \
+                    -DINA_ENABLE_OPENMP=OFF \
                     -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON \
                     -DCMAKE_INSTALL_NAME_DIR=${prefix}/lib \
                     -DCMAKE_SYSTEM_PREFIX_PATH=\"${prefix}\;/usr\" 
@@ -62,29 +64,45 @@ post-patch {
 variant llvm29 conflicts llvm30 llvm31 llvm32 llvm33 \
   description {Configure to use LLVM version 2.9} {
     depends_lib-append		port:llvm-2.9
-    configure.args-append	--DWITH_LLVM_CONFIG=llvm-config-mp-2.9
+    configure.args-append	-DWITH_LLVM_CONFIG=llvm-config-mp-2.9
 }
 
 variant llvm30 conflicts llvm29 llvm31 llvm32 llvm33 \
   description {Configure to use LLVM version 3.0} {
     depends_lib-append		port:llvm-3.0
-    configure.args-append	--DWITH_LLVM_CONFIG=llvm-config-mp-3.0
+    configure.args-append	-DWITH_LLVM_CONFIG=llvm-config-mp-3.0
 }
 
 variant llvm31 conflicts llvm29 llvm30 llvm32 llvm33 \
   description {Configure to use LLVM version 3.1} {
     depends_lib-append		port:llvm-3.1
-    configure.args-append	--DWITH_LLVM_CONFIG=llvm-config-mp-3.1
+    configure.args-append	-DWITH_LLVM_CONFIG=llvm-config-mp-3.1
 }
 
 variant llvm32 conflicts llvm29 llvm30 llvm31 llvm33 \
   description {Configure to use LLVM version 3.2} {
     depends_lib-append		port:llvm-3.2
-    configure.args-append	--DWITH_LLVM_CONFIG=llvm-config-mp-3.2
+    configure.args-append	-DWITH_LLVM_CONFIG=llvm-config-mp-3.2
 }
 
 variant llvm33 conflicts llvm29 llvm30 llvm31 llvm32 \
   description {Configure to use LLVM version 3.3} {
     depends_lib-append		port:llvm-3.3
-    configure.args-append	--DWITH_LLVM_CONFIG=llvm-config-mp-3.3
+    configure.args-append	-DWITH_LLVM_CONFIG=llvm-config-mp-3.3
 }
+
+variant gcc45 conflicts gcc46 gcc47 \
+  description {Configure to compile with gcc 4.5, enables OpenMP support} {
+    configure.compiler          macports-gcc-4.5
+}
+
+variant gcc46 conflicts gcc45 gcc47 \
+  description {Configure to compile with gcc 4.6, enables OpenMP support} {
+    configure.compiler          macports-gcc-4.6
+}
+
+variant gcc47 conflicts gcc45 gcc46 \
+  description {Configure to compile with gcc 4.7, enables OpenMP support} {
+    configure.compiler          macports-gcc-4.7
+}
+   

@@ -70,7 +70,6 @@
 #include "substitution.hh"
 #include "constantfolder.hh"
 #include "assignmentruleinliner.hh"
-#include "conservationanalysis.hh"
 #include "reversiblereactionconverter.hh"
 #include "partialmodel.hh"
 #include "referencecounter.hh"

@@ -82,16 +82,21 @@ public:
 
  int istate;
 
- virtual void evalODE (double x, double y[], double yd[],
-         int n)=0;
- virtual void evalJac (double x, double *y, double **jac,
-         int n)=0;
+ /** @todo This is actually a bad idea. As far as I know, every call to a virtual function
+  * will result into a function pointer lookup via the vtable of the instance of virtual class,
+  * which slows the execution. It is better to define a function interface and pass an instance as
+  * a pointer. I.e. typedef void (*f_lsoda_ode)(double x, double *y, double *dy, void *context);
+  * This will also perfectly match out JIT compiler stuff as it compiles a function pointer
+  * anyway. However, it seems not to be crucial as the benchmarks show.*/
+ virtual void evalODE (double x, double y[], double yd[], int n)=0;
+ /** @todo The same as above. */
+ virtual void evalJac (double x, double *y, double **jac, int n)=0;
 
  void f_lsoda (double t, double dt, double y[], int n, double eps);
 
  void lsoda (int neq, double *y, double *t, double tout,
-                    int itol, double *rtol, double *atol,
-                    int itask, int *istate, int iopt, int jt   );
+             int itol, double *rtol, double *atol,
+             int itask, int *istate, int iopt, int jt   );
 
  size_t numFunctionsEvaluations();
 
