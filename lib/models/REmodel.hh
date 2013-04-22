@@ -1,7 +1,7 @@
 #ifndef __INA_REmodel_HH__
 #define __INA_REmodel_HH__
 
-#include "ast/ast.hh"
+#include "../ast/ast.hh"
 #include "ssebasemodel.hh"
 #include "initialconditions.hh"
 

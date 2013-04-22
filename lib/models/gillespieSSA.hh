@@ -5,7 +5,7 @@
 #include "constantstoichiometrymixin.hh"
 #include "extensivespeciesmixin.hh"
 
-#include "eval/bci/engine.hh"
+#include "../eval/bci/engine.hh"
 
 #include <omp.h>
 

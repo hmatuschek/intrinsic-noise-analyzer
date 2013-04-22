@@ -6,8 +6,8 @@
 #include <map>
 
 #include "code.hh"
-#include "eval/compilercommon.hh"
-#include "eval/bci/compiler.hh"
+#include "../compilercommon.hh"
+#include "../bci/compiler.hh"
 
 
 namespace iNA {

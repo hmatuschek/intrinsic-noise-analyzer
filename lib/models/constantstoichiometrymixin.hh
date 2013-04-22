@@ -2,8 +2,8 @@
 #define __INA_MODELS_CONSTANTSTOICHIOMETRYMIXIN_HH__
 
 #include "basemodel.hh"
-#include "eigen3/Eigen/Eigen"
-#include "ginacsupportforeigen.hh"
+#include <eigen3/Eigen/Eigen>
+#include "../ginacsupportforeigen.hh"
 
 
 namespace iNA {

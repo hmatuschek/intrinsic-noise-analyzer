@@ -103,6 +103,7 @@ Scope::Scope(Scope *parent, bool is_closed)
 
 Scope::~Scope()
 {
+  _symbol_table.clear();
   // Iterate over all definitions and free them:
   for(std::map<std::string, Definition *>::iterator iter = this->_definitions.begin();
       iter != this->_definitions.end(); iter++)

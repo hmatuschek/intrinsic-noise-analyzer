@@ -4,8 +4,8 @@
 #include "stochasticsimulator.hh"
 #include "constantstoichiometrymixin.hh"
 #include "extensivespeciesmixin.hh"
-#include "eval/bci/engine.hh"
-#include "openmp.hh"
+#include "../eval/bci/engine.hh"
+#include "../openmp.hh"
 
 
 #define EIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET

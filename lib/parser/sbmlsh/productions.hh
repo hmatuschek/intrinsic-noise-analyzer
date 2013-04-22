@@ -2,8 +2,8 @@
 #define __INA_PARSER_SBMLSH_PRODUCTIONS_HH__
 
 #include "lexer.hh"
-#include <parser/production.hh>
-#include <parser/lexer.hh>
+#include "../production.hh"
+#include "../lexer.hh"
 
 namespace iNA {
 namespace Parser {

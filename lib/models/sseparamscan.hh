@@ -2,9 +2,9 @@
 #define __INA_MODELS_SSEPARAMSCAN_HH
 
 
-#include "nlesolve/nlesolve.hh"
+#include "../nlesolve/nlesolve.hh"
 #include "IOSmodel.hh"
-#include "math.hh"
+#include "../math.hh"
 #include "steadystateanalysis.hh"
 
 namespace iNA {

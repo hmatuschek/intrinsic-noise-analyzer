@@ -1,7 +1,7 @@
 #ifndef __INA__NLESOLVE_NLESOLVER_HH
 #define __INA__NLESOLVE_NLESOLVER_HH
 
-#include "eval/eval.hh"
+#include "../eval/eval.hh"
 
 namespace iNA{
 namespace NLEsolve{

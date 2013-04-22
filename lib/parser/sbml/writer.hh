@@ -1,7 +1,7 @@
 #ifndef __INA_PARSER_SBML_WRITER_HH__
 #define __INA_PARSER_SBML_WRITER_HH__
 
-#include <ast/ast.hh>
+#include "../../ast/ast.hh"
 #include <sbml/SBMLTypes.h>
 
 

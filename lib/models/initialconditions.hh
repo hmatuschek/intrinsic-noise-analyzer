@@ -1,10 +1,10 @@
 #ifndef __INA_INITIALCONDITIONS_HH
 #define __INA_INITIALCONDITIONS_HH
 
-#include "ast/ast.hh"
+#include "../ast/ast.hh"
 #include "ssebasemodel.hh"
 
-#include "trafo/constantfolder.hh"
+#include "../trafo/constantfolder.hh"
 
 namespace iNA {
 namespace Models {

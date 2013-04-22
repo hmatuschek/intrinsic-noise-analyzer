@@ -4,9 +4,9 @@
 #include "REmodel.hh"
 #include "LNAmodel.hh"
 #include "IOSmodel.hh"
-#include "eval/eval.hh"
-#include "eval/bcimp/engine.hh"
-#include "trafo/constantfolder.hh"
+#include "../eval/eval.hh"
+#include "../eval/bcimp/engine.hh"
+#include "../trafo/constantfolder.hh"
 
 namespace iNA {
 namespace Models {

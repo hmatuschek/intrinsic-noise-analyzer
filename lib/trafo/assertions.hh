@@ -1,8 +1,8 @@
 #ifndef __FLUC_TRAFO_ASSERTIONS_HH__
 #define __FLUC_TRAFO_ASSERTIONS_HH__
 
-#include "ast/ast.hh"
-#include "ginacsupportforeigen.hh"
+#include "../ast/ast.hh"
+#include "../ginacsupportforeigen.hh"
 
 
 namespace iNA {

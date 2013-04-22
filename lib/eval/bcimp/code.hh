@@ -1,9 +1,9 @@
 #ifndef __FLUC_EVALUATE_BCIMP_CODE_HH__
 #define __FLUC_EVALUATE_BCIMP_CODE_HH__
 
-#include "eval/bci/code.hh"
+#include "../bci/code.hh"
 #include <vector>
-#include "openmp.hh"
+#include "../../openmp.hh"
 
 
 namespace iNA {

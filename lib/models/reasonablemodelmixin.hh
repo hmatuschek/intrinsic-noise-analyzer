@@ -8,7 +8,7 @@
 #include "assertnoassignmentrule.hh"
 #include "assertnoraterule.hh"
 #include "assertirreversiblereactions.hh"
-#include "trafo/assertions.hh"
+#include "../trafo/assertions.hh"
 
 
 namespace iNA {

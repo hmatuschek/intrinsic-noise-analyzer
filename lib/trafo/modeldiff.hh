@@ -3,8 +3,8 @@
 
 #include <list>
 #include <vector>
-#include <ast/model.hh>
-#include <exception.hh>
+#include "../ast/model.hh"
+#include "../exception.hh"
 
 
 namespace iNA {

@@ -1,9 +1,9 @@
 #ifndef __INA_MODELS_STEADYSTATEANALYSIS_HH
 #define __INA_MODELS_STEADYSTATEANALYSIS_HH
 
-#include "nlesolve/nlesolve.hh"
+#include "../nlesolve/nlesolve.hh"
 #include "IOSmodel.hh"
-#include "math.hh"
+#include "../math.hh"
 
 namespace iNA {
 namespace Models {

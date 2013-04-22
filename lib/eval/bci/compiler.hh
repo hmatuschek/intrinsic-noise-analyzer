@@ -4,13 +4,13 @@
 #include "code.hh"
 #include <map>
 #include <ginac/ginac.h>
-#include "ginacsupportforeigen.hh"
-#include "ast/model.hh"
+#include "../../ginacsupportforeigen.hh"
+#include "../../ast/model.hh"
 #include "assembler.hh"
 #include "pass.hh"
-#include "utils/cputime.hh"
-#include "utils/logger.hh"
-#include "eval/compilercommon.hh"
+#include "../../utils/cputime.hh"
+#include "../../utils/logger.hh"
+#include "../compilercommon.hh"
 
 
 namespace iNA {

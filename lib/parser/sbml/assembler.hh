@@ -2,15 +2,15 @@
 #define __FLUC_PARSER_SBML_ASSEMBLER_HH__
 
 #include <sbml/SBMLTypes.h>
-#include "ast/functiondefinition.hh"
-#include "ast/reaction.hh"
-#include "ast/unitdefinition.hh"
-#include "ast/species.hh"
-#include "ast/compartment.hh"
-#include "ast/parameter.hh"
-#include "exception.hh"
-#include "ast/model.hh"
-#include "trafo/variablescaling.hh"
+#include "../../ast/functiondefinition.hh"
+#include "../../ast/reaction.hh"
+#include "../../ast/unitdefinition.hh"
+#include "../../ast/species.hh"
+#include "../../ast/compartment.hh"
+#include "../../ast/parameter.hh"
+#include "../../exception.hh"
+#include "../../ast/model.hh"
+#include "../../trafo/variablescaling.hh"
 
 
 namespace iNA {

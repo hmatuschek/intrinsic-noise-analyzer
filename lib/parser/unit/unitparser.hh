@@ -1,9 +1,9 @@
 #ifndef __INA_APP_TINYTEX_UNITPARSER_HH__
 #define __INA_APP_TINYTEX_UNITPARSER_HH__
 
-#include "ast/unitdefinition.hh"
-#include "parser/lexer.hh"
-#include "parser/production.hh"
+#include "../../ast/unitdefinition.hh"
+#include "../lexer.hh"
+#include "../production.hh"
 
 namespace iNA {
 namespace Parser {

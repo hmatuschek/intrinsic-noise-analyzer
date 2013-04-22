@@ -2,10 +2,10 @@
 #define __FLUC_EVALUATE_DIRECT_COMPILER_HH__
 
 #include "code.hh"
-#include "ast/model.hh"
-#include "eigen3/Eigen/Eigen"
-#include "ginacsupportforeigen.hh"
-#include "eval/compilercommon.hh"
+#include "../../ast/model.hh"
+#include <eigen3/Eigen/Eigen>
+#include "../../ginacsupportforeigen.hh"
+#include "../compilercommon.hh"
 
 
 namespace iNA {

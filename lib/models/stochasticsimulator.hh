@@ -1,16 +1,16 @@
 #ifndef __INA_STOCHASTICSIMULATOR_HH__
 #define __INA_STOCHASTICSIMULATOR_HH__
 
-#include "mersennetwister.hh"
+#include "../mersennetwister.hh"
 
-#include "ast/ast.hh"
+#include "../ast/ast.hh"
 #include <ginac/ginac.h>
 
 #include "basemodel.hh"
 #include "particlenumbersmixin.hh"
 #include "reasonablemodelmixin.hh"
 #include "histogram.hh"
-#include "openmp.hh"
+#include "../openmp.hh"
 
 
 namespace iNA {

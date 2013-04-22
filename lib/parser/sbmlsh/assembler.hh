@@ -3,11 +3,11 @@
 
 #include <typeinfo>
 
-#include <ast/unitdefinition.hh>
-#include <parser/lexer.hh>
-#include <parser/production.hh>
-#include <parser/expr/assembler.hh>
-#include <trafo/variablescaling.hh>
+#include "../../ast/unitdefinition.hh"
+#include "../../trafo/variablescaling.hh"
+#include "../lexer.hh"
+#include "../production.hh"
+#include "../expr/assembler.hh"
 
 
 

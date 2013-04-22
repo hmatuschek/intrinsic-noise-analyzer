@@ -4,7 +4,7 @@
 #include <list>
 #include <vector>
 #include <map>
-#include <exception.hh>
+#include "exception.hh"
 
 
 namespace iNA {
