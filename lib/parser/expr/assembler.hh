@@ -1,9 +1,9 @@
 #ifndef __FLUC_PARSER_EXPR_ASSEMBLER_HH__
 #define __FLUC_PARSER_EXPR_ASSEMBLER_HH__
 
-#include <parser/lexer.hh>
-#include <parser/production.hh>
-#include <ast/model.hh>
+#include "../lexer.hh"
+#include "../production.hh"
+#include "../../ast/model.hh"
 #include "parser.hh"
 
 

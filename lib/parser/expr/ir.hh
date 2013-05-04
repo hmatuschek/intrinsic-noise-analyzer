@@ -2,7 +2,7 @@
 #define __INA_PARSER_EXPR_IR_HH__
 
 #include <ginac/ginac.h>
-#include "smartptr.hh"
+#include "../../smartptr.hh"
 #include <vector>
 #include <complex>
 #include "parser.hh"

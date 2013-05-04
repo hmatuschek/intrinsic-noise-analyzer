@@ -1,7 +1,7 @@
 #ifndef __INA_PARSER_EXPR_PARSER_HH__
 #define __INA_PARSER_EXPR_PARSER_HH__
 
-#include <ast/ast.hh>
+#include "../../ast/ast.hh"
 
 
 namespace iNA {

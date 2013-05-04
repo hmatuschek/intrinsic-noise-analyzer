@@ -1,8 +1,8 @@
 #ifndef __INA_PARSER_EXPR_PRODUCTIONS_HH__
 #define __INA_PARSER_EXPR_PRODUCTIONS_HH__
 
-#include <parser/lexer.hh>
-#include <parser/production.hh>
+#include "../lexer.hh"
+#include "../production.hh"
 
 
 namespace iNA {
