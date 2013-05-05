@@ -57,7 +57,6 @@ SteadyStatePlot::SteadyStatePlot(SteadyStateTask *task, const QStringList select
   Plot::AxisTicks *ticks = new Plot::AxisTicks(this->getAxis()->getMapping(),
                                                Plot::AxisTick::BOTTOM);
   ticks->setLabel(tr("species"));
-
   this->getAxis()->setXTicks(ticks);
   this->getAxis()->addGraph(lna);
   this->getAxis()->addGraph(emre);
