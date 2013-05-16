@@ -132,6 +132,8 @@ SET(ina_app_HEADERS
 
 QT4_WRAP_CPP(ina_app_HEADERS_MOC ${ina_app_HEADERS})
 
+# Make sure, libina is found:
+LINK_DIRECTORIES("${CMAKE_BINARY_DIR}/lib")
 
 ADD_EXECUTABLE(ina ${ina_app_SOURCES} ${ina_app_HEADERS_MOC})
 TARGET_LINK_LIBRARIES(ina ${QT_LIBRARIES} ${LIBS} libina)

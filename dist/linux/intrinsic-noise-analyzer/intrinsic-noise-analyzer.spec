@@ -1,6 +1,6 @@
 Summary: An analysis tool for biochemical reaction networks
 
-%define version 0.4.1
+%define version 0.4.2
 
 License: GPLv2
 Group: Productivity/Scientific/Chemistry
@@ -11,7 +11,7 @@ Source: intrinsic-noise-analyzer-%{version}.tar.gz
 URL: https://googlecode.com/p/intrinsic-noise-analyzer
 Version: %{version}
 Buildroot: /tmp/intrinsicnoiseanalyzerrpm
-BuildRequires: gcc-c++, cmake, libsbml-devel >= 5.0
+BuildRequires: gcc-c++, cmake, libsbml-devel >= 5.0, libeigen3-devel >= 3.0
 Requires: libsbml >= 5.0, libina = %{version}-%{release}
 %if 0%{?suse_version}
 BuildRequires: libqt4-devel >= 4.5, libginac-devel, llvm-devel >= 2.9
@@ -36,7 +36,7 @@ expensive stochastic simulation algorithm.
 %package -n libina
 Summary: Runtime library for the intrinsic Noise Analyzer
 Group: Science
-BuildRequires: gcc-c++, cmake, libsbml-devel >= 5.0
+BuildRequires: gcc-c++, cmake, libsbml-devel >= 5.0, libeigen3-devel >= 3.0
 Requires: libsbml >= 5.0
 %if 0%{?suse_version}
 BuildRequires: libginac-devel

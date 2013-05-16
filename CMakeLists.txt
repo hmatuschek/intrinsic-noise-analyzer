@@ -183,6 +183,8 @@ MESSAGE(STATUS "C Flags: ${CMAKE_C_FLAGS}")
 MESSAGE(STATUS "C++ Flags: ${CMAKE_CXX_FLAGS}")
 MESSAGE(STATUS "C++ Flags (debug): ${CMAKE_CXX_FLAGS_DEBUG}")
 MESSAGE(STATUS "C++ Flags (release): ${CMAKE_CXX_FLAGS_RELEASE}")
+MESSAGE(STATUS "Libraries: ${LIBS}")
+
 
 #
 # Traverse into source tree:
