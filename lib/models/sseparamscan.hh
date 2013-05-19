@@ -113,7 +113,7 @@ public:
      *        coordinates. Contents will be overwritten.
      * @param opt_level: Optimization level for expression evaluation.
      */
-    int parameterScan(std::vector<ParameterSet> &parameterSets,
+    void parameterScan(std::vector<ParameterSet> &parameterSets,
                       std::vector<Eigen::VectorXd> &resultSet,
                       size_t numThreads = OpenMP::getMaxThreads())
 
@@ -124,8 +124,6 @@ public:
 
         // First make space
         resultSet.resize(parameterSets.size());
-
-        int iter=0;
 
         // Initialize with initial concentrations
         Eigen::VectorXd x(index.size());
@@ -164,7 +162,9 @@ public:
             {
 
                 // Solve the deterministic equations
-                iter = this->solver.solve(x, this->max_time, this->min_time_step, parameterSets[j]);
+                NLEsolve::Status status = this->solver.solve(x, this->max_time, this->min_time_step, parameterSets[j]);
+
+                if(!status) throw(iNA::NumericError());
 
                 // Now calculate LNA
                 calcLNA(this->sseModel,x);
@@ -184,7 +184,6 @@ public:
 
         }
 
-        return iter;
     }
 
 protected:

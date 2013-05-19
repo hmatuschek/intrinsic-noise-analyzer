@@ -19,14 +19,14 @@ int main(int argc, char *argv[])
 
     // Construct SSA model from SBML model
     Ast::Model sbml_model; Parser::Sbml::importModel(sbml_model, argv[1]);
-    Models::GenericOptimizedSSA< Eval::jit::Engine<Eigen::VectorXd> > model(sbml_model, 1, std::time(0));
+    Models::GenericOptimizedSSA< Eval::jit::Engine<Eigen::VectorXd> > model(sbml_model, 10, std::time(0));
 
-    double dt=0.1;
+    double dt=100;//0.1;
 
     double tMax = 1e10;
 
     std::cout << "Start SSA" << std::endl;
-    model.run(50);
+     model.run(5000);//model.run(50);
     std::cout << "Transients passed..." << std::endl;
 
 
