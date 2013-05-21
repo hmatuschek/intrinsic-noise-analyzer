@@ -7,6 +7,9 @@
 #include <QFile>
 #include <QMessageBox>
 
+#include <fstream>
+#include "utils/matexport.hh"
+
 #include "paramscanplot.hh"
 #include "../models/application.hh"
 #include "../doctree/documenttree.hh"
@@ -155,26 +158,51 @@ ParamScanResultWidget::customPlotButtonPressed()
 void
 ParamScanResultWidget::saveButtonPressed()
 {
+  QString selectedFilter;
+  QString filename = QFileDialog::getSaveFileName(
+        this, tr("Save as text..."), "",
+        tr("Text Files (*.txt *.csv);;Matlab 5 Files (*.mat)"), &selectedFilter);
+  if ("" == filename) { return; }
 
-    QString filename = QFileDialog::getSaveFileName(
-          this, tr("Save as text..."), "", tr("Text Files (*.txt *.csv)"));
-
-    if ("" == filename)
-    {
-      return;
-    }
-
-    QFile file(filename);
-
-    if (!file.open(QIODevice::WriteOnly| QIODevice::Text))
-    {
-      QMessageBox box;
-      box.setWindowTitle(tr("Can not open file"));
-      box.setText(tr("Can not open file %1 for writing").arg(filename));
-      box.exec();
-    }
-
-    this->paramscan_task_wrapper->getParamScanTask()->getParameterScan().saveAsText(file);
-    file.close();
-
+  if (tr("") == selectedFilter) {
+    saveAsCSV(filename);
+  } else if (tr("") == selectedFilter) {
+    saveAsMAT(filename);
+  } else {
+    QMessageBox::critical(0, tr("Can not save results to file"),
+                          tr("Can not save results to file %1: Unknown format %2").arg(
+                            filename, selectedFilter));
+  }
 }
+
+
+void
+ParamScanResultWidget::saveAsCSV(const QString &filename)
+{
+  QFile file(filename);
+  // Try to open file
+  if (!file.open(QIODevice::WriteOnly| QIODevice::Text)) {
+    QMessageBox::critical(0, tr("Cannot open file"),
+                          tr("Cannot open file %1 for writing").arg(filename));
+    return;
+  }
+  // Write...
+  paramscan_task_wrapper->getParamScanTask()->getParameterScan().saveAsText(file);
+  file.close();
+}
+
+void
+ParamScanResultWidget::saveAsMAT(const QString &filename) {
+  std::fstream file(filename.toLocal8Bit().constData(), std::fstream::out|std::fstream::binary);
+  if (! file.is_open()) {
+    QMessageBox::critical(0, tr("Can not open file"),
+                          tr("Can not open file %1 for writing").arg(filename));
+    return;
+  }
+
+  iNA::Utils::MatFile mat_file;
+  mat_file.add("ParamScan_result", paramscan_task_wrapper->getParamScanTask()->getParameterScan().matrix());
+  mat_file.serialize(file);
+  file.close();
+}
+

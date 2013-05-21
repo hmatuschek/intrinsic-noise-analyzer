@@ -7,6 +7,9 @@
 #include <QFile>
 #include <QMessageBox>
 
+#include <fstream>
+#include "utils/matexport.hh"
+
 #include "replot.hh"
 #include "../models/application.hh"
 #include "../doctree/documenttree.hh"
@@ -102,18 +105,50 @@ REResultWidget::genericPlotButtonPressed() {
 void
 REResultWidget::saveButtonPressed()
 {
+  QString selectedFilter;
   QString filename = QFileDialog::getSaveFileName(
-        this, tr("Save as text..."), "", tr("Text Files (*.txt *.csv)"));
+        this, tr("Save as text..."), "",
+        tr("Text Files (*.txt *.csv);;Matlab 5 Files (*.mat)"), &selectedFilter);
   if ("" == filename) { return; }
-  QFile file(filename);
 
+  if (tr("") == selectedFilter) {
+    saveAsCSV(filename);
+  } else if (tr("") == selectedFilter) {
+    saveAsMAT(filename);
+  } else {
+    QMessageBox::critical(0, tr("Can not save results to file"),
+                          tr("Can not save results to file %1: Unknown format %2").arg(
+                            filename, selectedFilter));
+  }
+}
+
+
+void
+REResultWidget::saveAsCSV(const QString &filename)
+{
+  QFile file(filename);
+  // Try to open file
   if (!file.open(QIODevice::WriteOnly| QIODevice::Text)) {
-    QMessageBox box;
-    box.setWindowTitle(tr("Can not open file"));
-    box.setText(tr("Can not open file %1 for writing").arg(filename));
-    box.exec();
+    QMessageBox::critical(0, tr("Cannot open file"),
+                          tr("Cannot open file %1 for writing").arg(filename));
+    return;
+  }
+  // Write...
+  re_task_wrapper->getRETask()->getTimeSeries()->saveAsText(file);
+  file.close();
+}
+
+void
+REResultWidget::saveAsMAT(const QString &filename) {
+  std::fstream file(filename.toLocal8Bit().constData(), std::fstream::out|std::fstream::binary);
+  if (! file.is_open()) {
+    QMessageBox::critical(0, tr("Can not open file"),
+                          tr("Can not open file %1 for writing").arg(filename));
+    return;
   }
 
-  this->re_task_wrapper->getRETask()->getTimeSeries()->saveAsText(file);
+  iNA::Utils::MatFile mat_file;
+  mat_file.add("RE_result", re_task_wrapper->getRETask()->getTimeSeries()->matrix());
+  mat_file.serialize(file);
   file.close();
 }

@@ -7,6 +7,9 @@
 #include <QFile>
 #include <QMessageBox>
 
+#include <fstream>
+#include "utils/matexport.hh"
+
 #include "lnaplot.hh"
 #include "../models/application.hh"
 #include "../doctree/documenttree.hh"
@@ -111,18 +114,49 @@ LNAResultWidget::_genericPlotButtonPressed() {
 void
 LNAResultWidget::_saveButtonPressed() {
   // Get filename
+  QString selectedFilter;
   QString filename = QFileDialog::getSaveFileName(
-        this, tr("Save as text..."), "", tr("Text Files (*.txt *.csv)"));
+        this, tr("Save results as ..."), "",
+        tr("Text Files (*.txt *.csv);;Matlab 5 Files (*.mat)"), &selectedFilter);
   if ("" == filename) { return; }
+
+  if (tr("Text Files (*.txt *.csv)") == selectedFilter) {
+    saveAsCSV(filename);
+  } else if (tr("") == selectedFilter) {
+    saveAsMAT(filename);
+  } else {
+    QMessageBox::critical(0, tr("Can not save results to file"),
+                          tr("Can not save results to file %1: Unknown format %2").arg(
+                            filename, selectedFilter));
+  }
+}
+
+void
+LNAResultWidget::saveAsCSV(const QString &filename)
+{
   QFile file(filename);
   // Try to open file
   if (!file.open(QIODevice::WriteOnly| QIODevice::Text)) {
-    QMessageBox box;
-    box.setWindowTitle(tr("Cannot open file"));
-    box.setText(tr("Cannot open file %1 for writing").arg(filename));
-    box.exec();
+    QMessageBox::critical(0, tr("Cannot open file"),
+                          tr("Cannot open file %1 for writing").arg(filename));
+    return;
   }
   // Write...
   _lna_task_wrapper->getLNATask()->getTimeSeries()->saveAsText(file);
+  file.close();
+}
+
+void
+LNAResultWidget::saveAsMAT(const QString &filename) {
+  std::fstream file(filename.toLocal8Bit().constData(), std::fstream::out|std::fstream::binary);
+  if (! file.is_open()) {
+    QMessageBox::critical(0, tr("Can not open file"),
+                          tr("Can not open file %1 for writing").arg(filename));
+    return;
+  }
+
+  iNA::Utils::MatFile mat_file;
+  mat_file.add("LNA_result", _lna_task_wrapper->getLNATask()->getTimeSeries()->matrix());
+  mat_file.serialize(file);
   file.close();
 }

@@ -41,7 +41,8 @@ private slots:
   void _plotButtonPressed();
   void _genericPlotButtonPressed();
   void _saveButtonPressed();
-
+  void saveAsCSV(const QString &filename);
+  void saveAsMAT(const QString &filename);
 
 private:
   LNATaskWrapper *_lna_task_wrapper;

@@ -31,6 +31,15 @@ class Application : public QObject, public Configuration
 {
   Q_OBJECT
 
+public:
+  /// Specifies the model type for inport.
+  typedef enum {
+    FORMAT_AUTO,    ///< Determine type by filename extension (if given) or ask the user.
+    FORMAT_SBML,    ///< Imports model as SBML, no user interaction.
+    FORMAT_SBMLsh,  ///< Imports the model as SBML-sh no user interaction.
+    FORMAT_ASK_USER ///< Asks the user for format before import.
+  }ModelType;
+
 protected:
   /** Default constructor for an Application. */
   explicit Application();
@@ -86,7 +95,7 @@ public slots:
   void checkForNewVersion();
 
   /** Opens a model specified by the given path. */
-  void importModel(const QString &path, bool anonymous=false);
+  void importModel(const QString &path, bool anonymous=false, ModelType type=FORMAT_AUTO);
 
 public:
   /** Shuts the only running application instance down. */
@@ -102,7 +111,7 @@ private slots:
   /** Handler for the "import model" menu action. */
   void onImportModel();
   /** Slot to import a certain model. */
-  void onImportModel(const QString &path, bool anonymous=false);
+  void onImportModel(const QString &path, bool anonymous=false, ModelType type=FORMAT_AUTO);
   /** Handler for "export model" action. */
   void onExportModel();
   /** Handler for "remove model" action. */

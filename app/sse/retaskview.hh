@@ -43,6 +43,8 @@ private slots:
   void quickPlotButtonPressed();
   void genericPlotButtonPressed();
   void saveButtonPressed();
+  void saveAsCSV(const QString &filename);
+  void saveAsMAT(const QString &filename);
 
 private:
   TableWrapper *tableWrapper;

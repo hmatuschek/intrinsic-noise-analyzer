@@ -41,6 +41,8 @@ public:
 private slots:
   void showPlot();
   void saveData();
+  void saveAsCSV(const QString &filename);
+  void saveAsMAT(const QString &filename);
   void _genericPlotButtonPressed();
 
 private:

@@ -6,6 +6,7 @@
 #include <QToolButton>
 #include <QDragEnterEvent>
 #include <QDropEvent>
+#include <QFileInfo>
 #include "downloaddialog.hh"
 
 
@@ -138,5 +139,10 @@ DocumentsView::dropEvent(QDropEvent *event)
 
   // Open downloaded file
   QString local_file = dialog.localFileName();
-  Application::getApp()->importModel(local_file, true);
+  // Try to determine file type by extension or remote file name:
+  QFileInfo info(dialog.remoteFileName());
+  Application::ModelType type=Application::FORMAT_ASK_USER;
+  if (("xml"==info.suffix()) || ("sbml"==info.suffix())) { type = Application::FORMAT_SBML; }
+  else if (("mod"==info.suffix()) || ("sbmlsh"==info.suffix())) { type=Application::FORMAT_SBMLsh; }
+  Application::getApp()->importModel(local_file, true, type);
 }

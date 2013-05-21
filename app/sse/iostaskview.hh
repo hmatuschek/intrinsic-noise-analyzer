@@ -41,7 +41,8 @@ private slots:
   void _onPlotButtonPressed();
   void _onGenericPlotButtonPressed();
   void _onSaveButtonPressed();
-
+  void saveAsCSV(const QString &filename);
+  void saveAsMAT(const QString &filename);
 
 private:
   IOSTaskWrapper *_ios_task_wrapper;

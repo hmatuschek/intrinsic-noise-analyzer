@@ -6,6 +6,9 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
+#include "utils/matexport.hh"
+#include <fstream>
+
 #include "ssaplot.hh"
 #include "../models/application.hh"
 #include "../doctree/documenttree.hh"
@@ -108,19 +111,48 @@ SSAResultWidget::_genericPlotButtonPressed()
 void
 SSAResultWidget::saveData()
 {
+  QString selectedFilter;
   QString filename = QFileDialog::getSaveFileName(
-        this, tr("Save as text..."), "", tr("Text Files (*.txt *.csv)"));
+        this, tr("Save data as ..."), "",
+        tr("Text Files (*.txt *.csv);;Matlab 5 Files (*.mat)"),
+        &selectedFilter);
   if ("" == filename) { return; }
-  QFile file(filename);
 
+  if (tr("Text Files (*.txt *.csv)") == selectedFilter) {
+    saveAsCSV(filename);
+  } else if (tr("Matlab 5 Files (*.mat)") == selectedFilter) {
+    saveAsMAT(filename);
+  } else {
+    QMessageBox::critical(0, tr("Can not save results."),
+                          tr("Can not save results into file %1: Unknown format %2").arg(
+                            filename, selectedFilter));
+  }
+}
+
+void
+SSAResultWidget::saveAsCSV(const QString &filename) {
+  QFile file(filename);
   if (!file.open(QIODevice::WriteOnly| QIODevice::Text)) {
-    QMessageBox box;
-    box.setWindowTitle(tr("Can not open file"));
-    box.setText(tr("Can not open file %1 for writing").arg(filename));
-    box.exec();
+    QMessageBox::critical(0, tr("Can not open file"),
+                          tr("Can not open file %1 for writing").arg(filename));
+    return;
   }
 
   this->ssa_task_wrapper->getSSATask()->getTimeSeries().saveAsText(file);
   file.close();
 }
 
+void
+SSAResultWidget::saveAsMAT(const QString &filename) {
+  std::fstream file(filename.toLocal8Bit().constData(), std::fstream::out|std::fstream::binary);
+  if (! file.is_open()) {
+    QMessageBox::critical(0, tr("Can not open file"),
+                          tr("Can not open file %1 for writing").arg(filename));
+    return;
+  }
+
+  iNA::Utils::MatFile mat_file;
+  mat_file.add("SSA_result", this->ssa_task_wrapper->getSSATask()->getTimeSeries().matrix());
+  mat_file.serialize(file);
+  file.close();
+}

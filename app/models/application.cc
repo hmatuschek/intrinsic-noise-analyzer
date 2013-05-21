@@ -246,9 +246,9 @@ Application::checkForNewVersion()
 
 
 void
-Application::importModel(const QString &path, bool anonymous)
+Application::importModel(const QString &path, bool anonymous, ModelType type)
 {
-  onImportModel(path, anonymous);
+  onImportModel(path, anonymous, type);
 }
 
 
@@ -309,9 +309,11 @@ void Application::onImportModel()
 }
 
 
-void Application::onImportModel(const QString &fileName, bool anonymous)
+void Application::onImportModel(const QString &fileName, bool anonymous, ModelType type)
 {
+  // Get file into
   QFileInfo info(fileName);
+
   // Check if file is readable:
   if (! info.isReadable()) {
     QMessageBox::critical(
@@ -320,28 +322,38 @@ void Application::onImportModel(const QString &fileName, bool anonymous)
     return;
   }
 
-  try {
-    DocumentItem *new_doc = 0;
-    // Try to determine file type by extension:
-    if (("xml" == info.suffix()) || ("sbml" == info.suffix())) {
-      if (anonymous)
-        new_doc = new DocumentItem(Parser::Sbml::importModel(fileName.toLocal8Bit().data()));
-      else
-        new_doc = new DocumentItem(Parser::Sbml::importModel(fileName.toLocal8Bit().data()), fileName);
-    } else if (("mod" == info.suffix()) || ("sbmlsh" == info.suffix())) {
-      if (anonymous)
-        new_doc = new DocumentItem(Parser::Sbmlsh::importModel(fileName.toLocal8Bit().data()));
-      else
-        new_doc = new DocumentItem(Parser::Sbmlsh::importModel(fileName.toLocal8Bit().data()), fileName);
+  // Try to determine file type by extension or ask user:
+  if ( (FORMAT_AUTO==type) && (("xml"==info.suffix()) || ("sbml"==info.suffix()))) {
+    type = FORMAT_SBML;
+  } else if ((FORMAT_AUTO==type) && (("mod"==info.suffix()) || ("sbmlsh"==info.suffix()))) {
+    type = FORMAT_SBMLsh;
+  } else if ((FORMAT_AUTO==type) || (FORMAT_ASK_USER==type)){
+    // ask user:
+    // If unknown extension -> ask the user
+    ModelFormatQuestion dialog(fileName);
+    if (QDialog::Accepted != dialog.exec()) { return; }
+    ModelFormatQuestion::Format format = dialog.getFormat();
+    switch (format) {
+    case ModelFormatQuestion::SBML_MODEL: type=FORMAT_SBML;
+      case ModelFormatQuestion::SBMLSH_MODEL: type=FORMAT_SBMLsh;
     }
-    // Add new document to tree:
-    if (0 != new_doc) {
-      docTree()->addDocument(new_doc);
-      if (! anonymous) {
-        addRecentModel(fileName);
-        updateRecentModelsMenu();
+  }
+
+  // Finally, import model
+  DocumentItem *new_doc = 0;
+  try {
+    if (FORMAT_SBML == type) {
+      if (anonymous) {
+        new_doc = new DocumentItem(Parser::Sbml::importModel(fileName.toLocal8Bit().data()));
+      } else {
+        new_doc = new DocumentItem(Parser::Sbml::importModel(fileName.toLocal8Bit().data()), fileName);
       }
-      return;
+    } else if (FORMAT_SBMLsh == type) {
+      if (anonymous) {
+        new_doc = new DocumentItem(Parser::Sbmlsh::importModel(fileName.toLocal8Bit().data()));
+      } else {
+        new_doc = new DocumentItem(Parser::Sbmlsh::importModel(fileName.toLocal8Bit().data()), fileName);
+      }
     }
   } catch (iNA::Parser::ParserError &err) {
     QMessageBox::warning(0, tr("Can not open model"), err.what());
@@ -351,42 +363,12 @@ void Application::onImportModel(const QString &fileName, bool anonymous)
     return;
   }
 
-  // If unknown extension -> ask the user
-  ModelFormatQuestion dialog(fileName);
-  if (QDialog::Accepted != dialog.exec()) { return; }
-  ModelFormatQuestion::Format format = dialog.getFormat();
-
-  // load model.
-  try {
-    DocumentItem *new_doc = 0;
-    // Try to determine file type by extension:
-    if (ModelFormatQuestion::SBML_MODEL == format) {
-      if (anonymous)
-        new_doc = new DocumentItem(Parser::Sbml::importModel(fileName.toStdString()));
-      else
-        new_doc = new DocumentItem(Parser::Sbml::importModel(fileName.toStdString()), fileName);
-    } else if (ModelFormatQuestion::SBMLSH_MODEL == format) {
-      if (anonymous)
-        new_doc = new DocumentItem(Parser::Sbmlsh::importModel(fileName.toStdString()));
-      else
-        new_doc = new DocumentItem(Parser::Sbmlsh::importModel(fileName.toStdString()), fileName);
-    }
-    // Add new document to tree:
-    if (0 != new_doc) {
-      docTree()->addDocument(new_doc);
-      if (! anonymous) {
-        addRecentModel(fileName);
-        updateRecentModelsMenu();
-      }
-      return;
-    }
-  } catch (iNA::Parser::ParserError &err) {
-    QMessageBox::warning(
-          0, tr("Can not open model"), err.what());
-    return;
-  } catch (iNA::Exception &err) {
-    QMessageBox::warning(0, tr("Can not open model"), err.what());
-    return;
+  // Add document to doc tree:
+  docTree()->addDocument(new_doc);
+  // Add document to list of recent model if not imported anonymously:
+  if (! anonymous) {
+    addRecentModel(fileName);
+    updateRecentModelsMenu();
   }
 }
 
