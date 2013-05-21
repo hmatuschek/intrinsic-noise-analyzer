@@ -11,14 +11,14 @@ Source: intrinsic-noise-analyzer-%{version}.tar.gz
 URL: https://googlecode.com/p/intrinsic-noise-analyzer
 Version: %{version}
 Buildroot: /tmp/intrinsicnoiseanalyzerrpm
-BuildRequires: gcc-c++, cmake, libsbml-devel >= 5.0, libeigen3-devel >= 3.0
+BuildRequires: gcc-c++, cmake, libsbml-devel >= 5.0
 Requires: libsbml >= 5.0, libina = %{version}-%{release}
 %if 0%{?suse_version}
-BuildRequires: libqt4-devel >= 4.5, libginac-devel, llvm-devel >= 2.9
+BuildRequires: libqt4-devel >= 4.5, libginac-devel, llvm-devel >= 2.9, libeigen3-devel >= 3.0
 Requires: libqt4 >= 4.5, libginac2, llvm >= 2.9
 %endif
 %if 0%{?fedora}
-BuildRequires: qt4-devel >= 4.5, ginac-devel, llvm-devel >= 2.9
+BuildRequires: qt4-devel >= 4.5, ginac-devel, llvm-devel >= 2.9, eigen3 >= 3.0
 Requires: qt4 >= 4.5, ginac, llvm >= 2.9
 %endif
 
@@ -36,14 +36,14 @@ expensive stochastic simulation algorithm.
 %package -n libina
 Summary: Runtime library for the intrinsic Noise Analyzer
 Group: Science
-BuildRequires: gcc-c++, cmake, libsbml-devel >= 5.0, libeigen3-devel >= 3.0
+BuildRequires: gcc-c++, cmake, libsbml-devel >= 5.0
 Requires: libsbml >= 5.0
 %if 0%{?suse_version}
-BuildRequires: libginac-devel
+BuildRequires: libginac-devel, libeigen3-devel >= 3.0
 Requires: libginac2
 %endif
 %if 0%{?fedora}
-BuildRequires: ginac-devel
+BuildRequires: ginac-devel, eigen3 >= 3.0
 BuildRequires: ginac
 %endif
 
