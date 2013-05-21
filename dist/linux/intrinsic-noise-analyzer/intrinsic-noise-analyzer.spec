@@ -2,7 +2,7 @@ Summary: An analysis tool for biochemical reaction networks
 
 %define version 0.4.2
 
-License: GPLv2
+License: GPL-2.0+
 Group: Productivity/Scientific/Chemistry
 Name: intrinsic-noise-analyzer
 Prefix: /usr
@@ -11,14 +11,14 @@ Source: intrinsic-noise-analyzer-%{version}.tar.gz
 URL: https://googlecode.com/p/intrinsic-noise-analyzer
 Version: %{version}
 Buildroot: /tmp/intrinsicnoiseanalyzerrpm
-BuildRequires: gcc-c++, cmake, libsbml-devel >= 5.0, libeigen3-devel >= 3.0
-Requires: libsbml >= 5.0, libina = %{version}-%{release}
+BuildRequires: gcc-c++, cmake, libsbml-devel >= 5.0
+Requires: libsbml >= 5.0, libina0_4_2 = %{version}-%{release}
 %if 0%{?suse_version}
-BuildRequires: libqt4-devel >= 4.5, libginac-devel, llvm-devel >= 2.9
+BuildRequires: libqt4-devel >= 4.5, libginac-devel, llvm-devel >= 2.9, libeigen3-devel >= 3.0
 Requires: libqt4 >= 4.5, libginac2, llvm >= 2.9
 %endif
 %if 0%{?fedora}
-BuildRequires: qt4-devel >= 4.5, ginac-devel, llvm-devel >= 2.9
+BuildRequires: qt4-devel >= 4.5, ginac-devel, llvm-devel >= 2.9, eigen3 >= 3.0
 Requires: qt4 >= 4.5, ginac, llvm >= 2.9
 %endif
 
@@ -33,22 +33,46 @@ Approximation. The results of the analysis can be tested against the computation
 expensive stochastic simulation algorithm.
 
 
-%package -n libina
+%package -n libina0_4_2
 Summary: Runtime library for the intrinsic Noise Analyzer
-Group: Science
-BuildRequires: gcc-c++, cmake, libsbml-devel >= 5.0, libeigen3-devel >= 3.0
+Group: Development/Libraries/C and C++
+BuildRequires: gcc-c++, cmake, libsbml-devel >= 5.0
 Requires: libsbml >= 5.0
 %if 0%{?suse_version}
-BuildRequires: libginac-devel
+BuildRequires: libginac-devel, libeigen3-devel >= 3.0
 Requires: libginac2
 %endif
 %if 0%{?fedora}
-BuildRequires: ginac-devel
+BuildRequires: ginac-devel, eigen3 >= 3.0
 BuildRequires: ginac
 %endif
 
-%description -n libina
+%description -n libina0_4_2
 Provides the runtime library for the intrinsic Noise Analyzer.
+
+%post -n libina0_4_2
+/sbin/ldconfig
+
+%postun -n libina0_4_2
+/sbin/ldconfig
+
+
+%package -n libina-devel
+Summary: Runtime library for the intrinsic Noise Analyzer
+Group: Development/Libraries/C and C++
+BuildRequires: gcc-c++, cmake, libsbml-devel >= 5.0
+Requires: libsbml >= 5.0, libina0_4_2 = %{version}-%{release}
+%if 0%{?suse_version}
+BuildRequires: libginac-devel, libeigen3-devel >= 3.0
+Requires: libginac2
+%endif
+%if 0%{?fedora}
+BuildRequires: ginac-devel, eigen3 >= 3.0
+BuildRequires: ginac
+%endif
+
+%description -n libina-devel
+Provides the runtime library header files for the intrinsic Noise Analyzer.
 
 %prep
 %setup -q
@@ -60,13 +84,13 @@ make
 %install
 make install
 
-%post
-/sbin/ldconfig
-
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-%postun
+%post -n libina-devel
+/sbin/ldconfig
+
+%postun -n libina-devel
 /sbin/ldconfig
 
 
@@ -77,6 +101,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_prefix}/share/icons/IntrinsicNoiseAnalyzer.png
 
 
-%files -n libina
+%files -n libina0_4_2
+%defattr(-, root, root, -)
+%{_libdir}/libina.so.*
+
+%files -n libina-devel
 %defattr(-, root, root, -)
 %{_libdir}/libina.so
+%{_includedir}/libina/
