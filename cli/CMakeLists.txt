@@ -46,9 +46,9 @@ SET(sbml_ssacov_HEADERS
     sbml_ssacov.hh)
 
 SET(sbml_pscan_SOURCES
-    sbml_pscan.cc)
+    sbml_pscan.cc sbml_hybrid.cc)
 SET(sbml_pscan_HEADERS
-    sbml_pscan.hh)
+    sbml_pscan.hh sbml_hybrid.hh)
 
 SET(sbml_pscan2_SOURCES
     sbml_pscan2.cc)
