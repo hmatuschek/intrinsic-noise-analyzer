@@ -3,7 +3,6 @@
 
 #include "stochasticsimulator.hh"
 #include "constantstoichiometrymixin.hh"
-#include "extensivespeciesmixin.hh"
 #include "../eval/bci/engine.hh"
 #include "../openmp.hh"
 

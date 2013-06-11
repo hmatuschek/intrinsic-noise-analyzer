@@ -205,7 +205,7 @@ add_subdirectory(lib)
 #add_subdirectory(unsupported)
 ELSE()
 add_subdirectory(lib)
-#add_subdirectory(app)
+add_subdirectory(app)
 add_subdirectory(cli)
 add_subdirectory(unsupported)
 # Exclude unit tests requiring glibc which is not available under Windows!

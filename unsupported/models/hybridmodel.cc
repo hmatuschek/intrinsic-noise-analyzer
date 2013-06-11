@@ -42,6 +42,22 @@ HybridModel::HybridModel(Ast::Model &model, std::set<std::string> specList)
       // Distill external model
       distill(this,&external,exR,translation_table);
 
+      // List internal species
+      std::cerr << "List of internal species (" << this->numSpecies() << "):" << std::endl;
+      for(size_t i=0; i< this->numSpecies(); i++)
+      {
+        std::cerr<<this->getSpecies(i)->getIdentifier()<<std::endl;
+      }
+      std::cerr << "====" << std::endl << std::endl;
+
+      // List internal reactions
+      std::cerr << "List of internal reactions (" << this->numReactions() << "):" << std::endl;
+      for(size_t i=0; i< this->numReactions(); i++)
+      {
+        std::cerr<<this->getReaction(i)->getIdentifier()<<std::endl;
+      }
+      std::cerr << "====" << std::endl << std::endl;
+
 }
 
 void
@@ -244,11 +260,9 @@ HybridModel::distill(Ast::Model * src, Ast::Model *external,
      * Now, clean up internal model
      */
 
-    std::cerr<<"Reactions removed:"<<std::endl;
     // Remove exogeneous reactions from original model
     for(std::set<Ast::Reaction *>::iterator it = exR.begin(); it!=exR.end(); it++)
     {
-      std::cerr<<(*it)->getName()<<std::endl;
       Ast::Reaction *reaction = ((*it));
       src->remDefinition(reaction);
       delete reaction; reaction=0;
@@ -257,7 +271,6 @@ HybridModel::distill(Ast::Model * src, Ast::Model *external,
     // Remove external species from internal model but not their references
     for(std::set<Ast::Species *>::iterator it = exS.begin(); it!=exS.end(); it++)
     {
-      std::cerr<<(*it)->getIdentifier()<<std::endl;
       Ast::Species *species = ((*it));
       src->remDefinition(species);
     }

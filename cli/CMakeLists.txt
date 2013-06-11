@@ -77,11 +77,11 @@ SET(sbml_fft_HEADERS
 ADD_EXECUTABLE(sbml_hybrid ${sbml_hybrid_SOURCES})
 TARGET_LINK_LIBRARIES(sbml_hybrid ${LIBS} libina libunsupported)
 
-#ADD_EXECUTABLE(sbml_ssa ${sbml_ssa_SOURCES})
-#TARGET_LINK_LIBRARIES(sbml_ssa ${LIBS} libina libunsupported)
+ADD_EXECUTABLE(sbml_ssa ${sbml_ssa_SOURCES})
+TARGET_LINK_LIBRARIES(sbml_ssa ${LIBS} libina libunsupported)
 
-#ADD_EXECUTABLE(sbml_ssacov ${sbml_ssacov_SOURCES})
-#TARGET_LINK_LIBRARIES(sbml_ssacov ${LIBS} libina)
+ADD_EXECUTABLE(sbml_ssacov ${sbml_ssacov_SOURCES})
+TARGET_LINK_LIBRARIES(sbml_ssacov ${LIBS} libina)
 
 #ADD_EXECUTABLE(sbml_dist ${sbml_dist_SOURCES})
 #TARGET_LINK_LIBRARIES(sbml_dist ${LIBS} libina libunsupported)

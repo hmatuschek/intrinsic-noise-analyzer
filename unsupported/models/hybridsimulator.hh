@@ -33,7 +33,7 @@ protected:
 
   Models::IOSmodel sseModel;
 
-  GenericSSEinterpreter<IOSmodel,VectorEngine, MatrixEngine> SSEint;
+  std::vector<GenericSSEinterpreter<IOSmodel,VectorEngine, MatrixEngine> *> SSEint;
   std::vector<ODE::LsodaDriver< GenericSSEinterpreter<IOSmodel,VectorEngine, MatrixEngine> > * > ODEint;
 
   // Vector for time of next jump
@@ -43,17 +43,19 @@ public:
   /**
     Constructor
   **/
-  HybridSimulator(Models::HybridModel &model, size_t ensembleSize, double epsilon_abs, double epsilon_rel)
-    : OptimizedSSA(model.getExternalModel(), ensembleSize, time(0), 0, 1),
+  HybridSimulator(Models::HybridModel &model, size_t ensembleSize, double epsilon_abs, double epsilon_rel, size_t num_threads=OpenMP::getMaxThreads())
+    : OptimizedSSA(model.getExternalModel(), ensembleSize, time(0), 0, num_threads),
       intModel(model), extModel(model.getExternalModel()),
       sseModel(intModel),
-      SSEint(sseModel,extModel,1),
-      ODEint(ensembleSize),
+      SSEint(num_threads),
+      ODEint(num_threads),
       tjump(ensembleSize,0)
   {
-    for(size_t i=0; i<ensembleSize; i++)
+
+    for(size_t i=0; i<num_threads; i++)
     {
-      ODEint[i] = new ODE::LsodaDriver< GenericSSEinterpreter<IOSmodel,VectorEngine, MatrixEngine> >(SSEint,1,epsilon_abs,epsilon_rel);
+      SSEint[i] = new GenericSSEinterpreter<IOSmodel,VectorEngine, MatrixEngine> (sseModel,extModel,1);
+      ODEint[i] = new ODE::LsodaDriver< GenericSSEinterpreter<IOSmodel,VectorEngine, MatrixEngine> >(*SSEint[i],1,epsilon_abs,epsilon_rel);
     }
   }
 
@@ -61,9 +63,10 @@ public:
   {
 
     // Clean up after you ...
-    for(int i=0; i<ensembleSize; i++)
+    for(size_t i=0; i<this->numThreads(); i++)
     {
       delete ODEint[i]; ODEint[i]=0;
+      delete SSEint[i]; SSEint[i]=0;
     }
 
   }
@@ -97,26 +100,29 @@ public:
 
   {
 
+      // Reset ODE integrator
+      ODEint[OpenMP::getThreadNum()]->reset();
+
       // Perform jump it occurs before exit time
       if(t_out>tjump[sid])
       {
         double oldjumptime=tjump[sid];
         // Perform single SSA step and update tjump
         this->singleStep(tjump[sid],sid);
-        // Reset Integrator and integrate until time of jump
-        ODEint[sid]->step(state,t_in,oldjumptime);
+        // Integrate until time of jump
+        ODEint[OpenMP::getThreadNum()]->step(state,t_in,oldjumptime);
 
         // Now update state vector (perform jump)
         state.tail(this->getState().cols()) = this->getState().row(sid);
         // Reset ODE integrator
-        ODEint[sid]->reset();
+        //ODEint[OpenMP::getThreadNum()]->reset();
 
         // Complete integration from time of jump
         runHybridSingle(state, sid, oldjumptime, t_out);
       }
       else // Simply update state
       {
-        ODEint[sid]->step(state,t_in,t_out);
+        ODEint[OpenMP::getThreadNum()]->step(state,t_in,t_out);
       }
 
   }
@@ -127,6 +133,7 @@ public:
   void runHybrid(std::vector<Eigen::VectorXd> &stateMatrix, double t_in, double t_out)
   {
 
+#pragma omp parallel for if(this->numThreads()>1) num_threads(this->numThreads()) schedule(dynamic)
     for(int sid=0; sid<ensembleSize; sid++)
       this->runHybridSingle(stateMatrix[sid], sid, t_in, t_out);
 
@@ -142,29 +149,68 @@ public:
       }
   };
 
-  typedef std::map<Eigen::VectorXd,size_t,lessVec> histType;
+  typedef std::map<Eigen::VectorXd,double,lessVec> histType;
   typedef std::map<Eigen::VectorXd,Eigen::VectorXd,lessVec> condMeanType;
   typedef std::map<Eigen::VectorXd,Eigen::MatrixXd,lessVec> condVarType;
 
-  void dynError(const std::vector<Eigen::VectorXd> &stateMatrix, condMeanType &condMean, condVarType &condVar)
-  {
 
-    histType histExt;
-    dynError(stateMatrix, condMean, condVar);
+  /**
+  * Error of transformed signal. E[V(Z|s)]
+  */
+  void transError(const std::vector<Eigen::VectorXd> &stateMatrix, Eigen::VectorXd &mean, Eigen::MatrixXd &transErr)
+
+  {
+      // Zero input
+      mean = Eigen::VectorXd::Zero(intModel.numSpecies());
+      transErr = Eigen::MatrixXd::Zero(intModel.numSpecies(),intModel.numSpecies());
+
+      histType histExt;
+      condMeanType condMean;
+      condVarType condVar;
+      condStat(stateMatrix, histExt, condMean, condVar);
+
+      for(std::map<Eigen::VectorXd, Eigen::VectorXd,lessVec>::iterator item = condMean.begin();
+          item!=condMean.end(); item++)
+      {
+          mean += (item->second)*histExt[item->first];
+          transErr += (item->second)*(item->second.transpose())*histExt[item->first];
+      }
+
+      // Normalize
+      //mean/=histExt.size();
+      //transErr/=histExt.size();
+
+      transErr -=  mean*mean.transpose();
 
   }
 
-  void dynError(const std::vector<Eigen::VectorXd> &stateMatrix, condVarType &condVar)
+
+  void dynError(const std::vector<Eigen::VectorXd> &stateMatrix, Eigen::MatrixXd &dynErr)
 
   {
 
-    histType histExt;
-    condMeanType condMean;
-    dynError(stateMatrix, condMean, condVar);
+      // Zero input
+      dynErr = Eigen::MatrixXd::Zero(intModel.numSpecies(),intModel.numSpecies());
+
+      histType histExt;
+      condMeanType condMean;
+      condVarType condVar;
+
+      condStat(stateMatrix, histExt, condMean, condVar);
+
+      for(std::map<Eigen::VectorXd, Eigen::MatrixXd,lessVec>::iterator item = condVar.begin();
+          item!=condVar.end(); item++)
+      {
+          dynErr += (item->second)*histExt[item->first];
+      }
+
+      // Normalize
+      //dynErr/=histExt.size();
 
   }
 
-  void dynError(const std::vector<Eigen::VectorXd> &stateMatrix, histType &histExt,
+
+  void condStat(const std::vector<Eigen::VectorXd> &stateMatrix, histType &histExt,
                 condMeanType &condMean, condVarType &condVar)
 
   {
@@ -177,7 +223,7 @@ public:
     condMean.clear();
     histExt.clear();
 
-    std::map<Eigen::VectorXd,Eigen::MatrixXd,lessVec>::iterator item;
+    std::map<Eigen::VectorXd, Eigen::MatrixXd,lessVec>::iterator item;
     for(int sid=0; sid<ensembleSize; sid++)
     {
 
@@ -204,24 +250,35 @@ public:
 
     } // finished ensemble average
 
+    double norm=0;
+
     // Normalize
     for(item = condVar.begin(); item!=condVar.end(); item++)
     {
+      // Divide by number of occurences
       condMean[item->first] /= histExt[item->first];
       item->second /= histExt[item->first];
+      // Substract mean
       item->second -= (condMean[item->first]*(condMean[item->first].transpose()));
+      // Compute normalization factor of histogram
+      norm += histExt[item->first];
     }
 
+    // Normalize histogram
+    for(item = condVar.begin(); item!=condVar.end(); item++)
+    {
+        histExt[item->first]/=norm;
+    }
 
   }
 
 
-  Eigen::MatrixXd mechError(const std::vector<Eigen::VectorXd> &stateMatrix, Eigen::MatrixXd &mechEcov)
+  void mechError(const std::vector<Eigen::VectorXd> &stateMatrix, Eigen::MatrixXd &mechErr)
 
   {
 
     // Zero matrix
-    mechEcov = Eigen::MatrixXd::Zero(intModel.numSpecies(),intModel.numSpecies());
+    mechErr = Eigen::MatrixXd::Zero(intModel.numSpecies(),intModel.numSpecies());
 
     Eigen::VectorXd mean,emre,iosemre,skewness;
     Eigen::MatrixXd cov, iosCov;
@@ -232,11 +289,11 @@ public:
       const Eigen::VectorXd &state = stateMatrix[sid];
       sseModel.fullState(state,mean,cov,emre,iosCov,skewness,iosemre);
 
-      mechEcov += cov;
+      mechErr += cov;
 
     }
 
-    return mechEcov/ensembleSize;
+    mechErr/=ensembleSize;
 
   }
 
