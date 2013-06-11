@@ -1,5 +1,5 @@
-#ifndef __FLUC_EVALUATE_BCIMP_CODE_HH__
-#define __FLUC_EVALUATE_BCIMP_CODE_HH__
+#ifndef __INA_EVALUATE_BCIMP_CODE_HH__
+#define __INA_EVALUATE_BCIMP_CODE_HH__
 
 #include "../bci/code.hh"
 #include <vector>

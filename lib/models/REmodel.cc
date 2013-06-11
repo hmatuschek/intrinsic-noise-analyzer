@@ -8,14 +8,14 @@ REmodel::REmodel(const Ast::Model &model)
   : SSEBaseModel(model),
     _sseLength(this->numSpecies()),_lnaLength(0), _iosLength(0)
 {
-    // set dimension
+    // Set dimension
     dim = this->numIndSpecies();
 
-    // setup index table
+    // Setup index table
     for(size_t i = 0; i<this->numIndSpecies(); i++)
         this->stateIndex.insert(std::make_pair(this->species[PermutationVec(i)],i));
 
-    // and combine to update vector
+    // ... and combine to update vector
     this->updateVector = this->REs;
 }
 
@@ -24,21 +24,7 @@ REmodel::fullState(const Eigen::VectorXd &state, Eigen::VectorXd &full_state)
 {
 
     InitialConditions context(*this);
-
     fullState(context,state,full_state);
-
-//  // make space
-//  full_state.resize(this->numSpecies());
-//  full_state.head(this->numIndSpecies()) = state.head(this->numIndSpecies());
-
-//  if(this->numDepSpecies()>0){
-//      full_state.tail(this->numDepSpecies()) =
-//              Eigen::ex2double(this->conserved_cycles)
-//              + this->Link0CMatrixNumeric*state.head(this->numIndSpecies());
-//  }
-
-//  // restore original order and return
-//  full_state = (this->PermutationM.transpose())*full_state;
 
 }
 
@@ -47,17 +33,18 @@ void
 REmodel::fullState(InitialConditions &context,const Eigen::VectorXd &state, Eigen::VectorXd &full_state)
 {
 
-  // make space
+  // Make space
   full_state.resize(this->numSpecies());
   full_state.head(this->numIndSpecies()) = state.head(this->numIndSpecies());
 
+  // Resolve conserved species
   if(this->numDepSpecies()>0){
       full_state.tail(this->numDepSpecies()) =
               context.getConservedCycles()
               + context.getLink0CMatrix()*state.head(this->numIndSpecies());
   }
 
-  // restore original order and return
+  // Restore original order and return
   full_state = (this->PermutationM.transpose())*full_state;
 
 }
@@ -67,22 +54,24 @@ REmodel::getFlux(const Eigen::VectorXd &state, Eigen::VectorXd &flux)
 
 {
 
-
-    // collect all the values of constant parameters except variable parameters
+    // Collect all the values of constant parameters except variable parameters
     Trafo::ConstantFolder constants(*this);
 
-
+    // Make space
     flux.resize(this->numReactions());
 
+    // First fold the conservation laws
+    this->foldConservationConstants(this->rate_expressions);
+
+    // Substistute state vector
     GiNaC::exmap subtab;
     for(size_t s=0; s<this->numIndSpecies(); s++)
         subtab.insert( std::pair<GiNaC::ex,GiNaC::ex>( getREvar(s), state(s) ) );
 
-    this->foldConservationConstants(this->rate_expressions);
-
     for(size_t i=0; i<numReactions();i++)
         flux(i)=GiNaC::ex_to<GiNaC::numeric>(constants.apply(this->rate_expressions(i)).subs(subtab)).to_double();
 
+    //...and return substitution table
     return subtab;
 
 }
@@ -91,7 +80,7 @@ size_t
 REmodel::getDimension()
 
 {
-  // this is enough for deterministic RE models
+  // This is enough for deterministic RE models
   return dim;
 }
 
@@ -135,26 +124,18 @@ REmodel::getJacobian() const {
 size_t
 REmodel::lnaLength()
 {
-
     return _lnaLength;
-
 }
-
 
 size_t
 REmodel::iosLength()
 {
-
     return _iosLength;
-
 }
-
 
 size_t
 REmodel::sseLength()
 {
-
     return _iosLength+_lnaLength;
-
 }
 

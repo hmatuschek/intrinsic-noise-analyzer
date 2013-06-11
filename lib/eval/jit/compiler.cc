@@ -2,6 +2,8 @@
 #include <llvm/PassManager.h>
 #ifdef INA_LLVM_VERSION_IS_32
 #include <llvm/DataLayout.h>
+#elif INA_LLVM_VERSION_IS_33
+#include <llvm/IR/DataLayout.h>
 #else
 #include <llvm/Target/TargetData.h>
 #endif
@@ -77,6 +79,8 @@ CompilerCore::finalize(size_t level)
   // Set up the optimizer pipeline.  Start with registering info about how the
   // target lays out data structures.
 #ifdef INA_LLVM_VERSION_IS_32
+  fpm.add(new llvm::DataLayout(*engine->getDataLayout()));
+#elif INA_LLVM_VERSION_IS_33
   fpm.add(new llvm::DataLayout(*engine->getDataLayout()));
 #else
   fpm.add(new llvm::TargetData(*engine->getTargetData()));

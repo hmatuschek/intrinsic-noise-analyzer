@@ -67,6 +67,10 @@ public:
     lsoda(getDimension(), state.data()-1, &t, t+step_size, 2, rtolwork, atolwork, 1, &istate, 0, 2);
   }
 
+  virtual void step(Eigen::VectorXd &state, double t_in, double t_out) {
+    lsoda(getDimension(), state.data()-1, &t_in, t_out, 2, rtolwork, atolwork, 1, &istate, 0, 2);
+  }
+
   virtual void evalODE(double t, double y[], double yd[], int nsize) {
     system.evaluate(y, t, yd);
   }

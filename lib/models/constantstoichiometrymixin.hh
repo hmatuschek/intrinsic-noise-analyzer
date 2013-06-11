@@ -11,7 +11,7 @@ namespace Models {
 
 
 /**
- * Asserts that the stoichiometry of the BaseModel (given to the constructor) is constant
+ * Asserts that the stoichiometry of Ast::Model (given to the constructor) is constant
  * and assembles the stoichiometry matrices for the model.
  *
  * @ingroup models
@@ -44,7 +44,7 @@ public:
   /**
    * Performs the checks on the given base model.
    */
-  ConstantStoichiometryMixin(BaseModel &base);
+  ConstantStoichiometryMixin(const Ast::Model &model);
 
   /**
    * Stores the stoichiometry matrix in the given @c Eigen::Matrix.

@@ -86,12 +86,9 @@ public:
     }
 
     /**
-     * Perform a parameter scan using the steady state analysis.
+     * Perform a parameter scan using the time course analysis. Outputs everything into the std::cout
      *
      * @param parameterSets: Vector of parameter sets to perform analysis for.
-     * @param resultSet: Outputs the steady state concentrations, covariance and EMRE vector in reduced
-     *        coordinates. Contents will be overwritten.
-     * @param opt_level: Optimization level for expression evaluation.
      */
     void parameterScan(std::vector<ParameterSet> &parameterSets, double t_final,
                        double timestep, double epsilon_abs, double epsilon_rel,

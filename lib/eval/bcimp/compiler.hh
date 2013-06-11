@@ -1,5 +1,5 @@
-#ifndef __FLUC_EVALUATE_BCIMP_COMPILER_HH__
-#define __FLUC_EVALUATE_BCIMP_COMPILER_HH__
+#ifndef __INA_EVALUATE_BCIMP_COMPILER_HH__
+#define __INA_EVALUATE_BCIMP_COMPILER_HH__
 
 #include <ginac/ginac.h>
 #include <eigen3/Eigen/Eigen>

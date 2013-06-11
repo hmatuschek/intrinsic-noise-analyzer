@@ -1,5 +1,5 @@
-#ifndef __INA_MODELS_OPTIMIZEDSSA_H
-#define __INA_MODELS_OPTIMIZEDSSA_H
+#ifndef __INA_MODELS_OPTIMIZEDSSA_HH
+#define __INA_MODELS_OPTIMIZEDSSA_HH
 
 #include "stochasticsimulator.hh"
 #include "constantstoichiometrymixin.hh"
@@ -142,6 +142,7 @@ public:
 #pragma omp parallel for if(this->numThreads()>1) num_threads(this->numThreads()) schedule(dynamic) private(propensitySum,tau,t,reaction)
     for(int sid=0;sid<this->ensembleSize;sid++)
     {
+      //reset time
       t=0;
 
       interpreter[OpenMP::getThreadNum()].setCode(&all_byte_code);
@@ -183,6 +184,49 @@ public:
     } // end ensemble loop
   }
 
+
+  /**
+   * The single reaction stepper for the SSA, very inefficient.
+   */
+  void singleStep(double &t, size_t sid)
+  {
+
+    // Initialization
+    double propensitySum;	        // sum of propensities
+    size_t reaction;			// reaction number selected
+
+    interpreter[OpenMP::getThreadNum()].setCode(&all_byte_code);
+    interpreter[OpenMP::getThreadNum()].run(this->observationMatrix.row(sid), prop[OpenMP::getThreadNum()]);
+
+    // Initialize sum propensities
+    propensitySum = prop[OpenMP::getThreadNum()].sum();
+
+    // Sample time step
+    if(propensitySum > 0) {
+       t += -std::log(this->rand[OpenMP::getThreadNum()].rand()) / propensitySum;
+    } else {
+      return;
+    }
+
+    // Select reaction
+    double r = this->rand[OpenMP::getThreadNum()].rand()*propensitySum;
+    double sum = prop[OpenMP::getThreadNum()](0);
+    reaction = 0;
+    while(sum < r)
+      sum += prop[OpenMP::getThreadNum()](++reaction);
+
+    // Update population of chemical species
+    for (Eigen::SparseMatrix<double>::InnerIterator it(this->sparseStoichiometry,reaction); it; ++it) {
+      this->observationMatrix(sid,it.row())+=it.value();
+    }
+
+    // Update only propensities that are changed in reaction
+    interpreter[OpenMP::getThreadNum()].setCode(byte_code[reaction]);
+    interpreter[OpenMP::getThreadNum()].run(this->observationMatrix.row(sid),prop[OpenMP::getThreadNum()]);
+
+    // Exit with updated time t
+  }
+
 private:
     /** Reserves space for propensities of each threads. */
     std::vector< Eigen::VectorXd > prop;
@@ -198,4 +242,4 @@ typedef GenericOptimizedSSA< Eval::bci::Engine<Eigen::VectorXd> > OptimizedSSA;
 }
 }
 
-#endif // __FLUC_OPTIMIZEDSSA_H
+#endif // __INA_OPTIMIZEDSSA_HH

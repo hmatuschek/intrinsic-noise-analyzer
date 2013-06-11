@@ -1,12 +1,21 @@
-#ifndef __FLUC_EVALUATE_LLVM_CODE_HH__
-#define __FLUC_EVALUATE_LLVM_CODE_HH__
+#ifndef __INA_EVALUATE_LLVM_CODE_HH__
+#define __INA_EVALUATE_LLVM_CODE_HH__
 
 #include "config.hh"
+#if INA_LLVM_VERSION_IS_33
+#include <llvm/IR/LLVMContext.h>
+#include <llvm/IR/Module.h>
+#include <llvm/IR/DerivedTypes.h>
+#include <llvm/IR/Constants.h>
+#include <llvm/IR/Instructions.h>
+#else
 #include <llvm/LLVMContext.h>
 #include <llvm/Module.h>
 #include <llvm/DerivedTypes.h>
 #include <llvm/Constants.h>
 #include <llvm/Instructions.h>
+#endif
+
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/ExecutionEngine/GenericValue.h>
 #include <llvm/Support/raw_ostream.h>
@@ -17,6 +26,8 @@
 #endif
 #if INA_LLVM_VERSION_IS_32
 #include <llvm/IRBuilder.h>
+#elif INA_LLVM_VERSION_IS_33
+#include <llvm/IR/IRBuilder.h>
 #else
 #include <llvm/Support/IRBuilder.h>
 #endif

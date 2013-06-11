@@ -4,7 +4,9 @@ SET(libina_unsupported_SOURCES
    models/maximumentropy.cc
    models/spectrumrecorder.cc
    models/tcparamscan.cc
-#   models/gillespieCLE.cc
+   models/hybridmodel.cc
+   models/hybridsimulator.cc
+   models/gillespieCLE.cc
 )
 
 SET(libina_unsupported_HEADERS
@@ -12,7 +14,9 @@ SET(libina_unsupported_HEADERS
    models/maximumentropy.hh
    models/spectrumrecorder.hh
    models/tcparamscan.hh
-#   models/gillespieCLE.hh
+   models/hybridmodel.hh
+   models/hybridsimulator.hh
+   models/gillespieCLE.hh
    )
 
 #
