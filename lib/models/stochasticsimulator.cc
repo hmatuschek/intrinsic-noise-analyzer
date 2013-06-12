@@ -100,6 +100,7 @@ StochasticSimulator::~StochasticSimulator()
 
 void
 StochasticSimulator::evaluate(const Eigen::VectorXd &populationVec, Eigen::VectorXd &propensities)
+
 {
   // Assemble substitutions
   GiNaC::exmap substitutions;
@@ -142,6 +143,7 @@ StochasticSimulator::getState() const
 
 void
 StochasticSimulator::getHistogram(size_t speciesId,std::map<double,double> &hist)
+
 {
 
     //hist.clear();
@@ -158,6 +160,7 @@ StochasticSimulator::getHistogram(size_t speciesId,std::map<double,double> &hist
 
 void
 StochasticSimulator::getHistogram(size_t speciesId,Histogram<double> &hist)
+
 {
     // Divide by volume and add to histogram.
     hist.insert(observationMatrix.col(speciesId) / this->Omega(speciesId));
@@ -176,7 +179,6 @@ StochasticSimulator::stats(Eigen::VectorXd &mean, Eigen::MatrixXd &covariance, E
   for(int ids=0;ids<this->ensembleSize;ids++){
     mean += this->observationMatrix.row(ids);
   }
-
 
   mean /= this->ensembleSize;
 
@@ -274,18 +276,21 @@ StochasticSimulator::size()
 
 double
 StochasticSimulator::uniform()
+
 {
   return this->rand[0].rand();
 }
 
 
 const size_t &StochasticSimulator::numThreads()
+
 {
     return this->num_threads;
 }
 
 
 Ast::Unit StochasticSimulator::getConcentrationUnit() const
+
 {
     return concentrationUnit;
 }

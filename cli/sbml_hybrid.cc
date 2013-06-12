@@ -24,6 +24,24 @@ void printProgBar( int percent ){
   std::cerr<< percent << "%     " << std::flush;
 }
 
+
+std::string Confucius()
+{
+
+  MersenneTwister mt(time(0));
+
+  std::vector<std::string> confucius;
+  confucius.push_back("Man who stand on hill with mouth open will wait long time for roast duck to drop in.");
+  confucius.push_back("It does not matter how slowly you go as long as you do not stop.");
+  confucius.push_back("Life is really simple, but we insist on making it complicated.");
+  confucius.push_back("When it is obvious that the goals cannot be reached, don't adjust the goals, adjust the action steps.");
+  confucius.push_back("Real knowledge is to know the extent of one's ignorance.");
+  confucius.push_back("I hear and I forget. I see and I remember. I do and I understand.");
+
+  return confucius[mt.rand()*confucius.size()];
+
+}
+
 int main(int argc, char *argv[])
 {
   // Check args:
@@ -33,12 +51,13 @@ int main(int argc, char *argv[])
     return -1;
   }
 
+
     // Ensemble size
-    int ens = 500000;
+    int ens = 500;
     // Timestep
-    double dt=0.1;
+    double dt=0.01;
     // Final time
-    double tmax = 10;
+    double tmax = 20;
 
 
     // Construct hybrid model from SBMLsh model
@@ -62,65 +81,60 @@ int main(int argc, char *argv[])
     size_t nInt = hybrid.numSpecies();
     size_t nExt = hybrid.getExternalModel().numSpecies();
 
-    // Do the work:
+    Models::HybridSimulator simulator(hybrid, ens, 1.e-8, 1.e-4);
 
-      // Construct SSA model from SBML model
-      Models::HybridSimulator simulator(hybrid, ens, 1.e-8, 1.e-4);
+    Models::Histogram<double> hist;
 
-      Models::Histogram<double> hist;
+    Eigen::VectorXd istate;
+    simulator.getInitial(istate);
 
-//      std::cout << "Start SSA" << std::endl;
-//      simulator.run(100);
-//      std::cout << "Transients passed..." << std::endl;
-
-      Eigen::VectorXd istate;
-      simulator.getInitial(istate);
-
-      std::vector<Eigen::VectorXd> state(ens,istate);
+    std::vector<Eigen::VectorXd> state(ens,istate);
 
 
-      Eigen::VectorXd mean;
+    Eigen::VectorXd mean;
 
-      Eigen::MatrixXd mechErr;
-      Eigen::MatrixXd dynErr;
-      Eigen::MatrixXd transErr;
+    Eigen::MatrixXd mechErr;
+    Eigen::MatrixXd dynErr;
+    Eigen::MatrixXd transErr;
 
-      double progress=0.;
-      std::cerr<< "Progress: " << std::endl;
-      try{
-        for(double t=0.; t<tmax; t+=dt)
-        {
+    // Some wisdom
+    double progress=0.;
+    std::cerr<< "Confucius says '" << Confucius() << "'"<<
+                std::endl << "Please wait for progress..." << std::endl;
+    try{
+      for(double t=0.; t<tmax; t+=dt)
+      {
 
-           if((t/tmax)>progress){ printProgBar(progress*100); progress+=0.01; }
-           //Single trajectory
+         if((t/tmax)>progress){ printProgBar(progress*100); progress+=0.01; }
+         //Single trajectory
 //           std::cout << t << "\t"
 //                     << state[0].head(nInt).transpose() << "\t"
 //                     << state[0].tail(nExt).transpose() << std::endl;
 
-          std::cout << t << "\t"
-                    << mean.transpose() << "\t"
-                    << (transErr).diagonal().transpose() << "\t"
-                    << (dynErr).diagonal().transpose() << "\t"
-                    << (mechErr).diagonal().transpose() << "\t"
-                    << std::endl;
+        std::cout << t << "\t"
+                  << mean.transpose() << "\t"
+                  << (transErr).diagonal().transpose() << "\t"
+                  << (dynErr).diagonal().transpose() << "\t"
+                  << (mechErr).diagonal().transpose() << "\t"
+                  << std::endl;
 
-           simulator.mechError(state, mechErr);
-           simulator.dynError(state, dynErr);
-           simulator.transError(state,mean,transErr);
-           simulator.runHybrid(state, t, t+dt);
+         simulator.mechError(state, mechErr);
+         simulator.dynError(state, dynErr);
+         simulator.transError(state,mean,transErr);
+         simulator.runHybrid(state, t, t+dt);
 
-           //simulator.stats(mean,cov,skew);
-
-        }
+         //simulator.stats(mean,cov,skew);
 
       }
-      catch (iNA::NumericError &err)
-      {
-          std::cerr << "Numeric error: " << err.what() << std::endl;
-      }
 
-      printProgBar(100);
-      std::cerr<<std::endl;
+    }
+    catch (iNA::NumericError &err)
+    {
+        std::cerr << "Numeric error: " << err.what() << std::endl;
+    }
+
+    printProgBar(100);
+    std::cerr<<std::endl;
 
 
 

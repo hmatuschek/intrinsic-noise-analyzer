@@ -231,7 +231,7 @@ public:
       sseModel.fullState(state,concentration,cov,emre,iosCov,skewness,iosemre);
 
       // Specify signal of interest.
-      Eigen::VectorXd SoI = state.tail(extModel.numSpecies());
+      Eigen::VectorXd SoI = state.tail(extModel.numSpecies()).head(1);
 
       // Collect mean, variance and histogram
       item = condVar.find(SoI);
