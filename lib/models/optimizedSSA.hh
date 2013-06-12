@@ -109,7 +109,7 @@ public:
 
 
   /** Destructor, also frees byte-code instances. */
-  ~GenericOptimizedSSA()
+  virtual ~GenericOptimizedSSA()
   {
     for (size_t i=0; i < this->byte_code.size(); i++) {
       delete byte_code[i];

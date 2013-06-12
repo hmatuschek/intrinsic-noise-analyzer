@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
     // Timestep
     double dt=0.01;
     // Final time
-    double tmax = 20;
+    double tmax = 10;
 
 
     // Construct hybrid model from SBMLsh model
@@ -92,10 +92,24 @@ int main(int argc, char *argv[])
 
 
     Eigen::VectorXd mean;
-
     Eigen::MatrixXd mechErr;
     Eigen::MatrixXd dynErr;
     Eigen::MatrixXd transErr;
+
+
+    Eigen::VectorXd meanEx(nExt);
+    Eigen::VectorXd skew(nExt);
+    Eigen::MatrixXd covEx(nExt,nExt);
+
+    // Open file for external statistics
+    std::ofstream outfile;
+    outfile.open ("external.dat");
+    outfile << "# time";
+    for(size_t i=0; i<nExt; i++)
+        outfile << "\t mean(" << hybrid.getExternalModel().getSpecies(i)->getIdentifier() <<")";
+    for(size_t i=0; i<nExt; i++)
+        outfile << "\t var(" << hybrid.getExternalModel().getSpecies(i)->getIdentifier() <<")";
+    outfile << std::endl;
 
     // Some wisdom
     double progress=0.;
@@ -123,7 +137,16 @@ int main(int argc, char *argv[])
          simulator.transError(state,mean,transErr);
          simulator.runHybrid(state, t, t+dt);
 
-         //simulator.stats(mean,cov,skew);
+         // External model statistics
+         simulator.stats(meanEx,covEx,skew);
+
+         outfile << t;
+         for(size_t i=0; i<nExt; i++)
+              outfile << "\t" << meanEx(i);
+         for(size_t i=0; i<nExt; i++)
+              outfile << "\t" << covEx(i,i);
+         outfile<<std::endl;
+
 
       }
 
