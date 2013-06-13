@@ -49,8 +49,9 @@ public:
    * @param num_threads Specifies the number of threads to use.
    */
   GenericOptimizedSSA(const Ast::Model &model, int ensembleSize, int seed,
-               size_t opt_level=0, size_t num_threads=OpenMP::getMaxThreads())
-    : StochasticSimulator(model, ensembleSize, seed, num_threads),
+               size_t opt_level=0, size_t num_threads=OpenMP::getMaxThreads(),
+               const std::vector<const GiNaC::symbol *> params = std::vector<const GiNaC::symbol *>())
+    : StochasticSimulator(model, ensembleSize, seed, num_threads, params),
       ConstantStoichiometryMixin((BaseModel &)(*this)),
       byte_code(this->numReactions()), all_byte_code(),
       sparseStoichiometry(numSpecies(),numReactions()),
@@ -223,7 +224,6 @@ public:
     interpreter[OpenMP::getThreadNum()].setCode(byte_code[reaction]);
     interpreter[OpenMP::getThreadNum()].run(this->observationMatrix.row(sid),prop[OpenMP::getThreadNum()]);
 
-    // Exit with updated time t
   }
 
 private:

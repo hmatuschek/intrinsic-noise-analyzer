@@ -6,13 +6,14 @@
 using namespace iNA;
 using namespace iNA::Models;
 
-StochasticSimulator::StochasticSimulator(const Ast::Model &model, int size, int seed, size_t threads)
+StochasticSimulator::StochasticSimulator(const Ast::Model &model, int size, int seed, size_t threads,
+                                         const std::vector<const GiNaC::symbol *> &parameters)
     : BaseModel(model),
       ParticleNumbersMixin((BaseModel &)(*this)),
       ReasonableModelMixin((BaseModel &)(*this)),
       num_threads(threads),
       rand(1),
-      observationMatrix(size,numSpecies()),
+      observationMatrix(size,numSpecies()+parameters.size()),
       ics(numSpecies()), Omega(numSpecies()), ensembleSize(size)
 
 {
@@ -30,6 +31,10 @@ StochasticSimulator::StochasticSimulator(const Ast::Model &model, int size, int 
   // make index table
   for(size_t i=0; i<this->numSpecies(); i++)
      this->stateIndex.insert(std::make_pair(this->getSpecies(i)->getSymbol(),i));
+
+  // add parameters
+  for(size_t i=0; i<parameters.size(); i++)
+    this->stateIndex.insert(std::make_pair(*parameters[i],i));
 
   // fold all constants
   Trafo::ConstantFolder constants(*this);
@@ -85,7 +90,7 @@ StochasticSimulator::StochasticSimulator(const Ast::Model &model, int size, int 
   // initialize ensemble
   for(int i=0; i<this->ensembleSize;i++)
   {
-     this->observationMatrix.row(i)=ics;
+     this->observationMatrix.row(i).head(this->numSpecies())=ics;
   }
 
 }
@@ -100,7 +105,6 @@ StochasticSimulator::~StochasticSimulator()
 
 void
 StochasticSimulator::evaluate(const Eigen::VectorXd &populationVec, Eigen::VectorXd &propensities)
-
 {
   // Assemble substitutions
   GiNaC::exmap substitutions;
@@ -143,7 +147,6 @@ StochasticSimulator::getState() const
 
 void
 StochasticSimulator::getHistogram(size_t speciesId,std::map<double,double> &hist)
-
 {
 
     //hist.clear();
@@ -160,7 +163,6 @@ StochasticSimulator::getHistogram(size_t speciesId,std::map<double,double> &hist
 
 void
 StochasticSimulator::getHistogram(size_t speciesId,Histogram<double> &hist)
-
 {
     // Divide by volume and add to histogram.
     hist.insert(observationMatrix.col(speciesId) / this->Omega(speciesId));
@@ -177,8 +179,9 @@ StochasticSimulator::stats(Eigen::VectorXd &mean, Eigen::MatrixXd &covariance, E
 
   // calculate mean numbers
   for(int ids=0;ids<this->ensembleSize;ids++){
-    mean += this->observationMatrix.row(ids);
+    mean += this->observationMatrix.row(ids).head(this->numSpecies());
   }
+
 
   mean /= this->ensembleSize;
 
@@ -238,6 +241,13 @@ StochasticSimulator::stats(Eigen::VectorXd &mean, Eigen::MatrixXd &covariance, E
 
 }
 
+Eigen::MatrixXd &
+StochasticSimulator::getObservationMatrix()
+{
+  return this->observationMatrix;
+}
+
+
 void
 StochasticSimulator::fluxStatistics(Eigen::VectorXd &mean, Eigen::MatrixXd &covariance)
 
@@ -276,21 +286,18 @@ StochasticSimulator::size()
 
 double
 StochasticSimulator::uniform()
-
 {
   return this->rand[0].rand();
 }
 
 
 const size_t &StochasticSimulator::numThreads()
-
 {
     return this->num_threads;
 }
 
 
 Ast::Unit StochasticSimulator::getConcentrationUnit() const
-
 {
     return concentrationUnit;
 }

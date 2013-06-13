@@ -83,7 +83,8 @@ public:
    * Is initialized with a model, the number of realization @c ensembleSize and a seed for the
    * random number generator
    **/
-  StochasticSimulator(const Ast::Model &model, int ensembleSize, int seed, size_t num_threads=OpenMP::getMaxThreads());
+  StochasticSimulator(const Ast::Model &model, int ensembleSize, int seed, size_t num_threads=OpenMP::getMaxThreads(),
+                      const std::vector<const GiNaC::symbol *> &parameters=std::vector<const GiNaC::symbol *>());
 
   /**
   * Gives number of threads used for OpenMP parallelism
@@ -117,6 +118,9 @@ public:
   *  @param covariance the lower diagonal covariance matrix
   **/
 
+
+  Eigen::MatrixXd & getObservationMatrix();
+
   void stats(Eigen::VectorXd &mean, Eigen::MatrixXd &covariance, Eigen::VectorXd &skewness);
 
   /**
@@ -126,7 +130,6 @@ public:
   *  @param covariance of fluxes
   **/
   void fluxStatistics(Eigen::VectorXd &mean, Eigen::MatrixXd &covariance);
-
 
   /**
   *  Evaluates the histogram of a species from current state
