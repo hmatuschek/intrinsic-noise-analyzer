@@ -13,6 +13,72 @@
 namespace iNA {
 namespace Models {
 
+class SignalOfInterest
+    : public std::vector<GiNaC::ex>
+{
+public:
+
+  std::set<Ast::Species *> exS;
+  std::vector<std::string> copy;
+
+  SignalOfInterest(const Ast::Model &model, const std::vector<std::string> &specList)
+    : copy(specList)
+
+  {
+
+    GiNaC::parser reader;
+    for(size_t i=0; i<specList.size(); i++)
+      this->push_back(reader(specList[i]));
+
+    GiNaC::symtab table = reader.get_syms();
+    GiNaC::exmap substitutions;
+
+    for(GiNaC::symtab::iterator it=table.begin(); it!=table.end(); it++)
+    {
+      GiNaC::ex exp;
+      try
+      {
+         // Resolve symbol
+         exp = model.getSpecies((*it).first)->getSymbol();
+         // Add to list of external species
+         exS.insert(model.getSpecies((*it).first));
+      }
+      catch(SymbolError &err)
+      {
+        try
+        {
+           // Fold parameter values immediately
+           exp = model.getParameter((*it).first)->getValue();
+        }
+        catch(SymbolError &err)
+        {
+          SymbolError err;
+          err << "Symbol " << (*it).first << " can neither be resolved as species or parameter.";
+          throw err;
+        }
+      }
+
+      // If found add to substitution table
+      substitutions.insert(std::make_pair(table[(*it).first],exp));
+
+    }
+
+    // Carry out substitutions
+    for(iterator it=this->begin(); it!=this->end(); it++)
+      (*it)=(*it).subs(substitutions);
+
+  }
+
+  const std::set<Ast::Species *> &getSpeciesOfInterest() const
+  {
+    return this->exS;
+  }
+
+
+
+};
+
+
 /**
  * Builds an hybrid model.
  *
@@ -23,22 +89,27 @@ class HybridModel
           private ConstantStoichiometryMixin
 
 {
+
 protected:
 
   Ast::Model external;
+  SignalOfInterest soi;
 
 public:
+
   /**
     Constructor.
     @param model Ast::Model to hybridize.
     @param specList Minimal list of external species.
   **/
-  HybridModel(Ast::Model &model, std::set<std::string> specList);
+  HybridModel(Ast::Model &model, std::vector<std::string> &soiList);
 
   /**
    * Returns the external model
    */
   Model &getExternalModel();
+
+  const SignalOfInterest &getSOI() const;
 
 protected:
 

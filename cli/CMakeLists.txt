@@ -73,8 +73,8 @@ SET(sbml_fft_HEADERS
 #ADD_EXECUTABLE(sbml_lna ${sbml_lna_SOURCES})
 #TARGET_LINK_LIBRARIES(sbml_lna ${LIBS} libina)
 
-#ADD_EXECUTABLE(sbml_pscan ${sbml_pscan_SOURCES})
-#TARGET_LINK_LIBRARIES(sbml_pscan ${LIBS} libina)
+ADD_EXECUTABLE(sbml_pscan ${sbml_pscan_SOURCES})
+TARGET_LINK_LIBRARIES(sbml_pscan ${LIBS} libina)
 
 #ADD_EXECUTABLE(sbml_pscan2 ${sbml_pscan2_SOURCES})
 #TARGET_LINK_LIBRARIES(sbml_pscan2 ${LIBS} libina)
@@ -86,11 +86,11 @@ ADD_EXECUTABLE(sbml_hybridSSA ${sbml_hybridSSA_SOURCES})
 TARGET_LINK_LIBRARIES(sbml_hybridSSA ${LIBS} libina libunsupported)
 
 
-ADD_EXECUTABLE(sbml_ssa ${sbml_ssa_SOURCES})
-TARGET_LINK_LIBRARIES(sbml_ssa ${LIBS} libina libunsupported)
+#ADD_EXECUTABLE(sbml_ssa ${sbml_ssa_SOURCES})
+#TARGET_LINK_LIBRARIES(sbml_ssa ${LIBS} libina libunsupported)
 
-ADD_EXECUTABLE(sbml_ssacov ${sbml_ssacov_SOURCES})
-TARGET_LINK_LIBRARIES(sbml_ssacov ${LIBS} libina)
+#ADD_EXECUTABLE(sbml_ssacov ${sbml_ssacov_SOURCES})
+#TARGET_LINK_LIBRARIES(sbml_ssacov ${LIBS} libina)
 
 #ADD_EXECUTABLE(sbml_dist ${sbml_dist_SOURCES})
 #TARGET_LINK_LIBRARIES(sbml_dist ${LIBS} libina libunsupported)

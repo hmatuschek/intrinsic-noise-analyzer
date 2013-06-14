@@ -26,11 +26,15 @@ class GenericHybridSimulator
 
 protected:
 
-  Ast::Model& intModel;
-  Ast::Model& extModel;
+  Ast::Model &intModel;
+  Ast::Model &extModel;
 
   // Vector for time of next jump
   std::vector<double> tjump;
+
+
+  VectorEngine::Code SOIcode;
+  VectorEngine::Interpreter SOIint;
 
 public:
   /**
@@ -190,8 +194,9 @@ public:
       const Eigen::VectorXd &state = stateMatrix[sid];
       getInternalStats(state,concentration,cov);
 
-      // Specify signal of interest.
-      Eigen::VectorXd SoI = state.tail(extModel.numSpecies()).head(1);
+      // Evaluate signal of interest.
+      Eigen::VectorXd SoI(extModel.numSpecies());
+      SOIint.run(state,SoI); //state.tail(extModel.numSpecies()).head(1);
 
       // Collect mean, variance and histogram
       item = condVar.find(SoI);
@@ -320,6 +325,20 @@ public:
       SSEint[i] = new GenericSSEinterpreter<IOSmodel,VectorEngine, MatrixEngine> (sseModel,extModel,1);
       ODEint[i] = new ODE::LsodaDriver< GenericSSEinterpreter<IOSmodel,VectorEngine, MatrixEngine> >(*SSEint[i],1,epsilon_abs,epsilon_rel);
     }
+
+    // Compile signal of interest
+    std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> extIndex;
+    for(size_t i=0; i<extModel.numSpecies(); i++)
+      extIndex.insert(std::make_pair(extModel.getSpecies(i)->getSymbol(),sseModel.getDimension()+i));
+
+    VectorEngine::Compiler compiler(extIndex);
+
+    compiler.setCode(&SOIcode);
+    const SignalOfInterest &soi = model.getSOI();
+    for(size_t i=0; i<soi.size(); i++)
+       compiler.compileExpressionAndStore(soi[i],i);
+    compiler.finalize(1);
+    SOIint.setCode(&SOIcode);
 
   }
 

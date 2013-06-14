@@ -3,18 +3,13 @@
 using namespace iNA;
 using namespace Models;
 
-HybridModel::HybridModel(Ast::Model &model, std::set<std::string> specList)
-  : Ast::Model(model), ConstantStoichiometryMixin(model), external()
+HybridModel::HybridModel(Ast::Model &model, std::vector<std::string> &soiList)
+  : Ast::Model(model), ConstantStoichiometryMixin(model), external(),
+    soi(*this,soiList)
 {
 
-      // Initialize list of external with species of interest
-      std::set<Ast::Species *>exS;
-      for(std::set<std::string>::iterator it = specList.begin(); it!=specList.end(); it++)
-      {
-          exS.insert(this->getSpecies(*it));
-      }
-
-      GiNaC::exmap translation_table;
+      // Initialize list of external species with signal of interest
+      std::set<Ast::Species *> exS = soi.getSpeciesOfInterest();
 
       // Select external reaction set given the external species exS
       std::set<Ast::Reaction *> exR;
@@ -40,6 +35,7 @@ HybridModel::HybridModel(Ast::Model &model, std::set<std::string> specList)
       std::cerr << "====" << std::endl << std::endl;
 
       // Distill external model
+      GiNaC::exmap translation_table;
       distill(this,&external,exR,translation_table);
 
       // List internal species
@@ -190,11 +186,6 @@ HybridModel::distill(Ast::Model * src, Ast::Model *external,
       }
     }
 
-//    // Register all parameter definitions:
-//    for (size_t i=0; i<src->numParameters(); i++) {
-//      external->addDefinition(this->getParameter(i));
-//    }
-
     // Copy all parameter definitions:
     for (size_t i=0; i<src->numParameters(); i++) {
       external->addDefinition(Ast::ModelCopyist::copyParameterDefinition(
@@ -202,26 +193,12 @@ HybridModel::distill(Ast::Model * src, Ast::Model *external,
                             translation_table));
     }
 
-
     // Copy all compartments:
     for (size_t i=0; i<src->numCompartments(); i++) {
       external->addDefinition(Ast::ModelCopyist::copyCompartmentDefinition(
                             static_cast<Ast::Compartment *>(src->getCompartment(i)),
                             translation_table));
     }
-
-
-//    // Register all compartments:
-//    for (size_t i=0; i<src->numCompartments(); i++) {
-//      external->addDefinition(this->getCompartment(i));
-//    }
-
-//    // Copy external species definition:
-//    for (std::set<Ast::Species *>::iterator it=exS.begin(); it!=exS.end(); it++) {
-//      external->addDefinition(Ast::ModelCopyist::copySpeciesDefinition(
-//                                static_cast<Ast::Species *>((*it)),
-//                                translation_table, species_table, external));
-//    }
 
     // Register external species definition:
     for (std::set<Ast::Species *>::iterator it=exS.begin(); it!=exS.end(); it++) {
@@ -285,6 +262,12 @@ Ast::Model &
 HybridModel::getExternalModel()
 {
   return external;
+}
+
+const SignalOfInterest &
+HybridModel::getSOI() const
+{
+  return soi;
 }
 
 Ast::Parameter *

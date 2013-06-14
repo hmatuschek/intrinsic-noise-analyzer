@@ -67,8 +67,8 @@ int main(int argc, char *argv[])
     Trafo::ReversibleReactionConverter converter; converter.apply(model);
 
     // Name species of interest
-    std::set<std::string> exS;
-    exS.insert("GeneOn");
+    std::vector<std::string> exS;
+    exS.push_back("GeneOn");
 
     Models::HybridModel hybrid(model,exS);
 
