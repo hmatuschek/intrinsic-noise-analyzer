@@ -34,7 +34,7 @@ StochasticSimulator::StochasticSimulator(const Ast::Model &model, int size, int 
 
   // add parameters
   for(size_t i=0; i<parameters.size(); i++)
-    this->stateIndex.insert(std::make_pair(*parameters[i],i));
+    this->stateIndex.insert(std::make_pair(*(parameters[i]),this->numSpecies()+i));
 
   // fold all constants
   Trafo::ConstantFolder constants(*this);
@@ -146,13 +146,13 @@ StochasticSimulator::getState() const
 
 
 void
-StochasticSimulator::getHistogram(size_t speciesId,std::map<double,double> &hist)
+StochasticSimulator::getHistogram(size_t speciesIdx,std::map<double,double> &hist)
 {
 
     //hist.clear();
     for(int sid=0; sid<observationMatrix.rows(); sid++)
     {
-        double val = observationMatrix(sid,speciesId);
+        double val = observationMatrix(sid,speciesIdx);
         std::map<double,double>::iterator it = hist.find(val);
         if(it==hist.end())
             hist.insert(std::make_pair<double,double>(val,1.));
@@ -162,10 +162,10 @@ StochasticSimulator::getHistogram(size_t speciesId,std::map<double,double> &hist
 }
 
 void
-StochasticSimulator::getHistogram(size_t speciesId,Histogram<double> &hist)
+StochasticSimulator::getHistogram(size_t specIdx, Histogram<double> &hist)
 {
     // Divide by volume and add to histogram.
-    hist.insert(observationMatrix.col(speciesId) / this->Omega(speciesId));
+    hist.insert(observationMatrix.col(specIdx) / this->Omega(specIdx));
 }
 
 void
@@ -181,7 +181,6 @@ StochasticSimulator::stats(Eigen::VectorXd &mean, Eigen::MatrixXd &covariance, E
   for(int ids=0;ids<this->ensembleSize;ids++){
     mean += this->observationMatrix.row(ids).head(this->numSpecies());
   }
-
 
   mean /= this->ensembleSize;
 

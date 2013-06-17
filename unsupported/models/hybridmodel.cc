@@ -265,7 +265,7 @@ HybridModel::getExternalModel()
 }
 
 const SignalOfInterest &
-HybridModel::getSOI() const
+HybridModel::getSoI() const
 {
   return soi;
 }

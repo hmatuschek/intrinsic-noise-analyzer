@@ -22,26 +22,6 @@ std::vector<std::string> readSoI(const std::string &parameterFile);
 
 std::string Confucius();
 
-static inline std::string &trimAll(std::string &s)
-{
-    if(s.size() == 0)
-    {
-        return s;
-    }
-
-    int val = 0;
-    for (int cur = 0; cur < s.size(); cur++)
-    {
-        if(s[cur] != ' ' && std::isalnum(s[cur]))
-        {
-            s[val] = s[cur];
-            val++;
-        }
-    }
-    s.resize(val);
-    return s;
-}
-
 int main(int argc, char *argv[])
 {
 
@@ -249,12 +229,12 @@ std::vector<std::string> readSoI(const std::string &parameterFile)
   while(!file.eof()) {
     std::getline(file, str);
     vecString.clear();
-    //split the line
+    //split line
     split(str, vecString);
     size_t idx = 0;
     //for each string in the vector convert it to a number -PROPERLY -    and put it in vecNumbers
     for (vecStringIt = vecString.begin(); vecStringIt != vecString.end(); ++vecStringIt, idx++) {
-      line.push_back(trimAll(*vecStringIt));
+      line.push_back(*vecStringIt);
     }
   }
   file.close();

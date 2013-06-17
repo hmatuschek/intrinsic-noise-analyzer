@@ -134,12 +134,12 @@ public:
   /**
   *  Evaluates the histogram of a species from current state
   **/
-  void getHistogram(size_t specId, std::map<double,double> &hist);
+  void getHistogram(size_t speciesIdx, std::map<double,double> &hist);
 
   /**
   *  Evaluates the histogram of a species from current state
   **/
-  void getHistogram(size_t specId, Histogram<double> &hist);
+  void getHistogram(size_t specIdx, Histogram<double> &hist);
 
   /**
   * Returns the ensemble size

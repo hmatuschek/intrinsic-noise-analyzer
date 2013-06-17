@@ -6,6 +6,7 @@ SET(libina_unsupported_SOURCES
    models/tcparamscan.cc
    models/hybridmodel.cc
    models/hybridsimulator.cc
+   models/hybridSSA.cc
    models/gillespieCLE.cc
 )
 
@@ -16,6 +17,7 @@ SET(libina_unsupported_HEADERS
    models/tcparamscan.hh
    models/hybridmodel.hh
    models/hybridsimulator.hh
+   models/hybridSSA.hh
    models/gillespieCLE.hh
    )
 

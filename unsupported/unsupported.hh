@@ -13,5 +13,6 @@
 #include "models/tcparamscan.hh"
 #include "models/hybridmodel.hh"
 #include "models/hybridsimulator.hh"
+#include "models/hybridSSA.hh"
 
 #endif // __INA_MODELS_UNSUPPORTED_HH

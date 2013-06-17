@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
 
 
     // Ensemble size
-    int ens = 50;
+    int ens = 500;
     // Timestep
     double dt=0.1;
     // Final time
@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
     size_t nInt = hybrid.numSpecies();
     size_t nExt = hybrid.getExternalModel().numSpecies();
 
-    Models::HybridSSA simulator(hybrid, ens, 1.e-8, 1.e-4);
+    Models::HybridSSA simulator(hybrid, ens, 1);
 
     Models::Histogram<double> hist;
 

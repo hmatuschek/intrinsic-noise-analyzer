@@ -109,7 +109,7 @@ public:
    */
   Model &getExternalModel();
 
-  const SignalOfInterest &getSOI() const;
+  const SignalOfInterest &getSoI() const;
 
 protected:
 

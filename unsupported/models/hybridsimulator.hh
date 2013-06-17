@@ -33,14 +33,14 @@ protected:
   std::vector<double> tjump;
 
 
-  VectorEngine::Code SOIcode;
-  VectorEngine::Interpreter SOIint;
+  VectorEngine::Code SoIcode;
+  VectorEngine::Interpreter SoIint;
 
 public:
   /**
     Constructor
   **/
-  GenericHybridSimulator(Models::HybridModel &model, size_t ensembleSize, double epsilon_abs, double epsilon_rel, size_t num_threads=OpenMP::getMaxThreads())
+  GenericHybridSimulator(Models::HybridModel &model, size_t ensembleSize, size_t num_threads=OpenMP::getMaxThreads())
     : OptimizedSSA(model.getExternalModel(), ensembleSize, time(0), 0, num_threads),
       intModel(model), extModel(model.getExternalModel()),
       tjump(ensembleSize,0)
@@ -56,11 +56,11 @@ public:
 
   virtual void getInitial(Eigen::VectorXd &state)=0;
 
-  virtual void runInternal(Eigen::VectorXd &state, const double &t_in, const double &t_out)=0;
+  virtual void runInternal(Eigen::VectorXd &state, const size_t &sid, const double &t_in, const double &t_out)=0;
 
   virtual void reset()=0;
 
-  virtual void getInternalStats(const Eigen::VectorXd &state, Eigen::VectorXd &mean, Eigen::MatrixXd &cov)=0;
+  virtual void getInternalStats(const Eigen::VectorXd &state, const size_t &sid, Eigen::VectorXd &mean, Eigen::MatrixXd &cov)=0;
 
   /**
    * Run hybrid method in continuous time.
@@ -78,7 +78,7 @@ public:
       {
         double oldjumptime=tjump[sid];
         // Integrate until time of jump
-        this->runInternal(state,t_in,oldjumptime);
+        this->runInternal(state,sid,t_in,oldjumptime);
 
         // Now update state vector (perform jump)
         state.tail(this->getState().cols()) = this->getState().row(sid);
@@ -91,7 +91,7 @@ public:
       }
       else // Simply update state
       {
-        this->runInternal(state,t_in,t_out);
+        this->runInternal(state,sid,t_in,t_out);
       }
 
 
@@ -192,11 +192,11 @@ public:
     {
 
       const Eigen::VectorXd &state = stateMatrix[sid];
-      getInternalStats(state,concentration,cov);
+      getInternalStats(state,sid,concentration,cov);
 
       // Evaluate signal of interest.
       Eigen::VectorXd SoI(extModel.numSpecies());
-      SOIint.run(state,SoI); //state.tail(extModel.numSpecies()).head(1);
+      SoIint.run(state,SoI); //state.tail(extModel.numSpecies()).head(1);
 
       // Collect mean, variance and histogram
       item = condVar.find(SoI);
@@ -252,7 +252,7 @@ public:
     {
 
       const Eigen::VectorXd &state = stateMatrix[sid];
-      getInternalStats(state,mean,cov);
+      getInternalStats(state,sid,mean,cov);
 
       mechErr += cov;
 
@@ -281,7 +281,7 @@ public:
       this->singleStep(t,sid);
 
       // Do SSE step
-      this->runInternal(state,t_in,t);
+      this->runInternal(state,sid,t_in,t);
       this->reset();
 
       // Update state vector
@@ -314,7 +314,7 @@ protected:
 public:
 
   HybridSimulator(Models::HybridModel &model, size_t ensembleSize, double epsilon_abs, double epsilon_rel, size_t num_threads=OpenMP::getMaxThreads())
-    : GenericHybridSimulator(model, ensembleSize, epsilon_abs, epsilon_rel, num_threads),
+    : GenericHybridSimulator(model, ensembleSize, num_threads),
       sseModel(intModel),
       SSEint(num_threads),
       ODEint(num_threads)
@@ -333,12 +333,12 @@ public:
 
     VectorEngine::Compiler compiler(extIndex);
 
-    compiler.setCode(&SOIcode);
-    const SignalOfInterest &soi = model.getSOI();
+    compiler.setCode(&SoIcode);
+    const SignalOfInterest &soi = model.getSoI();
     for(size_t i=0; i<soi.size(); i++)
        compiler.compileExpressionAndStore(soi[i],i);
     compiler.finalize(1);
-    SOIint.setCode(&SOIcode);
+    SoIint.setCode(&SoIcode);
 
   }
 
@@ -372,7 +372,7 @@ public:
 
   }
 
-  void runInternal(Eigen::VectorXd &state, const double &t_in, const double &t_out)
+  void runInternal(Eigen::VectorXd &state, const size_t &sid, const double &t_in, const double &t_out)
   {
     ODEint[OpenMP::getThreadNum()]->step(state,t_in,t_out);
   }
@@ -385,7 +385,7 @@ public:
   }
 
 
-  void getInternalStats(const Eigen::VectorXd &state, Eigen::VectorXd &mean, Eigen::MatrixXd &cov)
+  void getInternalStats(const Eigen::VectorXd &state, const size_t &sid, Eigen::VectorXd &mean, Eigen::MatrixXd &cov)
   {
 
     Eigen::VectorXd emre,iosemre,skewness;
@@ -399,125 +399,7 @@ public:
 };
 
 
-class HybridSSA
-    : public GenericHybridSimulator
-{
 
-protected:
-
-  size_t numExtVars;
-
-  std::vector<Models::OptimizedSSA *> ssaSim;
-
-public:
-
-  HybridSSA(Models::HybridModel &model, size_t ensembleSize, double epsilon_abs, double epsilon_rel, size_t num_threads=OpenMP::getMaxThreads())
-    : GenericHybridSimulator(model, ensembleSize, epsilon_abs, epsilon_rel, num_threads),
-      ssaSim(numThreads())
-
-  {
-    std::vector<const GiNaC::symbol *> params;
-
-    for(size_t i=0; i<model.getExternalModel().numSpecies(); i++)
-      params.push_back(&(model.getExternalModel().getSpecies(i)->getSymbol()));
-
-    numExtVars = model.getExternalModel().numSpecies();
-
-    for(size_t i=0; i<this->numThreads(); i++)
-      ssaSim[i] = new OptimizedSSA(model,ensembleSize,time(0),1,1,params);
-
-  }
-
-  virtual ~HybridSSA()
-
-  {
-    for(size_t i=0; i<this->numThreads(); i++)
-    {
-      delete ssaSim[i]; ssaSim[i]=0;
-    }
-  }
-
-  void getInitial(Eigen::VectorXd &state)
-  {
-
-    size_t dimCov = ssaSim[0]->numSpecies()*(ssaSim[0]->numSpecies()-1)/2;
-
-    state=Eigen::VectorXd::Zero(ssaSim[0]->numSpecies()+dimCov+this->numExtVars);
-    //state.head(ssaSim[0]->numSpecies())=(ssaSim[0]->getObservationMatrix().row(0)).head(ssaSim[0]->numSpecies());
-
-  }
-
-  void runInternal(Eigen::VectorXd &state, const double &t_in, const double &t_out)
-
-  {
-
-     // Update parameters
-     for(int i=0; i<ssaSim[OpenMP::getThreadNum()]->getObservationMatrix().rows();i++)
-        ssaSim[OpenMP::getThreadNum()]->getObservationMatrix().row(i).tail(numExtVars) = state.tail(numExtVars);
-
-     // Run the actual simulation
-     ssaSim[OpenMP::getThreadNum()]->run(t_out-t_in);
-
-     // Some statistics here
-     Eigen::VectorXd mean, covVec;
-     Eigen::MatrixXd cov;
-
-     // Use covvec as a dummy here
-     ssaSim[OpenMP::getThreadNum()]->stats(mean,cov,covVec);
-
-     flattenSymmetricMatrix(cov,covVec);
-
-     state.head(this->numSpecies()) = mean;
-     state.segment(this->numSpecies(),covVec.size()) = covVec;
-  }
-
-  void reset()
-
-  {
-    // Think about it
-  }
-
-  void getInternalStats(const Eigen::VectorXd &state, Eigen::VectorXd &mean, Eigen::MatrixXd &cov)
-
-  {
-
-    mean = state.head(this->numSpecies());
-
-    cov.resize(this->numSpecies(),this->numSpecies());
-    Eigen::VectorXd covVec = state.segment(this->numSpecies(),this->numSpecies()*(this->numSpecies()+1)/2);
-
-    // Unpack covariance
-    size_t idx=0;
-    for(size_t i=0;i<this->numSpecies();i++)
-    {
-      for(size_t j=0;j<=i;j++)
-      {
-        cov(i,j)=covVec(idx);
-        cov(j,i)=covVec(idx);
-        idx++;
-      }
-    }
-
-  }
-
-  // @todo Make this a global template function.
-  void flattenSymmetricMatrix(const Eigen::MatrixXd &mat,Eigen::VectorXd &vec)
-  {
-      vec.resize(this->numSpecies()*(this->numSpecies()+1)/2);
-      size_t idx=0;
-      for(size_t i=0;i<this->numSpecies();i++)
-      {
-        for(size_t j=0;j<=i;j++)
-        {
-          vec(idx)=mat(i,j);
-          idx++;
-        }
-      }
-  }
-
-
-
-};
 
 
 }
