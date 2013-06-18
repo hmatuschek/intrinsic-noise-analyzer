@@ -107,8 +107,8 @@ int main(int argc, char *argv[])
         outfile << "\t var(" << hybrid.getExternalModel().getSpecies(i)->getIdentifier() <<")";
     outfile << std::endl;
 
-    Eigen::VectorXd m;
-    Eigen::MatrixXd c;
+    std::vector<Eigen::VectorXd> m;
+    std::vector<Eigen::MatrixXd> c;
 
     // Some wisdom
     double progress=0.;
@@ -124,8 +124,8 @@ int main(int argc, char *argv[])
         simulator.getInternalStats(state[0],0,m,c);
         //Single trajectory
         trajFile << t << "\t"
-                  << m.head(nInt).transpose() << "\t"
-                  << c.diagonal() << "\t"
+                  << m[0].head(nInt).transpose() << "\t"
+                  << c[0].diagonal() << "\t"
                   << state[0].tail(nExt).transpose() << "\t" << std::endl;
 
         simulator.mechError(state, mechErr);

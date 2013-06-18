@@ -90,13 +90,14 @@ public:
   }
 
 
-  void getInternalStats(const Eigen::VectorXd &state, const size_t &sid, Eigen::VectorXd &mean, Eigen::MatrixXd &cov)
+  void getInternalStats(const Eigen::VectorXd &state, const size_t &sid, std::vector<Eigen::VectorXd> &mean, std::vector<Eigen::MatrixXd> &cov)
 
   {
-
+    mean.resize(1);
+    cov.resize(1);
     // Use covvec as a dummy here
     Eigen::VectorXd skew;
-    ssaSim[sid]->stats(mean, cov, skew);
+    ssaSim[sid]->stats(mean[0], cov[0], skew);
 
   }
 

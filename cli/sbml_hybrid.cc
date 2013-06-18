@@ -147,16 +147,26 @@ int main(int argc, char *argv[])
     std::ofstream intFile;
     if(intFileName) intFile.open(intFileName); else intFile.open("internal.dat");
 
+    int col=1;
     // Header
-    intFile << "# time" << "\t";
+    intFile << "# [" << col++ <<"]time" << "\t";
     for(size_t i=0; i<hybrid.numSpecies(); i++)
-        intFile << "\t" << hybrid.getSpecies(i)->getIdentifier();
+        intFile << "\t [" << col++ <<"]" << hybrid.getSpecies(i)->getIdentifier();
     for(size_t i=0; i<hybrid.numSpecies(); i++)
-        intFile << "\t tE(" << hybrid.getSpecies(i)->getIdentifier() << ")";
+        intFile << "\t [" << col++ <<"]tE(" << hybrid.getSpecies(i)->getIdentifier() << ")";
     for(size_t i=0; i<hybrid.numSpecies(); i++)
-        intFile << "\t dE(" << hybrid.getSpecies(i)->getIdentifier() << ")";
+        intFile << "\t [" << col++ <<"]dE(" << hybrid.getSpecies(i)->getIdentifier() << ")";
     for(size_t i=0; i<hybrid.numSpecies(); i++)
-        intFile << "\t mE(" << hybrid.getSpecies(i)->getIdentifier() << ")";
+        intFile << "\t [" << col++ <<"]mE(" << hybrid.getSpecies(i)->getIdentifier() << ")";
+
+    for(size_t i=0; i<hybrid.numSpecies(); i++)
+      intFile << "\t [" << col++ <<"]EMRE(" << hybrid.getSpecies(i)->getIdentifier() <<")";
+    for(size_t i=0; i<hybrid.numSpecies(); i++)
+        intFile << "\t [" << col++ <<"]tE_EMRE(" << hybrid.getSpecies(i)->getIdentifier() << ")";
+    for(size_t i=0; i<hybrid.numSpecies(); i++)
+        intFile << "\t [" << col++ <<"]dE_EMRE(" << hybrid.getSpecies(i)->getIdentifier() << ")";
+    for(size_t i=0; i<hybrid.numSpecies(); i++)
+        intFile << "\t [" << col++ <<"]mE_IOS(" << hybrid.getSpecies(i)->getIdentifier() << ")";
     intFile << std::endl;
 
     std::ofstream extFile;
@@ -197,8 +207,8 @@ int main(int argc, char *argv[])
             extFile << "\t" << covEx(i,i);
         extFile<<std::endl;
 
-        simulator.mechError(state, mechErr);
-        simulator.dynError(state, mean, transErr, dynErr);
+        simulator.mechError(state, mechErr,1);
+        simulator.dynError(state, mean, transErr, dynErr,1);
 
         intFile << t << "\t";
         for(size_t i=0; i<hybrid.numSpecies(); i++)
@@ -209,7 +219,21 @@ int main(int argc, char *argv[])
             intFile << "\t" << (dynErr).diagonal()(i);
         for(size_t i=0; i<hybrid.numSpecies(); i++)
             intFile << "\t" << (mechErr).diagonal()(i);
+
+        simulator.mechError(state, mechErr,2);
+        simulator.dynError(state, mean, transErr, dynErr,2);
+
+        intFile << "\t";
+        for(size_t i=0; i<hybrid.numSpecies(); i++)
+            intFile << "\t" << mean(i);
+        for(size_t i=0; i<hybrid.numSpecies(); i++)
+            intFile << "\t" << (transErr).diagonal()(i);
+        for(size_t i=0; i<hybrid.numSpecies(); i++)
+            intFile << "\t" << (dynErr).diagonal()(i);
+        for(size_t i=0; i<hybrid.numSpecies(); i++)
+            intFile << "\t" << (mechErr).diagonal()(i);
         intFile << std::endl;
+
 
         simulator.runHybrid(state, t, t+dt);
 
