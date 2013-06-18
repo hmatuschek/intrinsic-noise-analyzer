@@ -35,7 +35,6 @@ private:
    */
   size_t num_threads;
 
-
 protected:
   /**
    * A vector of thread-private RNGs.

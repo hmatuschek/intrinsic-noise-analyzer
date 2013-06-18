@@ -3,7 +3,7 @@
 using namespace iNA;
 using namespace Models;
 
-HybridModel::HybridModel(Ast::Model &model, std::vector<std::string> &soiList)
+HybridModel::HybridModel(Ast::Model &model, const std::vector<std::string> &soiList)
   : Ast::Model(model), ConstantStoichiometryMixin(model), external(),
     soi(*this,soiList)
 {
@@ -15,44 +15,51 @@ HybridModel::HybridModel(Ast::Model &model, std::vector<std::string> &soiList)
       std::set<Ast::Reaction *> exR;
       selectReactions(exS,exR);
 
-      // List external reactions
-      std::cerr << "List of external reactions (" << exR.size() << "):" << std::endl;
-      for(std::set<Ast::Reaction *>::iterator it = exR.begin(); it!=exR.end(); it++)
-      {
-        std::cerr<<(*it)->getName()<<std::endl;
-      }
-      std::cerr << "====" << std::endl << std::endl;
-
       // Assemble list of external species
       this->assembleExternalSpeciesList(exR,exS);
-
-      // List external species
-      std::cerr << "List of external species (" << exS.size() << "):" << std::endl;
-      for(std::set<Ast::Species *>::iterator it = exS.begin(); it!=exS.end(); it++)
-      {
-        std::cerr<<(*it)->getIdentifier()<<std::endl;
-      }
-      std::cerr << "====" << std::endl << std::endl;
 
       // Distill external model
       GiNaC::exmap translation_table;
       distill(this,&external,exR,translation_table);
 
-      // List internal species
-      std::cerr << "List of internal species (" << this->numSpecies() << "):" << std::endl;
-      for(size_t i=0; i< this->numSpecies(); i++)
-      {
-        std::cerr<<this->getSpecies(i)->getIdentifier()<<std::endl;
-      }
-      std::cerr << "====" << std::endl << std::endl;
+}
 
-      // List internal reactions
-      std::cerr << "List of internal reactions (" << this->numReactions() << "):" << std::endl;
-      for(size_t i=0; i< this->numReactions(); i++)
-      {
-        std::cerr<<this->getReaction(i)->getIdentifier()<<std::endl;
-      }
-      std::cerr << "====" << std::endl << std::endl;
+void
+HybridModel::dump(std::ostream &str)
+{
+
+    // List external species
+    str << "List of external species (" << this->getExternalModel().numSpecies() << "):" << std::endl;
+    for(Ast::Model::SpeciesIterator it = this->getExternalModel().speciesBegin();
+        it!=this->getExternalModel().speciesEnd(); it++)
+    {
+      str<<(*it)->getIdentifier()<<std::endl;
+    }
+    str << "====" << std::endl << std::endl;
+
+    // List external reactions
+    str << "List of external reactions (" << this->getExternalModel().numReactions() << "):" << std::endl;
+    for(Ast::Model::ReactionIterator it = getExternalModel().reactionsBegin(); it!=getExternalModel().reactionsEnd(); it++)
+    {
+      str<<(*it)->getName()<<std::endl;
+    }
+    str << "====" << std::endl << std::endl;
+
+    // List internal species
+    str << "List of internal species (" << this->numSpecies() << "):" << std::endl;
+    for(size_t i=0; i< this->numSpecies(); i++)
+    {
+      str<<this->getSpecies(i)->getIdentifier()<<std::endl;
+    }
+    str << "====" << std::endl << std::endl;
+
+    // List internal reactions
+    str << "List of internal reactions (" << this->numReactions() << "):" << std::endl;
+    for(size_t i=0; i< this->numReactions(); i++)
+    {
+      str<<this->getReaction(i)->getIdentifier()<<std::endl;
+    }
+    str << "====" << std::endl << std::endl;
 
 }
 

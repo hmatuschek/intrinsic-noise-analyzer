@@ -18,6 +18,7 @@ protected:
 
 public:
 
+
   HybridSSA(Models::HybridModel &model, size_t ensembleSize, size_t num_threads=OpenMP::getMaxThreads())
     : GenericHybridSimulator(model, ensembleSize, num_threads),
       numExtVars(model.getExternalModel().numSpecies()),
@@ -49,25 +50,24 @@ public:
 
   }
 
-  virtual ~HybridSSA()
 
+  virtual ~HybridSSA()
   {
+
     for(int i=0; i<this->ensembleSize; i++)
     {
       delete ssaSim[i]; ssaSim[i]=0;
     }
+
   }
+
 
   void getInitial(Eigen::VectorXd &state)
+
   {
-
-    //size_t dimCov = ssaSim[0]->numSpecies()*(ssaSim[0]->numSpecies()-1)/2;
-
-    state = Eigen::VectorXd::Zero(this->numExtVars);
-    //state.head(ssaSim[0]->numSpecies()) =
-    //    (ssaSim[0]->getObservationMatrix().row(0)).head(ssaSim[0]->numSpecies());
-
+      state = (ssaSim[0]->getObservationMatrix().row(0)).tail(this->numExtVars);
   }
+
 
   void runInternal(Eigen::VectorXd &state, const size_t &sid, const double &t_in, const double &t_out)
 
@@ -82,11 +82,13 @@ public:
 
   }
 
+
   void reset()
 
   {
     // Think about it
   }
+
 
   void getInternalStats(const Eigen::VectorXd &state, const size_t &sid, Eigen::VectorXd &mean, Eigen::MatrixXd &cov)
 
@@ -97,8 +99,6 @@ public:
     ssaSim[sid]->stats(mean, cov, skew);
 
   }
-
-
 
 
 };
