@@ -14,15 +14,20 @@ protected:
 
   size_t numExtVars;
 
+  size_t numIntEns;
+
+  size_t numExtEns;
+
   std::vector<Models::OptimizedSSA *> ssaSim;
 
 public:
 
 
-  HybridSSA(Models::HybridModel &model, size_t ensembleSize, size_t num_threads=OpenMP::getMaxThreads())
-    : GenericHybridSimulator(model, ensembleSize, num_threads),
+  HybridSSA(Models::HybridModel &model, size_t numExtEns, size_t numIntEns, size_t num_threads=OpenMP::getMaxThreads())
+    : GenericHybridSimulator(model, numExtEns, num_threads),
       numExtVars(model.getExternalModel().numSpecies()),
-      ssaSim(ensembleSize)
+      numExtEns(numExtEns), numIntEns(numIntEns),
+      ssaSim(numExtEns)
 
   {
 
@@ -31,8 +36,8 @@ public:
     for(size_t i=0; i<model.getExternalModel().numSpecies(); i++)
       params.push_back(&(model.getExternalModel().getSpecies(i)->getSymbol()));
 
-    for(int i=0; i<this->ensembleSize; i++)
-      ssaSim[i] = new OptimizedSSA(model,ensembleSize,time(0),1,1,params);
+    for(int i=0; i<numExtEns; i++)
+      ssaSim[i] = new OptimizedSSA(model,numIntEns,time(0),1,1,params);
 
     // Make lookup for signal of interest
     std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> extIndex;
@@ -54,7 +59,7 @@ public:
   virtual ~HybridSSA()
   {
 
-    for(int i=0; i<this->ensembleSize; i++)
+    for(int i=0; i<numIntEns; i++)
     {
       delete ssaSim[i]; ssaSim[i]=0;
     }

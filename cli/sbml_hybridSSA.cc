@@ -53,12 +53,12 @@ int main(int argc, char *argv[])
     }
 
     // Ensemble size
-    int ensExt = 1000;
-    int ensInt = 1000;
+    int ensExt = 500;
+    int ensInt = 500;
     // Timestep
-    double dt=0.1;
+    double dt=0.25;
     // Final time
-    double tmax = 100;
+    double tmax = 10;
 
     // Construct hybrid model from SBMLsh model
     Ast::Model model; Parser::Sbmlsh::importModel(model, argv[1]);
@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
     size_t nInt = hybrid.numSpecies();
     size_t nExt = hybrid.getExternalModel().numSpecies();
 
-    Models::HybridSSA simulator(hybrid, ensExt, 1);
+    Models::HybridSSA simulator(hybrid, ensExt, ensInt, 1);
 
     Models::Histogram<double> hist;
 
