@@ -32,6 +32,7 @@ protected:
   // Vector for time of next jump
   std::vector<double> tjump;
 
+  size_t SoIdim;
 
   VectorEngine::Code SoIcode;
   VectorEngine::Interpreter SoIint;
@@ -43,13 +44,12 @@ public:
   GenericHybridSimulator(Models::HybridModel &model, size_t ensembleSize, size_t num_threads=OpenMP::getMaxThreads())
     : OptimizedSSA(model.getExternalModel(), ensembleSize, time(0), 0, num_threads),
       intModel(model), extModel(model.getExternalModel()),
-      tjump(ensembleSize,0)
+      tjump(ensembleSize,0), SoIdim(model.getSoI().size())
   {
 
   }
 
   virtual ~GenericHybridSimulator()
-
   {
 
   }
@@ -60,7 +60,8 @@ public:
 
   virtual void reset()=0;
 
-  virtual void getInternalStats(const Eigen::VectorXd &state, const size_t &sid, Eigen::VectorXd &mean, Eigen::MatrixXd &cov)=0;
+  virtual void getInternalStats(const Eigen::VectorXd &state, const size_t &sid,
+                                std::vector<Eigen::VectorXd> &mean, std::vector<Eigen::MatrixXd> &cov)=0;
 
   /**
    * Run hybrid method in continuous time.
@@ -127,17 +128,18 @@ public:
   /**
   * Error of transformed signal. E[V(Z|s)]
   */
-  void transError(const std::vector<Eigen::VectorXd> &stateMatrix, Eigen::VectorXd &mean, Eigen::MatrixXd &transErr)
+  void dynError(const std::vector<Eigen::VectorXd> &stateMatrix, Eigen::VectorXd &mean, Eigen::MatrixXd &transErr, Eigen::MatrixXd &dynErr, size_t level=1)
 
   {
       // Zero input
       mean = Eigen::VectorXd::Zero(intModel.numSpecies());
       transErr = Eigen::MatrixXd::Zero(intModel.numSpecies(),intModel.numSpecies());
+      dynErr = Eigen::MatrixXd::Zero(intModel.numSpecies(),intModel.numSpecies());
 
       histType histExt;
       condMeanType condMean;
       condVarType condVar;
-      condStat(stateMatrix, histExt, condMean, condVar);
+      condStat(stateMatrix, histExt, condMean, condVar, level);
 
       for(std::map<Eigen::VectorXd, Eigen::VectorXd,lessVec>::iterator item = condMean.begin();
           item!=condMean.end(); item++)
@@ -146,41 +148,26 @@ public:
           transErr += (item->second)*(item->second.transpose())*histExt[item->first];
       }
 
-      // Substract mean
-      transErr -=  mean*mean.transpose();
-
-  }
-
-
-  void dynError(const std::vector<Eigen::VectorXd> &stateMatrix, Eigen::MatrixXd &dynErr)
-
-  {
-
-      // Zero input
-      dynErr = Eigen::MatrixXd::Zero(intModel.numSpecies(),intModel.numSpecies());
-
-      histType histExt;
-      condMeanType condMean;
-      condVarType condVar;
-
-      condStat(stateMatrix, histExt, condMean, condVar);
-
       for(std::map<Eigen::VectorXd, Eigen::MatrixXd,lessVec>::iterator item = condVar.begin();
           item!=condVar.end(); item++)
       {
           dynErr += (item->second)*histExt[item->first];
       }
 
+      // Substract mean
+      transErr -=  mean*mean.transpose();
+
   }
 
-
   void condStat(const std::vector<Eigen::VectorXd> &stateMatrix, histType &histExt,
-                condMeanType &condMean, condVarType &condVar)
+                condMeanType &condMean, condVarType &condVar, size_t level)
 
   {
 
-    Eigen::VectorXd concentration;
-    Eigen::MatrixXd cov;
+    std::vector<Eigen::VectorXd> mean(level);
+    std::vector<Eigen::MatrixXd> cov(level);
+
+    Eigen::VectorXd SoI(this->SoIdim);
 
     // Clear input variables
     condVar.clear();
@@ -192,24 +179,27 @@ public:
     {
 
       const Eigen::VectorXd &state = stateMatrix[sid];
-      getInternalStats(state,sid,concentration,cov);
+      getInternalStats(state,sid,mean,cov);
+
+      Eigen::VectorXd m = mean[0];
+      for(size_t i=1; i<level; i++)
+        m+=mean[1];
 
       // Evaluate signal of interest.
-      Eigen::VectorXd SoI(extModel.numSpecies());
       SoIint.run(state,SoI); //state.tail(extModel.numSpecies()).head(1);
 
       // Collect mean, variance and histogram
       item = condVar.find(SoI);
       if(item == condVar.end())
       {
-        condMean.insert(std::make_pair(SoI,concentration));
-        condVar.insert(std::make_pair(SoI,concentration*(concentration.transpose())));
+        condMean.insert(std::make_pair(SoI,m));
+        condVar.insert(std::make_pair(SoI,m*(m.transpose())));
         histExt.insert(std::make_pair(SoI,1));
       }
       else
       {
-        item->second += concentration*concentration.transpose();
-        condMean[SoI] += concentration;
+        item->second += m*m.transpose();
+        condMean[SoI] += m;
         histExt[SoI] += 1;
       }
 
@@ -238,15 +228,15 @@ public:
   }
 
 
-  void mechError(const std::vector<Eigen::VectorXd> &stateMatrix, Eigen::MatrixXd &mechErr)
+  void mechError(const std::vector<Eigen::VectorXd> &stateMatrix, Eigen::MatrixXd &mechErr, size_t level=1)
 
   {
 
     // Zero matrix
     mechErr = Eigen::MatrixXd::Zero(intModel.numSpecies(),intModel.numSpecies());
 
-    Eigen::VectorXd mean,emre,iosemre,skewness;
-    Eigen::MatrixXd cov, iosCov;
+    std::vector<Eigen::VectorXd> mean;
+    std::vector<Eigen::MatrixXd> cov;
 
     for(int sid=0; sid<ensembleSize; sid++)
     {
@@ -254,7 +244,8 @@ public:
       const Eigen::VectorXd &state = stateMatrix[sid];
       getInternalStats(state,sid,mean,cov);
 
-      mechErr += cov;
+      for(size_t i = 0; i<level; i++)
+        mechErr += cov[i];
 
     }
 
@@ -385,12 +376,15 @@ public:
   }
 
 
-  void getInternalStats(const Eigen::VectorXd &state, const size_t &sid, Eigen::VectorXd &mean, Eigen::MatrixXd &cov)
+  void getInternalStats(const Eigen::VectorXd &state, const size_t &sid,
+                        std::vector<Eigen::VectorXd> &mean, std::vector<Eigen::MatrixXd> &cov)
   {
 
-    Eigen::VectorXd emre,iosemre,skewness;
-    Eigen::MatrixXd iosCov;
-    sseModel.fullState(state,mean,cov,emre,iosCov,skewness,iosemre);
+    mean.resize(2);
+    cov.resize(2);
+
+    Eigen::VectorXd iosemre,skewness;
+    sseModel.fullState(state,mean[0],cov[0],mean[1],cov[1],skewness,iosemre);
 
   }
 

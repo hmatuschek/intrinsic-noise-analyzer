@@ -16,6 +16,7 @@ namespace Models {
 class SignalOfInterest
     : public std::vector<GiNaC::ex>
 {
+
 public:
 
   std::set<Ast::Species *> exS;
@@ -102,7 +103,7 @@ public:
     @param model Ast::Model to hybridize.
     @param specList Minimal list of external species.
   **/
-  HybridModel(Ast::Model &model, std::vector<std::string> &soiList);
+  HybridModel(Ast::Model &model, const std::vector<std::string> &soiList);
 
   /**
    * Returns the external model
@@ -139,6 +140,8 @@ protected:
   */
   Ast::Parameter * SpeciestoParameter(Ast::Species *node, GiNaC::exmap &translation_table,
                                   std::map<Ast::Species *, Ast::Species *> &species_table);
+
+  void dump(std::ostream &str);
 
 };
 

@@ -44,21 +44,21 @@ std::string Confucius()
 
 int main(int argc, char *argv[])
 {
-  // Check args:
-  if (argc != 2)
-  {
-    std::cerr << "Usage: " << argv[0] << " SBML_FILENAME" << std::endl;
-    return -1;
-  }
 
+    // Check args:
+    if (argc != 2)
+    {
+      std::cerr << "Usage: " << argv[0] << " SBML_FILENAME" << std::endl;
+      return -1;
+    }
 
     // Ensemble size
-    int ens = 500;
+    int ensExt = 500;
+    int ensInt = 500;
     // Timestep
-    double dt=0.1;
+    double dt=0.25;
     // Final time
     double tmax = 10;
-
 
     // Construct hybrid model from SBMLsh model
     Ast::Model model; Parser::Sbmlsh::importModel(model, argv[1]);
@@ -75,14 +75,14 @@ int main(int argc, char *argv[])
     size_t nInt = hybrid.numSpecies();
     size_t nExt = hybrid.getExternalModel().numSpecies();
 
-    Models::HybridSSA simulator(hybrid, ens, 1);
+    Models::HybridSSA simulator(hybrid, ensExt, ensInt, 1);
 
     Models::Histogram<double> hist;
 
     Eigen::VectorXd istate;
     simulator.getInitial(istate);
 
-    std::vector<Eigen::VectorXd> state(ens,istate);
+    std::vector<Eigen::VectorXd> state(ensExt,istate);
 
     Eigen::VectorXd mean;
     Eigen::MatrixXd mechErr;
@@ -107,6 +107,9 @@ int main(int argc, char *argv[])
         outfile << "\t var(" << hybrid.getExternalModel().getSpecies(i)->getIdentifier() <<")";
     outfile << std::endl;
 
+    std::vector<Eigen::VectorXd> m;
+    std::vector<Eigen::MatrixXd> c;
+
     // Some wisdom
     double progress=0.;
     std::cerr<< "Confucius says '" << Confucius() << "'"<<
@@ -118,14 +121,15 @@ int main(int argc, char *argv[])
         // Update progress bar
         if((t/tmax)>progress){ printProgBar(progress*100); progress+=0.01; }
 
+        simulator.getInternalStats(state[0],0,m,c);
         //Single trajectory
         trajFile << t << "\t"
-                  << state[0].head(nInt).transpose() << "\t"
-                  << state[0].tail(nExt).transpose() << std::endl;
+                  << m[0].head(nInt).transpose() << "\t"
+                  << c[0].diagonal() << "\t"
+                  << state[0].tail(nExt).transpose() << "\t" << std::endl;
 
         simulator.mechError(state, mechErr);
-        simulator.dynError(state, dynErr);
-        simulator.transError(state,mean,transErr);
+        simulator.dynError(state, mean, transErr, dynErr);
 
         std::cout << t << "\t"
                   << mean.transpose() << "\t"
@@ -146,7 +150,6 @@ int main(int argc, char *argv[])
               outfile << "\t" << covEx(i,i);
          outfile<<std::endl;
 
-
       }
 
     }
@@ -159,7 +162,5 @@ int main(int argc, char *argv[])
     std::cerr<<std::endl;
 
     trajFile.close();
-
-
 
 }

@@ -2,7 +2,6 @@
 #include "trafo/constantfolder.hh"
 #include "utils/logger.hh"
 
-
 using namespace iNA;
 using namespace iNA::Models;
 

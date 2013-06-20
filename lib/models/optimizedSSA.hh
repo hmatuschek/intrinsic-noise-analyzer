@@ -27,6 +27,7 @@ class GenericOptimizedSSA :
   public StochasticSimulator,
   public ConstantStoichiometryMixin
 {
+
 protected:
   /** Holds the dependency graph in terms of bytecode. **/
   std::vector<typename Engine::Code *> byte_code;

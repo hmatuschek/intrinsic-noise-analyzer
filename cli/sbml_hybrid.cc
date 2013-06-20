@@ -13,7 +13,6 @@
 #include <sstream>
 #include <fstream>
 
-
 using namespace iNA;
 
 void printProgBar( int percent );
@@ -25,9 +24,11 @@ std::string Confucius();
 int main(int argc, char *argv[])
 {
 
-  static const char *optString = "mstdera";
+  static const char *optString = "opmstdera";
 
   static const struct option longOpts[] = {
+      { "intfile",        required_argument, NULL, 'o' },
+      { "extfile",        required_argument, NULL, 'p' },
       { "model",          required_argument, NULL, 'm' },
       { "soi",            required_argument, NULL, 's' },
       { "tmax",           required_argument, NULL, 't' },
@@ -38,8 +39,10 @@ int main(int argc, char *argv[])
       { NULL, no_argument, NULL, 0 }
   };
 
-  const char *parameterFile=NULL;
-  const char *modelFile=0;
+  const char *parameterFileName=NULL;
+  const char *modelFileName=0;
+  const char *intFileName=0;
+  const char *extFileName=0;
 
   double tfinal = 10;
   double dt=0.1;
@@ -52,12 +55,20 @@ int main(int argc, char *argv[])
   while( opt != -1 ) {
       switch( opt ) {
 
+          case 'o':
+              intFileName = optarg;
+              break;
+
+          case 'p':
+              extFileName = optarg;
+              break;
+
           case 'm':
-              modelFile = optarg;
+              modelFileName = optarg;
               break;
 
           case 's':
-              parameterFile = optarg;
+              parameterFileName = optarg;
               break;
 
           case 't':
@@ -88,7 +99,7 @@ int main(int argc, char *argv[])
   }
 
     // Construct hybrid model from SBMLsh model
-    Ast::Model model; Parser::Sbmlsh::importModel(model, modelFile);
+    Ast::Model model; Parser::Sbmlsh::importModel(model, modelFileName);
 
     // Expand reversible reactions
     Trafo::ReversibleReactionConverter converter; converter.apply(model);
@@ -97,11 +108,11 @@ int main(int argc, char *argv[])
     std::vector<std::string> signal;
     try
     {
-      signal = readSoI(parameterFile);
+      signal = readSoI(parameterFileName);
     }
     catch (std::exception &err)
     {
-      std::cerr << "Argh, again, could not open SoI file: " << parameterFile << std::endl;
+      std::cerr << "Argh, again, could not open SoI file: " << parameterFileName << std::endl;
       return -1;
     }
 
@@ -133,20 +144,47 @@ int main(int argc, char *argv[])
     std::ofstream trajFile;
     trajFile.open ("traj.dat");
 
-    std::ofstream outfile;
-    outfile.open ("external.dat");
+    std::ofstream intFile;
+    if(intFileName) intFile.open(intFileName); else intFile.open("internal.dat");
 
-    outfile << "# time";
+    int col=1;
+    // Header
+    intFile << "# [" << col++ <<"]time" << "\t";
+    for(size_t i=0; i<hybrid.numSpecies(); i++)
+        intFile << "\t [" << col++ <<"]" << hybrid.getSpecies(i)->getIdentifier();
+    for(size_t i=0; i<hybrid.numSpecies(); i++)
+        intFile << "\t [" << col++ <<"]tE(" << hybrid.getSpecies(i)->getIdentifier() << ")";
+    for(size_t i=0; i<hybrid.numSpecies(); i++)
+        intFile << "\t [" << col++ <<"]dE(" << hybrid.getSpecies(i)->getIdentifier() << ")";
+    for(size_t i=0; i<hybrid.numSpecies(); i++)
+        intFile << "\t [" << col++ <<"]mE(" << hybrid.getSpecies(i)->getIdentifier() << ")";
+
+    for(size_t i=0; i<hybrid.numSpecies(); i++)
+      intFile << "\t [" << col++ <<"]EMRE(" << hybrid.getSpecies(i)->getIdentifier() <<")";
+    for(size_t i=0; i<hybrid.numSpecies(); i++)
+        intFile << "\t [" << col++ <<"]tE_EMRE(" << hybrid.getSpecies(i)->getIdentifier() << ")";
+    for(size_t i=0; i<hybrid.numSpecies(); i++)
+        intFile << "\t [" << col++ <<"]dE_EMRE(" << hybrid.getSpecies(i)->getIdentifier() << ")";
+    for(size_t i=0; i<hybrid.numSpecies(); i++)
+        intFile << "\t [" << col++ <<"]mE_IOS(" << hybrid.getSpecies(i)->getIdentifier() << ")";
+    intFile << std::endl;
+
+    std::ofstream extFile;
+    if(extFileName) extFile.open(extFileName); else extFile.open("external.dat");
+
+    // Header
+    extFile << "# time";
     for(size_t i=0; i<nExt; i++)
-        outfile << "\t mean(" << hybrid.getExternalModel().getSpecies(i)->getIdentifier() <<")";
+        extFile << "\t mean(" << hybrid.getExternalModel().getSpecies(i)->getIdentifier() <<")";
     for(size_t i=0; i<nExt; i++)
-        outfile << "\t var(" << hybrid.getExternalModel().getSpecies(i)->getIdentifier() <<")";
-    outfile << std::endl;
+        extFile << "\t var(" << hybrid.getExternalModel().getSpecies(i)->getIdentifier() <<")";
+    extFile << std::endl;
 
     // Some wisdom
     double progress=0.;
     std::cerr<< "Confucius says '" << Confucius() << "'"<<
                 std::endl << "Please wait for progress..." << std::endl;
+
     try{
       for(double t=0.; t<tfinal; t+=dt)
       {
@@ -159,29 +197,45 @@ int main(int argc, char *argv[])
                   << state[0].head(nInt).transpose() << "\t"
                   << state[0].tail(nExt).transpose() << std::endl;
 
-        simulator.mechError(state, mechErr);
-        simulator.dynError(state, dynErr);
-        simulator.transError(state,mean,transErr);
+        // External model statistics
+        simulator.stats(meanEx,covEx,skew);
 
-        std::cout << t << "\t"
-                  << mean.transpose() << "\t"
-                  << (transErr).diagonal().transpose() << "\t"
-                  << (dynErr).diagonal().transpose() << "\t"
-                  << (mechErr).diagonal().transpose() << "\t"
-                  << std::endl;
+        extFile << t;
+        for(size_t i=0; i<nExt; i++)
+            extFile << "\t" << meanEx(i);
+        for(size_t i=0; i<nExt; i++)
+            extFile << "\t" << covEx(i,i);
+        extFile<<std::endl;
 
-         simulator.runHybrid(state, t, t+dt);
+        simulator.mechError(state, mechErr,1);
+        simulator.dynError(state, mean, transErr, dynErr,1);
 
-         // External model statistics
-         simulator.stats(meanEx,covEx,skew);
+        intFile << t << "\t";
+        for(size_t i=0; i<hybrid.numSpecies(); i++)
+            intFile << "\t" << mean(i);
+        for(size_t i=0; i<hybrid.numSpecies(); i++)
+            intFile << "\t" << (transErr).diagonal()(i);
+        for(size_t i=0; i<hybrid.numSpecies(); i++)
+            intFile << "\t" << (dynErr).diagonal()(i);
+        for(size_t i=0; i<hybrid.numSpecies(); i++)
+            intFile << "\t" << (mechErr).diagonal()(i);
 
-         outfile << t;
-         for(size_t i=0; i<nExt; i++)
-              outfile << "\t" << meanEx(i);
-         for(size_t i=0; i<nExt; i++)
-              outfile << "\t" << covEx(i,i);
-         outfile<<std::endl;
+        simulator.mechError(state, mechErr,2);
+        simulator.dynError(state, mean, transErr, dynErr,2);
 
+        intFile << "\t";
+        for(size_t i=0; i<hybrid.numSpecies(); i++)
+            intFile << "\t" << mean(i);
+        for(size_t i=0; i<hybrid.numSpecies(); i++)
+            intFile << "\t" << (transErr).diagonal()(i);
+        for(size_t i=0; i<hybrid.numSpecies(); i++)
+            intFile << "\t" << (dynErr).diagonal()(i);
+        for(size_t i=0; i<hybrid.numSpecies(); i++)
+            intFile << "\t" << (mechErr).diagonal()(i);
+        intFile << std::endl;
+
+
+        simulator.runHybrid(state, t, t+dt);
 
       }
 
