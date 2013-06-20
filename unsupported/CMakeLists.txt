@@ -31,7 +31,7 @@ ADD_LIBRARY(libunsupported SHARED ${libina_unsupported_SOURCES})
 ENDIF()
 
 SET_TARGET_PROPERTIES(libunsupported PROPERTIES OUTPUT_NAME "inaunsupported")
-TARGET_LINK_LIBRARIES(libunsupported ${LIBS})
+TARGET_LINK_LIBRARIES(libunsupported ${LIBS} libina)
 
 
 # No installation needed or?
