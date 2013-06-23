@@ -79,8 +79,8 @@ TARGET_LINK_LIBRARIES(sbml_pscan ${LIBS} libina)
 #ADD_EXECUTABLE(sbml_pscan2 ${sbml_pscan2_SOURCES})
 #TARGET_LINK_LIBRARIES(sbml_pscan2 ${LIBS} libina)
 
-ADD_EXECUTABLE(sbml_hybrid ${sbml_hybrid_SOURCES})
-TARGET_LINK_LIBRARIES(sbml_hybrid ${LIBS} libina libunsupported)
+ADD_EXECUTABLE(hybrid ${sbml_hybrid_SOURCES})
+TARGET_LINK_LIBRARIES(hybrid ${LIBS} libina libunsupported)
 
 ADD_EXECUTABLE(sbml_hybridSSA ${sbml_hybridSSA_SOURCES})
 TARGET_LINK_LIBRARIES(sbml_hybridSSA ${LIBS} libina libunsupported)
@@ -92,8 +92,8 @@ TARGET_LINK_LIBRARIES(sbml_hybridSSA ${LIBS} libina libunsupported)
 #ADD_EXECUTABLE(sbml_ssacov ${sbml_ssacov_SOURCES})
 #TARGET_LINK_LIBRARIES(sbml_ssacov ${LIBS} libina)
 
-#ADD_EXECUTABLE(sbml_dist ${sbml_dist_SOURCES})
-#TARGET_LINK_LIBRARIES(sbml_dist ${LIBS} libina libunsupported)
+ADD_EXECUTABLE(sbml_dist ${sbml_dist_SOURCES})
+TARGET_LINK_LIBRARIES(sbml_dist ${LIBS} libina libunsupported)
 
 #ADD_EXECUTABLE(sbml_fft ${sbml_fft_SOURCES})
 #TARGET_LINK_LIBRARIES(sbml_fft ${LIBS} libina libunsupported)

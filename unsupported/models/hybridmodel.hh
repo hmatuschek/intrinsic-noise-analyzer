@@ -133,7 +133,10 @@ protected:
    Distills a model with list of species and reactions. Returns empty exR.
    TODO: avoid unnecessary parameters and things.
   */
-  void distill(Ast::Model * src, Ast::Model *external, std::set<Ast::Reaction *> exR, GiNaC::exmap &translation_table);
+  void distill(Ast::Model *external, std::set<Ast::Reaction *> exR, GiNaC::exmap &translation_table);
+
+  void updateUnits(const Model &external);
+
 
   /**
    Returns species definition as parameter.
