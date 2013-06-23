@@ -8,6 +8,7 @@ SET(libina_unsupported_SOURCES
    models/hybridsimulator.cc
    models/hybridSSA.cc
    models/gillespieCLE.cc
+#   models/histogramD.cc
 )
 
 SET(libina_unsupported_HEADERS
@@ -19,6 +20,7 @@ SET(libina_unsupported_HEADERS
    models/hybridsimulator.hh
    models/hybridSSA.hh
    models/gillespieCLE.hh
+#   models/histogramD.hh
    )
 
 #

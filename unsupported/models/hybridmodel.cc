@@ -20,7 +20,40 @@ HybridModel::HybridModel(Ast::Model &model, const std::vector<std::string> &soiL
 
       // Distill external model
       GiNaC::exmap translation_table;
-      distill(this,&external,exR,translation_table);
+      distill(&external,exR,translation_table);
+
+}
+
+void
+HybridModel::updateUnits(const Ast::Model &external)
+{
+
+  // If external model is defined in intensive units, skip:
+  if (!external.speciesHaveSubstanceUnits()) { return; }
+
+  // Holds forward and back substitutions:
+  GiNaC::exmap  forward_subst;
+  GiNaC::exmap  back_subst;
+
+  // Now update internal propensities:
+  for (size_t i = 0; i<external.numSpecies(); i++)
+  {
+    // Get the specices:
+    Ast::Species *species = external.getSpecies(i);
+    Ast::Compartment *compartment = species->getCompartment();
+
+    // Mark forward substitution of x -> x' * Volume
+    GiNaC::symbol x(species->getIdentifier()+"'");
+    forward_subst[species->getSymbol()] = x * compartment->getSymbol();
+    // and x' -> x
+    back_subst[x] = species->getSymbol();
+  }
+
+  for (size_t i=0; i<this->numReactions(); i++)
+  {
+    Ast::KineticLaw *kin = this->getReaction(i)->getKineticLaw();
+    kin->setRateLaw(kin->getRateLaw().subs(forward_subst).subs(back_subst));
+  }
 
 }
 
@@ -139,7 +172,7 @@ HybridModel::checkConsistency(const std::set<Ast::Reaction *> &exR, std::set<Ast
 }
 
 void
-HybridModel::distill(Ast::Model * src, Ast::Model *external,
+HybridModel::distill( Ast::Model *external,
              std::set<Ast::Reaction *> exR,
              GiNaC::exmap &translation_table)
 {
@@ -160,18 +193,18 @@ HybridModel::distill(Ast::Model * src, Ast::Model *external,
     std::map<Ast::Species *, Ast::Species *> species_table;
 
     // Set identifier of model:
-    external->setIdentifier(src->getIdentifier());
+    external->setIdentifier(this->getIdentifier());
 
     // Set name:
-    external->setName(src->getName());
+    external->setName(this->getName());
 
     // add time symbol to translation table:
-    translation_table[src->getTime()] = external->getTime();
+    translation_table[this->getTime()] = external->getTime();
 
     // Sorry, iteration is quiet in-efficient, however:
 
     // Copy function definitions:
-    for (Ast::Model::iterator iter = src->begin(); iter != src->end(); iter++) {
+    for (Ast::Model::iterator iter = this->begin(); iter != this->end(); iter++) {
       if (Ast::Node::isFunctionDefinition(*iter)) {
         external->addDefinition(Ast::ModelCopyist::copyFunctionDefinition(
                               static_cast<Ast::FunctionDefinition *>(*iter), translation_table));
@@ -179,14 +212,14 @@ HybridModel::distill(Ast::Model * src, Ast::Model *external,
     }
 
     // Copy default units:
-    external->setSubstanceUnit(src->getSubstanceUnit().asScaledBaseUnit(), false);
-    external->setVolumeUnit(src->getVolumeUnit().asScaledBaseUnit(), false);
-    external->setAreaUnit(src->getAreaUnit().asScaledBaseUnit(), false);
-    external->setLengthUnit(src->getLengthUnit().asScaledBaseUnit(), false);
-    external->setTimeUnit(src->getTimeUnit().asScaledBaseUnit(), false);
+    external->setSubstanceUnit(this->getSubstanceUnit().asScaledBaseUnit(), false);
+    external->setVolumeUnit(this->getVolumeUnit().asScaledBaseUnit(), false);
+    external->setAreaUnit(this->getAreaUnit().asScaledBaseUnit(), false);
+    external->setLengthUnit(this->getLengthUnit().asScaledBaseUnit(), false);
+    external->setTimeUnit(this->getTimeUnit().asScaledBaseUnit(), false);
 
     // Copy user defined "specialized" units:
-    for (Ast::Model::iterator iter = src->begin(); iter != src->end(); iter++) {
+    for (Ast::Model::iterator iter = this->begin(); iter != this->end(); iter++) {
       if (Ast::Node::isUnitDefinition(*iter)) {
         external->addDefinition(Ast::ModelCopyist::copyUnitDefinition(
                               static_cast<Ast::UnitDefinition *>(*iter)));
@@ -194,16 +227,16 @@ HybridModel::distill(Ast::Model * src, Ast::Model *external,
     }
 
     // Copy all parameter definitions:
-    for (size_t i=0; i<src->numParameters(); i++) {
+    for (size_t i=0; i<this->numParameters(); i++) {
       external->addDefinition(Ast::ModelCopyist::copyParameterDefinition(
-                            static_cast<Ast::Parameter *>(src->getParameter(i)),
+                            static_cast<Ast::Parameter *>(this->getParameter(i)),
                             translation_table));
     }
 
     // Copy all compartments:
-    for (size_t i=0; i<src->numCompartments(); i++) {
+    for (size_t i=0; i<this->numCompartments(); i++) {
       external->addDefinition(Ast::ModelCopyist::copyCompartmentDefinition(
-                            static_cast<Ast::Compartment *>(src->getCompartment(i)),
+                            static_cast<Ast::Compartment *>(this->getCompartment(i)),
                             translation_table));
     }
 
@@ -248,7 +281,7 @@ HybridModel::distill(Ast::Model * src, Ast::Model *external,
     for(std::set<Ast::Reaction *>::iterator it = exR.begin(); it!=exR.end(); it++)
     {
       Ast::Reaction *reaction = ((*it));
-      src->remDefinition(reaction);
+      this->remDefinition(reaction);
       delete reaction; reaction=0;
     }
 
@@ -256,8 +289,11 @@ HybridModel::distill(Ast::Model * src, Ast::Model *external,
     for(std::set<Ast::Species *>::iterator it = exS.begin(); it!=exS.end(); it++)
     {
       Ast::Species *species = ((*it));
-      src->remDefinition(species);
+      this->remDefinition(species);
     }
+
+    // Update units
+    updateUnits(*external);
 
     // Return empty lists
     exR.empty();
