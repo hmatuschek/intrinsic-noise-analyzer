@@ -8,6 +8,9 @@ HybridModel::HybridModel(Ast::Model &model, const std::vector<std::string> &soiL
     soi(*this,soiList)
 {
 
+      // Set concentration units
+      this->setSpeciesHaveSubstanceUnits(false);
+
       // Initialize list of external species with signal of interest
       std::set<Ast::Species *> exS = soi.getSpeciesOfInterest();
 
@@ -61,6 +64,8 @@ void
 HybridModel::dump(std::ostream &str)
 {
 
+    str << std::endl;
+
     // List external species
     str << "List of external species (" << this->getExternalModel().numSpecies() << "):" << std::endl;
     for(Ast::Model::SpeciesIterator it = this->getExternalModel().speciesBegin();
@@ -68,7 +73,7 @@ HybridModel::dump(std::ostream &str)
     {
       str<<(*it)->getIdentifier()<<std::endl;
     }
-    str << "====" << std::endl << std::endl;
+    str << "___" << std::endl << std::endl;
 
     // List external reactions
     str << "List of external reactions (" << this->getExternalModel().numReactions() << "):" << std::endl;
@@ -76,7 +81,7 @@ HybridModel::dump(std::ostream &str)
     {
       str<<(*it)->getName()<<std::endl;
     }
-    str << "====" << std::endl << std::endl;
+    str << "___" << std::endl << std::endl;
 
     // List internal species
     str << "List of internal species (" << this->numSpecies() << "):" << std::endl;
@@ -84,7 +89,7 @@ HybridModel::dump(std::ostream &str)
     {
       str<<this->getSpecies(i)->getIdentifier()<<std::endl;
     }
-    str << "====" << std::endl << std::endl;
+    str << "___" << std::endl << std::endl;
 
     // List internal reactions
     str << "List of internal reactions (" << this->numReactions() << "):" << std::endl;
@@ -92,7 +97,7 @@ HybridModel::dump(std::ostream &str)
     {
       str<<this->getReaction(i)->getIdentifier()<<std::endl;
     }
-    str << "====" << std::endl << std::endl;
+    str << "___" << std::endl << std::endl;
 
 }
 

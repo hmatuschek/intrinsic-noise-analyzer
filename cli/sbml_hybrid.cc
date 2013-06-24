@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
       { "model",          required_argument, NULL, 'm' },
       { "soi",            required_argument, NULL, 's' },
       { "tmax",           required_argument, NULL, 't' },
-      { "time-step",      required_argument, NULL, 'd' },
+      { "timestep",      required_argument, NULL, 'd' },
       { "ensemble-size",  required_argument, NULL, 'e' },
       { "eps-rel",        required_argument, NULL, 'r' },
       { "eps-abs",        required_argument, NULL, 'a' },
@@ -119,6 +119,8 @@ int main(int argc, char *argv[])
     // Construct hybrid model
     Models::HybridModel hybrid(model,signal);
 
+    hybrid.dump(std::cout);
+
     size_t nInt = hybrid.numSpecies();
     size_t nExt = hybrid.getExternalModel().numSpecies();
 
@@ -182,7 +184,7 @@ int main(int argc, char *argv[])
 
     // Some wisdom
     double progress=0.;
-    std::cerr<< "Confucius says '" << Confucius() << "'"<<
+    std::cout<< "Confucius says '" << Confucius() << "'"<<
                 std::endl << "Please wait for progress..." << std::endl;
 
     try{
@@ -311,9 +313,9 @@ void printProgBar( int percent ){
     }
   }
 
-  std::cerr<< "\r" "[" << bar << "] ";
-  std::cerr.width( 3 );
-  std::cerr<< percent << "%     " << std::flush;
+  std::cout<< "\r" "[" << bar << "] ";
+  std::cout.width( 3 );
+  std::cout<< percent << "%     " << std::flush;
 }
 
 

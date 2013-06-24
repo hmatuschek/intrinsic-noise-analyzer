@@ -144,6 +144,7 @@ protected:
   Ast::Parameter * SpeciestoParameter(Ast::Species *node, GiNaC::exmap &translation_table,
                                   std::map<Ast::Species *, Ast::Species *> &species_table);
 
+public:
   void dump(std::ostream &str);
 
 };
