@@ -29,13 +29,14 @@ checksums md5    b45e3e0b2ac26b2dc6d3025f3b34acea \
           sha1   359cbb9847b7b0ba6ea9038b97ea70303120818c \
           rmd160 a441f30ea8d32e0788e00615e531094e011e2895
 
-depends_lib  port:libsbml \
-             port:qt4-mac \
-             port:GiNaC \
+depends_lib  	port:libsbml \
+             	port:qt4-mac \
+             	port:GiNaC-gcc
+		port:gcc47
 
 depends_build port:cmake
 
-default_variants    +llvm32 +gcc45
+default_variants    +llvm32
 
 configure.cmd       cmake
 configure.pre_args  -DCMAKE_INSTALL_PREFIX=${prefix}
@@ -43,12 +44,13 @@ configure.args      -DCMAKE_VERBOSE_MAKEFILE=ON \
                     -DCMAKE_COLOR_MAKEFILE=OFF \
                     -DCMAKE_BUILD_TYPE=RELEASE \
                     -DINA_ENABLE_VERSION_CHECK=ON \
-                    -DINA_ENABLE_OPENMP=OFF \
+                    -DINA_ENABLE_OPENMP=ON \
                     -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON \
                     -DCMAKE_INSTALL_NAME_DIR=${prefix}/lib \
                     -DCMAKE_SYSTEM_PREFIX_PATH=\"${prefix}\;/usr\" 
 
-configure.args-append ../ina_src
+configure.args-append	../ina_src
+configure.compiler	macports-gcc-4.7
 
 # Phase modifications
 # Move source into ina_src; configure & build (out-of-source) in ${workpath}
@@ -91,18 +93,4 @@ variant llvm33 conflicts llvm29 llvm30 llvm31 llvm32 \
     configure.args-append	-DWITH_LLVM_CONFIG=llvm-config-mp-3.3
 }
 
-variant gcc45 conflicts gcc46 gcc47 \
-  description {Configure to compile with gcc 4.5, enables OpenMP support} {
-    configure.compiler          macports-gcc-4.5
-}
 
-variant gcc46 conflicts gcc45 gcc47 \
-  description {Configure to compile with gcc 4.6, enables OpenMP support} {
-    configure.compiler          macports-gcc-4.6
-}
-
-variant gcc47 conflicts gcc45 gcc46 \
-  description {Configure to compile with gcc 4.7, enables OpenMP support} {
-    configure.compiler          macports-gcc-4.7
-}
-   
