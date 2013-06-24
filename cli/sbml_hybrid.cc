@@ -324,6 +324,9 @@ std::string Confucius()
 
   MersenneTwister mt(time(0));
 
+  // have a look at http://en.wikipedia.org/wiki/Fortune_(Unix)
+  // or http://en.wikipedia.org/wiki/Cowsay ... ;-)
+
   std::vector<std::string> confucius;
   confucius.push_back("Man who stand on hill with mouth open will wait long time for roast duck to drop in.");
   confucius.push_back("It does not matter how slowly you go as long as you do not stop.");
