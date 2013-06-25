@@ -125,41 +125,8 @@ public:
   typedef std::map<Eigen::VectorXd,Eigen::MatrixXd,lessVec> condVarType;
 
 
-  /**
-  * Error of transformed signal. E[V(Z|s)]
-  */
-  void dynError(const std::vector<Eigen::VectorXd> &stateMatrix, Eigen::VectorXd &mean, Eigen::MatrixXd &transErr, Eigen::MatrixXd &dynErr, size_t level=1)
 
-  {
-      // Zero input
-      mean = Eigen::VectorXd::Zero(intModel.numSpecies());
-      transErr = Eigen::MatrixXd::Zero(intModel.numSpecies(),intModel.numSpecies());
-      dynErr = Eigen::MatrixXd::Zero(intModel.numSpecies(),intModel.numSpecies());
-
-      histType histExt;
-      condMeanType condMean;
-      condVarType condVar;
-      condStat(stateMatrix, histExt, condMean, condVar, level);
-
-      for(std::map<Eigen::VectorXd, Eigen::VectorXd,lessVec>::iterator item = condMean.begin();
-          item!=condMean.end(); item++)
-      {
-          mean += (item->second)*histExt[item->first];
-          transErr += (item->second)*(item->second.transpose())*histExt[item->first];
-      }
-
-      for(std::map<Eigen::VectorXd, Eigen::MatrixXd,lessVec>::iterator item = condVar.begin();
-          item!=condVar.end(); item++)
-      {
-          dynErr += (item->second)*histExt[item->first];
-      }
-
-      // Substract mean
-      transErr -=  mean*mean.transpose();
-
-  }
-
-  void condStat(const std::vector<Eigen::VectorXd> &stateMatrix, histType &histExt,
+  virtual void condStat(const std::vector<Eigen::VectorXd> &stateMatrix, histType &histExt,
                 condMeanType &condMean, condVarType &condVar, size_t level)
 
   {
@@ -227,31 +194,6 @@ public:
 
   }
 
-
-  void mechError(const std::vector<Eigen::VectorXd> &stateMatrix, Eigen::MatrixXd &mechErr, size_t level=1)
-
-  {
-
-    // Zero matrix
-    mechErr = Eigen::MatrixXd::Zero(intModel.numSpecies(),intModel.numSpecies());
-
-    std::vector<Eigen::VectorXd> mean;
-    std::vector<Eigen::MatrixXd> cov;
-
-    for(int sid=0; sid<ensembleSize; sid++)
-    {
-
-      const Eigen::VectorXd &state = stateMatrix[sid];
-      getInternalStats(state,sid,mean,cov);
-
-      for(size_t i = 0; i<level; i++)
-        mechErr += cov[i];
-
-    }
-
-    mechErr/=ensembleSize;
-
-  }
 
   /**
    * Run hybrid method reaction-wise.
@@ -387,6 +329,65 @@ public:
     sseModel.fullState(state,mean[0],cov[0],mean[1],cov[1],skewness,iosemre);
 
   }
+
+  void dynError(const std::vector<Eigen::VectorXd> &stateMatrix, Eigen::VectorXd &mean, Eigen::MatrixXd &transErr, Eigen::MatrixXd &dynErr, size_t level=1)
+
+  {
+      // Zero input
+      mean = Eigen::VectorXd::Zero(intModel.numSpecies());
+      transErr = Eigen::MatrixXd::Zero(intModel.numSpecies(),intModel.numSpecies());
+      dynErr = Eigen::MatrixXd::Zero(intModel.numSpecies(),intModel.numSpecies());
+
+      histType histExt;
+      condMeanType condMean;
+      condVarType condVar;
+      condStat(stateMatrix, histExt, condMean, condVar, level);
+
+      for(std::map<Eigen::VectorXd, Eigen::VectorXd,lessVec>::iterator item = condMean.begin();
+          item!=condMean.end(); item++)
+      {
+          mean += (item->second)*histExt[item->first];
+          transErr += (item->second)*(item->second.transpose())*histExt[item->first];
+      }
+
+      for(std::map<Eigen::VectorXd, Eigen::MatrixXd,lessVec>::iterator item = condVar.begin();
+          item!=condVar.end(); item++)
+      {
+          dynErr += (item->second)*histExt[item->first];
+      }
+
+      // Substract mean
+      transErr -=  mean*mean.transpose();
+
+  }
+
+  void mechError(const std::vector<Eigen::VectorXd> &stateMatrix, Eigen::MatrixXd &mechErr, size_t level=1)
+
+  {
+
+    // Zero matrix
+    mechErr = Eigen::MatrixXd::Zero(intModel.numSpecies(),intModel.numSpecies());
+
+    std::vector<Eigen::VectorXd> mean;
+    std::vector<Eigen::MatrixXd> cov;
+
+    for(int sid=0; sid<ensembleSize; sid++)
+    {
+
+      const Eigen::VectorXd &state = stateMatrix[sid];
+      getInternalStats(state,sid,mean,cov);
+
+      for(size_t i = 0; i<level; i++)
+        mechErr += cov[i];
+
+    }
+
+    mechErr/=ensembleSize;
+
+  }
+
+
+
 
 
 
