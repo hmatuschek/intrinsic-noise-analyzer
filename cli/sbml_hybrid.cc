@@ -24,11 +24,12 @@ std::string Confucius();
 int main(int argc, char *argv[])
 {
 
-  static const char *optString = "opmstdera";
+  static const char *optString = "opumstdera";
 
   static const struct option longOpts[] = {
       { "intfile",        required_argument, NULL, 'o' },
       { "extfile",        required_argument, NULL, 'p' },
+      { "trajfile",        required_argument, NULL, 'u' },
       { "model",          required_argument, NULL, 'm' },
       { "soi",            required_argument, NULL, 's' },
       { "tmax",           required_argument, NULL, 't' },
@@ -41,8 +42,9 @@ int main(int argc, char *argv[])
 
   const char *parameterFileName=NULL;
   const char *modelFileName=0;
-  const char *intFileName=0;
-  const char *extFileName=0;
+  const char *intFileName="internal.dat";
+  const char *extFileName="external.dat";
+  const char *trajFileName="traj.dat";
 
   double tfinal = 10;
   double dt=0.1;
@@ -61,6 +63,10 @@ int main(int argc, char *argv[])
 
           case 'p':
               extFileName = optarg;
+              break;
+
+          case 'u':
+              trajFileName = optarg;
               break;
 
           case 'm':
@@ -144,10 +150,20 @@ int main(int argc, char *argv[])
 
     // Open file for external statistics
     std::ofstream trajFile;
-    trajFile.open ("traj.dat");
+    trajFile.open (trajFileName);
+
+    // Header
+    trajFile << "# time";
+    for(size_t i=0; i<nInt; i++)
+        trajFile << "\t mean(" << hybrid.getSpecies(i)->getIdentifier() <<"|u^H)";
+    //for(size_t i=0; i<nInt; i++)
+    //    trajFile << "\t var(" << hybrid.getSpecies(i)->getIdentifier() <<")";
+    for(size_t i=0; i<nExt; i++)
+        trajFile << "\t " << hybrid.getExternalModel().getSpecies(i)->getIdentifier();
+    trajFile << std::endl;
 
     std::ofstream intFile;
-    if(intFileName) intFile.open(intFileName); else intFile.open("internal.dat");
+    intFile.open(intFileName);
 
     int col=1;
     // Header
@@ -155,7 +171,7 @@ int main(int argc, char *argv[])
     for(size_t i=0; i<hybrid.numSpecies(); i++)
         intFile << "\t [" << col++ <<"]" << hybrid.getSpecies(i)->getIdentifier();
     for(size_t i=0; i<hybrid.numSpecies(); i++)
-        intFile << "\t [" << col++ <<"]tE(" << hybrid.getSpecies(i)->getIdentifier() << ")";
+        intFile << "\t [" << col++ <<"]dR(" << hybrid.getSpecies(i)->getIdentifier() << ")";
     for(size_t i=0; i<hybrid.numSpecies(); i++)
         intFile << "\t [" << col++ <<"]dE(" << hybrid.getSpecies(i)->getIdentifier() << ")";
     for(size_t i=0; i<hybrid.numSpecies(); i++)
@@ -164,7 +180,7 @@ int main(int argc, char *argv[])
     for(size_t i=0; i<hybrid.numSpecies(); i++)
       intFile << "\t [" << col++ <<"]EMRE(" << hybrid.getSpecies(i)->getIdentifier() <<")";
     for(size_t i=0; i<hybrid.numSpecies(); i++)
-        intFile << "\t [" << col++ <<"]tE_EMRE(" << hybrid.getSpecies(i)->getIdentifier() << ")";
+        intFile << "\t [" << col++ <<"]dR_EMRE(" << hybrid.getSpecies(i)->getIdentifier() << ")";
     for(size_t i=0; i<hybrid.numSpecies(); i++)
         intFile << "\t [" << col++ <<"]dE_EMRE(" << hybrid.getSpecies(i)->getIdentifier() << ")";
     for(size_t i=0; i<hybrid.numSpecies(); i++)
@@ -172,7 +188,7 @@ int main(int argc, char *argv[])
     intFile << std::endl;
 
     std::ofstream extFile;
-    if(extFileName) extFile.open(extFileName); else extFile.open("external.dat");
+    extFile.open(extFileName);
 
     // Header
     extFile << "# time";
@@ -197,10 +213,11 @@ int main(int argc, char *argv[])
         //Single trajectory
         trajFile << t << "\t"
                   << state[0].head(nInt).transpose() << "\t"
-                  << state[0].tail(nExt).transpose() << std::endl;
+                  << state[0].tail(nExt).transpose() << "\t";
+        trajFile << std::endl;
 
         // External model statistics
-        simulator.stats(meanEx,covEx,skew);
+        simulator.stats(meanEx, covEx, skew);
 
         extFile << t;
         for(size_t i=0; i<nExt; i++)
@@ -222,8 +239,8 @@ int main(int argc, char *argv[])
         for(size_t i=0; i<hybrid.numSpecies(); i++)
             intFile << "\t" << (mechErr).diagonal()(i);
 
-        simulator.mechError(state, mechErr,2);
-        simulator.dynError(state, mean, transErr, dynErr,2);
+        simulator.mechError(state, mechErr, 2);
+        simulator.dynError(state, mean, transErr, dynErr, 2);
 
         intFile << "\t";
         for(size_t i=0; i<hybrid.numSpecies(); i++)

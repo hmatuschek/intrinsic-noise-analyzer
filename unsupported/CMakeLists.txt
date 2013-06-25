@@ -37,5 +37,5 @@ TARGET_LINK_LIBRARIES(libunsupported ${LIBS} libina)
 
 
 # No installation needed or?
-#INSTALL(TARGETS libunsupported
-#        DESTINATION ${CMAKE_INSTALL_LIBDIR})
+INSTALL(TARGETS libunsupported
+        DESTINATION ${CMAKE_INSTALL_LIBDIR})
