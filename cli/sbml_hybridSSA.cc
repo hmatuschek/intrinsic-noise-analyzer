@@ -53,8 +53,7 @@ int main(int argc, char *argv[])
     }
 
     // Ensemble size
-    int ensExt = 500;
-    int ensInt = 500;
+    int ensExt = 10000;
     // Timestep
     double dt=0.25;
     // Final time
@@ -75,7 +74,7 @@ int main(int argc, char *argv[])
     size_t nInt = hybrid.numSpecies();
     size_t nExt = hybrid.getExternalModel().numSpecies();
 
-    Models::HybridSSA simulator(hybrid, ensExt, ensInt, 1);
+    Models::HybridSSA simulator(hybrid, ensExt, 1);
 
     Models::Histogram<double> hist;
 
@@ -86,7 +85,7 @@ int main(int argc, char *argv[])
 
     Eigen::VectorXd mean;
     Eigen::MatrixXd mechErr;
-    Eigen::MatrixXd dynErr;
+    Eigen::MatrixXd fidErr;
     Eigen::MatrixXd transErr;
 
     Eigen::VectorXd meanEx(nExt);
@@ -129,12 +128,12 @@ int main(int argc, char *argv[])
                   << state[0].tail(nExt).transpose() << "\t" << std::endl;
 
         simulator.mechError(state, mechErr);
-        simulator.dynError(state, mean, transErr, dynErr);
+        simulator.fidError(state, mean, transErr, fidErr);
 
         std::cout << t << "\t"
                   << mean.transpose() << "\t"
                   << (transErr).diagonal().transpose() << "\t"
-                  << (dynErr).diagonal().transpose() << "\t"
+                  << (fidErr-mechErr).diagonal().transpose() << "\t"
                   << (mechErr).diagonal().transpose() << "\t"
                   << std::endl;
 
