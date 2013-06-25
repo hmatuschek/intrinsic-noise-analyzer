@@ -139,7 +139,7 @@ StochasticSimulator::getState() const
 
 {
 
-    return (observationMatrix*this->Omega.asDiagonal().inverse());
+    return (observationMatrix.leftCols(this->numSpecies())*this->Omega.asDiagonal().inverse());
 
 }
 

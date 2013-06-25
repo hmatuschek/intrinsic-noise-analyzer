@@ -14,19 +14,18 @@ protected:
 
   size_t numExtVars;
 
-  size_t numIntEns;
-
   size_t numExtEns;
+  size_t numIntEns;
 
   std::vector<Models::OptimizedSSA *> ssaSim;
 
 public:
 
 
-  HybridSSA(Models::HybridModel &model, size_t numExtEns, size_t numIntEns, size_t num_threads=OpenMP::getMaxThreads())
+  HybridSSA(Models::HybridModel &model, size_t numExtEns, size_t num_threads=OpenMP::getMaxThreads())
     : GenericHybridSimulator(model, numExtEns, num_threads),
       numExtVars(model.getExternalModel().numSpecies()),
-      numExtEns(numExtEns), numIntEns(numIntEns),
+      numExtEns(numExtEns), numIntEns(2),
       ssaSim(numExtEns)
 
   {
@@ -36,7 +35,7 @@ public:
     for(size_t i=0; i<model.getExternalModel().numSpecies(); i++)
       params.push_back(&(model.getExternalModel().getSpecies(i)->getSymbol()));
 
-    for(int i=0; i<numExtEns; i++)
+    for(size_t i=0; i<numExtEns; i++)
       ssaSim[i] = new OptimizedSSA(model,numIntEns,time(0),1,1,params);
 
     // Make lookup for signal of interest
@@ -59,7 +58,7 @@ public:
   virtual ~HybridSSA()
   {
 
-    for(int i=0; i<numIntEns; i++)
+    for(size_t i=0; i<numIntEns; i++)
     {
       delete ssaSim[i]; ssaSim[i]=0;
     }
@@ -72,6 +71,81 @@ public:
   {
       state = (ssaSim[0]->getObservationMatrix().row(0)).tail(this->numExtVars);
   }
+
+  void mechError(const std::vector<Eigen::VectorXd> &stateMatrix, Eigen::MatrixXd &mechErr)
+
+  {
+
+    // Zero matrix
+    mechErr = Eigen::MatrixXd::Zero(intModel.numSpecies(),intModel.numSpecies());
+
+    for(int sid=0; sid<ensembleSize; sid++)
+    {
+      Eigen::VectorXd r1 = ssaSim[sid]->getState().row(0).head(intModel.numSpecies());
+      Eigen::VectorXd r2 = ssaSim[sid]->getState().row(1).head(intModel.numSpecies());
+      mechErr += (r1-r2)*(r1-r2).transpose();
+    }
+
+    mechErr/=2*ensembleSize;
+
+  }
+
+
+  void covar(Eigen::MatrixXd &cov)
+
+  {
+
+    // Zero matrix
+    cov = Eigen::MatrixXd::Zero(intModel.numSpecies(),intModel.numSpecies());
+    Eigen::VectorXd mean = Eigen::VectorXd::Zero(intModel.numSpecies());
+
+    for(int sid=0; sid<ensembleSize; sid++)
+    {
+      Eigen::VectorXd r1 = ssaSim[sid]->getState().row(0).head(intModel.numSpecies());
+      mean += r1;
+      cov  += (r1)*(r1.transpose());
+    }
+
+    mean/=ensembleSize;
+    cov/=ensembleSize;
+
+    cov -= mean*(mean.transpose());
+
+  }
+
+  /**
+  * Error of transformed signal. E[V(Z|s)]
+  */
+  void fidError(const std::vector<Eigen::VectorXd> &stateMatrix, Eigen::VectorXd &mean, Eigen::MatrixXd &transErr, Eigen::MatrixXd &fidErr, size_t level=1)
+
+  {
+      // Zero input
+      mean = Eigen::VectorXd::Zero(intModel.numSpecies());
+      transErr = Eigen::MatrixXd::Zero(intModel.numSpecies(),intModel.numSpecies());
+      fidErr = Eigen::MatrixXd::Zero(intModel.numSpecies(),intModel.numSpecies());
+
+      histType histExt;
+      condMeanType condMean;
+      condVarType condVar;
+      condStat(stateMatrix, histExt, condMean, condVar, level);
+
+      for(std::map<Eigen::VectorXd, Eigen::VectorXd,lessVec>::iterator item = condMean.begin();
+          item!=condMean.end(); item++)
+      {
+          mean += (item->second)*histExt[item->first];
+          transErr += (item->second)*(item->second.transpose())*histExt[item->first];
+      }
+
+      // Substract mean
+      transErr.noalias() -=  mean*mean.transpose();
+
+      covar(fidErr);
+      fidErr -= transErr;
+
+
+  }
+
+
 
 
   void runInternal(Eigen::VectorXd &state, const size_t &sid, const double &t_in, const double &t_out)
@@ -105,7 +179,6 @@ public:
     ssaSim[sid]->stats(mean[0], cov[0], skew);
 
   }
-
 
 };
 
