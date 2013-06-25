@@ -13,7 +13,7 @@ inline bool isIdChar(const QChar &c) {
 
 
 ExpressionEditor::ExpressionEditor(QWidget *parent)
-  : QLineEdit(parent)
+  : QLineEdit(parent), _completer(0)
 {
   // pass...
 }
@@ -21,7 +21,7 @@ ExpressionEditor::ExpressionEditor(QWidget *parent)
 ExpressionEditor::ExpressionEditor(iNA::Ast::Scope &scope, QWidget *parent)
   : QLineEdit(parent)
 {
-  _completer = new QCompleter();
+  _completer = new QCompleter(this);
   _completer->setCompletionMode(QCompleter::PopupCompletion);
   _completer->setModel(new ScopeItemModel(scope, _completer));
   _completer->setWidget(this);
