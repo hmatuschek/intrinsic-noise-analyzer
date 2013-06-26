@@ -31,12 +31,6 @@ public:
  */
 class ModelSelectionTaskConfig
 {
-protected:
-  /**
-   * Will hold a weak reference to the selected document, will be null, if no document is selected.
-   */
-  DocumentItem *document;
-
 public:
   /** Default constructor. */
   ModelSelectionTaskConfig();
@@ -44,10 +38,16 @@ public:
   ModelSelectionTaskConfig(const ModelSelectionTaskConfig &other);
   /** Destructor. */
   virtual ~ModelSelectionTaskConfig();
+
   /** (Re-) Sets the document item of the model being selected for analysis. */
   virtual void setModelDocument(DocumentItem *document);
   /** Returns the currently selected document item of the model to be analyzed. */
   virtual DocumentItem *getModelDocument();
+
+protected:
+  /** Will hold a weak reference to the selected document, will be @c null, if no document is
+   * selected. */
+  DocumentItem *document;
 };
 
 

@@ -7,12 +7,12 @@
 
 
 
-class LNATaskWrapper : public TaskItem
+class LNATaskItem : public TaskItem
 {
   Q_OBJECT
 
 public:
-  LNATaskWrapper(LNATask *task, QObject *parent=0);
+  LNATaskItem(LNATask *task, QObject *parent=0);
 
   LNATask *getLNATask();
 

@@ -84,7 +84,7 @@ LogWindow::LogWindow(QWidget *parent)
   buttons->addWidget(_level_selector);
   buttons->addWidget(save_button);
   QVBoxLayout *layout = new QVBoxLayout();
-  layout->setMargin(0);
+  layout->setMargin(0); layout->setSpacing(5);
   layout->addWidget(_logtable);
   layout->addLayout(buttons);
   setLayout(layout);

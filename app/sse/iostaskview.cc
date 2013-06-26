@@ -22,7 +22,7 @@
 /* ********************************************************************************************* *
  * Implementation of RETaskView, derived from TaskView:
  * ********************************************************************************************* */
-IOSTaskView::IOSTaskView(IOSTaskWrapper *task_wrapper, QWidget *parent)
+IOSTaskView::IOSTaskView(IOSTaskItem *task_wrapper, QWidget *parent)
   : TaskView(task_wrapper, parent)
 {
   // Update main-widget:
@@ -33,7 +33,7 @@ IOSTaskView::IOSTaskView(IOSTaskWrapper *task_wrapper, QWidget *parent)
 QWidget *
 IOSTaskView::createResultWidget(TaskItem *task_item)
 {
-  return new IOSResultWidget(static_cast<IOSTaskWrapper *>(task_item));
+  return new IOSResultWidget(static_cast<IOSTaskItem *>(task_item));
 }
 
 
@@ -41,7 +41,7 @@ IOSTaskView::createResultWidget(TaskItem *task_item)
 /* ********************************************************************************************* *
  * Implementation of REResultWidget, show the result of a RE analysis.
  * ********************************************************************************************* */
-IOSResultWidget::IOSResultWidget(IOSTaskWrapper *task_wrapper, QWidget *parent):
+IOSResultWidget::IOSResultWidget(IOSTaskItem *task_wrapper, QWidget *parent):
   QWidget(parent), _ios_task_wrapper(task_wrapper)
 {
   setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);

@@ -22,7 +22,7 @@
 /* ********************************************************************************************* *
  * Implementation of LNATaskView, derived from TaskView:
  * ********************************************************************************************* */
-LNATaskView::LNATaskView(LNATaskWrapper *task_wrapper, QWidget *parent)
+LNATaskView::LNATaskView(LNATaskItem *task_wrapper, QWidget *parent)
   : TaskView(task_wrapper, parent)
 {
   // Update main-widget:
@@ -32,7 +32,7 @@ LNATaskView::LNATaskView(LNATaskWrapper *task_wrapper, QWidget *parent)
 
 QWidget *
 LNATaskView::createResultWidget(TaskItem *task_item) {
-  return new LNAResultWidget(static_cast<LNATaskWrapper *>(task_item));
+  return new LNAResultWidget(static_cast<LNATaskItem *>(task_item));
 }
 
 
@@ -40,7 +40,7 @@ LNATaskView::createResultWidget(TaskItem *task_item) {
 /* ********************************************************************************************* *
  * Implementation of LNAResultWidget, show the result of a LNA (SSE) analysis.
  * ********************************************************************************************* */
-LNAResultWidget::LNAResultWidget(LNATaskWrapper *task_wrapper, QWidget *parent):
+LNAResultWidget::LNAResultWidget(LNATaskItem *task_wrapper, QWidget *parent):
   QWidget(parent), _lna_task_wrapper(task_wrapper)
 {
   setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);

@@ -6,12 +6,12 @@
 #include "retask.hh"
 
 
-class RETaskWrapper : public TaskItem
+class RETaskItem : public TaskItem
 {
   Q_OBJECT
 
 public:
-  RETaskWrapper(RETask *task, QObject *parent=0);
+  RETaskItem(RETask *task, QObject *parent=0);
 
   RETask *getRETask();
 

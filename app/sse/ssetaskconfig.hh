@@ -23,24 +23,17 @@ public:
   } SSEMethod;
 
 
-protected:
-  SSEMethod selected_method;
-
-
 public:
   /**
    * Default constructor.
    */
   SSETaskConfig();
 
-  /**
-   * Copy constructor.
-   */
+  /** Copy constructor. */
   SSETaskConfig(const SSETaskConfig &other);
 
   /** Overrides the default implenentation of @c ModelSelectionTaskConfig and checks if
-   * the selected model can be used to instantiate a LNAModel. The LNA model instance is then
-   * stored in model. */
+   * the selected model can be used to instantiate the specified analysis. */
   virtual void setModelDocument(DocumentItem *document);
 
   /** Implements the @c SpeciesSelectionTaskConfig interface, and returns the model instance. */
@@ -55,15 +48,17 @@ public:
    * instantiated when @c setModelDocument is called. */
   void setMethod(SSEMethod method);
   /** Returns the selected method. */
-  SSEMethod getMethod() const;
+  SSEMethod method() const;
 
-public:
+protected:
+  /** Specifies the selected SSE analysis method. */
+  SSEMethod _selected_method;
   /** The model to be analyzed. */
-  iNA::Models::REmodel *re_model;
+  iNA::Models::REmodel *_re_model;
   /** The model to be analyzed. */
-  iNA::Models::LNAmodel *lna_model;
+  iNA::Models::LNAmodel *_lna_model;
   /** The model to be analyzed. */
-  iNA::Models::IOSmodel *ios_model;
+  iNA::Models::IOSmodel *_ios_model;
 };
 
 

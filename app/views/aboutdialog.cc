@@ -27,9 +27,11 @@ AboutDialog::AboutDialog(QWidget *parent)
   version->setTextFormat(Qt::LogText);
   version->setAlignment(Qt::AlignCenter);
 
-  QLabel *url = new QLabel(tr("http://code.google.com/p/intrinsic-noise-analyzer"));
+  QLabel *url = new QLabel();
+  url->setTextFormat(Qt::RichText); url->setOpenExternalLinks(true);
+  url->setText(tr("<a href=\"http://code.google.com/p/intrinsic-noise-analyzer\">"
+                  "http://code.google.com/p/intrinsic-noise-analyzer</a>"));
   url->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
-  url->setTextFormat(Qt::LogText);
   url->setAlignment(Qt::AlignCenter);
 
   QTabWidget *tabs = new QTabWidget();
@@ -62,7 +64,8 @@ AboutDialog::AboutDialog(QWidget *parent)
 AboutPage::AboutPage(QWidget *parent)
   : QTextEdit(parent)
 {
-  this->setHtml(AboutPage::content);
+  // Subst. version string in about text:
+  this->setHtml(AboutPage::content.arg(INA_VERSION_STRING));
   this->setReadOnly(true);
 }
 
@@ -104,8 +107,8 @@ QString AboutPage::content =
         "<LI>the Stochastic Simulation Algorithm - a widely used Monte Carlo method.</UL>"
         "iNA is based on the computer algebra system Ginac and the compiler framework LLVM. </p>"
 "  <h3>Copyright</h3>"
-"  <p>Intrinsic Noise Analyzer version 0.4.1, "
-"     Copyright (C) 2011,2012 Ramon Grima, Hannes Matuschek, Philipp Thomas</p>"
+"  <p>Intrinsic Noise Analyzer version %1, "
+"     Copyright (C) 2011-2013 Ramon Grima, Hannes Matuschek, Philipp Thomas</p>"
 "  <p>The Intrinsic Noise Analyzer comes with ABSOLUTELY NO WARRANTY;"
 "     This is free software, and you are welcome to redistribute it"
 "     under certain conditions; read \"License\" for details.</p>"

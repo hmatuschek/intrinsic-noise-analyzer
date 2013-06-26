@@ -7,12 +7,9 @@
 namespace iNA {
 namespace ODE {
 
-/**
- * @cond 0
+/** @cond 0
  * (exclude from docs)
- *
- * Defines the constants for @c LSODA.
- */
+ * Defines the constants for @c LSODA. */
 class LsodaConstants
 {
 public:
@@ -67,39 +64,42 @@ public:
    SOFTWARE.
 */
 
-/**
-* Repack of LSODA c from fortran tanslation
-* @todo convert all printf to exceptions
-* @todo incoorporate analytical Jacobian
-*/
-
+/** Repack of LSODA c from fortran tanslation
+ * @todo convert all printf to exceptions
+ * @todo incoorporate analytical Jacobian */
 class LSODA : public LsodaConstants {
 
 public:
- LSODA();
+  /** Default constructor. */
+  LSODA();
 
- virtual ~LSODA();
+  /** Destructor. */
+  virtual ~LSODA();
 
- int istate;
+  /** Internal state, seems to to be used so far?!? */
+  int istate;
 
  /** @todo This is actually a bad idea. As far as I know, every call to a virtual function
   * will result into a function pointer lookup via the vtable of the instance of virtual class,
   * which slows the execution. It is better to define a function interface and pass an instance as
   * a pointer. I.e. typedef void (*f_lsoda_ode)(double x, double *y, double *dy, void *context);
   * This will also perfectly match out JIT compiler stuff as it compiles a function pointer
-  * anyway. However, it seems not to be crucial as the benchmarks show.*/
+  * anyway. However, it seems not to be crucial as the benchmarks shows.*/
  virtual void evalODE (double x, double y[], double yd[], int n)=0;
+
  /** @todo The same as above. */
  virtual void evalJac (double x, double *y, double **jac, int n)=0;
 
  void f_lsoda (double t, double dt, double y[], int n, double eps);
 
+ /** Stepper interface. */
  void lsoda (int neq, double *y, double *t, double tout,
              int itol, double *rtol, double *atol,
              int itask, int *istate, int iopt, int jt   );
 
+ /** Returns the number of function evaluations made during integration. */
  size_t numFunctionsEvaluations();
-
+ /** Returns the number of Jacobian evaluations made during integration. */
  size_t numJacobianEvaluations();
 
 
