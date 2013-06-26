@@ -38,6 +38,7 @@ SbmlshEditorDialog::SbmlshEditorDialog(QWidget *parent) :
 
   QObject::connect(buttons, SIGNAL(accepted()), this, SLOT(onReimport()));
   QObject::connect(buttons, SIGNAL(rejected()), this, SLOT(reject()));
+  QObject::connect(_document, SIGNAL(contentsChanged()), this, SLOT(onContentChanged()));
 }
 
 
@@ -79,6 +80,13 @@ SbmlshEditorDialog::onReimport()
   }
 
   if (!has_error) accept();
+}
+
+
+void
+SbmlshEditorDialog::onContentChanged() {
+  QList<QTextEdit::ExtraSelection> selections;
+  _editor->setExtraSelections(selections);
 }
 
 

@@ -587,7 +587,7 @@ Application::configTimeCourseAnalysis() {
 
   try {
     // Decide which analysis task to create:
-    switch (wizard.getConfigCast<SSETaskConfig>().getMethod()) {
+    switch (wizard.getConfigCast<SSETaskConfig>().method()) {
 
     case SSETaskConfig::RE_ANALYSIS:
       task = new RETask(wizard.getConfigCast<SSETaskConfig>());
@@ -618,24 +618,24 @@ Application::configTimeCourseAnalysis() {
   }
 
   // Add task to application and run it:
-  switch(wizard.getConfigCast<SSETaskConfig>().getMethod()) {
+  switch(wizard.getConfigCast<SSETaskConfig>().method()) {
 
     case SSETaskConfig::RE_ANALYSIS:
       docTree()->addTask(
             wizard.getConfigCast<SSETaskConfig>().getModelDocument(),
-            new RETaskWrapper(dynamic_cast<RETask *>(task)));
+            new RETaskItem(dynamic_cast<RETask *>(task)));
       break;
 
     case SSETaskConfig::LNA_ANALYSIS:
       docTree()->addTask(
             wizard.getConfigCast<SSETaskConfig>().getModelDocument(),
-            new LNATaskWrapper(dynamic_cast<LNATask *>(task)));
+            new LNATaskItem(dynamic_cast<LNATask *>(task)));
       break;
 
     case SSETaskConfig::IOS_ANALYSIS:
       docTree()->addTask(
             wizard.getConfigCast<SSETaskConfig>().getModelDocument(),
-            new IOSTaskWrapper(dynamic_cast<IOSTask *>(task)));
+            new IOSTaskItem(dynamic_cast<IOSTask *>(task)));
       break;
 
   default:

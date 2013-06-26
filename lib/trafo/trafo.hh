@@ -71,7 +71,6 @@
 #include "constantfolder.hh"
 #include "assignmentruleinliner.hh"
 #include "reversiblereactionconverter.hh"
-#include "partialmodel.hh"
 #include "referencecounter.hh"
 #include "modeldiff.hh"
 #include "makeparamglobal.hh"

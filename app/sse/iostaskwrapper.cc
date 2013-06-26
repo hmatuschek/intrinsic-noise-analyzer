@@ -3,28 +3,28 @@
 #include "../models/application.hh"
 
 
-IOSTaskWrapper::IOSTaskWrapper(IOSTask *task, QObject *parent)
+IOSTaskItem::IOSTaskItem(IOSTask *task, QObject *parent)
   : TaskItem(task, parent)
 {
 }
 
 
 IOSTask *
-IOSTaskWrapper::getIOSTask()
+IOSTaskItem::getIOSTask()
 {
   return static_cast<IOSTask *>(this->task);
 }
 
 
 bool
-IOSTaskWrapper::providesView() const
+IOSTaskItem::providesView() const
 {
   return true;
 }
 
 
 QWidget *
-IOSTaskWrapper::createView()
+IOSTaskItem::createView()
 {
   return new IOSTaskView(this);
 }

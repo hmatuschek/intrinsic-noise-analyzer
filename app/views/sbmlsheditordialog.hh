@@ -27,6 +27,8 @@ public:
 private slots:
   /** "reimport" handler, parses the SBML-sh model and constructs a Ast::Model from it. */
   void onReimport();
+  /** Gets called once the SBML-sh source changed, clears all "error" highlighting. */
+  void onContentChanged();
 
 private:
   /** Holds the editor widget. */

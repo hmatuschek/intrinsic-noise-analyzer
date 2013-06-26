@@ -3,28 +3,28 @@
 #include "retaskview.hh"
 
 
-RETaskWrapper::RETaskWrapper(RETask *task, QObject *parent)
+RETaskItem::RETaskItem(RETask *task, QObject *parent)
   : TaskItem(task, parent)
 {
 }
 
 
 RETask *
-RETaskWrapper::getRETask()
+RETaskItem::getRETask()
 {
   return static_cast<RETask *>(this->task);
 }
 
 
 bool
-RETaskWrapper::providesView() const
+RETaskItem::providesView() const
 {
   return true;
 }
 
 
 QWidget *
-RETaskWrapper::createView()
+RETaskItem::createView()
 {
   return new RETaskView(this);
 }

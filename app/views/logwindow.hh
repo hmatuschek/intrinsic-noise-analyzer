@@ -20,7 +20,7 @@ public:
 
 public slots:
   /** Saves the log messages into the given file.
-   * Returns true on success. */
+   * Returns @c true on success. */
   bool saveLog(const QString &filename);
   /** Sets the filter level. */
   void setFilterLevel(iNA::Utils::Message::Level level);

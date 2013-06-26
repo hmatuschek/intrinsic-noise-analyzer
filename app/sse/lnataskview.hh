@@ -21,7 +21,7 @@ class LNATaskView : public TaskView
   Q_OBJECT
 
 public:
-  explicit LNATaskView(LNATaskWrapper *task_item, QWidget *parent=0);
+  explicit LNATaskView(LNATaskItem *task_item, QWidget *parent=0);
 
 protected:
   virtual QWidget *createResultWidget(TaskItem *task_item);
@@ -34,7 +34,7 @@ class LNAResultWidget : public QWidget
   Q_OBJECT
 
 public:
-  explicit LNAResultWidget(LNATaskWrapper *_lna_task_wrapper, QWidget *parent = 0);
+  explicit LNAResultWidget(LNATaskItem *_lna_task_wrapper, QWidget *parent = 0);
 
 
 private slots:
@@ -45,7 +45,7 @@ private slots:
   void saveAsMAT(const QString &filename);
 
 private:
-  LNATaskWrapper *_lna_task_wrapper;
+  LNATaskItem *_lna_task_wrapper;
   TableWrapper   *_tableWrapper;
   QTableView     *_dataTable;
   QPushButton    *_plotButton;
