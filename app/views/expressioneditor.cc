@@ -27,6 +27,8 @@ ExpressionEditor::ExpressionEditor(iNA::Ast::Scope &scope, QWidget *parent)
   _completer->setWidget(this);
   QObject::connect(_completer, SIGNAL(activated(QString)),
                    this, SLOT(insertCompletion(QString)));
+  QObject::connect(this, SIGNAL(editingFinished()),
+                   this, SLOT(onEditingFinished()));
 }
 
 void
@@ -61,10 +63,18 @@ ExpressionEditor::keyPressEvent(QKeyEvent *event)
     _completer->complete();
   }
 
-  // Complete anyway if there are at least 3 chars under the cursor:
+  // Complete anyway if there are at least 1 chars under the cursor:
   QString prefix; idUnderCursor(prefix);
   if (1 <= prefix.length()) {
     _completer->setCompletionPrefix(prefix);
     _completer->complete();
   }
+}
+
+void
+ExpressionEditor::onEditingFinished() {
+  // If there is no completer or completer is hidden -> done.
+  if ((0 == _completer) || (! _completer->popup()->isVisible())) { return; }
+  // Hide completer
+  _completer->popup()->hide();
 }
