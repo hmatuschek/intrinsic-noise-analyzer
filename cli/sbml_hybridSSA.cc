@@ -53,11 +53,11 @@ int main(int argc, char *argv[])
     }
 
     // Ensemble size
-    int ensExt = 10000;
+    int ensExt = 100000;
     // Timestep
     double dt=0.25;
     // Final time
-    double tmax = 10;
+    double tmax = 15;
 
     // Construct hybrid model from SBMLsh model
     Ast::Model model; Parser::Sbmlsh::importModel(model, argv[1]);
@@ -71,10 +71,9 @@ int main(int argc, char *argv[])
 
     Models::HybridModel hybrid(model,exS);
 
-    size_t nInt = hybrid.numSpecies();
     size_t nExt = hybrid.getExternalModel().numSpecies();
 
-    Models::HybridSSA simulator(hybrid, ensExt, 1);
+    Models::HybridSSA simulator(hybrid, ensExt, 4);
 
     Models::Histogram<double> hist;
 
@@ -86,7 +85,18 @@ int main(int argc, char *argv[])
     Eigen::VectorXd mean;
     Eigen::MatrixXd mechErr;
     Eigen::MatrixXd fidErr;
-    Eigen::MatrixXd transErr;
+    Eigen::MatrixXd transErr;    
+
+    Eigen::MatrixXd cov;
+
+    int num=tmax/dt;
+
+    std::vector<Eigen::VectorXd> meanE(num,Eigen::VectorXd::Zero(hybrid.numSpecies()));
+    std::vector<Eigen::MatrixXd> mechErrE(num,Eigen::MatrixXd::Zero(hybrid.numSpecies(),hybrid.numSpecies()));
+    std::vector<Eigen::MatrixXd> fidErrE(num,Eigen::MatrixXd::Zero(hybrid.numSpecies(),hybrid.numSpecies()));
+    std::vector<Eigen::MatrixXd> transErrE(num,Eigen::MatrixXd::Zero(hybrid.numSpecies(),hybrid.numSpecies()));
+    std::vector<Eigen::MatrixXd> covE(num,Eigen::MatrixXd::Zero(hybrid.numSpecies(),hybrid.numSpecies()));
+
 
     Eigen::VectorXd meanEx(nExt);
     Eigen::VectorXd skew(nExt);
@@ -110,46 +120,72 @@ int main(int argc, char *argv[])
     std::vector<Eigen::MatrixXd> c;
 
     // Some wisdom
-    double progress=0.;
     std::cerr<< "Confucius says '" << Confucius() << "'"<<
                 std::endl << "Please wait for progress..." << std::endl;
     try{
-      for(double t=0.; t<tmax; t+=dt)
+     for(int n=1; n<=1; n++)
+     {
+
+      int sid = 0;
+      for(double t=0.; t<tmax; t+=dt, sid++)
       {
 
-        // Update progress bar
-        if((t/tmax)>progress){ printProgBar(progress*100); progress+=0.01; }
 
-        simulator.getInternalStats(state[0],0,m,c);
-        //Single trajectory
-        trajFile << t << "\t"
-                  << m[0].head(nInt).transpose() << "\t"
-                  << c[0].diagonal() << "\t"
-                  << state[0].tail(nExt).transpose() << "\t" << std::endl;
+//        simulator.getInternalStats(state[0],0,m,c);
+//        //Single trajectory
+//        trajFile << t << "\t"
+//                  << m[0].head(nInt).transpose() << "\t"
+//                  << c[0].diagonal() << "\t"
+//                  << state[0].tail(nExt).transpose() << "\t" << std::endl;
 
         simulator.mechError(state, mechErr);
         simulator.fidError(state, mean, transErr, fidErr);
+        simulator.covar(cov);
 
-        std::cout << t << "\t"
-                  << mean.transpose() << "\t"
-                  << (transErr).diagonal().transpose() << "\t"
-                  << (fidErr-mechErr).diagonal().transpose() << "\t"
-                  << (mechErr).diagonal().transpose() << "\t"
-                  << std::endl;
+        meanE[sid]     +=mean;
+        mechErrE[sid]  +=mechErr;
+        transErrE[sid] +=transErr;
+        fidErrE[sid]   +=fidErr;
+        covE[sid]      +=cov;
 
          simulator.runHybrid(state, t, t+dt);
 
          // External model statistics
          simulator.stats(meanEx,covEx,skew);
 
-         outfile << t;
-         for(size_t i=0; i<nExt; i++)
-              outfile << "\t" << meanEx(i);
-         for(size_t i=0; i<nExt; i++)
-              outfile << "\t" << covEx(i,i);
-         outfile<<std::endl;
+//         outfile << t;
+//         for(size_t i=0; i<nExt; i++)
+//              outfile << "\t" << meanEx(i);
+//         for(size_t i=0; i<nExt; i++)
+//              outfile << "\t" << covEx(i,i);
+//         outfile<<std::endl;
 
       }
+
+      simulator.resetEnsemble();
+
+      std::ofstream intfile;
+      intfile.open ("internal.dat");
+
+      sid=0;
+      for(double t=0.; t<tmax; t+=dt, sid++)
+      {
+
+          intfile << t << "\t"
+                    << meanE[sid].transpose()/n << "\t"
+                    << (transErrE[sid]).diagonal().transpose()/n << "\t"
+                    << (fidErrE[sid]-mechErrE[sid]).diagonal().transpose()/n << "\t"
+                    << (mechErrE[sid]).diagonal().transpose()/n << "\t"
+                    << (covE[sid]).diagonal().transpose()/n << "\t"
+                    << std::endl;
+      }
+
+      intfile.close();
+
+      // Update progress bar
+      printProgBar(n);
+
+     }
 
     }
     catch (iNA::NumericError &err)

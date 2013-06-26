@@ -23,19 +23,19 @@ int main(int argc, char *argv[])
     Ast::Model sbml_model; Parser::Sbmlsh::importModel(sbml_model, argv[1]);
     // Expand reversible reactions
     Trafo::ReversibleReactionConverter converter; converter.apply(sbml_model);
-    Models::OptimizedSSA model(sbml_model, 1000, time(0));
-    double dt=0.1;
+    Models::GillespieSSA simulator(sbml_model, 10000, time(0), 1, 1);
+    double dt = 0.1;
 
     Models::Histogram<double> hist;
 
     std::cout << "Start SSA" << std::endl;
     //model.run(100);
-    std::cout << "Transients passed..." << std::endl;
+    //std::cout << "Transients passed..." << std::endl;
 
-    Eigen::VectorXd mean(model.numSpecies());
+    Eigen::VectorXd mean(simulator.numSpecies());
 
-    Eigen::VectorXd skew(model.numSpecies());
-    Eigen::MatrixXd cov(model.numSpecies(),model.numSpecies());
+    Eigen::VectorXd skew(simulator.numSpecies());
+    Eigen::MatrixXd cov(simulator.numSpecies(),simulator.numSpecies());
 
     std::ofstream outfile;
 
@@ -43,10 +43,10 @@ int main(int argc, char *argv[])
 
     // Header
     outfile << "# time";
-    for(size_t i=0; i<model.numSpecies(); i++)
-        outfile << "\t mean(" << model.getSpecies(i)->getIdentifier() <<")";
-    for(size_t i=0; i<model.numSpecies(); i++)
-        outfile << "\t var(" << model.getSpecies(i)->getIdentifier() <<")";
+    for(size_t i=0; i<simulator.numSpecies(); i++)
+        outfile << "\t mean(" << simulator.getSpecies(i)->getIdentifier() <<")";
+    for(size_t i=0; i<simulator.numSpecies(); i++)
+        outfile << "\t var(" << simulator.getSpecies(i)->getIdentifier() <<")";
     outfile << std::endl;
 
     for(double t=0.; t<10.; t+=dt)
@@ -54,18 +54,17 @@ int main(int argc, char *argv[])
 
        //std::cout << "t=" << t <<std::endl;
 
-       model.run(dt);
-       model.stats(mean,cov,skew);
+       simulator.run(dt);
+       simulator.stats(mean,cov,skew);
 
        outfile << t;
-       for(size_t i=0; i<model.numSpecies(); i++)
+       for(size_t i=0; i<simulator.numSpecies(); i++)
             outfile << "\t" << mean(i);
-       for(size_t i=0; i<model.numSpecies(); i++)
+       for(size_t i=0; i<simulator.numSpecies(); i++)
             outfile << "\t" << cov(i,i);
        outfile<<std::endl;
 
     }
-
 
     outfile.close();
 

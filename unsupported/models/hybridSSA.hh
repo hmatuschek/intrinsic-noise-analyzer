@@ -102,8 +102,8 @@ public:
     for(int sid=0; sid<ensembleSize; sid++)
     {
       Eigen::VectorXd r1 = ssaSim[sid]->getState().row(0).head(intModel.numSpecies());
-      mean += r1;
-      cov  += (r1)*(r1.transpose());
+      mean.noalias() += r1;
+      cov.noalias()  += (r1)*(r1.transpose());
     }
 
     mean/=ensembleSize;
@@ -113,16 +113,13 @@ public:
 
   }
 
-  /**
-  * Error of transformed signal. E[V(Z|s)]
-  */
   void fidError(const std::vector<Eigen::VectorXd> &stateMatrix, Eigen::VectorXd &mean, Eigen::MatrixXd &transErr, Eigen::MatrixXd &fidErr, size_t level=1)
 
   {
       // Zero input
       mean = Eigen::VectorXd::Zero(intModel.numSpecies());
       transErr = Eigen::MatrixXd::Zero(intModel.numSpecies(),intModel.numSpecies());
-      fidErr = Eigen::MatrixXd::Zero(intModel.numSpecies(),intModel.numSpecies());
+      //fidErr = Eigen::MatrixXd::Zero(intModel.numSpecies(),intModel.numSpecies());
 
       histType histExt;
       condMeanType condMean;
@@ -137,15 +134,18 @@ public:
       }
 
       // Substract mean
-      transErr.noalias() -=  mean*mean.transpose();
+      transErr -=  mean*mean.transpose();
 
       covar(fidErr);
       fidErr -= transErr;
 
-
   }
 
+  void resetInternal()
 
+  {
+    // Pass...
+  }
 
 
   void runInternal(Eigen::VectorXd &state, const size_t &sid, const double &t_in, const double &t_out)
@@ -162,10 +162,15 @@ public:
   }
 
 
-  void reset()
+  void resetEnsemble()
 
   {
-    // Think about it
+
+      for(size_t sid=0; sid<numExtEns;sid++)
+          ssaSim[sid]->reset();
+
+      this->reset();
+
   }
 
 
