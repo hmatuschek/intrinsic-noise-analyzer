@@ -53,8 +53,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
 void
-MainWindow::showPanel(QWidget *panel)
-{
+MainWindow::showPanel(QWidget *panel) {
+  // Postpone destruction of current widget...
+  if (0 != this->_mainPane->widget()) {
+    QWidget *currentWidget = _mainPane->takeWidget();
+    currentWidget->deleteLater();
+  }
   this->_mainPane->setWidget(panel);
 }
 
