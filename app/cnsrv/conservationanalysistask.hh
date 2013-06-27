@@ -59,13 +59,48 @@ private:
 };
 
 
-/** The result widget, presenting the conservation analysis results. */
+/** A table model holding the conservation cycles of the analysis. */
+class ConservationAnalysisTable: public QAbstractTableModel
+{
+  Q_OBJECT
+
+public:
+  ConservationAnalysisTable(ConservationAnalysisTask *task);
+
+  int rowCount(const QModelIndex &parent) const;
+  int columnCount(const QModelIndex &parent) const;
+  QVariant data(const QModelIndex &index, int role) const;
+  QVariant headerData(int section, Qt::Orientation orientation, int role) const;
+
+private:
+  ConservationAnalysisTask *_task;
+};
+
+
+/** The result widget, presenting the conservation analysis results as a table. */
 class ConservationAnalysisWidget: public QWidget
 {
   Q_OBJECT
 
 public:
   ConservationAnalysisWidget(ConservationAnalysisTask *task, QWidget *parent=0);
+
+private slots:
+  void onUpdateAnalysis();
+
+protected:
+  /** A weak reference to the analsis task. */
+  ConservationAnalysisTask *_task;
+};
+
+
+/** The result widget, presenting the conservation analysis results as a equation. */
+class ConservationAnalysisEqWidget: public QWidget
+{
+  Q_OBJECT
+
+public:
+  ConservationAnalysisEqWidget(ConservationAnalysisTask *task, QWidget *parent=0);
 
 private slots:
   void onUpdateAnalysis();

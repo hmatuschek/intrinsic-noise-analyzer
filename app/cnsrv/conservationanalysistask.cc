@@ -7,6 +7,8 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QPushButton>
+#include <QTableView>
+#include <QHeaderView>
 
 #include "../tinytex/ginac2formula.hh"
 #include <libina/utils/logger.hh>
@@ -99,11 +101,101 @@ ConservationAnalysisTask::model() {
 }
 
 
+/* ******************************************************************************************** *
+ * Implementation of analysis result table.
+ * ******************************************************************************************** */
+ConservationAnalysisTable::ConservationAnalysisTable(ConservationAnalysisTask *task)
+  : QAbstractTableModel(), _task(task)
+{
+  // pass...
+}
+
+int
+ConservationAnalysisTable::rowCount(const QModelIndex &parent) const {
+  return _task->numCycles();
+}
+
+int
+ConservationAnalysisTable::columnCount(const QModelIndex &parent) const {
+  return 2;
+}
+
+QVariant
+ConservationAnalysisTable::data(const QModelIndex &index, int role) const {
+  if ((Qt::DecorationRole != role) || !index.isValid()) { return QVariant(); }
+  if ((index.row() >= int(_task->numCycles())) || (index.column() >= 2)) { return QVariant(); }
+
+  // Return conserved quantity
+  if (0 == index.column()) {
+    return Ginac2Formula::toPixmap(_task->cycle(index.row()), _task->model(), true);
+  }
+  return Ginac2Formula::toPixmap(_task->constant(index.row()), _task->model(), true);
+}
+
+QVariant
+ConservationAnalysisTable::headerData(int section, Qt::Orientation orientation, int role) const {
+  if (Qt::DisplayRole != role) { return QVariant(); }
+
+  if (Qt::Horizontal == orientation) {
+    if (0 == section) { return tr("Conserved quantity"); }
+    else if (1 == section) { return tr("Value"); }
+    else { return QVariant(); }
+  } else if (Qt::Vertical == orientation) {
+    if ((section < 0) || (section >= int(_task->numCycles()))) { return QVariant(); }
+    return QString("%1").arg(section+1);
+  }
+
+  return QVariant();
+}
+
 
 /* ******************************************************************************************** *
  * Implementation of analysis result widget.
  * ******************************************************************************************** */
 ConservationAnalysisWidget::ConservationAnalysisWidget(ConservationAnalysisTask *task, QWidget *parent)
+  : QWidget(parent), _task(task)
+{
+  /// @todo Explain conservation cycles.
+  QLabel *label = new QLabel(tr(""));
+  label->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
+  label->setVisible(false);
+
+  QTableView *view = new QTableView();
+  view->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+  view->setModel(new ConservationAnalysisTable(_task));
+  view->setSelectionMode(QAbstractItemView::NoSelection);
+  view->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+
+  QPushButton *updateButton = new QPushButton(tr("Update"));
+  updateButton->setToolTip(tr("Updates or re-runs the analysis on the (possibly modified) model."));
+  updateButton->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+
+  // Layout widget:
+  QVBoxLayout *layout = new QVBoxLayout();
+  layout->addWidget(label);
+  layout->addWidget(view);
+
+  QHBoxLayout *button_box = new QHBoxLayout();
+  button_box->addStretch(1);
+  button_box->addWidget(updateButton);
+  layout->addLayout(button_box);
+
+  setLayout(layout);
+
+  QObject::connect(updateButton, SIGNAL(clicked()), this, SLOT(onUpdateAnalysis()));
+}
+
+void
+ConservationAnalysisEqWidget::onUpdateAnalysis() {
+  if (_task->isFinished())
+    _task->start();
+}
+
+
+/* ******************************************************************************************** *
+ * Implementation of analysis result widget.
+ * ******************************************************************************************** */
+ConservationAnalysisEqWidget::ConservationAnalysisEqWidget(ConservationAnalysisTask *task, QWidget *parent)
   : QWidget(parent), _task(task)
 {
   MathAlign align;
@@ -129,6 +221,7 @@ ConservationAnalysisWidget::ConservationAnalysisWidget(ConservationAnalysisTask 
   /// @todo Explain conservation cycles.
   QLabel *label = new QLabel(tr(""));
   label->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
+  label->setVisible(false);
 
   QPushButton *updateButton = new QPushButton(tr("Update"));
   updateButton->setToolTip(tr("Updates or re-runs the analysis on the (possibly modified) model."));
@@ -170,6 +263,7 @@ ConservationAnalysisView::ConservationAnalysisView(TaskItem *item, QWidget *pare
 QWidget *
 ConservationAnalysisView::createResultWidget(TaskItem *task_item) {
   ConservationAnalysisTask *task = dynamic_cast<ConservationAnalysisTask *>(task_item->getTask());
+  //return new ConservationAnalysisEqWidget(task);
   return new ConservationAnalysisWidget(task);
 }
 
