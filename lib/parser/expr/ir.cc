@@ -228,7 +228,11 @@ Node::_serialize(std::ostream &stream, const Context &ctx, size_t precedence)
   }
 
   if (isIntegerNode()) {
-    stream << _integer;
+    if (std::abs(_integer)<1e6) {
+      stream << _integer;
+    } else {
+      stream << double(_integer);
+    }
   }
   if (isRealNode()) {
     stream << _real;

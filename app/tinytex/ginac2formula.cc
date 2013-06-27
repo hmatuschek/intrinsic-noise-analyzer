@@ -146,7 +146,9 @@ Ginac2Formula::_assembleFormula(SmartPtr<Parser::Expr::Node> node, size_t preced
   }
 
   if (node->isIntegerNode()) {
-    return new MathText(QString("%1").arg(node->intValue()));
+    long value = node->intValue();
+    if (std::abs(value)<1e6) { return new MathText(QString("%1").arg(value)); }
+    return new MathText(QString("%1").arg(double(value)));
   }
 
   if (node->isRealNode()) {
