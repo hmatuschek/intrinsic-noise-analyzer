@@ -23,6 +23,11 @@ SET(ina_app_sse_HEADERS
     sse/lnatask.hh sse/lnataskwrapper.hh sse/lnataskview.hh
     sse/retask.hh  sse/retaskwrapper.hh  sse/retaskview.hh)
 
+SET(ina_app_conservation_SOURCES
+    cnsrv/conservationanalysistask.cc)
+SET(ina_app_conservation_HEADERS
+    cnsrv/conservationanalysistask.hh)
+
 SET(ina_app_steadystate_SOURCES
     steadystate/steadystatetask.cc steadystate/steadystatetaskwrapper.cc
     steadystate/steadystatewizard.cc steadystate/steadystateview.cc
@@ -112,6 +117,7 @@ SET(ina_app_SOURCES
     ${ina_app_plot_SOURCES}
     ${ina_app_tinytex_SOURCES}
     ${ina_app_sse_SOURCES}
+    ${ina_app_conservation_SOURCES}
     ${ina_app_steadystate_SOURCES}
     ${ina_app_ssa_SOURCES}
     ${ina_app_paramscan_SOURCES}
@@ -124,6 +130,7 @@ SET(ina_app_HEADERS
     ${ina_app_plot_HEADERS}
     ${ina_app_tinytex_HEADERS}
     ${ina_app_sse_HEADERS}
+    ${ina_app_conservation_HEADERS}
     ${ina_app_steadystate_HEADERS}
     ${ina_app_ssa_HEADERS}
     ${ina_app_ssaparamscan_HEADERS}

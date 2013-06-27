@@ -30,6 +30,8 @@
 #include "../ssa/ssataskwrapper.hh"
 #include "../ssa/ssawizard.hh"
 
+#include "../cnsrv/conservationanalysistask.hh"
+
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QFileInfo>
@@ -133,6 +135,10 @@ Application::Application() :
   _combineIrvReaction->setEnabled(false);
   _combineIrvReaction->setStatusTip(tr("Combine irreversible reactions to reversible ones when possible"));
 
+  _cnsrvAnalysisAction = new QAction(tr("&Conservation Analysis"), this);
+  _cnsrvAnalysisAction->setShortcut(QKeySequence(Qt::CTRL+Qt::SHIFT+Qt::Key_C));
+  _cnsrvAnalysisAction->setStatusTip(tr("Reveals conserved cycles."));
+
   _steadyStateAction = new QAction(tr("&Steady State Analysis (SSE)"), this);
   _steadyStateAction->setShortcut(QKeySequence(Qt::CTRL+Qt::SHIFT+Qt::Key_S));
   _steadyStateAction->setStatusTip(tr("Run a steady state analysis using the System Size Expansion (SSE)."));
@@ -168,6 +174,7 @@ Application::Application() :
   QObject::connect(_timeCourseAnalysisAction, SIGNAL(triggered()), this, SLOT(configTimeCourseAnalysis()));
   QObject::connect(_ssaAnalysisAction, SIGNAL(triggered()), this, SLOT(configSSAAnalysis()));
   QObject::connect(_ssaParameterScanAction, SIGNAL(triggered()), this, SLOT(configSSAParameterScan()));
+  QObject::connect(_cnsrvAnalysisAction, SIGNAL(triggered()), this, SLOT(configConservationAnalysis()));
   QObject::connect(_recentModelsMenu, SIGNAL(triggered(QAction*)), this, SLOT(onOpenRecentModel(QAction*)));
   QObject::connect(&_versionCheck, SIGNAL(newVersionAvailable(QString)), this, SLOT(onNewVersionAvailable(QString)));
 }
@@ -283,6 +290,7 @@ QAction *Application::configParameterScanAction() { return _parameterScanAction;
 QAction *Application::configTimeCourseAction() { return _timeCourseAnalysisAction; }
 QAction *Application::configSSAAnalysisAction() { return _ssaAnalysisAction; }
 QAction *Application::configSSAParameterScanAction() { return _ssaParameterScanAction; }
+QAction *Application::configConservationAnalysisAction() { return _cnsrvAnalysisAction; }
 QMenu   *Application::recentModelsMenu() { return _recentModelsMenu; }
 
 
@@ -675,6 +683,35 @@ Application::configSSAAnalysis()
   task->start();
 }
 
+
+void
+Application::configConservationAnalysis() {
+  ConservationAnalysisConfig config;
+  ConservationAnalysisWizard wizard(config);
+
+  wizard.restart(); if (QDialog::Accepted != wizard.exec()) { return; }
+
+  // Construct task from wizard:
+  ConservationAnalysisTask *task = 0;
+  try {
+    task = new ConservationAnalysisTask(
+          wizard.getConfigCast<ConservationAnalysisConfig>());
+  } catch (iNA::Exception err) {
+    QMessageBox::warning(
+          0, tr("Can not construct conservation analysis from model: "), err.what());
+    return;
+  } catch (std::exception &err) {
+    QMessageBox::warning(0, "Error: " ,err.what());
+    return;
+  }
+
+  // Add task to application and run it:
+  docTree()->addTask(
+        wizard.getConfigCast<ConservationAnalysisConfig>().getModelDocument(),
+        new ConservationAnalysisItem(task));
+
+  task->start();
+}
 
 void
 Application::onOpenRecentModel(QAction *action)

@@ -643,3 +643,105 @@ MathSub::layout(const MathContext &context, QGraphicsItem *parent)
 
 
 MathItem * MathSub::copy() const { return new MathSub(*this); }
+
+
+
+/* ******************************************************************************************** *
+ * Implementation of MathAlign (Table w 2 columns)
+ * ******************************************************************************************** */
+MathAlign::MathAlign()
+  : MathItem(), QGraphicsItemGroup()
+{
+  // Pass...
+}
+
+MathAlign::MathAlign(const MathAlign &other)
+  : MathItem(other), QGraphicsItemGroup()
+{
+  QList< QPair<MathItem *, MathItem *> >::const_iterator pair = other._rows.begin();
+  for (; pair != other._rows.end(); pair++) {
+    _rows.append(QPair<MathItem *, MathItem *>(pair->first->copy(), pair->second->copy()));
+  }
+}
+
+MathAlign::~MathAlign() {
+  QList< QPair<MathItem *, MathItem *> >::iterator pair = _rows.begin();
+  for (; pair != _rows.end(); pair++) {
+    delete pair->first;
+    delete pair->second;
+  }
+  _rows.clear();
+}
+
+void
+MathAlign::addRow(const QPair<MathItem *, MathItem *> &row) {
+  _rows.append(row);
+}
+
+MathItem *
+MathAlign::copy() const {
+  return new MathAlign(*this);
+}
+
+QGraphicsItem *
+MathAlign::layout(const MathContext &context, QGraphicsItem *parent) {
+  // First of all, create a grahics group that will hold the aligned items
+  QGraphicsItemGroup *group = new QGraphicsItemGroup(parent);
+
+  // Then layout all items & collect metrics
+  QList< QPair<MathItem *, MathItem *> >::iterator pair = _rows.begin();
+  QList< QPair<QGraphicsItem *, QGraphicsItem *> > items;
+  double max_width_left=0, max_width_right=0, tot_height=0;
+  for (; pair != _rows.end(); pair++) {
+    // Create items:
+    QPair<QGraphicsItem *, QGraphicsItem *> gpair(
+          pair->first->layout(context, group),
+          pair->second->layout(context, group));
+    // Check for errors:
+    if ((0 == gpair.first) || (0 == gpair.second)) {
+      delete group; return 0;
+    }
+    // add to graphics group
+    gpair.first->setPos(0,0); group->addToGroup(gpair.first);
+    gpair.second->setPos(0,0); group->addToGroup(gpair.second);
+    items.append(gpair);
+
+    // Update widths:
+    max_width_left = std::max(max_width_left, pair->first->metrics().width());
+    max_width_right = std::max(max_width_right, pair->second->metrics().width());
+
+    // Calc height of h-aligned pair (at ascecent) and add to total height
+    tot_height +=
+        std::max(pair->first->metrics().ascent(), pair->second->metrics().ascent()) +
+        std::max(pair->first->metrics().descent(), pair->second->metrics().descent());
+  }
+
+  // Then, position elements
+  pair = _rows.begin();
+  QList< QPair<QGraphicsItem *, QGraphicsItem *> >::iterator gpair = items.begin();
+  QRectF align_bb(0,0,0,0); qreal voffset = 0;
+  for(; pair!=_rows.end(); pair++, gpair++) {
+    qreal left_hoff = max_width_left - pair->first->metrics().width();
+    qreal right_hoff = max_width_left;
+    qreal max_asc = std::max(pair->first->metrics().ascent(), pair->second->metrics().ascent());
+    qreal left_voff = voffset+max_asc - pair->first->metrics().ascent();
+    qreal right_voff = voffset+max_asc - pair->second->metrics().ascent();
+    QRectF left_bb(pair->first->metrics().bb()); left_bb.translate(left_hoff, left_voff);
+    QRectF right_bb(pair->second->metrics().bb()); right_bb.translate(right_hoff, right_voff);
+    align_bb = align_bb.unite(left_bb).unite(right_bb);
+    gpair->first->setPos(left_hoff, left_voff);
+    gpair->second->setPos(right_hoff, right_voff);
+    voffset += std::max(pair->first->metrics().height(), pair->second->metrics().height());
+  }
+
+  // Assemble metric of align block
+  _metrics.setWidth(max_width_left+max_width_right);
+  _metrics.setHeight(tot_height);
+  _metrics.setAscent(tot_height/2);
+  _metrics.setLeftBearing(0);
+  _metrics.setRightBearing(0);
+  _metrics.setBB(align_bb);
+  _metrics.setCenter(tot_height/2);
+
+  return group;
+}

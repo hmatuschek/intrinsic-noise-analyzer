@@ -78,7 +78,7 @@ public:
   QAction *configTimeCourseAction();
   QAction *configSSAAnalysisAction();
   QAction *configSSAParameterScanAction();
-
+  QAction *configConservationAnalysisAction();
   /** Returns the recentModelsMenu */
   QMenu *recentModelsMenu();
 
@@ -134,7 +134,10 @@ private slots:
   void configSSAParameterScan();
   /** Handler to show Time Course Analysis Wizard. */
   void configTimeCourseAnalysis();
+  /** Handler to show SSA analysis wizard. */
   void configSSAAnalysis();
+  /** Handler to show conservation analysis wizard. */
+  void configConservationAnalysis();
   /** Updates the recently imported models menu. */
   void updateRecentModelsMenu();
   /** Shows a message that there is a new version of iNA available if not disabled. */
@@ -169,6 +172,7 @@ private:
   QAction *_expandRevReaction;
   /** The "combine irreversible ractions" menu action. */
   QAction *_combineIrvReaction;
+  QAction *_cnsrvAnalysisAction;
   /** The "steady state analysis (SSE)" action. */
   QAction *_steadyStateAction;
   QAction *_parameterScanAction;
