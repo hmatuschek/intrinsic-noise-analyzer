@@ -66,7 +66,7 @@ ConservationAnalysisTask::process() {
   for (int i=0; i<_cons_expr.rows(); i++) {
     _cons_const(i) = folder.apply(_cons_expr(i));
     Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
-    message << "Found circle " << (i+1) << "/" << _cons_const.cols() << ": "
+    message << "Found circle " << (i+1) << "/" << _cons_const.rows() << ": "
             << _cons_expr(i) << " = " << _cons_const(i);
     Utils::Logger::get().log(message);
   }

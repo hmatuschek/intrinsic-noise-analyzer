@@ -45,18 +45,13 @@ ModelSelectionWizardPage::initializePage()
     // and select it:
     if (Application::getApp()->hasADocumentSelected()) {
       DocumentTree *docs = Application::getApp()->docTree();
-      std::cerr << " A doc is selected in side-panel:"
-                << Application::getApp()->selectedDocument() << std::endl;
       for (int i=0; i<_modelSelection->model()->rowCount(); i++) {
         // If pointer matches -> found
         TreeItem *item_ptr = static_cast<TreeItem *>(docs->index(i, 0).internalPointer());
         DocumentItem *sel_ptr  = Application::getApp()->selectedDocument();
         if ( item_ptr == sel_ptr ) {
-          std::cerr << " Found model at index " << i << " in combobox...";
           _modelSelection->setCurrentIndex(i); return;
         }
-        std::cerr << "Selected model was not found in combobox as: "
-                  << item_ptr << " != " << sel_ptr << std::endl;
       }
     }
     _modelSelection->setCurrentIndex(0);
