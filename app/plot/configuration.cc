@@ -156,6 +156,11 @@ PlotConfig::createFigure() {
   plot->getAxis()->setYRangePolicy(yRangePolicy());
   plot->getAxis()->setYRange(yRange());
 
+  // Update plotrages from figure (in case of auto-scaleing):
+  plot->getAxis()->updatePlotRange();
+  setXRange(plot->getAxis()->getXRange());
+  setYRange(plot->getAxis()->getYRange());
+
   return plot;
 }
 
