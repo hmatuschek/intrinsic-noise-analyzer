@@ -33,7 +33,7 @@ ina-app: libina QtGui QtXml QtSvg QtCore QtNetwork libginac libcln libsbml libff
 	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libcln.6.dylib @executable_path/../Frameworks/libcln.6.dylib ${APP_BINARY_DIR}/ina
 	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libsbml.5.dylib @executable_path/../Frameworks/libsbml.5.dylib ${APP_BINARY_DIR}/ina
 	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libffi.6.dylib @executable_path/../Frameworks/libffi.6.dylib ${APP_BINARY_DIR}/ina 
-	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/gcc47/libffi.4.dylib @executable_path/../Frameworks/gcc47/libffi.6.dylib ${APP_BINARY_DIR}/ina 
+	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/gcc47/libffi.4.dylib @executable_path/../Frameworks/gcc47/libffi.4.dylib ${APP_BINARY_DIR}/ina 
 	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/gcc47/libgomp.1.dylib @executable_path/../Frameworks/gcc47/libgomp.1.dylib ${APP_BINARY_DIR}/ina 
 	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/gcc47/libgcc_s.1.dylib @executable_path/../Frameworks/gcc47/libgcc_s.1.dylib ${APP_BINARY_DIR}/ina 
 	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libstdc++.6.dylib @executable_path/../Frameworks/libstdc++.6.dylib ${APP_BINARY_DIR}/ina 
@@ -45,7 +45,7 @@ libina: libginac libcln libsbml
 	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libcln.6.dylib @executable_path/../Frameworks/libcln.6.dylib ${APP_LIBRARY_DIR}/libina.0.4.2.dylib
 	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libsbml.5.dylib @executable_path/../Frameworks/libsbml.5.dylib ${APP_LIBRARY_DIR}/libina.0.4.2.dylib
 	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libffi.6.dylib @executable_path/../Frameworks/libffi.6.dylib ${APP_LIBRARY_DIR}/libina.0.4.2.dylib 
-	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/gcc47/libffi.4.dylib @executable_path/../Frameworks/gcc47/libffi.6.dylib ${APP_LIBRARY_DIR}/libina.0.4.2.dylib 
+	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/gcc47/libffi.4.dylib @executable_path/../Frameworks/gcc47/libffi.4.dylib ${APP_LIBRARY_DIR}/libina.0.4.2.dylib 
 	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/gcc47/libgomp.1.dylib @executable_path/../Frameworks/gcc47/libgomp.1.dylib ${APP_LIBRARY_DIR}/libina.0.4.2.dylib 
 	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/gcc47/libgcc_s.1.dylib @executable_path/../Frameworks/gcc47/libgcc_s.1.dylib ${APP_LIBRARY_DIR}/libina.0.4.2.dylib 
 	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libstdc++.6.dylib @executable_path/../Frameworks/libstdc++.6.dylib ${APP_LIBRARY_DIR}/libina.0.4.2.dylib 
