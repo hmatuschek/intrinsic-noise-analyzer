@@ -30,6 +30,9 @@ protected:
   /** Holds the configuration for the task. */
   SSETaskConfig config;
 
+  /** Reference to sseModel. */
+  iNA::Models::REmodel * _sseModel;
+
   /** Holds the number of species in the selected model. */
   size_t _Ns;
 
@@ -53,7 +56,7 @@ protected:
 
 public:
   /** Constructs a Task. */
-  explicit RETask(const SSETaskConfig &config, QObject *parent = 0);
+  explicit RETask(SSETaskConfig &config, QObject *parent = 0);
 
   /** Destructor. */
   virtual ~RETask();

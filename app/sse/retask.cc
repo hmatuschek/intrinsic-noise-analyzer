@@ -13,11 +13,13 @@ using namespace iNA;
 /* ******************************************************************************************** *
  * Implementation of RETask
  * ******************************************************************************************** */
-RETask::RETask(const SSETaskConfig &config, QObject *parent) :
+RETask::RETask(SSETaskConfig &config, QObject *parent) :
   Task(parent), config(config), _Ns(config.getModel()->numSpecies()),
   interpreter(0), stepper(0),
   timeseries(1 + _Ns, 1+config.getIntegrationRange().getSteps()/(1+config.getIntermediateSteps()))
 {
+  sseModel = new iNA::Models::REmodel(*config.getModel());
+
   // First, construct interpreter and integerator by selected execution engine:
   switch(config.getEngine()) {
 
@@ -27,7 +29,7 @@ RETask::RETask(const SSETaskConfig &config, QObject *parent) :
     interpreter = new Models::GenericSSEinterpreter<
         Models::REmodel, Eval::direct::Engine<Eigen::VectorXd, Eigen::VectorXd>,
         Eval::direct::Engine<Eigen::VectorXd, Eigen::MatrixXd> >(
-          *config.getModelAs<iNA::Models::REmodel>(),
+          *sseModel,
           config.getOptLevel(), config.getNumEvalThreads(), false);
 
     // Instantiate integrator for that engine:
@@ -100,7 +102,7 @@ RETask::RETask(const SSETaskConfig &config, QObject *parent) :
       interpreter = new Models::GenericSSEinterpreter<
           Models::REmodel, Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>,
           Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd> >(
-            *config.getModelAs<iNA::Models::REmodel>(),
+            *sseModel,
             config.getOptLevel(), config.getNumEvalThreads(), false);
 
       // Instantiate integrator for that engine:
@@ -173,7 +175,7 @@ RETask::RETask(const SSETaskConfig &config, QObject *parent) :
     interpreter = new Models::GenericSSEinterpreter<
         Models::REmodel, Eval::bcimp::Engine<Eigen::VectorXd, Eigen::VectorXd>,
         Eval::bcimp::Engine<Eigen::VectorXd, Eigen::MatrixXd> >(
-          *config.getModelAs<iNA::Models::REmodel>(),
+          *sseModel,
           config.getOptLevel(), config.getNumEvalThreads(), false);
 
     // Instantiate integrator for that engine:
@@ -247,7 +249,7 @@ RETask::RETask(const SSETaskConfig &config, QObject *parent) :
     interpreter = new Models::GenericSSEinterpreter<
         Models::REmodel, Eval::jit::Engine<Eigen::VectorXd, Eigen::VectorXd>,
         Eval::jit::Engine<Eigen::VectorXd, Eigen::MatrixXd> >(
-          *config.getModelAs<iNA::Models::REmodel>(),
+          *sseModel,
           config.getOptLevel(), config.getNumEvalThreads(), false);
 
     // Instantiate integrator for that engine:
@@ -345,16 +347,21 @@ RETask::~RETask()
   // Free interpreter
   if (0 != this->interpreter)
     delete interpreter;
+
+  // Free model
+  if (0 != this->sseModel)
+      delete sseModel;
 }
 
 
 void
 RETask::process()
 {
+
   // Holds the current system state (reduced state)
-  Eigen::VectorXd x(config.getModelAs<iNA::Models::REmodel>()->getDimension());
+  Eigen::VectorXd x(sseModel->getDimension());
   // Holds the update to the next state (reduced state)
-  Eigen::VectorXd dx(config.getModelAs<iNA::Models::REmodel>()->getDimension());
+  Eigen::VectorXd dx(sseModel->getDimension());
 
   // Holds the concentrations for each species (full state)
   Eigen::VectorXd concentrations(config.getModel()->numSpecies());
@@ -363,9 +370,9 @@ RETask::process()
   Eigen::VectorXd output_vector(1 + config.getModel()->numSpecies());
 
   // initialize (reduced) state
-  config.getModelAs<iNA::Models::REmodel>()->getInitialState(x);
+  sseModel->getInitialState(x);
   // get full initial concentrations and covariance
-  config.getModelAs<iNA::Models::REmodel>()->fullState(x, concentrations);
+  sseModel->fullState(x, concentrations);
 
   {
     Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
@@ -412,7 +419,7 @@ RETask::process()
       continue;
 
     // Get full state:
-    config.getModelAs<iNA::Models::REmodel>()->fullState(x, concentrations);
+    sseModel->fullState(x, concentrations);
 
     // Store new time:
     output_vector(0) = t;
@@ -458,12 +465,12 @@ RETask::getTimeSeries()
 iNA::Ast::Unit
 RETask::getSpeciesUnit() const
 {
-  return this->config.getModelAs<iNA::Models::REmodel>()->getSpeciesUnit();
+  return this->sseModel->getSpeciesUnit();
 }
 
 
 const iNA::Ast::Unit &
 RETask::getTimeUnit() const
 {
-  return this->config.getModelAs<iNA::Models::REmodel>()->getTimeUnit();
+  return this->sseModel->getTimeUnit();
 }
