@@ -9,6 +9,7 @@
 #include <QPushButton>
 
 #include "../tinytex/ginac2formula.hh"
+#include <libina/utils/logger.hh>
 
 using namespace iNA;
 
@@ -59,9 +60,13 @@ ConservationAnalysisTask::process() {
   // Obtain conserved cycles
   _cons_expr = _analysis->getConservedCycles(s);
   // Calc conservation constants
-  _cons_const.resize(_cons_expr.cols());
-  for (int i=0; i<_cons_const.cols(); i++) {
+  _cons_const.resize(_cons_expr.rows());
+  for (int i=0; i<_cons_expr.rows(); i++) {
     _cons_const(i) = folder.apply(_cons_expr(i));
+    Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
+    message << "Found circle " << (i+1) << "/" << _cons_const.cols() << ": "
+            << _cons_expr(i) << " = " << _cons_const(i);
+    Utils::Logger::get().log(message);
   }
   // done. (big deal...)
 
@@ -75,7 +80,7 @@ ConservationAnalysisTask::getLabel() {
 
 size_t
 ConservationAnalysisTask::numCycles() const {
-  return _cons_expr.cols();
+  return _cons_expr.rows();
 }
 
 GiNaC::ex

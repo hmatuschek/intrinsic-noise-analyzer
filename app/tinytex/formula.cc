@@ -224,17 +224,23 @@ MathBlock::layout(const MathContext &context, QGraphicsItem *parent)
   QGraphicsItem *left  = (0 != _left) ? _left->layout(context, grp): 0;
   QGraphicsItem *right = (0 != _right) ? _right->layout(context, grp): 0;
 
+  qreal max_ascent = _center->metrics().ascent();
   qreal max_height = _center->metrics().bbHeight();
   qreal max_center = _center->metrics().center();
+  qreal max_tail   = _center->metrics().tail();
   qreal tot_width = _center->metrics().width();
   if (0 != _left) {
+    max_ascent = std::max(max_ascent, _left->metrics().ascent());
     max_height = std::max(max_height, _left->metrics().bbHeight());
     max_center = std::max(max_center, _left->metrics().center());
+    max_tail   = std::max(max_tail,   _left->metrics().tail());
     tot_width  += _left->metrics().width();
   }
   if (0 != _right) {
+    max_ascent = std::max(max_ascent, _right->metrics().ascent());
     max_height = std::max(max_height, _right->metrics().bbHeight());
     max_center = std::max(max_center, _right->metrics().center());
+    max_tail   = std::max(max_tail,   _right->metrics().tail());
     tot_width  += _right->metrics().width();
   }
 
@@ -289,11 +295,13 @@ MathBlock::layout(const MathContext &context, QGraphicsItem *parent)
   }
 
   _metrics.setWidth(tot_width);
-  _metrics.setHeight(max_height);
-  _metrics.setAscent(max_center);
+  //_metrics.setHeight(max_height);
+  _metrics.setHeight(max_center+max_tail);
+  _metrics.setAscent(max_ascent);
   _metrics.setLeftBearing(0); _metrics.setRightBearing(0);
   _metrics.setBB(my_bb);
-  _metrics.setCenter(max_center);
+  //_metrics.setCenter(max_center);
+  _metrics.setCenter(max_height/2);
 
   // Done:
   return grp;
@@ -650,13 +658,13 @@ MathItem * MathSub::copy() const { return new MathSub(*this); }
  * Implementation of MathAlign (Table w 2 columns)
  * ******************************************************************************************** */
 MathAlign::MathAlign()
-  : MathItem(), QGraphicsItemGroup()
+  : MathItem()
 {
   // Pass...
 }
 
 MathAlign::MathAlign(const MathAlign &other)
-  : MathItem(other), QGraphicsItemGroup()
+  : MathItem(other)
 {
   QList< QPair<MathItem *, MathItem *> >::const_iterator pair = other._rows.begin();
   for (; pair != other._rows.end(); pair++) {
@@ -724,13 +732,16 @@ MathAlign::layout(const MathContext &context, QGraphicsItem *parent) {
     qreal left_hoff = max_width_left - pair->first->metrics().width();
     qreal right_hoff = max_width_left;
     qreal max_asc = std::max(pair->first->metrics().ascent(), pair->second->metrics().ascent());
-    qreal left_voff = voffset+max_asc - pair->first->metrics().ascent();
-    qreal right_voff = voffset+max_asc - pair->second->metrics().ascent();
+    qreal left_voff = voffset + max_asc - pair->first->metrics().ascent();
+    qreal right_voff = voffset+ max_asc - pair->second->metrics().ascent();
     QRectF left_bb(pair->first->metrics().bb()); left_bb.translate(left_hoff, left_voff);
     QRectF right_bb(pair->second->metrics().bb()); right_bb.translate(right_hoff, right_voff);
+    // update BB of complete align
     align_bb = align_bb.unite(left_bb).unite(right_bb);
+    // set position of pair
     gpair->first->setPos(left_hoff, left_voff);
     gpair->second->setPos(right_hoff, right_voff);
+    // Update offset for next pair
     voffset += std::max(pair->first->metrics().height(), pair->second->metrics().height());
   }
 

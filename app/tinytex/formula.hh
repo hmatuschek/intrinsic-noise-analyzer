@@ -261,7 +261,7 @@ private:
 };
 
 
-class MathAlign: public MathItem, public QGraphicsItemGroup
+class MathAlign: public MathItem
 {
 public:
   MathAlign();
