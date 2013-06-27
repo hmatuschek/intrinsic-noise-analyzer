@@ -15,6 +15,9 @@ LNATask::LNATask(const SSETaskConfig &config, QObject *parent) :
     1+config.getIntegrationRange().getSteps()/(1+config.getIntermediateSteps())),
   _species_names(_Ns)
 {
+
+  _sseModel = new iNA::Models::LNAmodel(*config.getModel());
+
   size_t column = 0;
 
   _timeseries.setColumnName(column, "t"); column++;
@@ -56,6 +59,10 @@ LNATask::~LNATask()
   // Free interpreter
   if (0 != _interpreter)
     delete _interpreter;
+
+  // Free sseModel
+  if (0 != _sseModel)
+    delete _sseModel;
 }
 
 
@@ -67,9 +74,9 @@ LNATask::process()
   instantiateInterpreter();
 
   // Holds the current system state (reduced state)
-  Eigen::VectorXd x(_config.getModelAs<iNA::Models::LNAmodel>()->getDimension());
+  Eigen::VectorXd x(_sseModel->getDimension());
   // Holds the update to the next state (reduced state)
-  Eigen::VectorXd dx(_config.getModelAs<iNA::Models::LNAmodel>()->getDimension());
+  Eigen::VectorXd dx(_sseModel->getDimension());
 
   // Holds the concentrations for each species (full state)
   Eigen::VectorXd concentrations(_Ns);
@@ -84,9 +91,9 @@ LNATask::process()
   Eigen::VectorXd output_vector(this->_timeseries.getNumColumns());
 
   // initialize (reduced) state
-  _config.getModelAs<iNA::Models::LNAmodel>()->getInitialState(x);
+  _sseModel->getInitialState(x);
   // get full initial concentrations and covariance
-  _config.getModelAs<iNA::Models::LNAmodel>()->fullState(x, concentrations, cov, emre);
+  _sseModel->fullState(x, concentrations, cov, emre);
 
   {
     Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
@@ -141,7 +148,7 @@ LNATask::process()
     }
 
     // Get full state:
-    _config.getModelAs<iNA::Models::LNAmodel>()->fullState(x, concentrations, cov, emre);
+    _sseModel->fullState(x, concentrations, cov, emre);
 
     // Store new time:
     output_vector(0) = t;
@@ -204,13 +211,13 @@ LNATask::getSpeciesNames() const {
 
 iNA::Ast::Unit
 LNATask::getSpeciesUnit() const {
-  return this->_config.getModelAs<iNA::Models::LNAmodel>()->getSpeciesUnit();
+  return this->_sseModel->getSpeciesUnit();
 }
 
 
 const iNA::Ast::Unit &
 LNATask::getTimeUnit() const {
-  return this->_config.getModelAs<iNA::Models::LNAmodel>()->getTimeUnit();
+  return this->_sseModel->getTimeUnit();
 }
 
 
@@ -225,7 +232,7 @@ LNATask::instantiateInterpreter()
     _interpreter = new Models::GenericSSEinterpreter<
         Models::LNAmodel, Eval::direct::Engine<Eigen::VectorXd, Eigen::VectorXd>,
         Eval::direct::Engine<Eigen::VectorXd, Eigen::MatrixXd> >(
-          *_config.getModelAs<iNA::Models::LNAmodel>(),
+          *_sseModel,
           _config.getOptLevel(), _config.getNumEvalThreads(), false);
 
     // Instantiate integrator for that engine:
@@ -298,7 +305,7 @@ LNATask::instantiateInterpreter()
     _interpreter = new Models::GenericSSEinterpreter<
         Models::LNAmodel, Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>,
         Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd> >(
-          *_config.getModelAs<iNA::Models::LNAmodel>(),
+          *_sseModel,
           _config.getOptLevel(), _config.getNumEvalThreads(), false);
 
     // Instantiate integrator for that engine:
@@ -371,7 +378,7 @@ LNATask::instantiateInterpreter()
     _interpreter = new Models::GenericSSEinterpreter<
         Models::LNAmodel, Eval::bcimp::Engine<Eigen::VectorXd, Eigen::VectorXd>,
         Eval::bcimp::Engine<Eigen::VectorXd, Eigen::MatrixXd> >(
-          *_config.getModelAs<iNA::Models::LNAmodel>(),
+          *_sseModel,
           _config.getOptLevel(), _config.getNumEvalThreads(), false);
 
     // Instantiate integrator for that engine:
@@ -445,7 +452,7 @@ LNATask::instantiateInterpreter()
     _interpreter = new Models::GenericSSEinterpreter<
         Models::LNAmodel, Eval::jit::Engine<Eigen::VectorXd, Eigen::VectorXd>,
         Eval::jit::Engine<Eigen::VectorXd, Eigen::MatrixXd> >(
-          *_config.getModelAs<iNA::Models::LNAmodel>(),
+          *_sseModel,
           _config.getOptLevel(), _config.getNumEvalThreads(), false);
 
     // Instantiate integrator for that engine:
