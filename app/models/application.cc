@@ -217,7 +217,12 @@ Application::itemSelected(const QModelIndex &index)
 
   // This should no happen, anyway...
   if (0 == (wrapper = dynamic_cast<DocumentTreeItem *>(item))) { return; }
+  itemSelected(wrapper);
+}
 
+void
+Application::itemSelected(DocumentTreeItem *wrapper)
+{
   // If wrapper provides a view -> show it:
   if (wrapper->providesView()) {
     this->mainWindow->showPanel(wrapper->createView());
@@ -717,11 +722,11 @@ Application::configConservationAnalysis() {
   }
 
   // Add task to application and run it:
-  docTree()->addTask(
-        wizard.getConfigCast<ConservationAnalysisConfig>().getModelDocument(),
-        new ConservationAnalysisItem(task));
 
-  task->start();
+  TaskItem *item = new ConservationAnalysisItem(task);
+  docTree()->addTask(
+        wizard.getConfigCast<ConservationAnalysisConfig>().getModelDocument(), item);
+  task->start();  
 }
 
 void

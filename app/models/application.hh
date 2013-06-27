@@ -94,6 +94,7 @@ public slots:
    * This method checks if the item has an associated view, if so, the item is displayed on
    * the main-panel using that view. It also sets the currently selected item. */
   void itemSelected(const QModelIndex &index);
+  void itemSelected(DocumentTreeItem *item);
 
   /** Checks if a new version of iNA is available. */
   void checkForNewVersion();

@@ -295,13 +295,13 @@ MathBlock::layout(const MathContext &context, QGraphicsItem *parent)
   }
 
   _metrics.setWidth(tot_width);
-  //_metrics.setHeight(max_height);
-  _metrics.setHeight(max_center+max_tail);
+  _metrics.setHeight(max_height);
+  //_metrics.setHeight(max_center+max_tail);
   _metrics.setAscent(max_ascent);
   _metrics.setLeftBearing(0); _metrics.setRightBearing(0);
   _metrics.setBB(my_bb);
-  //_metrics.setCenter(max_center);
-  _metrics.setCenter(max_height/2);
+  _metrics.setCenter(max_center);
+  //_metrics.setCenter(max_height/2);
 
   // Done:
   return grp;
