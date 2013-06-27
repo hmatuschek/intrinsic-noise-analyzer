@@ -1,7 +1,12 @@
 #include "conservationanalysistask.hh"
 #include "libina/trafo/constantfolder.hh"
 
+#include <QGraphicsView>
 #include <QGraphicsScene>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QPushButton>
 
 #include "../tinytex/ginac2formula.hh"
 
@@ -94,7 +99,7 @@ ConservationAnalysisTask::model() {
  * Implementation of analysis result widget.
  * ******************************************************************************************** */
 ConservationAnalysisWidget::ConservationAnalysisWidget(ConservationAnalysisTask *task, QWidget *parent)
-  : QGraphicsView()
+  : QWidget(parent), _task(task)
 {
   MathAlign align;
 
@@ -107,13 +112,43 @@ ConservationAnalysisWidget::ConservationAnalysisWidget(ConservationAnalysisTask 
     align.addRow(left, right);
   }
 
-  MathContext ctx;
-  QGraphicsScene *scene = new QGraphicsScene(); setScene(scene);
+  MathContext ctx; ctx.setFontSize(ctx.fontSize()+4);
+  QGraphicsScene *scene = new QGraphicsScene();
+  QGraphicsView *view = new QGraphicsView(); view->setScene(scene);
+  view->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
   // Layout conservation cycles and show on scene
   QGraphicsItem *align_item = align.layout(ctx);
   scene->addItem(align_item);
+
+  /// @todo Explain conservation cycles.
+  QLabel *label = new QLabel(tr(""));
+  label->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
+
+  QPushButton *updateButton = new QPushButton(tr("Update"));
+  updateButton->setToolTip(tr("Updates or re-runs the analysis on the (possibly modified) model."));
+  updateButton->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+
+  // Layout widget:
+  QVBoxLayout *layout = new QVBoxLayout();
+  layout->addWidget(label);
+  layout->addWidget(view);
+
+  QHBoxLayout *button_box = new QHBoxLayout();
+  button_box->addStretch(1);
+  button_box->addWidget(updateButton);
+  layout->addLayout(button_box);
+
+  setLayout(layout);
+
+  QObject::connect(updateButton, SIGNAL(clicked()), this, SLOT(onUpdateAnalysis()));
 }
 
+void
+ConservationAnalysisWidget::onUpdateAnalysis() {
+  if (_task->isFinished())
+    _task->start();
+}
 
 
 /* ******************************************************************************************** *

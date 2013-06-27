@@ -1,8 +1,7 @@
 #ifndef __INA_APP_CONSERVATION_ANALYSIS_TAKS_HH__
 #define __INA_APP_CONSERVATION_ANALYSIS_TAKS_HH__
 
-#include <QTableWidget>
-#include <QGraphicsView>
+#include <QWidget>
 
 #include "../models/task.hh"
 #include "../models/generaltaskconfig.hh"
@@ -61,12 +60,19 @@ private:
 
 
 /** The result widget, presenting the conservation analysis results. */
-class ConservationAnalysisWidget: public QGraphicsView
+class ConservationAnalysisWidget: public QWidget
 {
   Q_OBJECT
 
 public:
   ConservationAnalysisWidget(ConservationAnalysisTask *task, QWidget *parent=0);
+
+private slots:
+  void onUpdateAnalysis();
+
+protected:
+  /** A weak reference to the analsis task. */
+  ConservationAnalysisTask *_task;
 };
 
 
