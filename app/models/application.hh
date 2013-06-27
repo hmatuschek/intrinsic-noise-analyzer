@@ -18,6 +18,7 @@
 class MainWindow;
 class DocumentTree;
 class DocumentTreeItem;
+class DocumentItem;
 
 
 /**
@@ -54,6 +55,9 @@ public:
 
   /** Checks if the item has a context-menu and displays it. */
   void showContextMenuAt(const QModelIndex &index, const QPoint &global_pos);
+
+  bool hasADocumentSelected() const;
+  DocumentItem *selectedDocument();
 
   /** Returns the document tree of the application. */
   DocumentTree *docTree();

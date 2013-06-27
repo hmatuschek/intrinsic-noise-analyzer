@@ -295,7 +295,12 @@ ConservationAnalysisItem::createView() {
 ConservationAnalysisWizard::ConservationAnalysisWizard(ConservationAnalysisConfig &config)
   : GeneralTaskWizard(), _config(config)
 {
-  addPage(new ModelSelectionWizardPage(this));
+  setWindowTitle(tr("Configure a conservation analysis"));
+
+  ModelSelectionWizardPage *page = new ModelSelectionWizardPage(this);
+  page->setTitle(tr("Conservation Analysis"));
+  page->setSubTitle(tr("Select a model to perform the conservation analysis on."));
+  addPage(page);
 }
 
 GeneralTaskConfig &

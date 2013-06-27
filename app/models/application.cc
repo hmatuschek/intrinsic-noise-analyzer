@@ -274,6 +274,17 @@ Application::showContextMenuAt(const QModelIndex &index, const QPoint &global_po
 DocumentTree * Application::docTree() { return this->document_tree; }
 
 
+bool
+Application::hasADocumentSelected() const {
+  return 0 != dynamic_cast<DocumentItem *>(getParentDocumentItem(_selected_item));
+}
+
+DocumentItem *
+Application::selectedDocument() {
+  return getParentDocumentItem(_selected_item);
+}
+
+
 /* ******************************************************************************************** *
  * ...
  * ******************************************************************************************** */
