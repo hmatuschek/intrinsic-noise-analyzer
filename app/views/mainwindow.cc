@@ -119,9 +119,10 @@ MainWindow::_createMenus()
   this->_modelMenu->addSeparator();
   this->_modelMenu->addAction(Application::getApp()->editModelAction());
 
+  this->_viewMenu = this->menuBar()->addMenu(tr("&View"));
+  this->_viewMenu->addAction(Application::getApp()->configConservationAnalysisAction());
+
   this->_analysisMenu = this->menuBar()->addMenu(tr("&Analysis"));
-  this->_analysisMenu->addAction(Application::getApp()->configConservationAnalysisAction());
-  this->_analysisMenu->addSeparator();
   this->_analysisMenu->addAction(Application::getApp()->configSteadyStateAction());
   this->_analysisMenu->addAction(Application::getApp()->configParameterScanAction());
   this->_analysisMenu->addAction(Application::getApp()->configTimeCourseAction());

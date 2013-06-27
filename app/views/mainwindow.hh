@@ -49,6 +49,8 @@ private:
 private:
   /** Holds the file-menu. */
   QMenu *_fileMenu;
+  /** Holds the 'View' menu. */
+  QMenu *_viewMenu;
   /** Holds the 'Analyses' menu. */
   QMenu *_analysisMenu;
   /** Holds the 'Model' menu. */

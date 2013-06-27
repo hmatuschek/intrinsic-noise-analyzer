@@ -122,6 +122,8 @@ int main(int argc, char *argv[])
     // Some wisdom
     std::cerr<< "Confucius says '" << Confucius() << "'"<<
                 std::endl << "Please wait for progress..." << std::endl;
+
+    double progress=0;
     try{
      for(int n=1; n<=1; n++)
      {
@@ -130,6 +132,8 @@ int main(int argc, char *argv[])
       for(double t=0.; t<tmax; t+=dt, sid++)
       {
 
+          // Update progress bar
+          if((t/tmax)>progress){ printProgBar(progress*100); progress+=0.01; }
 
 //        simulator.getInternalStats(state[0],0,m,c);
 //        //Single trajectory
@@ -181,9 +185,6 @@ int main(int argc, char *argv[])
       }
 
       intfile.close();
-
-      // Update progress bar
-      printProgBar(n);
 
      }
 
