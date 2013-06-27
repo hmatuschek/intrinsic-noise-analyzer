@@ -7,7 +7,7 @@ QTSVG_FRAMEWORK = /opt/local/Library/Frameworks/QtSvg.framework/Versions/4/QtSvg
 QTNET_FRAMEWORK = /opt/local/Library/Frameworks/QtNetwork.framework/Versions/4/QtNetwork
 APP_LIBRARY_DIR = IntrinsicNoiseAnalyzer.app/Contents/Frameworks
 APP_BINARY_DIR  = IntrinsicNoiseAnalyzer.app/Contents/MacOS
-VERSION = 0.4.1
+VERSION = 0.4.2
 
 app: dmg
 
@@ -23,7 +23,7 @@ dmg: ina-app
 ina-app: libina QtGui QtXml QtSvg QtCore QtNetwork libginac libcln libsbml libffi libffi-gcc47 libgomp libgcc_s libstdc++
 	cp $(SYSTEM_BINARY_DIR)/ina IntrinsicNoiseAnalyzer.app/Contents/MacOS
 	cp ina.icns IntrinsicNoiseAnalyzer.app/Contents/Resources
-	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libina.0.4.2.dylib @executable_path/../Frameworks/libina.0.4.2.dylib ${APP_BINARY_DIR}/ina
+	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libina.${VERSION}.dylib @executable_path/../Frameworks/libina.${VERSION}.dylib ${APP_BINARY_DIR}/ina
 	install_name_tool -change ${QTCORE_FRAMEWORK} @executable_path/../Frameworks/QtCore ${APP_BINARY_DIR}/ina
 	install_name_tool -change ${QTGUI_FRAMEWORK} @executable_path/../Frameworks/QtGui ${APP_BINARY_DIR}/ina
 	install_name_tool -change ${QTXML_FRAMEWORK} @executable_path/../Frameworks/QtXml ${APP_BINARY_DIR}/ina
@@ -39,13 +39,13 @@ ina-app: libina QtGui QtXml QtSvg QtCore QtNetwork libginac libcln libsbml libff
 	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libstdc++.6.dylib @executable_path/../Frameworks/libstdc++.6.dylib ${APP_BINARY_DIR}/ina 
 
 libina: libginac libcln libsbml
-	cp $(SYSTEM_LIBRARY_DIR)/libina.0.4.2.dylib ${APP_LIBRARY_DIR}
-	install_name_tool -id @executable_path/../Frameworks/libina.0.4.2.dylib ${APP_LIBRARY_DIR}/libina.0.4.2.dylib
-	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libginac.2.dylib @executable_path/../Frameworks/libginac.2.dylib ${APP_LIBRARY_DIR}/libina.0.4.2.dylib
-	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libcln.6.dylib @executable_path/../Frameworks/libcln.6.dylib ${APP_LIBRARY_DIR}/libina.0.4.2.dylib
-	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libsbml.5.dylib @executable_path/../Frameworks/libsbml.5.dylib ${APP_LIBRARY_DIR}/libina.0.4.2.dylib
-	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libffi.6.dylib @executable_path/../Frameworks/libffi.6.dylib ${APP_LIBRARY_DIR}/libina.0.4.2.dylib 
-	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/gcc47/libffi.4.dylib @executable_path/../Frameworks/gcc47/libffi.4.dylib ${APP_LIBRARY_DIR}/libina.0.4.2.dylib 
+	cp $(SYSTEM_LIBRARY_DIR)/libina.${VERSION}.dylib ${APP_LIBRARY_DIR}
+	install_name_tool -id @executable_path/../Frameworks/libina.${VERSION}.dylib ${APP_LIBRARY_DIR}/libina.${VERSION}.dylib
+	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libginac.2.dylib @executable_path/../Frameworks/libginac.2.dylib ${APP_LIBRARY_DIR}/libina.${VERSION}.dylib
+	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libcln.6.dylib @executable_path/../Frameworks/libcln.6.dylib ${APP_LIBRARY_DIR}/libina.${VERSION}.dylib
+	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libsbml.5.dylib @executable_path/../Frameworks/libsbml.5.dylib ${APP_LIBRARY_DIR}/libina.${VERSION}.dylib
+	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libffi.6.dylib @executable_path/../Frameworks/libffi.6.dylib ${APP_LIBRARY_DIR}/libina.${VERSION}.dylib 
+	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/gcc47/libffi.4.dylib @executable_path/../Frameworks/gcc47/libffi.4.dylib ${APP_LIBRARY_DIR}/libina.${VERSION}.dylib 
 	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/gcc47/libgomp.1.dylib @executable_path/../Frameworks/gcc47/libgomp.1.dylib ${APP_LIBRARY_DIR}/libina.0.4.2.dylib 
 	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/gcc47/libgcc_s.1.dylib @executable_path/../Frameworks/gcc47/libgcc_s.1.dylib ${APP_LIBRARY_DIR}/libina.0.4.2.dylib 
 	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libstdc++.6.dylib @executable_path/../Frameworks/libstdc++.6.dylib ${APP_LIBRARY_DIR}/libina.0.4.2.dylib 
