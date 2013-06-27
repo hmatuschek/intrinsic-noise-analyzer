@@ -186,7 +186,7 @@ SSAParamScanConfigPage::refreshParamRange(int)
     iNA::Trafo::ConstantFolder folder(*(config.getModel()));
     value = folder.apply(value);
     if (GiNaC::is_a<GiNaC::numeric>(value)) {
-      double val = GiNaC::ex_to<GiNaC::numeric>(value).to_double();
+      double val = Eigen::ex2double(value);
       p_min->setText(QString("%1").arg(val));
       p_max->setText(QString("%1").arg(1.1*val));
     }

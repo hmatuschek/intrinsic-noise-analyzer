@@ -35,7 +35,7 @@ ConstantStoichiometryMixin::ConstantStoichiometryMixin(const Ast::Model &model)
           throw err;
         }
 
-        this->products_stoichiometry(i,j) = GiNaC::to_double(GiNaC::ex_to<GiNaC::numeric>(stoi));
+        this->products_stoichiometry(i,j) = Eigen::ex2double(stoi);
       }
       else
       {
@@ -55,7 +55,7 @@ ConstantStoichiometryMixin::ConstantStoichiometryMixin(const Ast::Model &model)
               << "It is: " << stoi;
           throw err;
         }
-        this->reactants_stoichiometry(i,j) = GiNaC::to_double(GiNaC::ex_to<GiNaC::numeric>(stoi));
+        this->reactants_stoichiometry(i,j) = Eigen::ex2double(stoi);
       }
       else
       {

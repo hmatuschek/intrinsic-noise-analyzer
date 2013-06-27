@@ -134,7 +134,7 @@ StochasticSimulator::evaluate(const Eigen::VectorXd &populationVec, Eigen::Vecto
           << ": Propensity not reduced to value. Minimal expression: " << value;
       throw err;
     }
-    propensities(i) = GiNaC::ex_to<GiNaC::numeric>(value).to_double();
+    propensities(i) = Eigen::ex2double(value);
   }
 }
 
