@@ -161,6 +161,10 @@ public:
           break;
         }
 
+        // update time
+        t += tau;
+        if(t > step) break;
+
         // select reaction
         double r = this->rand[OpenMP::getThreadNum()].rand()*propensitySum;
         double sum = prop[OpenMP::getThreadNum()](0);
@@ -179,8 +183,7 @@ public:
 
         propensitySum = prop[OpenMP::getThreadNum()].sum();
 
-        // update time
-        t += tau;
+
       } //end time step loop
     } // end ensemble loop
   }

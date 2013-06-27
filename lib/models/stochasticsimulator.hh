@@ -91,9 +91,14 @@ public:
   const size_t &numThreads();
 
   /**
-  *  stepper
+  *  Stepper
   **/
   virtual void run(double step)=0;
+
+  /**
+  *  Resets the state of the ensemble to the initial value
+  **/
+  void reset();
 
   /**
    * Destructor.

@@ -58,7 +58,7 @@ public:
 
   virtual void runInternal(Eigen::VectorXd &state, const size_t &sid, const double &t_in, const double &t_out)=0;
 
-  virtual void reset()=0;
+  virtual void resetInternal()=0;
 
   virtual void getInternalStats(const Eigen::VectorXd &state, const size_t &sid,
                                 std::vector<Eigen::VectorXd> &mean, std::vector<Eigen::MatrixXd> &cov)=0;
@@ -72,7 +72,7 @@ public:
   {
 
       // Reset internal process
-      this->reset();
+      this->resetInternal();
 
       // Perform jump if it occurs before exit time
       if(t_out>tjump[sid])
@@ -215,7 +215,7 @@ public:
 
       // Do SSE step
       this->runInternal(state,sid,t_in,t);
-      this->reset();
+      this->resetInternal();
 
       // Update state vector
       state.tail(this->getState().cols()) = this->getState().row(sid);
@@ -311,7 +311,7 @@ public:
   }
 
 
-  void reset()
+  void resetInternal()
   {
     // Reset ODE integrator
     ODEint[OpenMP::getThreadNum()]->reset();

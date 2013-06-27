@@ -94,6 +94,20 @@ StochasticSimulator::StochasticSimulator(const Ast::Model &model, int size, int 
 
 }
 
+void
+StochasticSimulator::reset()
+
+{
+
+    // initialize ensemble
+    for(int i=0; i<this->ensembleSize;i++)
+    {
+       this->observationMatrix.row(i).head(this->numSpecies()) = ics;
+    }
+
+}
+
+
 
 StochasticSimulator::~StochasticSimulator()
 
@@ -181,7 +195,7 @@ StochasticSimulator::stats(Eigen::VectorXd &mean, Eigen::MatrixXd &covariance, E
     mean += this->observationMatrix.row(ids).head(this->numSpecies());
   }
 
-  mean /= this->ensembleSize;
+  mean /= double(this->ensembleSize);
 
   int idx=0;
 

@@ -103,6 +103,7 @@ HybridModel::dump(std::ostream &str)
 
 void
 HybridModel::selectReactions(std::set<Ast::Species *> &exS, std::set<Ast::Reaction *> &exR)
+
 {
 
   // Iterate over all species in list
@@ -127,6 +128,7 @@ HybridModel::selectReactions(std::set<Ast::Species *> &exS, std::set<Ast::Reacti
 
 void
 HybridModel::assembleExternalSpeciesList(const std::set<Ast::Reaction *> &exR, std::set<Ast::Species *> & exS)
+
 {
 
   for(std::set<Ast::Reaction *>::iterator it=exR.begin();it!=exR.end();++it)
@@ -144,6 +146,7 @@ HybridModel::assembleExternalSpeciesList(const std::set<Ast::Reaction *> &exR, s
 
 bool
 HybridModel::checkConsistency(const std::set<Ast::Reaction *> &exR, std::set<Ast::Species *> & exS)
+
 {
 
   // First check for emptyness
@@ -180,6 +183,7 @@ void
 HybridModel::distill( Ast::Model *external,
              std::set<Ast::Reaction *> exR,
              GiNaC::exmap &translation_table)
+
 {
 
 
@@ -308,12 +312,14 @@ HybridModel::distill( Ast::Model *external,
 
 Ast::Model &
 HybridModel::getExternalModel()
+
 {
   return external;
 }
 
 const SignalOfInterest &
 HybridModel::getSoI() const
+
 {
   return soi;
 }
