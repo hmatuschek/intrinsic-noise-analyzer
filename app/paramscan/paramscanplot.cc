@@ -191,6 +191,12 @@ createParameterScanLNAFanoPlotConfig(const QStringList &selected_species, ParamS
   config->setXLabel(QObject::tr("%1").arg(data.getColumnName(0)));
   config->setYLabel(QObject::tr("$F_Fano$"));
 
+  // Assemble a constant folder, that excludes the paramter we scan over:
+  GiNaC::exmap excludeFromICFold;
+  GiNaC::ex parameterSymbol = task->getConfig().getParameter().getSymbol();
+  excludeFromICFold[parameterSymbol] = 0;
+  iNA::Trafo::InitialValueFolder IC(*model, iNA::Trafo::Filter::ALL, excludeFromICFold);
+
   // Allocate a graph for each selected species
   size_t offset = 1; // skip parameter column
   for (size_t i=0; i<Nsel; i++) {
@@ -199,19 +205,38 @@ createParameterScanLNAFanoPlotConfig(const QStringList &selected_species, ParamS
     size_t mean_idx = offset + species_idx;
     size_t var_idx  = offset+Ntot + species_idx*(Ntot+1) - (species_idx*(species_idx+1))/2;
 
-    // Check if we can evaluate the volume
-    if(!GiNaC::is_a<GiNaC::numeric>(model->getSpecies(species_idx)->getCompartment()->getValue())) continue;
-    // Needs multiplier to obtain correct nondimensional quantity
-    double multiplier = Eigen::ex2double(model->getSpecies(species_idx)->getCompartment()->getValue());
-    multiplier *= Eigen::ex2double(model->getSpeciesUnit().getMultiplier()*std::pow(10.,model->getSpeciesUnit().getScale()));
-    // Multiply by Avogadro's number if defined in mole
-    if (model->getSubstanceUnit().isVariantOf(iNA::Ast::ScaledBaseUnit::MOLE)) multiplier *= iNA::constants::AVOGADRO;
-    // Coefficient wise operation -> coefficient of variation variance(X)/mean(X):
     Plot::LineGraphConfig *fano_config = new Plot::LineGraphConfig(config->data(), i);
-    fano_config->setLabel(QString("LNA(%1)").arg(model->getSpecies(species_idx)->getLabel().c_str()));
-    fano_config->setXExpression("$0");
-    fano_config->setYExpression(QString("%1*$%2/$%3").arg(multiplier).arg(var_idx).arg(mean_idx));
-    config->addGraph(fano_config);
+
+    // Check if we can evaluate the volume, fold all params except the one we scan over:
+    GiNaC::ex compVol = IC.apply(model->getSpecies(species_idx)->getCompartment()->getValue());
+    // substitute parameter symbol by the column-symbol of that parameter (if present)
+    compVol = compVol.subs(parameterSymbol == fano_config->columnSymbol(0));
+
+    // Needs multiplier to obtain correct nondimensional quantity
+    GiNaC::ex multiplier = compVol;
+    multiplier *= model->getSpeciesUnit().getMultiplier()*std::pow(10.,model->getSpeciesUnit().getScale());
+    // Multiply by Avogadro's number if defined in mole
+    if (model->getSubstanceUnit().isVariantOf(iNA::Ast::ScaledBaseUnit::MOLE)) {
+      multiplier *= iNA::constants::AVOGADRO;
+    }
+    // Assemble formula for Fano factor.
+    GiNaC::ex yexp =
+        multiplier * fano_config->columnSymbol(var_idx) / fano_config->columnSymbol(mean_idx);
+
+    // Coefficient wise operation -> coefficient of variation variance(X)/mean(X):
+    try {
+      fano_config->setLabel(QString("LNA(%1)").arg(model->getSpecies(species_idx)->getLabel().c_str()));
+      fano_config->setXExpression(fano_config->columnSymbol(0));
+      fano_config->setYExpression(yexp);
+      config->addGraph(fano_config);
+    } catch (iNA::Exception &err) {
+      iNA::Utils::Message msg = LOG_MESSAGE(iNA::Utils::Message::WARN);
+      msg << "Can not assemble plot formula for Fano factor of species "
+          << model->getSpecies(species_idx)->getLabel()
+          << "F(" << yexp <<"): " << err.what();
+      iNA::Utils::Logger::get().log(msg);
+      delete fano_config; continue;
+    }
   }
 
   // Force y plot-range to be [0, AUTO]:
@@ -279,6 +304,12 @@ createParameterScanIOSFanoPlotConfig(const QStringList &selected_species, ParamS
 
   iNA::Ast::Model *model = task->getConfig().getModel();
 
+  // Assemble a constant folder, that excludes the paramter we scan over:
+  GiNaC::exmap excludeFromICFold;
+  GiNaC::ex parameterSymbol = task->getConfig().getParameter().getSymbol();
+  excludeFromICFold[parameterSymbol] = 0;
+  iNA::Trafo::InitialValueFolder IC(*model, iNA::Trafo::Filter::ALL, excludeFromICFold);
+
   // Allocate a graph for each selected species
   size_t offset = 1+Ntot+((Ntot+1)*Ntot)/2; // skip parameter column, RE and LNA columns
   for (size_t i=0; i<Nsel; i++) {
@@ -286,20 +317,38 @@ createParameterScanIOSFanoPlotConfig(const QStringList &selected_species, ParamS
     size_t mean_idx = offset + species_idx;
     size_t var_idx  = offset+Ntot + species_idx*(Ntot+1) - (species_idx*(species_idx+1))/2;
 
-    // Check if we can evaluate the volume
-    if(!GiNaC::is_a<GiNaC::numeric>(model->getSpecies(species_idx)->getCompartment()->getValue())) continue;
-    // Needs multiplier to obtain correct nondimensional quantity
-    double multiplier = Eigen::ex2double(model->getSpecies(species_idx)->getCompartment()->getValue());
-    multiplier *= Eigen::ex2double(model->getSpeciesUnit().getMultiplier()*std::pow(10.,model->getSpeciesUnit().getScale()));
-    // Multiply by Avogadro's number if defined in mole
-    if (model->getSubstanceUnit().isVariantOf(iNA::Ast::ScaledBaseUnit::MOLE)) multiplier *= iNA::constants::AVOGADRO;
-
-    // Coefficient wise operation -> coefficient of variation variance(X)/mean(X):
     Plot::LineGraphConfig *fano_config = new Plot::LineGraphConfig(config->data(), i);
-    fano_config->setLabel(QString("IOS(%1)").arg(task->getConfig().getModel()->getSpecies(species_idx)->getLabel().c_str()));
-    fano_config->setXExpression("$0");
-    fano_config->setYExpression(QString("%1*$%2/$%3").arg(multiplier).arg(var_idx).arg(mean_idx));
-    config->addGraph(fano_config);
+
+    // Check if we can evaluate the volume, fold all params except the one we scan over:
+    GiNaC::ex compVol = IC.apply(model->getSpecies(species_idx)->getCompartment()->getValue());
+    // substitute parameter symbol by the column-symbol of that parameter (if present)
+    compVol = compVol.subs(parameterSymbol == fano_config->columnSymbol(0));
+
+    // Needs multiplier to obtain correct nondimensional quantity
+    GiNaC::ex multiplier = compVol;
+    multiplier *= model->getSpeciesUnit().getMultiplier()*std::pow(10.,model->getSpeciesUnit().getScale());
+    // Multiply by Avogadro's number if defined in mole
+    if (model->getSubstanceUnit().isVariantOf(iNA::Ast::ScaledBaseUnit::MOLE)) {
+      multiplier *= iNA::constants::AVOGADRO;
+    }
+    // Assemble formula for Fano factor.
+    GiNaC::ex yexp =
+        multiplier * fano_config->columnSymbol(var_idx) / fano_config->columnSymbol(mean_idx);
+
+    try {
+      // Coefficient wise operation -> coefficient of variation variance(X)/mean(X):
+      fano_config->setLabel(QString("IOS(%1)").arg(task->getConfig().getModel()->getSpecies(species_idx)->getLabel().c_str()));
+      fano_config->setXExpression(fano_config->columnSymbol(0));
+      fano_config->setYExpression(yexp);
+      config->addGraph(fano_config);
+    } catch (iNA::Exception &err) {
+      iNA::Utils::Message msg = LOG_MESSAGE(iNA::Utils::Message::WARN);
+      msg << "Can not assemble plot formula for Fano factor of species "
+          << model->getSpecies(species_idx)->getLabel()
+          << "F(" << yexp <<"): " << err.what();
+      iNA::Utils::Logger::get().log(msg);
+      delete fano_config; continue;
+    }
   }
 
   // Force y plot-range to be [0, AUTO]:

@@ -12,6 +12,8 @@
 
 #include "../tinytex/ginac2formula.hh"
 #include <libina/utils/logger.hh>
+#include "../views/unitrenderer.hh"
+
 
 using namespace iNA;
 
@@ -117,19 +119,32 @@ ConservationAnalysisTable::rowCount(const QModelIndex &parent) const {
 
 int
 ConservationAnalysisTable::columnCount(const QModelIndex &parent) const {
-  return 2;
+  return 3;
 }
 
 QVariant
 ConservationAnalysisTable::data(const QModelIndex &index, int role) const {
   if ((Qt::DecorationRole != role) || !index.isValid()) { return QVariant(); }
-  if ((index.row() >= int(_task->numCycles())) || (index.column() >= 2)) { return QVariant(); }
+  if ((index.row() >= int(_task->numCycles())) || (index.column() >= 3)) { return QVariant(); }
 
-  // Return conserved quantity
-  if (0 == index.column()) {
+  // Return conserved quantity or unit
+  switch (index.column()) {
+  case 0:
     return Ginac2Formula::toPixmap(_task->cycle(index.row()), _task->model(), true);
+
+  case 1:
+    return Ginac2Formula::toPixmap(_task->constant(index.row()), _task->model(), true);
+
+  case 2: {
+    UnitRenderer renderer(_task->model().getSpeciesUnit());
+    return renderer.toPixmap();
   }
-  return Ginac2Formula::toPixmap(_task->constant(index.row()), _task->model(), true);
+
+  default:
+    break;
+  }
+  // oops...
+  return QVariant();
 }
 
 QVariant
@@ -137,9 +152,12 @@ ConservationAnalysisTable::headerData(int section, Qt::Orientation orientation, 
   if (Qt::DisplayRole != role) { return QVariant(); }
 
   if (Qt::Horizontal == orientation) {
-    if (0 == section) { return tr("Conserved quantity"); }
-    else if (1 == section) { return tr("Value"); }
-    else { return QVariant(); }
+    switch (section) {
+    case 0: return tr("Conserved quantity");
+    case 1: return tr("Value");
+    case 2: return tr("Unit");
+    default: break;
+    }
   } else if (Qt::Vertical == orientation) {
     if ((section < 0) || (section >= int(_task->numCycles()))) { return QVariant(); }
     return QString("%1").arg(section+1);
