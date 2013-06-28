@@ -71,9 +71,10 @@ StochasticSimulator::StochasticSimulator(const Ast::Model &model, int size, int 
      }
 
      this->Omega(i)=evICs.evaluate(this->volumes(i));
+     std::cerr << "Initial volume of " << this->volumes(i)
+               << ": " << this->Omega(i) << std::endl;
 
-     if(this->Omega(i)>=0)
-     {
+     if (this->Omega(i)<=0) {
          InternalError err;
          err << "Could not initiate Stochastic Simulation since compartment <i>"
              << (this->getSpecies(i)->getCompartment()->hasName() ? this->getSpecies(i)->getCompartment()->getName() : this->getSpecies(i)->getCompartment()->getIdentifier())
