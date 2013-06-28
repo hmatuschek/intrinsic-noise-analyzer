@@ -48,14 +48,14 @@ StochasticSimulator::StochasticSimulator(const Ast::Model &model, int size, int 
      ics(i)=evICs.evaluate(this->species[i]);
      if(ics(i)>0.)
      {
-        //
+        /// @todo I guess @c round will do the trick
         ics(i)=std::floor( evICs.evaluate(this->species[i]) + 0.5 );
-        if(ics(i)==0.)
-        {
+        /// Is ICS==0 not a valid value? If you want to check if ics is integer
+        /// simply assert ics==floor(ics).
+        if(ics(i)==0.) {
             InternalError err;
-            err << "Could not initiate Stochastic Simulation since initial particle number of species <i>"
-                << (this->getSpecies(i)->hasName() ? this->getSpecies(i)->getName() : this->getSpecies(i)->getIdentifier())
-                << "</i> evaluated to zero.";
+            err << "Cannot initiate Stochastic Simulation since initial particle number of species <i>"
+                << this->getSpecies(i)->getLabel() << "</i> evaluated to zero.";
             throw err;
             throw InternalError();
         }
@@ -63,20 +63,18 @@ StochasticSimulator::StochasticSimulator(const Ast::Model &model, int size, int 
      else if(ics(i)<0.)
      {
          InternalError err;
-         err << "Could not initiate Stochastic Simulation since initial particle number of species <i>"
-             << (this->getSpecies(i)->hasName() ? this->getSpecies(i)->getName() : this->getSpecies(i)->getIdentifier())
-             << "</i> evaluated to a value < 0.";
+         err << "Cannot initiate Stochastic Simulation since initial particle number of species <i>"
+             << this->getSpecies(i)->getLabel() << "</i> evaluated to a value < 0.";
          throw err;
          throw InternalError();
      }
 
      this->Omega(i)=evICs.evaluate(this->volumes(i));
 
-     if(this->Omega(i)<=0)
-     {
+     if (this->Omega(i) <= 0) {
          InternalError err;
-         err << "Could not initiate Stochastic Simulation since compartment <i>"
-             << (this->getSpecies(i)->getCompartment()->hasName() ? this->getSpecies(i)->getCompartment()->getName() : this->getSpecies(i)->getCompartment()->getIdentifier())
+         err << "Cannot initiate Stochastic Simulation since compartment <i>"
+             << this->getSpecies(i)->getCompartment()->getLabel()
              << "</i> evaluated to non-positive value.";
          throw err;
          throw InternalError();
@@ -85,21 +83,15 @@ StochasticSimulator::StochasticSimulator(const Ast::Model &model, int size, int 
 
   Utils::Message msg = LOG_MESSAGE(Utils::Message::INFO);
   msg << "SSA initial copy numbers: ";
-  for(size_t i=0; i<numSpecies(); i++)
-  {
-      if(this->getSpecies(i)->hasName())
-        msg<<this->getSpecies(i)->getName();
-      else
-        msg<<this->getSpecies(i)->getIdentifier();
-
-      msg<<"="<<ics(i)<<" ";
+  for(size_t i=0; i<numSpecies(); i++) {
+    msg << this->getSpecies(i)->getLabel()
+        << "=" << ics(i) <<" ";
   }
   Utils::Logger::get().log(msg);
 
   // initialize ensemble
-  for(int i=0; i<this->ensembleSize;i++)
-  {
-     this->observationMatrix.row(i).head(this->numSpecies())=ics;
+  for(int i=0; i<this->ensembleSize;i++) {
+    this->observationMatrix.row(i).head(this->numSpecies()) = ics;
   }
 
 }

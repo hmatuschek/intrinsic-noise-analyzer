@@ -3,7 +3,7 @@ intrinsic-noise-analyzer (0.4.2-1) unstable; urgency=low
   * Made plots editable.
   * A lot of minor impovements and bugfixes.
 
- -- Hannes Matuschek <hmatuschek@gmail.com>  Mon, 16 Mar 2013 00:00:00 +0000
+ -- Hannes Matuschek <hmatuschek@gmail.com>  Mon, 27 June 2013 00:00:00 +0000
 
 intrinsic-noise-analyzer (0.4.1-1) unstable; urgency=low
 

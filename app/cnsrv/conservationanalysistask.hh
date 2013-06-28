@@ -123,6 +123,7 @@ public:
 };
 
 
+/** Configuration wizard for the analysis. */
 class ConservationAnalysisWizard: public GeneralTaskWizard
 {
   Q_OBJECT

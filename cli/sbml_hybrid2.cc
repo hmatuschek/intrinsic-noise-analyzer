@@ -1,4 +1,4 @@
-#include "sbml_hybrid.hh"
+#include "sbml_hybrid2.hh"
 #include <parser/sbml/sbml.hh>
 #include <fstream>
 #include "unsupported.hh"
@@ -14,9 +14,6 @@
 #include <fstream>
 
 using namespace iNA;
-
-
-void doSSE(Ast::Model &model);
 
 void printProgBar( int percent );
 
@@ -51,7 +48,7 @@ int main(int argc, char *argv[])
 
   double tfinal = 10;
   double dt=0.1;
-  double ensSize = 500;
+  double ensSize = 10000;
   double epsilon_abs=1e-10;
   double epsilon_rel=1.e-4;
 
@@ -133,24 +130,22 @@ int main(int argc, char *argv[])
     size_t nInt = hybrid.numSpecies();
     size_t nExt = hybrid.getExternalModel().numSpecies();
 
-    Models::HybridSimulator simulator(hybrid, ensSize, epsilon_abs, epsilon_rel);
+    Models::HybridSSAalt simulator(hybrid, ensSize, 1);
 
     Models::Histogram<double> hist;
 
-    Eigen::VectorXd istate = simulator.getInitial();
+    Eigen::MatrixXd istate = simulator.getInitial();
 
-    std::vector<Eigen::VectorXd> state(ensSize,istate);
+    std::vector<Eigen::MatrixXd> state(ensSize,istate);
 
     Eigen::VectorXd mean;
-    Eigen::MatrixXd mechErr;
-    Eigen::MatrixXd dynErr;
+    Eigen::MatrixXd mechErr,cov;
+    Eigen::MatrixXd fidErr;
     Eigen::MatrixXd transErr;
 
     Eigen::VectorXd meanEx(nExt);
     Eigen::VectorXd skew(nExt);
     Eigen::MatrixXd covEx(nExt,nExt);
-
-    doSSE(model);
 
     // Open file for external statistics
     std::ofstream trajFile;
@@ -191,6 +186,8 @@ int main(int argc, char *argv[])
         intFile << "\t [" << col++ <<"]mE_IOS(" << hybrid.getSpecies(i)->getIdentifier() << ")";
     intFile << std::endl;
 
+
+
     std::ofstream extFile;
     extFile.open(extFileName);
 
@@ -214,11 +211,11 @@ int main(int argc, char *argv[])
         // Update progress bar
         if((t/tfinal)>progress){ printProgBar(progress*100); progress+=0.01; }
 
-        //Single trajectory
-        trajFile << t << "\t"
-                  << state[0].head(nInt).transpose() << "\t"
-                  << state[0].tail(nExt).transpose() << "\t";
-        trajFile << std::endl;
+//        //Single trajectory
+//        trajFile << t << "\t"
+//                  << state[0].head(nInt).transpose() << "\t"
+//                  << state[0].tail(nExt).transpose() << "\t";
+//        trajFile << std::endl;
 
         // External model statistics
         simulator.stats(meanEx, covEx, skew);
@@ -230,33 +227,24 @@ int main(int argc, char *argv[])
             extFile << "\t" << covEx(i,i);
         extFile<<std::endl;
 
-        simulator.mechError(state, mechErr,1);
-        simulator.dynError(state, mean, transErr, dynErr,1);
+        simulator.mechError(state, mechErr);
+        simulator.fidError(state, mean, transErr, fidErr);
+        simulator.covar(state,cov);
+
+        double vol = 10;
 
         intFile << t << "\t";
         for(size_t i=0; i<hybrid.numSpecies(); i++)
-            intFile << "\t" << mean(i);
+            intFile << "\t" << mean(i)/vol;
         for(size_t i=0; i<hybrid.numSpecies(); i++)
-            intFile << "\t" << (transErr).diagonal()(i);
+            intFile << "\t" << (transErr).diagonal()(i)/vol/vol;
         for(size_t i=0; i<hybrid.numSpecies(); i++)
-            intFile << "\t" << (dynErr).diagonal()(i);
+            intFile << "\t" << (fidErr-mechErr).diagonal()(i)/vol/vol;
         for(size_t i=0; i<hybrid.numSpecies(); i++)
-            intFile << "\t" << (mechErr).diagonal()(i);
-
-        simulator.mechError(state, mechErr, 2);
-        simulator.dynError(state, mean, transErr, dynErr, 2);
-
-        intFile << "\t";
+            intFile << "\t" << (mechErr).diagonal()(i)/vol/vol;
         for(size_t i=0; i<hybrid.numSpecies(); i++)
-            intFile << "\t" << mean(i);
-        for(size_t i=0; i<hybrid.numSpecies(); i++)
-            intFile << "\t" << (transErr).diagonal()(i);
-        for(size_t i=0; i<hybrid.numSpecies(); i++)
-            intFile << "\t" << (dynErr).diagonal()(i);
-        for(size_t i=0; i<hybrid.numSpecies(); i++)
-            intFile << "\t" << (mechErr).diagonal()(i);
+            intFile << "\t" << (cov).diagonal()(i)/vol/vol;
         intFile << std::endl;
-
 
         simulator.runHybrid(state, t, t+dt);
 
@@ -339,52 +327,6 @@ void printProgBar( int percent ){
   std::cout<< percent << "%     " << std::flush;
 }
 
-void doSSE(Ast::Model &model)
-{
-
-  iNA::Models::IOSmodel iosM(model);
-
-  Models::SteadyStateAnalysis<Models::IOSmodel> steadyState(iosM);
-
-  // state vector (deterministic concentrations + covariances)
-
-  Eigen::VectorXd RE, EMRE, skew, io;
-  Eigen::MatrixXd LNA, IOS;
-
-  // Just dump all the nice expressions and values:
-  Eigen::VectorXd x(steadyState.getDimension());
-  steadyState.calcSteadyState(x);
-
-  std::ofstream extFile;
-  extFile.open("sse.dat");
-
-  int col=0;
-  // Header
-  for(size_t i=0; i<model.numSpecies(); i++)
-      extFile << "\t [" << col++ <<"]" << model.getSpecies(i)->getIdentifier();
-  for(size_t i=0; i<model.numSpecies(); i++)
-      extFile << "\t [" << col++ <<"]LNA(" << model.getSpecies(i)->getIdentifier() << ")";
-  for(size_t i=0; i<model.numSpecies(); i++)
-      extFile << "\t [" << col++ <<"]EMRE(" << model.getSpecies(i)->getIdentifier() << ")";
-  for(size_t i=0; i<model.numSpecies(); i++)
-      extFile << "\t [" << col++ <<"]IOS(" << model.getSpecies(i)->getIdentifier() << ")";
-  extFile << std::endl;
-
-  iosM.fullState(x,RE,LNA,EMRE,IOS,skew,io);
-
-  EMRE += RE;
-  IOS += LNA;
-
-  for(size_t i=0; i<model.numSpecies(); i++)
-    extFile << "\t" << RE(i);
-  for(size_t i=0; i<model.numSpecies(); i++)
-    extFile << "\t" << (LNA.diagonal())(i);
-  for(size_t i=0; i<model.numSpecies(); i++)
-    extFile << "\t" << EMRE(i);
-  for(size_t i=0; i<model.numSpecies(); i++)
-    extFile << "\t" << (IOS.diagonal())(i);
-
-}
 
 std::string Confucius()
 {
