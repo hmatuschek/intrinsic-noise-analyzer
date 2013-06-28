@@ -52,6 +52,10 @@ StochasticSimulator::StochasticSimulator(const Ast::Model &model, int size, int 
         ics(i) = std::floor( ics(i) + 0.5 );
         /// H: Is ICS==0 not a valid value? P: Yes, but ics>0 is asserted here.
         /// H: If you want to check if ics is integer P: I want to make it an integer here. But clearly positive IC evaluating to zero integer is a mistake.
+        /// H: Ok, why not std::ceil() it and send a log message that the IC has be rounded up if
+        ///    it was not an integer in the first place?
+        ///    I simply did not get why every fraction < 0.5 is invalid and every > 0.5 is ok, even
+        ///    w/o mentioning that rounding has taken place?
         if(ics(i)==0.) {
             InternalError err;
             err << "Cannot initiate Stochastic Simulation since initial particle number of species <i>"
