@@ -140,7 +140,7 @@ createSSAParameterScanFanoPlotConfig(const QStringList &selected_species, SSAPar
     Plot::LineGraphConfig *fano_config = new Plot::LineGraphConfig(config->data(), i);
 
     // Check if we can evaluate the volume, fold all params except the one we scan over:
-    GiNaC::ex compVol = IC.evaluate(model->getSpecies(species_idx)->getCompartment()->getValue());
+    GiNaC::ex compVol = IC.apply(model->getSpecies(species_idx)->getCompartment()->getValue());
     // substitute parameter symbol by the column-symbol of that parameter (if present)
     compVol = compVol.subs(parameterSymbol == fano_config->columnSymbol(0));
 
@@ -151,7 +151,6 @@ createSSAParameterScanFanoPlotConfig(const QStringList &selected_species, SSAPar
     if (model->getSubstanceUnit().isVariantOf(iNA::Ast::ScaledBaseUnit::MOLE)) {
       multiplier *= iNA::constants::AVOGADRO;
     }
-
     // Assemble formula for Fano factor.
     GiNaC::ex yexp =
         multiplier * fano_config->columnSymbol(var_idx) / fano_config->columnSymbol(mean_idx);
@@ -160,7 +159,7 @@ createSSAParameterScanFanoPlotConfig(const QStringList &selected_species, SSAPar
     try {
       fano_config->setLabel(data.getColumnName(mean_idx));
       fano_config->setXExpression(fano_config->columnSymbol(0));
-      fano_config->setYExpression(yexp);
+      fano_config->setYExpression(GiNaC::evalf(yexp));
       config->addGraph(fano_config);
     } catch (iNA::Exception &err) {
       iNA::Utils::Message msg = LOG_MESSAGE(iNA::Utils::Message::WARN);
