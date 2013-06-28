@@ -185,8 +185,8 @@ SSAParamScanTask::process()
   // Fill table with initial statistics:
   for(size_t pid=0; pid<_parameterSets.size(); pid++)
   {
-    parameterScan(pid,0) = GiNaC::ex_to<GiNaC::numeric>(
-          _parameterSets[pid][config.getParameter().getIdentifier()]).to_double();
+    parameterScan(pid,0) = Eigen::ex2double(
+          _parameterSets[pid][config.getParameter().getIdentifier()]);
 
     int col=1;
 
@@ -234,8 +234,8 @@ SSAParamScanTask::process()
     // Fill table
     for(size_t pid=0; pid<_parameterSets.size(); pid++)
     {
-      parameterScan(pid,0) = GiNaC::ex_to<GiNaC::numeric>(
-            _parameterSets[pid][config.getParameter().getIdentifier()]).to_double();
+      parameterScan(pid,0) = Eigen::ex2double(
+            _parameterSets[pid][config.getParameter().getIdentifier()]);
 
       int col=1;
 

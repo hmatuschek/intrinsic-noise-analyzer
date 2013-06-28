@@ -124,15 +124,8 @@ PlotConfigDialog::PlotConfigDialog(PlotConfig *config, QWidget *parent)
     _tabwidget->addTab(graph_tab, tr("Graphs"));
   }
 
-  { // Assemble Lables page:
+  { // Assemble Range page:
     QFormLayout *layout = new QFormLayout();
-
-    QLineEdit *title = new QLineEdit(_config->title());
-    layout->addRow(tr("Title"), title);
-    QLineEdit *xlabel = new QLineEdit(_config->xLabel());
-    layout->addRow(tr("X Label"), xlabel);
-    QLineEdit *ylabel = new QLineEdit(_config->yLabel());
-    layout->addRow(tr("Y Label"), ylabel);
 
     QHBoxLayout *min_xrange_layout = new QHBoxLayout();
     QCheckBox *min_xrange_policy = new QCheckBox(); _minXRange  = new QLineEdit();
@@ -186,9 +179,6 @@ PlotConfigDialog::PlotConfigDialog(PlotConfig *config, QWidget *parent)
     max_yrange_layout->addWidget(_maxYRange);
     layout->addRow(tr("max. Y"), max_yrange_layout);
 
-    QObject::connect(title, SIGNAL(textChanged(QString)), this, SLOT(onTitleChanged(QString)));
-    QObject::connect(xlabel, SIGNAL(textChanged(QString)), this, SLOT(onXLabelChanged(QString)));
-    QObject::connect(ylabel, SIGNAL(textChanged(QString)), this, SLOT(onYLabelChanged(QString)));
     QObject::connect(min_xrange_policy, SIGNAL(toggled(bool)), this, SLOT(onMinXRangePolicyChanged(bool)));
     QObject::connect(_minXRange, SIGNAL(textChanged(QString)), this, SLOT(onMinXRangeChanged(QString)));
     QObject::connect(max_xrange_policy, SIGNAL(toggled(bool)), this, SLOT(onMaxXRangePolicyChanged(bool)));
@@ -199,7 +189,25 @@ PlotConfigDialog::PlotConfigDialog(PlotConfig *config, QWidget *parent)
     QObject::connect(_maxYRange, SIGNAL(textChanged(QString)), this, SLOT(onMaxYRangeChanged(QString)));
 
     QWidget *panel = new QWidget(); panel->setLayout(layout);
-    _tabwidget->addTab(panel, tr("Label/Ranges"));
+    _tabwidget->addTab(panel, tr("Range"));
+  }
+
+  { // Assemble Labels page:
+    QFormLayout *layout = new QFormLayout();
+
+    QLineEdit *title = new QLineEdit(_config->title());
+    layout->addRow(tr("Title"), title);
+    QLineEdit *xlabel = new QLineEdit(_config->xLabel());
+    layout->addRow(tr("X Label"), xlabel);
+    QLineEdit *ylabel = new QLineEdit(_config->yLabel());
+    layout->addRow(tr("Y Label"), ylabel);
+
+    QObject::connect(title, SIGNAL(textChanged(QString)), this, SLOT(onTitleChanged(QString)));
+    QObject::connect(xlabel, SIGNAL(textChanged(QString)), this, SLOT(onXLabelChanged(QString)));
+    QObject::connect(ylabel, SIGNAL(textChanged(QString)), this, SLOT(onYLabelChanged(QString)));
+
+    QWidget *panel = new QWidget(); panel->setLayout(layout);
+    _tabwidget->addTab(panel, tr("Label"));
   }
 
   _stack = new QStackedWidget();

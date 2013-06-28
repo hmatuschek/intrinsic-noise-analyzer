@@ -84,10 +84,10 @@ IOSResultWidget::_onPlotButtonPressed()
   if (QDialog::Accepted != dialog.exec()) { return; }
   QStringList selected_species = dialog.selectedSpecies();
 
+  PlotItem *plot_item_to_show = new PlotItem(
+        createIOSEMRETimeSeriesPlotConfig(selected_species, _ios_task_wrapper->getIOSTask()));
   Application::getApp()->docTree()->addPlot(
-        this->_ios_task_wrapper,
-        new PlotItem(
-          createIOSEMRETimeSeriesPlotConfig(selected_species, _ios_task_wrapper->getIOSTask())));
+        this->_ios_task_wrapper, plot_item_to_show);
 
   if (1 < selected_species.size()) {
     Application::getApp()->docTree()->addPlot(

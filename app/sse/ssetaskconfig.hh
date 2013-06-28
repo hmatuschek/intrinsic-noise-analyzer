@@ -36,10 +36,15 @@ public:
    * the selected model can be used to instantiate the specified analysis. */
   virtual void setModelDocument(DocumentItem *document);
 
+  /** Allows to reset the model. */
+  void setModel(iNA::Ast::Model *m);
+
   /** Implements the @c SpeciesSelectionTaskConfig interface, and returns the model instance. */
   virtual iNA::Ast::Model *getModel() const;
 
-  /** Get model as specific type. */
+  /** Get model as specific type.
+  * @note Now absolete!
+  */
   template <class T> T* getModelAs() const {
     return dynamic_cast<T *>(getModel());
   }
@@ -54,11 +59,8 @@ protected:
   /** Specifies the selected SSE analysis method. */
   SSEMethod _selected_method;
   /** The model to be analyzed. */
-  iNA::Models::REmodel *_re_model;
-  /** The model to be analyzed. */
-  iNA::Models::LNAmodel *_lna_model;
-  /** The model to be analyzed. */
-  iNA::Models::IOSmodel *_ios_model;
+  iNA::Ast::Model *_re_model;
+
 };
 
 

@@ -5,6 +5,7 @@
 #include "plotitem.hh"
 #include "reactionitem.hh"
 #include "reactionsitem.hh"
+#include "../models/application.hh"
 
 #include <QDebug>
 
@@ -40,6 +41,7 @@ DocumentTree::addTask(DocumentItem *document, TaskItem *task) {
   beginInsertRows(analyses_index, num_analyses, num_analyses);
   document->addTask(task);
   endInsertRows();
+  Application::getApp()->itemSelected(task);
 }
 
 
@@ -51,6 +53,7 @@ DocumentTree::addPlot(TaskItem *task, PlotItem *plot) {
   beginInsertRows(task_index, num_plots, num_plots);
   task->addPlot(plot);
   endInsertRows();
+  Application::getApp()->itemSelected(plot);
 }
 
 void

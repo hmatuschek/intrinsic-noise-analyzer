@@ -115,7 +115,11 @@ void
 TaskItem::onProgress()
 {
   // Update label:
-  this->itemLabel = QString("%1 (%2 \%)").arg(this->task->getLabel()).arg(int(this->task->getProgress()*100));
+  if ((Task::INITIALIZED == task->getState()) || (Task::RUNNING == task->getState())) {
+    this->itemLabel = QString("%1 (%2 \%)").arg(
+          this->task->getLabel()).arg(
+          int(this->task->getProgress()*100));
+  }
 
   // Mark item for update
   Application::getApp()->docTree()->markForUpdate(this);

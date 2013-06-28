@@ -53,8 +53,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
 void
-MainWindow::showPanel(QWidget *panel)
-{
+MainWindow::showPanel(QWidget *panel) {
+  // Postpone destruction of current widget...
+  if (0 != this->_mainPane->widget()) {
+    QWidget *currentWidget = _mainPane->takeWidget();
+    currentWidget->deleteLater();
+  }
   this->_mainPane->setWidget(panel);
 }
 
@@ -118,6 +122,9 @@ MainWindow::_createMenus()
   this->_modelMenu->addAction(Application::getApp()->combineIrrevReacAction());
   this->_modelMenu->addSeparator();
   this->_modelMenu->addAction(Application::getApp()->editModelAction());
+
+  this->_viewMenu = this->menuBar()->addMenu(tr("&View"));
+  this->_viewMenu->addAction(Application::getApp()->configConservationAnalysisAction());
 
   this->_analysisMenu = this->menuBar()->addMenu(tr("&Analysis"));
   this->_analysisMenu->addAction(Application::getApp()->configSteadyStateAction());

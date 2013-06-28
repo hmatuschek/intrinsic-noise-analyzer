@@ -23,6 +23,9 @@ protected:
   /** Holds the configuration for the task. */
   SSETaskConfig config;
 
+  /** Reference to sseModel. */
+  iNA::Models::IOSmodel * _sseModel;
+
   /** Holds the number of species in the selected model. */
   size_t _Ns;
 

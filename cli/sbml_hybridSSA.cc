@@ -100,6 +100,8 @@ int main(int argc, char *argv[])
     // Some wisdom
     std::cerr<< "Confucius says '" << Confucius() << "'"<<
                 std::endl << "Please wait for progress..." << std::endl;
+
+    double progress=0;
     try{
 
       ensembleAverage(simulator, nExt, dt, tmax);
@@ -148,6 +150,8 @@ void ensembleAverage(iNA::Models::HybridSSA &simulator, int ensExt, double dt, d
   std::vector<Eigen::VectorXd> m;
   std::vector<Eigen::MatrixXd> c;
 
+  double progress = 0;
+
   for(int n=1; n<=1; n++)
   {
 
@@ -155,6 +159,8 @@ void ensembleAverage(iNA::Models::HybridSSA &simulator, int ensExt, double dt, d
    for(double t=0.; t<tmax; t+=dt, sid++)
    {
 
+          // Update progress bar
+          if((t/tmax)>progress){ printProgBar(progress*100); progress+=0.01; }
 
 //        simulator.getInternalStats(state[0],0,m,c);
 //        //Single trajectory
@@ -207,11 +213,8 @@ void ensembleAverage(iNA::Models::HybridSSA &simulator, int ensExt, double dt, d
 
    intfile.close();
 
-   // Update progress bar
-   printProgBar(n);
 
   }
-
 
 
 

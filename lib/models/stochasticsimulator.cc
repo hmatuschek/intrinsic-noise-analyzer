@@ -71,6 +71,16 @@ StochasticSimulator::StochasticSimulator(const Ast::Model &model, int size, int 
      }
 
      this->Omega(i)=evICs.evaluate(this->volumes(i));
+
+     if(this->Omega(i)>=0)
+     {
+         InternalError err;
+         err << "Could not initiate Stochastic Simulation since compartment <i>"
+             << (this->getSpecies(i)->getCompartment()->hasName() ? this->getSpecies(i)->getCompartment()->getName() : this->getSpecies(i)->getCompartment()->getIdentifier())
+             << "</i> evaluated to non-positive value.";
+         throw err;
+         throw InternalError();
+     }
   }
 
   Utils::Message msg = LOG_MESSAGE(Utils::Message::INFO);
@@ -134,7 +144,7 @@ StochasticSimulator::evaluate(const Eigen::VectorXd &populationVec, Eigen::Vecto
           << ": Propensity not reduced to value. Minimal expression: " << value;
       throw err;
     }
-    propensities(i) = GiNaC::ex_to<GiNaC::numeric>(value).to_double();
+    propensities(i) = Eigen::ex2double(value);
   }
 }
 
