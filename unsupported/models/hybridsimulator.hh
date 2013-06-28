@@ -19,6 +19,7 @@ typedef Eval::bci::Engine<Eigen::MatrixXd> MatrixEngine;
  *
  * @ingroup unsupported
  */
+template <typename StateType>
 class GenericHybridSimulator
     : public OptimizedSSA
 
@@ -54,9 +55,19 @@ public:
 
   }
 
-  virtual void getInitial(Eigen::VectorXd &state)=0;
+  const Ast::Model & getIntModel() const
+  {
+    return intModel;
+  }
 
-  virtual void runInternal(Eigen::VectorXd &state, const size_t &sid, const double &t_in, const double &t_out)=0;
+  const Ast::Model & getExtModel() const
+  {
+    return extModel;
+  }
+
+  virtual StateType getInitial()=0;
+
+  virtual void runInternal(StateType &state, const size_t &sid, const double &t_in, const double &t_out)=0;
 
   virtual void resetInternal()=0;
 
@@ -98,10 +109,47 @@ public:
 
   }
 
+
+  /**
+   * Run hybrid method in continuous time.
+   *
+   */
+  void runHybridSingle(Eigen::MatrixXd &state, const int &sid, const double &t_in, const double &t_out)
+
+  {
+
+      // Reset internal process
+      this->resetInternal();
+
+      // Perform jump if it occurs before exit time
+      if(t_out>tjump[sid])
+      {
+        double oldjumptime=tjump[sid];
+        // Integrate until time of jump
+        this->runInternal(state,sid,t_in,oldjumptime);
+
+        // Now update state vector (perform jump)
+        for(int i=0; i<state.rows(); i++)
+          state.row(i).tail(this->getState().cols()) = this->getState().row(sid);
+
+        // Perform single SSA step and update tjump
+        this->singleStep(tjump[sid],sid);
+
+        // Complete integration from time of jump
+        runHybridSingle(state, sid, oldjumptime, t_out);
+      }
+      else // Simply update state
+      {
+        this->runInternal(state,sid,t_in,t_out);
+      }
+
+
+  }
+
   /**
    * Run hybrid ensemble in continuous time.
    */
-  void runHybrid(std::vector<Eigen::VectorXd> &stateMatrix, double t_in, double t_out)
+  void runHybrid(std::vector<StateType> &stateMatrix, double t_in, double t_out)
   {
 
 #pragma omp parallel for if(this->numThreads()>1) num_threads(this->numThreads()) schedule(dynamic)
@@ -125,102 +173,28 @@ public:
   typedef std::map<Eigen::VectorXd,Eigen::MatrixXd,lessVec> condVarType;
 
 
+//  void runReactionWise(Eigen::VectorXd state, double &t,
+//                              size_t numThreads = OpenMP::getMaxThreads())
 
-  virtual void condStat(const std::vector<Eigen::VectorXd> &stateMatrix, histType &histExt,
-                condMeanType &condMean, condVarType &condVar, size_t level)
+//  {
 
-  {
+//      double t_in;
+//      size_t sid=0;
 
-    std::vector<Eigen::VectorXd> mean(level);
-    std::vector<Eigen::MatrixXd> cov(level);
+//      // Store initial time
+//      t_in=t;
 
-    Eigen::VectorXd SoI(this->SoIdim);
+//      // Perform timestep of the external model, exists with updated time t
+//      this->singleStep(t,sid);
 
-    // Clear input variables
-    condVar.clear();
-    condMean.clear();
-    histExt.clear();
+//      // Do SSE step
+//      this->runInternal(state,sid,t_in,t);
+//      this->resetInternal();
 
-    std::map<Eigen::VectorXd, Eigen::MatrixXd,lessVec>::iterator item;
-    for(int sid=0; sid<ensembleSize; sid++)
-    {
+//      // Update state vector
+//      state.tail(this->getState().cols()) = this->getState().row(sid);
 
-      const Eigen::VectorXd &state = stateMatrix[sid];
-      getInternalStats(state,sid,mean,cov);
-
-      Eigen::VectorXd m = mean[0];
-      for(size_t i=1; i<level; i++)
-        m+=mean[1];
-
-      // Evaluate signal of interest.
-      SoIint.run(state,SoI); //state.tail(extModel.numSpecies()).head(1);
-
-      // Collect mean, variance and histogram
-      item = condVar.find(SoI);
-      if(item == condVar.end())
-      {
-        condMean.insert(std::make_pair(SoI,m));
-        condVar.insert(std::make_pair(SoI,m*(m.transpose())));
-        histExt.insert(std::make_pair(SoI,1));
-      }
-      else
-      {
-        item->second += m*m.transpose();
-        condMean[SoI] += m;
-        histExt[SoI] += 1;
-      }
-
-    } // finished ensemble average
-
-    double norm=0;
-
-    // Normalize
-    for(item = condVar.begin(); item!=condVar.end(); item++)
-    {
-      // Divide by number of occurences
-      condMean[item->first] /= histExt[item->first];
-      item->second /= histExt[item->first];
-      // Substract mean
-      item->second -= (condMean[item->first]*(condMean[item->first].transpose()));
-      // Compute normalization factor of histogram
-      norm += histExt[item->first];
-    }
-
-    // Normalize histogram
-    for(item = condVar.begin(); item!=condVar.end(); item++)
-    {
-        histExt[item->first]/=norm;
-    }
-
-  }
-
-
-  /**
-   * Run hybrid method reaction-wise.
-   *
-   */
-  void runReactionWise(Eigen::VectorXd state, double &t,
-                              size_t numThreads = OpenMP::getMaxThreads())
-
-  {
-
-      double t_in;
-      size_t sid=0;
-
-      // Store initial time
-      t_in=t;
-
-      // Perform timestep of the external model, exists with updated time t
-      this->singleStep(t,sid);
-
-      // Do SSE step
-      this->runInternal(state,sid,t_in,t);
-      this->resetInternal();
-
-      // Update state vector
-      state.tail(this->getState().cols()) = this->getState().row(sid);
-
-  }
+//  }
 
 
 
@@ -234,7 +208,7 @@ public:
 
 
 class HybridSimulator
-    : public GenericHybridSimulator
+    : public GenericHybridSimulator<Eigen::VectorXd>
 {
 
 protected:
@@ -285,9 +259,10 @@ public:
     }
   }
 
-  void getInitial(Eigen::VectorXd &state)
+  Eigen::VectorXd getInitial()
   {
 
+    Eigen::VectorXd state;
     // Initialize with initial concentrations
     state.resize(sseModel.getDimension()+extModel.numSpecies());
     Eigen::VectorXd init(sseModel.getDimension());
@@ -302,6 +277,8 @@ public:
     {
        state(n++)=evICs.evaluate(extModel.getSpecies(i)->getSymbol());
     }
+
+    return state;
 
   }
 
@@ -386,6 +363,75 @@ public:
 
   }
 
+
+
+  void condStat(const std::vector<Eigen::VectorXd> &stateMatrix, histType &histExt,
+                condMeanType &condMean, condVarType &condVar, size_t level)
+
+  {
+
+    std::vector<Eigen::VectorXd> mean(level);
+    std::vector<Eigen::MatrixXd> cov(level);
+
+    Eigen::VectorXd SoI(this->SoIdim);
+
+    // Clear input variables
+    condVar.clear();
+    condMean.clear();
+    histExt.clear();
+
+    std::map<Eigen::VectorXd, Eigen::MatrixXd,lessVec>::iterator item;
+    for(int sid=0; sid<ensembleSize; sid++)
+    {
+
+      const Eigen::VectorXd &state = stateMatrix[sid];
+      getInternalStats(state,sid,mean,cov);
+
+      Eigen::VectorXd m = mean[0];
+      for(size_t i=1; i<level; i++)
+        m+=mean[1];
+
+      // Evaluate signal of interest.
+      SoIint.run(state,SoI); //state.tail(extModel.numSpecies()).head(1);
+
+      // Collect mean, variance and histogram
+      item = condVar.find(SoI);
+      if(item == condVar.end())
+      {
+        condMean.insert(std::make_pair(SoI,m));
+        condVar.insert(std::make_pair(SoI,m*(m.transpose())));
+        histExt.insert(std::make_pair(SoI,1));
+      }
+      else
+      {
+        item->second += m*m.transpose();
+        condMean[SoI] += m;
+        histExt[SoI] += 1;
+      }
+
+    } // finished ensemble average
+
+    double norm=0;
+
+    // Normalize
+    for(item = condVar.begin(); item!=condVar.end(); item++)
+    {
+      // Divide by number of occurences
+      condMean[item->first] /= histExt[item->first];
+      item->second /= histExt[item->first];
+      // Substract mean
+      item->second -= (condMean[item->first]*(condMean[item->first].transpose()));
+      // Compute normalization factor of histogram
+      norm += histExt[item->first];
+    }
+
+    // Normalize histogram
+    for(item = condVar.begin(); item!=condVar.end(); item++)
+    {
+        histExt[item->first]/=norm;
+    }
+
+  }
 
 
 

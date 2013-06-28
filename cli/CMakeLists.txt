@@ -55,6 +55,12 @@ SET(sbml_hybrid_SOURCES
 SET(sbml_hybrid_HEADERS
     sbml_hybrid.hh)
 
+
+SET(sbml_hybrid2_SOURCES
+    sbml_hybrid2.cc)
+SET(sbml_hybrid2_HEADERS
+    sbml_hybrid2.hh)
+
 SET(sbml_hybridSSA_SOURCES
     sbml_hybridSSA.cc)
 SET(sbml_hybridSSA_HEADERS
@@ -84,6 +90,10 @@ TARGET_LINK_LIBRARIES(hybrid ${LIBS} libina libunsupported)
 
 ADD_EXECUTABLE(hybridSSA ${sbml_hybridSSA_SOURCES})
 TARGET_LINK_LIBRARIES(hybridSSA ${LIBS} libina libunsupported)
+
+
+ADD_EXECUTABLE(hybridSSA2 ${sbml_hybrid2_SOURCES})
+TARGET_LINK_LIBRARIES(hybridSSA2 ${LIBS} libina libunsupported)
 
 #ADD_EXECUTABLE(sbml_ssa ${sbml_ssa_SOURCES})
 #TARGET_LINK_LIBRARIES(sbml_ssa ${LIBS} libina libunsupported)

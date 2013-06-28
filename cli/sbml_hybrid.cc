@@ -134,8 +134,7 @@ int main(int argc, char *argv[])
 
     Models::Histogram<double> hist;
 
-    Eigen::VectorXd istate;
-    simulator.getInitial(istate);
+    Eigen::VectorXd istate = simulator.getInitial();
 
     std::vector<Eigen::VectorXd> state(ensSize,istate);
 

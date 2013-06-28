@@ -6,6 +6,9 @@
 
 using namespace iNA;
 
+
+void ensembleAverage(iNA::Models::HybridSSA &simulator, int nExt, double dt, double tmax);
+
 void printProgBar( int percent ){
   std::string bar;
 
@@ -77,31 +80,6 @@ int main(int argc, char *argv[])
 
     Models::Histogram<double> hist;
 
-    Eigen::VectorXd istate;
-    simulator.getInitial(istate);
-
-    std::vector<Eigen::VectorXd> state(ensExt,istate);
-
-    Eigen::VectorXd mean;
-    Eigen::MatrixXd mechErr;
-    Eigen::MatrixXd fidErr;
-    Eigen::MatrixXd transErr;    
-
-    Eigen::MatrixXd cov;
-
-    int num=tmax/dt;
-
-    std::vector<Eigen::VectorXd> meanE(num,Eigen::VectorXd::Zero(hybrid.numSpecies()));
-    std::vector<Eigen::MatrixXd> mechErrE(num,Eigen::MatrixXd::Zero(hybrid.numSpecies(),hybrid.numSpecies()));
-    std::vector<Eigen::MatrixXd> fidErrE(num,Eigen::MatrixXd::Zero(hybrid.numSpecies(),hybrid.numSpecies()));
-    std::vector<Eigen::MatrixXd> transErrE(num,Eigen::MatrixXd::Zero(hybrid.numSpecies(),hybrid.numSpecies()));
-    std::vector<Eigen::MatrixXd> covE(num,Eigen::MatrixXd::Zero(hybrid.numSpecies(),hybrid.numSpecies()));
-
-
-    Eigen::VectorXd meanEx(nExt);
-    Eigen::VectorXd skew(nExt);
-    Eigen::MatrixXd covEx(nExt,nExt);
-
     // Open file for external statistics
     std::ofstream trajFile;
     trajFile.open ("traj.dat");
@@ -123,69 +101,8 @@ int main(int argc, char *argv[])
     std::cerr<< "Confucius says '" << Confucius() << "'"<<
                 std::endl << "Please wait for progress..." << std::endl;
     try{
-     for(int n=1; n<=1; n++)
-     {
 
-      int sid = 0;
-      for(double t=0.; t<tmax; t+=dt, sid++)
-      {
-
-
-//        simulator.getInternalStats(state[0],0,m,c);
-//        //Single trajectory
-//        trajFile << t << "\t"
-//                  << m[0].head(nInt).transpose() << "\t"
-//                  << c[0].diagonal() << "\t"
-//                  << state[0].tail(nExt).transpose() << "\t" << std::endl;
-
-        simulator.mechError(state, mechErr);
-        simulator.fidError(state, mean, transErr, fidErr);
-        simulator.covar(cov);
-
-        meanE[sid]     +=mean;
-        mechErrE[sid]  +=mechErr;
-        transErrE[sid] +=transErr;
-        fidErrE[sid]   +=fidErr;
-        covE[sid]      +=cov;
-
-         simulator.runHybrid(state, t, t+dt);
-
-         // External model statistics
-         simulator.stats(meanEx,covEx,skew);
-
-//         outfile << t;
-//         for(size_t i=0; i<nExt; i++)
-//              outfile << "\t" << meanEx(i);
-//         for(size_t i=0; i<nExt; i++)
-//              outfile << "\t" << covEx(i,i);
-//         outfile<<std::endl;
-
-      }
-
-      simulator.resetEnsemble();
-
-      std::ofstream intfile;
-      intfile.open ("internal.dat");
-
-      sid=0;
-      for(double t=0.; t<tmax; t+=dt, sid++)
-      {
-
-          intfile << t << "\t"
-                    << meanE[sid].transpose()/n << "\t"
-                    << (transErrE[sid]).diagonal().transpose()/n << "\t"
-                    << (fidErrE[sid]-mechErrE[sid]).diagonal().transpose()/n << "\t"
-                    << (mechErrE[sid]).diagonal().transpose()/n << "\t"
-                    << (covE[sid]).diagonal().transpose()/n << "\t"
-                    << std::endl;
-      }
-
-      intfile.close();
-
-      // Update progress bar
-      printProgBar(n);
-
-     }
+      ensembleAverage(simulator, nExt, dt, tmax);
 
     }
     catch (iNA::NumericError &err)
@@ -199,3 +116,104 @@ int main(int argc, char *argv[])
     trajFile.close();
 
 }
+
+void ensembleAverage(iNA::Models::HybridSSA &simulator, int ensExt, double dt, double tmax)
+
+{
+
+  std::vector<Eigen::VectorXd> state(ensExt, simulator.getInitial());
+
+
+  Eigen::VectorXd meanEx(simulator.getExtModel().numSpecies());
+  Eigen::VectorXd skew(simulator.getExtModel().numSpecies());
+  Eigen::MatrixXd covEx(simulator.getExtModel().numSpecies(),simulator.getExtModel().numSpecies());
+
+  int num=tmax/dt;
+
+  Eigen::VectorXd mean;
+  Eigen::MatrixXd mechErr;
+  Eigen::MatrixXd fidErr;
+  Eigen::MatrixXd transErr;
+
+  Eigen::MatrixXd cov;
+
+  size_t numSp = simulator.getIntModel().numSpecies();
+
+  std::vector<Eigen::VectorXd> meanE(num,Eigen::VectorXd::Zero(numSp));
+  std::vector<Eigen::MatrixXd> mechErrE(num,Eigen::MatrixXd::Zero(numSp,numSp));
+  std::vector<Eigen::MatrixXd> fidErrE(num,Eigen::MatrixXd::Zero(numSp,numSp));
+  std::vector<Eigen::MatrixXd> transErrE(num,Eigen::MatrixXd::Zero(numSp,numSp));
+  std::vector<Eigen::MatrixXd> covE(num,Eigen::MatrixXd::Zero(numSp,numSp));
+
+  std::vector<Eigen::VectorXd> m;
+  std::vector<Eigen::MatrixXd> c;
+
+  for(int n=1; n<=1; n++)
+  {
+
+   int sid = 0;
+   for(double t=0.; t<tmax; t+=dt, sid++)
+   {
+
+
+//        simulator.getInternalStats(state[0],0,m,c);
+//        //Single trajectory
+//        trajFile << t << "\t"
+//                  << m[0].head(nInt).transpose() << "\t"
+//                  << c[0].diagonal() << "\t"
+//                  << state[0].tail(nExt).transpose() << "\t" << std::endl;
+
+     simulator.mechError(state, mechErr);
+     simulator.fidError(state, mean, transErr, fidErr);
+     simulator.covar(cov);
+
+     meanE[sid]     +=mean;
+     mechErrE[sid]  +=mechErr;
+     transErrE[sid] +=transErr;
+     fidErrE[sid]   +=fidErr;
+     covE[sid]      +=cov;
+
+      simulator.runHybrid(state, t, t+dt);
+
+      // External model statistics
+      simulator.stats(meanEx,covEx,skew);
+
+//         outfile << t;
+//         for(size_t i=0; i<nExt; i++)
+//              outfile << "\t" << meanEx(i);
+//         for(size_t i=0; i<nExt; i++)
+//              outfile << "\t" << covEx(i,i);
+//         outfile<<std::endl;
+
+   }
+
+   simulator.resetEnsemble();
+
+   std::ofstream intfile;
+   intfile.open ("internal.dat");
+
+   sid=0;
+   for(double t=0.; t<tmax; t+=dt, sid++)
+   {
+
+       intfile << t << "\t"
+                 << meanE[sid].transpose()/n << "\t"
+                 << (transErrE[sid]).diagonal().transpose()/n << "\t"
+                 << (fidErrE[sid]-mechErrE[sid]).diagonal().transpose()/n << "\t"
+                 << (mechErrE[sid]).diagonal().transpose()/n << "\t"
+                 << (covE[sid]).diagonal().transpose()/n << "\t"
+                 << std::endl;
+   }
+
+   intfile.close();
+
+   // Update progress bar
+   printProgBar(n);
+
+  }
+
+
+
+
+}
+
