@@ -72,7 +72,7 @@ StochasticSimulator::StochasticSimulator(const Ast::Model &model, int size, int 
 
      this->Omega(i)=evICs.evaluate(this->volumes(i));
 
-     if(this->Omega(i)>=0)
+     if(this->Omega(i)<=0)
      {
          InternalError err;
          err << "Could not initiate Stochastic Simulation since compartment <i>"
