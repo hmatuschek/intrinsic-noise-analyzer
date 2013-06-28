@@ -9,13 +9,8 @@ namespace iNA {
 namespace Parser {
 namespace Expr {
 
-
-/**
- * Helper production to unify integers and floats to numbers with signs.
- *
- * Number =
- *   ["-"] (INTEGER | FLOAT );
- */
+/** Helper production to unify integers and floats to numbers with signs.
+ * Number =  ["-"] (INTEGER | FLOAT ); */
 class NumberProduction : public Parser::Production
 {
 protected:
@@ -32,10 +27,8 @@ private:
 };
 
 
-/**
- * FunctionCallArguments =
- *   Expression [, FunctionCallArguments]
- */
+/** FunctionCallArguments =
+ *   Expression [, FunctionCallArguments] */
 class FunctionCallArgumentsProduction : public Parser::Production
 {
 protected:
@@ -52,10 +45,8 @@ protected:
 };
 
 
-/**
- * FunctionCall =
- *   Identifier "(" FunctionCallArguments ")";
- */
+/** FunctionCall =
+ *   Identifier "(" FunctionCallArguments ")"; */
 class FunctionCallProduction : public Parser::Production
 {
 protected:
@@ -72,10 +63,8 @@ protected:
 };
 
 
-/**
- * AtomicExpression =
- *   Number | Identifier | FunctionCall | ("(" Expression ")") | "-" AtomicExpression;
- */
+/** AtomicExpression =
+ *   Number | Identifier | FunctionCall | ("(" Expression ")") | "-" AtomicExpression; */
 class AtomicExpressionProduction : public Parser::AltProduction
 {
 protected:
@@ -92,10 +81,8 @@ private:
 };
 
 
-/**
- * PowerExpression =
- *   (AtomicExpression ("^"|"**") PowerExpression) | AtomicExpression.
- */
+/** PowerExpression =
+ *   (AtomicExpression ("^"|"**") PowerExpression) | AtomicExpression. */
 class PowerExpressionProduction : public Parser::AltProduction
 {
 protected:
@@ -112,10 +99,8 @@ protected:
 };
 
 
-/**
- * ProductExpression =
- *   (PowerExpression ("*" | "/") ProductExpression) | PowerExpression;
- */
+/** ProductExpression =
+ *   (PowerExpression ("*" | "/") ProductExpression) | PowerExpression; */
 class ProductExpressionProduction : public Parser::Production
 {
 protected:
@@ -132,10 +117,8 @@ private:
 };
 
 
-/**
- * Expression =
- *   (ProductExpression ("+"|"-") Expression) | ProductExpression;
- */
+/** Expression =
+ *   (ProductExpression ("+"|"-") Expression) | ProductExpression; */
 class ExpressionProduction : public Parser::Production
 {
 protected:
@@ -152,10 +135,7 @@ private:
 };
 
 
-/**
- * Grammar =
- *  Expression END_OF_FILE;
- */
+/** Grammar =  Expression END_OF_FILE; */
 class ExpressionGrammar : public Parser::Production
 {
 protected:
@@ -170,7 +150,6 @@ private:
   /** Singleton instance. */
   static ExpressionGrammar *instance;
 };
-
 
 }
 }

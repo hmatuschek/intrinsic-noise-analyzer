@@ -1,5 +1,5 @@
-#ifndef __FLUC_UTILS_EXCEPTION_HH__
-#define __FLUC_UTILS_EXCEPTION_HH__
+#ifndef __INA_PARSER_EXCEPTION_HH__
+#define __INA_PARSER_EXCEPTION_HH__
 
 #include "../exception.hh"
 
@@ -8,11 +8,8 @@ namespace iNA {
 namespace Parser {
 
 
-/**
- * Base class for all parser exceptions.
- *
- * @ingroup parser
- */
+/** Base class for all parser exceptions.
+ * @ingroup parser */
 class ParserError: public Exception
 {
 protected:
@@ -22,13 +19,10 @@ protected:
 public:
   /** Constructor. */
   ParserError(int line=-1);
-
   /** Constructor with message. */
   ParserError(const std::string &message, int line=-1);
-
   /** Copy constructor. */
   ParserError(const ParserError &other);
-
   /** Destructor. */
   virtual ~ParserError() throw();
 
@@ -37,57 +31,33 @@ public:
 };
 
 
-/**
- * The lexer error class.
- *
- * @ingroup utils
- */
+/** The lexer error class.
+ * @ingroup parser */
 class LexerError: public ParserError
 {
 public:
-  /**
-   * Constructor.
-   */
+  /** Constructor. */
   LexerError(int line=-1);
-
-  /**
-   * Constructor with message.
-   */
+  /** Constructor with message. */
   LexerError(const std::string &message, int line=-1);
-
-  /**
-   * Copy constructor.
-   */
+  /** Copy constructor. */
   LexerError(const LexerError &other);
-
-  /**
-   * Destructor.
-   */
+  /** Destructor. */
   virtual ~LexerError() throw();
 };
 
 
-/**
- * The syntax/parser error class.
- *
- * @ingroup utils
- */
+/** The syntax/parser error class.
+ * @ingroup parser */
 class SyntaxError: public ParserError
 {
-protected:
-  /** Holds a list of expected tokens by the parser. */
-  std::set<std::string> _expected_tokens;
-
 public:
   /** Constructor. */
   SyntaxError(int line=-1);
-
   /** Constructor with message. */
   SyntaxError(const std::string &message, int line=-1);
-
   /** Copy constructor. */
   SyntaxError(const SyntaxError &other);
-
   /** Destructor. */
   virtual ~SyntaxError() throw();
 
@@ -97,6 +67,10 @@ public:
   void addExpectedTokenId(const std::string &id);
   /** Adds a list of expected token ids. */
   void addExpectedTokens(const std::set<std::string> &ids);
+
+protected:
+  /** Holds a list of expected tokens by the parser. */
+  std::set<std::string> _expected_tokens;
 };
 
 
