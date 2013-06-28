@@ -19,7 +19,7 @@ IOSTask::IOSTask(const SSETaskConfig &config, QObject *parent) :
   has_negative_variance(false)
 {
 
-  sseModel = new iNA::Models::IOSmodel(*config.getModel());
+  _sseModel = new iNA::Models::IOSmodel(*config.getModel());
 
   // Assemble index tables and assign column names to time-series table:
   size_t column = 0;
@@ -89,8 +89,8 @@ IOSTask::~IOSTask()
     delete interpreter;
 
   // Free sseModel
-  if (0 != this->sseModel)
-    delete sseModel;
+  if (0 != this->_sseModel)
+    delete _sseModel;
 
 
 }
@@ -116,7 +116,7 @@ IOSTask::process()
   }
 
   // Holds the current system state (reduced state)
-  Eigen::VectorXd x(sseModel->getDimension());
+  Eigen::VectorXd x(_sseModel->getDimension());
   // Holds the concentrations for each species (full state)
   Eigen::VectorXd concentrations(_Ns);
   // Holds the covariance matrix of species concentrations
@@ -134,9 +134,9 @@ IOSTask::process()
   Eigen::VectorXd output_vector(timeseries.getNumColumns());
 
   // initialize (reduced) state
-  sseModel->getInitialState(x);
+  _sseModel->getInitialState(x);
   // get full initial concentrations and covariance
-  sseModel->fullState(
+  _sseModel->fullState(
         x, concentrations, lna, emre, ios, thirdMoment, iosemre);
 
   this->setState(Task::RUNNING);
@@ -184,7 +184,7 @@ IOSTask::process()
     }
 
     // Get full state:
-    sseModel->fullState(
+    _sseModel->fullState(
           x, concentrations, lna, emre, ios, thirdMoment, iosemre);
 
     // store state and time:
@@ -245,13 +245,13 @@ IOSTask::getSpeciesNames() const {
 
 iNA::Ast::Unit
 IOSTask::getSpeciesUnit() const {
-  return this->sseModel->getSpeciesUnit();
+  return this->_sseModel->getSpeciesUnit();
 }
 
 
 iNA::Ast::Unit
 IOSTask::getTimeUnit() const {
-  return this->sseModel->getTimeUnit();
+  return this->_sseModel->getTimeUnit();
 }
 
 bool
@@ -274,7 +274,7 @@ IOSTask::instantiateInterpreter()
     interpreter = new Models::GenericSSEinterpreter<
         Models::IOSmodel, Eval::direct::Engine<Eigen::VectorXd, Eigen::VectorXd>,
         Eval::direct::Engine<Eigen::VectorXd, Eigen::MatrixXd> >(
-          *sseModel,
+          *_sseModel,
           config.getOptLevel(), config.getNumEvalThreads(), false);
 
     // Instantiate integrator for that engine:
@@ -347,7 +347,7 @@ IOSTask::instantiateInterpreter()
     interpreter = new Models::GenericSSEinterpreter<
         Models::IOSmodel, Eval::bci::Engine<Eigen::VectorXd, Eigen::VectorXd>,
         Eval::bci::Engine<Eigen::VectorXd, Eigen::MatrixXd> >(
-          *sseModel,
+          *_sseModel,
           config.getOptLevel(), config.getNumEvalThreads(), false);
 
     // Instantiate integrator for that engine:
@@ -420,7 +420,7 @@ IOSTask::instantiateInterpreter()
     interpreter = new Models::GenericSSEinterpreter<
         Models::IOSmodel, Eval::bcimp::Engine<Eigen::VectorXd, Eigen::VectorXd>,
         Eval::bcimp::Engine<Eigen::VectorXd, Eigen::MatrixXd> >(
-          *sseModel,
+          *_sseModel,
           config.getOptLevel(), config.getNumEvalThreads(), false);
 
     // Instantiate integrator for that engine:
@@ -494,7 +494,7 @@ IOSTask::instantiateInterpreter()
     interpreter = new Models::GenericSSEinterpreter<
         Models::IOSmodel, Eval::jit::Engine<Eigen::VectorXd, Eigen::VectorXd>,
         Eval::jit::Engine<Eigen::VectorXd, Eigen::MatrixXd> >(
-          *sseModel,
+          *_sseModel,
           config.getOptLevel(), config.getNumEvalThreads(), false);
 
     // Instantiate integrator for that engine:
