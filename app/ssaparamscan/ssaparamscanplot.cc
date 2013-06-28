@@ -125,8 +125,11 @@ createSSAParameterScanFanoPlotConfig(const QStringList &selected_species, SSAPar
   config->setYLabel(QObject::tr("$F_Fano$"));
 
   iNA::Ast::Model *model = task->getConfig().getModel();
-  //iNA::Trafo::InitialValueFolder IC(*model);
-
+  // Assemble a constant folder, that excludes the paramter we scan over:
+  GiNaC::exmap excludeFromICFold;
+  GiNaC::ex parameterSymbol = task->getConfig().getParameter().getSymbol();
+  excludeFromICFold[parameterSymbol] = 0;
+  iNA::Trafo::InitialValueFolder IC(*model, iNA::Trafo::Filter::ALL, excludeFromICFold);
 
   // Allocate a graph for each selected species
   size_t offset = 1; // skip parameter column
@@ -135,10 +138,9 @@ createSSAParameterScanFanoPlotConfig(const QStringList &selected_species, SSAPar
     size_t mean_idx = offset + species_idx;
     size_t var_idx  = offset + Ntot + species_idx + (species_idx*(species_idx+1))/2;
 
-    /// @bug Handle parameter dependence of compartment volume.
-    // Check if we can evaluate the volume
+    // Check if we can evaluate the volume, fold all params except the one we scan over:
     GiNaC::ex compVol = model->getSpecies(species_idx)->getCompartment()->getValue();
-    if (! GiNaC::is_a<GiNaC::numeric>(compVol)) { continue; }
+    if (! GiNaC::is_a<GiNaC::numeric>(compVol = IC.evaluate(compVol))) { continue; }
     // Needs multiplier to obtain correct nondimensional quantity
     double multiplier = Eigen::ex2double(compVol);
     multiplier *= model->getSpeciesUnit().getMultiplier()*std::pow(10.,model->getSpeciesUnit().getScale());
