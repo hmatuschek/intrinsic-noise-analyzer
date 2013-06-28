@@ -45,13 +45,13 @@ StochasticSimulator::StochasticSimulator(const Ast::Model &model, int size, int 
 
   for(size_t i=0; i<species.size();i++)
   {
-     ics(i)=evICs.evaluate(this->species[i]);
+     ics(i) = evICs.evaluate(this->species[i]);
      if(ics(i)>0.)
      {
-        /// @todo I guess @c round will do the trick
-        ics(i)=std::floor( evICs.evaluate(this->species[i]) + 0.5 );
-        /// Is ICS==0 not a valid value? If you want to check if ics is integer
-        /// simply assert ics==floor(ics).
+        /// H: I guess @c round will do the trick? P: Same thing! OK, I can avoid reevaluate.
+        ics(i) = std::floor( ics(i) + 0.5 );
+        /// H: Is ICS==0 not a valid value? P: Yes, but ics>0 is asserted here.
+        /// H: If you want to check if ics is integer P: I want to make it an integer here. But clearly positive IC evaluating to zero integer is a mistake.
         if(ics(i)==0.) {
             InternalError err;
             err << "Cannot initiate Stochastic Simulation since initial particle number of species <i>"
