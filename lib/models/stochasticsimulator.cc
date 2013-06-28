@@ -48,10 +48,11 @@ StochasticSimulator::StochasticSimulator(const Ast::Model &model, int size, int 
      ics(i)=evICs.evaluate(this->species[i]);
      if(ics(i)>0.)
      {
-        //
+        /// @todo I guess @c round will do the trick
         ics(i)=std::floor( evICs.evaluate(this->species[i]) + 0.5 );
-        if(ics(i)==0.)
-        {
+        /// Is ICS==0 not a valid value? If you want to check if ics is integer
+        /// simply assert ics==floor(ics).
+        if(ics(i)==0.) {
             InternalError err;
             err << "Could not initiate Stochastic Simulation since initial particle number of species <i>"
                 << (this->getSpecies(i)->hasName() ? this->getSpecies(i)->getName() : this->getSpecies(i)->getIdentifier())
@@ -71,10 +72,8 @@ StochasticSimulator::StochasticSimulator(const Ast::Model &model, int size, int 
      }
 
      this->Omega(i)=evICs.evaluate(this->volumes(i));
-     std::cerr << "Initial volume of " << this->volumes(i)
-               << ": " << this->Omega(i) << std::endl;
 
-     if (this->Omega(i)<=0) {
+     if (this->Omega(i) <= 0) {
          InternalError err;
          err << "Could not initiate Stochastic Simulation since compartment <i>"
              << (this->getSpecies(i)->getCompartment()->hasName() ? this->getSpecies(i)->getCompartment()->getName() : this->getSpecies(i)->getCompartment()->getIdentifier())
