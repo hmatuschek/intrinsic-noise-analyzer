@@ -438,6 +438,11 @@ LineGraphConfig::columnNames() const {
   return _columnNames;
 }
 
+GiNaC::symbol
+LineGraphConfig::columnSymbol(size_t column) {
+  return _parserContext.getColumnSymbol(column);
+}
+
 bool
 LineGraphConfig::checkExpression(const QString &expression) {
   return FormulaParser::check(expression, _parserContext);
@@ -451,8 +456,12 @@ LineGraphConfig::xExpression() {
 
 void
 LineGraphConfig::setXExpression(const QString &expression) throw (iNA::Parser::ParserError) {
-  _xExpression = FormulaParser::parse(expression, _parserContext);
-  compileExpressions();
+  setXExpression(FormulaParser::parse(expression, _parserContext));
+}
+
+void
+LineGraphConfig::setXExpression(const GiNaC::ex &expression) {
+  _xExpression = expression; compileExpressions();
 }
 
 QString
@@ -463,8 +472,12 @@ LineGraphConfig::yExpression() {
 
 void
 LineGraphConfig::setYExpression(const QString &expression) throw (iNA::Parser::ParserError) {
-  _yExpression = FormulaParser::parse(expression, _parserContext);
-  compileExpressions();
+  setYExpression(FormulaParser::parse(expression, _parserContext));
+}
+
+void
+LineGraphConfig::setYExpression(const GiNaC::ex &expression) {
+  _yExpression = expression; compileExpressions();
 }
 
 Graph *
