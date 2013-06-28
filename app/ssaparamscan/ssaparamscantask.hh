@@ -25,19 +25,21 @@ public:
       public EngineTaskConfig
   {
 
-  public:
-
-
   protected:
+    /** The model to scan. */
     iNA::Ast::Model *_model;
-
+    /** The parameter we scan. */
     iNA::Ast::Parameter * parameter;
+    /** Start value of the parameter. */
     double start_value;
+    /** End value of the parameter. */
     double end_value;
+    /** Number of steps of the parameter. */
     size_t steps;
-
+    /** Scan parameters i.e. the transient time (time to reach steady state,
+     * maximum simulation time and the time step at which samples are taken. */
     double t_transient, t_max, timestep;
-
+    /** Number of threads to use for simulation. */
     size_t num_threads;
 
   public:

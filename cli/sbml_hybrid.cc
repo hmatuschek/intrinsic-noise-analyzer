@@ -15,6 +15,9 @@
 
 using namespace iNA;
 
+
+void doSSE(Ast::Model &model);
+
 void printProgBar( int percent );
 
 std::vector<std::string> readSoI(const std::string &parameterFile);
@@ -146,6 +149,8 @@ int main(int argc, char *argv[])
     Eigen::VectorXd meanEx(nExt);
     Eigen::VectorXd skew(nExt);
     Eigen::MatrixXd covEx(nExt,nExt);
+
+    doSSE(model);
 
     // Open file for external statistics
     std::ofstream trajFile;
@@ -334,6 +339,52 @@ void printProgBar( int percent ){
   std::cout<< percent << "%     " << std::flush;
 }
 
+void doSSE(Ast::Model &model)
+{
+
+  iNA::Models::IOSmodel iosM(model);
+
+  Models::SteadyStateAnalysis<Models::IOSmodel> steadyState(iosM);
+
+  // state vector (deterministic concentrations + covariances)
+
+  Eigen::VectorXd RE, EMRE, skew, io;
+  Eigen::MatrixXd LNA, IOS;
+
+  // Just dump all the nice expressions and values:
+  Eigen::VectorXd x(steadyState.getDimension());
+  steadyState.calcSteadyState(x);
+
+  std::ofstream extFile;
+  extFile.open("sse.dat");
+
+  int col=0;
+  // Header
+  for(size_t i=0; i<model.numSpecies(); i++)
+      extFile << "\t [" << col++ <<"]" << model.getSpecies(i)->getIdentifier();
+  for(size_t i=0; i<model.numSpecies(); i++)
+      extFile << "\t [" << col++ <<"]LNA(" << model.getSpecies(i)->getIdentifier() << ")";
+  for(size_t i=0; i<model.numSpecies(); i++)
+      extFile << "\t [" << col++ <<"]EMRE(" << model.getSpecies(i)->getIdentifier() << ")";
+  for(size_t i=0; i<model.numSpecies(); i++)
+      extFile << "\t [" << col++ <<"]IOS(" << model.getSpecies(i)->getIdentifier() << ")";
+  extFile << std::endl;
+
+  iosM.fullState(x,RE,LNA,EMRE,IOS,skew,io);
+
+  EMRE += RE;
+  IOS += LNA;
+
+  for(size_t i=0; i<model.numSpecies(); i++)
+    extFile << "\t" << RE(i);
+  for(size_t i=0; i<model.numSpecies(); i++)
+    extFile << "\t" << (LNA.diagonal())(i);
+  for(size_t i=0; i<model.numSpecies(); i++)
+    extFile << "\t" << EMRE(i);
+  for(size_t i=0; i<model.numSpecies(); i++)
+    extFile << "\t" << (IOS.diagonal())(i);
+
+}
 
 std::string Confucius()
 {

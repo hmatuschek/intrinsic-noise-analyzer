@@ -256,7 +256,8 @@ public:
 
   /** Returns the list of column labels. */
   const QStringList &columnNames() const;
-
+  /** Returns the symbol for the specified column. */
+  GiNaC::symbol columnSymbol(size_t column);
   /** Checks if the given expression is valid. */
   bool checkExpression(const QString &expression);
   /** Returns the expression of the X values. */
@@ -264,11 +265,17 @@ public:
   /** Parses and sets the given expression as the X value expression.
    * @throws iNA::Parser::ParserError if the given expression can not be parsed. */
   void setXExpression(const QString &expression) throw (iNA::Parser::ParserError);
+  /** Sets the given expression as the X value expression. This expression must only contain
+   * column-symbols (see @c columbSymbol). */
+  void setXExpression(const GiNaC::ex &expression);
   /** Returns the expression of the Y values. */
   QString yExpression();
   /** Parses and sets the given expression as the Y value expression.
    * @throws iNA::Parser::ParserError if the given expression can not be parsed. */
   void setYExpression(const QString &expression) throw (iNA::Parser::ParserError);
+  /** Sets the given expression as the Y value expression. This expression must only contain
+   * column-symbols (see @c columbSymbol). */
+  void setYExpression(const GiNaC::ex &expression);
 
   /** Returns the line color. */
   const QColor &lineColor() const;
