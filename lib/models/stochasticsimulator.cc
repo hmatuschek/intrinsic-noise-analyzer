@@ -55,8 +55,7 @@ StochasticSimulator::StochasticSimulator(const Ast::Model &model, int size, int 
         if(ics(i)==0.) {
             InternalError err;
             err << "Could not initiate Stochastic Simulation since initial particle number of species <i>"
-                << (this->getSpecies(i)->hasName() ? this->getSpecies(i)->getName() : this->getSpecies(i)->getIdentifier())
-                << "</i> evaluated to zero.";
+                << this->getSpecies(i)->getLabel() << "</i> evaluated to zero.";
             throw err;
             throw InternalError();
         }
@@ -65,8 +64,7 @@ StochasticSimulator::StochasticSimulator(const Ast::Model &model, int size, int 
      {
          InternalError err;
          err << "Could not initiate Stochastic Simulation since initial particle number of species <i>"
-             << (this->getSpecies(i)->hasName() ? this->getSpecies(i)->getName() : this->getSpecies(i)->getIdentifier())
-             << "</i> evaluated to a value < 0.";
+             << this->getSpecies(i)->getLabel() << "</i> evaluated to a value < 0.";
          throw err;
          throw InternalError();
      }
@@ -76,7 +74,7 @@ StochasticSimulator::StochasticSimulator(const Ast::Model &model, int size, int 
      if (this->Omega(i) <= 0) {
          InternalError err;
          err << "Could not initiate Stochastic Simulation since compartment <i>"
-             << (this->getSpecies(i)->getCompartment()->hasName() ? this->getSpecies(i)->getCompartment()->getName() : this->getSpecies(i)->getCompartment()->getIdentifier())
+             << this->getSpecies(i)->getCompartment()->getLabel()
              << "</i> evaluated to non-positive value.";
          throw err;
          throw InternalError();
@@ -85,21 +83,15 @@ StochasticSimulator::StochasticSimulator(const Ast::Model &model, int size, int 
 
   Utils::Message msg = LOG_MESSAGE(Utils::Message::INFO);
   msg << "SSA initial copy numbers: ";
-  for(size_t i=0; i<numSpecies(); i++)
-  {
-      if(this->getSpecies(i)->hasName())
-        msg<<this->getSpecies(i)->getName();
-      else
-        msg<<this->getSpecies(i)->getIdentifier();
-
-      msg<<"="<<ics(i)<<" ";
+  for(size_t i=0; i<numSpecies(); i++) {
+    msg << this->getSpecies(i)->getLabel()
+        << "=" << ics(i) <<" ";
   }
   Utils::Logger::get().log(msg);
 
   // initialize ensemble
-  for(int i=0; i<this->ensembleSize;i++)
-  {
-     this->observationMatrix.row(i).head(this->numSpecies())=ics;
+  for(int i=0; i<this->ensembleSize;i++) {
+    this->observationMatrix.row(i).head(this->numSpecies()) = ics;
   }
 
 }

@@ -7,6 +7,7 @@
 #include "../plot/figure.hh"
 #include "../plot/configuration.hh"
 #include <math.h>
+#include <libina/trafo/constantfolder.hh>
 
 
 Plot::PlotConfig *
@@ -124,6 +125,8 @@ createSSAParameterScanFanoPlotConfig(const QStringList &selected_species, SSAPar
   config->setYLabel(QObject::tr("$F_Fano$"));
 
   iNA::Ast::Model *model = task->getConfig().getModel();
+  //iNA::Trafo::InitialValueFolder IC(*model);
+
 
   // Allocate a graph for each selected species
   size_t offset = 1; // skip parameter column
@@ -132,11 +135,13 @@ createSSAParameterScanFanoPlotConfig(const QStringList &selected_species, SSAPar
     size_t mean_idx = offset + species_idx;
     size_t var_idx  = offset + Ntot + species_idx + (species_idx*(species_idx+1))/2;
 
+    /// @bug Handle parameter dependence of compartment volume.
     // Check if we can evaluate the volume
-    if(!GiNaC::is_a<GiNaC::numeric>(model->getSpecies(species_idx)->getCompartment()->getValue())) continue;
+    GiNaC::ex compVol = model->getSpecies(species_idx)->getCompartment()->getValue();
+    if (! GiNaC::is_a<GiNaC::numeric>(compVol)) { continue; }
     // Needs multiplier to obtain correct nondimensional quantity
-    double multiplier = Eigen::ex2double(model->getSpecies(species_idx)->getCompartment()->getValue());
-    multiplier *= Eigen::ex2double(model->getSpeciesUnit().getMultiplier()*std::pow(10.,model->getSpeciesUnit().getScale()));
+    double multiplier = Eigen::ex2double(compVol);
+    multiplier *= model->getSpeciesUnit().getMultiplier()*std::pow(10.,model->getSpeciesUnit().getScale());
     // Multiply by Avogadro's number if defined in mole
     if (model->getSubstanceUnit().isVariantOf(iNA::Ast::ScaledBaseUnit::MOLE)) multiplier *= iNA::constants::AVOGADRO;
     // Assemble graph:
