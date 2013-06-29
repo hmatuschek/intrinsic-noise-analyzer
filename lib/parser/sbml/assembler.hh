@@ -45,7 +45,7 @@ public:
   Ast::Species *resolveSpecies(const std::string &id);
 
   /** Tries to resolve a variable in the current scope, if there is no definition in this scope,
-   * it ties to resolve the variable in the parent scope. */
+   * it tries to resolve the variable in the parent scope. */
   Ast::VariableDefinition *resolveVariable(const std::string &id);
 
   /** Tries to resolve a variable in the given scope. */
@@ -56,7 +56,7 @@ public:
 };
 
 
-// Internal used functions to traverse the SBML tree (libsbml)
+// Forward declaration of internal used functions to traverse the SBML tree (libsbml)
 void __process_model(
     LIBSBML_CPP_NAMESPACE_QUALIFIER Model *model, ParserContext &ctx);
 Ast::FunctionDefinition *__process_function_definition(

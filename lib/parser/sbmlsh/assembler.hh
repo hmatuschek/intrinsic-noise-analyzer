@@ -71,7 +71,8 @@ protected:
   /** Parses the initial values of compartments. */
   void linkCompartmentDefinitions(iNA::Parser::ConcreteSyntaxTree &comp);
   /** Handles a list species definition. */
-  void processSpeciesDefinition(iNA::Parser::ConcreteSyntaxTree &spec);
+  void processSpeciesDefinition(iNA::Parser::ConcreteSyntaxTree &spec,
+                                bool &speciesHasSubstanceUnits);
   /** Parses the initial value of species definitions. */
   void linkSpeciesDefinition(iNA::Parser::ConcreteSyntaxTree &spec, Trafo::VariableScaling &scaleing);
   /** Handles a list of species modifiers. */
