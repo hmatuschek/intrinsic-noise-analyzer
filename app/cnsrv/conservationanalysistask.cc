@@ -54,7 +54,7 @@ ConservationAnalysisTask::process() {
   setState(Task::RUNNING); setProgress(0.0);
 
   // Create & perform analysis:
-  _analysis = new Models::ConservationAnalysis(_config.getModelDocument()->getModel());
+  _analysis = new Models::ConservedQuantities(_config.getModelDocument()->getModel());
   // Now, get result...
   Trafo::InitialValueFolder folder(*_analysis);
 
@@ -62,17 +62,8 @@ ConservationAnalysisTask::process() {
   Eigen::VectorXex s(_analysis->numSpecies());
   for (size_t i=0; i<_analysis->numSpecies(); i++) { s(i) = _analysis->getSpecies(i)->getSymbol(); }
   // Obtain conserved cycles
-  if(_config.getModelDocument()->getModel().speciesHaveSubstanceUnits())
-  {
-    _cons_expr = _analysis->getConservedAmounts(s);
-    Eigen::VectorXd sd = Eigen::ex2double(folder.apply(s));
-    _cons_const = folder.apply(_analysis->getConservedAmounts(sd));
-  }
-  else
-  {
-    _cons_expr = _analysis->getConservedCycles(s);
-    _cons_const = folder.apply(_cons_expr);
-  }
+  _cons_expr = _analysis->getConservedCycles(s);
+  _cons_const = folder.apply(_cons_expr);
 
   // done. (big deal...)
 
@@ -198,7 +189,7 @@ ConservationAnalysisWidget::ConservationAnalysisWidget(ConservationAnalysisTask 
   view->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 
   QPushButton *updateButton = new QPushButton(tr("Update"));
-  updateButton->setToolTip(tr("Updates or re-runs the analysis on the (possibly modified) model."));
+  updateButton->setToolTip(tr("Update analysis for modified model."));
   updateButton->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
   // Layout widget:
@@ -255,7 +246,7 @@ ConservationAnalysisEqWidget::ConservationAnalysisEqWidget(ConservationAnalysisT
   label->setVisible(false);
 
   QPushButton *updateButton = new QPushButton(tr("Update"));
-  updateButton->setToolTip(tr("Updates or re-runs the analysis on the (possibly modified) model."));
+  updateButton->setToolTip(tr("Updates analysis for modified model."));
   updateButton->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
   // Layout widget:
@@ -326,11 +317,11 @@ ConservationAnalysisItem::createView() {
 ConservationAnalysisWizard::ConservationAnalysisWizard(ConservationAnalysisConfig &config)
   : GeneralTaskWizard(), _config(config)
 {
-  setWindowTitle(tr("Configure a conservation analysis"));
+  setWindowTitle(tr("Configure conservation analysis"));
 
   ModelSelectionWizardPage *page = new ModelSelectionWizardPage(this);
   page->setTitle(tr("Conservation Analysis"));
-  page->setSubTitle(tr("Select a model to perform the conservation analysis on."));
+  page->setSubTitle(tr("Select model to view conserved quantities."));
   addPage(page);
 }
 

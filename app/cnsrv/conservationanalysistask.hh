@@ -8,7 +8,7 @@
 #include "../views/taskview.hh"
 #include "../views/generaltaskwizard.hh"
 
-#include "libina/models/conservationanalysis.hh"
+#include "conservedquantities.hh"
 
 
 /** Implements the trivial config of the conservation analysis (just a selected model).
@@ -53,7 +53,7 @@ public:
 
 private:
   ConservationAnalysisConfig _config;
-  iNA::Models::ConservationAnalysis *_analysis;
+  iNA::Models::ConservedQuantities *_analysis;
   Eigen::VectorXex _cons_expr;
   Eigen::VectorXex _cons_const;
 };
