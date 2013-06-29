@@ -39,7 +39,7 @@ ConservationAnalysisConfig::ConservationAnalysisConfig(const ConservationAnalysi
  * ******************************************************************************************** */
 ConservationAnalysisTask::ConservationAnalysisTask(
     const ConservationAnalysisConfig &config, QObject *parent)
-  : Task(), _config(config), _analysis(0), _cons_expr(), _cons_const()
+  : Task(parent), _config(config), _analysis(0), _cons_expr(), _cons_const()
 {
   // pass...
 }
@@ -60,24 +60,15 @@ ConservationAnalysisTask::process() {
 
   // Assemble vector of species symbols
   Eigen::VectorXex s(_analysis->numSpecies());
-  for (size_t i=0; i<_analysis->numSpecies(); i++) { s(i) = _analysis->getSpecies(i)->getSymbol(); }
+  for (size_t i=0; i<_analysis->numSpecies(); i++) {
+    s(i) = _analysis->getSpecies(i)->getSymbol();
+  }
+
   // Obtain conserved cycles
   _cons_expr = _analysis->getConservedCycles(s);
   _cons_const = folder.apply(_cons_expr);
 
   // done. (big deal...)
-
-  //// Log message necessary?
-//  // Calc conservation constants
-//  _cons_const.resize(_cons_expr.rows());
-//  for (int i=0; i<_cons_expr.rows(); i++) {
-//    _cons_const(i) = folder.apply(_cons_expr(i));
-//    Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
-//    message << "Found circle " << (i+1) << "/" << _cons_const.rows() << ": "
-//            << _cons_expr(i) << " = " << _cons_const(i);
-//    Utils::Logger::get().log(message);
-//  }
-
   setState(Task::DONE); setProgress(1.0);
 }
 
