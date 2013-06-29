@@ -203,16 +203,12 @@ MESSAGE(STATUS "Libraries: ${LIBS}")
 #
 IF(INA_ENABLE_STATIC)
 add_subdirectory(lib)
-add_subdirectory(cli)
-add_subdirectory(unsupported)
 ELSE()
 
 add_subdirectory(lib)
 IF(WITH_INA_GUI)
   add_subdirectory(app)
 ENDIF(WITH_INA_GUI)
-add_subdirectory(cli)
-add_subdirectory(unsupported)
 # Exclude unit tests requiring glibc which is not available under Windows!
 IF(INA_BUILD_UNITTEST AND NOT WIN32)
   add_subdirectory(test)
