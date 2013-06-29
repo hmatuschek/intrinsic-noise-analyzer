@@ -99,3 +99,5 @@ TARGET_LINK_LIBRARIES(conjR ${LIBS} libina libunsupported)
 
 #ADD_EXECUTABLE(sbml_med ${sbml_med_SOURCES})
 #TARGET_LINK_LIBRARIES(sbml_med ${LIBS} libina libunsupported)
+
+INSTALL_TARGETS(/bin hybrid conjR)

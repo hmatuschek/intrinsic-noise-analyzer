@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
 
   double tfinal = 10;
   double dt=0.1;
-  double ensSize = 1000;
+  double ensSize = 500;
 
   int longIndex;
   int opt = getopt_long( argc, argv, optString, longOpts, &longIndex );

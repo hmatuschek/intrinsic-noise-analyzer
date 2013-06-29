@@ -180,7 +180,7 @@ ConservationAnalysisWidget::ConservationAnalysisWidget(ConservationAnalysisTask 
   view->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 
   QPushButton *updateButton = new QPushButton(tr("Update"));
-  updateButton->setToolTip(tr("Updates or re-runs the analysis on the (possibly modified) model."));
+  updateButton->setToolTip(tr("Update analysis for modified model."));
   updateButton->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
   // Layout widget:
@@ -237,7 +237,7 @@ ConservationAnalysisEqWidget::ConservationAnalysisEqWidget(ConservationAnalysisT
   label->setVisible(false);
 
   QPushButton *updateButton = new QPushButton(tr("Update"));
-  updateButton->setToolTip(tr("Updates or re-runs the analysis on the (possibly modified) model."));
+  updateButton->setToolTip(tr("Updates analysis for modified model."));
   updateButton->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
   // Layout widget:
@@ -308,11 +308,11 @@ ConservationAnalysisItem::createView() {
 ConservationAnalysisWizard::ConservationAnalysisWizard(ConservationAnalysisConfig &config)
   : GeneralTaskWizard(), _config(config)
 {
-  setWindowTitle(tr("Configure a conservation analysis"));
+  setWindowTitle(tr("Configure conservation analysis"));
 
   ModelSelectionWizardPage *page = new ModelSelectionWizardPage(this);
   page->setTitle(tr("Conservation Analysis"));
-  page->setSubTitle(tr("Select a model to perform the conservation analysis on."));
+  page->setSubTitle(tr("Select model to view conserved quantities."));
   addPage(page);
 }
 
