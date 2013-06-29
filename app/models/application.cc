@@ -135,9 +135,9 @@ Application::Application() :
   _combineIrvReaction->setEnabled(false);
   _combineIrvReaction->setStatusTip(tr("Combine irreversible reactions to reversible ones when possible"));
 
-  _cnsrvAnalysisAction = new QAction(tr("&Conservation Analysis"), this);
+  _cnsrvAnalysisAction = new QAction(tr("&Conserved Quantities"), this);
   _cnsrvAnalysisAction->setShortcut(QKeySequence(Qt::CTRL+Qt::SHIFT+Qt::Key_C));
-  _cnsrvAnalysisAction->setStatusTip(tr("Reveals conserved cycles."));
+  _cnsrvAnalysisAction->setStatusTip(tr("Displays conserved quantities of model."));
 
   _steadyStateAction = new QAction(tr("&Steady State Analysis (SSE)"), this);
   _steadyStateAction->setShortcut(QKeySequence(Qt::CTRL+Qt::SHIFT+Qt::Key_S));

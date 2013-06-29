@@ -62,50 +62,58 @@ ConservationAnalysis::ConservationAnalysis(const Ast::Model &model)
 }
 
 Eigen::MatrixXex
+ConservationAnalysis::getConservationMatrix()
+
+{
+    return this->Omega_dep.asDiagonal().inverse()*(conservation_matrix.cast<GiNaC::ex>())*(this->Omega.asDiagonal())*(this->PermutationM.cast<GiNaC::ex>());
+}
+
+Eigen::VectorXex
+ConservationAnalysis::getConservedAmounts(const Eigen::VectorXex &InitialAmount)
+
+{
+    return (conservation_matrix.cast<GiNaC::ex>())*(this->PermutationM.cast<GiNaC::ex>())*(InitialAmount);
+}
+
+Eigen::VectorXex
+ConservationAnalysis::getConservedAmounts(const Eigen::VectorXd &InitialAmount)
+
+{
+    return (conservation_matrix.cast<GiNaC::ex>())*(this->PermutationM.cast<GiNaC::ex>())*(InitialAmount.cast<GiNaC::ex>());
+}
+
+Eigen::VectorXex
 ConservationAnalysis::getConservedCycles(const Eigen::VectorXd &ICs)
 
 {
-
-    return this->Omega_dep.asDiagonal().inverse()*(conservation_matrix.cast<GiNaC::ex>())*(this->Omega.asDiagonal())*(this->PermutationM.cast<GiNaC::ex>())*(ICs.cast<GiNaC::ex>());
-
+    return this->getConservationMatrix()*(ICs.cast<GiNaC::ex>());
 }
 
 
-Eigen::MatrixXex
+Eigen::VectorXex
 ConservationAnalysis::getConservedCycles(const Eigen::VectorXex &ICs)
 
 {
-
-    return this->Omega_dep.asDiagonal().inverse()*(conservation_matrix.cast<GiNaC::ex>())*(this->Omega.asDiagonal())*(this->PermutationM.cast<GiNaC::ex>())*ICs;
-
-}
-
-Eigen::MatrixXex
-ConservationAnalysis::getConservationMatrix()
-{
-
-    return this->Omega_dep.asDiagonal().inverse()*(conservation_matrix.cast<GiNaC::ex>())*(this->Omega.asDiagonal())*(this->PermutationM.cast<GiNaC::ex>());
-
+    return this->getConservationMatrix()*ICs;
 }
 
 const Eigen::MatrixXex &
 ConservationAnalysis::getLink0CMatrix()
+
 {
-
     return this->Link0CMatrix;
-
 }
 
 const Eigen::MatrixXex
 ConservationAnalysis::getLinkCMatrix()
+
 {
-
     return (this->PermutationM.cast<GiNaC::ex>().transpose())*this->LinkCMatrix;
-
 }
 
 GiNaC::exmap
 ConservationAnalysis::getConservationConstants(const Eigen::VectorXex &conserved_cycles)
+
 {
 
     // generate substitution table
@@ -120,6 +128,7 @@ ConservationAnalysis::getConservationConstants(const Eigen::VectorXex &conserved
 
 GiNaC::exmap
 ConservationAnalysis::getConservationConstants(const Eigen::VectorXd &conserved_cycles)
+
 {
 
     // generate substitution table
@@ -134,12 +143,14 @@ ConservationAnalysis::getConservationConstants(const Eigen::VectorXd &conserved_
 
 const Eigen::Matrix<GiNaC::symbol,Eigen::Dynamic,1> &
 ConservationAnalysis::getConservationConstants()
+
 {
     return this->conservationConstants;
 }
 
 GiNaC::exmap
 ConservationAnalysis::getICconstants(const Eigen::VectorXd &initialcondition)
+
 {
 
     // generate substitution table
@@ -150,4 +161,3 @@ ConservationAnalysis::getICconstants(const Eigen::VectorXd &initialcondition)
     return table;
 
 }
-
