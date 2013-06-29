@@ -25,11 +25,8 @@ ModelExpressionContext::resolve(const std::string &identifier) {
 }
 
 std::string
-ModelExpressionContext::identifier(GiNaC::symbol symbol)
-{
-  iNA::Ast::VariableDefinition *var = _scope.getVariable(symbol);
-  if (var->hasName()) { return var->getName(); }
-  return var->getIdentifier();
+ModelExpressionContext::identifier(GiNaC::symbol symbol) const {
+  return _scope.getVariable(symbol)->getLabel();
 }
 
 bool
@@ -146,7 +143,9 @@ Ginac2Formula::_assembleFormula(SmartPtr<Parser::Expr::Node> node, size_t preced
   }
 
   if (node->isIntegerNode()) {
-    return new MathText(QString("%1").arg(node->intValue()));
+    long value = node->intValue();
+    if (std::abs(value)<1e6) { return new MathText(QString("%1").arg(value)); }
+    return new MathText(QString("%1").arg(double(value)));
   }
 
   if (node->isRealNode()) {

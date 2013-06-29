@@ -2,15 +2,14 @@
 
 SSETaskConfig::SSETaskConfig()
   : GeneralTaskConfig(), ModelSelectionTaskConfig(), EngineTaskConfig(), ODEIntTaskConfig(),
-    selected_method(UNDEFINED_ANALYSIS), re_model(0), lna_model(0), ios_model(0)
+    _selected_method(UNDEFINED_ANALYSIS), _re_model(0)
 {
   // pass...
 }
 
 SSETaskConfig::SSETaskConfig(const SSETaskConfig &other)
   : GeneralTaskConfig(), ModelSelectionTaskConfig(other), EngineTaskConfig(other),
-    ODEIntTaskConfig(other), selected_method(other.selected_method), re_model(other.re_model),
-    lna_model(other.lna_model), ios_model(other.ios_model)
+    ODEIntTaskConfig(other), _selected_method(other._selected_method), _re_model(other._re_model)
 {
   // Pass...
 }
@@ -21,65 +20,58 @@ SSETaskConfig::setModelDocument(DocumentItem *document)
 {
   ModelSelectionTaskConfig::setModelDocument(document);
 
-  // Construct analysis model depending on the selected method:
-  switch (selected_method) {
-  case RE_ANALYSIS:
-    this->re_model = new iNA::Models::REmodel(document->getModel());
-    this->lna_model = 0;
-    this->ios_model = 0;
-    break;
+  this->_re_model = new iNA::Models::ConservationAnalysis(document->getModel());
 
-  case LNA_ANALYSIS:
-    this->re_model = 0;
-    this->lna_model = new iNA::Models::LNAmodel(document->getModel());
-    this->ios_model = 0;
-    break;
+//  // Construct analysis model depending on the selected method:
+//  switch (_selected_method) {
+//  case RE_ANALYSIS:
+//    this->_re_model = new iNA::Models::REmodel(document->getModel());
+//    this->_lna_model = 0;
+//    this->_ios_model = 0;
+//    break;
 
-  case IOS_ANALYSIS:
-    this->re_model = 0;
-    this->lna_model = 0;
-    this->ios_model = new iNA::Models::IOSmodel(document->getModel());
-    break;
+//  case LNA_ANALYSIS:
+//    this->_re_model = 0;
+//    this->_lna_model = new iNA::Models::LNAmodel(document->getModel());
+//    this->_ios_model = 0;
+//    break;
 
-  case UNDEFINED_ANALYSIS:
-    this->re_model = 0;
-    this->lna_model = 0;
-    this->ios_model = 0;
-    break;
-  }
+//  case IOS_ANALYSIS:
+//    this->_re_model = 0;
+//    this->_lna_model = 0;
+//    this->_ios_model = new iNA::Models::IOSmodel(document->getModel());
+//    break;
+
+//  case UNDEFINED_ANALYSIS:
+//    this->_re_model = 0;
+//    this->_lna_model = 0;
+//    this->_ios_model = 0;
+//    break;
+//  }
 }
 
+void
+SSETaskConfig::setModel(iNA::Ast::Model *m)
+{
+    this->_re_model = m;
+}
 
 iNA::Ast::Model *
 SSETaskConfig::getModel() const
 {
-  switch (selected_method) {
-  case RE_ANALYSIS:
-    return this->re_model;
-
-  case LNA_ANALYSIS:
-    return this->lna_model;
-
-  case IOS_ANALYSIS:
-    return this->ios_model;
-
-  default:
-    break;
-  }
-
-  return 0;
+  return _re_model;
 }
 
 
 void
 SSETaskConfig::setMethod(SSEMethod method)
 {
-  selected_method = method;
+  _selected_method = method;
 }
 
 
 SSETaskConfig::SSEMethod
-SSETaskConfig::getMethod() const
+SSETaskConfig::method() const
 {
-  return selected_method;
+  return _selected_method;
 }

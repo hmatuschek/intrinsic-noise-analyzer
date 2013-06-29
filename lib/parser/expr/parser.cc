@@ -30,7 +30,7 @@ ScopeContext::resolve(const std::string &name)
 
 
 std::string
-ScopeContext::identifier(GiNaC::symbol symbol)
+ScopeContext::identifier(GiNaC::symbol symbol) const
 {
   return _scope->getVariable(symbol)->getIdentifier();
 }
@@ -64,9 +64,9 @@ TableContext::resolve(const std::string &identifier)
 }
 
 std::string
-TableContext::identifier(GiNaC::symbol symbol)
+TableContext::identifier(GiNaC::symbol symbol) const
 {
-  for (std::map<std::string, GiNaC::symbol>::iterator item=_symbol_table.begin();
+  for (std::map<std::string, GiNaC::symbol>::const_iterator item=_symbol_table.begin();
        item != _symbol_table.end(); item++)
   {
     if (item->second == symbol) {
@@ -142,7 +142,7 @@ Parser::Expr::serializeExpression(
 
 void
 Parser::Expr::serializeExpression(
-    GiNaC::ex expression, std::ostream &stream, Context &ctx, SerializationType stategy)
+    GiNaC::ex expression, std::ostream &stream, const Context &ctx, SerializationType stategy)
 {
   // First, create IR from expression
   SmartPtr<Node> node = Node::fromExpression(expression);

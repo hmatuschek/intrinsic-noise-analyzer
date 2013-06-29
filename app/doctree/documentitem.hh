@@ -11,6 +11,7 @@
 class TaskItem;
 class ModelItem;
 class AnalysesItem;
+class ReactionsItem;
 
 
 /**
@@ -61,6 +62,10 @@ public:
   iNA::Ast::Model &getModel();
   /** Returns the @c Ast::Model instance associated with this document. */
   const iNA::Ast::Model &getModel() const;
+
+  AnalysesItem *analysesItem();
+  ReactionsItem *reactionsItem();
+  size_t numAnalyses() const;
 
   /** Adds a task to the document.
    * The task will be shown as an analysis of the model. */

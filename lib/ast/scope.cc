@@ -103,6 +103,7 @@ Scope::Scope(Scope *parent, bool is_closed)
 
 Scope::~Scope()
 {
+  _symbol_table.clear();
   // Iterate over all definitions and free them:
   for(std::map<std::string, Definition *>::iterator iter = this->_definitions.begin();
       iter != this->_definitions.end(); iter++)
@@ -174,12 +175,17 @@ Scope::addDefinition(Definition *def)
   // Check if the if there is a definition with the same identifier:
   std::map<std::string, Definition *>::iterator item;
   if (this->_definitions.end() != (item = this->_definitions.find(def->getIdentifier()))) {
-    delete item->second;
-    item->second = def;
-  } else {
-    // Store definition in table
-    this->_definitions[def->getIdentifier()] = def;
+    SymbolError err;
+    err << "Can not add definition " << def->getIdentifier()
+        << " to scope: There is another definition with the same identifier!";
+    throw err;
+    // Ok, there was this but actually we should throw an exception!
+    // delete item->second;
+    // item->second = def;
   }
+
+  // Store definition in table
+  this->_definitions[def->getIdentifier()] = def;
 
   Scope *scope = 0;
   if (0 != (scope = dynamic_cast<Scope *>(def))) {

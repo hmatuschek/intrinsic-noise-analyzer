@@ -1,7 +1,7 @@
 #ifndef __INA_TRAFO_ASSIGNMENTRULEINLINER_HH__
 #define __INA_TRAFO_ASSIGNMENTRULEINLINER_HH__
 
-#include <ast/ast.hh>
+#include "../ast/ast.hh"
 #include "filterflags.hh"
 #include "substitution.hh"
 

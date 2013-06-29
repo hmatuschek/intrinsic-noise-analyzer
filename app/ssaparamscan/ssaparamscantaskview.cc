@@ -7,12 +7,17 @@
 #include <QFile>
 #include <QMessageBox>
 
-#include "../models/application.hh"
-#include "../doctree/plotitem.hh"
-#include "../views/genericplotdialog.hh"
-#include "ssaparamscanplot.hh"
-#include "../views/speciesselectiondialog.hh"
+#include <fstream>
+#include "utils/matexport.hh"
 
+#include "ssaparamscanplot.hh"
+#include "ssaparamscantask.hh"
+#include "../models/application.hh"
+#include "../doctree/documenttree.hh"
+#include "../doctree/plotitem.hh"
+#include "../views/speciesselectiondialog.hh"
+#include "../plot/canvas.hh"
+#include "../plot/plotconfigdialog.hh"
 
 
 /* ********************************************************************************************* *
@@ -89,33 +94,31 @@ void
 SSAParamScanResultWidget::plotButtonPressed()
 {
 
-  // Get the task config
-  const SSAParamScanTask::Config &config = paramscan_task_wrapper->getParamScanTask()->getConfig();
+  // Get the task & config
+  SSAParamScanTask *task = this->paramscan_task_wrapper->getParamScanTask();
+  const SSAParamScanTask::Config &config = task->getConfig();
 
   // Ask user for species to plot.
   SpeciesSelectionDialog dialog(config.getModel());
   dialog.setWindowTitle(tr("Parameter scan quick plot"));
   dialog.setTitle(tr("Select the species to plot."));
   if (QDialog::Accepted != dialog.exec()) { return; }
-  QStringList selected_species = dialog.getSelectedSpecies();
+  QStringList selected_species = dialog.selectedSpecies();
 
   // Add SSA variance plot
   Application::getApp()->docTree()->addPlot(
-            this->paramscan_task_wrapper,
-            new PlotItem(
-              new SSAParameterScanPlot(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
+        this->paramscan_task_wrapper,
+        new PlotItem(createSSAParameterScanPlotConfig(selected_species, task)));
 
   // Add SSA CV plot
   Application::getApp()->docTree()->addPlot(
-            this->paramscan_task_wrapper,
-            new PlotItem(
-              new SSAParameterScanCVPlot(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
+        this->paramscan_task_wrapper,
+        new PlotItem(createSSAParameterScanCVPlotConfig(selected_species, task)));
 
   // Add SSA Fano plot
   Application::getApp()->docTree()->addPlot(
-            this->paramscan_task_wrapper,
-            new PlotItem(
-              new SSAParameterScanFanoPlot(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
+        this->paramscan_task_wrapper,
+        new PlotItem(createSSAParameterScanFanoPlotConfig(selected_species, task)));
 
 
 }
@@ -124,52 +127,64 @@ void
 SSAParamScanResultWidget::customPlotButtonPressed()
 {
   // Show dialog
-  GenericPlotDialog dialog(&this->paramscan_task_wrapper->getParamScanTask()->getParameterScan());
-  if (QDialog::Rejected == dialog.exec()) { return; }
-
-  // Create plot figure with labels.
-  Plot::Figure *figure = new Plot::Figure(dialog.figureTitle());
-  figure->getAxis()->setXLabel(dialog.xLabel());
-  figure->getAxis()->setYLabel(dialog.yLabel());
-
-  // Iterate over all graphs of the configured plot:
-  for (size_t i=0; i<dialog.numGraphs(); i++) {
-    Plot::Graph *graph = dialog.graph(i).create(figure->getStyle(i));
-    figure->getAxis()->addGraph(graph);
-    figure->addToLegend(dialog.graph(i).label(), graph);
-  }
+  Plot::PlotConfig *config = new Plot::PlotConfig(
+        this->paramscan_task_wrapper->getParamScanTask()->getParameterScan());
+  Plot::PlotConfigDialog dialog(config);
+  if (QDialog::Accepted != dialog.exec()) { delete config; return; }
 
   // Add timeseries plot:
-  Application::getApp()->docTree()->addPlot(this->paramscan_task_wrapper, new PlotItem(figure));
+  Application::getApp()->docTree()->addPlot(this->paramscan_task_wrapper, new PlotItem(config));
 }
 
 void
 SSAParamScanResultWidget::saveButtonPressed()
 {
+  QString selectedFilter;
+  QString filename = QFileDialog::getSaveFileName(
+        this, tr("Save results in ..."), "",
+        tr("Text Files (*.txt *.csv);;Matlab 5 Files (*.mat)"), &selectedFilter);
+  if ("" == filename) { return; }
 
-    QString filename = QFileDialog::getSaveFileName(
-          this, tr("Save as text..."), "", tr("Text Files (*.txt *.csv)"));
-
-    if ("" == filename)
-    {
-      return;
-    }
-
-    QFile file(filename);
-
-    if (!file.open(QIODevice::WriteOnly| QIODevice::Text))
-    {
-      QMessageBox box;
-      box.setWindowTitle(tr("Can not open file"));
-      box.setText(tr("Can not open file %1 for writing").arg(filename));
-      box.exec();
-    }
-
-    this->paramscan_task_wrapper->getParamScanTask()->getParameterScan().saveAsText(file);
-    file.close();
-
+  if (tr("Text Files (*.txt *.csv)") == selectedFilter) {
+    saveAsCSV(filename);
+  } else if (tr("Matlab 5 Files (*.mat)") == selectedFilter) {
+    saveAsMAT(filename);
+  } else {
+    QMessageBox::critical(0, tr("Can not save results to file."),
+                          tr("Can not save results to file %1: Unknown format %2").arg(
+                            filename, selectedFilter));
+  }
 }
 
+void
+SSAParamScanResultWidget::saveAsCSV(const QString &filename) {
+  QFile file(filename);
+  if (!file.open(QIODevice::WriteOnly| QIODevice::Text)) {
+    QMessageBox::critical(0, tr("Can not open file"),
+                          tr("Can not open file %1 for writing").arg(filename));
+    return;
+  }
+
+  this->paramscan_task_wrapper->getParamScanTask()->getParameterScan().saveAsText(file);
+  file.close();
+}
+
+void
+SSAParamScanResultWidget::saveAsMAT(const QString &filename) {
+  std::fstream file(filename.toLocal8Bit().constData(), std::fstream::out|std::fstream::binary);
+  if (! file.is_open()) {
+    QMessageBox::critical(0, tr("Can not open file"),
+                          tr("Can not open file %1 for writing").arg(filename));
+    return;
+  }
+
+  // Store data as matrix in MAT file:
+  iNA::Utils::MatFile mat_file;
+  mat_file.add("SSA_param_scan",
+               paramscan_task_wrapper->getParamScanTask()->getParameterScan().matrix());
+  mat_file.serialize(file);
+  file.close();
+}
 
 
 
@@ -181,6 +196,8 @@ SSAParamScanPreviewWidget::SSAParamScanPreviewWidget(SSAParamScanTaskWrapper *ta
 {
   this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
   this->setBackgroundRole(QPalette::Window);
+
+  SSAParamScanTask *task = dynamic_cast<SSAParamScanTask *>(task_wrapper->getTask());
 
   // Preview
   _plot_canvas = new Plot::Canvas();
@@ -196,34 +213,12 @@ SSAParamScanPreviewWidget::SSAParamScanPreviewWidget(SSAParamScanTaskWrapper *ta
   _iteration_label = new QLabel("");
   _iteration_label->setTextFormat(Qt::LogText);
   // List of species
-  _species_list = new QListWidget();
+  _species_list = new SpeciesSelectionWidget(task->getConfig().getModel());
+  _species_list->selectAllSpecies();
   _species_list->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
-  // Button to select species
-  QPushButton *selection_button = new QPushButton("Select species");
-  QMenu *selection_menu = new QMenu();
-  selection_menu->addAction(tr("Select all species"), this, SLOT(onSelectAllSpecies()));
-  selection_menu->addAction(tr("Unselect all species"), this, SLOT(onSelectNoSpecies()));
-  selection_menu->addAction(tr("Invert selection"), this, SLOT(onInvertSelection()));
-  selection_button->setMenu(selection_menu);
   // Button to stop simulation
   QPushButton *done_button = new QPushButton(tr("Done"));
   QPushButton *reset_button = new QPushButton(tr("Reset Statistics"));
-
-  // Populate species list
-  SSAParamScanTask *task = dynamic_cast<SSAParamScanTask *>(task_wrapper->getTask());
-  for (size_t i=0; i<task->getConfig().getModel()->numSpecies(); i++) {
-    // Get name & id
-    iNA::Ast::Species *species = task->getConfig().getModel()->getSpecies(i);
-    QString id   = species->getIdentifier().c_str();
-    QString name = id;
-    if (species->hasName()) { name = species->getName().c_str(); }
-    // Assemble item
-    QListWidgetItem *item = new QListWidgetItem(name, _species_list);
-    item->setData(Qt::UserRole, id);
-    item->setCheckState(Qt::Checked);
-    item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable);
-    _species_list->addItem(item);
-  }
 
   // Assemble layout
   QHBoxLayout *layout = new QHBoxLayout();
@@ -234,7 +229,6 @@ SSAParamScanPreviewWidget::SSAParamScanPreviewWidget(SSAParamScanTaskWrapper *ta
   plot_layout->addWidget(_plot_canvas, 1);
   plot_layout->addLayout(plot_header);
   QVBoxLayout *species_list_layout = new QVBoxLayout();
-  species_list_layout->addWidget(selection_button, 0);
   species_list_layout->addWidget(_species_list, 1);
   species_list_layout->addWidget(reset_button);
   species_list_layout->addWidget(done_button);
@@ -243,8 +237,7 @@ SSAParamScanPreviewWidget::SSAParamScanPreviewWidget(SSAParamScanTaskWrapper *ta
   setLayout(layout);
 
   // Connect some signals
-  QObject::connect(_species_list, SIGNAL(itemChanged(QListWidgetItem*)),
-                   this, SLOT(onItemChanged(QListWidgetItem*)));
+  QObject::connect(_species_list, SIGNAL(selectionChanged()), this, SLOT(onScheduleUpdatePlot()));
   QObject::connect(done_button, SIGNAL(clicked()), this, SLOT(onDone()));
   QObject::connect(reset_button, SIGNAL(clicked()), this, SLOT(onReset()));
   QObject::connect(task, SIGNAL(stepPerformed()), this, SLOT(onScheduleUpdatePlot()));
@@ -252,13 +245,6 @@ SSAParamScanPreviewWidget::SSAParamScanPreviewWidget(SSAParamScanTaskWrapper *ta
 
   // update plot...
   updatePlot();
-}
-
-
-void
-SSAParamScanPreviewWidget::onItemChanged(QListWidgetItem *item)
-{
-  onScheduleUpdatePlot();
 }
 
 
@@ -276,15 +262,7 @@ void
 SSAParamScanPreviewWidget::updatePlot()
 {
   // Get selected species list
-  QStringList selected_species;
-  for (int i=0; i<_species_list->count(); i++) {
-    QListWidgetItem *item = _species_list->item(i);
-    if (Qt::Checked == item->checkState()) {
-      selected_species.append(item->data(Qt::UserRole).toString());
-    }
-  }
-
-  // Get task instance...
+  QStringList selected_species = _species_list->selectedSpecies();
   SSAParamScanTask *task = dynamic_cast<SSAParamScanTask *>(_task_item->getTask());
 
   // Update label:
@@ -299,12 +277,12 @@ SSAParamScanPreviewWidget::updatePlot()
   // Update plot
   switch(_plottype)
   {
-      case CONCENTRATION_PLOT:
-        _plot_canvas->setPlot(new SSAParameterScanPlot(selected_species, task)); break;
-      case FANO_PLOT:
-        _plot_canvas->setPlot(new SSAParameterScanFanoPlot(selected_species, task)); break;
-      case COEFVAR_PLOT:
-        _plot_canvas->setPlot(new SSAParameterScanCVPlot(selected_species, task)); break;
+  case CONCENTRATION_PLOT:
+    _plot_canvas->setPlot(createSSAParameterScanPlot(selected_species, task)); break;
+  case FANO_PLOT:
+    _plot_canvas->setPlot(createSSAParameterScanFanoPlot(selected_species, task)); break;
+  case COEFVAR_PLOT:
+    _plot_canvas->setPlot(createSSAParameterScanCVPlot(selected_species, task)); break;
   }
 
 }
@@ -322,36 +300,6 @@ SSAParamScanPreviewWidget::onReset()
 {
   SSAParamScanTask *task = dynamic_cast<SSAParamScanTask *>(_task_item->getTask());
   task->resetStatistics();
-}
-
-void
-SSAParamScanPreviewWidget::onSelectAllSpecies()
-{
-  for (int i=0; i<_species_list->count(); i++) {
-    QListWidgetItem *item = _species_list->item(i);
-    item->setCheckState(Qt::Checked);
-  }
-}
-
-void
-SSAParamScanPreviewWidget::onSelectNoSpecies()
-{
-  for (int i=0; i<_species_list->count(); i++) {
-    QListWidgetItem *item = _species_list->item(i);
-    item->setCheckState(Qt::Unchecked);
-  }
-}
-
-void
-SSAParamScanPreviewWidget::onInvertSelection()
-{
-  for (int i=0; i<_species_list->count(); i++) {
-    QListWidgetItem *item =_species_list->item(i);
-    if (Qt::Checked == item->checkState())
-      item->setCheckState(Qt::Unchecked);
-    else
-      item->setCheckState(Qt::Checked);
-  }
 }
 
 void

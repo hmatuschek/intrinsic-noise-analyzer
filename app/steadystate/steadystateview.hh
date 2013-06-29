@@ -13,6 +13,7 @@
 #include "../views/taskview.hh"
 
 
+/** Implements the taskview interface for the SteadyStateTask. */
 class SteadyStateView : public TaskView {
 public:
   explicit SteadyStateView(SteadyStateTaskWrapper *task_item, QWidget *parent=0);
@@ -22,14 +23,10 @@ protected:
 };
 
 
-
+/** Implements the actual result view. */
 class SteadyStateResultWidget : public QWidget
 {
   Q_OBJECT
-
-protected:
-  SteadyStateTaskWrapper *ss_task_wrapper;
-
 
 public:
   explicit SteadyStateResultWidget(SteadyStateTaskWrapper *task_wrapper, QWidget *parent = 0);
@@ -40,9 +37,14 @@ private slots:
   void saveSpectrum();
   void taskStateChanged();
   void saveData();
+  void saveAsCSV(const QString &filename);
+  void saveAsMAT(const QString &filename);
 
 private:
   void setValues();
+
+protected:
+  SteadyStateTaskWrapper *ss_task_wrapper;
 
 private:
   QLabel       *state_label;

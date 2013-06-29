@@ -6,23 +6,23 @@ using namespace iNA::Models;
 
 
 
-ConstantStoichiometryMixin::ConstantStoichiometryMixin(BaseModel &base)
-  : reactants_stoichiometry(base.numSpecies(), base.numReactions()),
-    products_stoichiometry(base.numSpecies(), base.numReactions()),
-    modifier_stoichiometry(base.numSpecies(), base.numReactions())
+ConstantStoichiometryMixin::ConstantStoichiometryMixin(const Ast::Model &model)
+  : reactants_stoichiometry(model.numSpecies(), model.numReactions()),
+    products_stoichiometry(model.numSpecies(), model.numReactions()),
+    modifier_stoichiometry(model.numSpecies(), model.numReactions())
 {
   /*
    * Assemble stoichiometric matrices and check if the entries are constant:
    */
-  for (size_t i=0; i<base.numSpecies(); i++)
+  for (size_t i=0; i<model.numSpecies(); i++)
   {
-    for (size_t j=0; j<base.numReactions(); j++)
+    for (size_t j=0; j<model.numReactions(); j++)
     {
-      Ast::Reaction *reac = base.reactions[j];
-      GiNaC::symbol spec = base.species[i];
+      Ast::Reaction *reac = model.getReaction(j);
+      GiNaC::symbol spec = model.getSpecies(i)->getSymbol();
 
       // If the reaction has the i-th species as a product but the species is not constant
-      if (reac->hasProduct(spec) && !base.getSpecies(i)->isConst())
+      if (reac->hasProduct(spec) && !model.getSpecies(i)->isConst())
       {
         GiNaC::ex stoi = reac->getProductStoichiometry(spec);
 
@@ -35,7 +35,7 @@ ConstantStoichiometryMixin::ConstantStoichiometryMixin(BaseModel &base)
           throw err;
         }
 
-        this->products_stoichiometry(i,j) = GiNaC::to_double(GiNaC::ex_to<GiNaC::numeric>(stoi));
+        this->products_stoichiometry(i,j) = Eigen::ex2double(stoi);
       }
       else
       {
@@ -43,7 +43,7 @@ ConstantStoichiometryMixin::ConstantStoichiometryMixin(BaseModel &base)
       }
 
       // Assemble reactants stoichiometry:
-      if (reac->hasReactant(spec) && !base.getSpecies(i)->isConst())
+      if (reac->hasReactant(spec) && !model.getSpecies(i)->isConst())
       {
         GiNaC::ex stoi = reac->getReactantStoichiometry(spec);
 
@@ -55,7 +55,7 @@ ConstantStoichiometryMixin::ConstantStoichiometryMixin(BaseModel &base)
               << "It is: " << stoi;
           throw err;
         }
-        this->reactants_stoichiometry(i,j) = GiNaC::to_double(GiNaC::ex_to<GiNaC::numeric>(stoi));
+        this->reactants_stoichiometry(i,j) = Eigen::ex2double(stoi);
       }
       else
       {

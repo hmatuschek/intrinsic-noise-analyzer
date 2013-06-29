@@ -23,6 +23,14 @@ Table::Table(const Eigen::MatrixXd &data, QObject *parent)
   // Pass...
 }
 
+Table::Table(const Table &other)
+  : QObject(), header(other.header), data(other.data),
+    current_insert_index(other.current_insert_index)
+{
+  // pass...
+}
+
+
 void
 Table::resize(size_t columns,size_t rows)
 {

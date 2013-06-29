@@ -33,6 +33,8 @@ private slots:
 private:
   /** Holds a weak reference to the list of reactions. */
   ReactionList *_reactions;
+  /** Holds a weak reference to the ReactionsItem instance. */
+  ReactionsItem *_reactions_item;
   /** The list of reactions. */
   QTableView *_reactionList;
   /** Shows the "new reaction" editor. */

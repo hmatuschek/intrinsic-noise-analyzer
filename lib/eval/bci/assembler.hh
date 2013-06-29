@@ -1,7 +1,7 @@
 #ifndef __INA_EVAL_BCI_ASSEMBLER_HH__
 #define __INA_EVAL_BCI_ASSEMBLER_HH__
 
-#include "ast/ast.hh"
+#include "../../ast/ast.hh"
 #include "code.hh"
 
 

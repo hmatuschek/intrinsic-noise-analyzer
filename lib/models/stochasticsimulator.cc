@@ -2,17 +2,17 @@
 #include "trafo/constantfolder.hh"
 #include "utils/logger.hh"
 
-
 using namespace iNA;
 using namespace iNA::Models;
 
-StochasticSimulator::StochasticSimulator(const Ast::Model &model, int size, int seed, size_t threads)
+StochasticSimulator::StochasticSimulator(const Ast::Model &model, int size, int seed, size_t threads,
+                                         const std::vector<const GiNaC::symbol *> &parameters)
     : BaseModel(model),
       ParticleNumbersMixin((BaseModel &)(*this)),
       ReasonableModelMixin((BaseModel &)(*this)),
       num_threads(threads),
       rand(1),
-      observationMatrix(size,numSpecies()),
+      observationMatrix(size,numSpecies()+parameters.size()),
       ics(numSpecies()), Omega(numSpecies()), ensembleSize(size)
 
 {
@@ -31,6 +31,10 @@ StochasticSimulator::StochasticSimulator(const Ast::Model &model, int size, int 
   for(size_t i=0; i<this->numSpecies(); i++)
      this->stateIndex.insert(std::make_pair(this->getSpecies(i)->getSymbol(),i));
 
+  // add parameters
+  for(size_t i=0; i<parameters.size(); i++)
+    this->stateIndex.insert(std::make_pair(*(parameters[i]),this->numSpecies()+i));
+
   // fold all constants
   Trafo::ConstantFolder constants(*this);
   for(size_t i=0;i<this->propensities.size();i++)
@@ -41,17 +45,21 @@ StochasticSimulator::StochasticSimulator(const Ast::Model &model, int size, int 
 
   for(size_t i=0; i<species.size();i++)
   {
-     ics(i)=evICs.evaluate(this->species[i]);
+     ics(i) = evICs.evaluate(this->species[i]);
      if(ics(i)>0.)
      {
-        //
-        ics(i)=std::floor( evICs.evaluate(this->species[i]) + 0.5 );
-        if(ics(i)==0.)
-        {
+        /// H: I guess @c round will do the trick? P: Same thing! OK, I can avoid reevaluate.
+        ics(i) = std::floor( ics(i) + 0.5 );
+        /// H: Is ICS==0 not a valid value? P: Yes, but ics>0 is asserted here.
+        /// H: If you want to check if ics is integer P: I want to make it an integer here. But clearly positive IC evaluating to zero integer is a mistake.
+        /// H: Ok, why not std::ceil() it and send a log message that the IC has be rounded up if
+        ///    it was not an integer in the first place?
+        ///    I simply did not get why every fraction < 0.5 is invalid and every > 0.5 is ok, even
+        ///    w/o mentioning that rounding has taken place?
+        if(ics(i)==0.) {
             InternalError err;
-            err << "Could not initiate Stochastic Simulation since initial particle number of species <i>"
-                << (this->getSpecies(i)->hasName() ? this->getSpecies(i)->getName() : this->getSpecies(i)->getIdentifier())
-                << "</i> evaluated to zero.";
+            err << "Cannot initiate Stochastic Simulation since initial particle number of species <i>"
+                << this->getSpecies(i)->getLabel() << "</i> evaluated to zero.";
             throw err;
             throw InternalError();
         }
@@ -59,36 +67,52 @@ StochasticSimulator::StochasticSimulator(const Ast::Model &model, int size, int 
      else if(ics(i)<0.)
      {
          InternalError err;
-         err << "Could not initiate Stochastic Simulation since initial particle number of species <i>"
-             << (this->getSpecies(i)->hasName() ? this->getSpecies(i)->getName() : this->getSpecies(i)->getIdentifier())
-             << "</i> evaluated to a value < 0.";
+         err << "Cannot initiate Stochastic Simulation since initial particle number of species <i>"
+             << this->getSpecies(i)->getLabel() << "</i> evaluated to a value < 0.";
          throw err;
          throw InternalError();
      }
 
      this->Omega(i)=evICs.evaluate(this->volumes(i));
+
+     if (this->Omega(i) <= 0) {
+         InternalError err;
+         err << "Cannot initiate Stochastic Simulation since compartment <i>"
+             << this->getSpecies(i)->getCompartment()->getLabel()
+             << "</i> evaluated to non-positive value.";
+         throw err;
+         throw InternalError();
+     }
   }
 
   Utils::Message msg = LOG_MESSAGE(Utils::Message::INFO);
   msg << "SSA initial copy numbers: ";
-  for(size_t i=0; i<numSpecies(); i++)
-  {
-      if(this->getSpecies(i)->hasName())
-        msg<<this->getSpecies(i)->getName();
-      else
-        msg<<this->getSpecies(i)->getIdentifier();
-
-      msg<<"="<<ics(i)<<" ";
+  for(size_t i=0; i<numSpecies(); i++) {
+    msg << this->getSpecies(i)->getLabel()
+        << "=" << ics(i) <<" ";
   }
   Utils::Logger::get().log(msg);
 
   // initialize ensemble
-  for(int i=0; i<this->ensembleSize;i++)
-  {
-     this->observationMatrix.row(i)=ics;
+  for(int i=0; i<this->ensembleSize;i++) {
+    this->observationMatrix.row(i).head(this->numSpecies()) = ics;
   }
 
 }
+
+void
+StochasticSimulator::reset()
+
+{
+
+    // initialize ensemble
+    for(int i=0; i<this->ensembleSize;i++)
+    {
+       this->observationMatrix.row(i).head(this->numSpecies()) = ics;
+    }
+
+}
+
 
 
 StochasticSimulator::~StochasticSimulator()
@@ -116,7 +140,7 @@ StochasticSimulator::evaluate(const Eigen::VectorXd &populationVec, Eigen::Vecto
           << ": Propensity not reduced to value. Minimal expression: " << value;
       throw err;
     }
-    propensities(i) = GiNaC::ex_to<GiNaC::numeric>(value).to_double();
+    propensities(i) = Eigen::ex2double(value);
   }
 }
 
@@ -135,19 +159,19 @@ StochasticSimulator::getState() const
 
 {
 
-    return (observationMatrix*this->Omega.asDiagonal().inverse());
+    return (observationMatrix.leftCols(this->numSpecies())*this->Omega.asDiagonal().inverse());
 
 }
 
 
 void
-StochasticSimulator::getHistogram(size_t speciesId,std::map<double,double> &hist)
+StochasticSimulator::getHistogram(size_t speciesIdx,std::map<double,double> &hist)
 {
 
     //hist.clear();
     for(int sid=0; sid<observationMatrix.rows(); sid++)
     {
-        double val = observationMatrix(sid,speciesId);
+        double val = observationMatrix(sid,speciesIdx);
         std::map<double,double>::iterator it = hist.find(val);
         if(it==hist.end())
             hist.insert(std::make_pair<double,double>(val,1.));
@@ -157,10 +181,10 @@ StochasticSimulator::getHistogram(size_t speciesId,std::map<double,double> &hist
 }
 
 void
-StochasticSimulator::getHistogram(size_t speciesId,Histogram<double> &hist)
+StochasticSimulator::getHistogram(size_t specIdx, Histogram<double> &hist)
 {
     // Divide by volume and add to histogram.
-    hist.insert(observationMatrix.col(speciesId) / this->Omega(speciesId));
+    hist.insert(observationMatrix.col(specIdx) / this->Omega(specIdx));
 }
 
 void
@@ -174,11 +198,10 @@ StochasticSimulator::stats(Eigen::VectorXd &mean, Eigen::MatrixXd &covariance, E
 
   // calculate mean numbers
   for(int ids=0;ids<this->ensembleSize;ids++){
-    mean += this->observationMatrix.row(ids);
+    mean += this->observationMatrix.row(ids).head(this->numSpecies());
   }
 
-
-  mean /= this->ensembleSize;
+  mean /= double(this->ensembleSize);
 
   int idx=0;
 
@@ -235,6 +258,13 @@ StochasticSimulator::stats(Eigen::VectorXd &mean, Eigen::MatrixXd &covariance, E
   }
 
 }
+
+Eigen::MatrixXd &
+StochasticSimulator::getObservationMatrix()
+{
+  return this->observationMatrix;
+}
+
 
 void
 StochasticSimulator::fluxStatistics(Eigen::VectorXd &mean, Eigen::MatrixXd &covariance)

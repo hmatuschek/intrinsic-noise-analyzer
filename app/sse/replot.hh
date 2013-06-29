@@ -1,19 +1,12 @@
 #ifndef __LNA_TIMESERIES_PLOT_HH__
 #define __LNA_TIMESERIES_PLOT_HH__
+#include <QStringList>
 
-#include "../plot/plot.hh"
-#include "../plot/graph.hh"
-#include "../models/timeseries.hh"
-#include "../views/varianceplot.hh"
-#include "retask.hh"
+// Forward declarations:
+namespace Plot { class PlotConfig; }
+class RETask;
 
-class RETimeSeriesPlot : public LinePlot
-{
-  Q_OBJECT
-
-public:
-  explicit RETimeSeriesPlot(QList<QString> &selected_species, RETask *data, QObject *parent=0);
-};
-
+/** Assembles the configuration of a RE Timeseries plot and creates the figure from it. */
+Plot::PlotConfig *createRETimeSeriesPlotConfig(QStringList &selected_species, RETask *task);
 
 #endif // LINESGRAPHADAPTOR_HH

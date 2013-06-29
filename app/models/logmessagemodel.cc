@@ -2,7 +2,7 @@
 #include <QDateTime>
 #include <QTextStream>
 #include <QBrush>
-
+#include <QFileInfo>
 
 
 MessageWrapper::MessageWrapper(const iNA::Utils::Message &message, QObject *parent)
@@ -12,32 +12,27 @@ MessageWrapper::MessageWrapper(const iNA::Utils::Message &message, QObject *pare
 }
 
 QString
-MessageWrapper::getText() const
-{
+MessageWrapper::getText() const {
   return QString::fromStdString(_message.getText());
 }
 
 QString
-MessageWrapper::getFile() const
-{
+MessageWrapper::getFile() const {
   return QString::fromStdString(_message.getFileName());
 }
 
 size_t
-MessageWrapper::getLine() const
-{
+MessageWrapper::getLine() const {
   return _message.getLevel();
 }
 
 iNA::Utils::Message::Level
-MessageWrapper::getLevel() const
-{
+MessageWrapper::getLevel() const {
   return _message.getLevel();
 }
 
 QDateTime
-MessageWrapper::getTime() const
-{
+MessageWrapper::getTime() const {
   return QDateTime::fromTime_t(_message.getTime());
 }
 
@@ -98,13 +93,13 @@ LogMessageModel::rowCount(const QModelIndex &parent) const {
 
 int
 LogMessageModel::columnCount(const QModelIndex &parent) const {
-  return 2;
+  return 3;
 }
 
 QVariant
 LogMessageModel::data(const QModelIndex &index, int role) const {
   if (index.row() >= _messages.size()) { return QVariant(); }
-  if (index.column() >= 3) { return QVariant(); }
+  if (index.column() >= 4) { return QVariant(); }
 
   // Select color by level:
   if (role == Qt::ForegroundRole) {
@@ -129,6 +124,8 @@ LogMessageModel::data(const QModelIndex &index, int role) const {
     if (0 == index.column()) {
       return QDateTime::fromTime_t(_messages.at(index.row()).getTime()).toString();
     } else if (1 == index.column()) {
+      return QFileInfo(QString::fromStdString(_messages.at(index.row()).getFileName())).fileName();
+    } else if (2 == index.column()) {
       return QString(_messages.at(index.row()).getText().c_str());
     }
   }
@@ -144,7 +141,8 @@ LogMessageModel::headerData(int section, Qt::Orientation orientation, int role) 
 
   switch (section) {
   case 0: return tr("time");
-  case 1: return tr("message");
+  case 1: return tr("file");
+  case 2: return tr("message");
   default: break;
   }
 

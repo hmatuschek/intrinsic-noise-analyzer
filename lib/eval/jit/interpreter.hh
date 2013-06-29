@@ -2,7 +2,7 @@
 #define __FLUC_EVALUATE_LLVM_INTERPRETER_HH__
 
 #include "code.hh"
-#include "exception.hh"
+#include "../../exception.hh"
 
 
 

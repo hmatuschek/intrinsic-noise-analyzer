@@ -28,6 +28,8 @@ protected:
 private slots:
   /** Callback that inserts the completion at the current cursor position. */
   void insertCompletion(const QString &completion);
+  /** Gets called once the editing is finished, hides the completer if visible. */
+  void onEditingFinished();
 
 private:
   /** Holds the auto-completion. */

@@ -1,11 +1,10 @@
-#ifndef __INA_MODELS_OPTIMIZEDSSA_H
-#define __INA_MODELS_OPTIMIZEDSSA_H
+#ifndef __INA_MODELS_OPTIMIZEDSSA_HH
+#define __INA_MODELS_OPTIMIZEDSSA_HH
 
 #include "stochasticsimulator.hh"
 #include "constantstoichiometrymixin.hh"
-#include "extensivespeciesmixin.hh"
-#include "eval/bci/engine.hh"
-#include "openmp.hh"
+#include "../eval/bci/engine.hh"
+#include "../openmp.hh"
 
 
 #define EIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET
@@ -28,6 +27,7 @@ class GenericOptimizedSSA :
   public StochasticSimulator,
   public ConstantStoichiometryMixin
 {
+
 protected:
   /** Holds the dependency graph in terms of bytecode. **/
   std::vector<typename Engine::Code *> byte_code;
@@ -50,8 +50,9 @@ public:
    * @param num_threads Specifies the number of threads to use.
    */
   GenericOptimizedSSA(const Ast::Model &model, int ensembleSize, int seed,
-               size_t opt_level=0, size_t num_threads=OpenMP::getMaxThreads())
-    : StochasticSimulator(model, ensembleSize, seed, num_threads),
+               size_t opt_level=0, size_t num_threads=OpenMP::getMaxThreads(),
+               const std::vector<const GiNaC::symbol *> params = std::vector<const GiNaC::symbol *>())
+    : StochasticSimulator(model, ensembleSize, seed, num_threads, params),
       ConstantStoichiometryMixin((BaseModel &)(*this)),
       byte_code(this->numReactions()), all_byte_code(),
       sparseStoichiometry(numSpecies(),numReactions()),
@@ -110,7 +111,7 @@ public:
 
 
   /** Destructor, also frees byte-code instances. */
-  ~GenericOptimizedSSA()
+  virtual ~GenericOptimizedSSA()
   {
     for (size_t i=0; i < this->byte_code.size(); i++) {
       delete byte_code[i];
@@ -142,6 +143,7 @@ public:
 #pragma omp parallel for if(this->numThreads()>1) num_threads(this->numThreads()) schedule(dynamic) private(propensitySum,tau,t,reaction)
     for(int sid=0;sid<this->ensembleSize;sid++)
     {
+      //reset time
       t=0;
 
       interpreter[OpenMP::getThreadNum()].setCode(&all_byte_code);
@@ -158,6 +160,10 @@ public:
         } else {
           break;
         }
+
+        // update time
+        t += tau;
+        if(t > step) break;
 
         // select reaction
         double r = this->rand[OpenMP::getThreadNum()].rand()*propensitySum;
@@ -177,10 +183,51 @@ public:
 
         propensitySum = prop[OpenMP::getThreadNum()].sum();
 
-        // update time
-        t += tau;
+
       } //end time step loop
     } // end ensemble loop
+  }
+
+
+  /**
+   * The single reaction stepper for the SSA, very inefficient.
+   */
+  void singleStep(double &t, size_t sid)
+  {
+
+    // Initialization
+    double propensitySum;	        // sum of propensities
+    size_t reaction;			// reaction number selected
+
+    interpreter[OpenMP::getThreadNum()].setCode(&all_byte_code);
+    interpreter[OpenMP::getThreadNum()].run(this->observationMatrix.row(sid), prop[OpenMP::getThreadNum()]);
+
+    // Initialize sum propensities
+    propensitySum = prop[OpenMP::getThreadNum()].sum();
+
+    // Sample time step
+    if(propensitySum > 0) {
+       t += -std::log(this->rand[OpenMP::getThreadNum()].rand()) / propensitySum;
+    } else {
+      return;
+    }
+
+    // Select reaction
+    double r = this->rand[OpenMP::getThreadNum()].rand()*propensitySum;
+    double sum = prop[OpenMP::getThreadNum()](0);
+    reaction = 0;
+    while(sum < r)
+      sum += prop[OpenMP::getThreadNum()](++reaction);
+
+    // Update population of chemical species
+    for (Eigen::SparseMatrix<double>::InnerIterator it(this->sparseStoichiometry,reaction); it; ++it) {
+      this->observationMatrix(sid,it.row())+=it.value();
+    }
+
+    // Update only propensities that are changed in reaction
+    interpreter[OpenMP::getThreadNum()].setCode(byte_code[reaction]);
+    interpreter[OpenMP::getThreadNum()].run(this->observationMatrix.row(sid),prop[OpenMP::getThreadNum()]);
+
   }
 
 private:
@@ -198,4 +245,4 @@ typedef GenericOptimizedSSA< Eval::bci::Engine<Eigen::VectorXd> > OptimizedSSA;
 }
 }
 
-#endif // __FLUC_OPTIMIZEDSSA_H
+#endif // __INA_OPTIMIZEDSSA_HH

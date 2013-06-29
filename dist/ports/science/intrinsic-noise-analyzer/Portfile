@@ -23,36 +23,34 @@ long_description iNA is a computational tool for quantitative analysis of fluctu
 license GPL-2
 
 homepage http://code.google.com/p/intrinsic-noise-analyzer
+master_sites http://intrinsic-noise-analyzer.googlecode.com/files/
 
-master_sites http://intrinsic-noise-analyzer.googlecode.com/files/ \
-             http://dl.dropbox.com/u/17326152/
+checksums md5    b45e3e0b2ac26b2dc6d3025f3b34acea \
+          sha1   359cbb9847b7b0ba6ea9038b97ea70303120818c \
+          rmd160 a441f30ea8d32e0788e00615e531094e011e2895
 
-checksums md5    ba03696db7ac7af1b4123408e476381d \
-          sha1   2d23f1718faf971a75579e63ee3be788d08e4ab4 \
-          rmd160 0a3c169a4d98643e05cb8ce52eb4d9cbdf4f9470
-
-depends_lib  port:libsbml \
-             port:qt4-mac \
-             port:GiNaC \
-             port:llvm-3.2
+depends_lib  	port:libsbml \
+             	port:qt4-mac \
+             	port:GiNaC-gcc
+		port:gcc47
 
 depends_build port:cmake
+
+default_variants    +llvm32
 
 configure.cmd       cmake
 configure.pre_args  -DCMAKE_INSTALL_PREFIX=${prefix}
 configure.args      -DCMAKE_VERBOSE_MAKEFILE=ON \
                     -DCMAKE_COLOR_MAKEFILE=OFF \
-                    -DCMAKE_BUILD_TYPE=Release \
+                    -DCMAKE_BUILD_TYPE=RELEASE \
+                    -DINA_ENABLE_VERSION_CHECK=ON \
+                    -DINA_ENABLE_OPENMP=ON \
                     -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON \
                     -DCMAKE_INSTALL_NAME_DIR=${prefix}/lib \
                     -DCMAKE_SYSTEM_PREFIX_PATH=\"${prefix}\;/usr\" 
 
-configure.args-append ../ina_src
-
-if {${configure.compiler} == "clang"} {
-    configure.compiler llvm-gcc-4.2
-}
-
+configure.args-append	../ina_src
+configure.compiler	macports-gcc-4.7
 
 # Phase modifications
 # Move source into ina_src; configure & build (out-of-source) in ${workpath}
@@ -64,3 +62,35 @@ post-extract {
 post-patch {
     file mkdir ${workpath}/${name}-${version}
 }
+
+variant llvm29 conflicts llvm30 llvm31 llvm32 llvm33 \
+  description {Configure to use LLVM version 2.9} {
+    depends_lib-append		port:llvm-2.9
+    configure.args-append	-DWITH_LLVM_CONFIG=llvm-config-mp-2.9
+}
+
+variant llvm30 conflicts llvm29 llvm31 llvm32 llvm33 \
+  description {Configure to use LLVM version 3.0} {
+    depends_lib-append		port:llvm-3.0
+    configure.args-append	-DWITH_LLVM_CONFIG=llvm-config-mp-3.0
+}
+
+variant llvm31 conflicts llvm29 llvm30 llvm32 llvm33 \
+  description {Configure to use LLVM version 3.1} {
+    depends_lib-append		port:llvm-3.1
+    configure.args-append	-DWITH_LLVM_CONFIG=llvm-config-mp-3.1
+}
+
+variant llvm32 conflicts llvm29 llvm30 llvm31 llvm33 \
+  description {Configure to use LLVM version 3.2} {
+    depends_lib-append		port:llvm-3.2
+    configure.args-append	-DWITH_LLVM_CONFIG=llvm-config-mp-3.2
+}
+
+variant llvm33 conflicts llvm29 llvm30 llvm31 llvm32 \
+  description {Configure to use LLVM version 3.3} {
+    depends_lib-append		port:llvm-3.3
+    configure.args-append	-DWITH_LLVM_CONFIG=llvm-config-mp-3.3
+}
+
+

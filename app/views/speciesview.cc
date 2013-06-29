@@ -36,6 +36,7 @@ SpeciesView::SpeciesView(SpeciesItem *species ,QWidget *parent) :
   _specTable->setModel(_species->species());
   _specTable->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
   _specTable->verticalHeader()->hide();
+  _specTable->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 
   // Register delegates for columns:
   _specTable->setItemDelegateForColumn(1, new PixmapDelegate(_specTable));

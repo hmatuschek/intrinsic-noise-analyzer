@@ -52,14 +52,13 @@ Figure::Figure(const QString &title, QObject *parent) :
         Configuration::getConfig()->getScheme(Configuration::DISPLAY_SCHEME).titleFont());
   MathItem *title_item = TinyTex::parseInlineQuoted(title.toStdString());
   _title = title_item->layout(_math_ctx); _titlesize = title_item->metrics().size();
-  delete title_item; _title->setPos(0,0);
+  delete title_item;
 
   // Construct axis (the area, where the data is plotted).
   _axis = new Axis();
 
   // Construct and hide legend:
   _legend = new Legend();
-  _legend->setPos(0,0);
 
   // Add items to QGraphicsScene:
   addItem(_title);
@@ -96,6 +95,8 @@ Figure::setScheme(Configuration::Scheme scheme)
 void
 Figure::updateAxes()
 {
+  if (! sceneRect().isValid()) { return; }
+
   // Some extra margin:
   double margin_left   = 10;
   double margin_right  = 20;
@@ -107,48 +108,51 @@ Figure::updateAxes()
   margin_top += _titlesize.height() + 10;
 
   // Update effective width and heigth of axes:
-  double effective_width = this->width()-margin_left-margin_right;
-  double effective_height = this->height()-margin_top-margin_bottom;
+  double effective_width = width()-margin_left-margin_right;
+  double effective_height = height()-margin_top-margin_bottom;
 
   // Update Axis:
-  this->_axis->setAxisSize(QSizeF(effective_width, effective_height));
-  this->_axis->setPos(margin_left, margin_top);
+  _axis->setAxisSize(QSizeF(effective_width, effective_height));
+  _axis->setPos(margin_left, margin_top);
 
   // Move title to proper position:
-  if (_titlesize.width() > _axis->getPlotArea().width())
-    _title->setPos(width()/2-_titlesize.width()/2, margin_top);
-  else {
+  if (_titlesize.width() > _axis->getPlotArea().width()) {
+    _title->setPos(width()/2-_titlesize.width()/2, title_y);
+  } else {
     double offset = margin_left + _axis->getPlotArea().x();
     _title->setPos(offset + _axis->getPlotArea().width()/2-_titlesize.width()/2, title_y);
   }
 
+  // Relayout legend:
+  _legend->updateLayout();
+  double legend_width  = _legend->boundingRect().width();
+  double legend_height = _legend->boundingRect().height();
+
   // Update legend position:
-  switch (this->_legend_pos)
+  switch (_legend_pos)
   {
   case TOP_LEFT:
-    this->_legend->setPos(margin_left+10, margin_top+10);
+    _legend->setPos(margin_left+10, margin_top+10);
     break;
 
   case TOP_RIGHT:
-    this->_legend->setPos(margin_left+effective_width-10-this->_legend->boundingRect().width(),
-                          margin_top+10);
+    _legend->setPos(margin_left+effective_width-10-legend_width, margin_top+10);
     break;
 
   case BOTTOM_LEFT:
-    this->_legend->setPos(margin_left+10,
-                          margin_top+effective_height-10-this->_legend->boundingRect().height());
+    _legend->setPos(margin_left+10, margin_top+effective_height-10-legend_height);
     break;
 
   case BOTTOM_RIGHT:
-    this->_legend->setPos(margin_left+effective_width-10-this->_legend->boundingRect().width(),
-                          margin_top+effective_height-10-this->_legend->boundingRect().height());
+    _legend->setPos(margin_left+effective_width-10-legend_width,
+                    margin_top+effective_height-10-legend_height);
     break;
   }
 
   // Update Axis:
-  this->_axis->updatePlotSize();
-  this->_axis->updatePlotRange();
-  this->_axis->forceRedraw();
+  _axis->updatePlotSize();
+  _axis->updatePlotRange();
+  _axis->forceRedraw();
 }
 
 
@@ -180,6 +184,7 @@ void
 Figure::addToLegend(const QString &label, Graph *graph)
 {
   _legend->addGraph(label, graph);
+  updateAxes();
 }
 
 
@@ -263,3 +268,31 @@ Figure::showMeasure(const QPointF &point)
 }
 
 
+
+/* ******************************************************************************************** *
+ * Implementation of ConfiguredPlot
+ * ******************************************************************************************** */
+ConfiguredPlot::ConfiguredPlot(PlotConfig *config, QObject *parent)
+  : Figure("", parent), _config(config)
+{
+  // Set title and lables:
+  setTitle(_config->title());
+  if (_config->hasXLabel()) { setXLabel(_config->xLabel()); }
+  if (_config->hasYLabel()) { setYLabel(_config->yLabel()); }
+
+  // Add graphs:
+  for(PlotConfig::iterator item=_config->begin(); item!=_config->end(); item++) {
+    Graph *graph = (*item)->createGraph();
+    getAxis()->addGraph(graph);
+    if ((*item)->showInLegend()) { addToLegend((*item)->label(), graph); }
+  }
+
+  // set ranges and range policies:
+  this->getAxis()->setXRangePolicy(_config->xRangePolicy());
+  this->getAxis()->setXRange(_config->xRange());
+  this->getAxis()->setYRangePolicy(_config->yRangePolicy());
+  this->getAxis()->setYRange(_config->yRange());
+
+  // Layout figure
+  this->updateAxes();
+}

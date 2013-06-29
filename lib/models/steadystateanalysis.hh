@@ -1,9 +1,9 @@
 #ifndef __INA_MODELS_STEADYSTATEANALYSIS_HH
 #define __INA_MODELS_STEADYSTATEANALYSIS_HH
 
-#include "nlesolve/nlesolve.hh"
+#include "../nlesolve/nlesolve.hh"
 #include "IOSmodel.hh"
-#include "math.hh"
+#include "../math.hh"
 
 namespace iNA {
 namespace Models {
@@ -184,10 +184,12 @@ public:
             subs_table.insert( std::pair<GiNaC::ex,GiNaC::ex>( model.getSSEvar(i), 0 ) );
         for(size_t i=0; i<lnaLength; i++)
         {
-            A(i) = GiNaC::ex_to<GiNaC::numeric>( sseUpdate(i).subs(subs_table) ).to_double();
+            A(i) = GiNaC::ex_to<GiNaC::numeric>(
+                  GiNaC::evalf(sseUpdate(i).subs(subs_table)) ).to_double();
             for(size_t j=0; j<lnaLength; j++)
             {
-               B(i,j) = GiNaC::ex_to<GiNaC::numeric>( sseUpdate(i).diff(model.getSSEvar(j)) ).to_double();
+               B(i,j) = GiNaC::ex_to<GiNaC::numeric>(
+                     GiNaC::evalf(sseUpdate(i).diff(model.getSSEvar(j))) ).to_double();
             }
         }
 
@@ -231,11 +233,12 @@ public:
 
         // collect all the values of constant parameters except variable parameters
         Trafo::ConstantFolder constants(sseModel);
+
         // fold variable parameters first and then all the rest as constant parameters
         Eigen::VectorXex updateVector = constants.apply( sseModel.getUpdateVector() );
-
         InitialConditions context(sseModel);
         updateVector = context.apply(updateVector);
+
 
         // initialize with initial concentrations
         Eigen::VectorXd conc(sseModel.getDimension());
@@ -288,10 +291,12 @@ public:
             subs_table.insert( std::pair<GiNaC::ex,GiNaC::ex>( model.getSSEvar(i), 0 ) );
         for(size_t i=lnaLength; i<sseLength; i++)
         {
-            A(i-lnaLength) = GiNaC::ex_to<GiNaC::numeric>( sseUpdate(i).subs(subs_table) ).to_double();
+            A(i-lnaLength) = GiNaC::ex_to<GiNaC::numeric>(
+                  GiNaC::evalf( sseUpdate(i).subs(subs_table)) ).to_double();
             for(size_t j=lnaLength; j<sseLength; j++)
             {
-               B(i-lnaLength,j-lnaLength) = GiNaC::ex_to<GiNaC::numeric>( sseUpdate(i).diff(model.getSSEvar(j)) ).to_double();
+               B(i-lnaLength,j-lnaLength) = GiNaC::ex_to<GiNaC::numeric>(
+                     GiNaC::evalf( sseUpdate(i).diff(model.getSSEvar(j))) ).to_double();
             }
         }
 

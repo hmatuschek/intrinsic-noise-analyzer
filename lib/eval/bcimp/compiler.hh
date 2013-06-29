@@ -1,13 +1,13 @@
-#ifndef __FLUC_EVALUATE_BCIMP_COMPILER_HH__
-#define __FLUC_EVALUATE_BCIMP_COMPILER_HH__
+#ifndef __INA_EVALUATE_BCIMP_COMPILER_HH__
+#define __INA_EVALUATE_BCIMP_COMPILER_HH__
 
 #include <ginac/ginac.h>
 #include <eigen3/Eigen/Eigen>
 #include <map>
 
 #include "code.hh"
-#include "eval/compilercommon.hh"
-#include "eval/bci/compiler.hh"
+#include "../compilercommon.hh"
+#include "../bci/compiler.hh"
 
 
 namespace iNA {

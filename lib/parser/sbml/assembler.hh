@@ -2,15 +2,15 @@
 #define __FLUC_PARSER_SBML_ASSEMBLER_HH__
 
 #include <sbml/SBMLTypes.h>
-#include "ast/functiondefinition.hh"
-#include "ast/reaction.hh"
-#include "ast/unitdefinition.hh"
-#include "ast/species.hh"
-#include "ast/compartment.hh"
-#include "ast/parameter.hh"
-#include "exception.hh"
-#include "ast/model.hh"
-#include "trafo/variablescaling.hh"
+#include "../../ast/functiondefinition.hh"
+#include "../../ast/reaction.hh"
+#include "../../ast/unitdefinition.hh"
+#include "../../ast/species.hh"
+#include "../../ast/compartment.hh"
+#include "../../ast/parameter.hh"
+#include "../../exception.hh"
+#include "../../ast/model.hh"
+#include "../../trafo/variablescaling.hh"
 
 
 namespace iNA {
@@ -45,7 +45,7 @@ public:
   Ast::Species *resolveSpecies(const std::string &id);
 
   /** Tries to resolve a variable in the current scope, if there is no definition in this scope,
-   * it ties to resolve the variable in the parent scope. */
+   * it tries to resolve the variable in the parent scope. */
   Ast::VariableDefinition *resolveVariable(const std::string &id);
 
   /** Tries to resolve a variable in the given scope. */
@@ -56,7 +56,7 @@ public:
 };
 
 
-// Internal used functions to traverse the SBML tree (libsbml)
+// Forward declaration of internal used functions to traverse the SBML tree (libsbml)
 void __process_model(
     LIBSBML_CPP_NAMESPACE_QUALIFIER Model *model, ParserContext &ctx);
 Ast::FunctionDefinition *__process_function_definition(

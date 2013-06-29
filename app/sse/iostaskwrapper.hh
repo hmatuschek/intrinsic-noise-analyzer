@@ -6,12 +6,12 @@
 #include "iostask.hh"
 
 
-class IOSTaskWrapper : public TaskItem
+class IOSTaskItem : public TaskItem
 {
   Q_OBJECT
 
 public:
-  IOSTaskWrapper(IOSTask *task, QObject *parent=0);
+  IOSTaskItem(IOSTask *task, QObject *parent=0);
 
   IOSTask *getIOSTask();
 

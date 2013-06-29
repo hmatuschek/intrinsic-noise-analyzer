@@ -3,7 +3,7 @@
 
 #include <vector>
 #include "code.hh"
-#include "smartptr.hh"
+#include "../../smartptr.hh"
 
 
 namespace iNA {

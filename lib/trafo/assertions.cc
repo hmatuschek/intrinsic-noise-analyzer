@@ -1,5 +1,5 @@
 #include "assertions.hh"
-#include "exception.hh"
+#include "../exception.hh"
 
 using namespace iNA;
 using namespace iNA::Trafo;

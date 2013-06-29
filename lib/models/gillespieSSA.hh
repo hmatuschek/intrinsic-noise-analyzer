@@ -5,7 +5,7 @@
 #include "constantstoichiometrymixin.hh"
 #include "extensivespeciesmixin.hh"
 
-#include "eval/bci/engine.hh"
+#include "../eval/bci/engine.hh"
 
 #include <omp.h>
 
@@ -92,6 +92,10 @@ public:
             break;
           }
 
+          // update time
+          t += tau;
+          if(t > step ) break;
+
           // select reaction
           double r = this->rand[OpenMP::getThreadNum()].rand()*propensitySum;
           double sum = this->prop[OpenMP::getThreadNum()](0);
@@ -102,8 +106,6 @@ public:
           // update chemical species
           this->observationMatrix.row(sid)+=this->stoichiometry.col(reaction);
 
-          // time
-          t += tau;
         } //end time step loop
       } // end ensemble loop
     }

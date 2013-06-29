@@ -2,7 +2,7 @@
 #define __INA_PARSER_EXPR_IR_HH__
 
 #include <ginac/ginac.h>
-#include "smartptr.hh"
+#include "../../smartptr.hh"
 #include <vector>
 #include <complex>
 #include "parser.hh"
@@ -91,7 +91,7 @@ public:
   /** Returns the symbol instance. */
   GiNaC::symbol symbol() const;
   /** Serializes the node into the given stream. */
-  void serialize(std::ostream &stream, Context &ctx);
+  void serialize(std::ostream &stream, const Context &ctx);
 
 
 public:
@@ -125,7 +125,7 @@ public:
 
 protected:
   /** Serializes this node into the given stream. */
-  void _serialize(std::ostream &stream, Context &ctx, size_t precedence);
+  void _serialize(std::ostream &stream, const Context &ctx, size_t precedence);
 
 
 private:

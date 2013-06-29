@@ -21,7 +21,7 @@ class RETaskView : public TaskView
   Q_OBJECT
 
 public:
-  explicit RETaskView(RETaskWrapper *task_item, QWidget *parent=0);
+  explicit RETaskView(RETaskItem *task_item, QWidget *parent=0);
 
 protected:
   virtual QWidget *createResultWidget(TaskItem *task_item);
@@ -34,15 +34,17 @@ class REResultWidget : public QWidget
   Q_OBJECT
 
 protected:
-  RETaskWrapper *re_task_wrapper;
+  RETaskItem *re_task_wrapper;
 
 public:
-  explicit REResultWidget(RETaskWrapper *re_task_wrapper, QWidget *parent = 0);
+  explicit REResultWidget(RETaskItem *re_task_wrapper, QWidget *parent = 0);
 
 private slots:
   void quickPlotButtonPressed();
   void genericPlotButtonPressed();
   void saveButtonPressed();
+  void saveAsCSV(const QString &filename);
+  void saveAsMAT(const QString &filename);
 
 private:
   TableWrapper *tableWrapper;

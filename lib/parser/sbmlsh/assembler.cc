@@ -100,6 +100,8 @@ Assembler::processModel(Parser::ConcreteSyntaxTree &model)
     processCompartmentDefinitions(model[2][0][1][2]);
   }
 
+  // If this flag is true, all species are defined in substance units...
+  bool allSpeciesHaveSubstanceUnits = model[3].matched();
   // If there are species definitions...
   if (model[3].matched()) {
     // EOL SpeciesDefinitions      : model[3][0]
@@ -107,8 +109,11 @@ Assembler::processModel(Parser::ConcreteSyntaxTree &model)
     //   "@species"                  : model[3][0][1][0]
     //   EOL
     //   SpeciesDefinitionList       : model[3][0][1][2]
-    processSpeciesDefinition(model[3][0][1][2]);
+    processSpeciesDefinition(model[3][0][1][2], allSpeciesHaveSubstanceUnits);
   }
+
+  // If all species are defined in substance units, the model too...
+  _model.setSpeciesHaveSubstanceUnits(allSpeciesHaveSubstanceUnits);
 
   // Do not process Rule productions...
   if (model[5].matched()) {
@@ -429,7 +434,7 @@ Assembler::linkCompartmentDefinitions(Parser::ConcreteSyntaxTree &comp)
 
 
 void
-Assembler::processSpeciesDefinition(Parser::ConcreteSyntaxTree &spec)
+Assembler::processSpeciesDefinition(Parser::ConcreteSyntaxTree &spec, bool &speciesHasSubstanceUnits)
 {
   /* SpeciesDefinitionList =           : spec
    *   ID                                : spec[0]
@@ -467,6 +472,8 @@ Assembler::processSpeciesDefinition(Parser::ConcreteSyntaxTree &spec)
     throw err;
   }
 
+  speciesHasSubstanceUnits &= has_substance_units;
+
   // Create species:
   Ast::Species *species = new Ast::Species(identifier, compartment, is_constant);
 
@@ -481,7 +488,7 @@ Assembler::processSpeciesDefinition(Parser::ConcreteSyntaxTree &spec)
 
   // Handle remaining species definition:
   if (spec[7].matched()) {
-    processSpeciesDefinition(spec[7][0][1]);
+    processSpeciesDefinition(spec[7][0][1], speciesHasSubstanceUnits);
   }
 }
 

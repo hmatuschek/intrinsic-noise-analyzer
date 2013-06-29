@@ -1,10 +1,12 @@
 #include "documentsview.hh"
+#include "../doctree/documenttree.hh"
 #include "../models/application.hh"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QToolButton>
 #include <QDragEnterEvent>
 #include <QDropEvent>
+#include <QFileInfo>
 #include "downloaddialog.hh"
 
 
@@ -12,8 +14,8 @@
 /* ********************************************************************************************* *
  * Implementation of SBML Models View, A QTreeView with some nice functionality
  * ********************************************************************************************* */
-DocumentsView::DocumentsView(QWidget *parent) :
-    QTreeView(parent)
+DocumentsView::DocumentsView(QWidget *parent)
+  : QTreeView(parent)
 {
   // The QAbstractItemModel holding all the data is the application singleton:
   this->setModel(Application::getApp()->docTree());
@@ -126,7 +128,7 @@ DocumentsView::dropEvent(QDropEvent *event)
   }
 
   // First, handle local files:
-  if ("file"==url.scheme() || ""==url.scheme()) { //url.isLocalFile()) { <-- needs 4.8
+  if ("file"==url.scheme() || ""==url.scheme()) {
     Application::getApp()->importModel(url.path(), false);
     return;
   }
@@ -137,5 +139,10 @@ DocumentsView::dropEvent(QDropEvent *event)
 
   // Open downloaded file
   QString local_file = dialog.localFileName();
-  Application::getApp()->importModel(local_file, true);
+  // Try to determine file type by extension or remote file name:
+  QFileInfo info(dialog.remoteFileName());
+  Application::ModelType type=Application::FORMAT_ASK_USER;
+  if (("xml"==info.suffix()) || ("sbml"==info.suffix())) { type = Application::FORMAT_SBML; }
+  else if (("mod"==info.suffix()) || ("sbmlsh"==info.suffix())) { type=Application::FORMAT_SBMLsh; }
+  Application::getApp()->importModel(local_file, true, type);
 }

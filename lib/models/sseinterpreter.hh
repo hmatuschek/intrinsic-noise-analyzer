@@ -1,12 +1,12 @@
-#ifndef __INA_MODELS_LNAINTERPRETER_HH
-#define __INA_MODELS_LNAINTERPRETER_HH
+#ifndef __INA_MODELS_SSEINTERPRETER_HH
+#define __INA_MODELS_SSEINTERPRETER_HH
 
 #include "REmodel.hh"
 #include "LNAmodel.hh"
 #include "IOSmodel.hh"
-#include "eval/eval.hh"
-#include "eval/bcimp/engine.hh"
-#include "trafo/constantfolder.hh"
+#include "../eval/eval.hh"
+#include "../eval/bcimp/engine.hh"
+#include "../trafo/constantfolder.hh"
 
 namespace iNA {
 namespace Models {
@@ -159,6 +159,68 @@ public:
 
 
   /**
+   * Alternative constructor resolving dependence on external model. For hell knows what reason.
+   *
+   * @param model Specifies the SSE model to integrate.
+   * @param opt_level Specifies the code-optimization level.
+   * @param num_threads Specifies the (optional) number of threads to use to evaluate the
+   *        system. By default, @c OpenMP::getMaxThreads will be used.
+   * @param compileJac Specifies if the Jacobian should be compiled immediately. If false, it will
+   *        be compiled on demand.
+   */
+
+  GenericSSEinterpreter(Sys &model, Ast::Model &extModel,
+                 size_t opt_level=0,
+                 size_t num_threads=OpenMP::getMaxThreads(), bool compileJac = false)
+    : sseModel(model), lookup(model.stateIndex), ICs(model), bytecode(num_threads), jacobianCode(num_threads),
+      hasJacobian(false), opt_level(opt_level),
+      updateVector(sseModel.getUpdateVector())
+  {
+
+    // Fold constants and get update vector
+    Trafo::ConstantFolder constants(sseModel);
+    updateVector = ICs.apply(constants.apply(updateVector));
+
+    // Fold constants from external model
+    Trafo::InitialValueFolder extICs(extModel);
+
+    // Fold external compartments
+    GiNaC::exmap ext_subs;
+    for(size_t i = 0; i<extModel.numCompartments(); i++)
+      ext_subs.insert(std::make_pair(extModel.getCompartment(i)->getSymbol(),extICs.apply(extModel.getCompartment(i)->getSymbol())));
+    ParameterFolder fold(ext_subs);
+    fold.apply(this->updateVector);
+
+    // Append external species to lookup table
+    for(size_t i=0; i<extModel.numSpecies(); i++)
+      lookup.insert(std::make_pair(extModel.getSpecies(i)->getSymbol(), updateVector.size()+i));
+
+    // Compile expressions
+    typename SysEngine::Compiler compiler(lookup);
+    compiler.setCode(&this->bytecode);
+    compiler.compileVector(updateVector);
+    compiler.finalize(opt_level);
+
+    // Set bytecode for interpreter
+    this->interpreter.setCode(&(this->bytecode));
+    this->jacobian_interpreter.setCode(&(this->jacobianCode));
+
+    if (compileJac)
+      this->compileJacobian();
+
+  }
+
+  /**
+   * Destructor.
+   */
+  virtual ~GenericSSEinterpreter()
+  {
+
+  }
+
+
+
+  /**
    * Derives and compiles the Jacobian from the ODEs.
    * If the Jacobian was already compiled, this method does nothing.
    */
@@ -266,6 +328,7 @@ public:
   {
     return this->sseModel.getDimension();
   }
+
 
 };
 

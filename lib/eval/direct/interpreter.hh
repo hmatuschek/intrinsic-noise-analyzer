@@ -1,8 +1,8 @@
-#ifndef __FLUC_EVALUATE_DIRECT_INTERPRETER_HH__
-#define __FLUC_EVALUATE_DIRECT_INTERPRETER_HH__
+#ifndef __INA_EVALUATE_DIRECT_INTERPRETER_HH__
+#define __INA_EVALUATE_DIRECT_INTERPRETER_HH__
 
 #include "code.hh"
-#include "exception.hh"
+#include "../../exception.hh"
 #include <complex>
 
 

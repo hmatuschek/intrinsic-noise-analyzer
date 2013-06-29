@@ -6,6 +6,7 @@
 #include "models/basemodel.hh"
 #include "documenttreeitem.hh"
 
+class ReactionsItem;
 
 /**
  * Represents a @c Ast::Model and associated analysis results for the GUI. Its a containter for
@@ -35,6 +36,9 @@ public:
   /** Returns a const reference to the SBML model. */
   const iNA::Ast::Model &getModel() const;
 
+  /** Returns a weak reference to the ReactionsItem */
+  ReactionsItem *reactionsItem();
+
   /** Returns true. */
   virtual bool providesView() const;
   /** Create a new model view. */
@@ -46,6 +50,8 @@ public:
 private:
   /** Holds the SBML document associated with the model. */
   iNA::Ast::Model *_model;
+  /** Holds the reactions item. */
+  ReactionsItem *_reactions;
   /** Holds the display label for the item in the @c DocumentTree. */
   QString itemLabel;
 };

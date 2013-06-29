@@ -1,4 +1,14 @@
 #include "documenttree.hh"
+#include "documentitem.hh"
+#include "analysesitem.hh"
+#include "taskitem.hh"
+#include "plotitem.hh"
+#include "reactionitem.hh"
+#include "reactionsitem.hh"
+#include "../models/application.hh"
+
+#include <QDebug>
+
 
 
 DocumentTree::DocumentTree(QObject *parent)
@@ -9,64 +19,65 @@ DocumentTree::DocumentTree(QObject *parent)
 
 
 void
-DocumentTree::resetCompleteTree()
-{
+DocumentTree::resetCompleteTree() {
   resetTree();
   this->reset();
 }
 
 
 void
-DocumentTree::addDocument(DocumentItem *document)
-{
-  // Check if model is allready in list of open models:
-  if (this->_children.contains(document))
-  {
-    document->deleteLater();
-    return;
-  }
-
-  // Take ownership of document:
-  document->setParent(this);
-
-  // Add document to _children:
-  emit this->layoutAboutToBeChanged();
-  this->addChild(document);
-  emit this->layoutChanged();
+DocumentTree::addDocument(DocumentItem *document) {
+  beginInsertRows(QModelIndex(), getTreeChildCount(), getTreeChildCount());
+  addChild(document);
+  endInsertRows();
 }
 
 
 void
-DocumentTree::addTask(DocumentItem *document, TaskItem *task)
-{
-  emit this->layoutAboutToBeChanged();
+DocumentTree::addTask(DocumentItem *document, TaskItem *task) {
   // Add task to document (document takes ownership of task):
+  QModelIndex analyses_index = getIndexOf(document->analysesItem());
+  size_t num_analyses = document->numAnalyses();
+  beginInsertRows(analyses_index, num_analyses, num_analyses);
   document->addTask(task);
-  emit this->layoutChanged();
+  endInsertRows();
+  Application::getApp()->itemSelected(task);
 }
 
 
 void
-DocumentTree::addPlot(TaskItem *task, PlotItem *plot)
-{
-  emit this->layoutAboutToBeChanged();
+DocumentTree::addPlot(TaskItem *task, PlotItem *plot) {
   // Add plot to analysis:
+  QModelIndex task_index = getIndexOf(task);
+  size_t num_plots = task->getTreeChildCount();
+  beginInsertRows(task_index, num_plots, num_plots);
   task->addPlot(plot);
-  emit this->layoutChanged();
+  endInsertRows();
+  Application::getApp()->itemSelected(plot);
 }
 
+void
+DocumentTree::addReaction(DocumentItem *document, ReactionItem *reaction) {
+  // Add a reaction to the model addressed by the given document:
+  ReactionsItem *reac_item = document->reactionsItem();
+  QModelIndex reactions_index = getIndexOf(reac_item);
+  size_t num_reacts = reac_item->getTreeChildCount();
+  beginInsertRows(reactions_index, num_reacts, num_reacts);
+  reac_item->addReaction(reaction);
+  endInsertRows();
+}
 
 void
-DocumentTree::removeTask(TaskItem *task)
-{
+DocumentTree::removeTask(TaskItem *task) {
   this->removeItem(task);
 }
 
 
 void
-DocumentTree::removeDocument(DocumentItem *document)
-{
-  this->removeItem(document);
+DocumentTree::removeDocument(DocumentItem *document) {
+  beginRemoveRows(QModelIndex(), document->getTreeRow(), document->getTreeRow());
+  removeChild(document);
+  endRemoveRows();
 }
 
 
@@ -79,26 +90,23 @@ DocumentTree::removeItem(TreeItem *item)
   TreeItem *parent_item = item->getTreeParent();
 
   // Remove from model:
-  emit this->layoutAboutToBeChanged();
-  this->beginRemoveRows(parent_index, item->getTreeRow(), item->getTreeRow());
+  beginRemoveRows(parent_index, item->getTreeRow(), item->getTreeRow());
   parent_item->removeChild(item);
-  this->endRemoveRows();
-  emit this->layoutChanged();
-
-  /// \todo This complete reset of the QAbstractItemModel should be replaced by a more
-  ///       selective event.
-  this->reset();
+  endRemoveRows();
 }
 
 void
-DocumentTree::removePlot(PlotItem *plot)
-{
-  this->removeItem(plot);
+DocumentTree::removePlot(PlotItem *plot) {
+  removeItem(plot);
 }
 
 void
-DocumentTree::markForUpdate(TreeItem *item)
-{
+DocumentTree::removeReaction(ReactionItem *item) {
+  removeItem(item);
+}
+
+void
+DocumentTree::markForUpdate(TreeItem *item) {
   QModelIndex idx = this->getIndexOf(item);
   emit this->dataChanged(idx, idx);
 }
@@ -111,22 +119,13 @@ DocumentTree::markForUpdate(TreeItem *item)
 QModelIndex
 DocumentTree::index(int row, int column, const QModelIndex &parent) const
 {
-  if (! this->hasIndex(row, column, parent))
-  {
-    return QModelIndex();
-  }
-
   const TreeItem *parentItem = 0;
-  if (! parent.isValid()) {
-    parentItem = this;
-  } else {
-    parentItem = static_cast<TreeItem *>(parent.internalPointer());
-  }
+  if (! parent.isValid()) { parentItem = this; }
+  else { parentItem = static_cast<TreeItem *>(parent.internalPointer()); }
 
   TreeItem *childItem = 0;
-  if (0 != (childItem = parentItem->getTreeChild(row)))
-  {
-    return this->createIndex(row, column, childItem);
+  if (0 != (childItem = parentItem->getTreeChild(row))) {
+    return createIndex(row, column, (void *)childItem);
   }
 
   return QModelIndex();
@@ -134,46 +133,30 @@ DocumentTree::index(int row, int column, const QModelIndex &parent) const
 
 
 QModelIndex
-DocumentTree::parent(const QModelIndex &index) const
-{
-  if (!index.isValid())
-    return QModelIndex();
-
+DocumentTree::parent(const QModelIndex &index) const {
+  if (!index.isValid()) { return QModelIndex(); }
   TreeItem *childItem = static_cast<TreeItem*>(index.internalPointer());
   TreeItem *parentItem = childItem->getTreeParent();
-
-  if (parentItem == this)
-    return QModelIndex();
-
-  return createIndex(parentItem->getTreeRow(), 0, parentItem);
+  if (parentItem == this) { return QModelIndex(); }
+  return createIndex(parentItem->getTreeRow(), 0, (void *)parentItem);
 }
 
 
 int
-DocumentTree::columnCount(const QModelIndex &parent) const
-{
-  if (parent.isValid())
-  {
+DocumentTree::columnCount(const QModelIndex &parent) const {
+  if (parent.isValid()) {
     return static_cast<TreeItem *>(parent.internalPointer())->getTreeColumnCount();
   }
-
   return this->getTreeColumnCount();
 }
 
 
 int
-DocumentTree::rowCount(const QModelIndex &parent) const
-{
+DocumentTree::rowCount(const QModelIndex &parent) const {
   TreeItem const *parentItem = 0;
-
-  if (parent.column() > 0)
-    return 0;
-
-  if (!parent.isValid())
-    parentItem = this;
-  else
-    parentItem = static_cast<TreeItem*>(parent.internalPointer());
-
+  if (parent.column() > 0) { return 0; }
+  if (!parent.isValid()) { parentItem = this; }
+  else { parentItem = static_cast<TreeItem*>(parent.internalPointer()); }
   return parentItem->getTreeChildCount();
 }
 
@@ -217,13 +200,13 @@ QModelIndex
 DocumentTree::getIndexOf(TreeItem *item) const
 {
   QModelIndex parent;
+  if (item == this) { return QModelIndex(); }
 
-  if (0 != item->getTreeParent())
-  {
+  if (0 != item->getTreeParent()) {
     parent = this->getIndexOf(item->getTreeParent());
   }
-
-  return this->index(item->getTreeRow(), 0, parent);
+  int row = item->getTreeRow();
+  return DocumentTree::index(row, 0, parent);
 }
 
 
@@ -232,33 +215,25 @@ DocumentTree::getIndexOf(TreeItem *item) const
  * Implementation of TreeItem interface
  * ********************************************************************************************* */
 TreeItem *
-DocumentTree::getTreeParent() const
-{
+DocumentTree::getTreeParent() const{
   return 0;
 }
 
 
 int
-DocumentTree::getTreeRow() const
-{
+DocumentTree::getTreeRow() const {
   return 0;
 }
 
 int
-DocumentTree::getTreeColumnCount() const
-{
+DocumentTree::getTreeColumnCount() const {
   return 1;
 }
 
 
 QVariant
-DocumentTree::getTreeData(int column) const
-{
-  if (0 == column)
-  {
-    return QVariant("Models");
-  }
-
+DocumentTree::getTreeData(int column) const {
+  if (0 == column) { return QVariant(tr("Models")); }
   return QVariant();
 }
 

@@ -3,7 +3,7 @@
 
 #include "basemodel.hh"
 #include "baseunitmixin.hh"
-#include "ginacsupportforeigen.hh"
+#include "../ginacsupportforeigen.hh"
 
 namespace iNA {
 namespace Models {

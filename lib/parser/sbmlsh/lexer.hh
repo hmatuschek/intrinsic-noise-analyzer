@@ -1,7 +1,7 @@
 #ifndef __FLUC_SBMLSH_LEXER_HH__
 #define __FLUC_SBMLSH_LEXER_HH__
 
-#include <parser/expr/lexer.hh>
+#include "../expr/lexer.hh"
 
 
 namespace iNA {

@@ -9,7 +9,7 @@
 #include <parser/expr/ir.hh>
 
 
-/** Simple expression context that resolves GiNaC symbols to the displayname of the associates
+/** Simple expression context that resolves GiNaC symbols to the displayname of the associated
  * @c iNA::Ast::VariableDefinition. This class is used by the Ginac2Formula renderer to reverse
  * lookup GiNaC symbols in expressions. */
 class ModelExpressionContext : public iNA::Parser::Expr::Context
@@ -21,7 +21,7 @@ public:
   GiNaC::symbol resolve(const std::string &identifier);
   /** Resolves a GiNaC symbol to the name of the corresponding @c iNA::Ast::VariableDefinition.
    * If the variable has no name assigned, the identifier is returned. */
-  std::string identifier(GiNaC::symbol symbol);
+  virtual std::string identifier(GiNaC::symbol symbol) const;
   /** Returns true if the given symbol belongs to a species and if the model is defined in
    * substance units. Returns always false if the scope is not element of an Model. */
   bool hasConcentrationUnits(GiNaC::symbol symbol);

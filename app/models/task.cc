@@ -42,10 +42,19 @@ Task::run()
   } catch (std::runtime_error &err) {
     iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::ERROR);
     message << "Task:: Caught std::runtime_error: " << err.what();
+    iNA::Utils::Logger::get().log(message);
     _error_message.setTitle("Runtime exception during analysis.");
     _error_message.setDetails(err.what());
     setState(Task::ERROR);
+  } catch (std::domain_error &err) {
+      iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::ERROR);
+      message << "Task:: Caught std::domain_error: " << err.what();
+      iNA::Utils::Logger::get().log(message);
+      _error_message.setTitle("Domain error during analysis.");
+      _error_message.setDetails(err.what());
+      setState(Task::ERROR);
   }
+
 }
 
 

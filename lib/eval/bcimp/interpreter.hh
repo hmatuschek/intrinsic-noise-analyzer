@@ -2,7 +2,7 @@
 #define __INA_EVAL_BCIMP_INTERPRETER_HH__
 
 #include "code.hh"
-#include "eval/bci/interpreter.hh"
+#include "../bci/interpreter.hh"
 
 
 namespace iNA {

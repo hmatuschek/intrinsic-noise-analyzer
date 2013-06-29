@@ -1,10 +1,10 @@
 #ifndef __INA_TRAFO_PARTIALMODEL_HH__
 #define __INA_TRAFO_PARTIALMODEL_HH__
 
-#include "ast/ast.hh"
+#include "../ast/ast.hh"
 #include "substitution.hh"
-#include "eigen3/Eigen/Eigen"
-#include "ginacsupportforeigen.hh"
+#include <eigen3/Eigen/Eigen>
+#include "../ginacsupportforeigen.hh"
 
 
 namespace iNA {

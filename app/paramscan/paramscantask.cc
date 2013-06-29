@@ -321,7 +321,7 @@ ParamScanTask::process()
       default:
           break;
       }
-      parameterScan(pid,0) = GiNaC::ex_to<GiNaC::numeric>(parameterSets[pid][config.getParameter().getIdentifier()]).to_double();
+      parameterScan(pid,0) = Eigen::ex2double(parameterSets[pid][config.getParameter().getIdentifier()]);
 
       int col=1;
 

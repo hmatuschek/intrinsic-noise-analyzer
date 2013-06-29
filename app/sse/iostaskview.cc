@@ -7,17 +7,22 @@
 #include <QFile>
 #include <QMessageBox>
 
-#include "../models/application.hh"
-#include "../doctree/plotitem.hh"
+#include <fstream>
+#include "utils/matexport.hh"
+
 #include "iosplot.hh"
+#include "../models/application.hh"
+#include "../doctree/documenttree.hh"
+#include "../doctree/plotitem.hh"
 #include "../views/speciesselectiondialog.hh"
-#include "../views/genericplotdialog.hh"
+#include "../plot/configuration.hh"
+#include "../plot/plotconfigdialog.hh"
 
 
 /* ********************************************************************************************* *
  * Implementation of RETaskView, derived from TaskView:
  * ********************************************************************************************* */
-IOSTaskView::IOSTaskView(IOSTaskWrapper *task_wrapper, QWidget *parent)
+IOSTaskView::IOSTaskView(IOSTaskItem *task_wrapper, QWidget *parent)
   : TaskView(task_wrapper, parent)
 {
   // Update main-widget:
@@ -28,7 +33,7 @@ IOSTaskView::IOSTaskView(IOSTaskWrapper *task_wrapper, QWidget *parent)
 QWidget *
 IOSTaskView::createResultWidget(TaskItem *task_item)
 {
-  return new IOSResultWidget(static_cast<IOSTaskWrapper *>(task_item));
+  return new IOSResultWidget(static_cast<IOSTaskItem *>(task_item));
 }
 
 
@@ -36,7 +41,7 @@ IOSTaskView::createResultWidget(TaskItem *task_item)
 /* ********************************************************************************************* *
  * Implementation of REResultWidget, show the result of a RE analysis.
  * ********************************************************************************************* */
-IOSResultWidget::IOSResultWidget(IOSTaskWrapper *task_wrapper, QWidget *parent):
+IOSResultWidget::IOSResultWidget(IOSTaskItem *task_wrapper, QWidget *parent):
   QWidget(parent), _ios_task_wrapper(task_wrapper)
 {
   setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
@@ -76,25 +81,25 @@ IOSResultWidget::_onPlotButtonPressed()
   SpeciesSelectionDialog dialog(_ios_task_wrapper->getIOSTask()->getConfig().getModel());
   dialog.setWindowTitle(tr("IOS quick plot"));
   dialog.setTitle(tr("Select the species to plot."));
-  if (QDialog::Rejected == dialog.exec()) { return; }
-  QStringList selected_species = dialog.getSelectedSpecies();
+  if (QDialog::Accepted != dialog.exec()) { return; }
+  QStringList selected_species = dialog.selectedSpecies();
 
+  PlotItem *plot_item_to_show = new PlotItem(
+        createIOSEMRETimeSeriesPlotConfig(selected_species, _ios_task_wrapper->getIOSTask()));
   Application::getApp()->docTree()->addPlot(
-        this->_ios_task_wrapper,
-        new PlotItem(
-          new IOSEMRETimeSeriesPlot(selected_species, _ios_task_wrapper->getIOSTask())));
+        this->_ios_task_wrapper, plot_item_to_show);
 
-  if (0 < selected_species.size()) {
+  if (1 < selected_species.size()) {
     Application::getApp()->docTree()->addPlot(
           this->_ios_task_wrapper,
           new PlotItem(
-            new IOSEMRECorrelationPlot(selected_species, _ios_task_wrapper->getIOSTask())));
+            createIOSEMRECorrelationPlotConfig(selected_species, _ios_task_wrapper->getIOSTask())));
   }
 
   Application::getApp()->docTree()->addPlot(
         this->_ios_task_wrapper,
         new PlotItem(
-          new IOSEMREComparePlot(selected_species,_ios_task_wrapper->getIOSTask())));
+          createIOSEMREComparePlotConfig(selected_species,_ios_task_wrapper->getIOSTask())));
 }
 
 
@@ -102,47 +107,58 @@ void
 IOSResultWidget::_onGenericPlotButtonPressed()
 {
   // Show dialog
-  GenericPlotDialog dialog(_ios_task_wrapper->getIOSTask()->getTimeSeries());
-  if (QDialog::Rejected == dialog.exec()) { return; }
-
-  // Create plot figure with labels.
-  Plot::Figure *figure = new Plot::Figure(dialog.figureTitle());
-  figure->getAxis()->setXLabel(dialog.xLabel());
-  figure->getAxis()->setYLabel(dialog.yLabel());
-
-  // Iterate over all graphs of the configured plot:
-  for (size_t i=0; i<dialog.numGraphs(); i++) {
-    Plot::Graph *graph = dialog.graph(i).create(figure->getStyle(i));
-    figure->getAxis()->addGraph(graph);
-    figure->addToLegend(dialog.graph(i).label(), graph);
-  }
+  Plot::PlotConfig *config = new Plot::PlotConfig(*(_ios_task_wrapper->getIOSTask()->getTimeSeries()));
+  Plot::PlotConfigDialog dialog(config);
+  if (QDialog::Accepted != dialog.exec()) { return; }
 
   // Add timeseries plot:
-  Application::getApp()->docTree()->addPlot(_ios_task_wrapper, new PlotItem(figure));
+  Application::getApp()->docTree()->addPlot(_ios_task_wrapper, new PlotItem(config));
 }
 
 
 void
 IOSResultWidget::_onSaveButtonPressed()
 {
+  QString selectedFilter;
   QString filename = QFileDialog::getSaveFileName(
-        this, tr("Save as text..."), "", tr("Text Files (*.txt *.csv)"));
+        this, tr("Save results in ..."), "",
+        tr("Text Files (*.txt *.csv);;Matlab 5 Files (*.mat)"), &selectedFilter);
+  if ("" == filename) { return; }
+  if (tr("Text Files (*.txt *.csv)") == selectedFilter) {
+    saveAsCSV(filename);
+  } else if (tr("Matlab 5 Files (*.mat)") == selectedFilter) {
+    saveAsMAT(filename);
+  } else {
+    QMessageBox::critical(0, tr("Can not save results"),
+                          tr("Can not save results to file %1: Unknown format %2").arg(
+                            filename, selectedFilter));
+  }
+}
 
-  if ("" == filename)
-  {
+void
+IOSResultWidget::saveAsCSV(const QString &filename)
+{
+  QFile file(filename);
+  if (!file.open(QIODevice::WriteOnly| QIODevice::Text)) {
+    QMessageBox::critical(0, tr("Can not open file"),
+                          tr("Can not open file %1 for writing").arg(filename));
+    return;
+  }
+  _ios_task_wrapper->getIOSTask()->getTimeSeries()->saveAsText(file);
+  file.close();
+}
+
+void
+IOSResultWidget::saveAsMAT(const QString &filename) {
+  std::fstream file(filename.toLocal8Bit().constData(), std::fstream::out|std::fstream::binary);
+  if (! file.is_open()) {
+    QMessageBox::critical(0, tr("Can not open file"),
+                          tr("Can not open file %1 for writing").arg(filename));
     return;
   }
 
-  QFile file(filename);
-
-  if (!file.open(QIODevice::WriteOnly| QIODevice::Text))
-  {
-    QMessageBox box;
-    box.setWindowTitle(tr("Can not open file"));
-    box.setText(tr("Can not open file %1 for writing").arg(filename));
-    box.exec();
-  }
-
-  this->_ios_task_wrapper->getIOSTask()->getTimeSeries()->saveAsText(file);
+  iNA::Utils::MatFile mat_file;
+  mat_file.add("IOS_result", _ios_task_wrapper->getIOSTask()->getTimeSeries()->matrix());
+  mat_file.serialize(file);
   file.close();
 }

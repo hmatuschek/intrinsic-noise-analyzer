@@ -5,6 +5,7 @@
 #include "reaction.hh"
 
 
+
 namespace iNA {
 namespace Ast {
 
@@ -58,7 +59,7 @@ public:
    */
   static void mergeReversibleKineticLaw(Ast::KineticLaw *forward, const Ast::KineticLaw *reverse);
 
-protected:
+//protected:
   /** Helper function to copy function definitions. */
   static Ast::FunctionDefinition *copyFunctionDefinition(Ast::FunctionDefinition *node,
                                                          GiNaC::exmap &translation_table);

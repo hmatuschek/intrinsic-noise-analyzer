@@ -1,0 +1,89 @@
+@model:3.1.1 = dimer "Dimerization"
+
+@units
+ substance = item
+ volume = litre
+ area = metre: e=2
+ length = metre
+ time = second: m=60
+
+@compartments
+ cell = Omega "cell"
+
+@species
+ cell: [D]  = 1/Omega 
+ cell: [mRNA]  = 0 
+ cell: [Protein]  = 0 
+ cell: [Q]  = 0 
+ cell: [Dimer]  = 0 
+ cell: [Don]  = 0 
+ cell: [R]  = 30/Omega 
+ cell: [T]  = 0 
+
+@parameters
+ k1=0.0078
+ k2=k3*11
+ k3=0.0039
+ km7=0.9
+ k7=0.012
+ k4=0.0007
+ Omega=1
+ k6=0
+ km6=0.5
+ km5=0.3
+ k5=0.038
+ km8=7.75*1/K9
+ k8=K9*0.00526
+ km9=K9*0.2
+ k9=0.2*1/K9
+ K9=twoh**0.5
+ twoh=200
+
+@reactions
+ @r= translation "Translation"
+  mRNA -> mRNA + Protein
+  k2*mRNA*cell
+
+ @r= degrade_mRNA "mRNA degradation"
+  mRNA -> 
+  mRNA*k3*cell
+
+ @r= protein_degradation "Protein degradation"
+  Protein -> 
+  k4*Protein*cell
+
+ @r= NFReverse "NF (Reverse)"
+  Q -> D + Dimer
+  Q*km7*cell
+
+ @r= NF "NF"
+  D + Dimer -> Q
+  k7*D*Dimer*cell
+
+ @r= Polymerase "Polymerase"
+  D + R -> Don
+  D*cell*k5*R
+
+ @r= PolymeraseReverse "Polymerase (Reverse)"
+  Don -> D + R
+  km5*Don*cell
+
+ @r= transcription "Transcription"
+  Don -> D + mRNA + R
+  Don*cell*k1
+
+ @r= reaction_1 "reaction"
+  D + Protein -> T
+  D*k8*Protein*cell
+
+ @r= reaction_1Reverse "reaction (Reverse)"
+  T -> D + Protein
+  km8*T*cell
+
+ @r= reaction_2 "reaction"
+  Protein + T -> Q
+  k9*T*Protein*cell
+
+ @r= reaction_2Reverse "reaction (Reverse)"
+  Q -> Protein + T
+  Q*cell*km9

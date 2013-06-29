@@ -2,7 +2,7 @@
 #define __INA_EVAL_COMPILERCOMMON_HH__
 
 #include <eigen3/Eigen/Eigen>
-#include "ginacsupportforeigen.hh"
+#include "../ginacsupportforeigen.hh"
 
 
 namespace iNA {

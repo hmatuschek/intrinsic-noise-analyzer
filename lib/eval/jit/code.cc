@@ -1,10 +1,16 @@
 #include "code.hh"
 #include "exception.hh"
 #include <iostream>
+#ifdef INA_LLVM_VERSION_IS_33
+#include <llvm/IR/DerivedTypes.h>
+#else
 #include <llvm/DerivedTypes.h>
+#endif
 #include <llvm/PassManager.h>
 #ifdef INA_LLVM_VERSION_IS_32
 #include <llvm/DataLayout.h>
+#elif  INA_LLVM_VERSION_IS_33
+#include <llvm/IR/DataLayout.h>
 #else
 #include <llvm/Target/TargetData.h>
 #endif

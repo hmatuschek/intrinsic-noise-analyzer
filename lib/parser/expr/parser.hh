@@ -1,7 +1,7 @@
 #ifndef __INA_PARSER_EXPR_PARSER_HH__
 #define __INA_PARSER_EXPR_PARSER_HH__
 
-#include <ast/ast.hh>
+#include "../../ast/ast.hh"
 
 
 namespace iNA {
@@ -17,7 +17,7 @@ public:
   virtual GiNaC::symbol resolve(const std::string &identifier) = 0;
   /** Returns the idenfitier for the given symbol. This is used for serializing expressions into
    * text. */
-  virtual std::string identifier(GiNaC::symbol symbol) = 0;
+  virtual std::string identifier(GiNaC::symbol symbol) const = 0;
 };
 
 
@@ -37,7 +37,7 @@ public:
   virtual GiNaC::symbol resolve(const std::string &name);
 
   /** Resolves the given GiNaC symbol to its identifier. */
-  virtual std::string identifier(GiNaC::symbol symbol);
+  virtual std::string identifier(GiNaC::symbol symbol) const;
 };
 
 
@@ -64,7 +64,7 @@ public:
   /** Resolves a symbol identifier. */
   GiNaC::symbol resolve(const std::string &identifier);
   /** Resolves a symbol. */
-  std::string identifier(GiNaC::symbol symbol);
+  std::string identifier(GiNaC::symbol symbol) const;
 };
 
 
@@ -79,7 +79,7 @@ GiNaC::ex parseExpression(const std::string &text, Context &scope);
 GiNaC::ex parseExpression(const std::string &text, Ast::Scope *scope);
 
 /** Serializes the given expression into the given stream using the given context. */
-void serializeExpression(GiNaC::ex expression, std::ostream &stream, Context &ctx,
+void serializeExpression(GiNaC::ex expression, std::ostream &stream, const Context &ctx,
                          SerializationType stategy=SERIALIZE_PRETTY);
 
 /** Serializes the given expression into the given stream using the given context. */

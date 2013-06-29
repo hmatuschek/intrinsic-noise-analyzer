@@ -18,7 +18,6 @@
 #include "odetest.hh"
 #include "modelcopytest.hh"
 #include "constantfoldertest.hh"
-#include "conservationanalysistest.hh"
 #include "unitparsertest.hh"
 #include "benchmark.hh"
 #include "benchmark_pscan.hh"
@@ -91,8 +90,6 @@ int main(int argc, char *argv[])
     runner.addSuite(OptionParserTest::suite());
   if (0 == skipped_tests.count("ConstantFolder"))
     runner.addSuite(ConstantFolderTest::suite());
-  if (0 == skipped_tests.count("ConservationAnalysis"))
-    runner.addSuite(ConservationAnalysisTest::suite());
   if (0 == skipped_tests.count("UnitParser"))
     runner.addSuite(UnitParserTest::suite());
   if (0 == skipped_tests.count("RETest"))

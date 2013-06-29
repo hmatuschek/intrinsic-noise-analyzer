@@ -2,9 +2,9 @@
 #define __INA_MODELS_SSEPARAMSCAN_HH
 
 
-#include "nlesolve/nlesolve.hh"
+#include "../nlesolve/nlesolve.hh"
 #include "IOSmodel.hh"
-#include "math.hh"
+#include "../math.hh"
 #include "steadystateanalysis.hh"
 
 namespace iNA {
@@ -113,7 +113,7 @@ public:
      *        coordinates. Contents will be overwritten.
      * @param opt_level: Optimization level for expression evaluation.
      */
-    int parameterScan(std::vector<ParameterSet> &parameterSets,
+    void parameterScan(std::vector<ParameterSet> &parameterSets,
                       std::vector<Eigen::VectorXd> &resultSet,
                       size_t numThreads = OpenMP::getMaxThreads())
 
@@ -124,8 +124,6 @@ public:
 
         // First make space
         resultSet.resize(parameterSets.size());
-
-        int iter=0;
 
         // Initialize with initial concentrations
         Eigen::VectorXd x(index.size());
@@ -164,7 +162,9 @@ public:
             {
 
                 // Solve the deterministic equations
-                iter = this->solver.solve(x, this->max_time, this->min_time_step, parameterSets[j]);
+                NLEsolve::Status status = this->solver.solve(x, this->max_time, this->min_time_step, parameterSets[j]);
+
+                if(!status) throw(iNA::NumericError());
 
                 // Now calculate LNA
                 calcLNA(this->sseModel,x);
@@ -184,7 +184,6 @@ public:
 
         }
 
-        return iter;
     }
 
 protected:
@@ -367,140 +366,6 @@ protected:
 };
 
 
-
-
-
-
-
-/**
-* Extension of the SteadyStateAnalysis to perform a Parameter scan.
-*/
-template <typename M>
-class ParameterScanOld
-        : public SteadyStateAnalysis<M>
-{
-
-public:
-
-    ParameterScanOld(M &model)
-        : SteadyStateAnalysis<M>(model)
-    {
-
-        // Pass...
-
-    }
-
-    /**
-    * Constructor
-    */
-    ParameterScanOld(M &model, size_t iter, double epsilon, double t_max=1e9, double dt=1e-1)
-      : SteadyStateAnalysis<M>(model,iter,epsilon,t_max,dt)
-
-    {
-
-    }
-
-    /**
-     * Perform a parameter scan using the steady state analysis.
-     *
-     * @param parameterSets: Vector of parameter sets to perform analysis for.
-     * @param resultSet: Outputs the steady state concentrations, covariance and EMRE vector in reduced
-     *        coordinates. Contents will be overwritten.
-     */
-    int parameterScan(std::vector<ParameterSet> &parameterSets, std::vector<Eigen::VectorXd> &resultSet, size_t numThreads=OpenMP::getMaxThreads())
-
-    {
-
-        // Only works with single thread due to Ginac
-        numThreads = 1;
-
-        // First make space
-        resultSet.resize(parameterSets.size());
-
-        // Initialize with initial concentrations
-        Eigen::VectorXd x(this->sseModel.getDimension());
-        this->sseModel.getInitialState(x);
-        Eigen::VectorXd conc=x.head(this->sseModel.numIndSpecies());
-
-        // Get the SSE vector
-        size_t offset = this->sseModel.numIndSpecies();
-        //size_t lnaLength = offset*(offset+1)/2;
-        size_t sseLength = this->sseModel.getUpdateVector().size()-this->sseModel.numIndSpecies();
-
-        Eigen::VectorXex updateVector;
-
-        int iter=0;
-
-        std::vector< NLEsolve::HybridSolver<M> > solvers(numThreads,this->solver);
-
-        // Copy models for parallelization
-        std::vector< M * > models(numThreads);
-        models[0] = &this->sseModel;
-        Ast::Model* base = dynamic_cast<Ast::Model*>(&this->sseModel);
-//#pragma omp parallel for if(numThreads>1) num_threads(numThreads)
-        for(size_t j=1; j<numThreads; j++)
-        {
-            models[j] = new M((*base));
-        }
-
-//#pragma omp parallel for if(numThreads>1) num_threads(numThreads) schedule(dynamic) firstprivate(iter,x,conc)
-        // Iterate over all parameter sets
-        for(size_t j = 0; j < parameterSets.size(); j++)
-        {
-
-            // Generate parameter substitution table
-            Trafo::excludeType ptab = models[OpenMP::getThreadNum()]->makeExclusionTable(parameterSets[j]);
-
-            // Collect all the values of constant parameters except variable parameters
-            Trafo::ConstantFolder constants(*(models[OpenMP::getThreadNum()]), Trafo::Filter::ALL_CONST, ptab);
-            InitialConditions ICs(*(models[OpenMP::getThreadNum()]),ptab);
-
-            // Translate identifier to parameters collect variable parameters
-            ParameterFolder parameters(ptab);
-
-            // Fold variable parameters and all the rest
-            Eigen::VectorXex updateVector = ICs.apply(parameters.apply(constants.apply( models[OpenMP::getThreadNum()]->getUpdateVector() ) ));
-            Eigen::VectorXex REs = updateVector.head(offset);
-            Eigen::VectorXex sseUpdate = updateVector.segment(offset,sseLength);
-            Eigen::MatrixXex Jacobian = ICs.apply(parameters.apply(constants.apply( models[OpenMP::getThreadNum()]->getJacobian()) ));
-
-            // Setup solver and solve for RE concentrations
-            try
-            {
-
-                solvers[OpenMP::getThreadNum()].set(models[OpenMP::getThreadNum()]->stateIndex,REs,Jacobian);
-                iter = solvers[OpenMP::getThreadNum()].solve(conc, this->max_time, this->min_time_step);
-                x.head(offset) = conc;
-
-                // ... and substitute RE concentrations
-                GiNaC::exmap subs_table;
-                for (size_t s=0; s<models[OpenMP::getThreadNum()]->numIndSpecies(); s++)
-                    subs_table.insert( std::pair<GiNaC::ex,GiNaC::ex>( models[OpenMP::getThreadNum()]->getREvar(s), conc(s) ) );
-                for (size_t i=0; i<sseLength; i++)
-                    sseUpdate(i) = sseUpdate(i).subs(subs_table);
-
-                // Calc LNA & IOS
-                this->calcLNA(*models[OpenMP::getThreadNum()],x,sseUpdate);
-                this->calcIOS(*models[OpenMP::getThreadNum()],x,sseUpdate);
-
-                // Store result
-                resultSet[j] = x;
-
-            }
-            catch (iNA::NumericError &err)
-            {
-                // Generate a vector of nans the easy way
-                resultSet[j] = Eigen::VectorXd::Zero(models[OpenMP::getThreadNum()]->getDimension())/0.;
-            }
-
-        }
-
-        return iter;
-    }
-
-
-
-};
 
 }} // Close namespaces
 

@@ -1,7 +1,7 @@
 #ifndef __FLUC_ODE_ODEMODEL_HH__
 #define __FLUC_ODE_ODEMODEL_HH__
 
-#include "eval/eval.hh"
+#include "../eval/eval.hh"
 
 namespace iNA {
 namespace ODE {

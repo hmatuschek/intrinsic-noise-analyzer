@@ -40,35 +40,24 @@ private:
 
 
 
-/**
- * Represents the collection of graphs in a figure, also implements clipping.
- *
- * @ingroup plot
- */
+/** Displays the collection of graphs in a figure, also implements clipping.
+ * @ingroup plot */
 class GraphGroup : public QObject, public QGraphicsItemGroup
 {
-protected:
-  /**
-   * Holds the clipping-area.
-   */
-  QRectF clipping;
-
+  Q_OBJECT
 
 public:
-  /**
-   * Constructs a new (empty) graph group.
-   */
+  /** Constructs a new (empty) graph group. */
   explicit GraphGroup(QObject *parent=0);
 
-  /**
-   * (Re-) Sets the clipping.
-   */
+  /** (Re-) Sets the clipping. */
   void setClipping(const QRectF &rect);
-
-  /**
-   * Returns the bounding-box == clipping area.
-   */
+  /** Returns the bounding-box == clipping area. */
   virtual QRectF boundingRect() const;
+
+protected:
+  /** Holds the clipping-area. */
+  QRectF _clipping;
 };
 
 
@@ -81,8 +70,6 @@ public:
 class Axis : public QObject, public QGraphicsItemGroup
 {
   Q_OBJECT
-
-
 
 public:
   /** Constructs an empty Axis instance. */
@@ -97,6 +84,8 @@ public:
   void setAxisSize(const QSizeF &size);
 
   /** (Re-) Sets the x-range. */
+  void setXRange(const Range &range);
+  /** (Re-) Sets the x-range. */
   void setXRange(double min, double max);
   /** Returns the x-range. */
   Range getXRange();
@@ -109,6 +98,8 @@ public:
   /** Sets the label of the x axis. */
   void setXLabel(const QString &label);
 
+  /** (Re-) Sets the y-range. */
+  void setYRange(const Range &range);
   /** (Re-) Sets the y-range. */
   void setYRange(double min, double max);
   /** Returns the y-range. */

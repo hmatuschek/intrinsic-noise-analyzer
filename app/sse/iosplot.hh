@@ -1,38 +1,19 @@
-#ifndef __IOS_TIMESERIES_PLOT_HH__
-#define __IOS_TIMESERIES_PLOT_HH__
+#ifndef __INA_APP_IOS_PLOT_HH__
+#define __INA_APP_IOS_PLOT_HH__
+#include <QStringList>
 
-#include "../plot/plot.hh"
-#include "../plot/graph.hh"
-#include "../models/timeseries.hh"
-#include "../views/varianceplot.hh"
-#include "iostask.hh"
-
-
-class IOSEMRETimeSeriesPlot : public VariancePlot
-{
-  Q_OBJECT
-
-public:
-  explicit IOSEMRETimeSeriesPlot(const QStringList &selected_species, IOSTask *task, QObject *parent=0);
-};
+// Forward declarations
+namespace Plot { class PlotConfig; }
+class IOSTask;
 
 
-class IOSEMREComparePlot : public LinePlot
-{
-  Q_OBJECT
+Plot::PlotConfig *
+createIOSEMRETimeSeriesPlotConfig(const QStringList &selected_species, IOSTask *task);
 
-public:
-  explicit IOSEMREComparePlot(const QStringList &selected_species, IOSTask *task,
-                              QObject *parent=0);
-};
+Plot::PlotConfig *
+createIOSEMREComparePlotConfig(const QStringList &selected_species, IOSTask *task);
 
+Plot::PlotConfig *
+createIOSEMRECorrelationPlotConfig(const QStringList &selected_species, IOSTask *task);
 
-class IOSEMRECorrelationPlot : public Plot::Figure
-{
-  Q_OBJECT
-
-public:
-  explicit IOSEMRECorrelationPlot(const QStringList &selected_species, IOSTask *task, QObject *parent=0);
-};
-
-#endif // LINESGRAPHADAPTOR_HH
+#endif // __INA_APP_IOS_PLOT_HH__

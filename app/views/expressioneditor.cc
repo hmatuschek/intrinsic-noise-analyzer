@@ -13,7 +13,7 @@ inline bool isIdChar(const QChar &c) {
 
 
 ExpressionEditor::ExpressionEditor(QWidget *parent)
-  : QLineEdit(parent)
+  : QLineEdit(parent), _completer(0)
 {
   // pass...
 }
@@ -21,12 +21,14 @@ ExpressionEditor::ExpressionEditor(QWidget *parent)
 ExpressionEditor::ExpressionEditor(iNA::Ast::Scope &scope, QWidget *parent)
   : QLineEdit(parent)
 {
-  _completer = new QCompleter();
+  _completer = new QCompleter(this);
   _completer->setCompletionMode(QCompleter::PopupCompletion);
   _completer->setModel(new ScopeItemModel(scope, _completer));
   _completer->setWidget(this);
   QObject::connect(_completer, SIGNAL(activated(QString)),
                    this, SLOT(insertCompletion(QString)));
+  QObject::connect(this, SIGNAL(editingFinished()),
+                   this, SLOT(onEditingFinished()));
 }
 
 void
@@ -61,10 +63,18 @@ ExpressionEditor::keyPressEvent(QKeyEvent *event)
     _completer->complete();
   }
 
-  // Complete anyway if there are at least 3 chars under the cursor:
+  // Complete anyway if there are at least 1 chars under the cursor:
   QString prefix; idUnderCursor(prefix);
   if (1 <= prefix.length()) {
     _completer->setCompletionPrefix(prefix);
     _completer->complete();
   }
+}
+
+void
+ExpressionEditor::onEditingFinished() {
+  // If there is no completer or completer is hidden -> done.
+  if ((0 == _completer) || (! _completer->popup()->isVisible())) { return; }
+  // Hide completer
+  _completer->popup()->hide();
 }

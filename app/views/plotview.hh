@@ -4,9 +4,10 @@
 #include <QWidget>
 #include <QComboBox>
 
-#include "../plot/canvas.hh"
-#include "../plot/plotrangedialog.hh"
-#include "../doctree/plotitem.hh"
+class PlotItem;
+namespace Plot {
+class Canvas;
+}
 
 
 /** Common view of a plot.
@@ -17,11 +18,7 @@ class PlotView : public QWidget
 
 public:
   /** Constructs a view for the given plot-item. */
-  explicit PlotView(PlotItem *plot_wrapper, QWidget *parent = 0);
-
-private:
-  /** Holds the plot-canvas, showing the plot. */
-  Plot::Canvas *canvas;
+  explicit PlotView(PlotItem *plot_item, QWidget *parent = 0);
 
 private slots:
   /** Shows a save-as dialog. */
@@ -32,10 +29,16 @@ private slots:
   void onPlotDestroy();
   /** Resets the plot-scheme. */
   void onSchemeSelected(int idx);
+  /** Re-configures the plot. */
+  void onConfigPlot();
 
 private:
+  /** Holds a weak reference to the plot item being shown. */
+  PlotItem *_plotitem;
+  /** Holds the plot-canvas, showing the plot. */
+  Plot::Canvas *_canvas;
   /** Combobox of plot-schemes. */
-  QComboBox *schemeBox;
+  QComboBox *_schemeBox;
 };
 
 #endif // __INA_APP_VIEW_PLOTVIEW_HH__

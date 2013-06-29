@@ -9,6 +9,12 @@ PixmapDelegate::PixmapDelegate(QObject *parent)
   // Pass...
 }
 
+QSize
+PixmapDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const {
+  QPixmap image = index.model()->data(index, Qt::DisplayRole).value<QPixmap>();
+  return image.size()+QSize(6,0);
+}
+
 void
 PixmapDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {

@@ -7,11 +7,16 @@
 #include <QFile>
 #include <QMessageBox>
 
-#include "../models/application.hh"
-#include "../doctree/plotitem.hh"
-#include "../views/genericplotdialog.hh"
+#include <fstream>
+#include "utils/matexport.hh"
+
 #include "paramscanplot.hh"
+#include "../models/application.hh"
+#include "../doctree/documenttree.hh"
+#include "../doctree/plotitem.hh"
 #include "../views/speciesselectiondialog.hh"
+#include "../plot/configuration.hh"
+#include "../plot/plotconfigdialog.hh"
 
 
 
@@ -83,7 +88,7 @@ ParamScanResultWidget::plotButtonPressed()
   dialog.setWindowTitle(tr("Parameter scan quick plot"));
   dialog.setTitle(tr("Select the species to plot."));
   if (QDialog::Accepted != dialog.exec()) { return; }
-  QStringList selected_species = dialog.getSelectedSpecies();
+  QStringList selected_species = dialog.selectedSpecies();
 
   switch(config.getMethod())
   {
@@ -92,8 +97,7 @@ ParamScanResultWidget::plotButtonPressed()
       Application::getApp()->docTree()->addPlot(
             this->paramscan_task_wrapper,
             new PlotItem(
-              new SimpleParameterScanPlot(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
-
+              createParameterScanREPlotConfig(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
       break;
 
   case ParamScanTask::Config::LNA_ANALYSIS:
@@ -101,41 +105,37 @@ ParamScanResultWidget::plotButtonPressed()
       Application::getApp()->docTree()->addPlot(
             this->paramscan_task_wrapper,
             new PlotItem(
-              new ParameterScanPlot(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
-
+              createParameterScanLNAPlotConfig(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
       // Add LNA COV plot
       Application::getApp()->docTree()->addPlot(
             this->paramscan_task_wrapper,
             new PlotItem(
-              new ParameterScanCVPlot(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
-
+              createParameterScanLNACVPlotConfig(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
       // Add Fano COV plot
       Application::getApp()->docTree()->addPlot(
             this->paramscan_task_wrapper,
             new PlotItem(
-              new ParameterScanFanoPlot(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
-
+              createParameterScanLNAFanoPlotConfig(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
       break;
+
   case ParamScanTask::Config::IOS_ANALYSIS:
       // Add IOS parameter plot
       Application::getApp()->docTree()->addPlot(
             this->paramscan_task_wrapper,
             new PlotItem(
-              new ParameterScanIOSPlot(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
-
+              createParameterScanIOSPlotConfig(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
       // Add IOS COV plot
       Application::getApp()->docTree()->addPlot(
             this->paramscan_task_wrapper,
             new PlotItem(
-              new ParameterScanCVIOSPlot(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
-
+              createParameterScanIOSCVPlotConfig(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
       // Add IOS Fano plot
       Application::getApp()->docTree()->addPlot(
             this->paramscan_task_wrapper,
             new PlotItem(
-              new ParameterScanFanoIOSPlot(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
-
+              createParameterScanIOSFanoPlotConfig(selected_species,this->paramscan_task_wrapper->getParamScanTask())));
       break;
+
   default:
       break;
   }
@@ -146,48 +146,63 @@ void
 ParamScanResultWidget::customPlotButtonPressed()
 {
   // Show dialog
-  GenericPlotDialog dialog(&this->paramscan_task_wrapper->getParamScanTask()->getParameterScan());
-  if (QDialog::Rejected == dialog.exec()) { return; }
-
-  // Create plot figure with labels.
-  Plot::Figure *figure = new Plot::Figure(dialog.figureTitle());
-  figure->getAxis()->setXLabel(dialog.xLabel());
-  figure->getAxis()->setYLabel(dialog.yLabel());
-
-  // Iterate over all graphs of the configured plot:
-  for (size_t i=0; i<dialog.numGraphs(); i++) {
-    Plot::Graph *graph = dialog.graph(i).create(figure->getStyle(i));
-    figure->getAxis()->addGraph(graph);
-    figure->addToLegend(dialog.graph(i).label(), graph);
-  }
-
+  Plot::PlotConfig *config = new Plot::PlotConfig(
+        this->paramscan_task_wrapper->getParamScanTask()->getParameterScan());
+  Plot::PlotConfigDialog dialog(config);
+  if (QDialog::Accepted != dialog.exec()) { return; }
   // Add timeseries plot:
-  Application::getApp()->docTree()->addPlot(this->paramscan_task_wrapper, new PlotItem(figure));
+  Application::getApp()->docTree()->addPlot(
+        this->paramscan_task_wrapper, new PlotItem(config));
 }
 
 void
 ParamScanResultWidget::saveButtonPressed()
 {
+  QString selectedFilter;
+  QString filename = QFileDialog::getSaveFileName(
+        this, tr("Save as text..."), "",
+        tr("Text Files (*.txt *.csv);;Matlab 5 Files (*.mat)"), &selectedFilter);
+  if ("" == filename) { return; }
 
-    QString filename = QFileDialog::getSaveFileName(
-          this, tr("Save as text..."), "", tr("Text Files (*.txt *.csv)"));
-
-    if ("" == filename)
-    {
-      return;
-    }
-
-    QFile file(filename);
-
-    if (!file.open(QIODevice::WriteOnly| QIODevice::Text))
-    {
-      QMessageBox box;
-      box.setWindowTitle(tr("Can not open file"));
-      box.setText(tr("Can not open file %1 for writing").arg(filename));
-      box.exec();
-    }
-
-    this->paramscan_task_wrapper->getParamScanTask()->getParameterScan().saveAsText(file);
-    file.close();
-
+  if (tr("") == selectedFilter) {
+    saveAsCSV(filename);
+  } else if (tr("") == selectedFilter) {
+    saveAsMAT(filename);
+  } else {
+    QMessageBox::critical(0, tr("Can not save results to file"),
+                          tr("Can not save results to file %1: Unknown format %2").arg(
+                            filename, selectedFilter));
+  }
 }
+
+
+void
+ParamScanResultWidget::saveAsCSV(const QString &filename)
+{
+  QFile file(filename);
+  // Try to open file
+  if (!file.open(QIODevice::WriteOnly| QIODevice::Text)) {
+    QMessageBox::critical(0, tr("Cannot open file"),
+                          tr("Cannot open file %1 for writing").arg(filename));
+    return;
+  }
+  // Write...
+  paramscan_task_wrapper->getParamScanTask()->getParameterScan().saveAsText(file);
+  file.close();
+}
+
+void
+ParamScanResultWidget::saveAsMAT(const QString &filename) {
+  std::fstream file(filename.toLocal8Bit().constData(), std::fstream::out|std::fstream::binary);
+  if (! file.is_open()) {
+    QMessageBox::critical(0, tr("Can not open file"),
+                          tr("Can not open file %1 for writing").arg(filename));
+    return;
+  }
+
+  iNA::Utils::MatFile mat_file;
+  mat_file.add("ParamScan_result", paramscan_task_wrapper->getParamScanTask()->getParameterScan().matrix());
+  mat_file.serialize(file);
+  file.close();
+}
+

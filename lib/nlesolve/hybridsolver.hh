@@ -1,11 +1,11 @@
 #ifndef __INA_NLESOLVE_HYBRIDSOLVER_HH
 #define __INA_NLESOLVE_HYBRIDSOLVER_HH
 
-#include "nlesolve/newtonraphson.hh"
-#include "ode/lsoda.hh"
+#include "newtonraphson.hh"
+#include "../ode/lsoda.hh"
 
-#include "models/ssebasemodel.hh"
-#include "models/initialconditions.hh"
+#include "../models/ssebasemodel.hh"
+#include "../models/initialconditions.hh"
 
 namespace iNA{
 namespace NLEsolve{

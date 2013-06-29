@@ -1,8 +1,8 @@
-#ifndef __FLUC_EVALUATE_LLVM_ASSEMBLER_HH__
-#define __FLUC_EVALUATE_LLVM_ASSEMBLER_HH__
+#ifndef __INA_EVALUATE_LLVM_ASSEMBLER_HH__
+#define __INA_EVALUATE_LLVM_ASSEMBLER_HH__
 
 #include "code.hh"
-#include "exception.hh"
+#include "../../exception.hh"
 #include "builder.hh"
 #include <ginac/ginac.h>
 

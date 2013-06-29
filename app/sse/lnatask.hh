@@ -26,6 +26,9 @@ protected:
   /** Holds the configuration for the task. */
   SSETaskConfig _config;
 
+  /** Reference to sseModel. */
+  iNA::Models::LNAmodel * _sseModel;
+
   /** Holds the number of species in the analyzed model. */
   size_t _Ns;
 

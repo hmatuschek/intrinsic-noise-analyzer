@@ -3,8 +3,8 @@
 
 
 #include <sbml/SBMLTypes.h>
-#include "ast/ast.hh"
-#include "trafo/substitution.hh"
+#include "../ast/ast.hh"
+#include "../trafo/substitution.hh"
 
 namespace iNA {
 namespace Models {

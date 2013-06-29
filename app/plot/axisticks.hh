@@ -16,20 +16,14 @@
 namespace Plot {
 
 
-/**
- * Represents a single axis tick (small dash with some text/value).
- *
+/** Represents a single axis tick (small dash with some text/value).
  * All axis ticks have a value, determining the position of the tick along the axis. An axis tick
  * may also have a label, if present, it is shown instead of the value.
- *
- * @ingroup plot
- */
+ * @ingroup plot */
 class AxisTick : public QGraphicsItemGroup
 {
 public:
-  /**
-   * Speciefies the position of the tick.
-   */
+  /** Speciefies the position of the tick. */
   typedef enum
   {
     LEFT,    ///< The tick belongs to an axis, displayed on the left side of the graph.
@@ -39,72 +33,41 @@ public:
   } Orientation;
 
 
-protected:
-  /**
-   * Holds the value of the tick, determining the position of the tick and the label, if no
-   * label has been assigned to the tick.
-   */
-  double value;
-
-  /**
-   * Holds the graphics item for the label.
-   */
-  QGraphicsTextItem *label;
-
-  /**
-   * Holds the graphics item for the tick (short line).
-   */
-  QGraphicsLineItem *tick;
-
-  /**
-   * Holds the orientation of the tick.
-   */
-  Orientation orientation;
-
-
 public:
-  /**
-   * Constructs a new axis tick for the given value and orientation.
-   */
+  /** Constructs a new axis tick for the given value and orientation. */
   AxisTick(double value, Orientation orientation);
 
-  /**
-   * Constructs a new axis tick with the given value, label (displayed instead of the value) and
-   * orientation.
-   */
+  /** Constructs a new axis tick with the given value, label (displayed instead of the value) and
+   * orientation. */
   AxisTick(double value, const QString &label, Orientation orientation);
 
-  /**
-   * Resets the label of the tick.
-   */
+  /** Resets the label of the tick. */
   void setLabel(const QString &label);
-
-  /**
-   * Returns the label as a string.
-   */
+  /** Returns the label as a string. */
   QString getLabel();
 
-  /**
-   * Returns the value of the tick.
-   */
+  /** Returns the value of the tick. */
   double getValue() const;
-
-  /**
-   * Resets the value of the tick.
-   */
+  /** Resets the value of the tick. */
   void setValue(double value, bool update_label);
 
-  /**
-   * Returns the bounding box of the complete item (label and tick).
-   */
+  /** Returns the bounding box of the complete item (label and tick). */
   virtual QRectF boundingRect() const;
 
-
 public slots:
-  /**
-   * (Re-) Sets the plot-scheme.
-   */
+  /** (Re-) Sets the plot-scheme. */
   void setScheme(Configuration::Scheme scheme);
+
+protected:
+  /** Holds the value of the tick, determining the position of the tick and the label, if no
+   * label has been assigned to the tick. */
+  double value;
+  /** Holds the graphics item for the label. */
+  QGraphicsTextItem *label;
+  /** Holds the graphics item for the tick (short line). */
+  QGraphicsLineItem *tick;
+  /** Holds the orientation of the tick. */
+  Orientation orientation;
 };
 
 
@@ -119,24 +82,20 @@ public:
 
   /** (Re-) Sets the label. */
   void setLabel(const QString &label);
-
   /** Adds a tick. */
   void addTick(AxisTick *tick);
-
+  /** Returns the line width used. */
+  qreal lineWidth() const;
   /** Returns the bounding-box. */
   virtual QRectF boundingRect() const;
-
 
 public slots:
   /** Updates the ranges, rearanges ticks. */
   void updateRange();
-
   /** Updates the display-size, rearanges ticks. */
   void updateSize();
-
   /** (Re-) Sets the plot-scheme. */
   void setScheme(Configuration::Scheme scheme);
-
 
 protected:
   /** Updates the labels. */

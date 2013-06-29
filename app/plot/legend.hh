@@ -12,14 +12,26 @@
 namespace Plot {
 
 
-/**
- * Represents an item (graph) in a legend.
- *
- * @ingroup plot
- */
+/** Represents an item (graph) in a legend.
+ * @ingroup plot */
 class LegendItem : public QObject, public QGraphicsItemGroup
 {
   Q_OBJECT
+
+public:
+  /** Constructs a legend-item for the given graph and with the given label. */
+  explicit LegendItem(const QString &_label, Graph *_graph, QObject *parent=0);
+
+  /** Returns the bounding-box of the item. */
+  virtual QRectF boundingRect() const;
+
+  /** Updates the legend-item. */
+  void updateLayout();
+
+
+public slots:
+  /** (Re-) Sets the plot-scheme. */
+  void setScheme(Configuration::Scheme scheme);
 
 protected:
   /** Holds a weak reference to the graph item. */
@@ -38,106 +50,52 @@ protected:
   double _sample_length;
   /** The bounding-box of the legend-item. */
   QRectF _bb;
-
-
-public:
-  /** Constructs a legend-item for the given graph and with the given label. */
-  explicit LegendItem(const QString &_label, Graph *_graph, QObject *parent=0);
-
-  /** Returns the bounding-box of the item. */
-  virtual QRectF boundingRect() const;
-
-  /** Updates the legend-item. */
-  void updateLayout();
-
-
-public slots:
-  /** (Re-) Sets the plot-scheme. */
-  void setScheme(Configuration::Scheme scheme);
 };
 
 
 
-/**
- * Represents a plot-legend, a collection of @c LegendItem instances.
- *
- * @ingroup plot
- */
+/** Represents a plot-legend, a collection of @c LegendItem instances.
+ * @ingroup plot */
 class Legend : public QObject, public QGraphicsItemGroup
 {
   Q_OBJECT
 
-protected:
-  /**
-   * Holds the list of legend-items.
-   */
-  QList<LegendItem *> items;
-
-  /**
-   * The background of the legend.
-   */
-  QGraphicsPathItem *background;
-
-  /**
-   * Left margin.
-   */
-  double margin_left;
-
-  /**
-   * Bottom margin.
-   */
-  double margin_bottom;
-
-  /**
-   * Right margin.
-   */
-  double margin_right;
-
-  /**
-   * Top margin.
-   */
-  double margin_top;
-
-  /**
-   * Space between legend-items.
-   */
-  double line_spacing;
-
-  /**
-   * Holds the bounding-box of the legend.
-   */
-  QRectF bb;
-
-
 public:
-  /**
-   * Constructs an empty legend.
-   */
+  /** Constructs an empty legend. */
   Legend(QObject *parent=0);
 
-  /**
-   * Adds a graph to the legend with the given label.
-   */
+  /** Adds a graph to the legend with the given label. */
   void addGraph(const QString &label, Graph *graph);
-
-  /**
-   * Returns the bounding-box of the legend.
-   */
+  /** Returns the bounding-box of the legend. */
   virtual QRectF boundingRect() const;
 
-
 public slots:
-  /**
-   * Updates the scheme of all legend-items:
-   */
+  /** Updates the layout of the legend. */
+  void updateLayout();
+  /** Updates the scheme of all legend-items: */
   void setScheme(Configuration::Scheme scheme);
 
+protected slots:
+  /** Updates the Layout of the legend. */
+  void updateBB();
 
 protected:
-  /**
-   * Updates the BB of the legend.
-   */
-  void updateBB();
+  /** Holds the list of legend-items. */
+  QList<LegendItem *> _items;
+  /** The background of the legend. */
+  QGraphicsPathItem *_background;
+  /** Left margin. */
+  double _margin_left;
+  /** Bottom margin. */
+  double _margin_bottom;
+  /** Right margin. */
+  double _margin_right;
+  /** Top margin. */
+  double _margin_top;
+  /** Space between legend-items. */
+  double _line_spacing;
+  /** Holds the bounding-box of the legend. */
+  QRectF _bb;
 };
 
 

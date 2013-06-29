@@ -115,6 +115,18 @@ Parser::Sbml::__process_model(LIBSBML_CPP_NAMESPACE_QUALIFIER Model *model, Pars
     ctx.model().setName(model->getName());
   }
 
+  // First of all, check if all species are defined in substance units, if it is the case,
+  // set model to substance units:
+  bool all_species_have_substance_units = (0 != model->getNumSpecies());
+  for (size_t i=0; i<model->getNumSpecies(); i++) {
+    all_species_have_substance_units &=
+        model->getSpecies(i)->isSetHasOnlySubstanceUnits();
+  }
+  // if all species have substance units -> the model too...
+  if (all_species_have_substance_units) {
+    ctx.model().setSpeciesHaveSubstanceUnits(true);
+  }
+
   /* Process all function definitions in model by forwarding them to
    * __process_function_definition. */
   for (size_t i=0; i<model->getNumFunctionDefinitions(); i++) {
@@ -122,6 +134,11 @@ Parser::Sbml::__process_model(LIBSBML_CPP_NAMESPACE_QUALIFIER Model *model, Pars
     Ast::FunctionDefinition *def = __process_function_definition(func_def, ctx);
     ctx.model().addDefinition(def);
   }
+
+  /// @bug Unit definitions live in a separate scope, they identifier may collide with those
+  /// used to species etc. Simply do not add unit-definitions into the model scope. Store them
+  /// in a temporary table for parsing only, hence models will have no unit definitions as
+  /// only parameters may have individual units.
 
   /* First of all, process unit-definitions. */
   for (size_t i=0; i<model->getNumUnitDefinitions(); i++)

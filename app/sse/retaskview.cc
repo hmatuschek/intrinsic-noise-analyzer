@@ -7,17 +7,22 @@
 #include <QFile>
 #include <QMessageBox>
 
-#include "../models/application.hh"
-#include "../doctree/plotitem.hh"
+#include <fstream>
+#include "utils/matexport.hh"
+
 #include "replot.hh"
+#include "../models/application.hh"
+#include "../doctree/documenttree.hh"
+#include "../doctree/plotitem.hh"
 #include "../views/speciesselectiondialog.hh"
-#include "../views/genericplotdialog.hh"
+#include "../plot/configuration.hh"
+#include "../plot/plotconfigdialog.hh"
 
 
 /* ********************************************************************************************* *
  * Implementation of RETaskView, derived from TaskView:
  * ********************************************************************************************* */
-RETaskView::RETaskView(RETaskWrapper *task_wrapper, QWidget *parent)
+RETaskView::RETaskView(RETaskItem *task_wrapper, QWidget *parent)
   : TaskView(task_wrapper, parent)
 {
   // Update main-widget:
@@ -28,7 +33,7 @@ RETaskView::RETaskView(RETaskWrapper *task_wrapper, QWidget *parent)
 QWidget *
 RETaskView::createResultWidget(TaskItem *task_item)
 {
-  return new REResultWidget(static_cast<RETaskWrapper *>(task_item));
+  return new REResultWidget(static_cast<RETaskItem *>(task_item));
 }
 
 
@@ -36,7 +41,7 @@ RETaskView::createResultWidget(TaskItem *task_item)
 /* ********************************************************************************************* *
  * Implementation of REResultWidget, show the result of a RE analysis.
  * ********************************************************************************************* */
-REResultWidget::REResultWidget(RETaskWrapper *task_wrapper, QWidget *parent):
+REResultWidget::REResultWidget(RETaskItem *task_wrapper, QWidget *parent):
   QWidget(parent), re_task_wrapper(task_wrapper)
 {
   this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
@@ -70,68 +75,80 @@ REResultWidget::REResultWidget(RETaskWrapper *task_wrapper, QWidget *parent):
 
 
 void
-REResultWidget::quickPlotButtonPressed()
-{
+REResultWidget::quickPlotButtonPressed() {
   // Create SSE quick plot dialog
   SpeciesSelectionDialog re_dialog(re_task_wrapper->getRETask()->getConfig().getModel());
   re_dialog.setWindowTitle(tr("RE quick plot"));
   re_dialog.setTitle(tr("Select the species to plot."));
-
   // Exec & get selected species
   if (QDialog::Rejected == re_dialog.exec()) { return; }
-  QList<QString> selected_species = re_dialog.getSelectedSpecies();
-
+  QStringList selected_species = re_dialog.selectedSpecies();
   // Create and add timeseries plot:
-  Plot::Figure *figure = new RETimeSeriesPlot(selected_species, re_task_wrapper->getRETask());
-  Application::getApp()->docTree()->addPlot(this->re_task_wrapper, new PlotItem(figure));
+  Plot::PlotConfig *config = createRETimeSeriesPlotConfig(
+        selected_species, re_task_wrapper->getRETask());
+  Application::getApp()->docTree()->addPlot(this->re_task_wrapper, new PlotItem(config));
 }
 
 
 void
-REResultWidget::genericPlotButtonPressed()
-{
+REResultWidget::genericPlotButtonPressed() {
+  // Create empty config:
+  Plot::PlotConfig *config = new Plot::PlotConfig(*(re_task_wrapper->getRETask()->getTimeSeries()));
   // Show dialog
-  GenericPlotDialog dialog(re_task_wrapper->getRETask()->getTimeSeries());
-  if (QDialog::Rejected == dialog.exec()) { return; }
-
-  // Create plot figure with labels.
-  Plot::Figure *figure = new Plot::Figure(dialog.figureTitle());
-  figure->getAxis()->setXLabel(dialog.xLabel());
-  figure->getAxis()->setYLabel(dialog.yLabel());
-
-  // Iterate over all graphs of the configured plot:
-  for (size_t i=0; i<dialog.numGraphs(); i++) {
-    Plot::Graph *graph = dialog.graph(i).create(figure->getStyle(i));
-    figure->getAxis()->addGraph(graph);
-    figure->addToLegend(dialog.graph(i).label(), graph);
-  }
-
-  // Add timeseries plot:
-  Application::getApp()->docTree()->addPlot(re_task_wrapper, new PlotItem(figure));
+  Plot::PlotConfigDialog dialog(config);
+  if (QDialog::Accepted != dialog.exec()) { delete config; return; }
+  // Add plot:
+  Application::getApp()->docTree()->addPlot(re_task_wrapper, new PlotItem(config));
 }
 
 
 void
 REResultWidget::saveButtonPressed()
 {
+  QString selectedFilter;
   QString filename = QFileDialog::getSaveFileName(
-        this, tr("Save as text..."), "", tr("Text Files (*.txt *.csv)"));
+        this, tr("Save as text..."), "",
+        tr("Text Files (*.txt *.csv);;Matlab 5 Files (*.mat)"), &selectedFilter);
+  if ("" == filename) { return; }
 
-  if ("" == filename)
-  {
+  if (tr("") == selectedFilter) {
+    saveAsCSV(filename);
+  } else if (tr("") == selectedFilter) {
+    saveAsMAT(filename);
+  } else {
+    QMessageBox::critical(0, tr("Can not save results to file"),
+                          tr("Can not save results to file %1: Unknown format %2").arg(
+                            filename, selectedFilter));
+  }
+}
+
+
+void
+REResultWidget::saveAsCSV(const QString &filename)
+{
+  QFile file(filename);
+  // Try to open file
+  if (!file.open(QIODevice::WriteOnly| QIODevice::Text)) {
+    QMessageBox::critical(0, tr("Cannot open file"),
+                          tr("Cannot open file %1 for writing").arg(filename));
+    return;
+  }
+  // Write...
+  re_task_wrapper->getRETask()->getTimeSeries()->saveAsText(file);
+  file.close();
+}
+
+void
+REResultWidget::saveAsMAT(const QString &filename) {
+  std::fstream file(filename.toLocal8Bit().constData(), std::fstream::out|std::fstream::binary);
+  if (! file.is_open()) {
+    QMessageBox::critical(0, tr("Can not open file"),
+                          tr("Can not open file %1 for writing").arg(filename));
     return;
   }
 
-  QFile file(filename);
-
-  if (!file.open(QIODevice::WriteOnly| QIODevice::Text))
-  {
-    QMessageBox box;
-    box.setWindowTitle(tr("Can not open file"));
-    box.setText(tr("Can not open file %1 for writing").arg(filename));
-    box.exec();
-  }
-
-  this->re_task_wrapper->getRETask()->getTimeSeries()->saveAsText(file);
+  iNA::Utils::MatFile mat_file;
+  mat_file.add("RE_result", re_task_wrapper->getRETask()->getTimeSeries()->matrix());
+  mat_file.serialize(file);
   file.close();
 }

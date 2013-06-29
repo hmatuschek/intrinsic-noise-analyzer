@@ -41,6 +41,7 @@ CompartmentView::CompartmentView(CompartmentsItem *compartments, QWidget *parent
   _compTable->setModel(this->_compartments->compartments());
   _compTable->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
   _compTable->verticalHeader()->hide();
+  _compTable->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 
   // Delegate for compartment name
   _compTable->setItemDelegateForColumn(1, new PixmapDelegate(this));

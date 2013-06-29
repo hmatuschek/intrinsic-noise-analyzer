@@ -2,8 +2,8 @@
 #define __INA_PARSER_SBMLSH_WRITER_HH__
 
 #include <ostream>
-#include <ast/model.hh>
-#include <ast/reaction.hh>
+#include "../../ast/model.hh"
+#include "../../ast/reaction.hh"
 
 
 namespace iNA {

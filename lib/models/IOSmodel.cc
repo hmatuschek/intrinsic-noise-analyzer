@@ -374,6 +374,9 @@ IOSmodel::fullState(InitialConditions &context, const Eigen::VectorXd &state,
 
 {
 
+    // Make space
+    third.resize(this->numSpecies());
+
     // reconstruct full concentration vector and covariances in original permutation order
     LNAmodel::fullState(context,state,concentrations,cov,emre);
 

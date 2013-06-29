@@ -53,8 +53,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
 void
-MainWindow::showPanel(QWidget *panel)
-{
+MainWindow::showPanel(QWidget *panel) {
+  // Postpone destruction of current widget...
+  if (0 != this->_mainPane->widget()) {
+    QWidget *currentWidget = _mainPane->takeWidget();
+    currentWidget->deleteLater();
+  }
   this->_mainPane->setWidget(panel);
 }
 
@@ -84,7 +88,7 @@ MainWindow::_createActions()
   this->_checkForUpdatesAct->setChecked(Application::getApp()->checkNewVersionAvailable());
 
   // If update check is disabled at compile time -> disable menu entry:
-#ifdef INA_DISABLE_NEW_VERSION_CHECK
+#ifndef INA_ENABLE_VERSION_CHECK
   this->_checkForUpdatesAct->setEnabled(false);
   this->_checkForUpdatesAct->setChecked(false);
   this->_checkForUpdatesAct->setVisible(false);
@@ -118,6 +122,9 @@ MainWindow::_createMenus()
   this->_modelMenu->addAction(Application::getApp()->combineIrrevReacAction());
   this->_modelMenu->addSeparator();
   this->_modelMenu->addAction(Application::getApp()->editModelAction());
+
+  this->_viewMenu = this->menuBar()->addMenu(tr("&View"));
+  this->_viewMenu->addAction(Application::getApp()->configConservationAnalysisAction());
 
   this->_analysisMenu = this->menuBar()->addMenu(tr("&Analysis"));
   this->_analysisMenu->addAction(Application::getApp()->configSteadyStateAction());

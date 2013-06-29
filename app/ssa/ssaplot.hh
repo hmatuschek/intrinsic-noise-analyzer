@@ -1,28 +1,14 @@
 #ifndef SSAPLOT_HH
 #define SSAPLOT_HH
+#include <QStringList>
 
-#include "../views/varianceplot.hh"
-#include "ssatask.hh"
+namespace Plot { class PlotConfig; }
+class SSATask;
 
+Plot::PlotConfig *
+createSSAPlotConfig(const QStringList &selected_species, SSATask *task);
 
-/** Simply plots the mean and std. dev for the selected species. */
-class SSAPlot : public LinePlot
-{
-  Q_OBJECT
-
-public:
-  SSAPlot(const QStringList &selected_species, SSATask *task, QObject *parent=0);
-};
-
-
-/** Plots the correlation coefficients. */
-class SSACorrelationPlot : public LinePlot
-{
-  Q_OBJECT
-
-public:
-  SSACorrelationPlot(const QStringList &selected_species, SSATask *task, QObject *parent=0);
-};
-
+Plot::PlotConfig *
+createSSACorrelationPlotConfig(const QStringList &selected_species, SSATask *task);
 
 #endif // SSAPLOT_HH

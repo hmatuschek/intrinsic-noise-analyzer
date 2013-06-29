@@ -44,6 +44,8 @@ public:
 private slots:
   void plotButtonPressed();
   void saveButtonPressed();  
+  void saveAsCSV(const QString &filename);
+  void saveAsMAT(const QString &filename);
   void customPlotButtonPressed();
 
 

@@ -1,8 +1,8 @@
 #ifndef __INA_TRAFO_CONSISTENCYCHECK_HH__
 #define __INA_TRAFO_CONSISTENCYCHECK_HH__
 
-#include <ast/model.hh>
-#include <exception.hh>
+#include "../ast/model.hh"
+#include "../exception.hh"
 
 namespace iNA {
 namespace Trafo {

@@ -82,11 +82,17 @@ public:
     /** Links concentrations to full state */
     const Eigen::MatrixXex getLinkCMatrix();
 
-    /** Yields the values of conserved cycles */
-    Eigen::MatrixXex getConservedCycles(const Eigen::VectorXd &ICs);
+    /** Yields the values of conserved amounts. */
+    Eigen::VectorXex getConservedAmounts(const Eigen::VectorXd &InitialAmount);
+
+    /** Yields the conserved amounts as functions of the initial amounts. */
+    Eigen::VectorXex getConservedAmounts(const Eigen::VectorXex &InitialAmount);
+
+    /** Yields the values of conserved cycles as as functions of the initial conditions. */
+    Eigen::VectorXex getConservedCycles(const Eigen::VectorXd &ICs);
 
     /** Yields the expressions for conserved cycles as functions of the initial conditions. */
-    Eigen::MatrixXex getConservedCycles(const Eigen::VectorXex &ICs);
+    Eigen::VectorXex getConservedCycles(const Eigen::VectorXex &ICs);
 
     /** Yields the conservation matrix in concentration space */
     Eigen::MatrixXex getConservationMatrix();

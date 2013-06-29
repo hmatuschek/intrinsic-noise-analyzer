@@ -226,6 +226,10 @@ AxisTicks::addTick(AxisTick *tick) {
   addToGroup(_ticks.back());
 }
 
+qreal
+AxisTicks::lineWidth() const {
+  return _axis_line->pen().width();
+}
 
 void
 AxisTicks::updateRange() {

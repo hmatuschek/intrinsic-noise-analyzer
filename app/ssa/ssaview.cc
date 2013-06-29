@@ -6,11 +6,16 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
-#include "../models/application.hh"
-#include "../doctree/plotitem.hh"
-#include "../views/genericplotdialog.hh"
-#include "../views/speciesselectiondialog.hh"
+#include "utils/matexport.hh"
+#include <fstream>
+
 #include "ssaplot.hh"
+#include "../models/application.hh"
+#include "../doctree/documenttree.hh"
+#include "../doctree/plotitem.hh"
+#include "../plot/configuration.hh"
+#include "../plot/plotconfigdialog.hh"
+#include "../views/speciesselectiondialog.hh"
 
 
 
@@ -25,8 +30,7 @@ SSATaskView::SSATaskView(SSATaskWrapper *task_wrapper, QWidget *parent)
 }
 
 QWidget *
-SSATaskView::createResultWidget(TaskItem *task_item)
-{
+SSATaskView::createResultWidget(TaskItem *task_item) {
   return new SSAResultWidget(static_cast<SSATaskWrapper *>(task_item));
 }
 
@@ -80,62 +84,75 @@ SSAResultWidget::showPlot()
   dialog.setWindowTitle(tr("SSA quick plot"));
   dialog.setTitle(tr("Select the species to plot."));
   if (QDialog::Accepted != dialog.exec()) { return; }
-  QStringList selected_species = dialog.getSelectedSpecies();
+  QStringList selected_species = dialog.selectedSpecies();
 
   // Simply construct and add plot to task:
   Application::getApp()->docTree()->addPlot(
         this->ssa_task_wrapper,
-        new PlotItem(new SSAPlot(selected_species, this->ssa_task_wrapper->getSSATask())));
+        new PlotItem(
+          createSSAPlotConfig(selected_species, this->ssa_task_wrapper->getSSATask())));
   Application::getApp()->docTree()->addPlot(
         this->ssa_task_wrapper,
-        new PlotItem(new SSACorrelationPlot(selected_species, this->ssa_task_wrapper->getSSATask())));
+        new PlotItem(
+          createSSACorrelationPlotConfig(selected_species, this->ssa_task_wrapper->getSSATask())));
 }
 
 void
 SSAResultWidget::_genericPlotButtonPressed()
 {
   // Show dialog
-  GenericPlotDialog dialog(&ssa_task_wrapper->getSSATask()->getTimeSeries());
-  if (QDialog::Rejected == dialog.exec()) { return; }
-
-  // Create plot figure with labels.
-  Plot::Figure *figure = new Plot::Figure(dialog.figureTitle());
-  figure->getAxis()->setXLabel(dialog.xLabel());
-  figure->getAxis()->setYLabel(dialog.yLabel());
-
-  // Iterate over all graphs of the configured plot:
-  for (size_t i=0; i<dialog.numGraphs(); i++) {
-    Plot::Graph *graph = dialog.graph(i).create(figure->getStyle(i));
-    figure->getAxis()->addGraph(graph);
-    figure->addToLegend(dialog.graph(i).label(), graph);
-  }
-
+  Plot::PlotConfig *config = new Plot::PlotConfig(ssa_task_wrapper->getSSATask()->getTimeSeries());
+  Plot::PlotConfigDialog dialog(config);
+  if (QDialog::Accepted != dialog.exec()) { return; }
   // Add timeseries plot:
-  Application::getApp()->docTree()->addPlot(ssa_task_wrapper, new PlotItem(figure));
+  Application::getApp()->docTree()->addPlot(ssa_task_wrapper, new PlotItem(config));
 }
 
 void
 SSAResultWidget::saveData()
 {
+  QString selectedFilter;
   QString filename = QFileDialog::getSaveFileName(
-        this, tr("Save as text..."), "", tr("Text Files (*.txt *.csv)"));
+        this, tr("Save data as ..."), "",
+        tr("Text Files (*.txt *.csv);;Matlab 5 Files (*.mat)"),
+        &selectedFilter);
+  if ("" == filename) { return; }
 
-  if ("" == filename)
-  {
-    return;
+  if (tr("Text Files (*.txt *.csv)") == selectedFilter) {
+    saveAsCSV(filename);
+  } else if (tr("Matlab 5 Files (*.mat)") == selectedFilter) {
+    saveAsMAT(filename);
+  } else {
+    QMessageBox::critical(0, tr("Can not save results."),
+                          tr("Can not save results into file %1: Unknown format %2").arg(
+                            filename, selectedFilter));
   }
+}
 
+void
+SSAResultWidget::saveAsCSV(const QString &filename) {
   QFile file(filename);
-
-  if (!file.open(QIODevice::WriteOnly| QIODevice::Text))
-  {
-    QMessageBox box;
-    box.setWindowTitle(tr("Can not open file"));
-    box.setText(tr("Can not open file %1 for writing").arg(filename));
-    box.exec();
+  if (!file.open(QIODevice::WriteOnly| QIODevice::Text)) {
+    QMessageBox::critical(0, tr("Can not open file"),
+                          tr("Can not open file %1 for writing").arg(filename));
+    return;
   }
 
   this->ssa_task_wrapper->getSSATask()->getTimeSeries().saveAsText(file);
   file.close();
 }
 
+void
+SSAResultWidget::saveAsMAT(const QString &filename) {
+  std::fstream file(filename.toLocal8Bit().constData(), std::fstream::out|std::fstream::binary);
+  if (! file.is_open()) {
+    QMessageBox::critical(0, tr("Can not open file"),
+                          tr("Can not open file %1 for writing").arg(filename));
+    return;
+  }
+
+  iNA::Utils::MatFile mat_file;
+  mat_file.add("SSA_result", this->ssa_task_wrapper->getSSATask()->getTimeSeries().matrix());
+  mat_file.serialize(file);
+  file.close();
+}

@@ -6,11 +6,8 @@
 #include <QPushButton>
 #include "../doctree/speciesitem.hh"
 
-/**
- * Displays the list of species held by a @c SpeciesItem.
- *
- * @ingroup gui
- */
+/** Displays the list of species held by a @c SpeciesItem.
+ * @ingroup gui */
 class SpeciesView : public QWidget
 {
   Q_OBJECT

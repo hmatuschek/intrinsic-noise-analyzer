@@ -8,7 +8,7 @@
 #include <map>
 #include <cmath>
 
-#include "ast/model.hh"
+#include "../../ast/model.hh"
 #include "code.hh"
 
 

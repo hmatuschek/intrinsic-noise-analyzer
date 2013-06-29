@@ -3,11 +3,11 @@
 
 #include <typeinfo>
 
-#include <ast/unitdefinition.hh>
-#include <parser/lexer.hh>
-#include <parser/production.hh>
-#include <parser/expr/assembler.hh>
-#include <trafo/variablescaling.hh>
+#include "../../ast/unitdefinition.hh"
+#include "../../trafo/variablescaling.hh"
+#include "../lexer.hh"
+#include "../production.hh"
+#include "../expr/assembler.hh"
 
 
 
@@ -71,7 +71,8 @@ protected:
   /** Parses the initial values of compartments. */
   void linkCompartmentDefinitions(iNA::Parser::ConcreteSyntaxTree &comp);
   /** Handles a list species definition. */
-  void processSpeciesDefinition(iNA::Parser::ConcreteSyntaxTree &spec);
+  void processSpeciesDefinition(iNA::Parser::ConcreteSyntaxTree &spec,
+                                bool &speciesHasSubstanceUnits);
   /** Parses the initial value of species definitions. */
   void linkSpeciesDefinition(iNA::Parser::ConcreteSyntaxTree &spec, Trafo::VariableScaling &scaleing);
   /** Handles a list of species modifiers. */

@@ -30,13 +30,13 @@ SET(libina_ast_HEADERS
 
 SET(libina_trafo_SOURCES
     trafo/assertions.cc trafo/substitution.cc trafo/constantfolder.cc
-    trafo/partialmodel.cc trafo/assignmentruleinliner.cc
-    trafo/conservationanalysis.cc trafo/reversiblereactionconverter.cc trafo/variablescaling.cc
+    trafo/assignmentruleinliner.cc
+    trafo/reversiblereactionconverter.cc trafo/variablescaling.cc
     trafo/consistencycheck.cc trafo/modeldiff.cc trafo/referencecounter.cc trafo/makeparamglobal.cc)
 SET(libina_trafo_HEADERS trafo/trafo.hh trafo/filterflags.hh
     trafo/assertions.hh trafo/substitution.hh trafo/constantfolder.hh
-    trafo/partialmodel.hh trafo/assignmentruleinliner.hh
-    trafo/conservationanalysis.hh trafo/reversiblereactionconverter.hh trafo/variablescaling.hh
+    trafo/assignmentruleinliner.hh
+    trafo/reversiblereactionconverter.hh trafo/variablescaling.hh
     trafo/consistencycheck.hh trafo/modeldiff.hh trafo/referencecounter.hh trafo/makeparamglobal.hh)
 
 SET(libina_sbmlsh_parser_SOURCES
@@ -181,7 +181,7 @@ SET(libina_eval_direct_HEADERS
 SET(libina_eval_bytecode_SOURCES
     eval/bci/code.cc eval/bci/compiler.cc eval/bci/assembler.cc eval/bci/interpreter.cc
     eval/bci/dependencetree.cc eval/bci/pass.cc eval/bci/engine.cc)
-SET(libina_eval_direct_HEADERS
+SET(libina_eval_bytecode_HEADERS
     eval/bci/code.hh eval/bci/compiler.hh eval/bci/assembler.hh eval/bci/interpreter.hh
     eval/bci/dependencetree.hh eval/bci/pass.hh eval/bci/engine.hh)
 
@@ -247,21 +247,24 @@ COPY_HEADERS_WITH_DIRECTORY("${libina_HEADERS}" "${CMAKE_CURRENT_BINARY_DIR}/inc
 # Compile library
 #
 IF(INA_ENABLE_STATIC)
+ # As static library:
 ADD_LIBRARY(libina STATIC ${libina_SOURCES})
 ELSE()
-ADD_LIBRARY(libina SHARED ${libina_SOURCES})
+ # As shared library:
+ ADD_LIBRARY(libina SHARED ${libina_SOURCES})
+ SET_TARGET_PROPERTIES(libina PROPERTIES
+  OUTPUT_NAME "ina"
+  VERSION "${INA_VERSION_MAJOR}.${INA_VERSION_MINOR}.${INA_VERSION_PATCH}"
+  SOVERION "${INA_VERSION_MAJOR}"
+  INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
 ENDIF()
 
-SET_TARGET_PROPERTIES(libina PROPERTIES OUTPUT_NAME "ina")
 TARGET_LINK_LIBRARIES(libina ${LIBS})
-
 
 # Install library files
 INSTALL(TARGETS libina
         DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 # Install header files
-IF(UNIX AND APPLE)
 INSTALL_HEADERS_WITH_DIRECTORY("${libina_HEADERS}" "${CMAKE_INSTALL_INCLUDEDIR}/libina")
 INSTALL(FILES "${CMAKE_CURRENT_BINARY_DIR}/config.hh" DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/libina")
-ENDIF(UNIX AND APPLE)

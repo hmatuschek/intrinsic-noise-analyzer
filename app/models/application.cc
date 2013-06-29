@@ -1,5 +1,8 @@
 #include "application.hh"
 
+#include "../doctree/documenttree.hh"
+#include "../doctree/documenttreeitem.hh"
+
 #include "../views/mainwindow.hh"
 #include "../views/importmodeldialog.hh"
 #include "../views/sbmlsheditordialog.hh"
@@ -26,6 +29,8 @@
 #include "../ssa/ssatask.hh"
 #include "../ssa/ssataskwrapper.hh"
 #include "../ssa/ssawizard.hh"
+
+#include "../cnsrv/conservationanalysistask.hh"
 
 #include <QMessageBox>
 #include <QFileDialog>
@@ -130,6 +135,10 @@ Application::Application() :
   _combineIrvReaction->setEnabled(false);
   _combineIrvReaction->setStatusTip(tr("Combine irreversible reactions to reversible ones when possible"));
 
+  _cnsrvAnalysisAction = new QAction(tr("&Conserved Quantities"), this);
+  _cnsrvAnalysisAction->setShortcut(QKeySequence(Qt::CTRL+Qt::SHIFT+Qt::Key_C));
+  _cnsrvAnalysisAction->setStatusTip(tr("Displays conserved quantities of model."));
+
   _steadyStateAction = new QAction(tr("&Steady State Analysis (SSE)"), this);
   _steadyStateAction->setShortcut(QKeySequence(Qt::CTRL+Qt::SHIFT+Qt::Key_S));
   _steadyStateAction->setStatusTip(tr("Run a steady state analysis using the System Size Expansion (SSE)."));
@@ -165,6 +174,7 @@ Application::Application() :
   QObject::connect(_timeCourseAnalysisAction, SIGNAL(triggered()), this, SLOT(configTimeCourseAnalysis()));
   QObject::connect(_ssaAnalysisAction, SIGNAL(triggered()), this, SLOT(configSSAAnalysis()));
   QObject::connect(_ssaParameterScanAction, SIGNAL(triggered()), this, SLOT(configSSAParameterScan()));
+  QObject::connect(_cnsrvAnalysisAction, SIGNAL(triggered()), this, SLOT(configConservationAnalysis()));
   QObject::connect(_recentModelsMenu, SIGNAL(triggered(QAction*)), this, SLOT(onOpenRecentModel(QAction*)));
   QObject::connect(&_versionCheck, SIGNAL(newVersionAvailable(QString)), this, SLOT(onNewVersionAvailable(QString)));
 }
@@ -207,7 +217,12 @@ Application::itemSelected(const QModelIndex &index)
 
   // This should no happen, anyway...
   if (0 == (wrapper = dynamic_cast<DocumentTreeItem *>(item))) { return; }
+  itemSelected(wrapper);
+}
 
+void
+Application::itemSelected(DocumentTreeItem *wrapper)
+{
   // If wrapper provides a view -> show it:
   if (wrapper->providesView()) {
     this->mainWindow->showPanel(wrapper->createView());
@@ -243,9 +258,9 @@ Application::checkForNewVersion()
 
 
 void
-Application::importModel(const QString &path, bool anonymous)
+Application::importModel(const QString &path, bool anonymous, ModelType type)
 {
-  onImportModel(path, anonymous);
+  onImportModel(path, anonymous, type);
 }
 
 
@@ -264,6 +279,17 @@ Application::showContextMenuAt(const QModelIndex &index, const QPoint &global_po
 DocumentTree * Application::docTree() { return this->document_tree; }
 
 
+bool
+Application::hasADocumentSelected() const {
+  return 0 != dynamic_cast<DocumentItem *>(getParentDocumentItem(_selected_item));
+}
+
+DocumentItem *
+Application::selectedDocument() {
+  return getParentDocumentItem(_selected_item);
+}
+
+
 /* ******************************************************************************************** *
  * ...
  * ******************************************************************************************** */
@@ -280,6 +306,7 @@ QAction *Application::configParameterScanAction() { return _parameterScanAction;
 QAction *Application::configTimeCourseAction() { return _timeCourseAnalysisAction; }
 QAction *Application::configSSAAnalysisAction() { return _ssaAnalysisAction; }
 QAction *Application::configSSAParameterScanAction() { return _ssaParameterScanAction; }
+QAction *Application::configConservationAnalysisAction() { return _cnsrvAnalysisAction; }
 QMenu   *Application::recentModelsMenu() { return _recentModelsMenu; }
 
 
@@ -288,9 +315,7 @@ QMenu   *Application::recentModelsMenu() { return _recentModelsMenu; }
  * ******************************************************************************************** */
 void Application::onNewModel()
 {
-
-  iNA::Ast::Model *new_model = new iNA::Ast::Model(
-              "New_model", "New model");
+  iNA::Ast::Model *new_model = new iNA::Ast::Model("New_model", "New model");
   docTree()->addDocument(new DocumentItem(new_model));
 
 }
@@ -299,93 +324,75 @@ void Application::onNewModel()
 void Application::onImportModel()
 {
   // Show a file-dialog for files:
-  QString fileName = QFileDialog::getOpenFileName(
-        0, tr("Import model"), "",
-        tr("All Models (*.xml *.sbml *.mod *.sbmlsh);;SBML Models (*.xml *.sbml);;SBML-sh Models (*.mod *.sbmlsh);;All Files (*.*"));
+  QString fileFilters = tr(
+        "All Models (*.xml *.sbml *.mod *.sbmlsh);;SBML Models (*.xml *.sbml);;"
+        "SBML-sh Models (*.mod *.sbmlsh);;All Files (*.*");
+  QString fileName = QFileDialog::getOpenFileName(0, tr("Import model"), "", fileFilters);
   if (0 == fileName.size()) { return; }
-
   onImportModel(fileName);
 }
 
 
-void Application::onImportModel(const QString &fileName, bool anonymous)
+void Application::onImportModel(const QString &fileName, bool anonymous, ModelType type)
 {
+  // Get file into
   QFileInfo info(fileName);
+
   // Check if file is readable:
   if (! info.isReadable()) {
-    QMessageBox::critical(0, tr("Can not import model"),
-                          tr("Can not import model from file %1: File not readable.").arg(info.fileName()));
+    QMessageBox::critical(
+          0, tr("Can not import model"),
+          tr("Can not import model from file %1: File not readable.").arg(info.fileName()));
     return;
   }
 
+  // Try to determine file type by extension or ask user:
+  if ( (FORMAT_AUTO==type) && (("xml"==info.suffix()) || ("sbml"==info.suffix()))) {
+    type = FORMAT_SBML;
+  } else if ((FORMAT_AUTO==type) && (("mod"==info.suffix()) || ("sbmlsh"==info.suffix()))) {
+    type = FORMAT_SBMLsh;
+  } else if ((FORMAT_AUTO==type) || (FORMAT_ASK_USER==type)){
+    // ask user:
+    // If unknown extension -> ask the user
+    ModelFormatQuestion dialog(fileName);
+    if (QDialog::Accepted != dialog.exec()) { return; }
+    ModelFormatQuestion::Format format = dialog.getFormat();
+    switch (format) {
+    case ModelFormatQuestion::SBML_MODEL: type=FORMAT_SBML;
+      case ModelFormatQuestion::SBMLSH_MODEL: type=FORMAT_SBMLsh;
+    }
+  }
+
+  // Finally, import model
+  DocumentItem *new_doc = 0;
   try {
-    DocumentItem *new_doc = 0;
-    // Try to determine file type by extension:
-    if (("xml" == info.suffix()) || ("sbml" == info.suffix())) {
-      if (anonymous)
+    if (FORMAT_SBML == type) {
+      if (anonymous) {
         new_doc = new DocumentItem(Parser::Sbml::importModel(fileName.toLocal8Bit().data()));
-      else
+      } else {
         new_doc = new DocumentItem(Parser::Sbml::importModel(fileName.toLocal8Bit().data()), fileName);
-    } else if (("mod" == info.suffix()) || ("sbmlsh" == info.suffix())) {
-      if (anonymous)
-        new_doc = new DocumentItem(Parser::Sbmlsh::importModel(fileName.toLocal8Bit().data()));
-      else
-        new_doc = new DocumentItem(Parser::Sbmlsh::importModel(fileName.toLocal8Bit().data()), fileName);
-    }
-    // Add new document to tree:
-    if (0 != new_doc) {
-      docTree()->addDocument(new_doc);
-      if (! anonymous) {
-        addRecentModel(fileName);
-        updateRecentModelsMenu();
       }
-      return;
+    } else if (FORMAT_SBMLsh == type) {
+      if (anonymous) {
+        new_doc = new DocumentItem(Parser::Sbmlsh::importModel(fileName.toLocal8Bit().data()));
+      } else {
+        new_doc = new DocumentItem(Parser::Sbmlsh::importModel(fileName.toLocal8Bit().data()), fileName);
+      }
     }
   } catch (iNA::Parser::ParserError &err) {
-    QMessageBox::warning(
-          0, tr("Can not open model"), err.what());
+    QMessageBox::warning(0, tr("Can not open model"), err.what());
     return;
   } catch (iNA::Exception &err) {
     QMessageBox::warning(0, tr("Can not open model"), err.what());
     return;
   }
 
-  // If unknown extension -> ask the user
-  ModelFormatQuestion dialog(fileName);
-  if (QDialog::Accepted != dialog.exec()) { return; }
-  ModelFormatQuestion::Format format = dialog.getFormat();
-
-  // load model.
-  try {
-    DocumentItem *new_doc = 0;
-    // Try to determine file type by extension:
-    if (ModelFormatQuestion::SBML_MODEL == format) {
-      if (anonymous)
-        new_doc = new DocumentItem(Parser::Sbml::importModel(fileName.toStdString()));
-      else
-        new_doc = new DocumentItem(Parser::Sbml::importModel(fileName.toStdString()), fileName);
-    } else if (ModelFormatQuestion::SBMLSH_MODEL == format) {
-      if (anonymous)
-        new_doc = new DocumentItem(Parser::Sbmlsh::importModel(fileName.toStdString()));
-      else
-        new_doc = new DocumentItem(Parser::Sbmlsh::importModel(fileName.toStdString()), fileName);
-    }
-    // Add new document to tree:
-    if (0 != new_doc) {
-      docTree()->addDocument(new_doc);
-      if (! anonymous) {
-        addRecentModel(fileName);
-        updateRecentModelsMenu();
-      }
-      return;
-    }
-  } catch (iNA::Parser::ParserError &err) {
-    QMessageBox::warning(
-          0, tr("Can not open model"), err.what());
-    return;
-  } catch (iNA::Exception &err) {
-    QMessageBox::warning(0, tr("Can not open model"), err.what());
-    return;
+  // Add document to doc tree:
+  docTree()->addDocument(new_doc);
+  // Add document to list of recent model if not imported anonymously:
+  if (! anonymous) {
+    addRecentModel(fileName);
+    updateRecentModelsMenu();
   }
 }
 
@@ -604,7 +611,7 @@ Application::configTimeCourseAnalysis() {
 
   try {
     // Decide which analysis task to create:
-    switch (wizard.getConfigCast<SSETaskConfig>().getMethod()) {
+    switch (wizard.getConfigCast<SSETaskConfig>().method()) {
 
     case SSETaskConfig::RE_ANALYSIS:
       task = new RETask(wizard.getConfigCast<SSETaskConfig>());
@@ -635,24 +642,24 @@ Application::configTimeCourseAnalysis() {
   }
 
   // Add task to application and run it:
-  switch(wizard.getConfigCast<SSETaskConfig>().getMethod()) {
+  switch(wizard.getConfigCast<SSETaskConfig>().method()) {
 
     case SSETaskConfig::RE_ANALYSIS:
       docTree()->addTask(
             wizard.getConfigCast<SSETaskConfig>().getModelDocument(),
-            new RETaskWrapper(dynamic_cast<RETask *>(task)));
+            new RETaskItem(dynamic_cast<RETask *>(task)));
       break;
 
     case SSETaskConfig::LNA_ANALYSIS:
       docTree()->addTask(
             wizard.getConfigCast<SSETaskConfig>().getModelDocument(),
-            new LNATaskWrapper(dynamic_cast<LNATask *>(task)));
+            new LNATaskItem(dynamic_cast<LNATask *>(task)));
       break;
 
     case SSETaskConfig::IOS_ANALYSIS:
       docTree()->addTask(
             wizard.getConfigCast<SSETaskConfig>().getModelDocument(),
-            new IOSTaskWrapper(dynamic_cast<IOSTask *>(task)));
+            new IOSTaskItem(dynamic_cast<IOSTask *>(task)));
       break;
 
   default:
@@ -692,6 +699,35 @@ Application::configSSAAnalysis()
   task->start();
 }
 
+
+void
+Application::configConservationAnalysis() {
+  ConservationAnalysisConfig config;
+  ConservationAnalysisWizard wizard(config);
+
+  wizard.restart(); if (QDialog::Accepted != wizard.exec()) { return; }
+
+  // Construct task from wizard:
+  ConservationAnalysisTask *task = 0;
+  try {
+    task = new ConservationAnalysisTask(
+          wizard.getConfigCast<ConservationAnalysisConfig>());
+  } catch (iNA::Exception err) {
+    QMessageBox::warning(
+          0, tr("Can not construct conservation analysis from model: "), err.what());
+    return;
+  } catch (std::exception &err) {
+    QMessageBox::warning(0, "Error: " ,err.what());
+    return;
+  }
+
+  // Add task to application and run it:
+
+  TaskItem *item = new ConservationAnalysisItem(task);
+  docTree()->addTask(
+        wizard.getConfigCast<ConservationAnalysisConfig>().getModelDocument(), item);
+  task->start();  
+}
 
 void
 Application::onOpenRecentModel(QAction *action)

@@ -1,16 +1,16 @@
 #ifndef __INA_STOCHASTICSIMULATOR_HH__
 #define __INA_STOCHASTICSIMULATOR_HH__
 
-#include "mersennetwister.hh"
+#include "../mersennetwister.hh"
 
-#include "ast/ast.hh"
+#include "../ast/ast.hh"
 #include <ginac/ginac.h>
 
 #include "basemodel.hh"
 #include "particlenumbersmixin.hh"
 #include "reasonablemodelmixin.hh"
 #include "histogram.hh"
-#include "openmp.hh"
+#include "../openmp.hh"
 
 
 namespace iNA {
@@ -34,7 +34,6 @@ private:
    * Number of OpenMP threads to be used.
    */
   size_t num_threads;
-
 
 protected:
   /**
@@ -83,7 +82,8 @@ public:
    * Is initialized with a model, the number of realization @c ensembleSize and a seed for the
    * random number generator
    **/
-  StochasticSimulator(const Ast::Model &model, int ensembleSize, int seed, size_t num_threads=OpenMP::getMaxThreads());
+  StochasticSimulator(const Ast::Model &model, int ensembleSize, int seed, size_t num_threads=OpenMP::getMaxThreads(),
+                      const std::vector<const GiNaC::symbol *> &parameters=std::vector<const GiNaC::symbol *>());
 
   /**
   * Gives number of threads used for OpenMP parallelism
@@ -91,9 +91,14 @@ public:
   const size_t &numThreads();
 
   /**
-  *  stepper
+  *  Stepper
   **/
   virtual void run(double step)=0;
+
+  /**
+  *  Resets the state of the ensemble to the initial value
+  **/
+  void reset();
 
   /**
    * Destructor.
@@ -117,6 +122,9 @@ public:
   *  @param covariance the lower diagonal covariance matrix
   **/
 
+
+  Eigen::MatrixXd & getObservationMatrix();
+
   void stats(Eigen::VectorXd &mean, Eigen::MatrixXd &covariance, Eigen::VectorXd &skewness);
 
   /**
@@ -127,16 +135,15 @@ public:
   **/
   void fluxStatistics(Eigen::VectorXd &mean, Eigen::MatrixXd &covariance);
 
+  /**
+  *  Evaluates the histogram of a species from current state
+  **/
+  void getHistogram(size_t speciesIdx, std::map<double,double> &hist);
 
   /**
   *  Evaluates the histogram of a species from current state
   **/
-  void getHistogram(size_t specId, std::map<double,double> &hist);
-
-  /**
-  *  Evaluates the histogram of a species from current state
-  **/
-  void getHistogram(size_t specId, Histogram<double> &hist);
+  void getHistogram(size_t specIdx, Histogram<double> &hist);
 
   /**
   * Returns the ensemble size

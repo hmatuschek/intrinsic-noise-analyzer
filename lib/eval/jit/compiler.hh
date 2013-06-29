@@ -4,11 +4,11 @@
 #include "code.hh"
 #include "assembler.hh"
 #include "builder.hh"
-#include "eval/compilercommon.hh"
+#include "../compilercommon.hh"
 
 #include <ginac/ginac.h>
 #include <eigen3/Eigen/Eigen>
-#include "ginacsupportforeigen.hh"
+#include "../../ginacsupportforeigen.hh"
 
 
 namespace iNA {

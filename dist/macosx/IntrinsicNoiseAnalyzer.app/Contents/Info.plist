@@ -6,7 +6,7 @@
 	<string>ina</string>
 
 	<key>CFBundleGetInfoString</key>
-	<string>IntrinsicNoiseAnalyzer 0.4.1</string>
+	<string>IntrinsicNoiseAnalyzer 0.4.2</string>
 	
 	<key>CFBundleIdentifier</key>
 	<string>com.googlecode.intrinsic-noise-analyzer</string>
@@ -27,7 +27,7 @@
 	<string>0.4</string>
 
 	<key>CFBundleVersion</key>
-	<string>0.4.1</string>
+	<string>0.4.2</string>
 
 	<key>LSMinimumSystemVersion</key>
 	<string>10.6.0</string>

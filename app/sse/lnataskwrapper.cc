@@ -3,28 +3,28 @@
 #include "lnataskview.hh"
 
 
-LNATaskWrapper::LNATaskWrapper(LNATask *task, QObject *parent)
+LNATaskItem::LNATaskItem(LNATask *task, QObject *parent)
   : TaskItem(task, parent)
 {
 }
 
 
 LNATask *
-LNATaskWrapper::getLNATask()
+LNATaskItem::getLNATask()
 {
   return static_cast<LNATask *>(this->task);
 }
 
 
 bool
-LNATaskWrapper::providesView() const
+LNATaskItem::providesView() const
 {
   return true;
 }
 
 
 QWidget *
-LNATaskWrapper::createView()
+LNATaskItem::createView()
 {
   return new LNATaskView(this);
 }

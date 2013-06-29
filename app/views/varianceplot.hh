@@ -25,6 +25,7 @@ public:
                         const Eigen::VectorXd &var, const QString &label="");
 };
 
+
 /**
  * General purpose variance plot.
  *

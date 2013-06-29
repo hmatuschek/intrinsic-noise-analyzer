@@ -1,7 +1,7 @@
 #ifndef __INA_REmodel_HH__
 #define __INA_REmodel_HH__
 
-#include "ast/ast.hh"
+#include "../ast/ast.hh"
 #include "ssebasemodel.hh"
 #include "initialconditions.hh"
 
@@ -76,7 +76,6 @@ public:
 
   double foldVertex(std::list<int> lower, std::list<int> upper);
 
-
   /**
    * Interface for the integrator: get initial state vector.
    */
@@ -89,11 +88,12 @@ public:
 
   virtual void getInitial(InitialConditions &ICs, Eigen::VectorXd &x);
 
-
+protected:
   size_t _sseLength;
   size_t _lnaLength;
   size_t _iosLength;
 
+public:
   size_t sseLength();
   size_t lnaLength();
   size_t iosLength();
@@ -104,4 +104,4 @@ public:
 }
 }
 
-#endif // REMODEL_HH
+#endif // __INA_REMODEL_HH

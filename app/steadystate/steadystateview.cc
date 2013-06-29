@@ -8,12 +8,13 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
-
+#include <fstream>
 #include "../models/application.hh"
+#include "../doctree/documenttree.hh"
 #include "../doctree/plotitem.hh"
 #include "steadystatespectrumplot.hh"
 #include "../views/speciesselectiondialog.hh"
-
+#include "utils/matexport.hh"
 
 
 SteadyStateView::SteadyStateView(SteadyStateTaskWrapper *task_wrapper, QWidget *parent)
@@ -146,7 +147,7 @@ SteadyStateResultWidget::plotSpectrum()
   dialog.setWindowTitle(tr("Steady State quick plot"));
   dialog.setTitle(tr("Select the species to plot."));
   if (QDialog::Rejected == dialog.exec()) { return; }
-  QStringList selected_species = dialog.getSelectedSpecies();
+  QStringList selected_species = dialog.selectedSpecies();
 
   // Create plot
   Application::getApp()->docTree()->addPlot(
@@ -186,22 +187,34 @@ void
 SteadyStateResultWidget::saveData()
 {
   // First get file-name from user:
+  QString selectedFilter;
   QString filename = QFileDialog::getSaveFileName(
-        this, tr("Save as text..."), "", tr("Text Files (*.txt *.csv)"));
+        this, tr("Save results as ..."), "",
+        tr("Text Files (*.txt *.csv);;Matlab 5 Files (*.mat)"), &selectedFilter);
+  if ("" == filename) { return; }
 
-  if ("" == filename)
-  {
-    return;
+  if (tr("Text Files (*.txt *.csv)") == selectedFilter) {
+    saveAsCSV(filename);
+  } else if (tr("Matlab 5 Files (*.mat)") == selectedFilter) {
+    saveAsMAT(filename);
+  } else {
+    QMessageBox::critical(
+          0, tr("Can not save data."),
+          tr("Can not save analysis result to file %1: Unknown type selected %2").arg(
+            filename, selectedFilter));
   }
+}
 
+void
+SteadyStateResultWidget::saveAsCSV(const QString &filename)
+{
   QFile file(filename);
-
-  if (! file.open(QIODevice::WriteOnly| QIODevice::Text))
-  {
+  if (! file.open(QIODevice::WriteOnly| QIODevice::Text)) {
     QMessageBox box;
     box.setWindowTitle(tr("Cannot open file"));
     box.setText(tr("Cannot open file %1 for writing").arg(filename));
     box.exec();
+    return;
   }
 
   // Get data from task
@@ -221,29 +234,25 @@ SteadyStateResultWidget::saveData()
 
   // Dump Species names/IDs:
   out << "# ";
-  for (int i=0; i<conc.size(); i++)
-  {
+  for (int i=0; i<conc.size(); i++) {
     out << task->getSpeciesName(i) << "\t";
   }
   out << "\n";
 
   // Dump concentrations:
-  for(int i=0; i<conc.size(); i++)
-  {
+  for(int i=0; i<conc.size(); i++) {
     out << conc(i) << "\t";
   }
   out << "\n";
 
   // Dump EMRE:
-  for (int i=0; i<emre.size(); i++)
-  {
+  for (int i=0; i<emre.size(); i++) {
     out << emre(i) + conc(i) << "\t";
   }
   out << "\n";
 
   // Dump IOS:
-  for (int i=0; i<emre.size(); i++)
-  {
+  for (int i=0; i<emre.size(); i++) {
     out << emre(i) + conc(i)  + ios(i) << "\t";
   }
   out << "\n";
@@ -255,6 +264,39 @@ SteadyStateResultWidget::saveData()
     }
     out << "\n";
   }
+
+  // Close file:
+  file.close();
+}
+
+void
+SteadyStateResultWidget::saveAsMAT(const QString &filename) {
+  std::fstream file(filename.toLocal8Bit().constData(),
+                    std::fstream::out | std::fstream::binary);
+  if (! file.is_open()) {
+    QMessageBox box;
+    box.setWindowTitle(tr("Cannot open file"));
+    box.setText(tr("Cannot open file %1 for writing").arg(filename));
+    box.exec();
+    return;
+  }
+
+  // Get data from task
+  SteadyStateTask *task = this->ss_task_wrapper->getSteadyStateTask();
+  Eigen::VectorXd conc = task->getConcentrations();
+  Eigen::VectorXd emre = task->getEMRECorrections();
+  Eigen::VectorXd ios  = task->getIOSCorrections();
+  Eigen::MatrixXd concentrations(3, conc.size()); concentrations << conc, emre, ios;
+  Eigen::MatrixXd lna_cov  = task->getLNACovariances();
+  Eigen::MatrixXd ios_cov  = task->getIOSCovariances();
+
+  iNA::Utils::MatFile mat_file;
+  mat_file.add("RE_con", conc);
+  mat_file.add("EMRE_con", conc);
+  mat_file.add("IOS_con", ios);
+  mat_file.add("LNA_cov", lna_cov);
+  mat_file.add("IOS_cov", ios_cov);
+  mat_file.serialize(file);
 
   // Close file:
   file.close();

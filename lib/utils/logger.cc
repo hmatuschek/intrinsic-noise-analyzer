@@ -183,8 +183,12 @@ TextMessageHandler::handleMessage(const Message &message)
     break;
   }
 
+  std::string fileName = message.getFileName();
+  size_t slashIdx = fileName.find_last_of("/\\");
+  if (std::string::npos != slashIdx) { fileName = fileName.substr(slashIdx+1); }
+
   if (message.getFileName().size() > 0) {
-    _stream << "In file " << message.getFileName() << " ";
+    _stream << "In file " << fileName << " ";
     if (message.getLineNo() > 0) {
       _stream << "@ line " << message.getLineNo();
     }

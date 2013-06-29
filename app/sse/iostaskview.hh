@@ -21,7 +21,7 @@ class IOSTaskView : public TaskView
   Q_OBJECT
 
 public:
-  explicit IOSTaskView(IOSTaskWrapper *task_item, QWidget *parent=0);
+  explicit IOSTaskView(IOSTaskItem *task_item, QWidget *parent=0);
 
 protected:
   virtual QWidget *createResultWidget(TaskItem *task_item);
@@ -34,17 +34,18 @@ class IOSResultWidget : public QWidget
   Q_OBJECT
 
 public:
-  explicit IOSResultWidget(IOSTaskWrapper *_ios_task_wrapper, QWidget *parent = 0);
+  explicit IOSResultWidget(IOSTaskItem *_ios_task_wrapper, QWidget *parent = 0);
 
 
 private slots:
   void _onPlotButtonPressed();
   void _onGenericPlotButtonPressed();
   void _onSaveButtonPressed();
-
+  void saveAsCSV(const QString &filename);
+  void saveAsMAT(const QString &filename);
 
 private:
-  IOSTaskWrapper *_ios_task_wrapper;
+  IOSTaskItem *_ios_task_wrapper;
   TableWrapper *_tableWrapper;
   QTableView   *_dataTable;
   QPushButton  *_plotButton;

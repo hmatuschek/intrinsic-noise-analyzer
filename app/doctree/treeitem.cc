@@ -4,39 +4,34 @@
 
 
 TreeItem::TreeItem()
-  : _tree_parent(0)
+  : _tree_parent(0), _children()
 {
   // Pass...
 }
 
 
 TreeItem *
-TreeItem::getTreeChild(int row) const
-{
+TreeItem::getTreeChild(int row) const {
   return this->_children.value(row);
 }
 
 
 void
-TreeItem::setTreeParent(TreeItem *parent)
-{
+TreeItem::setTreeParent(TreeItem *parent) {
   this->_tree_parent = parent;
 }
 
 
 TreeItem *
-TreeItem::getTreeParent() const
-{
+TreeItem::getTreeParent() const {
   return this->_tree_parent;
 }
 
 
 int
-TreeItem::getTreeRow() const
-{
+TreeItem::getTreeRow() const {
   if (0 == this->_tree_parent)
-    return 0;
-
+    return -1;
   return this->_tree_parent->indexOfTreeChild(this);
 }
 
@@ -44,31 +39,28 @@ TreeItem::getTreeRow() const
 int
 TreeItem::indexOfTreeChild(const TreeItem *node) const
 {
-  return this->_children.indexOf(const_cast<TreeItem *>(node));
+  return _children.indexOf(const_cast<TreeItem *>(node));
 }
 
 
 int
-TreeItem::getTreeChildCount() const
-{
-  return this->_children.size();
+TreeItem::getTreeChildCount() const {
+  return _children.size();
 }
 
 
 void
-TreeItem::addChild(TreeItem *node)
-{
+TreeItem::addChild(TreeItem *node) {
   node->setTreeParent(this);
-  this->_children.append(node);
+  _children.append(node);
 }
 
 
 void
-TreeItem::removeChild(TreeItem *node)
-{
+TreeItem::removeChild(TreeItem *node) {
   if (! this->_children.removeOne(node)) {
     iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::ERROR);
-    message << "OOps can not remove tree-item " << node << " not in list?";
+    message << "Oops can not remove tree-item " << node << " not in list?";
     iNA::Utils::Logger::get().log(message);
   }
 }

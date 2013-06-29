@@ -7,17 +7,22 @@
 #include <QFile>
 #include <QMessageBox>
 
-#include "../models/application.hh"
-#include "../doctree/plotitem.hh"
+#include <fstream>
+#include "utils/matexport.hh"
+
 #include "lnaplot.hh"
+#include "../models/application.hh"
+#include "../doctree/documenttree.hh"
+#include "../doctree/plotitem.hh"
 #include "../views/speciesselectiondialog.hh"
-#include "../views/genericplotdialog.hh"
+#include "../plot/configuration.hh"
+#include "../plot/plotconfigdialog.hh"
 
 
 /* ********************************************************************************************* *
  * Implementation of LNATaskView, derived from TaskView:
  * ********************************************************************************************* */
-LNATaskView::LNATaskView(LNATaskWrapper *task_wrapper, QWidget *parent)
+LNATaskView::LNATaskView(LNATaskItem *task_wrapper, QWidget *parent)
   : TaskView(task_wrapper, parent)
 {
   // Update main-widget:
@@ -26,9 +31,8 @@ LNATaskView::LNATaskView(LNATaskWrapper *task_wrapper, QWidget *parent)
 
 
 QWidget *
-LNATaskView::createResultWidget(TaskItem *task_item)
-{
-  return new LNAResultWidget(static_cast<LNATaskWrapper *>(task_item));
+LNATaskView::createResultWidget(TaskItem *task_item) {
+  return new LNAResultWidget(static_cast<LNATaskItem *>(task_item));
 }
 
 
@@ -36,7 +40,7 @@ LNATaskView::createResultWidget(TaskItem *task_item)
 /* ********************************************************************************************* *
  * Implementation of LNAResultWidget, show the result of a LNA (SSE) analysis.
  * ********************************************************************************************* */
-LNAResultWidget::LNAResultWidget(LNATaskWrapper *task_wrapper, QWidget *parent):
+LNAResultWidget::LNAResultWidget(LNATaskItem *task_wrapper, QWidget *parent):
   QWidget(parent), _lna_task_wrapper(task_wrapper)
 {
   setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
@@ -70,70 +74,89 @@ LNAResultWidget::LNAResultWidget(LNATaskWrapper *task_wrapper, QWidget *parent):
 
 
 void
-LNAResultWidget::_plotButtonPressed()
-{
+LNAResultWidget::_plotButtonPressed() {
   SpeciesSelectionDialog dialog(_lna_task_wrapper->getLNATask()->getConfig().getModel());
   dialog.setWindowTitle(tr("LNA quick plot"));
   dialog.setTitle(tr("Select the species to plot."));
 
   if (QDialog::Rejected == dialog.exec()) { return; }
-  QStringList selected_species = dialog.getSelectedSpecies();
+  QStringList selected_species = dialog.selectedSpecies();
 
   // Add timeseries plot:
   Application::getApp()->docTree()->addPlot(
         _lna_task_wrapper,
-        new PlotItem(new LNATimeSeriesPlot(selected_species, _lna_task_wrapper->getLNATask())));
+        new PlotItem(
+          createLNATimeSeriesPlotConfig(selected_species, _lna_task_wrapper->getLNATask())));
 
   // Add correlation coefficient plot (if there are more than one species selected).
   if (1 < selected_species.size()) {
     Application::getApp()->docTree()->addPlot(
           _lna_task_wrapper,
           new PlotItem(
-            new LNACorrelationPlot(selected_species, _lna_task_wrapper->getLNATask())));
+            createLNACorrelationPlotConfig(selected_species, _lna_task_wrapper->getLNATask())));
   }
 }
 
 
 void
-LNAResultWidget::_genericPlotButtonPressed()
-{
+LNAResultWidget::_genericPlotButtonPressed() {
+  // Create empty plot config:
+  Plot::PlotConfig *config = new Plot::PlotConfig(
+        *(_lna_task_wrapper->getLNATask()->getTimeSeries()));
   // Show dialog
-  GenericPlotDialog dialog(_lna_task_wrapper->getLNATask()->getTimeSeries());
-  if (QDialog::Rejected == dialog.exec()) { return; }
-
-  // Create plot figure with labels.
-  Plot::Figure *figure = new Plot::Figure(dialog.figureTitle());
-  figure->getAxis()->setXLabel(dialog.xLabel());
-  figure->getAxis()->setYLabel(dialog.yLabel());
-
-  // Iterate over all graphs of the configured plot:
-  for (size_t i=0; i<dialog.numGraphs(); i++) {
-    Plot::Graph *graph = dialog.graph(i).create(figure->getStyle(i));
-    figure->getAxis()->addGraph(graph);
-    figure->addToLegend(dialog.graph(i).label(), graph);
-  }
-
+  Plot::PlotConfigDialog dialog(config);
+  if (QDialog::Accepted != dialog.exec()) { delete config; return; }
   // Add timeseries plot:
-  Application::getApp()->docTree()->addPlot(_lna_task_wrapper, new PlotItem(figure));
+  Application::getApp()->docTree()->addPlot(_lna_task_wrapper, new PlotItem(config));
 }
 
 
 void
-LNAResultWidget::_saveButtonPressed()
-{
+LNAResultWidget::_saveButtonPressed() {
+  // Get filename
+  QString selectedFilter;
   QString filename = QFileDialog::getSaveFileName(
-        this, tr("Save as text..."), "", tr("Text Files (*.txt *.csv)"));
-
+        this, tr("Save results as ..."), "",
+        tr("Text Files (*.txt *.csv);;Matlab 5 Files (*.mat)"), &selectedFilter);
   if ("" == filename) { return; }
 
+  if (tr("Text Files (*.txt *.csv)") == selectedFilter) {
+    saveAsCSV(filename);
+  } else if (tr("") == selectedFilter) {
+    saveAsMAT(filename);
+  } else {
+    QMessageBox::critical(0, tr("Can not save results to file"),
+                          tr("Can not save results to file %1: Unknown format %2").arg(
+                            filename, selectedFilter));
+  }
+}
+
+void
+LNAResultWidget::saveAsCSV(const QString &filename)
+{
   QFile file(filename);
+  // Try to open file
   if (!file.open(QIODevice::WriteOnly| QIODevice::Text)) {
-    QMessageBox box;
-    box.setWindowTitle(tr("Cannot open file"));
-    box.setText(tr("Cannot open file %1 for writing").arg(filename));
-    box.exec();
+    QMessageBox::critical(0, tr("Cannot open file"),
+                          tr("Cannot open file %1 for writing").arg(filename));
+    return;
+  }
+  // Write...
+  _lna_task_wrapper->getLNATask()->getTimeSeries()->saveAsText(file);
+  file.close();
+}
+
+void
+LNAResultWidget::saveAsMAT(const QString &filename) {
+  std::fstream file(filename.toLocal8Bit().constData(), std::fstream::out|std::fstream::binary);
+  if (! file.is_open()) {
+    QMessageBox::critical(0, tr("Can not open file"),
+                          tr("Can not open file %1 for writing").arg(filename));
+    return;
   }
 
-  _lna_task_wrapper->getLNATask()->getTimeSeries()->saveAsText(file);
+  iNA::Utils::MatFile mat_file;
+  mat_file.add("LNA_result", _lna_task_wrapper->getLNATask()->getTimeSeries()->matrix());
+  mat_file.serialize(file);
   file.close();
 }

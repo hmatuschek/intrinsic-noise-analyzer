@@ -1,16 +1,14 @@
 #ifndef __FLUC_PARSER_EXPR_LEXER_HH__
 #define __FLUC_PARSER_EXPR_LEXER_HH__
 
-#include <parser/lexer.hh>
+#include "../lexer.hh"
 
 
 namespace iNA {
 namespace Parser {
 namespace Expr {
 
-/**
- * Defines all token types used by the SBML-sh parser
- */
+/** Defines all token types used by the SBML-sh parser */
 typedef enum {
   T_WHITESPACE = Token::FIRST_USER_DEFINED,  ///< A white space char (SPACE, TAB)
   T_IDENTIFIER,       ///< C-style identifier.

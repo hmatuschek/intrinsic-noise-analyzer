@@ -98,10 +98,6 @@ LNAmodel::postConstructor()
     Eigen::VectorXex EMREUpdate;
     EMREUpdate = ((this->JacobianM*emreVariables)+Delta);
 
-    // fold constants
-    //this->foldConservationConstants(CovUpdate);
-    //this->foldConservationConstants(EMREUpdate);
-
     // and combine to update vector
     this->updateVector.head(this->numIndSpecies())=REupdate;
     this->updateVector.segment(this->numIndSpecies(),dimCOV) = CovUpdate;

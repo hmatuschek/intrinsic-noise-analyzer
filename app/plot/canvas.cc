@@ -1,11 +1,12 @@
 #include "canvas.hh"
+#include "figure.hh"
 #include <QMouseEvent>
 
 using namespace Plot;
 
 
 Canvas::Canvas(QWidget *parent)
-  : QWidget(parent), plot(0)
+  : QWidget(parent), _plot(0)
 {
 }
 
@@ -13,7 +14,7 @@ Canvas::Canvas(QWidget *parent)
 Plot::Figure *
 Canvas::getPlot()
 {
-  return this->plot;
+  return this->_plot;
 }
 
 
@@ -21,15 +22,14 @@ void
 Canvas::setPlot(Plot::Figure *plot)
 {
   // Store plot
-  this->plot = plot;
-
+  this->_plot = plot;
   // Resize plot to this size:
   QSize size = this->size();
-  this->plot->setSceneRect(0,0, size.width(), size.height());
-
+  this->_plot->setSceneRect(0,0, size.width(), size.height());
   // Signal plot to update axes:
-  this->plot->updateAxes();
-
+  this->_plot->updateAxes();
+  // Signal plot to update axes:
+  this->_plot->updateAxes();
   // Update widget:
   this->update();
 }
@@ -38,23 +38,23 @@ Canvas::setPlot(Plot::Figure *plot)
 void
 Canvas::saveAs(const QString &filename, Figure::FileType type)
 {
-  if (0 == this->plot)
+  if (0 == this->_plot)
     return;
-  this->plot->save(filename, type);
+  this->_plot->save(filename, type);
 }
 
 
 void
 Canvas::setScheme(Configuration::Scheme scheme)
 {
-  if (0 == this->plot)
+  if (0 == this->_plot)
     return;
 
   // Set scheme of plot:
-  this->plot->setScheme(scheme);
+  this->_plot->setScheme(scheme);
   // Signal plot to update itself:
-  this->plot->updateAxes();
-  this->plot->updateAxes();
+  this->_plot->updateAxes();
+  this->_plot->updateAxes();
 
   // redraw plot:
   this->update();
@@ -66,14 +66,15 @@ Canvas::resizeEvent(QResizeEvent *event)
 {
   QWidget::resizeEvent(event);
 
-  if (0 == this->plot)
+  if (0 == this->_plot)
     return;
 
   QSize size = this->size();
-  this->plot->setSceneRect(0,0, size.width(), size.height());
+  this->_plot->setSceneRect(0,0, size.width(), size.height());
 
   // Signal plot to update axes:
-  this->plot->updateAxes();
+  this->_plot->updateAxes();
+  this->_plot->updateAxes();
 }
 
 
@@ -82,7 +83,7 @@ Canvas::paintEvent(QPaintEvent *event)
 {
   QWidget::paintEvent(event);
 
-  if (0 == this->plot)
+  if (0 == this->_plot)
     return;
 
   QPainter painter(this);
@@ -91,15 +92,15 @@ Canvas::paintEvent(QPaintEvent *event)
                          QPainter::TextAntialiasing);
   painter.fillRect(0,0, this->size().width(), this->size().height(), Qt::white);
 
-  this->plot->render(&painter);
+  this->_plot->render(&painter);
 }
 
 
 void
 Canvas::mousePressEvent(QMouseEvent *event)
 {
-  if (0 == plot) { return; }
+  if (0 == _plot) { return; }
   // Do not call default handler!
-  plot->showMeasure(event->pos());
+  _plot->showMeasure(event->pos());
   this->update();
 }

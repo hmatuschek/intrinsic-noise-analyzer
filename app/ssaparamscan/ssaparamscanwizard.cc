@@ -126,7 +126,7 @@ SSAParamScanConfigPage::SSAParamScanConfigPage(GeneralTaskWizard *parent)
   p_num->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
   QIntValidator *p_num_val = new QIntValidator(); p_num_val->setBottom(1);
   p_num->setValidator(p_num_val);
-  p_num->setToolTip("Number of intermediate steps.");
+  p_num->setToolTip("Number of steps taken between minimum and maximum parameter value.");
   registerField("p_num", p_num);
 
   thread_count = new QSpinBox();
@@ -186,7 +186,7 @@ SSAParamScanConfigPage::refreshParamRange(int)
     iNA::Trafo::ConstantFolder folder(*(config.getModel()));
     value = folder.apply(value);
     if (GiNaC::is_a<GiNaC::numeric>(value)) {
-      double val = GiNaC::ex_to<GiNaC::numeric>(value).to_double();
+      double val = Eigen::ex2double(value);
       p_min->setText(QString("%1").arg(val));
       p_max->setText(QString("%1").arg(1.1*val));
     }

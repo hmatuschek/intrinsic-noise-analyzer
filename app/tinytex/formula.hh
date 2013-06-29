@@ -260,4 +260,24 @@ private:
   MathItem *_lower;
 };
 
+
+class MathAlign: public MathItem
+{
+public:
+  MathAlign();
+  MathAlign(const MathAlign &other);
+  virtual ~MathAlign();
+
+  inline void addRow(MathItem *left, MathItem *right) {
+    addRow(QPair<MathItem *, MathItem *>(left, right));
+  }
+  void addRow(const QPair<MathItem *, MathItem *> &row);
+
+  QGraphicsItem *layout(const MathContext &context, QGraphicsItem *parent=0);
+  MathItem *copy() const;
+
+private:
+  QList< QPair<MathItem *, MathItem *> > _rows;
+};
+
 #endif // __INA_APP_TINYTEX_FORMULA_HH__

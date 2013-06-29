@@ -1,5 +1,6 @@
 #include "main.hh"
 
+#include "doctree/documenttree.hh"
 #include "doctree/documentitem.hh"
 #include "utils/logger.hh"
 
