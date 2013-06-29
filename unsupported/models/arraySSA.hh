@@ -1,24 +1,196 @@
 #ifndef __INA_MODELS_ARRAYSSA_HH
 #define __INA_MODELS_ARRAYSSA_HH
 
-#include "models/stochasticsimulator.hh"
+#include "unsupported.hh"
 #include "models/constantstoichiometrymixin.hh"
 #include "eval/bci/engine.hh"
 #include "openmp.hh"
 
-
-#define EIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET
 #include <eigen3/Eigen/Sparse>
 
 namespace iNA {
 namespace Models {
 
+class ParametricSSABase :
+    public BaseModel, ParticleNumbersMixin, ReasonableModelMixin
+
+{
+private:
+  /**
+   * Number of OpenMP threads to be used.
+   */
+  size_t num_threads;
+
+protected:
+  /**
+   * A vector of thread-private RNGs.
+   */
+  std::vector<MersenneTwister> rand;
+
+  /**
+  * index map for bytecode interpreter
+  **/
+  std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> stateIndex;
+
+  /**
+  * data matrix storing each individual observation
+  **/
+  Eigen::MatrixXd observationMatrix;
+
+  /**
+  * Stores the initial conditions of a simulator.
+  **/
+  Eigen::VectorXd ics;
+
+  /**
+  * Vector containing the values of the compartment volumes for each reactant
+  **/
+  Eigen::VectorXd Omega;
+
+  /**
+   * Internal storage of ensemble size.
+   **/
+  int ensembleSize;
+
+public :
+
+  ParametricSSABase(Models::HybridModel &model, int size, int seed, size_t threads,
+                                   const std::vector<const GiNaC::symbol *> &parameters)
+  : BaseModel(model),
+    ParticleNumbersMixin((BaseModel &)(*this)),
+    ReasonableModelMixin((BaseModel &)(*this)),
+    num_threads(threads),
+    rand(1),
+    observationMatrix(size,numSpecies()+parameters.size()),
+    ics(numSpecies()), Omega(numSpecies()), ensembleSize(size)
+
+  {
+
+      // set number of threads
+      if(num_threads > OpenMP::getMaxThreads())
+      this->num_threads = OpenMP::getMaxThreads();
+
+      // seed random number generators with a single seed
+      rand.resize(this->num_threads);
+      rand[0].seed(seed);
+      for(size_t i=1;i<rand.size();i++)
+      rand[i].seed(rand[i-1].rand_int());
+
+      // make index table
+      for(size_t i=0; i<this->numSpecies(); i++)
+      this->stateIndex.insert(std::make_pair(this->getSpecies(i)->getSymbol(),i));
+
+      // add parameters
+      for(size_t i=0; i<parameters.size(); i++)
+      this->stateIndex.insert(std::make_pair(*(parameters[i]),this->numSpecies()+i));
+
+      // fold all constants
+      Trafo::ConstantFolder constants(*this);
+      for(size_t i=0;i<this->propensities.size();i++)
+        this->propensities[i] = constants.apply(this->propensities[i]);
+
+      // evaluate initial concentrations & get volumes
+      Trafo::InitialValueFolder evICs(*this);
+
+      for(size_t i=0; i<species.size();i++)
+      {
+        ics(i)=evICs.evaluate(this->species[i]);
+        if(ics(i)>0.)
+        {
+          ics(i)=std::floor( ics(i) + 0.5 );
+          if(ics(i)==0.) {
+              InternalError err;
+              err << "Cannot initiate Stochastic Simulation since initial particle number of species <i>"
+                  << this->getSpecies(i)->getLabel() << "</i> evaluated to zero.";
+              throw err;
+              throw InternalError();
+          }
+        }
+        else if(ics(i)<0.)
+        {
+           InternalError err;
+           err << "Cannot initiate Stochastic Simulation since initial particle number of species <i>"
+               << this->getSpecies(i)->getLabel() << "</i> evaluated to a value < 0.";
+           throw err;
+           throw InternalError();
+        }
+
+        this->Omega(i)=evICs.evaluate(this->volumes(i));
+
+        if (this->Omega(i) <= 0) {
+           InternalError err;
+           err << "Cannot initiate Stochastic Simulation since compartment <i>"
+               << this->getSpecies(i)->getCompartment()->getLabel()
+               << "</i> evaluated to non-positive value.";
+           throw err;
+           throw InternalError();
+        }
+      }
+
+      // initialize ensemble
+      for(int i=0; i<this->ensembleSize;i++) {
+        this->observationMatrix.row(i).head(this->numSpecies()) = ics;
+      }
+
+      // Initialize external parameter
+      Trafo::InitialValueFolder extICs(model.getExternalModel());
+      Eigen::VectorXd eICs(model.getExternalModel().numSpecies());
+
+      for(size_t i=0; i<model.getExternalModel().numSpecies(); i++)
+        eICs(i)=extICs.evaluate(model.getExternalModel().getSpecies(i)->getSymbol());
+
+      for(int i=0; i<this->ensembleSize;i++) {
+        this->observationMatrix.row(i).tail(model.getExternalModel().numSpecies()) = eICs;
+      }
+
+  }
+
+  virtual ~ParametricSSABase()
+  {
+  //...
+  }
+
+  void getState(Eigen::MatrixXd &state)
+  {
+    state = (observationMatrix*this->Omega.asDiagonal().inverse());
+  }
+
+  Eigen::MatrixXd getState() const
+  {
+    return (observationMatrix.leftCols(this->numSpecies())*this->Omega.asDiagonal().inverse());
+  }
+
+
+  Eigen::MatrixXd & getObservationMatrix()
+  {
+    return this->observationMatrix;
+  }
+
+  size_t size()
+  {
+    return this->ensembleSize;
+  }
+
+  const size_t numThreads()
+  {
+    return this->num_threads;
+  }
+
+  Ast::Unit getConcentrationUnit() const
+  {
+    return concentrationUnit;
+  }
+
+
+};
+
+
 /**
  * @ingroup unsupported
  */
 template <class Engine>
-class GenericArraySSA :
-  public StochasticSimulator,
+class GenericParametricSSA :
+  public ParametricSSABase,
   public ConstantStoichiometryMixin
 {
 
@@ -35,18 +207,18 @@ protected:
 public:
 
   /**
-   * Is constructed from a Ast::Model.
+   * Is constructed from a Models::HybridModel.
    *
    * @param model Specifies the model, the construct the SSA analysis for.
-   * @param ensembleSize Specifies the ensemble size to use.
    * @param seed A seed for the random number generator.
    * @param opt_level Specifies the byte-code optimization level.
    * @param num_threads Specifies the number of threads to use.
+   * @param params External parameter vector.
    */
-  GenericArraySSA(const Ast::Model &model, int seed,
+  GenericParametricSSA(Models::HybridModel &model, int seed,
                size_t opt_level=0, size_t num_threads=OpenMP::getMaxThreads(),
                const std::vector<const GiNaC::symbol *> params = std::vector<const GiNaC::symbol *>())
-    : StochasticSimulator(model, 1, seed, num_threads, params),
+    : ParametricSSABase(model, 2, seed, num_threads, params),
       ConstantStoichiometryMixin((BaseModel &)(*this)),
       byte_code(this->numReactions()), all_byte_code(),
       sparseStoichiometry(numSpecies(),numReactions()),
@@ -106,21 +278,15 @@ public:
 
 
   /** Destructor, also frees byte-code instances. */
-  virtual ~GenericArraySSA()
+  virtual ~GenericParametricSSA()
   {
     for (size_t i=0; i < this->byte_code.size(); i++) {
       delete byte_code[i];
     }
   }
 
-  void run(double step)
-  {
-    // ... Pass
-
-  }
-
   /**
-   * The stepper for the SSA
+   * The stepper
    */
   void run(double step, Eigen::MatrixXd &state)
   {
@@ -167,12 +333,17 @@ public:
 
         // update only propensities that are changed in reaction
         interpreter[OpenMP::getThreadNum()].setCode(byte_code[reaction]);
-        interpreter[OpenMP::getThreadNum()].run(state,prop[OpenMP::getThreadNum()]);
+        interpreter[OpenMP::getThreadNum()].run(state.row(sid),prop[OpenMP::getThreadNum()]);
 
         propensitySum = prop[OpenMP::getThreadNum()].sum();
 
       } //end time step loop
     } // end ensemble loop
+  }
+
+  Eigen::VectorXd &getOmega()
+  {
+    return Omega;
   }
 
 
@@ -186,9 +357,9 @@ private:
 
 
 /** Defines the default implementation of the optimized SSA, using the byte-code interpreter. */
-typedef GenericArraySSA< Eval::bci::Engine<Eigen::VectorXd> > ArraySSA;
+typedef GenericParametricSSA< Eval::bci::Engine<Eigen::VectorXd> > ParametricSSA;
 
 }
 }
 
-#endif // __INA_OPTIMIZEDSSA_HH
+#endif // __INA_ARRAYSSA_HH

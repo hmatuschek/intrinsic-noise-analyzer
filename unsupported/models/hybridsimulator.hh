@@ -6,6 +6,23 @@
 #include "ina.hh"
 #include "hybridmodel.hh"
 
+namespace Eigen {
+
+class lessVectorXd
+{
+  public:
+   bool operator()(const Eigen::VectorXd &x,const Eigen::VectorXd &y) const
+   {
+     for(int i=0; i<x.size(); i++)
+       if (x(i) != y(i)) return (x(i)<y(i));
+     return false;
+   }
+};
+
+}
+
+
+
 namespace iNA {
 namespace Models {
 
@@ -51,16 +68,19 @@ public:
   }
 
   virtual ~GenericHybridSimulator()
+
   {
 
   }
 
   const Ast::Model & getIntModel() const
+
   {
     return intModel;
   }
 
   const Ast::Model & getExtModel() const
+
   {
     return extModel;
   }
@@ -70,9 +90,6 @@ public:
   virtual void runInternal(StateType &state, const size_t &sid, const double &t_in, const double &t_out)=0;
 
   virtual void resetInternal()=0;
-
-  virtual void getInternalStats(const Eigen::VectorXd &state, const size_t &sid,
-                                std::vector<Eigen::VectorXd> &mean, std::vector<Eigen::MatrixXd> &cov)=0;
 
   /**
    * Run hybrid method in continuous time.
@@ -158,53 +175,12 @@ public:
 
   }
 
- class lessVec {
-    public:
-      bool operator()(const Eigen::VectorXd &x,const Eigen::VectorXd &y) const
-      {
-        for(int i=0; i<x.size(); i++)
-          if (x(i) != y(i)) return (x(i)<y(i));
-        return false;
-      }
+  /** Some simple type definitions */
+  typedef std::map<Eigen::VectorXd,double,Eigen::lessVectorXd> histType;
+  typedef std::map<Eigen::VectorXd,Eigen::VectorXd,Eigen::lessVectorXd> condMeanType;
+  typedef std::map<Eigen::VectorXd,Eigen::MatrixXd,Eigen::lessVectorXd> condVarType;
+
   };
-
-  typedef std::map<Eigen::VectorXd,double,lessVec> histType;
-  typedef std::map<Eigen::VectorXd,Eigen::VectorXd,lessVec> condMeanType;
-  typedef std::map<Eigen::VectorXd,Eigen::MatrixXd,lessVec> condVarType;
-
-
-//  void runReactionWise(Eigen::VectorXd state, double &t,
-//                              size_t numThreads = OpenMP::getMaxThreads())
-
-//  {
-
-//      double t_in;
-//      size_t sid=0;
-
-//      // Store initial time
-//      t_in=t;
-
-//      // Perform timestep of the external model, exists with updated time t
-//      this->singleStep(t,sid);
-
-//      // Do SSE step
-//      this->runInternal(state,sid,t_in,t);
-//      this->resetInternal();
-
-//      // Update state vector
-//      state.tail(this->getState().cols()) = this->getState().row(sid);
-
-//  }
-
-
-
-
-
-
-};
-
-
-
 
 
 class HybridSimulator
@@ -320,21 +296,21 @@ public:
       condVarType condVar;
       condStat(stateMatrix, histExt, condMean, condVar, level);
 
-      for(std::map<Eigen::VectorXd, Eigen::VectorXd,lessVec>::iterator item = condMean.begin();
+      for(condMeanType::iterator item = condMean.begin();
           item!=condMean.end(); item++)
       {
           mean += (item->second)*histExt[item->first];
-          transErr += (item->second)*(item->second.transpose())*histExt[item->first];
+          transErr.noalias() += (item->second)*(item->second.transpose())*histExt[item->first];
       }
 
-      for(std::map<Eigen::VectorXd, Eigen::MatrixXd,lessVec>::iterator item = condVar.begin();
+      for(condVarType::iterator item = condVar.begin();
           item!=condVar.end(); item++)
       {
           dynErr += (item->second)*histExt[item->first];
       }
 
       // Substract mean
-      transErr -=  mean*mean.transpose();
+      transErr.noalias() -=  mean*mean.transpose();
 
   }
 
@@ -380,7 +356,7 @@ public:
     condMean.clear();
     histExt.clear();
 
-    std::map<Eigen::VectorXd, Eigen::MatrixXd,lessVec>::iterator item;
+    condVarType::iterator item;
     for(int sid=0; sid<ensembleSize; sid++)
     {
 
@@ -404,7 +380,7 @@ public:
       }
       else
       {
-        item->second += m*m.transpose();
+        condVar[SoI].noalias() += m*m.transpose();
         condMean[SoI] += m;
         histExt[SoI] += 1;
       }
@@ -420,7 +396,7 @@ public:
       condMean[item->first] /= histExt[item->first];
       item->second /= histExt[item->first];
       // Substract mean
-      item->second -= (condMean[item->first]*(condMean[item->first].transpose()));
+      item->second.noalias() -= (condMean[item->first]*(condMean[item->first].transpose()));
       // Compute normalization factor of histogram
       norm += histExt[item->first];
     }
@@ -432,10 +408,6 @@ public:
     }
 
   }
-
-
-
-
 
 };
 

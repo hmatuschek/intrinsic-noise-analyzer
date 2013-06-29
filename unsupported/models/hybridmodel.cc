@@ -68,18 +68,17 @@ HybridModel::dump(std::ostream &str)
 
     // List external species
     str << "List of external species (" << this->getExternalModel().numSpecies() << "):" << std::endl;
-    for(Ast::Model::SpeciesIterator it = this->getExternalModel().speciesBegin();
-        it!=this->getExternalModel().speciesEnd(); it++)
+    for(size_t i=0; i<this->getExternalModel().numSpecies(); i++)
     {
-      str<<(*it)->getIdentifier()<<std::endl;
+      str<<this->getExternalModel().getSpecies(i)->getIdentifier()<<std::endl;
     }
     str << "___" << std::endl << std::endl;
 
     // List external reactions
     str << "List of external reactions (" << this->getExternalModel().numReactions() << "):" << std::endl;
-    for(Ast::Model::ReactionIterator it = getExternalModel().reactionsBegin(); it!=getExternalModel().reactionsEnd(); it++)
+    for(size_t i=0; i<this->getExternalModel().numReactions(); i++)
     {
-      str<<(*it)->getName()<<std::endl;
+      str<<this->getExternalModel().getSpecies(i)->getName()<<std::endl;
     }
     str << "___" << std::endl << std::endl;
 
@@ -310,8 +309,7 @@ HybridModel::distill( Ast::Model *external,
 }
 
 
-Ast::Model &
-HybridModel::getExternalModel()
+Ast::Model &HybridModel::getExternalModel()
 
 {
   return external;

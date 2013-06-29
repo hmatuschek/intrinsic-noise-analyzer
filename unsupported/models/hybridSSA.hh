@@ -22,7 +22,6 @@ protected:
 
 public:
 
-
   HybridSSA(Models::HybridModel &model, size_t numExtEns, size_t num_threads=OpenMP::getMaxThreads())
     : GenericHybridSimulator(model, numExtEns, num_threads),
       numExtVars(model.getExternalModel().numSpecies()),
@@ -130,7 +129,7 @@ public:
     condMean.clear();
     histExt.clear();
 
-    std::map<Eigen::VectorXd, Eigen::MatrixXd,lessVec>::iterator item;
+    condVarType::iterator item;
     for(int sid=0; sid<ensembleSize; sid++)
     {
 
@@ -196,7 +195,7 @@ public:
       condVarType condVar;
       condStat(stateMatrix, histExt, condMean, condVar, level);
 
-      for(std::map<Eigen::VectorXd, Eigen::VectorXd,lessVec>::iterator item = condMean.begin();
+      for(condMeanType::iterator item = condMean.begin();
           item!=condMean.end(); item++)
       {
           mean += (item->second)*histExt[item->first];
@@ -259,7 +258,7 @@ public:
 
 
 
-class HybridSSAalt
+class DualReporter
     : public GenericHybridSimulator<Eigen::MatrixXd>
 {
 
@@ -270,12 +269,12 @@ protected:
   size_t numExtEns;
   size_t numIntEns;
 
-  ArraySSA * SSA;
+  ParametricSSA * SSA;
 
 public:
 
 
-  HybridSSAalt(Models::HybridModel &model, size_t numExtEns, size_t num_threads=OpenMP::getMaxThreads())
+  DualReporter(Models::HybridModel &model, size_t numExtEns, size_t num_threads=OpenMP::getMaxThreads())
     : GenericHybridSimulator(model, numExtEns, num_threads),
       numExtVars(model.getExternalModel().numSpecies()),
       numExtEns(numExtEns), numIntEns(2)
@@ -287,7 +286,7 @@ public:
     for(size_t i=0; i<model.getExternalModel().numSpecies(); i++)
       params.push_back(&(model.getExternalModel().getSpecies(i)->getSymbol()));
 
-    SSA = new ArraySSA(model,time(0),1,num_threads,params);
+    SSA = new ParametricSSA(model,time(0),1,num_threads,params);
 
     // Make lookup for signal of interest
     std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> extIndex;
@@ -305,20 +304,89 @@ public:
 
   }
 
+  virtual ~DualReporter()
 
-  virtual ~HybridSSAalt()
   {
       delete SSA; SSA=0;
   }
 
-
   Eigen::MatrixXd getInitial()
 
   {
-    Eigen::MatrixXd x(2,SSA->getObservationMatrix().cols());
-    x.row(0)=SSA->getObservationMatrix();
-    x.row(1)=SSA->getObservationMatrix();
-    return x;
+    return SSA->getObservationMatrix();
+  }
+
+  void resetInternal()
+
+  {
+    // Pass...
+  }
+
+  void runInternal(Eigen::MatrixXd &state, const size_t &sid, const double &t_in, const double &t_out)
+
+  {
+     // Run the actual simulation
+     SSA->run(t_out-t_in, state);
+  }
+
+  void getInternalStats(const Eigen::VectorXd &state, Eigen::VectorXd &mean)
+
+  {
+    mean = state.head(state.size()-SSA->numSpecies());
+  }
+
+  void condStat(const std::vector<Eigen::MatrixXd> &stateMatrix, histType &histExt,
+                condMeanType &condMean)
+
+  {
+
+    Eigen::VectorXd mean;
+    Eigen::VectorXd SoI(this->SoIdim);
+
+    // Clear input variables
+    condMean.clear();
+    histExt.clear();
+
+    condMeanType::iterator item;
+    for(size_t sid=0; sid<stateMatrix.size(); sid++)
+    {
+
+      const Eigen::VectorXd &state = stateMatrix[sid].row(0);
+      getInternalStats(state,mean);
+
+      // Evaluate signal of interest.
+      SoIint.run(state,SoI);
+
+      // Collect mean, variance and histogram
+      item = condMean.find(SoI);
+      if(item == condMean.end())
+      {
+        condMean.insert(std::make_pair(SoI,mean));
+        histExt.insert(std::make_pair(SoI,1));
+      }
+      else
+      {
+        condMean[SoI] += mean;
+        histExt[SoI] += 1;
+      }
+
+    } // finished ensemble average
+
+    double norm=0;
+    for(item = condMean.begin(); item!=condMean.end(); item++)
+    {
+      // Divide by number of occurences
+      condMean[item->first] /= histExt[item->first];
+      // Compute normalization factor of histogram
+      norm += histExt[item->first];
+    }
+
+    // Normalize histogram
+    for(item = condMean.begin(); item!=condMean.end(); item++)
+    {
+        histExt[item->first]/=norm;
+    }
+
   }
 
   void mechError(const std::vector<Eigen::MatrixXd> &stateMatrix, Eigen::MatrixXd &mechErr)
@@ -341,7 +409,7 @@ public:
   }
 
 
-  void covar(const std::vector<Eigen::MatrixXd> &stateMatrix, Eigen::MatrixXd &cov)
+  void covariance(const std::vector<Eigen::MatrixXd> &stateMatrix, Eigen::MatrixXd &cov)
 
   {
 
@@ -375,8 +443,7 @@ public:
       condMeanType condMean;
       condStat(stateMatrix, histExt, condMean);
 
-      for(std::map<Eigen::VectorXd, Eigen::VectorXd,lessVec>::iterator item = condMean.begin();
-          item!=condMean.end(); item++)
+      for(condMeanType::iterator item = condMean.begin(); item!=condMean.end(); item++)
       {
           mean += (item->second)*histExt[item->first];
           transErr += (item->second)*(item->second.transpose())*histExt[item->first];
@@ -385,99 +452,21 @@ public:
       // Substract mean
       transErr.noalias() -=  mean*(mean.transpose());
 
-      covar(stateMatrix, fidErr);
+      this->covariance(stateMatrix, fidErr);
       fidErr -= transErr;
 
   }
 
-  void resetInternal()
+  void makeConcentrations(Eigen::VectorXd &vec)
 
   {
-    // Pass...
+    vec = SSA->getOmega().asDiagonal().inverse()*vec;
   }
 
-
-  void runInternal(Eigen::MatrixXd &state, const size_t &sid, const double &t_in, const double &t_out)
-
-  {
-
-     // Update external parameters
-     //for(int i=0; i<ssaSim[OpenMP::getThreadNum()]->getObservationMatrix().rows();i++)
-     //   SSA.run(state) getObservationMatrix().row(i).tail(numExtVars) = state; //.tail(numExtVars);
-
-     // Run the actual simulation
-     SSA->run(t_out-t_in, state);
-
-  }
-
-
-  void getInternalStats(const Eigen::VectorXd &state, const size_t &sid, std::vector<Eigen::VectorXd> &mean, std::vector<Eigen::MatrixXd> &cov)
+  void makeConcentrations(Eigen::MatrixXd &cov)
 
   {
-    mean.resize(1);
-    cov.resize(1);
-    // Use covvec as a dummy here
-    mean[0] = state.head(state.size()-SSA->numSpecies());
-
-  }
-
-
-  void condStat(const std::vector<Eigen::MatrixXd> &stateMatrix, histType &histExt,
-                condMeanType &condMean)
-
-  {
-
-    std::vector<Eigen::VectorXd> mean(1);
-    std::vector<Eigen::MatrixXd> cov(1);
-
-    Eigen::VectorXd SoI(this->SoIdim);
-
-    // Clear input variables
-    condMean.clear();
-    histExt.clear();
-
-    condMeanType::iterator item;
-    for(size_t sid=0; sid<stateMatrix.size(); sid++)
-    {
-
-      const Eigen::VectorXd &state = stateMatrix[sid].row(0);
-      getInternalStats(state,sid,mean,cov);
-
-      Eigen::VectorXd m = mean[0];
-
-      // Evaluate signal of interest.
-      SoIint.run(state,SoI);
-
-      // Collect mean, variance and histogram
-      item = condMean.find(SoI);
-      if(item == condMean.end())
-      {
-        condMean.insert(std::make_pair(SoI,m));
-        histExt.insert(std::make_pair(SoI,1));
-      }
-      else
-      {
-        condMean[SoI] += m;
-        histExt[SoI] += 1;
-      }
-
-    } // finished ensemble average
-
-    double norm=0;
-    for(item = condMean.begin(); item!=condMean.end(); item++)
-    {
-      // Divide by number of occurences
-      condMean[item->first] /= histExt[item->first];
-      // Compute normalization factor of histogram
-      norm += histExt[item->first];
-    }
-
-    // Normalize histogram
-    for(item = condMean.begin(); item!=condMean.end(); item++)
-    {
-        histExt[item->first]/=norm;
-    }
-
+    cov = (SSA->getOmega().asDiagonal().inverse())*cov*(SSA->getOmega().asDiagonal().inverse());
   }
 
 };

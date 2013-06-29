@@ -1,25 +1,10 @@
-#include "sbml_hybrid2.hh"
+#include "sbml_hybridSSA.hh"
 #include <parser/sbml/sbml.hh>
 #include <fstream>
 #include "unsupported.hh"
 #include "trafo/reversiblereactionconverter.hh"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <getopt.h>
-
-#include <string>
-#include <sstream>
-#include <fstream>
-
 using namespace iNA;
-
-void printProgBar( int percent );
-
-std::vector<std::string> readSoI(const std::string &parameterFile);
-
-std::string Confucius();
 
 int main(int argc, char *argv[])
 {
@@ -48,9 +33,7 @@ int main(int argc, char *argv[])
 
   double tfinal = 10;
   double dt=0.1;
-  double ensSize = 10000;
-  double epsilon_abs=1e-10;
-  double epsilon_rel=1.e-4;
+  double ensSize = 1000;
 
   int longIndex;
   int opt = getopt_long( argc, argv, optString, longOpts, &longIndex );
@@ -89,13 +72,13 @@ int main(int argc, char *argv[])
               ensSize = atoi(optarg);
               break;
 
-          case 'r':
-              epsilon_rel = atof(optarg);
-              break;
+//          case 'r':
+//              epsilon_rel = atof(optarg);
+//              break;
 
-          case 'a':
-              epsilon_abs = atof(optarg);
-              break;
+//          case 'a':
+//              epsilon_abs = atof(optarg);
+//              break;
 
           default:
               break;
@@ -130,13 +113,9 @@ int main(int argc, char *argv[])
     size_t nInt = hybrid.numSpecies();
     size_t nExt = hybrid.getExternalModel().numSpecies();
 
-    Models::HybridSSAalt simulator(hybrid, ensSize, 1);
+    Models::DualReporter simulator(hybrid, ensSize);
 
-    Models::Histogram<double> hist;
-
-    Eigen::MatrixXd istate = simulator.getInitial();
-
-    std::vector<Eigen::MatrixXd> state(ensSize,istate);
+    std::vector<Eigen::MatrixXd> state(ensSize,simulator.getInitial());
 
     Eigen::VectorXd mean;
     Eigen::MatrixXd mechErr,cov;
@@ -152,21 +131,23 @@ int main(int argc, char *argv[])
     trajFile.open (trajFileName);
 
     // Header
-    trajFile << "# time";
-    for(size_t i=0; i<nInt; i++)
-        trajFile << "\t mean(" << hybrid.getSpecies(i)->getIdentifier() <<"|u^H)";
-    //for(size_t i=0; i<nInt; i++)
-    //    trajFile << "\t var(" << hybrid.getSpecies(i)->getIdentifier() <<")";
+    int col=1;
+    trajFile << "# [" << col++ <<"]time";
     for(size_t i=0; i<nExt; i++)
-        trajFile << "\t " << hybrid.getExternalModel().getSpecies(i)->getIdentifier();
+        trajFile << "\t [" << col++ <<"]"<< hybrid.getExternalModel().getSpecies(i)->getIdentifier();
+    for(size_t i=0; i<nInt; i++)
+    {
+        trajFile << "\t [" << col++ <<"]R1(" << hybrid.getSpecies(i)->getIdentifier() <<"|u^H)";
+        trajFile << "\t [" << col++ <<"]R2(" << hybrid.getSpecies(i)->getIdentifier() <<"|u^H)";
+    }
     trajFile << std::endl;
 
     std::ofstream intFile;
     intFile.open(intFileName);
 
-    int col=1;
+    col=1;
     // Header
-    intFile << "# [" << col++ <<"]time" << "\t";
+    intFile << "# [" << col++ <<"]time";
     for(size_t i=0; i<hybrid.numSpecies(); i++)
         intFile << "\t [" << col++ <<"]" << hybrid.getSpecies(i)->getIdentifier();
     for(size_t i=0; i<hybrid.numSpecies(); i++)
@@ -175,18 +156,7 @@ int main(int argc, char *argv[])
         intFile << "\t [" << col++ <<"]dE(" << hybrid.getSpecies(i)->getIdentifier() << ")";
     for(size_t i=0; i<hybrid.numSpecies(); i++)
         intFile << "\t [" << col++ <<"]mE(" << hybrid.getSpecies(i)->getIdentifier() << ")";
-
-    for(size_t i=0; i<hybrid.numSpecies(); i++)
-      intFile << "\t [" << col++ <<"]EMRE(" << hybrid.getSpecies(i)->getIdentifier() <<")";
-    for(size_t i=0; i<hybrid.numSpecies(); i++)
-        intFile << "\t [" << col++ <<"]dR_EMRE(" << hybrid.getSpecies(i)->getIdentifier() << ")";
-    for(size_t i=0; i<hybrid.numSpecies(); i++)
-        intFile << "\t [" << col++ <<"]dE_EMRE(" << hybrid.getSpecies(i)->getIdentifier() << ")";
-    for(size_t i=0; i<hybrid.numSpecies(); i++)
-        intFile << "\t [" << col++ <<"]mE_IOS(" << hybrid.getSpecies(i)->getIdentifier() << ")";
     intFile << std::endl;
-
-
 
     std::ofstream extFile;
     extFile.open(extFileName);
@@ -211,11 +181,13 @@ int main(int argc, char *argv[])
         // Update progress bar
         if((t/tfinal)>progress){ printProgBar(progress*100); progress+=0.01; }
 
-//        //Single trajectory
-//        trajFile << t << "\t"
-//                  << state[0].head(nInt).transpose() << "\t"
-//                  << state[0].tail(nExt).transpose() << "\t";
-//        trajFile << std::endl;
+        //Single trajectory
+        trajFile << t;
+        for(size_t i=0; i<nExt; i++)
+          trajFile << "\t" << state[0].row(0).tail(nExt)(i);
+        for(size_t i=0; i<nInt; i++)
+          trajFile << "\t" << state[0].row(0)(i) << "\t" << state[0].row(1)(i);
+        trajFile << std::endl;
 
         // External model statistics
         simulator.stats(meanEx, covEx, skew);
@@ -229,21 +201,22 @@ int main(int argc, char *argv[])
 
         simulator.mechError(state, mechErr);
         simulator.fidError(state, mean, transErr, fidErr);
-        simulator.covar(state,cov);
+        simulator.covariance(state, cov);
 
-        double vol = 10;
+        simulator.makeConcentrations(mean);
+        simulator.makeConcentrations(mechErr);
+        simulator.makeConcentrations(transErr);
+        simulator.makeConcentrations(fidErr);
 
         intFile << t << "\t";
         for(size_t i=0; i<hybrid.numSpecies(); i++)
-            intFile << "\t" << mean(i)/vol;
+            intFile << "\t" << mean(i);
         for(size_t i=0; i<hybrid.numSpecies(); i++)
-            intFile << "\t" << (transErr).diagonal()(i)/vol/vol;
+            intFile << "\t" << (transErr).diagonal()(i);
         for(size_t i=0; i<hybrid.numSpecies(); i++)
-            intFile << "\t" << (fidErr-mechErr).diagonal()(i)/vol/vol;
+            intFile << "\t" << (fidErr-mechErr).diagonal()(i);
         for(size_t i=0; i<hybrid.numSpecies(); i++)
-            intFile << "\t" << (mechErr).diagonal()(i)/vol/vol;
-        for(size_t i=0; i<hybrid.numSpecies(); i++)
-            intFile << "\t" << (cov).diagonal()(i)/vol/vol;
+            intFile << "\t" << (mechErr).diagonal()(i);
         intFile << std::endl;
 
         simulator.runHybrid(state, t, t+dt);

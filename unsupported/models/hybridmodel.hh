@@ -108,7 +108,7 @@ public:
   /**
    * Returns the external model
    */
-  Model &getExternalModel();
+  Ast::Model &getExternalModel();
 
   const SignalOfInterest &getSoI() const;
 

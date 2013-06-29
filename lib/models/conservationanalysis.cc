@@ -79,7 +79,7 @@ Eigen::VectorXex
 ConservationAnalysis::getConservedAmounts(const Eigen::VectorXd &InitialAmount)
 
 {
-    return (conservation_matrix.cast<GiNaC::ex>())*(this->PermutationM.cast<GiNaC::ex>())*(InitialAmount.cast<GiNaC::ex>());
+    return (conservation_matrix.cast<GiNaC::ex>())*(this->Omega.asDiagonal())*(this->PermutationM.cast<GiNaC::ex>())*(InitialAmount.cast<GiNaC::ex>());
 }
 
 Eigen::VectorXex
