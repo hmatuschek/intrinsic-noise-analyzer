@@ -96,7 +96,7 @@ protected:
 
     Eigen::VectorXd ICs;
 
-    SSEBaseModel &model;
+    const SSEBaseModel &model;
 
 
     ParameterFolder params;

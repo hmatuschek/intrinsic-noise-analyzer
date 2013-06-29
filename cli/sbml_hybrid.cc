@@ -15,15 +15,6 @@
 
 using namespace iNA;
 
-
-void doSSE(Ast::Model &model);
-
-void printProgBar( int percent );
-
-std::vector<std::string> readSoI(const std::string &parameterFile);
-
-std::string Confucius();
-
 int main(int argc, char *argv[])
 {
 
@@ -321,7 +312,9 @@ std::vector<std::string> readSoI(const std::string &parameterFile)
 }
 
 
-void printProgBar( int percent ){
+void printProgBar( int percent )
+
+{
   std::string bar;
 
   for(int i = 0; i < 50; i++){
