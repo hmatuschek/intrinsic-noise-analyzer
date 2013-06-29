@@ -1,5 +1,5 @@
-#ifndef __CLI_SBML_HYBRIDSSA_HH__
-#define __CLI_SBML_HYBRIDSSA_HH__
+#ifndef __CLI_SBML_HYBRID2_HH__
+#define __CLI_SBML_HYBRID2_HH__
 
 #include <iostream>
 #include "ina.hh"
