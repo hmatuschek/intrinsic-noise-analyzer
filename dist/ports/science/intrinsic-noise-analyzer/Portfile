@@ -4,7 +4,7 @@
 PortSystem 1.0
 
 name intrinsic-noise-analyzer
-version 0.4.1
+version 0.4.2
 categories science
 platforms darwin
 
@@ -25,9 +25,9 @@ license GPL-2
 homepage http://code.google.com/p/intrinsic-noise-analyzer
 master_sites http://intrinsic-noise-analyzer.googlecode.com/files/
 
-checksums md5    b45e3e0b2ac26b2dc6d3025f3b34acea \
-          sha1   359cbb9847b7b0ba6ea9038b97ea70303120818c \
-          rmd160 a441f30ea8d32e0788e00615e531094e011e2895
+checksums md5    5175e9bc50cfa1270bdf8be185a56358 \
+          sha1   ea144b2e618847cad40371de2c0e1eb7ad1773b7 \
+          rmd160 1dcd29d8444949836cc9a00bad5bd4ad07282837
 
 depends_lib  	port:libsbml \
              	port:qt4-mac \
