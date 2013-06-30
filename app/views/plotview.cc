@@ -41,7 +41,7 @@ PlotView::PlotView(PlotItem *plot_item, QWidget *parent) :
   if (_plotitem->hasConfig()) { range_button->setVisible(false); }
 
   // Configure plot button:
-  QPushButton *config_plot = new QPushButton(tr("Configure plot"));
+  QPushButton *config_plot = new QPushButton(tr("Edit plot"));
   config_plot->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
   if (! _plotitem->hasConfig()) { config_plot->setVisible(false); }
 
