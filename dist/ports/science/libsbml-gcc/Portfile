@@ -34,11 +34,12 @@ depends_lib         port:bzip2 \
                     port:zlib \
 		    port:gcc47
 
+configure.compiler      macports-gcc-4.7
+
 configure.args      --with-bzip2=${prefix} \
                     --with-libxml=${prefix} \
                     --with-zlib=${prefix}
 
-configure.compiler      macports-gcc-4.7
 
 configure.universal_args-delete --disable-dependency-tracking
 
