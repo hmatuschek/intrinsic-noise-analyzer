@@ -148,7 +148,8 @@ LNAResultWidget::saveAsCSV(const QString &filename)
 
 void
 LNAResultWidget::saveAsMAT(const QString &filename) {
-  std::fstream file(filename.toLocal8Bit().constData(), std::fstream::out|std::fstream::binary);
+  std::fstream file(filename.toLocal8Bit().constData(),
+                    std::fstream::out|std::fstream::binary|std::fstream::trunc);
   if (! file.is_open()) {
     QMessageBox::critical(0, tr("Can not open file"),
                           tr("Can not open file %1 for writing").arg(filename));
