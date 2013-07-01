@@ -115,9 +115,10 @@ void
 LNAResultWidget::_saveButtonPressed() {
   // Get filename
   QString selectedFilter;
+  //QString filters = tr("Text Files (*.txt *.csv);;Matlab 5 Files (*.mat)";
+  QString filters = tr("Text Files (*.txt *.csv)");
   QString filename = QFileDialog::getSaveFileName(
-        this, tr("Save results as ..."), "",
-        tr("Text Files (*.txt *.csv);;Matlab 5 Files (*.mat)"), &selectedFilter);
+        this, tr("Save results as ..."), "", filters, &selectedFilter);
   if ("" == filename) { return; }
 
   if (tr("Text Files (*.txt *.csv)") == selectedFilter) {
