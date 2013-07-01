@@ -23,16 +23,17 @@ long_description iNA is a computational tool for quantitative analysis of fluctu
 license GPL-2
 
 homepage http://code.google.com/p/intrinsic-noise-analyzer
-master_sites http://intrinsic-noise-analyzer.googlecode.com/files/
+master_sites http://intrinsic-noise-analyzer.googlecode.com/files/ \
+             https://dl.dropboxusercontent.com/u/17326152/
 
-checksums md5    5175e9bc50cfa1270bdf8be185a56358 \
-          sha1   ea144b2e618847cad40371de2c0e1eb7ad1773b7 \
-          rmd160 1dcd29d8444949836cc9a00bad5bd4ad07282837
+checksums md5    358e4bd9bf467cecc6ef00c9bf6f34cb \
+          sha1   c592212638b6ca800f1497e52be68458a987ae70 \
+          rmd160 31dd98286b8a23cd5bd94bd0c82b9361b218f475
 
-depends_lib  	port:libsbml \
+depends_lib  	port:libsbml-gcc \
              	port:qt4-mac \
              	port:GiNaC-gcc \
-        		port:gcc47
+                port:gcc47
 
 depends_build port:cmake
 

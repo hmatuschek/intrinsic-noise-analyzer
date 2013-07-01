@@ -1,14 +1,16 @@
 # -*- coding: utf-8; mode: tcl; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- vim:fenc=utf-8:ft=tcl:et:sw=4:ts=4:sts=4
-# $Id$
+# $Id: Portfile 106680 2013-06-05 01:25:26Z ryandesign@macports.org $
 
 PortSystem          1.0
 
-name                libsbml
+name                libsbml-gcc
 version             5.8.0
 categories          science
 platforms           darwin
 maintainers         nomaintainer
 license             LGPL-2.1+
+
+conflicts           libsbml
 
 description         The Systems Biology Markup Language library
 
@@ -29,43 +31,40 @@ checksums           rmd160  185beb54cdda53e5a74958c77964ea3015c7b533 \
 
 depends_lib         port:bzip2 \
                     port:libxml2 \
-                    port:zlib
+                    port:zlib \
+		    port:gcc47
 
 configure.args      --with-bzip2=${prefix} \
                     --with-libxml=${prefix} \
                     --with-zlib=${prefix}
 
+configure.compiler      macports-gcc-4.7
+
 configure.universal_args-delete --disable-dependency-tracking
 
-variant python26 conflicts python27 python31 python32 python33 \
- description {Configure to use Python version 2.6} {
-	depends_lib-append		port:python26 
-	configure.args-append	--with-python --with-python-interpreter=${prefix}/bin/python2.6
+variant python26 conflicts python27 python31 python32 python33 description {Configure to use Python version 2.6} {
+    depends_lib-append      port:python26
+    configure.args-append   --with-python --with-python-interpreter=${prefix}/bin/python2.6
 }
 
-variant python27 conflicts python26 python31 python32 python33 \
- description {Configure to use Python version 2.7} {
-	depends_lib-append		port:python27
-	configure.args-append	--with-python --with-python-interpreter=${prefix}/bin/python2.7
+variant python27 conflicts python26 python31 python32 python33 description {Configure to use Python version 2.7} {
+    depends_lib-append      port:python27
+    configure.args-append   --with-python --with-python-interpreter=${prefix}/bin/python2.7
 }
 
-variant python31 conflicts python26 python27 python32 python33 \
- description {Configure to use Python version 3.1} {
-	depends_lib-append		port:python31
-	configure.args-append	--with-python --with-python-interpreter=${prefix}/bin/python3.1
+variant python31 conflicts python26 python27 python32 python33 description {Configure to use Python version 3.1} {
+    depends_lib-append      port:python31
+    configure.args-append   --with-python --with-python-interpreter=${prefix}/bin/python3.1
 }
 
-variant python32 conflicts python26 python27 python31 python33 \
- description {Configure to use Python version 3.2} {
-	depends_lib-append		port:python32
-	configure.args-append	--with-python --with-python-interpreter=${prefix}/bin/python3.2
+variant python32 conflicts python26 python27 python31 python33 description {Configure to use Python version 3.2} {
+    depends_lib-append      port:python32
+    configure.args-append   --with-python --with-python-interpreter=${prefix}/bin/python3.2
 }
 
-variant python33 conflicts python26 python27 python31 python32 \
- description {Configure to use Python version 3.3} {
-	depends_lib-append		port:python33
-	configure.args-append	--with-python --with-python-interpreter=${prefix}/bin/python3.3
+variant python33 conflicts python26 python27 python31 python32 description {Configure to use Python version 3.3} {
+    depends_lib-append      port:python33
+    configure.args-append   --with-python --with-python-interpreter=${prefix}/bin/python3.3
 }
-
 
 livecheck.regex     /libSBML-(\[0-9.\]+)-src${extract.suffix}
