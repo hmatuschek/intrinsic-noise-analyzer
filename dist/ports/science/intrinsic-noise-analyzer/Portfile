@@ -31,8 +31,8 @@ checksums md5    5175e9bc50cfa1270bdf8be185a56358 \
 
 depends_lib  	port:libsbml \
              	port:qt4-mac \
-             	port:GiNaC-gcc
-		port:gcc47
+             	port:GiNaC-gcc \
+        		port:gcc47
 
 depends_build port:cmake
 
