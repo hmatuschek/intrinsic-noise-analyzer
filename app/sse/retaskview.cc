@@ -111,9 +111,9 @@ REResultWidget::saveButtonPressed()
         tr("Text Files (*.txt *.csv);;Matlab 5 Files (*.mat)"), &selectedFilter);
   if ("" == filename) { return; }
 
-  if (tr("") == selectedFilter) {
+  if (tr("Text Files (*.txt *.csv)") == selectedFilter) {
     saveAsCSV(filename);
-  } else if (tr("") == selectedFilter) {
+  } else if (tr("Matlab 5 Files (*.mat)") == selectedFilter) {
     saveAsMAT(filename);
   } else {
     QMessageBox::critical(0, tr("Can not save results to file"),
@@ -140,7 +140,8 @@ REResultWidget::saveAsCSV(const QString &filename)
 
 void
 REResultWidget::saveAsMAT(const QString &filename) {
-  std::fstream file(filename.toLocal8Bit().constData(), std::fstream::out|std::fstream::binary);
+  std::fstream file(filename.toLocal8Bit().constData(),
+                    std::fstream::out|std::fstream::binary|std::fstream::trunc);
   if (! file.is_open()) {
     QMessageBox::critical(0, tr("Can not open file"),
                           tr("Can not open file %1 for writing").arg(filename));

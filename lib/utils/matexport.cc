@@ -214,7 +214,7 @@ MatFileValue::serialize(std::ostream &stream) const
   }
 
   // Add padding bytes to multiple of 64bit
-  size_t padd = (8 - dataSize()) % 8;
+  size_t padd = (dataSize()%8) ? (8 - (dataSize() % 8)) : 0;
   for (size_t i=0; i<padd; i++) { stream.put(0x00); }
 }
 
