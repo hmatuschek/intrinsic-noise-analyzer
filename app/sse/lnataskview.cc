@@ -122,7 +122,7 @@ LNAResultWidget::_saveButtonPressed() {
 
   if (tr("Text Files (*.txt *.csv)") == selectedFilter) {
     saveAsCSV(filename);
-  } else if (tr("") == selectedFilter) {
+  } else if (tr("Matlab 5 Files (*.mat)") == selectedFilter) {
     saveAsMAT(filename);
   } else {
     QMessageBox::critical(0, tr("Can not save results to file"),
