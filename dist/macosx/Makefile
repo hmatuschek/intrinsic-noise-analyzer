@@ -157,7 +157,7 @@ libcrypto:
 
 
 libffi-gcc47:
-	mkdir ${APP_LIBRARY_DIR}/gcc47/
+	mkdir -p ${APP_LIBRARY_DIR}/gcc47/
 	cp ${SYSTEM_LIBRARY_DIR}/gcc47/libffi.4.dylib ${APP_LIBRARY_DIR}/gcc47/
 	chmod u+w ${APP_LIBRARY_DIR}/gcc47/libffi.4.dylib
 	install_name_tool -id @executable_path/../Frameworks/gcc47/libffi.4.dylib ${APP_LIBRARY_DIR}/gcc47/libffi.4.dylib
