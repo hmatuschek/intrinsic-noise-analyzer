@@ -157,19 +157,20 @@ libcrypto:
 
 
 libffi-gcc47:
-	cp ${SYSTEM_LIBRARY_DIR}/gcc47/libffi.4.dylib ${APP_LIBRARY_DIR}/gcc47
+	mkdir ${APP_LIBRARY_DIR}/gcc47/
+	cp ${SYSTEM_LIBRARY_DIR}/gcc47/libffi.4.dylib ${APP_LIBRARY_DIR}/gcc47/
 	chmod u+w ${APP_LIBRARY_DIR}/gcc47/libffi.4.dylib
 	install_name_tool -id @executable_path/../Frameworks/gcc47/libffi.4.dylib ${APP_LIBRARY_DIR}/gcc47/libffi.4.dylib
 	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/gcc47/libgcc_s.1.dylib @executable_path/../Frameworks/gcc47/libgcc_s.1.dylib ${APP_LIBRARY_DIR}/gcc47/libffi.4.dylib 
 
 libgomp:
-	cp ${SYSTEM_LIBRARY_DIR}/gcc47/libgomp.1.dylib ${APP_LIBRARY_DIR}/gcc47
+	cp ${SYSTEM_LIBRARY_DIR}/gcc47/libgomp.1.dylib ${APP_LIBRARY_DIR}/gcc47/
 	chmod u+w ${APP_LIBRARY_DIR}/gcc47/libgomp.1.dylib
 	install_name_tool -id @executable_path/../Frameworks/gcc47/libgomp.1.dylib ${APP_LIBRARY_DIR}/gcc47/libgomp.1.dylib
 	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/gcc47/libgcc_s.1.dylib @executable_path/../Frameworks/gcc47/libgcc_s.1.dylib ${APP_LIBRARY_DIR}/gcc47/libgomp.1.dylib 
 		
 libgcc_s:
-	cp ${SYSTEM_LIBRARY_DIR}/gcc47/libgcc_s.1.dylib ${APP_LIBRARY_DIR}/gcc47
+	cp ${SYSTEM_LIBRARY_DIR}/gcc47/libgcc_s.1.dylib ${APP_LIBRARY_DIR}/gcc47/
 	chmod u+w ${APP_LIBRARY_DIR}/gcc47/libgcc_s.1.dylib
 	install_name_tool -id @executable_path/../Frameworks/gcc47/libgcc_s.1.dylib ${APP_LIBRARY_DIR}/gcc47/libgcc_s.1.dylib
 
