@@ -53,7 +53,8 @@ DocumentTree::addPlot(TaskItem *task, PlotItem *plot) {
   beginInsertRows(task_index, num_plots, num_plots);
   task->addPlot(plot);
   endInsertRows();
-  Application::getApp()->itemSelected(plot);
+  // Uncomment for auto-show...
+  //Application::getApp()->itemSelected(plot);
 }
 
 void

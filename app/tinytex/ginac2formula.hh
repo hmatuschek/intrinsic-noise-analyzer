@@ -1,7 +1,7 @@
 #ifndef __INA_APP_TINYTEX_GINAC2FORMULA_HH__
 #define __INA_APP_TINYTEX_GINAC2FORMULA_HH__
 
-#include <ginac.h>
+#include <ginac/ginac.h>
 #include "ast/scope.hh"
 #include <QList>
 #include <QVariant>
