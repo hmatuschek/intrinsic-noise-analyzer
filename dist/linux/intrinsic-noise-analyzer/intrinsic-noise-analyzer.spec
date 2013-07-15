@@ -18,7 +18,7 @@ BuildRequires: libqt4-devel >= 4.5, libginac-devel, llvm-devel >= 2.9, libeigen3
 Requires: libqt4 >= 4.5, libginac2, llvm >= 2.9
 %endif
 %if 0%{?fedora}
-BuildRequires: qt4-devel >= 4.5, ginac-devel, llvm-devel >= 2.9, eigen3 >= 3.0
+BuildRequires: qt4-devel >= 4.5, ginac-devel, llvm-devel >= 2.9, llvm-static >= 2.9, eigen3 >= 3.0
 Requires: qt4 >= 4.5, ginac, llvm >= 2.9
 %endif
 
