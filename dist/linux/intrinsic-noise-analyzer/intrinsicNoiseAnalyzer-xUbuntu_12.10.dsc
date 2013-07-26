@@ -1,6 +1,6 @@
 Format: 3.0 (quilt)
 Source: intrinsic-noise-analyzer
-Binary: intrinsic-noise-analyzer
+Binary: intrinsic-noise-analyzer, libina, libina-dev
 Architecture: any
 Version: 0.4.2-2
 Maintainer: Hannes Matuschek <hmatuschek@gmail.com>
