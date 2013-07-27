@@ -6,7 +6,7 @@ Standards-Version: 3.9.2
 Section: libs
 Homepage: http://sbml.org/
 
-Package: libsbml-dev
+Package: libsbml5-dev
 Section: libdevel
 Architecture: any
 Depends: libsbml5 (= ${binary:Version}), libxml2-dev, libbz2-dev, zlib1g-dev|libz-dev
