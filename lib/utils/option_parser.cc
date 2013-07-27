@@ -70,8 +70,7 @@ OptionRule::operator()(const char *argv[], int argc, size_t &idx, Parser &parser
     if(2 != str.size())
       return false;
 
-    if(not this->is_flag)
-    {
+    if(! this->is_flag) {
       // consume option:
       idx++;
 
@@ -82,9 +81,8 @@ OptionRule::operator()(const char *argv[], int argc, size_t &idx, Parser &parser
 
       this->value = argv[idx]; idx++;
       parser.set_option(this->long_name, this->value);
-    }
-    else
-    {
+    } else {
+      idx++;
       parser.set_flag(this->long_name);
     }
 
