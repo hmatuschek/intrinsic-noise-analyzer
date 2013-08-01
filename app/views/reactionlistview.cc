@@ -71,6 +71,7 @@ ReactionListView::onNewReaction()
   editor.commitReactionScope();
 
   // Update document tree
+  Application::getApp()->resetSelectedItem();
   Application::getApp()->docTree()->resetCompleteTree();
 }
 
@@ -132,5 +133,6 @@ ReactionListView::onReactionEditing(const QModelIndex &index)
   // Add new reaction and new species to the model
   editor.commitReactionScope();
   // Update document tree
+  Application::getApp()->resetSelectedItem();
   Application::getApp()->docTree()->resetCompleteTree();
 }

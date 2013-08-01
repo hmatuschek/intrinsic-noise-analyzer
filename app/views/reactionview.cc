@@ -213,6 +213,7 @@ ReactionView::onReactionEditing()
   _label->setText(tr("Reaction") + " " + _reaction->getDisplayName());
 
   // Update tree model
+  Application::getApp()->resetSelectedItem();
   Application::getApp()->docTree()->resetCompleteTree();
 }
 
