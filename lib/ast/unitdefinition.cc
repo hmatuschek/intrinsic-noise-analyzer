@@ -560,6 +560,31 @@ Unit::operator /(const Unit &other) const
 }
 
 
+bool
+Unit::operator <(const Unit &other) const {
+  // Compare by multiplier
+  if (this->common_multiplier < other.common_multiplier) { return true; }
+  if (this->common_multiplier > other.common_multiplier) { return false; }
+  if (this->common_scale < other.common_scale) { return true; }
+  if (this->common_scale > other.common_scale) { return false; }
+  if (this->units.size() < other.units.size()) { return true; }
+  if (this->units.size() > other.units.size()) { return false; }
+  // Compare scaled base units:
+  std::map<ScaledBaseUnit::BaseUnit, int>::iterator my_unit = units.begin();
+  std::map<ScaledBaseUnit::BaseUnit, int>::iterator other_unit = other.units.begin();
+  for (; my_unit!=units.end(); my_unit++, other_unit++) {
+    // Compare base unit
+    if (my_unit->first < other_unit->first) { return true; }
+    if (my_unit->first > other_unit->first) { return false; }
+    // if units are equal -> compare exponents
+    if (my_unit->second < other_unit->second) { return true; }
+    if (my_unit->second > other_unit->second) { return false; }
+  }
+  // Units are equal -> return false
+  return false;
+}
+
+
 Unit
 Unit::dimensionless(double multiplier, int scale)
 {

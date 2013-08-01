@@ -196,6 +196,8 @@ public:
   Unit operator *(const Unit &other) const;
   /** Implements simple unit manipulations. */
   Unit operator /(const Unit &other) const;
+  /** Implements a lexicographic ordering of the unit. */
+  bool operator <(const Unit &other) const;
 
   /** Returns the common multiplier of the unit. */
   double getMultiplier() const;
