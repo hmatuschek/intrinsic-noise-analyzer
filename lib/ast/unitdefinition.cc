@@ -565,13 +565,15 @@ Unit::operator <(const Unit &other) const {
   // Compare by multiplier
   if (this->common_multiplier < other.common_multiplier) { return true; }
   if (this->common_multiplier > other.common_multiplier) { return false; }
+  // Compare by scale
   if (this->common_scale < other.common_scale) { return true; }
   if (this->common_scale > other.common_scale) { return false; }
+  // Compare by number of base units
   if (this->units.size() < other.units.size()) { return true; }
   if (this->units.size() > other.units.size()) { return false; }
   // Compare scaled base units:
-  std::map<ScaledBaseUnit::BaseUnit, int>::iterator my_unit = units.begin();
-  std::map<ScaledBaseUnit::BaseUnit, int>::iterator other_unit = other.units.begin();
+  std::map<ScaledBaseUnit::BaseUnit, int>::const_iterator my_unit = units.begin();
+  std::map<ScaledBaseUnit::BaseUnit, int>::const_iterator other_unit = other.units.begin();
   for (; my_unit!=units.end(); my_unit++, other_unit++) {
     // Compare base unit
     if (my_unit->first < other_unit->first) { return true; }
