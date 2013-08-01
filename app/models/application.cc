@@ -198,6 +198,8 @@ Application::setMainWindow(MainWindow *mainwindow)
 
 void
 Application::resetSelectedItem() {
+  std::cerr << "Unselect item " << _selected_item << std::endl;
+
   _selected_item = 0;
   _exportModel->setEnabled(false);
   _editModel->setEnabled(false);
@@ -230,6 +232,7 @@ Application::itemSelected(DocumentTreeItem *wrapper)
 
   // Set selected item:
   _selected_item = wrapper;
+  std::cerr << "Selected item " << _selected_item << std::endl;
 
   // If selected item is a document item -> enabled exportModel menu item:
   if (0 != dynamic_cast<DocumentItem *>(getParentDocumentItem(wrapper))) {
@@ -489,6 +492,8 @@ void Application::onExpandRevReactions()
   if (0 == (document = dynamic_cast<DocumentItem *>(getParentDocumentItem(_selected_item)))) {
     return;
   }
+  resetSelectedItem();
+
   // Get model
   iNA::Ast::Model &model = document->getModel();
   // Expand reversible reactions
@@ -511,6 +516,7 @@ void Application::onCombineIrrevReactions()
 // redundant:  if (0 == _selected_item) { return; }
   if (0 == (document = dynamic_cast<DocumentItem *>(getParentDocumentItem(_selected_item)))) { return; }
   iNA::Ast::Model &model = document->getModel();
+  resetSelectedItem();
 
   iNA::Trafo::IrreversibleReactionCollapser collector;
 
@@ -522,7 +528,6 @@ void Application::onCombineIrrevReactions()
   }
 
   docTree()->resetCompleteTree();
-
 }
 
 void
