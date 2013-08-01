@@ -7,7 +7,7 @@
 
 #include "../eval/bci/engine.hh"
 
-#include <omp.h>
+#include "openmp.hh"
 
 
 namespace iNA {

@@ -328,7 +328,7 @@ public:
   virtual ~VarianceLineGraphConfig();
 
   /** Copies the config. */
-  virtual AbstractGraphConfig *copy() const;
+  virtual AbstractGraphConfig *copy(PlotConfig *config) const;
   /** Creates the @c VarianceLineGraph. */
   virtual Graph *createGraph();
 
