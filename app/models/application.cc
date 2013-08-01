@@ -198,7 +198,6 @@ Application::setMainWindow(MainWindow *mainwindow)
 
 void
 Application::resetSelectedItem() {
-  std::cerr << "Unselect item " << _selected_item << std::endl;
 
   _selected_item = 0;
   _exportModel->setEnabled(false);
@@ -232,7 +231,6 @@ Application::itemSelected(DocumentTreeItem *wrapper)
 
   // Set selected item:
   _selected_item = wrapper;
-  std::cerr << "Selected item " << _selected_item << std::endl;
 
   // If selected item is a document item -> enabled exportModel menu item:
   if (0 != dynamic_cast<DocumentItem *>(getParentDocumentItem(wrapper))) {

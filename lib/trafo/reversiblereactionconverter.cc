@@ -125,6 +125,7 @@ void ReversibleReactionConverter::apply(Ast::Model &model)
 void IrreversibleReactionCollapser::apply(Ast::Model &model)
 {
   size_t count=0;
+  // List of irreversible reactions that has been removed
   std::set<Ast::Reaction *>  burned_reactions;
 
   // Iterate over all reactions:
@@ -144,10 +145,19 @@ void IrreversibleReactionCollapser::apply(Ast::Model &model)
       if(forward->isReverseOf(reverse) && (0 == burned_reactions.count(reverse)))
       {
         // Make reversible
-        forward->setReversible(true);
-        Ast::ModelCopyist::mergeReversibleKineticLaw(forward->getKineticLaw(),reverse->getKineticLaw());
+        try {
+          Ast::ModelCopyist::mergeReversibleKineticLaw(forward->getKineticLaw(),reverse->getKineticLaw());
+        } catch (iNA::Exception &err) {
+          Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
+          message << "Can not collapse reaction " << forward->getName()
+                  << " with " << reverse->getName() << ": " << err.what();
+          Utils::Logger::get().log(message);
+          continue; // Continue search for reverse direction
+        }
 
-        // and remove reverse reaction
+        // Make forward reaction reversible
+        forward->setReversible(true);
+        // and mark reverse reaction for deletion
         burned_reactions.insert(reverse);
 
         // Create a log message.
