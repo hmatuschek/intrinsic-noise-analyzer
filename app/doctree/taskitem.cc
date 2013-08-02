@@ -191,6 +191,7 @@ TaskItem::removeTask()
   }
 
   // Remove item from document tree:
+  Application::getApp()->resetSelectedItem();
   Application::getApp()->docTree()->removeTask(this);
 
   // Mark object for deletion:

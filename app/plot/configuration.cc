@@ -553,7 +553,7 @@ VarianceLineGraphConfig::compileExpressions() {
 }
 
 AbstractGraphConfig *
-VarianceLineGraphConfig::copy() const {
+VarianceLineGraphConfig::copy(PlotConfig *config) const {
   return new VarianceLineGraphConfig(*this);
 }
 

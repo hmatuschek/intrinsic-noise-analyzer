@@ -52,9 +52,9 @@ DocumentItem * getParentDocumentItem(TreeItem * item)
 {
   if (item==0) return 0;
 
-  return (0 != dynamic_cast<DocumentItem *>(item)
-      ? dynamic_cast<DocumentItem *>(item)
-      : getParentDocumentItem(item->getTreeParent()));
+  DocumentItem *ditem = dynamic_cast<DocumentItem *>(item);
+  if (0 == ditem) { return getParentDocumentItem(item->getTreeParent()); }
+  return ditem;
 }
 
 
@@ -282,11 +282,13 @@ DocumentTree * Application::docTree() { return this->document_tree; }
 
 bool
 Application::hasADocumentSelected() const {
-  return 0 != dynamic_cast<DocumentItem *>(getParentDocumentItem(_selected_item));
+  if (0 == _selected_item) { return false; }
+  return 0 != getParentDocumentItem(_selected_item);
 }
 
 DocumentItem *
 Application::selectedDocument() {
+  if (0 == _selected_item) { return 0; }
   return getParentDocumentItem(_selected_item);
 }
 
@@ -400,7 +402,7 @@ void Application::onImportModel(const QString &fileName, bool anonymous, ModelTy
 
 void Application::onExportModel()
 {
-  DocumentItem *document = dynamic_cast<DocumentItem *>(getParentDocumentItem(_selected_item));
+  DocumentItem *document = getParentDocumentItem(_selected_item);
   if (0 == document) { return; }
 
   // Ask for filename and type:
@@ -431,8 +433,7 @@ void Application::onCloseModel()
 {
   DocumentItem *document = 0;
 
-// redundant:  if (0 == _selected_item) { return; }
-  if (0 == (document = dynamic_cast<DocumentItem *>(getParentDocumentItem(_selected_item)))) { return; }
+  if (0 == (document = getParentDocumentItem(_selected_item))) { return; }
   // signal document to close
   document->closeDocument();
   resetSelectedItem();
@@ -445,8 +446,7 @@ void Application::onCloseAll()
 
   QObjectList::const_iterator it = docTree()->children().begin();
 
-  while(it!=docTree()->children().end())
-  {
+  while(it!=docTree()->children().end()) {
     document = dynamic_cast<DocumentItem *>(*it++);
     document->closeDocument();
   }
@@ -510,9 +510,7 @@ void Application::onExpandRevReactions()
 void Application::onCombineIrrevReactions()
 {
   DocumentItem *document = 0;
-
-// redundant:  if (0 == _selected_item) { return; }
-  if (0 == (document = dynamic_cast<DocumentItem *>(getParentDocumentItem(_selected_item)))) { return; }
+  if (0 == (document = getParentDocumentItem(_selected_item))) { return; }
   iNA::Ast::Model &model = document->getModel();
   resetSelectedItem();
 
@@ -524,7 +522,6 @@ void Application::onCombineIrrevReactions()
           0, tr("Combine Reversible Reactions"),
           tr("Can not combine irreversible reactions: %1").arg(err.what()));
   }
-
   docTree()->resetCompleteTree();
 }
 

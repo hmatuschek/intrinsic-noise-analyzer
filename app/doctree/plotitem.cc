@@ -105,6 +105,7 @@ PlotItem::removePlot()
 {
   // Remove item from document tree:
   Application::getApp()->docTree()->removePlot(this);
+  Application::getApp()->resetSelectedItem();
 
   // Mark object for deletion:
   this->deleteLater();
