@@ -198,6 +198,7 @@ Application::setMainWindow(MainWindow *mainwindow)
 
 void
 Application::resetSelectedItem() {
+
   _selected_item = 0;
   _exportModel->setEnabled(false);
   _editModel->setEnabled(false);
@@ -489,10 +490,19 @@ void Application::onExpandRevReactions()
   if (0 == (document = dynamic_cast<DocumentItem *>(getParentDocumentItem(_selected_item)))) {
     return;
   }
+  resetSelectedItem();
+
   // Get model
   iNA::Ast::Model &model = document->getModel();
   // Expand reversible reactions
-  iNA::Trafo::ReversibleReactionConverter converter; converter.apply(model);
+  iNA::Trafo::ReversibleReactionConverter converter;
+  try { converter.apply(model); }
+  catch (iNA::Exception &err) {
+    QMessageBox::critical(
+          0, tr("Expand Reversible Reactions"),
+          tr("Can not expand reversible reactions: %1").arg(err.what()));
+  }
+
   // Update tree model
   docTree()->resetCompleteTree();
 }
@@ -502,9 +512,16 @@ void Application::onCombineIrrevReactions()
   DocumentItem *document = 0;
   if (0 == (document = getParentDocumentItem(_selected_item))) { return; }
   iNA::Ast::Model &model = document->getModel();
+  resetSelectedItem();
 
-  iNA::Trafo::IrreversibleReactionCollapser collector; collector.apply(model);
+  iNA::Trafo::IrreversibleReactionCollapser collector;
 
+  try { collector.apply(model); }
+  catch (iNA::Exception &err) {
+    QMessageBox::critical(
+          0, tr("Combine Reversible Reactions"),
+          tr("Can not combine irreversible reactions: %1").arg(err.what()));
+  }
   docTree()->resetCompleteTree();
 }
 
