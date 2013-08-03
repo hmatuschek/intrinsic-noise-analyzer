@@ -156,6 +156,9 @@ public:
   /** Iterator over scaled base units of the unit. */
   typedef std::map<ScaledBaseUnit::BaseUnit, int>::const_iterator iterator;
 
+  /** Redefine base units here. */
+  typedef Ast::ScaledBaseUnit::BaseUnit BaseUnit;
+
 protected:
   /** The common multiplier of all scaled base-units. */
   double _common_multiplier;
