@@ -10,6 +10,8 @@ namespace Ast {
 
 
 /** Elementary transformation (mostly scaling) of a base unit.
+ * @deprecated This class will be removed in favor of the @c Ast::Unit class which represents units
+ *             in a more algebraic way.
  * @ingroup ast */
 class ScaledBaseUnit
 {
@@ -168,7 +170,6 @@ protected:
   Unit(const std::map<ScaledBaseUnit::BaseUnit, int> &_units,
        double common_multiplier, int common_scale);
 
-
 public:
   /** Default constructor (dimensionless). */
   Unit();
@@ -193,6 +194,8 @@ public:
   Unit operator /(const Unit &other) const;
   /** Implements a lexicographic ordering of the unit. */
   bool operator <(const Unit &other) const;
+  /** Implements the integer exponent of units. */
+  Unit pow(int exponent);
 
   /** Returns the common multiplier of the unit. */
   double getMultiplier() const;

@@ -510,6 +510,18 @@ Unit::operator <(const Unit &other) const {
   return false;
 }
 
+Unit
+Unit::pow(int exponent) const {
+  double common_multiplier = std::pow(this->_common_multiplier, exponent);
+  int    common_scale = this->_common_scale * exponent;
+  std::map<ScaledBaseUnit::BaseUnit, int> units;
+  std::map<ScaledBaseUnit::BaseUnit, int>::iterator item = other._units.begin();
+  for (; item!=other._units.end(); item++) {
+    int exp = item->second * exponent;
+    if (exp != 0) { units[item->first] = exp; }
+  }
+  return Unit(units, common_multiplier, common_scale);
+}
 
 Unit
 Unit::dimensionless(double multiplier, int scale)
