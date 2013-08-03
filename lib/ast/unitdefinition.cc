@@ -515,10 +515,10 @@ Unit::pow(int exponent) const {
   double common_multiplier = std::pow(this->_common_multiplier, exponent);
   int    common_scale = this->_common_scale * exponent;
   std::map<ScaledBaseUnit::BaseUnit, int> units;
-  std::map<ScaledBaseUnit::BaseUnit, int>::iterator item = other._units.begin();
-  for (; item!=other._units.end(); item++) {
+  std::map<ScaledBaseUnit::BaseUnit, int>::const_iterator item = _units.begin();
+  for (; item!=_units.end(); item++) {
     int exp = item->second * exponent;
-    if (exp != 0) { units[item->first] = exp; }
+    if (0 != exp) { units[item->first] = exp; }
   }
   return Unit(units, common_multiplier, common_scale);
 }

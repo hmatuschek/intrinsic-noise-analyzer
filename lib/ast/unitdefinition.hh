@@ -195,7 +195,7 @@ public:
   /** Implements a lexicographic ordering of the unit. */
   bool operator <(const Unit &other) const;
   /** Implements the integer exponent of units. */
-  Unit pow(int exponent);
+  Unit pow(int exponent) const;
 
   /** Returns the common multiplier of the unit. */
   double getMultiplier() const;
