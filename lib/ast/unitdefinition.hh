@@ -9,17 +9,12 @@ namespace iNA {
 namespace Ast {
 
 
-/**
- * Elementary transformation (mostly scaling) of a base unit.
- *
- * @ingroup ast
- */
+/** Elementary transformation (mostly scaling) of a base unit.
+ * @ingroup ast */
 class ScaledBaseUnit
 {
 public:
-  /**
-   * This enum holds all pre-defined base-units defined by SBML.
-   */
+  /** This enum holds all pre-defined base-units defined by SBML. */
   typedef enum
   {
     AMPERE,               ///< The ampere unit.
@@ -151,10 +146,8 @@ private:
 
 
 
-/** Represents an unit, composed as a product of scaled base-units (@c ScaledBaseUnit).
- *
- * @ingroup ast
- */
+/** Represents an unit, composed as a product of scaled base-units (@c ScaledBaseUnit). *
+ * @ingroup ast */
 class Unit
 {
 public:
@@ -163,16 +156,16 @@ public:
 
 protected:
   /** The common multiplier of all scaled base-units. */
-  double common_multiplier;
+  double _common_multiplier;
   /** The common scale of all scaled base-units. */
-  double common_scale;
+  double _common_scale;
   /** This list represents the product of scaled base-units, that build the actual unit. */
-  std::map<ScaledBaseUnit::BaseUnit, int> units;
+  std::map<ScaledBaseUnit::BaseUnit, int> _units;
 
 
 protected:
   /** Hidden constructor. Avoids direct instantiation. */
-  Unit(const std::map<ScaledBaseUnit::BaseUnit, int> &units,
+  Unit(const std::map<ScaledBaseUnit::BaseUnit, int> &_units,
        double common_multiplier, int common_scale);
 
 
@@ -183,6 +176,8 @@ public:
   Unit(const std::list<ScaledBaseUnit> &units);
   /** Constructs a simple unit as a scaled variant of a base-unit. */
   Unit(const ScaledBaseUnit &base);
+  /** Constructs a unit from the given base-unit. */
+  Unit(ScaledBaseUnit::BaseUnit unit, double multiplier=1.0, int scale=0, int exponent=1);
   /** Copy constructor. */
   Unit(const Unit &other);
 
@@ -255,10 +250,9 @@ public:
 
 
 
-/**
- * This class defines a unit as a product of scaled base units.
- *
- * @ingroup
+/** This class defines a unit as a product of scaled base units.
+ * @deprecated Units are stored directly within the model and paramters, remove this from the
+ *             model definition.
  */
 class UnitDefinition : public Definition
 {

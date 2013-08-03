@@ -91,81 +91,80 @@ UnitDefinition::apply(Ast::Operator &op)
  * ********************************************************************************************* */
 Unit::Unit(const std::map<ScaledBaseUnit::BaseUnit, int> &units,
            double common_multiplier, int common_scale)
-  : common_multiplier(common_multiplier), common_scale(common_scale), units(units)
+  : _common_multiplier(common_multiplier), _common_scale(common_scale), _units(units)
 {
   // Pass...
 }
 
 
 Unit::Unit()
-  : common_multiplier(1.0), common_scale(0), units()
+  : _common_multiplier(1.0), _common_scale(0), _units()
 {
   // Pass...
 }
 
 
 Unit::Unit(const std::list<ScaledBaseUnit> &units)
-  : common_multiplier(1.0), common_scale(0), units()
+  : _common_multiplier(1.0), _common_scale(0), _units()
 {
-  for (std::list<ScaledBaseUnit>::const_iterator iter = units.begin();
-       iter != units.end(); iter++)
-  {
-    common_multiplier *= std::pow(iter->getMultiplier(), iter->getExponent());
-    common_scale      += iter->getScale() * iter->getExponent();
+  std::list<ScaledBaseUnit>::const_iterator iter = units.begin();
+  for (; iter != units.end(); iter++) {
+    _common_multiplier *= std::pow(iter->getMultiplier(), iter->getExponent());
+    _common_scale      += iter->getScale() * iter->getExponent();
 
     // Skip DIMENSIONLESS
-    if (ScaledBaseUnit::DIMENSIONLESS == iter->getBaseUnit())
-    {
+    if (ScaledBaseUnit::DIMENSIONLESS == iter->getBaseUnit()) {
       continue;
     }
 
     // Check if there is already this base-unit in units:
     std::map<ScaledBaseUnit::BaseUnit, int>::iterator item;
-    if (this->units.end() != (item = this->units.find(iter->getBaseUnit())))
-    {
-      this->units[iter->getBaseUnit()] = this->units[iter->getBaseUnit()] + iter->getExponent();
-      if (0 == this->units[iter->getBaseUnit()])
-      {
-        this->units.erase(iter->getBaseUnit());
+    if (this->_units.end() != (item = this->_units.find(iter->getBaseUnit()))) {
+      this->_units[iter->getBaseUnit()] = this->_units[iter->getBaseUnit()] + iter->getExponent();
+      if (0 == this->_units[iter->getBaseUnit()]) {
+        this->_units.erase(iter->getBaseUnit());
       }
-
-    }
-    else
-    {
-      this->units[iter->getBaseUnit()] = iter->getExponent();
+    } else {
+      this->_units[iter->getBaseUnit()] = iter->getExponent();
     }
   }
 }
-
 
 Unit::Unit(const ScaledBaseUnit &base)
-  : common_multiplier(1.0), common_scale(0), units()
+  : _common_multiplier(1.0), _common_scale(0), _units()
 {
-  this->common_multiplier *= std::pow(base.getMultiplier(), base.getExponent());
-  this->common_scale      += base.getScale() * base.getExponent();
+  this->_common_multiplier *= std::pow(base.getMultiplier(), base.getExponent());
+  this->_common_scale      += base.getScale() * base.getExponent();
 
-  if (ScaledBaseUnit::DIMENSIONLESS != base.getBaseUnit())
-  {
-    this->units[base.getBaseUnit()] = base.getExponent();
+  if (ScaledBaseUnit::DIMENSIONLESS != base.getBaseUnit()) {
+    this->_units[base.getBaseUnit()] = base.getExponent();
   }
 }
 
+Unit::Unit(ScaledBaseUnit::BaseUnit unit, double multiplier, int scale, int exponent)
+  : _common_multiplier(1.0), _common_scale(0), _units()
+{
+  _common_multiplier *= std::pow(multiplier, exponent);
+  _common_scale      += scale * exponent;
+
+  if (ScaledBaseUnit::DIMENSIONLESS != unit) {
+    this->_units[unit] = exponent;
+  }
+}
 
 Unit::Unit(const Unit &other)
-  : common_multiplier(other.common_multiplier), common_scale(other.common_scale), units(other.units)
+  : _common_multiplier(other._common_multiplier), _common_scale(other._common_scale), _units(other._units)
 {
   // Pass...
 }
 
-
 const Unit &
-Unit::operator =(const Unit &other)
-{
+Unit::operator =(const Unit &other) {
   // Override the scaled units:
-  this->units.clear();
-  this->units = other.units;
-  this->common_multiplier = other.common_multiplier;
-  this->common_scale = other.common_scale;
+  this->_units.clear();
+  this->_units = other._units;
+  this->_common_multiplier = other._common_multiplier;
+  this->_common_scale = other._common_scale;
 
   return *this;
 }
@@ -173,32 +172,29 @@ Unit::operator =(const Unit &other)
 
 double
 Unit::getMultiplier() const {
-  return this->common_multiplier;
+  return this->_common_multiplier;
 }
 
 double
 Unit::getScale() const {
-  return this->common_scale;
+  return this->_common_scale;
 }
 
 size_t
 Unit::size() const {
-  return units.size();
+  return _units.size();
 }
 
 
 bool
-Unit::isVariantOf(ScaledBaseUnit::BaseUnit baseUnit, int expo) const
-{
+Unit::isVariantOf(ScaledBaseUnit::BaseUnit baseUnit, int expo) const {
   // A unit is dimension-less if there are no units:
-  if (ScaledBaseUnit::DIMENSIONLESS == baseUnit && 0 == this->units.size())
-  {
+  if (ScaledBaseUnit::DIMENSIONLESS == baseUnit && 0 == this->_units.size()) {
     return true;
   }
 
   // If the unit consists of more than one base-unit:
-  if (1 != this->units.size())
-  {
+  if (1 != this->_units.size()) {
     return false;
   }
 
@@ -207,18 +203,15 @@ Unit::isVariantOf(ScaledBaseUnit::BaseUnit baseUnit, int expo) const
 
 
 bool
-Unit::hasVariantOf(ScaledBaseUnit::BaseUnit baseUnit, int expo) const
-{
+Unit::hasVariantOf(ScaledBaseUnit::BaseUnit baseUnit, int expo) const {
   // Any unit has a dimensionless factor!
-  if (ScaledBaseUnit::DIMENSIONLESS == baseUnit)
-  {
+  if (ScaledBaseUnit::DIMENSIONLESS == baseUnit) {
     return true;
   }
 
   // Seach for base unti
-  std::map<ScaledBaseUnit::BaseUnit, int>::const_iterator item = this->units.find(baseUnit);
-  if (this->units.end() == item || item->second != expo)
-  {
+  std::map<ScaledBaseUnit::BaseUnit, int>::const_iterator item = this->_units.find(baseUnit);
+  if (this->_units.end() == item || item->second != expo) {
     return false;
   }
 
@@ -227,35 +220,32 @@ Unit::hasVariantOf(ScaledBaseUnit::BaseUnit baseUnit, int expo) const
 
 
 bool
-Unit::isSubstanceUnit() const
-{
+Unit::isSubstanceUnit() const {
   // Dimensionless is a valid substabce unit.
-  if (0 == this->units.size()) {
+  if (0 == this->_units.size()) {
     return true;
   }
 
-  return (1 == this->units.size()) && this->hasSubstanceUnit();
+  return (1 == this->_units.size()) && this->hasSubstanceUnit();
 }
 
 
 bool
-Unit::hasSubstanceUnit() const
-{
+Unit::hasSubstanceUnit() const {
   return (hasVariantOf(Ast::ScaledBaseUnit::MOLE) || hasVariantOf(Ast::ScaledBaseUnit::ITEM) ||
           hasVariantOf(Ast::ScaledBaseUnit::GRAM) || hasVariantOf(Ast::ScaledBaseUnit::KILOGRAM));
 }
 
 
 bool
-Unit::isConcentrationUnit() const
-{
+Unit::isConcentrationUnit() const {
   if (this->isVariantOf(Ast::ScaledBaseUnit::DIMENSIONLESS, -1) ||
       this->isVariantOf(Ast::ScaledBaseUnit::LITRE, -1) ||
       this->isVariantOf(Ast::ScaledBaseUnit::METRE, -3)) {
     return false;
   }
 
-  if (2 != this->units.size()) {
+  if (2 != this->_units.size()) {
     return false;
   }
 
@@ -293,49 +283,46 @@ Unit::isTimeUnit() const {
 bool
 Unit::isDimensionless() const
 {
-  return 0 == this->units.size();
+  return 0 == this->_units.size();
 }
 
 
 bool
-Unit::isExactlyDimensionless() const
-{
-  return isDimensionless() && (1 == common_multiplier) && (0 == common_scale);
+Unit::isExactlyDimensionless() const {
+  return isDimensionless() && (1 == _common_multiplier) && (0 == _common_scale);
 }
 
 
 ScaledBaseUnit
-Unit::asScaledBaseUnit() const
-{
+Unit::asScaledBaseUnit() const {
   // Handle dimensionless unit explicitly:
   if (this->isDimensionless()) {
     return ScaledBaseUnit(ScaledBaseUnit::DIMENSIONLESS, 1, 0, 1);
   }
 
-  if (1 != this->units.size())
-  {
+  if (1 != this->_units.size()) {
     InternalError err;
     err << "Cannot construct a scaled base-unit from non-atomic unit: "
         << this->dump();
     throw err;
   }
 
-  ScaledBaseUnit::BaseUnit base_unit = this->units.begin()->first;
-  int    exponent   = this->units.begin()->second;
-  int    scale      = int(this->common_scale/exponent);
-  double multiplier = std::exp(std::log(this->common_multiplier)/exponent);;
+  ScaledBaseUnit::BaseUnit base_unit = this->_units.begin()->first;
+  int    exponent   = this->_units.begin()->second;
+  int    scale      = int(this->_common_scale/exponent);
+  double multiplier = std::exp(std::log(this->_common_multiplier)/exponent);;
   return ScaledBaseUnit(base_unit, multiplier, scale, exponent);
 }
 
 
 Unit::iterator
 Unit::begin() const {
-  return units.begin();
+  return _units.begin();
 }
 
 Unit::iterator
 Unit::end() const {
-  return units.end();
+  return _units.end();
 }
 
 
@@ -346,17 +333,17 @@ Unit::dump(std::ostream &str, bool tex) const
   // return standard dump
   if(!tex)
   {
-    if (1 != this->common_multiplier || 0 != this->common_scale) {
-      str << this->common_multiplier << "e" << this->common_scale;
+    if (1 != this->_common_multiplier || 0 != this->_common_scale) {
+      str << this->_common_multiplier << "e" << this->_common_scale;
     }
 
-    if (0 < this->units.size())
+    if (0 < this->_units.size())
     {
-      if (1 != this->common_multiplier || 0 != this->common_scale)
+      if (1 != this->_common_multiplier || 0 != this->_common_scale)
         str << "(";
 
-      std::map<ScaledBaseUnit::BaseUnit, int>::const_iterator iter = this->units.begin();
-      for (size_t i=0; i<this->units.size()-1; i++, iter++)
+      std::map<ScaledBaseUnit::BaseUnit, int>::const_iterator iter = this->_units.begin();
+      for (size_t i=0; i<this->_units.size()-1; i++, iter++)
       {
         str << ScaledBaseUnit::baseUnitRepr(iter->first);
         if (1 != iter->second)
@@ -370,7 +357,7 @@ Unit::dump(std::ostream &str, bool tex) const
     }
 
 
-    if (1 != this->common_multiplier || 0 != this->common_scale)
+    if (1 != this->_common_multiplier || 0 != this->_common_scale)
       str << ")";
 
     return;
@@ -385,8 +372,8 @@ Unit::dump(std::ostream &str, bool tex) const
   // catch times which refer explictly to units of minutes, hours or days
   if (isVariantOf(ScaledBaseUnit::SECOND))
   {
-    float fac = common_multiplier;
-    fac *= (0 != common_scale) ? std::pow(10.,common_scale) : 1;
+    float fac = _common_multiplier;
+    fac *= (0 != _common_scale) ? std::pow(10.,_common_scale) : 1;
 
     if( fac==86400 ) { str << "d$"; return; }
     else if ( fac==3600 ) { str << "h$"; return; }
@@ -394,25 +381,25 @@ Unit::dump(std::ostream &str, bool tex) const
   }
 
   // first dump the scale
-  if (1 != this->common_multiplier) {
-    str << this->common_multiplier << "\times";
+  if (1 != this->_common_multiplier) {
+    str << this->_common_multiplier << "\times";
   }
 
-  if (0 != this->common_scale) {
-    str << "10^{" << this->common_scale << "}";
+  if (0 != this->_common_scale) {
+    str << "10^{" << this->_common_scale << "}";
   }
 
   // then the units
-  if (0 < this->units.size())
+  if (0 < this->_units.size())
   {
     std::ostringstream numerator,denominator;
     size_t nnum=0,nden=0;
 
-    if (1 != this->common_multiplier || 0 != this->common_scale)
+    if (1 != this->_common_multiplier || 0 != this->_common_scale)
       str << "(";
 
-    std::map<ScaledBaseUnit::BaseUnit, int>::const_iterator iter = this->units.begin();
-    for (size_t i=0; i<this->units.size(); i++, iter++)
+    std::map<ScaledBaseUnit::BaseUnit, int>::const_iterator iter = this->_units.begin();
+    for (size_t i=0; i<this->_units.size(); i++, iter++)
     {
       if (0 < iter->second)
       {
@@ -431,7 +418,7 @@ Unit::dump(std::ostream &str, bool tex) const
       }
     }
 
-    nden = units.size()-nnum;
+    nden = _units.size()-nnum;
 
     if(nnum>0) {
       if (nnum>1) str << "(";
@@ -448,7 +435,7 @@ Unit::dump(std::ostream &str, bool tex) const
        if (nden>1) str << ")";
     }
 
-    if (1 != this->common_multiplier || 0 != this->common_scale)
+    if (1 != this->_common_multiplier || 0 != this->_common_scale)
         str << ")";
   }
   str << "$";
@@ -466,20 +453,20 @@ Unit::dump(bool tex) const {
 bool
 Unit::operator ==(const Unit &other) const
 {
-  if(this->common_multiplier != other.common_multiplier || this->common_scale != other.common_scale)
+  if(this->_common_multiplier != other._common_multiplier || this->_common_scale != other._common_scale)
   {
     return false;
   }
 
-  if (this->units.size() != other.units.size())
+  if (this->_units.size() != other._units.size())
     return false;
 
   // Left compare base-units with exponents:
-  for (std::map<ScaledBaseUnit::BaseUnit, int>::const_iterator iter = this->units.begin();
-       iter != this->units.end(); iter++)
+  for (std::map<ScaledBaseUnit::BaseUnit, int>::const_iterator iter = this->_units.begin();
+       iter != this->_units.end(); iter++)
   {
-    std::map<ScaledBaseUnit::BaseUnit, int>::const_iterator item = other.units.find(iter->first);
-    if (other.units.end() == item)
+    std::map<ScaledBaseUnit::BaseUnit, int>::const_iterator item = other._units.find(iter->first);
+    if (other._units.end() == item)
       return false;
 
     if (iter->second != item->second)
@@ -500,15 +487,15 @@ Unit
 Unit::operator *(const Unit &other) const
 {
   // Copy product of own scaled base-units
-  std::map<ScaledBaseUnit::BaseUnit, int> units(this->units);
+  std::map<ScaledBaseUnit::BaseUnit, int> units(this->_units);
 
   // add scaled units of other:
-  for (std::map<ScaledBaseUnit::BaseUnit, int>::const_iterator iter = other.units.begin();
-       iter != other.units.end(); iter++)
+  for (std::map<ScaledBaseUnit::BaseUnit, int>::const_iterator iter = other._units.begin();
+       iter != other._units.end(); iter++)
   {
     std::map<ScaledBaseUnit::BaseUnit, int>::iterator item = units.find(iter->first);
 
-    if (other.units.end() != item)
+    if (other._units.end() != item)
     {
       units[iter->first] = units[iter->first] + iter->second;
       if (0 == units[iter->first])
@@ -523,8 +510,8 @@ Unit::operator *(const Unit &other) const
   }
 
   // Done.
-  return Unit(units, this->common_multiplier * other.common_multiplier,
-              this->common_scale + other.common_scale);
+  return Unit(units, this->_common_multiplier * other._common_multiplier,
+              this->_common_scale + other._common_scale);
 }
 
 
@@ -532,15 +519,15 @@ Unit
 Unit::operator /(const Unit &other) const
 {
   // Copy product of own scaled base-units
-  std::map<ScaledBaseUnit::BaseUnit, int> units(this->units);
+  std::map<ScaledBaseUnit::BaseUnit, int> units(this->_units);
 
   // add scaled units of other:
-  for (std::map<ScaledBaseUnit::BaseUnit, int>::const_iterator iter = other.units.begin();
-       iter != other.units.end(); iter++)
+  for (std::map<ScaledBaseUnit::BaseUnit, int>::const_iterator iter = other._units.begin();
+       iter != other._units.end(); iter++)
   {
     std::map<ScaledBaseUnit::BaseUnit, int>::iterator item = units.find(iter->first);
 
-    if (other.units.end() != item)
+    if (other._units.end() != item)
     {
       units[iter->first] = units[iter->first] - iter->second;
       if (0 == units[iter->first])
@@ -555,26 +542,26 @@ Unit::operator /(const Unit &other) const
   }
 
   // Done.
-  return Unit(units, this->common_multiplier / other.common_multiplier,
-              this->common_scale - other.common_scale);
+  return Unit(units, this->_common_multiplier / other._common_multiplier,
+              this->_common_scale - other._common_scale);
 }
 
 
 bool
 Unit::operator <(const Unit &other) const {
   // Compare by multiplier
-  if (this->common_multiplier < other.common_multiplier) { return true; }
-  if (this->common_multiplier > other.common_multiplier) { return false; }
+  if (this->_common_multiplier < other._common_multiplier) { return true; }
+  if (this->_common_multiplier > other._common_multiplier) { return false; }
   // Compare by scale
-  if (this->common_scale < other.common_scale) { return true; }
-  if (this->common_scale > other.common_scale) { return false; }
+  if (this->_common_scale < other._common_scale) { return true; }
+  if (this->_common_scale > other._common_scale) { return false; }
   // Compare by number of base units
-  if (this->units.size() < other.units.size()) { return true; }
-  if (this->units.size() > other.units.size()) { return false; }
+  if (this->_units.size() < other._units.size()) { return true; }
+  if (this->_units.size() > other._units.size()) { return false; }
   // Compare scaled base units:
-  std::map<ScaledBaseUnit::BaseUnit, int>::const_iterator my_unit = units.begin();
-  std::map<ScaledBaseUnit::BaseUnit, int>::const_iterator other_unit = other.units.begin();
-  for (; my_unit!=units.end(); my_unit++, other_unit++) {
+  std::map<ScaledBaseUnit::BaseUnit, int>::const_iterator my_unit = _units.begin();
+  std::map<ScaledBaseUnit::BaseUnit, int>::const_iterator other_unit = other._units.begin();
+  for (; my_unit!=_units.end(); my_unit++, other_unit++) {
     // Compare base unit
     if (my_unit->first < other_unit->first) { return true; }
     if (my_unit->first > other_unit->first) { return false; }
