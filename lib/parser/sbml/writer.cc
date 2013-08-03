@@ -9,17 +9,19 @@ using namespace iNA::Parser::Sbml;
 LIBSBML_CPP_NAMESPACE_QUALIFIER Model *
 Writer::processModel(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIER SBMLDocument *sbml_doc)
 {
+  // This table will holds the mapping from Ast::Unit to the identifier of the SBML unit definition
+  std::map<Ast::Unit, std::string> units;
   LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model = sbml_doc->createModel();
   // First, serialize unit definitions:
   processUnitDefinitions(model, sbml_model);
   // then, serialize parameter definitions:
-  processParameters(model, sbml_model);
+  processParameters(model, units, sbml_model);
   // them serialize compartments
   processCompartments(model, sbml_model);
   // then serialise species:
   processSpeciesList(model, sbml_model);
   // then serialise reactions
-  processReactions(model, sbml_model);
+  processReactions(model, sbml_model, units);
 
   // Set model id
   sbml_model->setId(model.getIdentifier());
@@ -51,18 +53,6 @@ Writer::processUnitDefinitions(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIE
 
   sbml_unit = sbml_model->createUnitDefinition(); sbml_unit->setId("time");
   processUnit(model.getTimeUnit().asScaledBaseUnit(), sbml_unit);
-
-
-  for (Ast::Model::iterator item=model.begin(); item!=model.end(); item++) {
-    // Skip non unit definitions:
-    if (! Ast::Node::isUnitDefinition(*item)) { continue; }
-
-    Ast::UnitDefinition *unit_def = static_cast<Ast::UnitDefinition *>(*item);
-    LIBSBML_CPP_NAMESPACE_QUALIFIER UnitDefinition *sbml_unit = sbml_model->createUnitDefinition();
-    sbml_unit->setId(unit_def->getIdentifier());
-    if (unit_def->hasName()) { sbml_unit->setName(unit_def->getName()); }
-    processUnitDefinition(unit_def->getUnit(), sbml_unit);
-  }
 }
 
 
@@ -230,12 +220,13 @@ Writer::processFunctionDefinition(
 
 
 void
-Writer::processParameters(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model)
+Writer::processParameters(Ast::Model &model, std::map<Ast::Unit, std::string> &units,
+                          LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model)
 {
   for (size_t i=0; i<model.numParameters(); i++) {
     Ast::Parameter *param = model.getParameter(i);
     LIBSBML_CPP_NAMESPACE_QUALIFIER Parameter *sbml_param = sbml_model->createParameter();
-    processParameter(param, sbml_param);
+    processParameter(param, units, sbml_param, sbml_model);
     if (param->hasValue()) { processInitialValue(param, sbml_model, model); }
     if (param->hasRule()) { processRule(param, sbml_model, model); }
   }
@@ -243,11 +234,17 @@ Writer::processParameters(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIER Mod
 
 
 void
-Writer::processParameter(Ast::Parameter *param, LIBSBML_CPP_NAMESPACE_QUALIFIER Parameter *sbml_param)
+Writer::processParameter(Ast::Parameter *param,
+                         std::map<Ast::Unit, std::string> &units,
+                         LIBSBML_CPP_NAMESPACE_QUALIFIER Parameter *sbml_param,
+                         LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model)
 {
   sbml_param->setId(param->getIdentifier());
   if (param->hasName()) { sbml_param->setName(param->getName()); }
   sbml_param->setConstant(param->isConst());
+  if (! hasDefaultUnit(param)) {
+    sbml_param->setUnits(getUnitIdentifier(param, units, sbml_model));
+  }
 }
 
 
@@ -309,17 +306,20 @@ Writer::processSpecies(Ast::Species *species, LIBSBML_CPP_NAMESPACE_QUALIFIER Sp
 
 
 void
-Writer::processReactions(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model)
+Writer::processReactions(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model,
+                         std::map<Ast::Unit, std::string> &units)
 {
   for (size_t i=0; i<model.numReactions(); i++) {
     Ast::Reaction *reac = model.getReaction(i);
     LIBSBML_CPP_NAMESPACE_QUALIFIER Reaction *sbml_reac = sbml_model->createReaction();
-    processReaction(reac, sbml_reac, model);
+    processReaction(reac, sbml_reac, model, sbml_model, units);
   }
 }
 
 void
-Writer::processReaction(Ast::Reaction *reac, LIBSBML_CPP_NAMESPACE_QUALIFIER Reaction *sbml_reac, Ast::Model &model)
+Writer::processReaction(Ast::Reaction *reac, LIBSBML_CPP_NAMESPACE_QUALIFIER Reaction *sbml_reac,
+                        Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model,
+                        std::map<Ast::Unit, std::string> &units)
 {
   // Handle name and id of reactions:
   sbml_reac->setId(reac->getIdentifier());
@@ -352,11 +352,13 @@ Writer::processReaction(Ast::Reaction *reac, LIBSBML_CPP_NAMESPACE_QUALIFIER Rea
 
   // process kinetic law:
   LIBSBML_CPP_NAMESPACE_QUALIFIER KineticLaw *sbml_law = sbml_reac->createKineticLaw();
-  processKineticLaw(reac->getKineticLaw(), sbml_law, model);
+  processKineticLaw(reac->getKineticLaw(), sbml_law, sbml_model, units, model);
 }
 
 void
-Writer::processKineticLaw(Ast::KineticLaw *law, LIBSBML_CPP_NAMESPACE_QUALIFIER KineticLaw *sbml_law, Ast::Model &model)
+Writer::processKineticLaw(Ast::KineticLaw *law, LIBSBML_CPP_NAMESPACE_QUALIFIER KineticLaw *sbml_law,
+                          LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model,
+                          std::map<Ast::Unit, std::string> &units, Ast::Model &model)
 {
   // Handle local paramerers:
   for (Ast::KineticLaw::iterator item=law->begin(); item != law->end(); item++) {
@@ -371,8 +373,8 @@ Writer::processKineticLaw(Ast::KineticLaw *law, LIBSBML_CPP_NAMESPACE_QUALIFIER 
     LIBSBML_CPP_NAMESPACE_QUALIFIER Parameter *sbml_param = sbml_law->createParameter();
     sbml_param->setId(param->getIdentifier());
     if (param->hasName()) {sbml_param->setName(param->getName()); }
-    if (! hasDefaultUnit(param, model)) {
-      sbml_param->setUnits(getUnitIdentifier(param, model));
+    if (! hasDefaultUnit(param)) {
+      sbml_param->setUnits(getUnitIdentifier(param, units, sbml_model));
     }
     if (param->hasValue()) {
       if (! GiNaC::is_a<GiNaC::numeric>(param->getValue()) ) {
@@ -430,20 +432,25 @@ Writer::processRule(Ast::VariableDefinition *var, LIBSBML_CPP_NAMESPACE_QUALIFIE
 
 
 bool
-Writer::hasDefaultUnit(Ast::Parameter *var, Ast::Model &model)
-{
+Writer::hasDefaultUnit(Ast::Parameter *var) {
   return var->getUnit().isExactlyDimensionless();
 }
 
 
 std::string
-Writer::getUnitIdentifier(Ast::Parameter *var, Ast::Model &model)
+Writer::getUnitIdentifier(Ast::Parameter *var, std::map<Ast::Unit, std::string> units,
+                          LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model)
 {
+  // Check if unit is dimension less -> default
   if (! var->getUnit().isExactlyDimensionless()) {
     return "dimensionless";
   }
-
-  return model.getUnitDefinition(var->getUnit())->getIdentifier();
+  // Check if unit was defined earlier:
+  if (0 != units.count(var->getUnit())) { return units[var->getUnit()]; }
+  // Otherwise define unit in SBML model and return identifier:
+  LIBSBML_CPP_NAMESPACE_QUALIFIER UnitDefinition *unit_def = sbml_model->createUnitDefinition();
+  processUnitDefinition(var->getUnit(), unit_def);
+  return unit_def->getId();
 }
 
 

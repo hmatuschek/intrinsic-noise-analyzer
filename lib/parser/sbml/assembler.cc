@@ -99,6 +99,29 @@ ParserContext::model() {
   return _model;
 }
 
+bool
+ParserContext::hasUnit(const std::string &id) const {
+  return 0 != _units.count(id);
+}
+
+const Ast::Unit &
+ParserContext::unit(const std::string &id) const {
+  std::map<std::string, Ast::Unit>::const_iterator unit = _units.find(id);
+  if (_units.end() == unit) {
+    SymbolError err; err << "Unit '" << id << "' not defined!";
+    throw err;
+  }
+  return unit->second;
+}
+
+void
+ParserContext::defineUnit(const std::string &id, const Ast::Unit &unit) {
+  if (hasUnit(id)) {
+    SymbolError err; err << "Can not redefine unit '" << id << "'!";
+    throw err;
+  }
+  _units[id] = unit;
+}
 
 
 /* ******************************************************************************************** *
@@ -144,16 +167,13 @@ Parser::Sbml::__process_model(LIBSBML_CPP_NAMESPACE_QUALIFIER Model *model, Pars
   for (size_t i=0; i<model->getNumUnitDefinitions(); i++)
   {
     LIBSBML_CPP_NAMESPACE_QUALIFIER UnitDefinition *sbml_unit = model->getUnitDefinition(i);
-
     // Handle default units
     if (__is_default_unit_redefinition(sbml_unit, ctx)) {
       __process_default_unit_redefinition(sbml_unit, ctx);
       continue;
     }
-
     // Otherwise handle a new unit:
-    Ast::UnitDefinition *unit = __process_unit_definition(sbml_unit, ctx);
-    ctx.model().addDefinition(unit);
+    __process_unit_definition(sbml_unit, ctx);
   }
 
   /* Process all parameters of the model by forwarding them to processParameterDefinition. */
@@ -319,7 +339,7 @@ Parser::Sbml::__process_species_definition(
   // If the species has its own unit
   if (node->isSetUnits()) {
     // Get unit defined for species:
-    species_substance_unit = ctx.model().getUnit(node->getUnits());
+    species_substance_unit = ctx.unit(node->getUnits());
   }
 
   // Get the factor that scales the species substance unit into the model substance unit
@@ -415,7 +435,7 @@ Parser::Sbml::__process_parameter_definition(LIBSBML_CPP_NAMESPACE_QUALIFIER Par
   // Get units for parameter (it there is one):
   Ast::Unit unit(Ast::Unit::dimensionless());
   if (node->isSetUnits()) {
-    unit = ctx.model().getUnit(node->getUnits());
+    unit = ctx.unit(node->getUnits());
   }
 
   // Construct and return parameter definition (constant variable)
@@ -467,8 +487,8 @@ Parser::Sbml::__process_compartment_definition(
   }
 
   // Now, handle unit of compartment
-  if (node->isSetUnits() && !(unit == ctx.model().getUnit(node->getUnits()))) {
-    Ast::Unit comp_unit = ctx.model().getUnit(node->getUnits());
+  if (node->isSetUnits() && !(unit == ctx.unit(node->getUnits()))) {
+    Ast::Unit comp_unit = ctx.unit(node->getUnits());
     Ast::Unit scale = unit/comp_unit;
     if (! scale.isDimensionless()) {
       TypeError err;
@@ -552,7 +572,7 @@ Parser::Sbml::__process_default_unit_redefinition(LIBSBML_CPP_NAMESPACE_QUALIFIE
 }
 
 
-Ast::UnitDefinition *
+void
 Parser::Sbml::__process_unit_definition(LIBSBML_CPP_NAMESPACE_QUALIFIER UnitDefinition *node, ParserContext &ctx)
 {
   // Assemble ScaledUnits vector:
@@ -562,7 +582,7 @@ Parser::Sbml::__process_unit_definition(LIBSBML_CPP_NAMESPACE_QUALIFIER UnitDefi
   }
 
   // Assemble UnitDefinition:
-  return new Ast::UnitDefinition(node->getId(), units);
+  ctx.defineUnit(node->getId(), Ast::Unit(units));
 }
 
 
