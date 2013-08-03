@@ -24,69 +24,6 @@ public:
 
 
 /* ********************************************************************************************* *
- * Implementation of UnitDefinition
- * ********************************************************************************************* */
-UnitDefinition::UnitDefinition(const std::string &identifier, std::list<ScaledBaseUnit> units)
-  : Definition(identifier, Node::UNIT_DEFINITION), unit(units)
-{
-  // Pass...
-}
-
-
-UnitDefinition::UnitDefinition(const std::string &identifier, const Unit &unit)
-  : Definition(identifier, Node::UNIT_DEFINITION), unit(unit)
-{
-  // Pass...
-}
-
-
-bool
-UnitDefinition::isVariantOf(ScaledBaseUnit::BaseUnit baseUnit)
-{
-  return this->unit.isVariantOf(baseUnit);
-}
-
-
-const Unit &
-UnitDefinition::getUnit() const
-{
-  return this->unit;
-}
-
-
-void
-UnitDefinition::dump(std::ostream &str)
-{
-  str << "[" << this->getIdentifier() << " = ";
-  this->unit.dump(str);
-  str << "]";
-}
-
-
-void
-UnitDefinition::accept(Ast::Visitor &visitor) const
-{
-  if (UnitDefinition::Visitor *unit_vis = dynamic_cast<UnitDefinition::Visitor *>(&visitor)) {
-    unit_vis->visit(this);
-  } else {
-    Definition::accept(visitor);
-  }
-}
-
-
-void
-UnitDefinition::apply(Ast::Operator &op)
-{
-  if (UnitDefinition::Operator *unit_op = dynamic_cast<UnitDefinition::Operator *>(&op)) {
-    unit_op->act(this);
-  } else {
-    Definition::apply(op);
-  }
-}
-
-
-
-/* ********************************************************************************************* *
  * Implementation of Unit
  * ********************************************************************************************* */
 Unit::Unit(const std::map<ScaledBaseUnit::BaseUnit, int> &units,

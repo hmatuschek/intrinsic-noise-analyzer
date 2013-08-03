@@ -12,8 +12,6 @@ namespace iNA {
 class ModelCopyTest : public UnitTest::TestCase
 {
 protected:
-  void testUnitEqual(Ast::UnitDefinition *A, Ast::UnitDefinition *B);
-
   void testConstraint(Ast::Constraint *A, Ast::Constraint *B, GiNaC::exmap &symbol_table);
   void testAlgebraicConstraint(Ast::AlgebraicConstraint *A, Ast::AlgebraicConstraint *B,
                                GiNaC::exmap &symbol_table);

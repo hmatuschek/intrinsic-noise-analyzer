@@ -404,61 +404,14 @@ Model::getUnit(const std::string &name) const
     return item->second;
   }
 
-  // Otherwise search for a definition:
-  return this->getUnitDefinition(name)->getUnit();
-}
-
-
-UnitDefinition *
-Model::getUnitDefinition(const std::string &identifier)
-{
-  Definition *def = this->getDefinition(identifier);
-
-  if (! Node::isUnitDefinition(def))
-  {
-    SymbolError err;
-    err << "Symbol " << identifier << " does not name a unit-definition in this module.";
-    throw err;
-  }
-
-  return static_cast<Ast::UnitDefinition *>(def);
-}
-
-
-UnitDefinition * const
-Model::getUnitDefinition(const std::string &identifier) const
-{
-  Definition * const def = this->getDefinition(identifier);
-
-  if (! Node::isUnitDefinition(def))
-  {
-    SymbolError err;
-    err << "Symbol " << identifier << " does not name a unit-definition in this module.";
-    throw err;
-  }
-
-  return static_cast<Ast::UnitDefinition * const>(def);
-}
-
-
-UnitDefinition * const
-Model::getUnitDefinition(const Unit &unit) const
-{
-  for (Model::const_iterator item=this->begin(); item!=this->end(); item++) {
-    if (! Ast::Node::isUnitDefinition(*item)) { continue; }
-    Ast::UnitDefinition * const unit_def = (Ast::UnitDefinition * const)(*item);
-    if (unit_def->getUnit() == unit) { return unit_def; }
-  }
-
-  SymbolError err;
-  err << "Can not find matching unit!";
+  SymbolError err; err << "Can not find unit '" << name << "'!";
   throw err;
 }
 
 
 size_t
 Model::numParameters() const {
-  return this->parameter_vector.size();
+  return this->_parameter_vector.size();
 }
 
 bool
@@ -534,13 +487,13 @@ Model::getParameter(const GiNaC::symbol &symbol) const
 Parameter *
 Model::getParameter(size_t idx)
 {
-  return this->parameter_vector[idx];
+  return this->_parameter_vector[idx];
 }
 
 Parameter * const
 Model::getParameter(size_t idx) const
 {
-  return this->parameter_vector[idx];
+  return this->_parameter_vector[idx];
 }
 
 
@@ -562,9 +515,9 @@ size_t
 Model::getParameterIdx(const Parameter *parameter) const
 {
   // Search vector for parameter:
-  for (size_t i=0; i<this->parameter_vector.size(); i++)
+  for (size_t i=0; i<this->_parameter_vector.size(); i++)
   {
-    if (parameter == this->parameter_vector[i])
+    if (parameter == this->_parameter_vector[i])
     {
       return i;
     }
@@ -581,7 +534,7 @@ Model::getParameterIdx(const Parameter *parameter) const
 size_t
 Model::numCompartments() const
 {
-  return this->compartment_vector.size();
+  return this->_compartment_vector.size();
 }
 
 
@@ -665,13 +618,13 @@ Model::getCompartment(const GiNaC::symbol &symbol) const
 Compartment *
 Model::getCompartment(size_t idx)
 {
-  return this->compartment_vector[idx];
+  return this->_compartment_vector[idx];
 }
 
 Compartment * const
 Model::getCompartment(size_t idx) const
 {
-  return this->compartment_vector[idx];
+  return this->_compartment_vector[idx];
 }
 
 
@@ -693,9 +646,9 @@ size_t
 Model::getCompartmentIdx(Compartment *compartment) const
 {
   // Search compartment vector for compartment:
-  for (size_t i=0; i<this->compartment_vector.size(); i++)
+  for (size_t i=0; i<this->_compartment_vector.size(); i++)
   {
-    if (compartment == this->compartment_vector[i])
+    if (compartment == this->_compartment_vector[i])
     {
       return i;
     }
@@ -711,7 +664,7 @@ Model::getCompartmentIdx(Compartment *compartment) const
 size_t
 Model::numSpecies() const
 {
-  return this->species_vector.size();
+  return this->_species_vector.size();
 }
 
 
@@ -794,13 +747,13 @@ Model::getSpecies(const GiNaC::symbol &symbol) const
 Species *
 Model::getSpecies(size_t idx)
 {
-  return this->species_vector[idx];
+  return this->_species_vector[idx];
 }
 
 Species * const
 Model::getSpecies(size_t idx) const
 {
-  return this->species_vector[idx];
+  return this->_species_vector[idx];
 }
 
 
@@ -822,9 +775,9 @@ size_t
 Model::getSpeciesIdx(Species *species) const
 {
   // Search species vector for species:
-  for (size_t i=0; i<this->species_vector.size(); i++)
+  for (size_t i=0; i<this->_species_vector.size(); i++)
   {
-    if (species == this->species_vector[i])
+    if (species == this->_species_vector[i])
     {
       return i;
     }
@@ -839,7 +792,7 @@ Model::getSpeciesIdx(Species *species) const
 
 size_t
 Model::numReactions() const {
-  return this->reaction_vector.size();
+  return this->_reaction_vector.size();
 }
 
 bool
@@ -880,12 +833,12 @@ Model::getReaction(const std::string &identifier) const
 
 Reaction *
 Model::getReaction(size_t idx) {
-  return this->reaction_vector[idx];
+  return this->_reaction_vector[idx];
 }
 
 Reaction * const
 Model::getReaction(size_t idx) const {
-  return this->reaction_vector[idx];
+  return this->_reaction_vector[idx];
 }
 
 size_t
@@ -897,8 +850,8 @@ size_t
 Model::getReactionIdx(Reaction *reac) const
 {
   // Search reaction in reaction vector:
-  for (size_t i=0; i<this->reaction_vector.size(); i++) {
-    if (reac == this->reaction_vector[i]) {
+  for (size_t i=0; i<this->_reaction_vector.size(); i++) {
+    if (reac == this->_reaction_vector[i]) {
       return i;
     }
   }
@@ -912,49 +865,49 @@ Model::getReactionIdx(Reaction *reac) const
 Model::CompartmentIterator
 Model::compartmentsBegin()
 {
-    return compartment_vector.begin();
+    return _compartment_vector.begin();
 }
 
 Model::CompartmentIterator
 Model::compartmentsEnd()
 {
-    return compartment_vector.end();
+    return _compartment_vector.end();
 }
 
 Model::ParameterIterator
 Model::parametersBegin()
 {
-    return parameter_vector.begin();
+    return _parameter_vector.begin();
 }
 
 Model::ParameterIterator
 Model::parametersEnd()
 {
-    return parameter_vector.end();
+    return _parameter_vector.end();
 }
 
 Model::SpeciesIterator
 Model::speciesBegin()
 {
-    return species_vector.begin();
+    return _species_vector.begin();
 }
 
 Model::SpeciesIterator
 Model::speciesEnd()
 {
-    return species_vector.end();
+    return _species_vector.end();
 }
 
 Model::ReactionIterator
 Model::reactionsBegin()
 {
-    return reaction_vector.begin();
+    return _reaction_vector.begin();
 }
 
 Model::ReactionIterator
 Model::reactionsEnd()
 {
-    return reaction_vector.end();
+    return _reaction_vector.end();
 }
 
 FunctionDefinition *
@@ -982,19 +935,19 @@ Model::addDefinition(Definition *def)
   switch (def->getNodeType())
   {
   case Node::COMPARTMENT_DEFINITION:
-    this->compartment_vector.push_back(static_cast<Compartment *>(def));
+    this->_compartment_vector.push_back(static_cast<Compartment *>(def));
     break;
 
   case Node::SPECIES_DEFINITION:
-    this->species_vector.push_back(static_cast<Species *>(def));
+    this->_species_vector.push_back(static_cast<Species *>(def));
     break;
 
   case Node::PARAMETER_DEFINITION:
-    this->parameter_vector.push_back(static_cast<Parameter *>(def));
+    this->_parameter_vector.push_back(static_cast<Parameter *>(def));
     break;
 
   case Node::REACTION_DEFINITION:
-    this->reaction_vector.push_back(static_cast<Reaction *>(def));
+    this->_reaction_vector.push_back(static_cast<Reaction *>(def));
     break;
 
   default:
@@ -1013,34 +966,34 @@ Model::addDefinition(Definition *def, Definition *after)
   {
   case Node::COMPARTMENT_DEFINITION:
   {
-    std::vector<Compartment *>::iterator pos=this->compartment_vector.begin();
-    while(pos!=this->compartment_vector.end())
+    std::vector<Compartment *>::iterator pos=this->_compartment_vector.begin();
+    while(pos!=this->_compartment_vector.end())
         if((*(pos++))==static_cast<Compartment *>(after)) break;
-    this->compartment_vector.insert(pos,static_cast<Compartment *>(def));
+    this->_compartment_vector.insert(pos,static_cast<Compartment *>(def));
   } break;
 
   case Node::SPECIES_DEFINITION:
   {
-    std::vector<Species *>::iterator pos=this->species_vector.begin();
-    while(pos!=this->species_vector.end())
+    std::vector<Species *>::iterator pos=this->_species_vector.begin();
+    while(pos!=this->_species_vector.end())
         if((*(pos++))==static_cast<Species *>(after)) break;
-    this->species_vector.insert(pos,static_cast<Species *>(def));
+    this->_species_vector.insert(pos,static_cast<Species *>(def));
   } break;
 
   case Node::PARAMETER_DEFINITION:
   {
-    std::vector<Parameter *>::iterator pos=this->parameter_vector.begin();
-    while(pos!=this->parameter_vector.end())
+    std::vector<Parameter *>::iterator pos=this->_parameter_vector.begin();
+    while(pos!=this->_parameter_vector.end())
         if((*(pos++))==static_cast<Parameter *>(after)) break;
-    this->parameter_vector.insert(pos,static_cast<Parameter *>(def));
+    this->_parameter_vector.insert(pos,static_cast<Parameter *>(def));
   } break;
 
   case Node::REACTION_DEFINITION:
   {
-    std::vector<Reaction *>::iterator pos=this->reaction_vector.begin();
-    while(pos!=this->reaction_vector.end())
+    std::vector<Reaction *>::iterator pos=this->_reaction_vector.begin();
+    while(pos!=this->_reaction_vector.end())
         if((*(pos++))==static_cast<Reaction *>(after)) break;
-    this->reaction_vector.insert(pos,static_cast<Reaction *>(def));
+    this->_reaction_vector.insert(pos,static_cast<Reaction *>(def));
   } break;
 
   default:
@@ -1055,23 +1008,23 @@ Model::remDefinition(Definition *def)
   // Remove definition from index vectors.
   switch(def->getNodeType()) {
   case Node::COMPARTMENT_DEFINITION:
-    this->compartment_vector.erase(
-          compartment_vector.begin()+getCompartmentIdx(static_cast<Compartment *>(def)));
+    this->_compartment_vector.erase(
+          _compartment_vector.begin()+getCompartmentIdx(static_cast<Compartment *>(def)));
     break;
 
   case Node::SPECIES_DEFINITION:
-    this->species_vector.erase(
-          species_vector.begin()+getSpeciesIdx(static_cast<Species *>(def)));
+    this->_species_vector.erase(
+          _species_vector.begin()+getSpeciesIdx(static_cast<Species *>(def)));
     break;
 
   case Node::PARAMETER_DEFINITION:
-    this->parameter_vector.erase(
-          parameter_vector.begin()+getParameterIdx(static_cast<Parameter *>(def)));
+    this->_parameter_vector.erase(
+          _parameter_vector.begin()+getParameterIdx(static_cast<Parameter *>(def)));
     break;
 
   case Node::REACTION_DEFINITION:
-    this->reaction_vector.erase(
-          reaction_vector.begin()+getReactionIdx(static_cast<Reaction *>(def)));
+    this->_reaction_vector.erase(
+          _reaction_vector.begin()+getReactionIdx(static_cast<Reaction *>(def)));
     break;
 
   default:

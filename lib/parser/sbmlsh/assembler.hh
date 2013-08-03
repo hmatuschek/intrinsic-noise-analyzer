@@ -31,17 +31,6 @@ namespace Sbmlsh {
  * @c Ast::Model instance from it. */
 class Assembler
 {
-protected:
-  /** Holds a weak reference to the Lexer instance. */
-  iNA::Parser::Lexer &_lexer;
-
-  /** Holds a weak reference to the model being assembled. */
-  Ast::Model &_model;
-
-  /** Maps the name of a base unit to the Ast::ScaledBaseUnit::BaseUnit enum. */
-  std::map<std::string, Ast::ScaledBaseUnit::BaseUnit> _base_unit_map;
-
-
 public:
   /** Constructor. */
   Assembler(Ast::Model &model, iNA::Parser::Lexer &lexer);
@@ -106,6 +95,21 @@ protected:
   void processProducts(iNA::Parser::ConcreteSyntaxTree &sum, Ast::Reaction *reaction);
   /** Removes the quotes. */
   void unquote(std::string &name);
+  /** Defines a unit in the unit table. */
+  void defineUnit(const std::string &id, const Ast::Unit &unit);
+
+protected:
+  /** Holds a weak reference to the Lexer instance. */
+  iNA::Parser::Lexer &_lexer;
+
+  /** Holds a weak reference to the model being assembled. */
+  Ast::Model &_model;
+
+  /** Maps the name of a base unit to the Ast::ScaledBaseUnit::BaseUnit enum. */
+  std::map<std::string, Ast::ScaledBaseUnit::BaseUnit> _base_unit_map;
+
+  /** Maps a unit identifier to a unit. */
+  std::map<std::string, Ast::Unit> _units;
 };
 
 

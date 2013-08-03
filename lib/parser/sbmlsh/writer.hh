@@ -26,7 +26,7 @@ protected:
   /** Serializes the list of unit definitions. */
   static void processUnitDefinitions(Ast::Model &model, std::ostream &output);
   /** Serializes a unit definition. */
-  static void processUnitDefinition(Ast::UnitDefinition *unit, std::ostream &output);
+  static void processUnitDefinition(const std::string &id, const Ast::Unit &unit, std::ostream &output);
   /** Serializes a single scaled base unit. */
   static void processScaledUnit(const Ast::ScaledBaseUnit &unit, std::ostream &output);
   /** Serializes the list of compartments. */

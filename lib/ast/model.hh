@@ -63,19 +63,19 @@ protected:
 
   /** Holds a vector of weak-references to all compartments defined in the model, in order of
    * definition. This vector does not own the compartment instance. */
-  std::vector<Compartment *> compartment_vector;
+  std::vector<Compartment *> _compartment_vector;
 
   /** Holds a vector of weak-references to all species defined in the model, in oder of their
    * definition. */
-  std::vector<Species *> species_vector;
+  std::vector<Species *> _species_vector;
 
   /** Holds a vector of weak-references to all (global) parameters in the model, in order of their
    * definition. */
-  std::vector<Parameter *> parameter_vector;
+  std::vector<Parameter *> _parameter_vector;
 
   /** Holds a vector of weak-references to all reactions in the model, in order of their definition.
    * This vector does not own the reaction instances. */
-  std::vector<Reaction *> reaction_vector;
+  std::vector<Reaction *> _reaction_vector;
 
 public:
   /** The compartment iterator. */
@@ -206,22 +206,7 @@ public:
    * not a time unit. */
   void setTimeUnit(const Unit &unit, bool scale_model=true);
 
-  /** Returns the given unit or throws an exception if unknwon. */
   const Unit &getUnit(const std::string &name) const;
-
-  /** Returns the unit definition by identifier.
-   * Equivalent to call @c getUnitDefinition(getSymbol(const std::string &identifier)).
-   * @throws SymbolError If the identifier is not associated with a unit definition. */
-  UnitDefinition *getUnitDefinition(const std::string &identifier);
-
-  /** Returns the unit definition by identifier.
-   * Equivalent to call @c getUnitDefinition(getSymbol(const std::string &identifier)).
-   * @throws SymbolError If the identifier is not associated with a unit definition. */
-  UnitDefinition * const getUnitDefinition(const std::string &identifier) const;
-
-  /** Returns the unit definition by matching the unit.
-   * @throws SymbolError If the unit is not associated with a unit definition. */
-  UnitDefinition * const getUnitDefinition(const Unit &unit) const;
 
   /** Returns the number of species defined in the model. */
   size_t numSpecies() const;

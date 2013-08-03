@@ -270,26 +270,19 @@ Assembler::processUnitDefinition(Parser::ConcreteSyntaxTree &unit)
   processScaledUnitList(unit[2], units);
 
   std::string identifier = _lexer[unit[0].getTokenIdx()].getValue();
-  Ast::UnitDefinition *def = new Ast::UnitDefinition(identifier, units);
-
-  if (unit[3].matched()) {
-    std::string name = _lexer[unit[3][0].getTokenIdx()].getValue();
-    unquote(name); def->setName(name);
-  }
 
   if ("substance" == identifier) {
-    _model.setSubstanceUnit(def->getUnit().asScaledBaseUnit(), false); delete def;
+    _model.setSubstanceUnit(units.front(), false);
   } else if ("volume" == identifier) {
-    _model.setVolumeUnit(def->getUnit().asScaledBaseUnit(), false); delete def;
+    _model.setVolumeUnit(units.front(), false);
   } else if ("area" == identifier) {
-    _model.setAreaUnit(def->getUnit().asScaledBaseUnit(), false); delete def;
+    _model.setAreaUnit(units.front(), false);
   } else if ("length" == identifier) {
-    _model.setLengthUnit(def->getUnit().asScaledBaseUnit(), false); delete def;
+    _model.setLengthUnit(units.front(), false);
   } else if ("time" == identifier) {
-    _model.setTimeUnit(def->getUnit().asScaledBaseUnit(), false); delete def;
+    _model.setTimeUnit(units.front(), false);
   } else {
-    // Add unit definition to model:
-    _model.addDefinition(def);
+    defineUnit(identifier, units);
   }
 
   // If there are some unit definitions left
@@ -954,7 +947,16 @@ Assembler::processProducts(Parser::ConcreteSyntaxTree &sum, Ast::Reaction *react
 
 
 void
-Assembler::unquote(std::string &name)
-{
+Assembler::unquote(std::string &name) {
   name = name.substr(1, name.size()-2);
+}
+
+
+void
+Assembler::defineUnit(const std::string &id, const Ast::Unit &unit) {
+  if (0 != _units.count(id)) {
+    SymbolError err; err << "Can not redefine unit '" << id << "'!";
+    throw err;
+  }
+  _units[id] = unit;
 }

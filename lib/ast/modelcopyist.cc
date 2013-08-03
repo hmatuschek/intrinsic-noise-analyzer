@@ -49,14 +49,6 @@ ModelCopyist::copy(const Ast::Model *src, Ast::Model *dest, GiNaC::exmap &transl
   dest->setLengthUnit(src->getLengthUnit().asScaledBaseUnit(), false);
   dest->setTimeUnit(src->getTimeUnit().asScaledBaseUnit(), false);
 
-  // Copy user defined "specialized" units:
-  for (Ast::Model::const_iterator iter = src->begin(); iter != src->end(); iter++) {
-    if (Ast::Node::isUnitDefinition(*iter)) {
-      dest->addDefinition(ModelCopyist::copyUnitDefinition(
-                            static_cast<Ast::UnitDefinition *>(*iter)));
-    }
-  }
-
   // Copy all parameter definitions:
   for (size_t i=0; i<src->numParameters(); i++) {
     dest->addDefinition(ModelCopyist::copyParameterDefinition(
@@ -167,13 +159,6 @@ ModelCopyist::copyFunctionDefinition(Ast::FunctionDefinition *node, GiNaC::exmap
   GiNaC::ex body = node->getBody().subs(translation_table);
 
   return new Ast::FunctionDefinition(node->getIdentifier(), arguments, body);
-}
-
-
-Ast::UnitDefinition *
-ModelCopyist::copyUnitDefinition(Ast::UnitDefinition *node)
-{
-  return new Ast::UnitDefinition(node->getIdentifier(), node->getUnit());
 }
 
 

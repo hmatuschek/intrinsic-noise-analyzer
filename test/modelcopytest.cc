@@ -7,14 +7,6 @@ using namespace iNA;
 
 
 void
-ModelCopyTest::testUnitEqual(Ast::UnitDefinition *A, Ast::UnitDefinition *B)
-{
-  // Simply test if units are equal:
-  UT_ASSERT(A->getUnit() == B->getUnit());
-}
-
-
-void
 ModelCopyTest::testConstraint(Ast::Constraint *A, Ast::Constraint *B, GiNaC::exmap &symbol_table)
 {
   if (Ast::Node::isAlgebraicConstraint(A)) {
@@ -252,10 +244,6 @@ ModelCopyTest::testModelEqual(Ast::Model &A, Ast::Model &B)
             dynamic_cast<Ast::Constraint *>(def_a),
             dynamic_cast<Ast::Constraint *>(def_b),
             symbol_table);
-    } else if (Ast::Node::isUnitDefinition(*item)) {
-      this->testUnitEqual(
-            dynamic_cast<Ast::UnitDefinition *>(def_a),
-            dynamic_cast<Ast::UnitDefinition *>(def_b));
     }
   }
 

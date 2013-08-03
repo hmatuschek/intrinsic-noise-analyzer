@@ -120,18 +120,9 @@ Writer::processUnitDefinitions(Ast::Model &model, std::ostream &output)
   processScaledUnit(model.getTimeUnit().asScaledBaseUnit(), temp);
   units.push_back(temp.str());
 
-  for(Ast::Model::iterator item = model.begin(); item != model.end(); item++) {
-    // skip non unit definitions
-    if (! Ast::Node::isUnitDefinition(*item)) { continue; }
-    // get unit-definition
-    Ast::UnitDefinition *unit = static_cast<Ast::UnitDefinition *>(*item);
-    // clear stream
-    temp.str("");
-    // process unit definition into temp stream:
-    processUnitDefinition(unit, temp);
-    // Append definition to list of unit definitions:
-    units.push_back(temp.str());
-  }
+  /** @todo Check if unit export is needed. As far as I know, there is no way to specify
+   * the unit of a variable (Parameter) explicitly, hence there should be no need to
+   * define specialized units. */
 
   // Assemble unit definition section if there are some definitions:
   if (0 < units.size()) {
@@ -144,12 +135,11 @@ Writer::processUnitDefinitions(Ast::Model &model, std::ostream &output)
 }
 
 void
-Writer::processUnitDefinition(Ast::UnitDefinition *unit_def, std::ostream &output)
+Writer::processUnitDefinition(const std::string &id, const Ast::Unit &unit, std::ostream &output)
 {
   std::list<std::string> units;
   std::stringstream temp;
 
-  const Ast::Unit &unit = unit_def->getUnit();
   if ( (1 != unit.getMultiplier()) || (0 != unit.getScale())) {
     processScaledUnit(Ast::ScaledBaseUnit(
                         Ast::ScaledBaseUnit::DIMENSIONLESS, unit.getMultiplier(),
@@ -165,7 +155,7 @@ Writer::processUnitDefinition(Ast::UnitDefinition *unit_def, std::ostream &outpu
   }
 
   // Serialize
-  output << std::endl << " " << unit_def->getIdentifier() << " = ";
+  output << std::endl << " " << id << " = ";
   std::list<std::string>::iterator item = units.begin();
   if (0 < units.size()) {
     for (size_t i=0; i<(units.size()-1); i++, item++) {
