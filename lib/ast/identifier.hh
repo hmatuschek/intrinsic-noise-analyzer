@@ -20,7 +20,10 @@ bool isValidId(const std::string &id);
 
 /** Implements a simple assertion to check id a string is an identifier. */
 #define INA_ASSERT_IDENTIFIER(id) if (! iNA::Ast::isValidId(id)) { \
-  iNA::SymbolError err; err << "Given string '" << id << "' is not a valid identifier."; \
-  throw err; }
+  iNA::SymbolError err; \
+  err << "In " << __FILE__ << " ( " << (unsigned int)(__LINE__) << "): Given string '" \
+       << id << "' is not a valid identifier."; \
+  throw err; \
+}
 
 #endif // __INA_AST_IDENTIFIER_HH__

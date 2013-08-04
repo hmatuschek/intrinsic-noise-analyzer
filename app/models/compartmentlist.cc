@@ -7,6 +7,7 @@
 #include "../tinytex/ginac2formula.hh"
 #include "../tinytex/tinytex.hh"
 #include "../views/unitrenderer.hh"
+#include "libina/ast/identifier.hh"
 #include <QMessageBox>
 
 
@@ -139,7 +140,7 @@ CompartmentList::_updateIndentifier(iNA::Ast::Compartment *compartment, const QV
   if (id == compartment->getIdentifier()) { return true; }
 
   // Check ID format
-  if (! iNA::Ast::isIdentifier(id)) {
+  if (! iNA::Ast::isValidId(id)) {
     QMessageBox::warning(0, tr("Can not set identifier"),
                          tr("The identifier can not be set to \"%1\", invalid format").arg(qid));
     return false;
