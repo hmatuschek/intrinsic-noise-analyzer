@@ -97,7 +97,7 @@ ModelView::ModelView(ModelItem *model_item, QWidget *parent)
 void
 ModelView::onModelIdentifierChanged()
 {
-  if (! QRegExp("[_a-zA-Z][_a-zA-Z0-9]*").exactMatch(_model_identifier->text())) {
+  if (! iNA::Ast::isValidId(_model_identifier->text().toStdString())) {
     QMessageBox::critical(0, tr("Invalid model identifier"),
                           tr("Model identifier must constist of alpha-numeric chars and '_', "
                              "and must not start with a number."));

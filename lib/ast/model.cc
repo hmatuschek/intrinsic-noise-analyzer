@@ -7,7 +7,7 @@
 #include <cmath>
 #include "math.hh"
 #include "utils/logger.hh"
-
+#include "identifier.hh"
 
 using namespace iNA;
 using namespace iNA::Ast;
@@ -17,6 +17,8 @@ Ast::Model::Model(const std::string &identifier, const std::string &name)
   : Scope(), _identifier(identifier), _name(name), _species_have_substance_units(false),
     _predefined_units()
 {
+  INA_ASSERT_IDENTIFIER(_identifier);
+
   // Populate pre-defined units.
   _predefined_units["ampere"] = Unit(ScaledBaseUnit(ScaledBaseUnit::AMPERE, 1, 0, 1));
   _predefined_units["becquerel"] = Unit(ScaledBaseUnit(ScaledBaseUnit::BECQUEREL, 1, 0, 1));
@@ -76,6 +78,7 @@ Ast::Model::getIdentifier() const {
 
 void
 Ast::Model::setIdentifier(const std::string &identifier) {
+  INA_ASSERT_IDENTIFIER(_identifier);
   _identifier = identifier;
 }
 

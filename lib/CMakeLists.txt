@@ -20,13 +20,15 @@ SET(libina_ast_SOURCES
     ast/definition.cc ast/functiondefinition.cc ast/node.cc ast/rule.cc
     ast/reaction.cc ast/scope.cc ast/variabledefinition.cc ast/constraint.cc
     ast/unitdefinition.cc ast/species.cc ast/compartment.cc ast/parameter.cc
-    ast/model.cc ast/visitor.cc ast/unitconverter.cc ast/modelcopyist.cc)
+    ast/model.cc ast/visitor.cc ast/unitconverter.cc ast/modelcopyist.cc
+    ast/identifier.cc)
 SET(libina_ast_HEADERS
     ast/ast.hh
     ast/definition.hh ast/functiondefinition.hh ast/node.hh ast/rule.hh
     ast/reaction.hh ast/scope.hh ast/variabledefinition.hh ast/constraint.hh
     ast/unitdefinition.hh ast/species.hh ast/compartment.hh ast/parameter.hh
-    ast/model.hh ast/visitor.hh ast/unitconverter.hh ast/modelcopyist.hh)
+    ast/model.hh ast/visitor.hh ast/unitconverter.hh ast/modelcopyist.hh
+    ast/identifier.hh)
 
 SET(libina_trafo_SOURCES
     trafo/assertions.cc trafo/substitution.cc trafo/constantfolder.cc

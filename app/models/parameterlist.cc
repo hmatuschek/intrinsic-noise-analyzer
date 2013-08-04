@@ -185,7 +185,7 @@ ParameterList::_updateIdentifier(iNA::Ast::Parameter *param, const QVariant &val
   if (id == param->getIdentifier()) { return true; }
 
   // Check ID format
-  if (! QRegExp("[a-zA-Z_][a-zA-Z0-9_]*").exactMatch(qid)) {
+  if (! iNA::Ast::isValidId(id)) {
     QMessageBox::warning(0, tr("Can not set identifier"),
                          tr("Identifier \"%1\" has invalid format.").arg(qid));
     return false;

@@ -139,7 +139,7 @@ CompartmentList::_updateIndentifier(iNA::Ast::Compartment *compartment, const QV
   if (id == compartment->getIdentifier()) { return true; }
 
   // Check ID format
-  if (! QRegExp("[a-zA-Z_][a-zA-Z0-9_]*").exactMatch(qid)) {
+  if (! iNA::Ast::isIdentifier(id)) {
     QMessageBox::warning(0, tr("Can not set identifier"),
                          tr("The identifier can not be set to \"%1\", invalid format").arg(qid));
     return false;

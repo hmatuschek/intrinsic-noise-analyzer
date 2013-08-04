@@ -1,4 +1,5 @@
 #include "definition.hh"
+#include "identifier.hh"
 
 using namespace iNA::Ast;
 
@@ -6,14 +7,14 @@ using namespace iNA::Ast;
 Definition::Definition(const std::string &id, Node::NodeType node_type)
   : Node(node_type), _identifier(id), _name()
 {
-  // Done.
+  INA_ASSERT_IDENTIFIER(_identifier);
 }
 
 
 Definition::Definition(const std::string &id, const std::string &name, Node::NodeType node_type)
   : Node(node_type), _identifier(id), _name(name)
 {
-  // Done.
+  INA_ASSERT_IDENTIFIER(_identifier);
 }
 
 
@@ -29,6 +30,7 @@ Definition::getIdentifier() const {
 
 void
 Definition::setIdentifier(const std::string &id) {
+  INA_ASSERT_IDENTIFIER(id);
   _identifier = id;
 }
 
