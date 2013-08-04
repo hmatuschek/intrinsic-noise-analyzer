@@ -102,13 +102,13 @@ Exception::operator <<(const GiNaC::ex &expression)
 
 
 CompilerException::CompilerException()
-  : Exception("Compiler: ")
+  : Exception()
 {
   // Pass
 }
 
 CompilerException::CompilerException(const std::string &message)
-  : Exception("Compiler: ")
+  : Exception()
 {
   (*this) << message;
 }

@@ -5,7 +5,8 @@
 #include "../models/application.hh"
 #include "../doctree/documenttree.hh"
 #include "../doctree/documentitem.hh"
-#include <utils/logger.hh>
+#include "libina/ast/identifier.hh"
+#include "libina/utils/logger.hh"
 
 #include <QLabel>
 #include <QPalette>
