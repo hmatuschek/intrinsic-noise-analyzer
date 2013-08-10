@@ -3,7 +3,7 @@ using namespace iNA::Ast;
 
 
 inline bool __is_letter(char c) {
-  return (((c>='a') && (c<='z')) || ((c>='A') && (c<='A')));
+  return (((c>='a') && (c<='z')) || ((c>='A') && (c<='Z')));
 }
 
 inline bool __is_digit(char c) {
