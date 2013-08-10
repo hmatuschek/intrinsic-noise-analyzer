@@ -104,17 +104,18 @@ public:
 
         solver.set(codeODE, codeJac);
 
-        this->setPrecision(epsilon);
+        this->setPrecision(epsilon,epsilon);
         this->setMaxIterations(iter);
     }
 
     /**
     * Set the precision of the root finding algorithm
     */
-    void setPrecision(const double &epsilon)
+    void setPrecision(const double &relError, const double &absError)
 
     {
-        this->solver.parameters.epsilon = epsilon;
+        this->solver.parameters.relError = relError;
+        this->solver.parameters.absError = absError;
     }
 
     /**
@@ -194,7 +195,7 @@ public:
         }
 
 
-        x.segment(offset,lnaLength) = NLEsolve::PrecisionSolve::precisionSolve(B, -A, solver.parameters.epsilon);
+        x.segment(offset,lnaLength) = NLEsolve::PrecisionSolve::precisionSolve(B, -A, solver.parameters.relError);
 
         // substitute LNA
         subs_table.clear();
@@ -238,7 +239,6 @@ public:
         Eigen::VectorXex updateVector = constants.apply( sseModel.getUpdateVector() );
         InitialConditions context(sseModel);
         updateVector = context.apply(updateVector);
-
 
         // initialize with initial concentrations
         Eigen::VectorXd conc(sseModel.getDimension());
@@ -300,7 +300,7 @@ public:
             }
         }
 
-        x.tail(sseLength-lnaLength) = NLEsolve::PrecisionSolve::precisionSolve(B,-A,solver.parameters.epsilon);
+        x.tail(sseLength-lnaLength) = NLEsolve::PrecisionSolve::precisionSolve(B,-A,solver.parameters.relError);
 
     }
 
