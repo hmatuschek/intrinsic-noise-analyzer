@@ -12,7 +12,6 @@ void
 ModelCopyist::copy(const Ast::Model *src, Ast::Model *dest)
 {
   GiNaC::exmap translation_table;
-
   ModelCopyist::copy(src, dest, translation_table);
 }
 
@@ -48,6 +47,8 @@ ModelCopyist::copy(const Ast::Model *src, Ast::Model *dest, GiNaC::exmap &transl
   dest->setAreaUnit(src->getAreaUnit().asScaledBaseUnit(), false);
   dest->setLengthUnit(src->getLengthUnit().asScaledBaseUnit(), false);
   dest->setTimeUnit(src->getTimeUnit().asScaledBaseUnit(), false);
+  // Set model has substance or concentration units
+  dest->setSpeciesHaveSubstanceUnits(src->speciesHaveSubstanceUnits());
 
   // Copy all parameter definitions:
   for (size_t i=0; i<src->numParameters(); i++) {
@@ -354,10 +355,8 @@ ModelCopyist::copyKineticLaw(Ast::KineticLaw *node, GiNaC::exmap &translation_ta
   Ast::KineticLaw *kinetic_law = new Ast::KineticLaw(GiNaC::ex());
 
   // First, copy all local parameters:
-  for (Ast::KineticLaw::iterator iter = node->begin(); iter != node->end(); iter++)
-  {
-    if (! Ast::Node::isParameter(*iter))
-    {
+  for (Ast::KineticLaw::iterator iter = node->begin(); iter != node->end(); iter++) {
+    if (! Ast::Node::isParameter(*iter)) {
       InternalError err;
       err << "Can not copy kinetic law: Law has local non-parameter variable defined!";
       throw err;
