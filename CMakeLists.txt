@@ -203,11 +203,13 @@ MESSAGE(STATUS "Libraries: ${LIBS}")
 #
 # Traverse into source tree:
 #
-IF(INA_ENABLE_STATIC)
-add_subdirectory(lib)
-ELSE()
 
 add_subdirectory(lib)
+add_subdirectory(unsupported)
+add_subdirectory(cli)
+
+IF(INA_ENABLE_STATIC)
+ELSE()
 IF(WITH_INA_GUI)
   add_subdirectory(app)
 ENDIF(WITH_INA_GUI)

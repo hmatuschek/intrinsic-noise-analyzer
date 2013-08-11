@@ -121,6 +121,7 @@ public:
 
           LineSearchStatus lcheck = newtonStep(state_old,state,stpmax);
 
+          // Check for negative values
           if ((state.head(this->dim).array()<0).any())
           {
               state = state_old;
@@ -138,14 +139,11 @@ public:
           }
 
           // Test for absolute and relative errors
-          if (maxNorm(state-state_old) < std::max(this->parameters.absError, maxNorm(state)*this->parameters.relError )
-              && maxNorm(this->ODEs) < std::max(this->parameters.absError, maxNorm(state)*this->parameters.relError) )
-          {
-              //convergence of dx
+          if (maxNorm(state-state_old) < std::min(this->parameters.absError, maxNorm(state)*this->parameters.relError)
+              && maxNorm(this->ODEs) < std::min(this->parameters.absError, maxNorm(state)*this->parameters.relError) )
               return Success;
-          }
 
-      } // next newton iteration
+      } // Next newton iteration
 
       return MaxIterationsReached;
   }
