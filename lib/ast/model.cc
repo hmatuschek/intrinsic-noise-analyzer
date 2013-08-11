@@ -66,7 +66,7 @@ Ast::Model::Model(const Model &other)
   : Scope(), _species_have_substance_units(other._species_have_substance_units),
     _predefined_units(other._predefined_units)
 {
-  // Copy "other" module into this module
+  // Copy "other" model into this model
   ModelCopyist::copy(&other, this);
 }
 
@@ -78,7 +78,7 @@ Ast::Model::getIdentifier() const {
 
 void
 Ast::Model::setIdentifier(const std::string &identifier) {
-  INA_ASSERT_IDENTIFIER(_identifier);
+  INA_ASSERT_IDENTIFIER(identifier);
   _identifier = identifier;
 }
 
