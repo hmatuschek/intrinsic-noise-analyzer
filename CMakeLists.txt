@@ -205,8 +205,8 @@ MESSAGE(STATUS "Libraries: ${LIBS}")
 #
 
 add_subdirectory(lib)
-add_subdirectory(unsupported)
-add_subdirectory(cli)
+#add_subdirectory(unsupported)
+#add_subdirectory(cli)
 
 IF(INA_ENABLE_STATIC)
 ELSE()
