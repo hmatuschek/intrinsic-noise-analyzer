@@ -128,19 +128,19 @@ CompilerException::~CompilerException() throw()
 
 
 SymbolError::SymbolError()
-  : CompilerException("Symbol Error: ")
+  : Exception("Symbol Error: ")
 {
   // pass
 }
 
 SymbolError::SymbolError(const std::string &message)
-  : CompilerException("Symbol Error: ")
+  : Exception("Symbol Error: ")
 {
   (*this) << message;
 }
 
 SymbolError::SymbolError(const SymbolError &other)
-  : CompilerException(other)
+  : Exception(other)
 {
   // Pass.
 }
@@ -153,19 +153,19 @@ SymbolError::~SymbolError() throw()
 
 
 SemanticError::SemanticError()
-  : CompilerException("Semantic Error: ")
+  : Exception("Semantic Error: ")
 {
   // Pass.
 }
 
 SemanticError::SemanticError(const std::string &message)
-  : CompilerException("Semantic Error: ")
+  : Exception("Semantic Error: ")
 {
   (*this) << message;
 }
 
 SemanticError::SemanticError(const SemanticError &other)
-  : CompilerException(other)
+  : Exception(other)
 {
   // pass.
 }
@@ -179,19 +179,19 @@ SemanticError::~SemanticError() throw()
 
 
 TypeError::TypeError()
-  : CompilerException("Type Error: ")
+  : Exception("Type Error: ")
 {
   // Pass.
 }
 
 TypeError::TypeError(const std::string &message)
-  : CompilerException("Type Error: ")
+  : Exception("Type Error: ")
 {
   (*this) << message;
 }
 
 TypeError::TypeError(const TypeError &other)
-  : CompilerException(other)
+  : Exception(other)
 {
   // Pass.
 }
