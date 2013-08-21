@@ -20,12 +20,13 @@ void
 SteadyStateTest::testEnzymeKineticsRE() {
   // Read doc and check for errors:
   Ast::Model sbml_model;
-  Parser::Sbml::importModel(sbml_model, "test/regression-tests/enzymekinetics1.xml");
-  // Construct IOS model to integrate
+  Parser::Sbml::importModel(sbml_model, "test/regression-tests/extended_goodwin.xml");
+  // Construct RE model to integrate
   Models::REmodel model(sbml_model);
   // Perform analysis:
   Eigen::VectorXd state(model.getDimension());
   Models::SteadyStateAnalysis<Models::REmodel> analysis(model);
+  analysis.setMaxIterations(1000);
   analysis.calcSteadyState(state);
 }
 
@@ -33,12 +34,13 @@ void
 SteadyStateTest::testEnzymeKineticsLNA() {
   // Read doc and check for errors:
   Ast::Model sbml_model;
-  Parser::Sbml::importModel(sbml_model, "test/regression-tests/enzymekinetics1.xml");
-  // Construct IOS model to integrate
+  Parser::Sbml::importModel(sbml_model, "test/regression-tests/extended_goodwin.xml");
+  // Construct LNA model to integrate
   Models::LNAmodel model(sbml_model);
   // Perform analysis:
   Eigen::VectorXd state(model.getDimension());
   Models::SteadyStateAnalysis<Models::LNAmodel> analysis(model);
+  analysis.setMaxIterations(1000);
   analysis.calcSteadyState(state);
 }
 
@@ -46,14 +48,16 @@ void
 SteadyStateTest::testEnzymeKineticsIOS() {
   // Read doc and check for errors:
   Ast::Model sbml_model;
-  Parser::Sbml::importModel(sbml_model, "test/regression-tests/enzymekinetics1.xml");
+  Parser::Sbml::importModel(sbml_model, "test/regression-tests/extended_goodwin.xml");
   // Construct model to integrate
   Models::IOSmodel model(sbml_model);
   // Perform analysis:
   Eigen::VectorXd state(model.getDimension());
   Models::SteadyStateAnalysis<Models::IOSmodel> analysis(model);
+  analysis.setMaxIterations(1000);
   analysis.calcSteadyState(state);
 }
+
 
 UnitTest::TestSuite *
 SteadyStateTest::suite() {
