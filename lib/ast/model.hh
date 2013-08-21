@@ -27,56 +27,6 @@ public:
   /** Operator class for models. */
   class Operator { public: virtual void act(Model *model) = 0; };
 
-protected:
-  /** Holds the model identifier, should be a unique identifier. */
-  std::string _identifier;
-
-  /** Holds the model name. This name is used as a display name for the model. */
-  std::string _name;
-
-  /** Holds the global unique symbol to represent the time in a explicit time-dependent
-   * system. */
-  GiNaC::symbol _time_symbol;
-
-  /** If true, the species are measured in substance units
-   * (the unit returned by @c getSubstanceUnit). If not, the species are measured in concentration
-   * units, the unit given by @c getSubstanceUnit() / @c getVolumeUnit(). */
-  bool _species_have_substance_units;
-
-  /** Holds the global default unit for substance. */
-  Unit _substance_unit;
-
-  /** Holds the global default unit for a volume. */
-  Unit _volume_unit;
-
-  /** Holds the global default unit for a area. */
-  Unit _area_unit;
-
-  /** Holds the global default unit for a length. */
-  Unit _length_unit;
-
-  /** Holds teh global default unit for the time. */
-  Unit _time_unit;
-
-  /** Holds a list of pre-defined units. */
-  std::map<std::string, Unit> _predefined_units;
-
-  /** Holds a vector of weak-references to all compartments defined in the model, in order of
-   * definition. This vector does not own the compartment instance. */
-  std::vector<Compartment *> _compartment_vector;
-
-  /** Holds a vector of weak-references to all species defined in the model, in oder of their
-   * definition. */
-  std::vector<Species *> _species_vector;
-
-  /** Holds a vector of weak-references to all (global) parameters in the model, in order of their
-   * definition. */
-  std::vector<Parameter *> _parameter_vector;
-
-  /** Holds a vector of weak-references to all reactions in the model, in order of their definition.
-   * This vector does not own the reaction instances. */
-  std::vector<Reaction *> _reaction_vector;
-
 public:
   /** The compartment iterator. */
   typedef std::vector<Compartment *>::iterator CompartmentIterator;
@@ -205,8 +155,6 @@ public:
   /** Resets the time unit of the model, a @c UnitError exception is thrown if the given unit is
    * not a time unit. */
   void setTimeUnit(const Unit &unit, bool scale_model=true);
-
-  const Unit &getUnit(const std::string &name) const;
 
   /** Returns the number of species defined in the model. */
   size_t numSpecies() const;
@@ -391,6 +339,53 @@ public:
 
   /** Applies an operator on the model. */
   virtual void apply(Ast::Operator &op);
+
+protected:
+  /** Holds the model identifier, should be a unique identifier. */
+  std::string _identifier;
+
+  /** Holds the model name. This name is used as a display name for the model. */
+  std::string _name;
+
+  /** Holds the global unique symbol to represent the time in a explicit time-dependent
+   * system. */
+  GiNaC::symbol _time_symbol;
+
+  /** If true, the species are measured in substance units
+   * (the unit returned by @c getSubstanceUnit). If not, the species are measured in concentration
+   * units, the unit given by @c getSubstanceUnit() / @c getVolumeUnit(). */
+  bool _species_have_substance_units;
+
+  /** Holds the global default unit for substance. */
+  Unit _substance_unit;
+
+  /** Holds the global default unit for a volume. */
+  Unit _volume_unit;
+
+  /** Holds the global default unit for a area. */
+  Unit _area_unit;
+
+  /** Holds the global default unit for a length. */
+  Unit _length_unit;
+
+  /** Holds teh global default unit for the time. */
+  Unit _time_unit;
+
+  /** Holds a vector of weak-references to all compartments defined in the model, in order of
+   * definition. This vector does not own the compartment instance. */
+  std::vector<Compartment *> _compartment_vector;
+
+  /** Holds a vector of weak-references to all species defined in the model, in oder of their
+   * definition. */
+  std::vector<Species *> _species_vector;
+
+  /** Holds a vector of weak-references to all (global) parameters in the model, in order of their
+   * definition. */
+  std::vector<Parameter *> _parameter_vector;
+
+  /** Holds a vector of weak-references to all reactions in the model, in order of their definition.
+   * This vector does not own the reaction instances. */
+  std::vector<Reaction *> _reaction_vector;
 };
 
 
