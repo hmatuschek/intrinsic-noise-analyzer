@@ -149,11 +149,9 @@ public:
 
 
 
-/**
- * A production of a single token.
- *
- * @ingroup parser
- */
+/** A production of a single token. A token production might by marked as terminal, hence the parser
+ * will not backtrace beond this production node.
+ * @ingroup parser */
 class TokenProduction: public Production
 {
 public:
