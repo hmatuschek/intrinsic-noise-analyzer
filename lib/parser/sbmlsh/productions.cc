@@ -2,6 +2,7 @@
 #include <parser/production.hh>
 #include "exception.hh"
 #include <parser/expr/productions.hh>
+#include <ast/unitdefinition.hh>
 
 
 using namespace iNA;
@@ -367,21 +368,9 @@ ScaledUnitListProduction::get()
  *   ("mole" | "litre" | "second" | ...);
  * ******************************************************************************************** */
 ScaledUnitIdentifierProduction::ScaledUnitIdentifierProduction()
-  : TokenProduction(T_IDENTIFIER), valid_units()
+  : TokenProduction(T_IDENTIFIER)
 {
   ScaledUnitIdentifierProduction::instance = this;
-
-  valid_units.insert("ampere"); valid_units.insert("becquerel"); valid_units.insert("candela");
-  valid_units.insert("coulomb"); valid_units.insert("dimensionless"); valid_units.insert("farad");
-  valid_units.insert("gram"); valid_units.insert("katal"); valid_units.insert("gray");
-  valid_units.insert("kelvin"); valid_units.insert("henry"); valid_units.insert("kilogram");
-  valid_units.insert("hertz"); valid_units.insert("litre"); valid_units.insert("item");
-  valid_units.insert("lumen"); valid_units.insert("joule"); valid_units.insert("lux");
-  valid_units.insert("metre"); valid_units.insert("mole"); valid_units.insert("newton");
-  valid_units.insert("ohm"); valid_units.insert("pascal"); valid_units.insert("radian");
-  valid_units.insert("second"); valid_units.insert("watt"); valid_units.insert("siemens");
-  valid_units.insert("weber"); valid_units.insert("sievert"); valid_units.insert("steradian");
-  valid_units.insert("tesla"); valid_units.insert("volt");
 }
 
 ScaledUnitIdentifierProduction::~ScaledUnitIdentifierProduction() {
@@ -399,8 +388,7 @@ ScaledUnitIdentifierProduction::parse(iNA::Parser::Lexer &lexer, iNA::Parser::Co
   TokenProduction::parse(lexer, element);
 
   // Check if identifier not matches:
-  if (this->valid_units.end() == this->valid_units.find(id))
-  {
+  if (! Ast::Unit::isBaseUnitName(id)) {
     Parser::SyntaxError err(line);
     err << "@line " << line << ": "
         << "Invalid (base-) unit " << id;

@@ -82,7 +82,7 @@ void __process_default_unit_redefinition(
     LIBSBML_CPP_NAMESPACE_QUALIFIER UnitDefinition *node, ParserContext &ctx);
 void __process_unit_definition(
     LIBSBML_CPP_NAMESPACE_QUALIFIER UnitDefinition *node, ParserContext &ctx);
-Ast::ScaledBaseUnit __process_unit(
+Ast::Unit __process_unit(
     LIBSBML_CPP_NAMESPACE_QUALIFIER Unit *unit, ParserContext &ctx);
 
 Ast::VariableDefinition *__process_parameter_definition(

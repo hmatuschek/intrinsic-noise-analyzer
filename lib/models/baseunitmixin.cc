@@ -14,9 +14,9 @@ BaseUnitMixin::BaseUnitMixin(BaseModel &base)
 
   // ensure unit of propensities is item/time:
   for (size_t i=0; i<base.propensities.size(); i++) {
-    if (base.getSubstanceUnit().hasVariantOf(Ast::ScaledBaseUnit::MOLE)) {
+    if (base.getSubstanceUnit().hasVariantOf(Ast::Unit::MOLE)) {
       base.propensities[i] *= multiplier*constants::AVOGADRO;
-    } else if (base.getSubstanceUnit().hasVariantOf(Ast::ScaledBaseUnit::ITEM)) {
+    } else if (base.getSubstanceUnit().hasVariantOf(Ast::Unit::ITEM)) {
       base.propensities[i] *= multiplier;
     }
   }

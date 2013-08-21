@@ -14,7 +14,6 @@ namespace Utils {
 /**
  * Abstract class defining the interface for all MAT file elements.
  * This class is used internal and may not be used directly by the application.
- * @ingroup dataexport
  */
 class MatFileElement
 {
@@ -56,7 +55,6 @@ protected:
 
 /**
  * A MAT file element holding a data block of a certain value.
- * @ingroup dataexport
  */
 class MatFileValue : public MatFileElement
 {
@@ -132,7 +130,6 @@ private:
 /**
  * Generic MAT file matrix element. Note that Matlab calls everything a "matrix" that
  * is not just a series of numbers or chars.
- * @ingroup dataexport
  */
 class MatFileComplexElement : public MatFileElement
 {
@@ -171,7 +168,6 @@ protected:
  * Each matrix element consists of the matrix itself and a name attribute, used
  * to address the matrix in the MAT file. Note that the name must be a valid Matlab identifier, not
  * all ASCII chars are allowed for that name. iNA does not check if the name has the correct format.
- * @ingroup dataexport
  */
 class MatFileMatrixElement : public MatFileComplexElement
 {
@@ -215,7 +211,7 @@ public:
   /** Destructor. Also frees all all elements of the file.*/
   ~MatFile();
 
-  /** Serializes the MAT file into the given stram. */
+  /** Serializes the MAT file into the given stream. */
   void serialize(std::ostream &stream);
 
   /** Adds a single signed integer value to the file. */

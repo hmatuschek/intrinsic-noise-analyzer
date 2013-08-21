@@ -42,11 +42,11 @@ ModelCopyist::copy(const Ast::Model *src, Ast::Model *dest, GiNaC::exmap &transl
   }
 
   // Copy default units:
-  dest->setSubstanceUnit(src->getSubstanceUnit().asScaledBaseUnit(), false);
-  dest->setVolumeUnit(src->getVolumeUnit().asScaledBaseUnit(), false);
-  dest->setAreaUnit(src->getAreaUnit().asScaledBaseUnit(), false);
-  dest->setLengthUnit(src->getLengthUnit().asScaledBaseUnit(), false);
-  dest->setTimeUnit(src->getTimeUnit().asScaledBaseUnit(), false);
+  dest->setSubstanceUnit(src->getSubstanceUnit(), false);
+  dest->setVolumeUnit(src->getVolumeUnit(), false);
+  dest->setAreaUnit(src->getAreaUnit(), false);
+  dest->setLengthUnit(src->getLengthUnit(), false);
+  dest->setTimeUnit(src->getTimeUnit(), false);
   // Set model has substance or concentration units
   dest->setSpeciesHaveSubstanceUnits(src->speciesHaveSubstanceUnits());
 

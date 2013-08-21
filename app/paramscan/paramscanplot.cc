@@ -216,7 +216,7 @@ createParameterScanLNAFanoPlotConfig(const QStringList &selected_species, ParamS
     GiNaC::ex multiplier = compVol;
     multiplier *= model->getSpeciesUnit().getMultiplier()*std::pow(10.,model->getSpeciesUnit().getScale());
     // Multiply by Avogadro's number if defined in mole
-    if (model->getSubstanceUnit().isVariantOf(iNA::Ast::ScaledBaseUnit::MOLE)) {
+    if (model->getSubstanceUnit().isVariantOf(iNA::Ast::Unit::MOLE)) {
       multiplier *= iNA::constants::AVOGADRO;
     }
     // Assemble formula for Fano factor.
@@ -328,7 +328,7 @@ createParameterScanIOSFanoPlotConfig(const QStringList &selected_species, ParamS
     GiNaC::ex multiplier = compVol;
     multiplier *= model->getSpeciesUnit().getMultiplier()*std::pow(10.,model->getSpeciesUnit().getScale());
     // Multiply by Avogadro's number if defined in mole
-    if (model->getSubstanceUnit().isVariantOf(iNA::Ast::ScaledBaseUnit::MOLE)) {
+    if (model->getSubstanceUnit().isVariantOf(iNA::Ast::Unit::MOLE)) {
       multiplier *= iNA::constants::AVOGADRO;
     }
     // Assemble formula for Fano factor.

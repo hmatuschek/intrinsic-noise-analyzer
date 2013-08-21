@@ -106,7 +106,7 @@ public:
 /**
  * This exception will be thrown if a symbol/name/identifier can not be resolved.
  */
-class SymbolError : public CompilerException
+class SymbolError : public Exception
 {
 public:
   /**
@@ -132,7 +132,7 @@ public:
 /**
  * General exception to signal a semantic error.
  */
-class SemanticError : public CompilerException
+class SemanticError : public Exception
 {
 public:
   /**
@@ -158,7 +158,7 @@ public:
 /**
  * General exception to signal a type-error.
  */
-class TypeError : public CompilerException
+class TypeError : public Exception
 {
 public:
   /**

@@ -24,7 +24,7 @@ ConstCompartmentMixin::ConstCompartmentMixin(BaseModel &base)
 
   // define the compartment volumes for all species
   GiNaC::numeric fac=1.;
-  if(base.getSubstanceUnit().hasVariantOf(Ast::ScaledBaseUnit::MOLE)) {
+  if(base.getSubstanceUnit().hasVariantOf(Ast::Unit::MOLE)) {
     double multiplier = base.getSubstanceUnit().getMultiplier();
     multiplier *= std::pow(10., base.getSubstanceUnit().getScale());
     fac = multiplier*constants::AVOGADRO;

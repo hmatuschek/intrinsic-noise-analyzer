@@ -1,5 +1,5 @@
-#ifndef __FLUC_EVAL_HH__
-#define __FLUC_EVAL_HH__
+#ifndef __INA_EVAL_HH__
+#define __INA_EVAL_HH__
 
 #include "../config.hh"
 
