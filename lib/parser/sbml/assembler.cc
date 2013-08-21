@@ -13,6 +13,40 @@ ParserContext::ParserContext(Ast::Model &model)
 {
   // Store pointer to module (also a scope) into scope stack:
   this->_scope_stack.push_back(&_model);
+
+  // Define predefined units...
+  _units["ampere"] = Ast::Unit(Ast::ScaledBaseUnit::AMPERE, 1, 0, 1);
+  _units["becquerel"] = Ast::Unit(Ast::ScaledBaseUnit::BECQUEREL, 1, 0, 1);
+  _units["candela"] = Ast::Unit(Ast::ScaledBaseUnit::CANDELA, 1, 0, 1);
+  _units["coulomb"] = Ast::Unit(Ast::ScaledBaseUnit::COULOMB, 1, 0, 1);
+  _units["dimensionless"] = Ast::Unit(Ast::ScaledBaseUnit::DIMENSIONLESS, 1, 0, 1);
+  _units["farad"] = Ast::Unit(Ast::ScaledBaseUnit::FARAD, 1, 0, 1);
+  _units["gram"] = Ast::Unit(Ast::ScaledBaseUnit::GRAM, 1, 0, 1);
+  _units["katal"] = Ast::Unit(Ast::ScaledBaseUnit::KATAL, 1, 0, 1);
+  _units["gray"] = Ast::Unit(Ast::ScaledBaseUnit::GRAY, 1, 0, 1);
+  _units["kelvin"] = Ast::Unit(Ast::ScaledBaseUnit::KELVIN, 1, 0, 1);
+  _units["henry"] = Ast::Unit(Ast::ScaledBaseUnit::HENRY, 1, 0, 1);
+  _units["kilogram"] = Ast::Unit(Ast::ScaledBaseUnit::KILOGRAM, 1, 0, 1);
+  _units["hertz"] = Ast::Unit(Ast::ScaledBaseUnit::HERTZ, 1, 0, 1);
+  _units["litre"] = Ast::Unit(Ast::ScaledBaseUnit::LITRE, 1, 0, 1);
+  _units["item"] = Ast::Unit(Ast::ScaledBaseUnit::ITEM, 1, 0, 1);
+  _units["lumen"] = Ast::Unit(Ast::ScaledBaseUnit::LUMEN, 1, 0, 1);
+  _units["joule"] = Ast::Unit(Ast::ScaledBaseUnit::JOULE, 1, 0, 1);
+  _units["lux"] = Ast::Unit(Ast::ScaledBaseUnit::LUX, 1, 0, 1);
+  _units["metre"] = Ast::Unit(Ast::ScaledBaseUnit::METRE, 1, 0, 1);
+  _units["mole"] = Ast::Unit(Ast::ScaledBaseUnit::MOLE, 1, 0, 1);
+  _units["newton"] = Ast::Unit(Ast::ScaledBaseUnit::NEWTON, 1, 0, 1);
+  _units["ohm"] = Ast::Unit(Ast::ScaledBaseUnit::OHM, 1, 0, 1);
+  _units["pascal"] = Ast::Unit(Ast::ScaledBaseUnit::PASCAL, 1, 0, 1);
+  _units["radian"] = Ast::Unit(Ast::ScaledBaseUnit::RADIAN, 1, 0, 1);
+  _units["second"] = Ast::Unit(Ast::ScaledBaseUnit::SECOND, 1, 0, 1);
+  _units["watt"] = Ast::Unit(Ast::ScaledBaseUnit::WATT, 1, 0, 1);
+  _units["siemens"] = Ast::Unit(Ast::ScaledBaseUnit::SIEMENS, 1, 0, 1);
+  _units["weber"] = Ast::Unit(Ast::ScaledBaseUnit::WEBER, 1, 0, 1);
+  _units["sievert"] = Ast::Unit(Ast::ScaledBaseUnit::SIEVERT, 1, 0, 1);
+  _units["steradian"] = Ast::Unit(Ast::ScaledBaseUnit::STERADIAN, 1, 0, 1);
+  _units["tesla"] = Ast::Unit(Ast::ScaledBaseUnit::TESLA, 1, 0, 1);
+  _units["volt"] = Ast::Unit(Ast::ScaledBaseUnit::VOLT, 1, 0, 1);
 }
 
 
@@ -101,11 +135,23 @@ ParserContext::model() {
 
 bool
 ParserContext::hasUnit(const std::string &id) const {
+  // check if unit ID is one of the model units
+  if (("substance"==id) || ("volume"==id) || ("area"==id) || ("length"==id) || ("time"==id)) {
+    return true;
+  }
+  // otherwise resolve identifier:
   return 0 != _units.count(id);
 }
 
 const Ast::Unit &
 ParserContext::unit(const std::string &id) const {
+  // Resolve model units
+  if ("substance"==id)   { return _model.getSubstanceUnit(); }
+  else if ("volume"==id) { return _model.getVolumeUnit(); }
+  else if ("area"==id)   { return _model.getAreaUnit(); }
+  else if ("length"==id) { return _model.getLengthUnit(); }
+  else if ("time"==id)   { return _model.getTimeUnit(); }
+  // Resolve unit identifier in user and pre-defined units.
   std::map<std::string, Ast::Unit>::const_iterator unit = _units.find(id);
   if (_units.end() == unit) {
     SymbolError err; err << "Unit '" << id << "' not defined!";
