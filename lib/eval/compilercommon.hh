@@ -31,28 +31,23 @@ public:
   /** Compiles a vector of expressions.
    * The value of the i-th expression will be stored at the i-th index in the output-vector
    * during evaluation. */
-  void compileVector(const Eigen::VectorXex &vector)
-  {
-    for (int index = 0; index < vector.rows(); index++)
-    {
+  void compileVector(const Eigen::VectorXex &vector) {
+    for (int index = 0; index < vector.rows(); index++) {
       this->compileExpressionAndStore(vector(index), index);
     }
   }
 
   /** Compiles a matrix of expressions, that will evaluate to an @c Eigen::MatrixXd of the same
    * shape. */
-  void compileMatrix(const Eigen::MatrixXex &matrix)
-  {
-    for (int i=0; i<matrix.rows(); i++)
-    {
-      for (int j=0; j<matrix.cols(); j++)
-      {
+  void compileMatrix(const Eigen::MatrixXex &matrix) {
+    for (int i=0; i<matrix.rows(); i++) {
+      for (int j=0; j<matrix.cols(); j++) {
         size_t index = 0;
-        if (OutType::Flags & Eigen::RowMajorBit)
+        if (OutType::Flags & Eigen::RowMajorBit) {
           index = j + matrix.cols()*i;
-        else
+        } else {
           index = i + matrix.rows()*j;
-
+        }
         this->compileExpressionAndStore(matrix(i,j), index);
       }
     }
