@@ -124,6 +124,11 @@ Unit::size() const {
 
 
 bool
+Unit::isScaledBaseUnit() const {
+  return ((0 == _units.size()) || (1 == _units.size()));
+}
+
+bool
 Unit::isVariantOf(ScaledBaseUnit::BaseUnit baseUnit, int expo) const {
   // A unit is dimension-less if there are no units:
   if (ScaledBaseUnit::DIMENSIONLESS == baseUnit && 0 == this->_units.size()) {
@@ -251,6 +256,26 @@ Unit::asScaledBaseUnit() const {
   return ScaledBaseUnit(base_unit, multiplier, scale, exponent);
 }
 
+void
+Unit::asScaledBaseUnit(ScaledBaseUnit::BaseUnit &unit, double &multiplier, int &scale, int &exponent) const {
+  // Handle dimensionless unit explicitly:
+  if (this->isDimensionless()) {
+    unit = ScaledBaseUnit::DIMENSIONLESS; multiplier = 1; scale = 0; exponent = 1; return;
+  }
+
+  if (1 != this->_units.size()) {
+    InternalError err;
+    err << "Cannot construct a scaled base-unit from non-atomic unit: "
+        << this->dump();
+    throw err;
+  }
+
+  // unpack
+  unit = _units.begin()->first;
+  exponent   = _units.begin()->second;
+  scale      = int(_common_scale/exponent);
+  multiplier = std::exp(std::log(_common_multiplier)/exponent);
+}
 
 Unit::iterator
 Unit::begin() const {

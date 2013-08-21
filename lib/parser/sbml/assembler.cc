@@ -575,7 +575,7 @@ Parser::Sbml::__process_default_unit_redefinition(LIBSBML_CPP_NAMESPACE_QUALIFIE
   }
 
   if ("substance" == node->getId()) {
-    Ast::ScaledBaseUnit unit = __process_unit(node->getUnit(0), ctx);
+    Ast::Unit unit = __process_unit(node->getUnit(0), ctx);
     if (! unit.isSubstanceUnit()) {
       SemanticError err;
       err << "Redefinition of default unit " << node->getId() << " requires a substance unit.";
@@ -583,7 +583,7 @@ Parser::Sbml::__process_default_unit_redefinition(LIBSBML_CPP_NAMESPACE_QUALIFIE
     }
     ctx.model().setSubstanceUnit(unit, false);
   } else if ("volume" == node->getId()) {
-    Ast::ScaledBaseUnit unit = __process_unit(node->getUnit(0), ctx);
+    Ast::Unit unit = __process_unit(node->getUnit(0), ctx);
     if (! unit.isVolumeUnit()) {
       SemanticError err;
       err << "Redefinition of default unit " << node->getId() << " requires a volume unit.";
@@ -591,7 +591,7 @@ Parser::Sbml::__process_default_unit_redefinition(LIBSBML_CPP_NAMESPACE_QUALIFIE
     }
     ctx.model().setVolumeUnit(unit, false);
   } else if ("area" == node->getId()) {
-    Ast::ScaledBaseUnit unit = __process_unit(node->getUnit(0), ctx);
+    Ast::Unit unit = __process_unit(node->getUnit(0), ctx);
     if (! unit.isAreaUnit()) {
       SemanticError err;
       err << "Redefinition of default unit " << node->getId() << " requires a area unit.";
@@ -599,7 +599,7 @@ Parser::Sbml::__process_default_unit_redefinition(LIBSBML_CPP_NAMESPACE_QUALIFIE
     }
     ctx.model().setAreaUnit(unit, false);
   } else if ("length" == node->getId()) {
-    Ast::ScaledBaseUnit unit = __process_unit(node->getUnit(0), ctx);
+    Ast::Unit unit = __process_unit(node->getUnit(0), ctx);
     if (! unit.isLengthUnit()) {
       SemanticError err;
       err << "Redefinition of default unit " << node->getId() << " requires a length unit.";
@@ -607,7 +607,7 @@ Parser::Sbml::__process_default_unit_redefinition(LIBSBML_CPP_NAMESPACE_QUALIFIE
     }
     ctx.model().setLengthUnit(unit, false);
   } else if ("time" == node->getId()) {
-    Ast::ScaledBaseUnit unit = __process_unit(node->getUnit(0), ctx);
+    Ast::Unit unit = __process_unit(node->getUnit(0), ctx);
     if (! unit.isTimeUnit()) {
       SemanticError err;
       err << "Redefinition of default unit " << node->getId() << " required time unit.";
@@ -622,92 +622,92 @@ void
 Parser::Sbml::__process_unit_definition(LIBSBML_CPP_NAMESPACE_QUALIFIER UnitDefinition *node, ParserContext &ctx)
 {
   // Assemble ScaledUnits vector:
-  std::list<Ast::ScaledBaseUnit> units;
+  Ast::Unit unit; // initially dimensionless
   for (size_t i=0; i<node->getNumUnits(); i++) {
-    units.push_back(__process_unit(node->getUnit(0), ctx));
+    unit = unit * __process_unit(node->getUnit(i), ctx);
   }
 
   // Assemble UnitDefinition:
-  ctx.defineUnit(node->getId(), Ast::Unit(units));
+  ctx.defineUnit(node->getId(), unit);
 }
 
 
-Ast::ScaledBaseUnit
+Ast::Unit
 Parser::Sbml::__process_unit(LIBSBML_CPP_NAMESPACE_QUALIFIER Unit *unit, ParserContext &ctx)
 {
   // Dispatch by base unit:
   switch (unit->getKind())
   {
   case LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_AMPERE:
-    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::AMPERE, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::Unit(Ast::ScaledBaseUnit::AMPERE, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_AVOGADRO:
-    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::AVOGADRO, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::Unit(Ast::ScaledBaseUnit::AVOGADRO, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_BECQUEREL:
-    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::BECQUEREL, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::Unit(Ast::ScaledBaseUnit::BECQUEREL, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_CANDELA:
-    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::CANDELA, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::Unit(Ast::ScaledBaseUnit::CANDELA, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_CELSIUS:
-    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::CELSIUS, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::Unit(Ast::ScaledBaseUnit::CELSIUS, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_COULOMB:
-    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::COULOMB, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::Unit(Ast::ScaledBaseUnit::COULOMB, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_DIMENSIONLESS:
-    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::DIMENSIONLESS, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::Unit(Ast::ScaledBaseUnit::DIMENSIONLESS, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_FARAD:
-    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::FARAD, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::Unit(Ast::ScaledBaseUnit::FARAD, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_GRAM:
-    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::GRAM, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::Unit(Ast::ScaledBaseUnit::GRAM, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_GRAY:
-    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::GRAY, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::Unit(Ast::ScaledBaseUnit::GRAY, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_HENRY:
-    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::HENRY, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::Unit(Ast::ScaledBaseUnit::HENRY, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_HERTZ:
-    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::HERTZ, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::Unit(Ast::ScaledBaseUnit::HERTZ, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_ITEM:
-    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::ITEM, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::Unit(Ast::ScaledBaseUnit::ITEM, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_JOULE:
-    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::JOULE, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::Unit(Ast::ScaledBaseUnit::JOULE, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_KATAL:
-    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::KATAL, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::Unit(Ast::ScaledBaseUnit::KATAL, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_KELVIN:
-    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::KELVIN, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::Unit(Ast::ScaledBaseUnit::KELVIN, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_KILOGRAM:
-    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::KILOGRAM, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::Unit(Ast::ScaledBaseUnit::KILOGRAM, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_LITER:
   case LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_LITRE:
-    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::LITRE, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::Unit(Ast::ScaledBaseUnit::LITRE, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_LUMEN:
-    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::LUMEN, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::Unit(Ast::ScaledBaseUnit::LUMEN, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_LUX:
-    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::LUX, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::Unit(Ast::ScaledBaseUnit::LUX, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_METER:
   case LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_METRE:
-    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::METRE, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::Unit(Ast::ScaledBaseUnit::METRE, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_MOLE:
-    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::MOLE, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::Unit(Ast::ScaledBaseUnit::MOLE, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_NEWTON:
-    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::NEWTON, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::Unit(Ast::ScaledBaseUnit::NEWTON, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_OHM:
-    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::OHM, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::Unit(Ast::ScaledBaseUnit::OHM, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_PASCAL:
-    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::PASCAL, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::Unit(Ast::ScaledBaseUnit::PASCAL, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_RADIAN:
-    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::RADIAN, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::Unit(Ast::ScaledBaseUnit::RADIAN, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_SECOND:
-    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::SECOND, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::Unit(Ast::ScaledBaseUnit::SECOND, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_SIEMENS:
-    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::SIEMENS, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::Unit(Ast::ScaledBaseUnit::SIEMENS, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_SIEVERT:
-    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::SIEVERT, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::Unit(Ast::ScaledBaseUnit::SIEVERT, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_STERADIAN:
-    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::STERADIAN, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::Unit(Ast::ScaledBaseUnit::STERADIAN, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_TESLA:
-    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::TESLA, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::Unit(Ast::ScaledBaseUnit::TESLA, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_VOLT:
-    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::VOLT, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::Unit(Ast::ScaledBaseUnit::VOLT, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_WATT:
-    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::WATT, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::Unit(Ast::ScaledBaseUnit::WATT, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_WEBER:
-    return Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::WEBER, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
+    return Ast::Unit(Ast::ScaledBaseUnit::WEBER, unit->getMultiplier(), unit->getScale(), unit->getExponentAsDouble());
   case LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_INVALID:
     break;
   }

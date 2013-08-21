@@ -72,7 +72,6 @@ public:
   ScaledBaseUnit();
 
   /** Constructs a unit from a base-unit and scaling as
-   *
    * \f[ u = \left(multiplier\cdot 10^{scale}\cdot u_b\right)^{exponent} \f] */
   ScaledBaseUnit(BaseUnit unit, double multiplier, int scale, int exponent);
 
@@ -209,6 +208,8 @@ public:
    * this figure is 0. */
   size_t size() const;
 
+  /** Returns @c true if the unit is a scaled base unit. */
+  bool isScaledBaseUnit() const;
   /** Returns true, if the unit is a scaled variant of the given base-unit with given exponent. */
   bool isVariantOf(ScaledBaseUnit::BaseUnit baseUnit, int expo = 1.0) const;
   /** Retunrs true, if the unit contains a variant of the given base-unit with given exponent. */
@@ -242,6 +243,7 @@ public:
    * @note This method only returns a proper @c ScaledUnit instance if the unit consists of a
    * single scaled base unit. Otherwise it throws a @c InternalError exception. */
   ScaledBaseUnit asScaledBaseUnit() const;
+  void asScaledBaseUnit(ScaledBaseUnit::BaseUnit &unit, double &multiplier, int &scale, int &exponent) const;
 
   /** Iterator pointing to the first scaled base unit of the unit. */
   iterator begin() const;

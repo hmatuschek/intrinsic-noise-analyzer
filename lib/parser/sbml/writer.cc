@@ -39,20 +39,28 @@ Writer::processUnitDefinitions(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIE
 {
   // Redefine default units:
   LIBSBML_CPP_NAMESPACE_QUALIFIER UnitDefinition *sbml_unit;
-  sbml_unit = sbml_model->createUnitDefinition(); sbml_unit->setId("substance");
-  processUnit(model.getSubstanceUnit().asScaledBaseUnit(), sbml_unit);
 
+  // Set default substance unit
+  sbml_unit = sbml_model->createUnitDefinition(); sbml_unit->setId("substance");
+  Ast::ScaledBaseUnit::BaseUnit unit; double multiplier; int scale; int exponent;
+  model.getSubstanceUnit().asScaledBaseUnit(unit, multiplier, scale, exponent);
+  processUnit(unit, multiplier, scale, exponent, sbml_unit);
+  // and default volume unit
   sbml_unit = sbml_model->createUnitDefinition(); sbml_unit->setId("volume");
-  processUnit(model.getVolumeUnit().asScaledBaseUnit(), sbml_unit);
+  model.getVolumeUnit().asScaledBaseUnit(unit, multiplier, scale, exponent);
+  processUnit(unit, multiplier, scale, exponent, sbml_unit);
 
   sbml_unit = sbml_model->createUnitDefinition(); sbml_unit->setId("area");
-  processUnit(model.getAreaUnit().asScaledBaseUnit(), sbml_unit);
+  model.getAreaUnit().asScaledBaseUnit(unit, multiplier, scale, exponent);
+  processUnit(unit, multiplier, scale, exponent, sbml_unit);
 
   sbml_unit = sbml_model->createUnitDefinition(); sbml_unit->setId("length");
-  processUnit(model.getLengthUnit().asScaledBaseUnit(), sbml_unit);
+  model.getLengthUnit().asScaledBaseUnit(unit, multiplier, scale, exponent);
+  processUnit(unit, multiplier, scale, exponent, sbml_unit);
 
   sbml_unit = sbml_model->createUnitDefinition(); sbml_unit->setId("time");
-  processUnit(model.getTimeUnit().asScaledBaseUnit(), sbml_unit);
+  model.getTimeUnit().asScaledBaseUnit(unit, multiplier, scale, exponent);
+  processUnit(unit, multiplier, scale, exponent, sbml_unit);
 }
 
 
@@ -61,23 +69,22 @@ Writer::processUnitDefinition(const Ast::Unit &unit, LIBSBML_CPP_NAMESPACE_QUALI
 {
   if ( (1 != unit.getMultiplier()) || (0 != unit.getScale()) ) {
     processUnit(
-          Ast::ScaledBaseUnit(
-            Ast::ScaledBaseUnit::DIMENSIONLESS, unit.getMultiplier(), unit.getScale(), 1),
-          sbml_unit_def);
+          Ast::ScaledBaseUnit::DIMENSIONLESS, unit.getMultiplier(), unit.getScale(), 1, sbml_unit_def);
   }
 
   for (Ast::Unit::iterator item=unit.begin(); item!=unit.end(); item++) {
-    processUnit(Ast::ScaledBaseUnit(item->first, 1, 0, item->second), sbml_unit_def);
+    processUnit(item->first, 1, 0, item->second, sbml_unit_def);
   }
 }
 
 
 void
-Writer::processUnit(const Ast::ScaledBaseUnit &unit, LIBSBML_CPP_NAMESPACE_QUALIFIER UnitDefinition *sbml_unit_def)
+Writer::processUnit(Ast::ScaledBaseUnit::BaseUnit unit, double multiplier, int scale, int exponent,
+                    LIBSBML_CPP_NAMESPACE_QUALIFIER UnitDefinition *sbml_unit_def)
 {
   LIBSBML_CPP_NAMESPACE_QUALIFIER Unit *sbml_unit = sbml_unit_def->createUnit();
 
-  switch(unit.getBaseUnit()) {
+  switch(unit) {
   case Ast::ScaledBaseUnit::AMPERE:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_AMPERE);
     break;
@@ -182,9 +189,9 @@ Writer::processUnit(const Ast::ScaledBaseUnit &unit, LIBSBML_CPP_NAMESPACE_QUALI
     break;
   }
 
-  sbml_unit->setMultiplier(unit.getMultiplier());
-  sbml_unit->setScale(unit.getScale());
-  sbml_unit->setExponent(unit.getExponent());
+  sbml_unit->setMultiplier(multiplier);
+  sbml_unit->setScale(scale);
+  sbml_unit->setExponent(exponent);
 }
 
 

@@ -18,11 +18,11 @@ Ast::Model::Model(const std::string &identifier, const std::string &name)
 {
   INA_ASSERT_IDENTIFIER(_identifier);
   // Define default units:
-  _substance_unit = ScaledBaseUnit(ScaledBaseUnit::MOLE, 1, 0, 1);
-  _volume_unit    = ScaledBaseUnit(ScaledBaseUnit::LITRE, 1, 0, 1);
-  _area_unit      = ScaledBaseUnit(ScaledBaseUnit::METRE, 1, 0, 2);
-  _length_unit    = ScaledBaseUnit(ScaledBaseUnit::METRE, 1, 0, 1);
-  _time_unit      = ScaledBaseUnit(ScaledBaseUnit::SECOND, 1, 0, 1);
+  _substance_unit = Unit(ScaledBaseUnit::MOLE, 1, 0, 1);
+  _volume_unit    = Unit(ScaledBaseUnit::LITRE, 1, 0, 1);
+  _area_unit      = Unit(ScaledBaseUnit::METRE, 1, 0, 2);
+  _length_unit    = Unit(ScaledBaseUnit::METRE, 1, 0, 1);
+  _time_unit      = Unit(ScaledBaseUnit::SECOND, 1, 0, 1);
 }
 
 

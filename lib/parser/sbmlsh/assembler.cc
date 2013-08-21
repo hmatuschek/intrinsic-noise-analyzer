@@ -229,7 +229,7 @@ Assembler::processDefaultUnitDefinitions(Parser::ConcreteSyntaxTree &def_units)
     err << "Cannot parse SBML-SH: Unknown unit name: " << unit_id;
     throw err;
   }
-  Ast::ScaledBaseUnit base_unit(item->second, 1,0,1);
+  Ast::Unit base_unit(item->second, 1,0,1);
 
   // Dispatch by flag...
   if (def_unit_id == "s") {
@@ -256,7 +256,7 @@ Assembler::processDefaultUnitDefinitions(Parser::ConcreteSyntaxTree &def_units)
 
 
 void
-Assembler::processUnitDefinition(Parser::ConcreteSyntaxTree &unit)
+Assembler::processUnitDefinition(Parser::ConcreteSyntaxTree &unit_prod)
 {
   // UnitDefinitionList =          : unit
   //   Identifier                    :unit[0]  (Token)
@@ -266,35 +266,34 @@ Assembler::processUnitDefinition(Parser::ConcreteSyntaxTree &unit)
   //   [EOL UnitDefinitionList]      :unit[4]; 4.0.1
 
   // Collect scaled base units for this unit:
-  std::list<Ast::ScaledBaseUnit> units;
-  processScaledUnitList(unit[2], units);
+  Ast::Unit unit;
+  processScaledUnitList(unit_prod[2], unit);
 
-  std::string identifier = _lexer[unit[0].getTokenIdx()].getValue();
+  std::string identifier = _lexer[unit_prod[0].getTokenIdx()].getValue();
 
   if ("substance" == identifier) {
-    _model.setSubstanceUnit(units.front(), false);
+    _model.setSubstanceUnit(unit, false);
   } else if ("volume" == identifier) {
-    _model.setVolumeUnit(units.front(), false);
+    _model.setVolumeUnit(unit, false);
   } else if ("area" == identifier) {
-    _model.setAreaUnit(units.front(), false);
+    _model.setAreaUnit(unit, false);
   } else if ("length" == identifier) {
-    _model.setLengthUnit(units.front(), false);
+    _model.setLengthUnit(unit, false);
   } else if ("time" == identifier) {
-    _model.setTimeUnit(units.front(), false);
+    _model.setTimeUnit(unit, false);
   } else {
-    defineUnit(identifier, units);
+    defineUnit(identifier, unit);
   }
 
   // If there are some unit definitions left
-  if (unit[4].matched()) {
-    processUnitDefinition(unit[4][0][1]);
+  if (unit_prod[4].matched()) {
+    processUnitDefinition(unit_prod[4][0][1]);
   }
 }
 
 
 void
-Assembler::processScaledUnitList(Parser::ConcreteSyntaxTree &unit,
-                                 std::list<Ast::ScaledBaseUnit> &unit_list)
+Assembler::processScaledUnitList(Parser::ConcreteSyntaxTree &unit_prod, Ast::Unit &unit)
 {
   // ScaledUnitList =                      : units
   //   ScaledUnitIdentifier                  : units[0] (Token)
@@ -304,7 +303,7 @@ Assembler::processScaledUnitList(Parser::ConcreteSyntaxTree &unit,
   //   [";" ScaledUnitList];                   : units[2] 2,0,1
 
   /* Dispatch by base unit name. */
-  const Parser::Token &uid_token = _lexer[unit[0].getTokenIdx()];
+  const Parser::Token &uid_token = _lexer[unit_prod[0].getTokenIdx()];
   std::string base_unit_id = uid_token.getValue();
   std::map<std::string, Ast::ScaledBaseUnit::BaseUnit>::iterator item
       = _base_unit_map.find(base_unit_id);
@@ -319,16 +318,16 @@ Assembler::processScaledUnitList(Parser::ConcreteSyntaxTree &unit,
 
   /* Handle unit modifiers. */
   double multiplier = 1; int scale = 0; int exponent = 1;
-  if (unit[1].matched()) {
-    processScaledUnitModifierList(unit[1][0][1], multiplier, scale, exponent);
+  if (unit_prod[1].matched()) {
+    processScaledUnitModifierList(unit_prod[1][0][1], multiplier, scale, exponent);
   }
 
   // Assemble scaled base unit:
-  unit_list.push_back(Ast::ScaledBaseUnit(base_unit, multiplier, scale, exponent));
+  unit = unit*Ast::Unit(base_unit, multiplier, scale, exponent);
 
   // If there are scaled units left:
-  if (unit[2].matched()) {
-    processScaledUnitList(unit[2][0][1], unit_list);
+  if (unit_prod[2].matched()) {
+    processScaledUnitList(unit_prod[2][0][1], unit);
   }
 }
 

@@ -29,7 +29,7 @@ ParticleNumbersMixin::ParticleNumbersMixin(BaseModel &base)
 
   // Set the substance unit to item and force the model to update itself:
   //  this will scale all species and their initial values
-  base.setSubstanceUnit(Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::ITEM, 1, 0, 1), true);
+  base.setSubstanceUnit(Ast::Unit(Ast::ScaledBaseUnit::ITEM, 1, 0, 1), true);
 
   // Holds forward and back substitutions:
   GiNaC::exmap  forward_subst;

@@ -50,8 +50,7 @@ protected:
   /** Handles a unit definition. */
   void processUnitDefinition(iNA::Parser::ConcreteSyntaxTree &unit);
   /** Handles a list of scaled base unit. */
-  void processScaledUnitList(iNA::Parser::ConcreteSyntaxTree &unit,
-                             std::list<Ast::ScaledBaseUnit> &unit_list);
+  void processScaledUnitList(iNA::Parser::ConcreteSyntaxTree &unit_prod, Ast::Unit &unit);
   /** Handles a list of modifiers of base units. */
   void processScaledUnitModifierList(iNA::Parser::ConcreteSyntaxTree &sulist,
                                      double &multiplier, int &scale, int &exponent);

@@ -96,33 +96,24 @@ Writer::processUnitDefinitions(Ast::Model &model, std::ostream &output)
   std::stringstream temp;
 
   // Process default substance unit first:
-  temp.str(""); temp << std::endl << " substance = ";
-  processScaledUnit(model.getSubstanceUnit().asScaledBaseUnit(), temp);
+  temp.str(""); processUnitDefinition("substance", model.getSubstanceUnit(), temp);
   units.push_back(temp.str());
 
   // Process default volume unit:
-  temp.str(""); temp << std::endl << " volume = ";
-  processScaledUnit(model.getVolumeUnit().asScaledBaseUnit(), temp);
+  temp.str(""); processUnitDefinition("volume", model.getVolumeUnit(), temp);
   units.push_back(temp.str());
 
   // Process default area unit:
-  temp.str(""); temp << std::endl << " area = ";
-  processScaledUnit(model.getAreaUnit().asScaledBaseUnit(), temp);
+  temp.str(""); processUnitDefinition("area", model.getAreaUnit(), temp);
   units.push_back(temp.str());
 
   // Process default length unit:
-  temp.str(""); temp << std::endl << " length = ";
-  processScaledUnit(model.getLengthUnit().asScaledBaseUnit(), temp);
+  temp.str(""); processUnitDefinition("length", model.getLengthUnit(), temp);
   units.push_back(temp.str());
 
   // Process default time unit:
-  temp.str(""); temp << std::endl << " time = ";
-  processScaledUnit(model.getTimeUnit().asScaledBaseUnit(), temp);
+  temp.str(""); processUnitDefinition("time", model.getTimeUnit(), temp);
   units.push_back(temp.str());
-
-  /** @todo Check if unit export is needed. As far as I know, there is no way to specify
-   * the unit of a variable (Parameter) explicitly, hence there should be no need to
-   * define specialized units. */
 
   // Assemble unit definition section if there are some definitions:
   if (0 < units.size()) {
@@ -140,18 +131,24 @@ Writer::processUnitDefinition(const std::string &id, const Ast::Unit &unit, std:
   std::list<std::string> units;
   std::stringstream temp;
 
-  if ( (1 != unit.getMultiplier()) || (0 != unit.getScale())) {
-    processScaledUnit(Ast::ScaledBaseUnit(
-                        Ast::ScaledBaseUnit::DIMENSIONLESS, unit.getMultiplier(),
-                        unit.getScale(), 1),
-                      temp);
+  if (unit.isScaledBaseUnit()) {
+    // If the unit can be expressed in terms of a single scaled base unit -> write compact format
+    Ast::ScaledBaseUnit::BaseUnit bunit; double multiplier=1; int scale=0, exponent=1;
+    unit.asScaledBaseUnit(bunit, multiplier, scale, exponent);
+    processScaledUnit(bunit, multiplier, scale, exponent, temp);
     units.push_back(temp.str()); temp.str("");
-  }
-
-  // process scaled base unit of unit:
-  for (Ast::Unit::iterator it=unit.begin(); it != unit.end(); it++) {
-    processScaledUnit(Ast::ScaledBaseUnit(it->first, 1, 0, it->second), temp);
-    units.push_back(temp.str()); temp.str();
+  } else {
+    // If unit is formed in terms of a product of scaled base units:
+    if ( (1 != unit.getMultiplier()) || (0 != unit.getScale())) {
+      processScaledUnit(
+            Ast::ScaledBaseUnit::DIMENSIONLESS, unit.getMultiplier(), unit.getScale(), 1, temp);
+      units.push_back(temp.str()); temp.str("");
+    }
+    // process scaled base units of unit:
+    for (Ast::Unit::iterator it=unit.begin(); it != unit.end(); it++) {
+      processScaledUnit(it->first, 1, 0, it->second, temp);
+      units.push_back(temp.str()); temp.str();
+    }
   }
 
   // Serialize
@@ -166,20 +163,14 @@ Writer::processUnitDefinition(const std::string &id, const Ast::Unit &unit, std:
 }
 
 void
-Writer::processScaledUnit(const Ast::ScaledBaseUnit &unit, std::ostream &output)
+Writer::processScaledUnit(Ast::ScaledBaseUnit::BaseUnit unit, double multiplier, int scale, int exponent, std::ostream &output)
 {
   std::list<std::string> modifier; std::stringstream temp;
-  if (1 != unit.getMultiplier()) {
-    temp << "m=" << unit.getMultiplier(); modifier.push_back(temp.str()); temp.str("");
-  }
-  if (0 != unit.getScale()) {
-    temp << "s=" << unit.getScale(); modifier.push_back(temp.str()); temp.str("");
-  }
-  if (1 != unit.getExponent()) {
-    temp << "e=" << unit.getExponent(); modifier.push_back(temp.str()); temp.str("");
-  }
+  if (1 != multiplier) { temp << "m=" << multiplier; modifier.push_back(temp.str()); temp.str(""); }
+  if (0 != scale) { temp << "s=" << scale; modifier.push_back(temp.str()); temp.str(""); }
+  if (1 != exponent) { temp << "e=" << exponent; modifier.push_back(temp.str()); temp.str(""); }
 
-  output << Writer::getBaseUnitIdentifier(unit.getBaseUnit());
+  output << Writer::getBaseUnitIdentifier(unit);
   if (0 < modifier.size()) {
     output << ": ";
     std::list<std::string>::iterator item = modifier.begin();
