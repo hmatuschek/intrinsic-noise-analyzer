@@ -20,10 +20,8 @@ MatFile::MatFile()
 
 MatFile::~MatFile()
 {
-  for (std::list<MatFileElement *>::iterator element = _elements.begin(); element != _elements.end(); element++)
-  {
-    delete *element;
-  }
+  std::list<MatFileElement *>::iterator element = _elements.begin();
+  for (; element != _elements.end(); element++) { delete *element; }
 }
 
 
@@ -98,6 +96,9 @@ MatFileElement::storageSize() const {
 void
 MatFileElement::serialize(std::ostream &stream) const
 {
+  /*std::cerr << "Serialize Element t=" << _type << ": "
+            << this->dataSize() << "b ("
+            << this->storageSize() << "b)" << std::endl; */
   uint32_t type_field = uint32_t(_type);
   uint32_t length_field = uint32_t(this->dataSize());
   stream.write((char *)(&type_field), sizeof(uint32_t));
@@ -303,9 +304,8 @@ MatFileComplexElement::MatFileComplexElement(ArrayType type)
 
 MatFileComplexElement::~MatFileComplexElement()
 {
-  for (std::list<MatFileElement*>::iterator item=_subelements.begin(); item!=_subelements.end(); item++) {
-    delete *item;
-  }
+  std::list<MatFileElement*>::iterator item=_subelements.begin();
+  for (; item!=_subelements.end(); item++) { delete *item; }
 }
 
 void
@@ -315,11 +315,9 @@ MatFileComplexElement::add(MatFileElement *element) {
 
 size_t
 MatFileComplexElement::dataSize() const {
-  // Data size is sum of storafge sizes of all sub elements.
-  size_t s=0;
-  for (std::list<MatFileElement *>::const_iterator item=_subelements.begin(); item!=_subelements.end(); item++) {
-    s += (*item)->storageSize();
-  }
+  // Data size is sum of storage sizes of all sub elements.
+  std::list<MatFileElement *>::const_iterator item=_subelements.begin(); size_t s=0;
+  for (; item!=_subelements.end(); item++) { s += (*item)->storageSize(); }
   return s;
 }
 
@@ -328,11 +326,9 @@ MatFileComplexElement::serialize(std::ostream &stream) const
 {
   // Serialize generic header:
   MatFileElement::serialize(stream);
-
   // now serialize all sub-elements:
-  for (std::list<MatFileElement *>::const_iterator item=_subelements.begin(); item!=_subelements.end(); item++) {
-    (*item)->serialize(stream);
-  }
+  std::list<MatFileElement *>::const_iterator item=_subelements.begin();
+  for (; item!=_subelements.end(); item++) { (*item)->serialize(stream); }
 }
 
 

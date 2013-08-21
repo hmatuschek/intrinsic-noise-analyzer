@@ -112,8 +112,8 @@ void
 SSAResultWidget::saveData()
 {
   QString selectedFilter;
-  //QString filters = tr("Text Files (*.txt *.csv);;Matlab 5 Files (*.mat)";
-  QString filters = tr("Text Files (*.txt *.csv)");
+  QString filters = tr("Text Files (*.txt *.csv);;Matlab 5 Files (*.mat)");
+  //QString filters = tr("Text Files (*.txt *.csv)");
 
   QString filename = QFileDialog::getSaveFileName(
         this, tr("Save data as ..."), "", filters, &selectedFilter);

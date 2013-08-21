@@ -227,7 +227,7 @@ TokenProduction::parse(Lexer &lexer, ConcreteSyntaxTree &element)
   ConcreteSyntaxTree::asTokenNode(element, lexer.currentIndex());
 
   // Consume token...
-  lexer.setTerminal(_is_terminal);
+  if (_is_terminal) { lexer.setTerminal(true); }
   lexer.next();
 }
 
