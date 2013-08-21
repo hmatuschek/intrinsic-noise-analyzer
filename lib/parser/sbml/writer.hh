@@ -24,7 +24,7 @@ protected:
   /** Translates a single unit definition. */
   static void processUnitDefinition(const Ast::Unit &unit, LIBSBML_CPP_NAMESPACE_QUALIFIER UnitDefinition *sbml_unit_def);
   /** Translates a scaled BaseUnit. */
-  static void processUnit(Ast::ScaledBaseUnit::BaseUnit unit, double multiplier, int scale, int exponent,
+  static void processUnit(Ast::Unit::BaseUnit unit, double multiplier, int scale, int exponent,
                           LIBSBML_CPP_NAMESPACE_QUALIFIER UnitDefinition *sbml_unit_def);
   /** Translates the list of function definitions. */
   static void processFunctionDefinitions(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model);

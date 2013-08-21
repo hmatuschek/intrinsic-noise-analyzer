@@ -10,7 +10,7 @@ UnitConverter::Error::Error(const Error &other) : Exception(other) { }
 
 
 Unit
-UnitConverter::reduceToSI(ScaledBaseUnit::BaseUnit base_unit, int exponent)
+UnitConverter::reduceToSI(Unit::BaseUnit base_unit, int exponent)
 {
   // Default if it is already a base unit:
   Unit result = Unit(base_unit, 1, 0, exponent);
@@ -18,14 +18,14 @@ UnitConverter::reduceToSI(ScaledBaseUnit::BaseUnit base_unit, int exponent)
   /// @todo Perform much more conversion here!!!
 
   // Litre -> 10-3 m^3
-  if (ScaledBaseUnit::LITRE == base_unit) {
-    result = Unit(ScaledBaseUnit::METRE, 1, 0, 3*exponent);
+  if (Unit::LITRE == base_unit) {
+    result = Unit(Unit::METRE, 1, 0, 3*exponent);
     result = result * Unit::dimensionless(1, -3*exponent);
   }
 
   // Mole -> Item
-  if (ScaledBaseUnit::MOLE == base_unit) {
-    result = Unit(ScaledBaseUnit::ITEM, 6.02214129, 23, exponent);
+  if (Unit::MOLE == base_unit) {
+    result = Unit(Unit::ITEM, 6.02214129, 23, exponent);
   }
   return result;
 }

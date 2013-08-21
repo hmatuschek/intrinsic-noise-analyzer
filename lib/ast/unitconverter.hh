@@ -34,7 +34,7 @@ protected:
   /** Returns the conversion factor if a & b can reduce. */
   static Unit reduceToSI(const Unit &unit);
   /** Returns the conversion factor if a & b can reduce. */
-  static Unit reduceToSI(ScaledBaseUnit::BaseUnit base_unit, int exponent);
+  static Unit reduceToSI(Unit::BaseUnit base_unit, int exponent);
 };
 
 }

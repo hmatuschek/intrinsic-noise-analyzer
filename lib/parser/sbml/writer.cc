@@ -42,7 +42,7 @@ Writer::processUnitDefinitions(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIE
 
   // Set default substance unit
   sbml_unit = sbml_model->createUnitDefinition(); sbml_unit->setId("substance");
-  Ast::ScaledBaseUnit::BaseUnit unit; double multiplier; int scale; int exponent;
+  Ast::Unit::BaseUnit unit; double multiplier; int scale; int exponent;
   model.getSubstanceUnit().asScaledBaseUnit(unit, multiplier, scale, exponent);
   processUnit(unit, multiplier, scale, exponent, sbml_unit);
   // and default volume unit
@@ -69,7 +69,7 @@ Writer::processUnitDefinition(const Ast::Unit &unit, LIBSBML_CPP_NAMESPACE_QUALI
 {
   if ( (1 != unit.getMultiplier()) || (0 != unit.getScale()) ) {
     processUnit(
-          Ast::ScaledBaseUnit::DIMENSIONLESS, unit.getMultiplier(), unit.getScale(), 1, sbml_unit_def);
+          Ast::Unit::DIMENSIONLESS, unit.getMultiplier(), unit.getScale(), 1, sbml_unit_def);
   }
 
   for (Ast::Unit::iterator item=unit.begin(); item!=unit.end(); item++) {
@@ -79,112 +79,112 @@ Writer::processUnitDefinition(const Ast::Unit &unit, LIBSBML_CPP_NAMESPACE_QUALI
 
 
 void
-Writer::processUnit(Ast::ScaledBaseUnit::BaseUnit unit, double multiplier, int scale, int exponent,
+Writer::processUnit(Ast::Unit::BaseUnit unit, double multiplier, int scale, int exponent,
                     LIBSBML_CPP_NAMESPACE_QUALIFIER UnitDefinition *sbml_unit_def)
 {
   LIBSBML_CPP_NAMESPACE_QUALIFIER Unit *sbml_unit = sbml_unit_def->createUnit();
 
   switch(unit) {
-  case Ast::ScaledBaseUnit::AMPERE:
+  case Ast::Unit::AMPERE:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_AMPERE);
     break;
-  case Ast::ScaledBaseUnit::AVOGADRO:
+  case Ast::Unit::AVOGADRO:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_AVOGADRO);
     break;
-  case Ast::ScaledBaseUnit::BECQUEREL:
+  case Ast::Unit::BECQUEREL:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_BECQUEREL);
     break;
-  case Ast::ScaledBaseUnit::CANDELA:
+  case Ast::Unit::CANDELA:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_CANDELA);
     break;
-  case Ast::ScaledBaseUnit::CELSIUS:
+  case Ast::Unit::CELSIUS:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_CELSIUS);
     break;
-  case Ast::ScaledBaseUnit::COULOMB:
+  case Ast::Unit::COULOMB:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_COULOMB);
     break;
-  case Ast::ScaledBaseUnit::DIMENSIONLESS:
+  case Ast::Unit::DIMENSIONLESS:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_DIMENSIONLESS);
     break;
-  case Ast::ScaledBaseUnit::FARAD:
+  case Ast::Unit::FARAD:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_FARAD);
     break;
-  case Ast::ScaledBaseUnit::GRAM:
+  case Ast::Unit::GRAM:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_GRAM);
     break;
-  case Ast::ScaledBaseUnit::GRAY:
+  case Ast::Unit::GRAY:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_GRAY);
     break;
-  case Ast::ScaledBaseUnit::HENRY:
+  case Ast::Unit::HENRY:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_HENRY);
     break;
-  case Ast::ScaledBaseUnit::HERTZ:
+  case Ast::Unit::HERTZ:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_HERTZ);
     break;
-  case Ast::ScaledBaseUnit::ITEM:
+  case Ast::Unit::ITEM:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_ITEM);
     break;
-  case Ast::ScaledBaseUnit::JOULE:
+  case Ast::Unit::JOULE:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_JOULE);
     break;
-  case Ast::ScaledBaseUnit::KATAL:
+  case Ast::Unit::KATAL:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_KATAL);
     break;
-  case Ast::ScaledBaseUnit::KELVIN:
+  case Ast::Unit::KELVIN:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_KELVIN);
     break;
-  case Ast::ScaledBaseUnit::KILOGRAM:
+  case Ast::Unit::KILOGRAM:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_KILOGRAM);
     break;
-  case Ast::ScaledBaseUnit::LITRE:
+  case Ast::Unit::LITRE:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_LITRE);
     break;
-  case Ast::ScaledBaseUnit::LUMEN:
+  case Ast::Unit::LUMEN:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_LUMEN);
     break;
-  case Ast::ScaledBaseUnit::LUX:
+  case Ast::Unit::LUX:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_LUX);
     break;
-  case Ast::ScaledBaseUnit::METRE:
+  case Ast::Unit::METRE:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_METRE);
     break;
-  case Ast::ScaledBaseUnit::MOLE:
+  case Ast::Unit::MOLE:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_MOLE);
     break;
-  case Ast::ScaledBaseUnit::NEWTON:
+  case Ast::Unit::NEWTON:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_NEWTON);
     break;
-  case Ast::ScaledBaseUnit::OHM:
+  case Ast::Unit::OHM:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_OHM);
     break;
-  case Ast::ScaledBaseUnit::PASCAL:
+  case Ast::Unit::PASCAL:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_PASCAL);
     break;
-  case Ast::ScaledBaseUnit::RADIAN:
+  case Ast::Unit::RADIAN:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_RADIAN);
     break;
-  case Ast::ScaledBaseUnit::SECOND:
+  case Ast::Unit::SECOND:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_SECOND);
     break;
-  case Ast::ScaledBaseUnit::SIEMENS:
+  case Ast::Unit::SIEMENS:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_SIEMENS);
     break;
-  case Ast::ScaledBaseUnit::SIEVERT:
+  case Ast::Unit::SIEVERT:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_SIEVERT);
     break;
-  case Ast::ScaledBaseUnit::STERADIAN:
+  case Ast::Unit::STERADIAN:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_STERADIAN);
     break;
-  case Ast::ScaledBaseUnit::TESLA:
+  case Ast::Unit::TESLA:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_TESLA);
     break;
-  case Ast::ScaledBaseUnit::VOLT:
+  case Ast::Unit::VOLT:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_VOLT);
     break;
-  case Ast::ScaledBaseUnit::WATT:
+  case Ast::Unit::WATT:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_WATT);
     break;
-  case Ast::ScaledBaseUnit::WEBER:
+  case Ast::Unit::WEBER:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_WEBER);
     break;
   }

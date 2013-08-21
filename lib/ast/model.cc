@@ -18,11 +18,11 @@ Ast::Model::Model(const std::string &identifier, const std::string &name)
 {
   INA_ASSERT_IDENTIFIER(_identifier);
   // Define default units:
-  _substance_unit = Unit(ScaledBaseUnit::MOLE, 1, 0, 1);
-  _volume_unit    = Unit(ScaledBaseUnit::LITRE, 1, 0, 1);
-  _area_unit      = Unit(ScaledBaseUnit::METRE, 1, 0, 2);
-  _length_unit    = Unit(ScaledBaseUnit::METRE, 1, 0, 1);
-  _time_unit      = Unit(ScaledBaseUnit::SECOND, 1, 0, 1);
+  _substance_unit = Unit(Unit::MOLE, 1, 0, 1);
+  _volume_unit    = Unit(Unit::LITRE, 1, 0, 1);
+  _area_unit      = Unit(Unit::METRE, 1, 0, 2);
+  _length_unit    = Unit(Unit::METRE, 1, 0, 1);
+  _time_unit      = Unit(Unit::SECOND, 1, 0, 1);
 }
 
 
@@ -152,12 +152,12 @@ Model::setSubstanceUnit(const Unit &unit, bool scale_model)
   Unit scale = old_unit/unit; double factor;
   if (scale.isDimensionless()) {
     factor = scale.getMultiplier(); factor *= std::pow(10., scale.getScale());
-  } else if (2 == scale.size() && scale.hasVariantOf(ScaledBaseUnit::MOLE, 1) &&
-             scale.hasVariantOf(ScaledBaseUnit::ITEM, -1)) {
+  } else if (2 == scale.size() && scale.hasVariantOf(Unit::MOLE, 1) &&
+             scale.hasVariantOf(Unit::ITEM, -1)) {
     factor = scale.getMultiplier(); factor *= std::pow(10., scale.getScale());
     factor *= constants::AVOGADRO;
-  } else if (2 == scale.size() && scale.hasVariantOf(ScaledBaseUnit::MOLE, -1) &&
-             scale.hasVariantOf(ScaledBaseUnit::ITEM, 1)) {
+  } else if (2 == scale.size() && scale.hasVariantOf(Unit::MOLE, -1) &&
+             scale.hasVariantOf(Unit::ITEM, 1)) {
     factor = scale.getMultiplier(); factor *= std::pow(10., scale.getScale());
     factor /= constants::AVOGADRO;
   } else {

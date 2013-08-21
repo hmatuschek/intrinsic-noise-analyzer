@@ -105,7 +105,7 @@ protected:
   Ast::Model &_model;
 
   /** Maps the name of a base unit to the Ast::ScaledBaseUnit::BaseUnit enum. */
-  std::map<std::string, Ast::ScaledBaseUnit::BaseUnit> _base_unit_map;
+  std::map<std::string, Ast::Unit::BaseUnit> _base_unit_map;
 
   /** Maps a unit identifier to a unit. */
   std::map<std::string, Ast::Unit> _units;

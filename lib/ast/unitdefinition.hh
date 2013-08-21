@@ -9,11 +9,15 @@ namespace iNA {
 namespace Ast {
 
 
-/** Elementary transformation (mostly scaling) of a base unit.
- * @deprecated This class will be removed in favor of the @c Ast::Unit class which represents units
- *             in a more algebraic way.
+/** Represents an unit, composed as a product of scaled base-units (@c Unit::BaseUnit) i.e.
+ * \f[
+ *  U = m\cdot 10^s\cdot \prod_i^ N u_i^{e_i}\,,
+ * \f]
+ * where @c m and @c s represent the common multiplier and scale and \f$u_i\f$, \f$e_i\f$ represents
+ * the \f$N\f$ pairs of @c BaseUnit and exponent that from the unit \f$U\f$. A dimensionless unit is
+ * defined with \f$N=0\f$.
  * @ingroup ast */
-class ScaledBaseUnit
+class Unit
 {
 public:
   /** This enum holds all pre-defined base-units defined by SBML. */
@@ -55,132 +59,23 @@ public:
     WEBER                 ///< The weber unit.
   } BaseUnit;
 
-
-protected:
-  /** Holds a weak reference to the unit. */
-  BaseUnit unit;
-  /** Holds the multiplier of unit. */
-  double multiplier;
-  /** Holds the scale of the unit. */
-  int scale;
-  /** Holds the exponent of the unit. */
-  int exponent;
-
-
-public:
-  /** Default constructor, equivalent to call: ScaledBaseUnit(DIMENSIONLESS, 1, 0, 1). */
-  ScaledBaseUnit();
-
-  /** Constructs a unit from a base-unit and scaling as
-   * \f[ u = \left(multiplier\cdot 10^{scale}\cdot u_b\right)^{exponent} \f] */
-  ScaledBaseUnit(BaseUnit unit, double multiplier, int scale, int exponent);
-
-  /** Trivial constructor from base unit, equivalent to ScaledBaseUnit(unit, 1, 0, 1). */
-  explicit ScaledBaseUnit(BaseUnit unit);
-
-  /** Copy constructor. */
-  ScaledBaseUnit(const ScaledBaseUnit &other);
-
-  /** Implements the assignment operator for scaled units. */
-  const ScaledBaseUnit &operator =(const ScaledBaseUnit &other);
-
-  /** Returns the multiplier of unit. */
-  double getMultiplier() const;
-
-  /** Returns the scale of unit. */
-  int getScale() const;
-
-  /** Retunrs the exponent. */
-  int getExponent() const;
-
-  /** Returns the base-unit. */
-  ScaledBaseUnit::BaseUnit getBaseUnit() const;
-
-  /** Aka. is exponent == 1? Means if the unit is a linear scaling of a base unit. */
-  bool isLinScaling() const;
-
-  /** Returns true, if the ScaledUnit is a proper unit for substances.
-   * I.e., if the unit is a linear scaling of either: @c ScaledUnit::MOLE, @c ScaledUnit::ITEM,
-   * @c ScaledUnit::GRAM, @c ScaledUnit::KILOGRAM or @c ScaledUnit::DIMENSIONLESS. */
-  bool isSubstanceUnit() const;
-
-  /** Returns true, if the ScaledUnit is a proper unit for volumes.
-   * I.e. if the unit is a linear scaling of @c ScaledUnit::LITRE or @c ScaledUnit::DIMENSIONLESS
-   * or if it is a qubic scaling of @c ScaledUnit::METRE. */
-  bool isVolumeUnit() const;
-
-  /** Returns true, if the ScaledUnit is a proper unit for areas.
-   * I.e., if the unit is a linear scaling of @c ScaledUnit::DIMENSIONLESS or a quadratic scaling
-   * of @c ScaledUnit::METRE. */
-  bool isAreaUnit() const;
-
-  /** Returns true, if the ScaledUnit is a proper unit for length.
-   * i.e. if the unit is a linear scaling of @c ScaledUnit::METRE or
-   * @c ScaledUnit::DIMENSIONLESS. */
-  bool isLengthUnit() const;
-
-  /** Returns true, if the ScaledUnit is a proper unit of for time.
-   * I.e. if the unit is a linear scaling of @c ScaledUnit::TIME or @c ScaledUnit::DIMENSIONLESS. */
-  bool isTimeUnit() const;
-
-  /** Dums a string representation of the unit into the given stream. */
-  void dump(std::ostream &str) const;
-
-
-public:
-  /** Helper function to get a short string representation of a base-unit. */
-  static std::string baseUnitRepr(ScaledBaseUnit::BaseUnit base);
-  /** Helper function to get the name of the base-unit as defined by SBML. */
-  static std::string baseUnitName(ScaledBaseUnit::BaseUnit base);
-  /** Helper function to get a base-unit by its name as defined by SBML. */
-  static ScaledBaseUnit::BaseUnit baseUnitByName(const std::string &name);
-  /** Returns true if the given name names a base unit. */
-  static bool isBaseUnitName(const std::string &name);
-
-private:
-  /** Static unit->name table. */
-  static std::map<ScaledBaseUnit::BaseUnit, std::string> _unit_to_name;
-  /** Static name->unit table. */
-  static std::map<std::string, ScaledBaseUnit::BaseUnit> _name_to_unit;
-};
-
-
-
-
-/** Represents an unit, composed as a product of scaled base-units (@c ScaledBaseUnit). *
- * @ingroup ast */
-class Unit
-{
-public:
   /** Iterator over scaled base units of the unit. */
-  typedef std::map<ScaledBaseUnit::BaseUnit, int>::const_iterator iterator;
-
-  /** Redefine base units here. */
-  typedef ScaledBaseUnit::BaseUnit BaseUnit;
-
-protected:
-  /** The common multiplier of all scaled base-units. */
-  double _common_multiplier;
-  /** The common scale of all scaled base-units. */
-  double _common_scale;
-  /** This list represents the product of scaled base-units, that build the actual unit. */
-  std::map<ScaledBaseUnit::BaseUnit, int> _units;
+  typedef std::map<Unit::BaseUnit, int>::const_iterator iterator;
 
 
 protected:
   /** Hidden constructor. Avoids direct instantiation. */
-  Unit(const std::map<ScaledBaseUnit::BaseUnit, int> &_units,
+  Unit(const std::map<Unit::BaseUnit, int> &_units,
        double common_multiplier, int common_scale);
 
 public:
   /** Default constructor (dimensionless). */
   Unit();
-  /** Constructs a unit. */
-  Unit(const std::list<ScaledBaseUnit> &units);
-  /** Constructs a simple unit as a scaled variant of a base-unit. */
-  Unit(const ScaledBaseUnit &base);
-  /** Constructs a unit from the given base-unit. */
-  Unit(ScaledBaseUnit::BaseUnit unit, double multiplier=1.0, int scale=0, int exponent=1);
+  /** Constructs a unit from the given base-unit of the form \f$ U = (m\cdot 10^s\cdot u)^ e\f$,
+   * where @c m represents the given multiplier, @c s the scale @c u the base unit and @c e the
+   * exponent. Please note that this representation differs from the one used to represent the
+   * complete unit. */
+  Unit(Unit::BaseUnit unit, double multiplier=1.0, int scale=0, int exponent=1);
   /** Copy constructor. */
   Unit(const Unit &other);
 
@@ -211,9 +106,9 @@ public:
   /** Returns @c true if the unit is a scaled base unit. */
   bool isScaledBaseUnit() const;
   /** Returns true, if the unit is a scaled variant of the given base-unit with given exponent. */
-  bool isVariantOf(ScaledBaseUnit::BaseUnit baseUnit, int expo = 1.0) const;
+  bool isVariantOf(Unit::BaseUnit baseUnit, int expo = 1.0) const;
   /** Retunrs true, if the unit contains a variant of the given base-unit with given exponent. */
-  bool hasVariantOf(ScaledBaseUnit::BaseUnit baseUnit, int expo = 1.0) const;
+  bool hasVariantOf(Unit::BaseUnit baseUnit, int expo = 1.0) const;
   /** Returns true, if the unit is a linear scaled substance unit. */
   bool isSubstanceUnit() const;
   /** Returns true, if one of the unit-factors is a linear scaling of a substance unit. */
@@ -242,18 +137,40 @@ public:
   /** Returns the unit as a scaled base unit.
    * @note This method only returns a proper @c ScaledUnit instance if the unit consists of a
    * single scaled base unit. Otherwise it throws a @c InternalError exception. */
-  ScaledBaseUnit asScaledBaseUnit() const;
-  void asScaledBaseUnit(ScaledBaseUnit::BaseUnit &unit, double &multiplier, int &scale, int &exponent) const;
+  void asScaledBaseUnit(Unit::BaseUnit &unit, double &multiplier, int &scale, int &exponent) const;
 
   /** Iterator pointing to the first scaled base unit of the unit. */
   iterator begin() const;
   /** Iterator pointing right after the last scaled base unit of this unit. */
   iterator end() const;
 
-
 public:
   /** Constructs a dimensionless unit. */
   static Unit dimensionless(double multiplier=1.0, int scale=0);
+
+  /** Helper function to get a short string representation of a base-unit. */
+  static std::string baseUnitRepr(Unit::BaseUnit base);
+  /** Helper function to get the name of the base-unit as defined by SBML. */
+  static std::string baseUnitName(Unit::BaseUnit base);
+  /** Helper function to get a base-unit by its name as defined by SBML. */
+  static Unit::BaseUnit baseUnitByName(const std::string &name);
+  /** Returns true if the given name names a base unit. */
+  static bool isBaseUnitName(const std::string &name);
+
+protected:
+  /** The common multiplier of all scaled base-units. */
+  double _common_multiplier;
+  /** The common scale of all scaled base-units. */
+  double _common_scale;
+  /** This list represents the product of scaled base-units, that build the actual unit. */
+  std::map<Unit::BaseUnit, int> _units;
+
+private:
+  /** Static unit->name table. */
+  static std::map<Unit::BaseUnit, std::string> _unit_to_name;
+  /** Static name->unit table. */
+  static std::map<std::string, Unit::BaseUnit> _name_to_unit;
+
 };
 
 

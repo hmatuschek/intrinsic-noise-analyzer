@@ -45,43 +45,43 @@ Writer::processModelHeader(Ast::Model &model, std::ostream &output)
 
 /* Translates a Ast::ScaledBaseUnit::BaseUnit into its string identifier. */
 std::string
-Writer::getBaseUnitIdentifier(Ast::ScaledBaseUnit::BaseUnit unit)
+Writer::getBaseUnitIdentifier(Ast::Unit::BaseUnit unit)
 {
   switch (unit) {
-  case Ast::ScaledBaseUnit::AMPERE: return "ampere";
-  case Ast::ScaledBaseUnit::AVOGADRO: return "avogadro";
-  case Ast::ScaledBaseUnit::BECQUEREL: return "becquerel";
-  case Ast::ScaledBaseUnit::CANDELA: return "candela";
-  case Ast::ScaledBaseUnit::CELSIUS: return "celsius";
-  case Ast::ScaledBaseUnit::COULOMB: return "coulomb";
-  case Ast::ScaledBaseUnit::DIMENSIONLESS: return "dimensionless";
-  case Ast::ScaledBaseUnit::FARAD: return "farad";
-  case Ast::ScaledBaseUnit::GRAM: return "gram";
-  case Ast::ScaledBaseUnit::GRAY: return "gray";
-  case Ast::ScaledBaseUnit::HENRY: return "henry";
-  case Ast::ScaledBaseUnit::HERTZ: return "herz";
-  case Ast::ScaledBaseUnit::ITEM: return "item";
-  case Ast::ScaledBaseUnit::JOULE: return "joule";
-  case Ast::ScaledBaseUnit::KATAL: return "katal";
-  case Ast::ScaledBaseUnit::KELVIN: return "kelvin";
-  case Ast::ScaledBaseUnit::KILOGRAM: return "kilogram";
-  case Ast::ScaledBaseUnit::LITRE: return "litre";
-  case Ast::ScaledBaseUnit::LUMEN: return "lumen";
-  case Ast::ScaledBaseUnit::LUX: return "lux";
-  case Ast::ScaledBaseUnit::METRE: return "metre";
-  case Ast::ScaledBaseUnit::MOLE: return "mole";
-  case Ast::ScaledBaseUnit::NEWTON: return "newton";
-  case Ast::ScaledBaseUnit::OHM: return "ohm";
-  case Ast::ScaledBaseUnit::PASCAL: return "pascal";
-  case Ast::ScaledBaseUnit::RADIAN: return "radian";
-  case Ast::ScaledBaseUnit::SECOND: return "second";
-  case Ast::ScaledBaseUnit::SIEMENS: return "siemens";
-  case Ast::ScaledBaseUnit::SIEVERT: return "sievert";
-  case Ast::ScaledBaseUnit::STERADIAN: return "sterdian";
-  case Ast::ScaledBaseUnit::TESLA: return "tesla";
-  case Ast::ScaledBaseUnit::VOLT: return "volt";
-  case Ast::ScaledBaseUnit::WATT: return "watt";
-  case Ast::ScaledBaseUnit::WEBER: return "weber";
+  case Ast::Unit::AMPERE: return "ampere";
+  case Ast::Unit::AVOGADRO: return "avogadro";
+  case Ast::Unit::BECQUEREL: return "becquerel";
+  case Ast::Unit::CANDELA: return "candela";
+  case Ast::Unit::CELSIUS: return "celsius";
+  case Ast::Unit::COULOMB: return "coulomb";
+  case Ast::Unit::DIMENSIONLESS: return "dimensionless";
+  case Ast::Unit::FARAD: return "farad";
+  case Ast::Unit::GRAM: return "gram";
+  case Ast::Unit::GRAY: return "gray";
+  case Ast::Unit::HENRY: return "henry";
+  case Ast::Unit::HERTZ: return "herz";
+  case Ast::Unit::ITEM: return "item";
+  case Ast::Unit::JOULE: return "joule";
+  case Ast::Unit::KATAL: return "katal";
+  case Ast::Unit::KELVIN: return "kelvin";
+  case Ast::Unit::KILOGRAM: return "kilogram";
+  case Ast::Unit::LITRE: return "litre";
+  case Ast::Unit::LUMEN: return "lumen";
+  case Ast::Unit::LUX: return "lux";
+  case Ast::Unit::METRE: return "metre";
+  case Ast::Unit::MOLE: return "mole";
+  case Ast::Unit::NEWTON: return "newton";
+  case Ast::Unit::OHM: return "ohm";
+  case Ast::Unit::PASCAL: return "pascal";
+  case Ast::Unit::RADIAN: return "radian";
+  case Ast::Unit::SECOND: return "second";
+  case Ast::Unit::SIEMENS: return "siemens";
+  case Ast::Unit::SIEVERT: return "sievert";
+  case Ast::Unit::STERADIAN: return "sterdian";
+  case Ast::Unit::TESLA: return "tesla";
+  case Ast::Unit::VOLT: return "volt";
+  case Ast::Unit::WATT: return "watt";
+  case Ast::Unit::WEBER: return "weber";
   }
 
   return "dimensionless";
@@ -133,7 +133,7 @@ Writer::processUnitDefinition(const std::string &id, const Ast::Unit &unit, std:
 
   if (unit.isScaledBaseUnit()) {
     // If the unit can be expressed in terms of a single scaled base unit -> write compact format
-    Ast::ScaledBaseUnit::BaseUnit bunit; double multiplier=1; int scale=0, exponent=1;
+    Ast::Unit::BaseUnit bunit; double multiplier=1; int scale=0, exponent=1;
     unit.asScaledBaseUnit(bunit, multiplier, scale, exponent);
     processScaledUnit(bunit, multiplier, scale, exponent, temp);
     units.push_back(temp.str()); temp.str("");
@@ -141,7 +141,7 @@ Writer::processUnitDefinition(const std::string &id, const Ast::Unit &unit, std:
     // If unit is formed in terms of a product of scaled base units:
     if ( (1 != unit.getMultiplier()) || (0 != unit.getScale())) {
       processScaledUnit(
-            Ast::ScaledBaseUnit::DIMENSIONLESS, unit.getMultiplier(), unit.getScale(), 1, temp);
+            Ast::Unit::DIMENSIONLESS, unit.getMultiplier(), unit.getScale(), 1, temp);
       units.push_back(temp.str()); temp.str("");
     }
     // process scaled base units of unit:
@@ -163,7 +163,7 @@ Writer::processUnitDefinition(const std::string &id, const Ast::Unit &unit, std:
 }
 
 void
-Writer::processScaledUnit(Ast::ScaledBaseUnit::BaseUnit unit, double multiplier, int scale, int exponent, std::ostream &output)
+Writer::processScaledUnit(Ast::Unit::BaseUnit unit, double multiplier, int scale, int exponent, std::ostream &output)
 {
   std::list<std::string> modifier; std::stringstream temp;
   if (1 != multiplier) { temp << "m=" << multiplier; modifier.push_back(temp.str()); temp.str(""); }
