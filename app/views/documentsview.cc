@@ -154,12 +154,12 @@ void
 DocumentsView::onItemAutoView(const QModelIndex &item) {
   // Check if item is valid
   if (! item.isValid()) { return; }
-  qDebug() << "Select item: " << item;
   // Expand item
   expand(item);
   // Make it visible in TreeView
   scrollTo(item);
   // Select item...
   QItemSelectionModel *selection = selectionModel();
+  // Clear current selection and set new one.
   selection->select(item, QItemSelectionModel::Clear | QItemSelectionModel::SelectCurrent);
 }
