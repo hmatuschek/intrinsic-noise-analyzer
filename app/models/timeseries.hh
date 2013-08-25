@@ -9,7 +9,7 @@
 #include <QMutexLocker>
 #include <QFile>
 
-#include <eigen3/Eigen/Eigen>
+#include <ginacsupportforeigen.hh>
 
 /**
  * Represents a table of data (ie. a time-series) of some covariates.
