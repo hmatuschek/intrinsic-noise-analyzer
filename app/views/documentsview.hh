@@ -26,6 +26,9 @@ protected slots:
   /** Handles a context-menu event. */
   void conextMenuRequested(const QPoint &pos);
 
+  /** Gets called whenever an item requests to be selected (and visible) */
+  void onItemAutoView(const QModelIndex &item);
+
 protected:
   /** Implements the DragEnter event handler. */
   virtual void dragEnterEvent(QDragEnterEvent *event);

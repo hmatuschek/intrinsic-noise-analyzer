@@ -7,6 +7,7 @@
 #include <QDragEnterEvent>
 #include <QDropEvent>
 #include <QFileInfo>
+#include <QDebug>
 #include "downloaddialog.hh"
 
 
@@ -19,6 +20,8 @@ DocumentsView::DocumentsView(QWidget *parent)
 {
   // The QAbstractItemModel holding all the data is the application singleton:
   this->setModel(Application::getApp()->docTree());
+  this->setSelectionMode(QAbstractItemView::SingleSelection);
+  this->setSelectionBehavior(QAbstractItemView::SelectItems);
 
   // Enable context menus:
   this->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -27,6 +30,10 @@ DocumentsView::DocumentsView(QWidget *parent)
 
   // Enable drop events:
   setAcceptDrops(true);
+
+  // Handles auto-view events
+  QObject::connect(Application::getApp()->docTree(), SIGNAL(autoView(QModelIndex)),
+                   this, SLOT(onItemAutoView(QModelIndex)));
 }
 
 
@@ -54,11 +61,9 @@ DocumentsView::conextMenuRequested(const QPoint &pos)
 {
   // Get model index:
   QModelIndex index = this->indexAt(pos);
-
   if (! index.isValid()) {
     return;
   }
-
   Application::getApp()->showContextMenuAt(index, this->mapToGlobal(pos));
 }
 
@@ -92,21 +97,18 @@ DocumentsView::dragEnterEvent(QDragEnterEvent *event)
 
 
 void
-DocumentsView::dragMoveEvent(QDragMoveEvent *event)
-{
+DocumentsView::dragMoveEvent(QDragMoveEvent *event) {
   event->acceptProposedAction();
 }
 
 void
-DocumentsView::dragLeaveEvent(QDragLeaveEvent *event)
-{
+DocumentsView::dragLeaveEvent(QDragLeaveEvent *event) {
   event->accept();
 }
 
 
 void
-DocumentsView::dropEvent(QDropEvent *event)
-{
+DocumentsView::dropEvent(QDropEvent *event) {
   // Check action
   if (0 == (event->possibleActions() & Qt::CopyAction)) { return; }
 
@@ -145,4 +147,19 @@ DocumentsView::dropEvent(QDropEvent *event)
   if (("xml"==info.suffix()) || ("sbml"==info.suffix())) { type = Application::FORMAT_SBML; }
   else if (("mod"==info.suffix()) || ("sbmlsh"==info.suffix())) { type=Application::FORMAT_SBMLsh; }
   Application::getApp()->importModel(local_file, true, type);
+}
+
+
+void
+DocumentsView::onItemAutoView(const QModelIndex &item) {
+  // Check if item is valid
+  if (! item.isValid()) { return; }
+  qDebug() << "Select item: " << item;
+  // Expand item
+  expand(item);
+  // Make it visible in TreeView
+  scrollTo(item);
+  // Select item...
+  QItemSelectionModel *selection = selectionModel();
+  selection->select(item, QItemSelectionModel::Clear | QItemSelectionModel::SelectCurrent);
 }
