@@ -41,7 +41,9 @@ DocumentTree::addTask(DocumentItem *document, TaskItem *task) {
   beginInsertRows(analyses_index, num_analyses, num_analyses);
   document->addTask(task);
   endInsertRows();
-  Application::getApp()->itemSelected(task);
+  // Signal view to make item visible and select it
+  //  this will show the item in the main panel automatically
+  emit autoView(getIndexOf(task));
 }
 
 
@@ -53,8 +55,6 @@ DocumentTree::addPlot(TaskItem *task, PlotItem *plot) {
   beginInsertRows(task_index, num_plots, num_plots);
   task->addPlot(plot);
   endInsertRows();
-  // Uncomment for auto-show...
-  //Application::getApp()->itemSelected(plot);
 }
 
 void

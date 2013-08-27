@@ -216,7 +216,7 @@ Application::itemSelected(const QModelIndex &index)
   TreeItem *item = static_cast<TreeItem *>(index.internalPointer());
   DocumentTreeItem *wrapper = 0;
 
-  // This should no happen, anyway...
+  // This should not happen, anyway...
   if (0 == (wrapper = dynamic_cast<DocumentTreeItem *>(item))) { return; }
   itemSelected(wrapper);
 }

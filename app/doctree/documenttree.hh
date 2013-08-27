@@ -59,6 +59,11 @@ public:
 
   virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
+signals:
+  /** Gets emitted if an item gets activated automatically, i.e. a Task is added to the
+   * doctree. In this case its item gets activated automatically and the view should
+   * react on that event by selecing that activated item. */
+  void autoView(const QModelIndex &item);
 
 private:
   void removeItem(TreeItem *item);
