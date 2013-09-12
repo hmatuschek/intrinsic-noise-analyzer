@@ -32,7 +32,7 @@ SET(libina_ast_HEADERS
 
 SET(libina_trafo_SOURCES
     trafo/assertions.cc trafo/substitution.cc trafo/constantfolder.cc
-    trafo/assignmentruleinliner.cc
+    trafo/assignmentruleinliner.cc trafo/exprverification.cc
     trafo/reversiblereactionconverter.cc trafo/variablescaling.cc
     trafo/consistencycheck.cc trafo/modeldiff.cc trafo/referencecounter.cc trafo/makeparamglobal.cc)
 SET(libina_trafo_HEADERS trafo/trafo.hh trafo/filterflags.hh
