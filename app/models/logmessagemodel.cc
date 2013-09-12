@@ -66,9 +66,10 @@ LogWindowMessageHandler::LogWindowMessageHandler()
 }
 
 void
-LogWindowMessageHandler::handleMessage(const iNA::Utils::Message &message)
-{
-  emit newMessage(new MessageWrapper(message));
+LogWindowMessageHandler::handleMessage(const iNA::Utils::Message &message) {
+  MessageWrapper *wrapper = new MessageWrapper(message);
+  emit newMessage(wrapper);
+  wrapper->deleteLater();
 }
 
 

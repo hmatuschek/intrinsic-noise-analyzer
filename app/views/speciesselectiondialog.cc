@@ -24,7 +24,7 @@ SpeciesSelectionWidget::SpeciesSelectionWidget(Ast::Model *model, QWidget *paren
 
   // Widgets
   QPushButton *select_button = new QPushButton(tr("Select"));
-  QMenu *menu = new QMenu();
+  QMenu *menu = new QMenu(select_button);
   menu->addAction(tr("Select all species"), _model, SLOT(selectAllSpecies()));
   menu->addAction(tr("Select no species"), _model, SLOT(selectNoSpecies()));
   menu->addAction(tr("Invert selection"), _model, SLOT(invertSelection()));

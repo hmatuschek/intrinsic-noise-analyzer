@@ -85,6 +85,12 @@ public:
       }
     }
 
+    virtual ~SSAparamScan() {
+      // Free simulators
+      for (size_t i=0; i<simulators.size(); i++) {
+        delete simulators[i];
+      }
+    }
 
     void run(double timestep)
     {      

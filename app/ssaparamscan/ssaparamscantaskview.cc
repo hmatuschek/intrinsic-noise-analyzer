@@ -205,7 +205,7 @@ SSAParamScanPreviewWidget::SSAParamScanPreviewWidget(SSAParamScanTaskWrapper *ta
   _plot_canvas->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
   // Button to select plot
   QPushButton *plot_type_button = new QPushButton(tr("Select plot type"));
-  QMenu *plot_menu = new QMenu();
+  QMenu *plot_menu = new QMenu(plot_type_button);
   plot_menu->addAction(tr("Concentrations"), this, SLOT(onConcentrationPlotSelected()));
   plot_menu->addAction(tr("Coefficient of variation"), this, SLOT(onCOVPlotSelected()));
   plot_menu->addAction(tr("Fano factor"), this, SLOT(onFanoPlotSelected()));

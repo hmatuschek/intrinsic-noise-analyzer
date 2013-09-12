@@ -57,7 +57,8 @@ createSSAParameterScanPlotConfig(const QStringList &selected_species, SSAParamSc
 Plot::Figure *
 createSSAParameterScanPlot(const QStringList &selected_species, SSAParamScanTask *task) {
   Plot::PlotConfig *config = createSSAParameterScanPlotConfig(selected_species, task);
-  return config->createFigure();
+  Plot::Figure *figure = config->createFigure(); delete config;
+  return figure;
 }
 
 
@@ -104,7 +105,8 @@ createSSAParameterScanCVPlotConfig(const QStringList &selected_species, SSAParam
 Plot::Figure *
 createSSAParameterScanCVPlot(const QStringList &selected_species, SSAParamScanTask *task) {
   Plot::PlotConfig *config = createSSAParameterScanCVPlotConfig(selected_species, task);
-  return config->createFigure();
+  Plot::Figure *figure = config->createFigure(); delete config;
+  return figure;
 }
 
 
@@ -182,5 +184,6 @@ createSSAParameterScanFanoPlotConfig(const QStringList &selected_species, SSAPar
 Plot::Figure *
 createSSAParameterScanFanoPlot(const QStringList &selected_species, SSAParamScanTask *task) {
   Plot::PlotConfig *config = createSSAParameterScanFanoPlotConfig(selected_species, task);
-  return config->createFigure();
+  Plot::Figure *figure = config->createFigure(); delete config;
+  return figure;
 }
