@@ -31,7 +31,9 @@ SSAParamScanTask::Config::setModelDocument(DocumentItem *document)
   ModelSelectionTaskConfig::setModelDocument(document);
 
   // Try to construct SSA model from SBML model associated with the selected document
-  new iNA::Models::OptimizedSSA(document->getModel(),1, 1024);
+  iNA::Models::OptimizedSSA *test_ssa
+      = new iNA::Models::OptimizedSSA(document->getModel(),1, 1024);
+  delete test_ssa;
 
   this->_model = &(document->getModel());
 

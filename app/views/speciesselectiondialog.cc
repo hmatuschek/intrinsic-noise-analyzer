@@ -20,7 +20,7 @@ SpeciesSelectionWidget::SpeciesSelectionWidget(Ast::Model *model, QWidget *paren
   : QWidget(parent)
 {
   // Create selection model
-  _model = new SpeciesSelectionModel(model);
+  _model = new SpeciesSelectionModel(model, this);
 
   // Widgets
   QPushButton *select_button = new QPushButton(tr("Select"));

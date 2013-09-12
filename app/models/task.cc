@@ -7,7 +7,8 @@
 
 
 Task::Task(QObject *parent)
-  : QThread(parent), _progress(0.0), _state(Task::INITIALIZED), _error_message()
+  : QThread(parent), _progress(0.0), _state(Task::INITIALIZED), _error_message(),
+    _start_time(0), _current_time(0)
 {
   // Connect signals:
   QObject::connect(this, SIGNAL(terminated()), this, SLOT(taskTerminated()));
