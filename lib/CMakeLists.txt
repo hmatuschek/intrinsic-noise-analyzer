@@ -37,7 +37,7 @@ SET(libina_trafo_SOURCES
     trafo/consistencycheck.cc trafo/modeldiff.cc trafo/referencecounter.cc trafo/makeparamglobal.cc)
 SET(libina_trafo_HEADERS trafo/trafo.hh trafo/filterflags.hh
     trafo/assertions.hh trafo/substitution.hh trafo/constantfolder.hh
-    trafo/assignmentruleinliner.hh
+    trafo/assignmentruleinliner.hh trafo/exprverification.hh
     trafo/reversiblereactionconverter.hh trafo/variablescaling.hh
     trafo/consistencycheck.hh trafo/modeldiff.hh trafo/referencecounter.hh trafo/makeparamglobal.hh)
 
