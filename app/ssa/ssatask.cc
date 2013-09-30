@@ -8,17 +8,16 @@ using namespace iNA;
  * ******************************************************************************************** */
 SSATaskConfig::SSATaskConfig()
   : GeneralTaskConfig(), ModelSelectionTaskConfig(),
-    EngineTaskConfig(), method(SSATaskConfig::DIRECT_SSA), ensemble_size(0), final_time(0),
-    steps(0), num_threads(0), simulator(0)
+    EngineTaskConfig(), _method(SSATaskConfig::DIRECT_SSA), _ensemble_size(0), _final_time(0),
+    _steps(0), _simulator(0)
 {
   // Pass...
 }
 
 SSATaskConfig::SSATaskConfig(const SSATaskConfig &other)
   : GeneralTaskConfig(), ModelSelectionTaskConfig(other),
-    EngineTaskConfig(other), method(other.method), ensemble_size(other.ensemble_size),
-    final_time(other.final_time), steps(other.steps), num_threads(other.num_threads),
-    simulator(other.simulator)
+    EngineTaskConfig(other), _method(other._method), _ensemble_size(other._ensemble_size),
+    _final_time(other._final_time), _steps(other._steps), _simulator(other._simulator)
 {
   // Pass...
 }
@@ -27,7 +26,7 @@ SSATaskConfig::SSATaskConfig(const SSATaskConfig &other)
 Models::StochasticSimulator *
 SSATaskConfig::getSimulator() const
 {
-  return simulator;
+  return _simulator;
 }
 
 
@@ -36,86 +35,73 @@ SSATaskConfig::setModelDocument(DocumentItem *document)
 {
   ModelSelectionTaskConfig::setModelDocument(document);
   // create copy of model:
-  model = new iNA::Ast::Model(getModelDocument()->getModel());
+  _model = new iNA::Ast::Model(getModelDocument()->getModel());
 }
 
 
 Ast::Model *
 SSATaskConfig::getModel() const
 {
-  return model;
+  return _model;
 }
 
 
 void
 SSATaskConfig::setSimulator(iNA::Models::StochasticSimulator *sim)
 {
-  simulator=sim;
+  _simulator=sim;
 }
 
 
 SSATaskConfig::SSAMethod
 SSATaskConfig::getMethod() const
 {
-  return method;
+  return _method;
 }
 
 void
 SSATaskConfig::setMethod(SSAMethod meth)
 {
-  method = meth;
+  _method = meth;
 }
 
 
 size_t
 SSATaskConfig::getEnsembleSize() const
 {
-  return ensemble_size;
+  return _ensemble_size;
 }
 
 void
 SSATaskConfig::setEnsembleSize(size_t size)
 {
-  ensemble_size = size;
+  _ensemble_size = size;
 }
 
 
 size_t
 SSATaskConfig::getSteps() const
 {
-  return steps;
+  return _steps;
 }
 
 void
 SSATaskConfig::setSteps(size_t steps)
 {
-  this->steps = steps;
+  this->_steps = steps;
 }
 
 
 double
 SSATaskConfig::getFinalTime() const
 {
-  return final_time;
+  return _final_time;
 }
 
 void
 SSATaskConfig::setFinalTime(double ftime)
 {
-  final_time = ftime;
-}
-
-
-size_t
-SSATaskConfig::getNumThreads() const
-{
-  return num_threads;
-}
-
-void
-SSATaskConfig::setNumThreads(size_t num)
-{
-  num_threads = num;
+  _final_time = ftime;
 }
 
 

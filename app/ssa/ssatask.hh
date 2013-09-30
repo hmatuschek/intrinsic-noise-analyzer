@@ -22,16 +22,6 @@ public:
   } SSAMethod;
 
 
-protected:
-  SSAMethod   method;
-  size_t      ensemble_size;
-  double      final_time;
-  size_t      steps;
-  size_t      num_threads;
-  iNA::Ast::Model *model;
-  iNA::Models::StochasticSimulator *simulator;
-
-
 public:
   /** Default constructor. */
   SSATaskConfig();
@@ -55,10 +45,16 @@ public:
   void setFinalTime(double ftime);
 
   size_t getSteps() const;
-  void setSteps(size_t steps);
+  void setSteps(size_t _steps);
 
-  size_t getNumThreads() const;
-  void setNumThreads(size_t num);
+
+protected:
+  SSAMethod   _method;
+  size_t      _ensemble_size;
+  double      _final_time;
+  size_t      _steps;
+  iNA::Ast::Model *_model;
+  iNA::Models::StochasticSimulator *_simulator;
 };
 
 

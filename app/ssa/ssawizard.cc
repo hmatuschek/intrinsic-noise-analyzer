@@ -146,7 +146,7 @@ SSAConfigPage::validatePage()
   config.setEnsembleSize(this->field("size").toUInt(&valid));
   config.setFinalTime(this->field("time").toDouble(&valid));
   config.setSteps(this->field("steps").toUInt(&valid));
-  config.setNumThreads(this->field("thread_count").toInt(&valid));
+  config.setNumEvalThreads(this->field("thread_count").toInt(&valid));
 
   return valid;
 }
@@ -214,7 +214,7 @@ SSASummaryPage::initializePage()
     break;
 
   }
-  this->thread_count->setText(QString("%1").arg(config.getNumThreads()));
+  this->thread_count->setText(QString("%1").arg(config.getNumEvalThreads()));
   size_t num_species = config.getModel()->numSpecies();
   int mem_usage = 8*config.getSteps()*(1 + num_species + (num_species*(1+num_species))/2);
   this->mem_usage->setText(QString("%1MB").arg(double(mem_usage)/(1024*1024)));
