@@ -1,4 +1,5 @@
 #include "logger.hh"
+#include <iostream>
 
 using namespace iNA::Utils;
 
@@ -112,8 +113,8 @@ Logger::shutdown()
 void
 Logger::log(const Message &message)
 {
-  for (std::list<MessageHandler *>::iterator it = this->_handlers.begin();
-       it != this->_handlers.end(); it++) {
+  std::list<MessageHandler *>::iterator it = this->_handlers.begin();
+  for (;it != this->_handlers.end(); it++) {
     (*it)->handleMessage(message);
   }
 }

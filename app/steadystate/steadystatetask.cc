@@ -144,7 +144,6 @@ SteadyStateTask::process()
    message << "Finished steady state analysis.";
    iNA::Utils::Logger::get().log(message);
   }
-
 }
 
 

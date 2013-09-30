@@ -69,7 +69,6 @@ void
 LogWindowMessageHandler::handleMessage(const iNA::Utils::Message &message) {
   MessageWrapper *wrapper = new MessageWrapper(message);
   emit newMessage(wrapper);
-  wrapper->deleteLater();
 }
 
 
@@ -163,6 +162,7 @@ LogMessageModel::onNewMessage(MessageWrapper *message) {
   beginInsertRows(QModelIndex(), row_idx, row_idx);
   _messages.append(message->message());
   endInsertRows();
+  message->deleteLater();
 }
 
 

@@ -7,6 +7,24 @@
 
 using namespace std;
 
+class DebugApplication: public QApplication
+{
+public:
+  DebugApplication(int &argc, char **argv)
+    : QApplication(argc, argv) { }
+
+  virtual bool notify(QObject *obj, QEvent *evt) {
+    try {
+      return QApplication::notify(obj, evt);
+    } catch (std::exception &err) {
+      std::cerr << "Caught exception: " << err.what()
+                << ". Exit..." << std::endl;
+      this->exit(-1);
+    }
+    return false;
+  }
+};
+
 
 int main(int argc, char *argv[])
 {
@@ -15,7 +33,8 @@ int main(int argc, char *argv[])
         new iNA::Utils::TextMessageHandler(std::cerr, iNA::Utils::Message::DEBUG));
 
   // Instantiate a QApplication
-  QApplication qapp(argc, argv);
+  //QApplication qapp(argc, argv);
+  DebugApplication qapp(argc, argv);
 
   // Instantiate our own application model, holds all the data of the running application
   Application *app = Application::getApp();
