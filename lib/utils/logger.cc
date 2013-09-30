@@ -86,7 +86,7 @@ Logger::~Logger()
   for(std::list<MessageHandler *>::iterator it = this->_handlers.begin();
       it != this->_handlers.end(); it++)
   {
-    //delete *it;
+    delete *it;
   }
 }
 

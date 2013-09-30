@@ -93,6 +93,8 @@ public:
  */
 class MessageHandler {
 public:
+  virtual ~MessageHandler() { }
+
   /** Needs to be implemented by actual message handlers to process a message. */
   virtual void handleMessage(const Message &message) = 0;
 };
@@ -114,7 +116,7 @@ public:
 
 public:
   /** Destructor. Also frees all message handlers. */
-  ~Logger();
+  virtual ~Logger();
   /** Returns the global logger instance. */
   static Logger &get();
   /** Destroys the global logger instance. */

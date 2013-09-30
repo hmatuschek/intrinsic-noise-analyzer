@@ -74,19 +74,19 @@ SteadyStateSpectrumConfigPage::SteadyStateSpectrumConfigPage(GeneralTaskWizard *
 
   this->n_iter = new QLineEdit(); this->n_iter->setText("100");
   this->n_iter->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
-  QIntValidator *n_iter_val = new QIntValidator(); n_iter_val->setBottom(1);
+  QIntValidator *n_iter_val = new QIntValidator(n_iter); n_iter_val->setBottom(1);
   this->n_iter->setValidator(n_iter_val);
   this->registerField("n_iter", this->n_iter);
 
   this->epsilon = new QLineEdit(); this->epsilon->setText("1e-9");
   this->epsilon->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
-  QDoubleValidator *epsilon_val = new QDoubleValidator(0); epsilon_val->setBottom(1);
+  QDoubleValidator *epsilon_val = new QDoubleValidator(epsilon); epsilon_val->setBottom(1);
   this->epsilon->setValidator(epsilon_val);
   this->registerField("epsilon", this->epsilon);
 
   t_max = new QLineEdit(); t_max->setText("1e9");
   t_max->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
-  QDoubleValidator *t_max_val = new QDoubleValidator(0); t_max_val->setBottom(0);
+  QDoubleValidator *t_max_val = new QDoubleValidator(t_max); t_max_val->setBottom(0);
   t_max->setValidator(t_max_val);
 
   this->n_iter->setToolTip("Maximum number of iterations used by the Newton-Rapson method.");

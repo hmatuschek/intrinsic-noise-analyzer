@@ -10,6 +10,7 @@
 #include "expressioneditor.hh"
 
 #include <ast/unitconverter.hh>
+#include <ast/identifier.hh>
 #include <parser/exception.hh>
 #include <utils/logger.hh>
 
@@ -765,8 +766,7 @@ ReactionEditorPage::_createReaction(const QString &name, QList<QPair<int, QStrin
   // Create unique identifier for reaction:
   // And remove all white spaces
   std::string identifier = name.simplified().replace(" ","").toStdString();
-
-  if (0 == identifier.length()) { identifier = "reaction"; }
+  if (! iNA::Ast::isValidId(identifier)) { identifier = "reaction"; }
   identifier = scope->getRootScope()->getNewIdentifier(identifier);
 
   // Create reaction and add to scope:
