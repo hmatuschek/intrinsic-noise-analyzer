@@ -164,7 +164,18 @@ public:
                 // Solve the deterministic equations
                 NLEsolve::Status status = this->solver.solve(x, this->max_time, this->min_time_step, parameterSets[j]);
 
-                if(!status) throw(iNA::NumericError());
+                // Throw exception on error
+                if (NLEsolve::Success != status) {
+                  iNA::NumericError err;
+                  err << "Error in steady state solver: ";
+                  switch (status) {
+                  case NLEsolve::MaxIterationsReached:
+                    err << "Maximum integration time reached."; break;
+                  default:
+                    err << "Unknown problem."; break;
+                  }
+                  throw err;
+                }
 
                 // Now calculate LNA
                 calcLNA(this->sseModel,x);
@@ -178,8 +189,12 @@ public:
             }
             catch (iNA::NumericError &err)
             {
-                // Generate a vector of nans the easy way
-                resultSet[j] = Eigen::VectorXd::Zero(this->sseModel.getDimension())/0.;
+              Utils::Message msg = LOG_MESSAGE(Utils::Message::ERROR);
+              msg << "Numeric error during parameter scan: " << err.what();
+              Utils::Logger::get().log(msg);
+
+              // Generate a vector of nans the easy way
+              resultSet[j] = Eigen::VectorXd::Zero(this->sseModel.getDimension())/0.;
             }
 
         }
