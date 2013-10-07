@@ -18,13 +18,19 @@
 
 
 
-/** This class collects symbols in the kinetic law expression of the reaction that are not defined
- * in the given scope. */
+/** This class collects all changes being made to the model or reaction, means all compartments
+ * species and reaction local parameters that are created along with a reaction. It also
+ * implements the @c iNA::Parser::Expr::ScopeContext interface, hence it can be used to
+ * resolve symbols in expressions. During parsing, the context collects and hence defines
+ * some symbols that are not defined in a present scope.
+ * If a new reaction is created, the root scope is the model. If an existing reaction is
+ * edited, the root scope is the kinetic law of the reaction being edited. This allows
+ * to resolve the reaction local parameters already defined. */
 class ReactionEditorContext : public iNA::Parser::Expr::ScopeContext
 {
 public:
   /** Constructor.
-   * @param root Defines the root scope of the context. All symbols that are not defined in this
+   * @param root Defines the scope of the context. All symbols that are not defined in this
    *        scope are collected. */
   ReactionEditorContext(iNA::Ast::Scope *root);
 
@@ -32,6 +38,7 @@ public:
   virtual GiNaC::symbol resolve(const std::string &identifier);
   /** Resolves the given symbol to the identifier of the variable. */
   virtual std::string identifier(GiNaC::symbol symbol);
+
   /** Returns the table (id -> symbol) of undefined symbols in the expression. */
   const std::map<std::string, GiNaC::symbol> &undefinedSymbols() const;
 
@@ -48,14 +55,15 @@ class ReactionEditor : public QWizard
   Q_OBJECT
 
 public:
-  /** Creates the reaction editor wizard, if reaction != 0, the reaction equation and propensity
-   * is taken from this reaction. */
+  /** Creates the reaction editor wizard. If @c reaction != 0, the reaction is edited, otherwise a
+   * new reaction is created. */
   explicit ReactionEditor(iNA::Ast::Model &model, iNA::Ast::Reaction *reaction=0, QWidget *parent=0);
 
   /** Returns a weak reference to the model instance. */
   iNA::Ast::Model &model();
 
-  /** Returns a weak reference to the defined reaction (or 0 if there is no reaction defined). */
+  /** Returns a weak reference to the defined reaction (or 0 if there is no reaction, means a
+   * new reaction is created). */
   iNA::Ast::Reaction *reaction();
 
   iNA::Ast::Scope *reactionScope();
@@ -70,7 +78,10 @@ public:
 private:
   /** A weak reference to the model. */
   iNA::Ast::Model &_model;
+  /** Holds a temporary overlay scope for species and compartments being created along with the
+   * reaction. */
   iNA::Ast::Scope *_current_reaction_scope;
+  /** Holds the reaction being edited. If 0, a new reaction is created. */
   iNA::Ast::Reaction *_current_reaction;
 };
 
@@ -82,8 +93,11 @@ class ReactionEditorPage : public QWizardPage
   Q_OBJECT
 
 protected:
+  /** Defines the possible types of kinetic laws. */
   typedef enum {
-    MASSACTION_SINGLE, MASSACTION_MULTI, USER_DEFINED
+    MASSACTION_SINGLE, ///< Single compartment mass action.
+    MASSACTION_MULTI,  ///< Multi compartment mass action.
+    USER_DEFINED       ///< User defined kinetic law.
   } KineticLawType;
 
 
@@ -94,7 +108,6 @@ public:
   /** Validates the stoichiometry/reaction equation and kinetic law. */
   virtual bool validatePage();
 
-
 protected:
   /** Returns the currently selected kinetic law type. */
   KineticLawType kineticLawType() const;
@@ -103,7 +116,8 @@ protected:
 
 
 private slots:
-  /** Implements the automatic update of the kinetic law. */
+  /** Implements the automatic update of the kinetic law. Get called if the type of the kinetic law
+   * is not user defined. */
   void _updateKineticLaw();
 
   /** Whenever the type of kinetic law changed. */
