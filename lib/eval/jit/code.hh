@@ -1,7 +1,7 @@
 #ifndef __INA_EVALUATE_LLVM_CODE_HH__
 #define __INA_EVALUATE_LLVM_CODE_HH__
 
-#include "libina/config.hh"
+#include "config.hh"
 #if INA_LLVM_VERSION_IS_33
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
