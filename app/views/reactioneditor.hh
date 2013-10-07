@@ -31,8 +31,8 @@ class ReactionEditorContext : public iNA::Parser::Expr::ScopeContext
 public:
   /** Constructor.
    * @param root Defines the scope of the context. All symbols that are not defined in this
-   *        scope are collected. */
-  ReactionEditorContext(iNA::Ast::Scope *root);
+   *        scope are collected as new (reaction local) parameters. */
+  ReactionEditorContext(iNA::Ast::Model *model, iNA::Ast::Scope *root=0);
 
   /** Resolves or creates a symbol for the given identifier. */
   virtual GiNaC::symbol resolve(const std::string &identifier);
@@ -40,11 +40,41 @@ public:
   virtual std::string identifier(GiNaC::symbol symbol);
 
   /** Returns the table (id -> symbol) of undefined symbols in the expression. */
-  const std::map<std::string, GiNaC::symbol> &undefinedSymbols() const;
+  const std::map<std::string, GiNaC::symbol> &undefinedParameters() const;
+
+  /** Returns @c true if the given ID is a symbol for a local parameter, species or compartment or
+   * if it is defined within the root scope. */
+  bool hasIdentifier(const std::string &id) const;
+
+  /** Returns the list of undefined species that need to be defined in the model. */
+  const std::map<std::string, GiNaC::symbol> &undefinedSpecies() const;
+
+  /** Returns the first compartment defined in the model or creates a new "dummy" symbol and
+   * ID for it. */
+  const GiNaC::symbol &compartmentSymbol() const;
+  const std::string &compartmentIdentifier() const;
+  bool compartmentIsUndefined() const;
+
+  /** Resets the context. All pre-defined species and parameters are removed. */
+  void reset();
 
 private:
-  /** Holds the list of undefined symbols during expression parsing. */
-  std::map<std::string, GiNaC::symbol> _undefined_symbols;
+  /** Holds a weak reference to the model. */
+  iNA::Ast::Model *_model;
+  /** Holds the list of undefined parameter symbols. */
+  std::map<std::string, GiNaC::symbol> _param_symbols;
+  /** Reverse lookup table for undefined parameter symbols. */
+  std::map<GiNaC::symbol, std::string, GiNaC::ex_is_less> _param_ids;
+  /** Hols the list of undefined species symbols. */
+  std::map<std::string, GiNaC::symbol> _species_symbols;
+  /** Hols the list of undefined species symbols. */
+  std::map<GiNaC::symbol, std::string, GiNaC::ex_is_less> _species_ids;
+  /** The symbol of the first compartment in the model or a dummy symbol for it. */
+  GiNaC::symbol _compartment_symbol;
+  /** The ID of the first compartment in the model or a dummy for it. */
+  std::string _compartment_id;
+  /** If true, the compartment symbol is a dummy. */
+  bool _compartment_undefined;
 };
 
 
@@ -66,10 +96,14 @@ public:
    * new reaction is created). */
   iNA::Ast::Reaction *reaction();
 
+  /** @deprecated Use ReactionEditorContext instead. */
   iNA::Ast::Scope *reactionScope();
 
+  ReactionEditorContext &context();
+
   /** REsets the current reaction scope. This scope holds the reaction definition
-   * as well as all newly created species for that scope. */
+   * as well as all newly created species for that scope.
+   * @deprecated Use ReactionEditorContext instead. */
   void setReactionScope(iNA::Ast::Scope *reaction_scope);
 
   /** Commits the reaction and species defined in the current reaction scope to the model. */
@@ -79,10 +113,12 @@ private:
   /** A weak reference to the model. */
   iNA::Ast::Model &_model;
   /** Holds a temporary overlay scope for species and compartments being created along with the
-   * reaction. */
+   * reaction.
+   * @deprecated Use ReactionEditorContext instead. */
   iNA::Ast::Scope *_current_reaction_scope;
   /** Holds the reaction being edited. If 0, a new reaction is created. */
   iNA::Ast::Reaction *_current_reaction;
+  ReactionEditorContext _context;
 };
 
 
@@ -142,8 +178,8 @@ private:
   bool _parseIdentifier(QString &text);
 
   /** Returns the set of compartments, the reaction takes place in.*/
-  std::set<iNA::Ast::Compartment *> _collectCompartments(QList< QPair<int, QString> > &reactants,
-                                                         QList< QPair<int, QString> > &products);
+  std::set<std::string> _collectCompartments(QList< QPair<int, QString> > &reactants,
+                                             QList< QPair<int, QString> > &products);
 
 
   /** Collect reactants and assemble stoichiometries */
@@ -213,6 +249,7 @@ private:
   QColor _error_background;
   /** Holds the identifier of the expression being edited. Is empty on new reaction. */
   iNA::Ast::Reaction *_current_reaction;
+  ReactionEditorContext &_context;
 };
 
 
@@ -229,6 +266,11 @@ public:
 
   /** Updates the reaction preview. */
   virtual void initializePage();
+
+protected:
+  MathItem *_layoutReactionPreview(QList< QPair<int, QString> > &reactants,
+                                   QList< QPair<int, QString> > &products,
+                                   const GiNaC::ex &kineticLaw, bool is_reversible);
 
 private:
   /** Holds the weak reference to the model. */

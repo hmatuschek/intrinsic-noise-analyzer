@@ -24,10 +24,6 @@ public:
 /** Implementes symbol resolution using @c iNA::Ast::Scope instances. */
 class ScopeContext : public Context
 {
-protected:
-  /** Holds the scope of the context to be used to resolve symbols. */
-  const Ast::Scope *_scope;
-
 public:
   /** Constructs an expression context using the given model as the global namespace/context. */
   ScopeContext(const Ast::Scope *model);
@@ -38,6 +34,11 @@ public:
 
   /** Resolves the given GiNaC symbol to its identifier. */
   virtual std::string identifier(GiNaC::symbol symbol) const;
+
+protected:
+  /** Holds the scope of the context to be used to resolve symbols. */
+  const Ast::Scope *_scope;
+
 };
 
 
@@ -52,10 +53,6 @@ typedef enum {
 /** A simple parser context mainly for testing. It holds a simple identifier->symbol table to
  * resolve symbol names. */
 class TableContext : public Context {
-protected:
-  /** Holds the identifier -> symbol table. */
-  std::map<std::string, GiNaC::symbol> _symbol_table;
-
 public:
   /** Constructor. */
   TableContext();
@@ -65,6 +62,10 @@ public:
   GiNaC::symbol resolve(const std::string &identifier);
   /** Resolves a symbol. */
   std::string identifier(GiNaC::symbol symbol) const;
+
+protected:
+  /** Holds the identifier -> symbol table. */
+  std::map<std::string, GiNaC::symbol> _symbol_table;
 };
 
 
