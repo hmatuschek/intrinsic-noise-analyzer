@@ -1104,6 +1104,10 @@ ReactionEditorSummaryPage::ReactionEditorSummaryPage(ReactionEditor *wizard)
   QFormLayout *species_layout = new QFormLayout();
   _created_species = new QLabel();
   species_layout->addRow(tr("Created species"), _created_species);
+  _created_compartments = new QLabel();
+  species_layout->addRow(tr("Created compartments"), _created_compartments);
+  _created_parameters = new QLabel();
+  species_layout->addRow(tr("Created parameters"), _created_parameters);
 
   // Assemble layout
   QVBoxLayout *layout = new QVBoxLayout();
@@ -1129,10 +1133,33 @@ ReactionEditorSummaryPage::initializePage()
     if (! iNA::Ast::Node::isSpecies(*item)) { continue; }
     created_species.append((*item)->getIdentifier().c_str());
   }
-
   if (0 == created_species.size()) {
     _created_species->setText(tr("<none>"));
   } else {
     _created_species->setText(created_species.join(", "));
+  }
+
+  // Assemble list of created compartments:
+  QStringList created_compartments;
+  for (iNA::Ast::Scope::iterator item=scope->begin(); item!=scope->end(); item++) {
+    if (! iNA::Ast::Node::isCompartment(*item)) { continue; }
+    created_compartments.append((*item)->getIdentifier().c_str());
+  }
+  if (0 == created_compartments.size()) {
+    _created_compartments->setText(tr("<none>"));
+  } else {
+    _created_compartments->setText(created_species.join(", "));
+  }
+
+  // Assemble list of created parameters:
+  QStringList created_parameters;
+  for (iNA::Ast::Scope::iterator item=scope->begin(); item!=scope->end(); item++) {
+    if (! iNA::Ast::Node::isParameter(*item)) { continue; }
+    created_parameters.append((*item)->getIdentifier().c_str());
+  }
+  if (0 == created_parameters.size()) {
+    _created_parameters->setText(tr("<none>"));
+  } else {
+    _created_parameters->setText(created_species.join(", "));
   }
 }

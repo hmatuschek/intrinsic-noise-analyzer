@@ -223,6 +223,11 @@ private:
   QLabel *_reaction_preview;
   /** Displays the species being created. */
   QLabel *_created_species;
+  /** Displays the compartments being created. */
+  QLabel *_created_compartments;
+  /** Displays the parameters being created. */
+  QLabel *_created_parameters;
+
 };
 
 
