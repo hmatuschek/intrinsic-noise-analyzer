@@ -84,6 +84,9 @@ ReactionEditorContext::undefinedParameters() const {
 GiNaC::symbol
 ReactionEditorContext::getOrCreateLocalParameter(const std::string &id) {
   if (0 != _param_symbols.count(id)) { return _param_symbols[id]; }
+  if (_scope->hasDefinition(id, true) && iNA::Ast::Node::isParameter(_scope->getDefinition(id))) {
+    return _scope->getVariable(id)->getSymbol();
+  }
   _param_symbols[id] = GiNaC::symbol(id);
   _param_ids[_param_symbols[id]] = id;
   return _param_symbols[id];
@@ -110,6 +113,7 @@ ReactionEditorContext::hasSpecies(const std::string &id) const {
 GiNaC::symbol
 ReactionEditorContext::getOrCreateSpecies(const std::string &id) {
   if (hasSpecies(id)) { return _species_symbols[id]; }
+  if (_model->hasSpecies(id)) { return _model->getSpecies(id)->getSymbol(); }
   _species_symbols[id] = GiNaC::symbol(id);
   _species_ids[_species_symbols[id]] = id;
   return _species_symbols[id];
