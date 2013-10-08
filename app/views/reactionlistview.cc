@@ -67,8 +67,74 @@ ReactionListView::onNewReaction()
   ReactionEditor editor(_reactions->getModel());
   if (QDialog::Rejected == editor.exec()) { return; }
 
-  // Add reaction and new species to the model
-  editor.commitReactionScope();
+  iNA::Ast::Compartment *compartment = 0;
+  GiNaC::exmap subst_table;
+  iNA::Ast::Model &model = _reactions->getModel();
+
+  // If a compartment needs to be created
+  if (editor.context().compartmentIsUndefined()) {
+    // Get an new unique ID for the compartment
+    compartment = new iNA::Ast::Compartment(editor.context().compartmentIdentifier(), 1,
+                                            iNA::Ast::Compartment::VOLUME);
+    subst_table[editor.context().compartmentSymbol()] = compartment->getSymbol();
+    model.addDefinition(compartment);
+  } else {
+    // Resolve compartment to be used to define new species in
+    if (! model.hasCompartment(editor.context().compartmentIdentifier())) {
+      QMessageBox::critical(0, tr("Can not create reaction"),
+                            tr("Internal error: Can not resolve compartment '%1' in model.").arg(
+                              editor.context().compartmentIdentifier().c_str()));
+      return;
+    }
+    compartment = model.getCompartment(editor.context().compartmentIdentifier());
+  }
+
+  // Define undefined species
+  std::map<std::string, GiNaC::symbol>::const_iterator spec = editor.context().undefinedSpecies().begin();
+  for (; spec != editor.context().undefinedSpecies().end(); spec++) {
+    iNA::Ast::Species *species = new iNA::Ast::Species(spec->first, 0, compartment, "", false);
+    subst_table[spec->second] = species->getSymbol();
+    model.addDefinition(species);
+  }
+
+  // Assemble kinetic law
+  iNA::Ast::KineticLaw *law = new iNA::Ast::KineticLaw(0);
+  // define local parameters
+  std::map<std::string, GiNaC::symbol>::const_iterator para = editor.context().undefinedParameters().begin();
+  for (; para != editor.context().undefinedParameters().end(); para++) {
+    iNA::Ast::Parameter *parameter = new iNA::Ast::Parameter(
+          para->first, 1, iNA::Ast::Unit::dimensionless(), true);
+    subst_table[para->second] = parameter->getSymbol();
+    law->addDefinition(parameter);
+  }
+  // Set rate law (substituted)
+  law->setRateLaw(editor.kineticLaw().subs(subst_table));
+
+  // Obtain a new unique ID for reaction from reaction name
+  QString id_base = editor.reactionName(); id_base.replace(QRegExp("[^a-zA-Z0-9_]"), "_");
+  std::string reac_id = model.getNewIdentifier(id_base.toStdString());
+  // create reaction
+  iNA::Ast::Reaction *reaction = new iNA::Ast::Reaction(
+        reac_id, editor.reactionName().toStdString(), law, editor.isReversible());
+  // Populate reactants
+  StoichiometryList::const_iterator reactant = editor.reactants().begin();
+  for (; reactant != editor.reactants().end(); reactant++) {
+    iNA::Ast::Species *species = model.getSpecies(reactant->second.toStdString());
+    reaction->addReactantStoichiometry(species, reactant->first);
+  }
+  // Populate products
+  StoichiometryList::const_iterator product = editor.products().begin();
+  for (; product != editor.products().end(); product++) {
+    iNA::Ast::Species *species = model.getSpecies(product->second.toStdString());
+    reaction->addProductStoichiometry(species, product->first);
+  }
+
+  // Done. Add reaction to model:
+  model.addDefinition(reaction);
+
+  /// @todo There is no need to reset the complete tree as the reaction just gets inserted.
+  ///       Therefore only a update of the ReactionListView needs to be performed. And the index
+  ///       of the inserted item in the DocTreeModel is know.
 
   // Update document tree
   Application::getApp()->resetSelectedItem();
@@ -130,8 +196,72 @@ ReactionListView::onReactionEditing(const QModelIndex &index)
   ReactionEditor editor(_reactions->getModel(), reaction);
   if (QDialog::Rejected == editor.exec()) { return; }
 
-  // Add new reaction and new species to the model
-  editor.commitReactionScope();
+  iNA::Ast::Compartment *compartment = 0;
+  GiNaC::exmap subst_table;
+  iNA::Ast::Model &model = _reactions->getModel();
+
+  // If a compartment needs to be created
+  if (editor.context().compartmentIsUndefined()) {
+    // Get an new unique ID for the compartment
+    compartment = new iNA::Ast::Compartment(editor.context().compartmentIdentifier(), 1,
+                                            iNA::Ast::Compartment::VOLUME);
+    subst_table[editor.context().compartmentSymbol()] = compartment->getSymbol();
+    model.addDefinition(compartment);
+  } else {
+    // Resolve compartment to be used to define new species in
+    if (! model.hasCompartment(editor.context().compartmentIdentifier())) {
+      QMessageBox::critical(0, tr("Can not create reaction"),
+                            tr("Internal error: Can not resolve compartment '%1' in model.").arg(
+                              editor.context().compartmentIdentifier().c_str()));
+      return;
+    }
+    compartment = model.getCompartment(editor.context().compartmentIdentifier());
+  }
+
+  // Define undefined species
+  std::map<std::string, GiNaC::symbol>::const_iterator spec = editor.context().undefinedSpecies().begin();
+  for (; spec != editor.context().undefinedSpecies().end(); spec++) {
+    iNA::Ast::Species *species = new iNA::Ast::Species(spec->first, 0, compartment, "", false);
+    subst_table[spec->second] = species->getSymbol();
+    model.addDefinition(species);
+  }
+
+  // Update reaction name
+  reaction->setName(editor.reactionName().toStdString());
+  // Update reactant stoichiometry
+  reaction->clearReactants();
+  StoichiometryList::const_iterator reactant = editor.reactants().begin();
+  for (; reactant != editor.reactants().end(); reactant++) {
+    iNA::Ast::Species *species = model.getSpecies(reactant->second.toStdString());
+    reaction->addReactantStoichiometry(species, reactant->first);
+  }
+  // Update product stoichiometry
+  reaction->clearProducts();
+  StoichiometryList::const_iterator product = editor.products().begin();
+  for (; product != editor.products().end(); product++) {
+    iNA::Ast::Species *species = model.getSpecies(product->second.toStdString());
+    reaction->addProductStoichiometry(species, product->first);
+  }
+  // Clear modifiers
+  reaction->clearModifier();
+
+  // Assemble kinetic law
+  iNA::Ast::KineticLaw *law = reaction->getKineticLaw();
+  // define local parameters
+  std::map<std::string, GiNaC::symbol>::const_iterator para = editor.context().undefinedParameters().begin();
+  for (; para != editor.context().undefinedParameters().end(); para++) {
+    iNA::Ast::Parameter *parameter = new iNA::Ast::Parameter(
+          para->first, 1, iNA::Ast::Unit::dimensionless(), true);
+    subst_table[para->second] = parameter->getSymbol();
+    law->addDefinition(parameter);
+  }
+  // Set rate law (substituted)
+  law->setRateLaw(editor.kineticLaw().subs(subst_table));
+
+  /// @todo There is no need to reset the complete tree as the reaction just gets updated.
+  ///       Therefore only a update of the ReactionListView needs to be performed. Also the
+  ///       label of the reaction in the document tree needs to be updated.
+
   // Update document tree
   Application::getApp()->resetSelectedItem();
   Application::getApp()->docTree()->resetCompleteTree();

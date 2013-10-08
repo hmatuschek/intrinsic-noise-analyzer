@@ -41,6 +41,7 @@ public:
 
   /** Returns the table (id -> symbol) of undefined symbols in the expression. */
   const std::map<std::string, GiNaC::symbol> &undefinedParameters() const;
+  GiNaC::symbol getOrCreateLocalParameter(const std::string &id);
 
   /** Returns @c true if the given ID is a symbol for a local parameter, species or compartment or
    * if it is defined within the root scope. */
@@ -48,6 +49,8 @@ public:
 
   /** Returns the list of undefined species that need to be defined in the model. */
   const std::map<std::string, GiNaC::symbol> &undefinedSpecies() const;
+  bool hasSpecies(const std::string &id) const;
+  GiNaC::symbol getOrCreateSpecies(const std::string &id);
 
   /** Returns the first compartment defined in the model or creates a new "dummy" symbol and
    * ID for it. */
@@ -78,6 +81,9 @@ private:
 };
 
 
+typedef QPair<int, QString> StoichiometryPair;
+typedef QList<StoichiometryPair> StoichiometryList;
+
 
 /** A wizard to create or edit reactions. */
 class ReactionEditor : public QWizard
@@ -96,29 +102,42 @@ public:
    * new reaction is created). */
   iNA::Ast::Reaction *reaction();
 
-  /** @deprecated Use ReactionEditorContext instead. */
-  iNA::Ast::Scope *reactionScope();
-
   ReactionEditorContext &context();
 
-  /** REsets the current reaction scope. This scope holds the reaction definition
-   * as well as all newly created species for that scope.
-   * @deprecated Use ReactionEditorContext instead. */
-  void setReactionScope(iNA::Ast::Scope *reaction_scope);
+  const StoichiometryList &reactants() const;
+  StoichiometryList &reactants();
+  void setReactants(const StoichiometryList &list);
 
-  /** Commits the reaction and species defined in the current reaction scope to the model. */
-  void commitReactionScope();
+  const StoichiometryList &products() const;
+  StoichiometryList &products();
+  void setProducts(const StoichiometryList &list);
+
+  const GiNaC::ex &kineticLaw() const;
+  GiNaC::ex &kineticLaw();
+  void setKinteticLaw(const GiNaC::ex &expr);
+
+  bool isReversible() const;
+  void setReversible(bool rev);
+
+  const QString &reactionName() const;
+  void setReactionName(const QString &name);
 
 private:
   /** A weak reference to the model. */
   iNA::Ast::Model &_model;
-  /** Holds a temporary overlay scope for species and compartments being created along with the
-   * reaction.
-   * @deprecated Use ReactionEditorContext instead. */
-  iNA::Ast::Scope *_current_reaction_scope;
   /** Holds the reaction being edited. If 0, a new reaction is created. */
   iNA::Ast::Reaction *_current_reaction;
+  /** Holds the current reaction editor context that collects the defined compartments,
+   * species and parameters. */
   ReactionEditorContext _context;
+  /** The reactants stoichiometry. */
+  StoichiometryList _reactants;
+  /** The product stoichiometry. */
+  StoichiometryList _products;
+  /** The kintetic law. */
+  GiNaC::ex _kineticLaw;
+  bool _is_reversible;
+  QString _reactionName;
 };
 
 
@@ -170,7 +189,7 @@ private:
   QString _serializePropensity();
 
   /** Parses a (incomplete) reaction equation. */
-  bool _parseEquation(const QString &text, QList< QPair<int, QString> > &reactants,
+  bool _parseReactionEquation(const QString &text, QList< QPair<int, QString> > &reactants,
                      QList< QPair<int, QString> > &product, bool &reversible);
   /** Parses a single stoichiometry expression. */
   bool _parseStoichiometry(const QString &text, QList< QPair<int, QString> > &stoichiometry);
@@ -199,26 +218,22 @@ private:
   MathItem *_renderName(const QString &id);
 
   /** Creates a species definition for each undefined species in the stoichiometry. */
-  void _defineUnknownSpecies(QList< QPair<int, QString> > &reactants,
-                             QList< QPair<int, QString> > &products,
-                             iNA::Ast::Scope *scope);
-
-  /** Creates a new reaction for the given products and reactants, kinetic law is initially empty. */
-  iNA::Ast::Reaction *_createReaction(const QString &name, QList< QPair<int, QString> > &reactants,
-                                      QList< QPair<int, QString> > &products, bool is_reversible,
-                                      iNA::Ast::Scope *scope);
+  void _defineUnknownSpecies(const StoichiometryList &reactants,
+                             const StoichiometryList &products);
 
   /** Creates the kinetic law for the given reaction. */
-  void _createKineticLaw(iNA::Ast::Reaction *reaction);
+  GiNaC::ex _createKineticLaw(const StoichiometryList &reactants, const StoichiometryList &products,
+                              bool is_reversible);
 
   /** Creates the mass action kinetic law for the given reaction. */
-  void _createMAKineticLaw(iNA::Ast::Reaction *reaction);
-  GiNaC::ex _createMAFactor(iNA::Ast::Species *species, GiNaC::ex stoichiometry);
-  GiNaC::ex _createMASingleFactor(iNA::Ast::Species *species, int stoichiometry);
-  GiNaC::ex _createMAMultiFactor(iNA::Ast::Species *species, int stiochiometry);
+  GiNaC::ex _createMAKineticLaw(const StoichiometryList &reactants,
+                                const StoichiometryList &products, bool is_reversible);
+  GiNaC::ex _createMAFactor(const QString &species, GiNaC::ex stoichiometry);
+  GiNaC::ex _createMASingleFactor(const QString &species, int stoichiometry);
+  GiNaC::ex _createMAMultiFactor(const QString &species, int stiochiometry);
 
   /** Creates the kinetic law for this reaction from the kinetic law expression editor. */
-  void _parseAndCreateKineticLaw(iNA::Ast::Reaction *reaction);
+  GiNaC::ex _parseAndCreateKineticLaw();
 
   /** Updates the current reaction. */
   void _updateCurrentReaction(const QString &name, QList< QPair<int, QString> > &reactants,
@@ -249,7 +264,7 @@ private:
   QColor _error_background;
   /** Holds the identifier of the expression being edited. Is empty on new reaction. */
   iNA::Ast::Reaction *_current_reaction;
-  ReactionEditorContext &_context;
+  ReactionEditor *_editor;
 };
 
 
@@ -268,13 +283,15 @@ public:
   virtual void initializePage();
 
 protected:
-  MathItem *_layoutReactionPreview(QList< QPair<int, QString> > &reactants,
-                                   QList< QPair<int, QString> > &products,
+  MathItem *_layoutReactionPreview(const StoichiometryList &reactants,
+                                   const StoichiometryList &products,
                                    const GiNaC::ex &kineticLaw, bool is_reversible);
 
 private:
   /** Holds the weak reference to the model. */
   iNA::Ast::Model &_model;
+  /** Holds a weak reference to the reaction editor. */
+  ReactionEditor *_editor;
   /** Displays the preview of the reaction. */
   QLabel *_reaction_preview;
   /** Displays the species being created. */

@@ -26,6 +26,12 @@ ModelExpressionContext::resolve(const std::string &identifier) {
 
 std::string
 ModelExpressionContext::identifier(GiNaC::symbol symbol) const {
+  if (! _scope.hasVariable(symbol)) {
+    iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::WARN);
+    message << "Can not resolve symbol '" << symbol.get_name() << "', resort to symbol name.";
+    iNA::Utils::Logger::get().log(message);
+    return symbol.get_name();
+  }
   return _scope.getVariable(symbol)->getLabel();
 }
 
@@ -33,6 +39,7 @@ bool
 ModelExpressionContext::hasConcentrationUnits(GiNaC::symbol symbol) {
   const iNA::Ast::Model *model = dynamic_cast<const iNA::Ast::Model *>(_scope.getRootScope());
   if (0 == model) { return false; }
+  if (! _scope.hasVariable(symbol)) { return false; }
   return (iNA::Ast::Node::isSpecies(_scope.getVariable(symbol)) &&
           (!model->speciesHaveSubstanceUnits()));
 }
