@@ -8,6 +8,7 @@
 #include "../doctree/documenttree.hh"
 #include "reactioneditor.hh"
 #include <utils/logger.hh>
+#include <ast/identifier.hh>
 
 
 ReactionListView::ReactionListView(ReactionsItem *reactions, QWidget *parent)
@@ -110,12 +111,14 @@ ReactionListView::onNewReaction()
   // Set rate law (substituted)
   law->setRateLaw(editor.kineticLaw().subs(subst_table));
 
-  // Obtain a new unique ID for reaction from reaction name
+  // Obtain a new unique and valid ID for reaction from reaction name
   QString id_base = editor.reactionName(); id_base.replace(QRegExp("[^a-zA-Z0-9_]"), "_");
+  if (! iNA::Ast::isValidId(id_base.toStdString())) { id_base = "reaction"; }
   std::string reac_id = model.getNewIdentifier(id_base.toStdString());
   // create reaction
   iNA::Ast::Reaction *reaction = new iNA::Ast::Reaction(
         reac_id, editor.reactionName().toStdString(), law, editor.isReversible());
+
   // Populate reactants
   StoichiometryList::const_iterator reactant = editor.reactants().begin();
   for (; reactant != editor.reactants().end(); reactant++) {
