@@ -352,10 +352,6 @@ Writer::processReaction(Ast::Reaction *reac, LIBSBML_CPP_NAMESPACE_QUALIFIER Rea
   }
 
   // Process modifiers:
-  /*for (Ast::Reaction::mod_iterator item = reac->modifiersBegin(); item != reac->modifiersEnd(); item++) {
-    LIBSBML_CPP_NAMESPACE_QUALIFIER ModifierSpeciesReference *sbml_r = sbml_reac->createModifier();
-    sbml_r->setSpecies((*item)->getIdentifier());
-  }*/
   std::set<std::string> modifiers; getReactionModifier(reac, model, modifiers);
   std::set<std::string>::iterator modifier = modifiers.begin();
   for (; modifier != modifiers.end(); modifier++) {

@@ -405,6 +405,10 @@ ReactionEditorPage::_updateKineticLaw()
   equation_palette.setColor(QPalette::Base, _default_background);
   _equation->setPalette(equation_palette);
 
+  // Clear context and define new species
+  _editor->context().reset();
+  _defineUnknownSpecies(reactants, products);
+
   // Do not update anything if autoupdate is not enabled.
   if (USER_DEFINED == kineticLawType()) { return; }
 
@@ -905,9 +909,6 @@ ReactionEditorPage::_updateCurrentReaction(
 bool
 ReactionEditorPage::validatePage()
 {
-  // Clear context, all pre-defined species etc are removed.
-  _editor->context().reset();
-
   // Check reaction equation:
   QList< QPair<int, QString> > reactants, products;
   bool is_reversible = false;
@@ -915,6 +916,11 @@ ReactionEditorPage::validatePage()
   if (! _parseReactionEquation(_equation->text(), reactants, products, is_reversible)) {
     return false;
   }
+
+  // Clear context, all pre-defined species etc are removed.
+  _editor->context().reset();
+  // Update reaction editor context
+  _defineUnknownSpecies(reactants, products);
 
   // Check kinetic law (if defined by user):
   if (USER_DEFINED == kineticLawType()) {
@@ -938,8 +944,6 @@ ReactionEditorPage::validatePage()
     }
   }
 
-  // Update reaction editor context
-  _defineUnknownSpecies(reactants, products);
   // Create kinetic law for that reaction and store in editor
   try {
     _editor->setKinteticLaw(_createKineticLaw(reactants, products, is_reversible));
