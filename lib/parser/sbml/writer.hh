@@ -53,6 +53,9 @@ protected:
   static void processReaction(Ast::Reaction *reac, LIBSBML_CPP_NAMESPACE_QUALIFIER Reaction *sbml_reac,
                               Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model,
                               std::map<Ast::Unit, std::string> &units);
+
+  static void getReactionModifier(Ast::Reaction *reac, Ast::Model &model, std::set<std::string> &modifiers);
+
   /** Translates a kinetic law. */
   static void processKineticLaw(Ast::KineticLaw *law, LIBSBML_CPP_NAMESPACE_QUALIFIER KineticLaw *sbml_law,
                                 LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model,

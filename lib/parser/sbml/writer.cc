@@ -352,14 +352,39 @@ Writer::processReaction(Ast::Reaction *reac, LIBSBML_CPP_NAMESPACE_QUALIFIER Rea
   }
 
   // Process modifiers:
-  for (Ast::Reaction::mod_iterator item = reac->modifiersBegin(); item != reac->modifiersEnd(); item++) {
+  /*for (Ast::Reaction::mod_iterator item = reac->modifiersBegin(); item != reac->modifiersEnd(); item++) {
     LIBSBML_CPP_NAMESPACE_QUALIFIER ModifierSpeciesReference *sbml_r = sbml_reac->createModifier();
     sbml_r->setSpecies((*item)->getIdentifier());
+  }*/
+  std::set<std::string> modifiers; getReactionModifier(reac, model, modifiers);
+  std::set<std::string>::iterator modifier = modifiers.begin();
+  for (; modifier != modifiers.end(); modifier++) {
+    LIBSBML_CPP_NAMESPACE_QUALIFIER ModifierSpeciesReference *sbml_r = sbml_reac->createModifier();
+    sbml_r->setSpecies(*modifier);
   }
 
   // process kinetic law:
   LIBSBML_CPP_NAMESPACE_QUALIFIER KineticLaw *sbml_law = sbml_reac->createKineticLaw();
   processKineticLaw(reac->getKineticLaw(), sbml_law, sbml_model, units, model);
+}
+
+
+void
+Writer::getReactionModifier(Ast::Reaction *reac, Ast::Model &model, std::set<std::string> &modifiers)
+{
+  // Check all species defined in the model
+  for (size_t i=0; i<model.numSpecies(); i++) {
+    // Get species
+    Ast::Species *species = model.getSpecies(i);
+    // If species is reactant of reaction -> skip
+    if (reac->hasReactant(species)) { continue; }
+    // If species is product of reaction -> skip
+    if (reac->hasProduct(species)) { continue; }
+    // If kinetic law depends on species -> add as modifier
+    if (reac->getKineticLaw()->getRateLaw().has(species->getSymbol())) {
+      modifiers.insert(species->getIdentifier());
+    }
+  }
 }
 
 void
