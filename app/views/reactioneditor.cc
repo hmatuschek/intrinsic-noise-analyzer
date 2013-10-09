@@ -933,7 +933,7 @@ ReactionEditorPage::validatePage()
       palette.setColor(QPalette::Base, _default_background);
       _kineticLawEditor->setPalette(palette);
     } catch (iNA::Exception &err) {
-      // On on, set formula background color to red
+      // On error, set formula background color to red
       QPalette palette = _kineticLawEditor->palette();
       palette.setColor(QPalette::Base, _error_background);
       _kineticLawEditor->setPalette(palette);
