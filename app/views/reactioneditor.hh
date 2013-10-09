@@ -15,7 +15,7 @@
 #include <ast/model.hh>
 #include <parser/expr/parser.hh>
 #include "../tinytex/formula.hh"
-
+#include "../tinytex/ginac2formula.hh"
 
 
 /** This class collects all changes being made to the model or reaction, means all compartments
@@ -58,6 +58,9 @@ public:
   const std::string &compartmentIdentifier() const;
   bool compartmentIsUndefined() const;
 
+  /** Returns true if the model is defined in concentration units. */
+  bool hasConcentrationUnits() const;
+
   /** Resets the context. All pre-defined species and parameters are removed. */
   void reset();
 
@@ -78,6 +81,25 @@ private:
   std::string _compartment_id;
   /** If true, the compartment symbol is a dummy. */
   bool _compartment_undefined;
+};
+
+
+/** A simple wrapper class that wraps a ReactionEditorContext used to render expressions
+ * refering to pre-defined species, compartments and parameters properly. */
+class ReactionEditorDisplayContext: public ExpressionContext {
+public:
+  ReactionEditorDisplayContext(ReactionEditorContext &context);
+
+  /** Resolves or creates a symbol for the given identifier. */
+  virtual GiNaC::symbol resolve(const std::string &identifier);
+
+  /** Resolves the given symbol to the identifier of the variable. */
+  virtual std::string identifier(GiNaC::symbol symbol) const;
+
+  bool hasConcentrationUnits(const GiNaC::symbol &symbol);
+
+protected:
+  ReactionEditorContext &_context;
 };
 
 
@@ -205,8 +227,8 @@ private:
   std::map<QString,int> _collectStoichiometries(QList<QPair<int, QString> > &reactants);
 
   /** Renders the kinetic law. */
-  MathItem *_renderKineticLaw(bool is_reversible, QList< QPair<int, QString> > &reactants,
-                              QList< QPair<int, QString> > &products);
+  MathItem *_renderKineticLaw(bool is_reversible, StoichiometryList &reactants,
+                              StoichiometryList &products);
 
   /** Creates a species definition for each undefined species in the stoichiometry. */
   void _defineUnknownSpecies(const StoichiometryList &reactants,
@@ -274,7 +296,7 @@ public:
   virtual void initializePage();
 
 protected:
-  MathItem *_layoutReactionPreview(const StoichiometryList &reactants,
+  MathItem *_renderReactionPreview(const StoichiometryList &reactants,
                                    const StoichiometryList &products,
                                    const GiNaC::ex &kineticLaw, bool is_reversible);
 

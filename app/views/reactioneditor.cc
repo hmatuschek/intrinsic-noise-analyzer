@@ -134,6 +134,11 @@ ReactionEditorContext::compartmentIsUndefined() const {
   return _compartment_undefined;
 }
 
+bool
+ReactionEditorContext::hasConcentrationUnits() const  {
+  return !(_model->speciesHaveSubstanceUnits());
+}
+
 void
 ReactionEditorContext::reset() {
   _param_ids.clear();
@@ -141,6 +146,38 @@ ReactionEditorContext::reset() {
   _species_ids.clear();
   _species_symbols.clear();
 }
+
+
+/* ********************************************************************************************* *
+ * Implementation of ReactionEditorDisplayContext
+ * ********************************************************************************************* */
+ReactionEditorDisplayContext::ReactionEditorDisplayContext(ReactionEditorContext &context)
+  : _context(context)
+{
+  // pass...
+}
+
+GiNaC::symbol
+ReactionEditorDisplayContext::resolve(const std::string &identifier) {
+  return _context.resolve(identifier);
+}
+
+std::string
+ReactionEditorDisplayContext::identifier(GiNaC::symbol symbol) const {
+  std::string id;
+  try { id = _context.identifier(symbol); }
+  catch (iNA::Exception &err) { id = symbol.get_name(); }
+  return id;
+}
+
+bool
+ReactionEditorDisplayContext::hasConcentrationUnits(const GiNaC::symbol &symbol) {
+  std::string id;
+  try { id = _context.identifier(symbol); }
+  catch (iNA::Exception &err) { id = symbol.get_name(); }
+  return _context.hasConcentrationUnits() && _context.hasSpecies(id);
+}
+
 
 
 /* ********************************************************************************************* *
@@ -610,13 +647,12 @@ ReactionEditorPage::_collectStoichiometries(QList<QPair<int, QString> > &reactan
 
 
 MathItem *
-ReactionEditorPage::_renderKineticLaw(bool is_reversible, QList<QPair<int, QString> > &reactants,
-                                      QList<QPair<int, QString> > &products)
+ReactionEditorPage::_renderKineticLaw(bool is_reversible, StoichiometryList &reactants,
+                                      StoichiometryList &products)
 {
   // Assemble kinetic law
   GiNaC::ex kinLaw = _createKineticLaw(reactants, products, is_reversible);
-  // Render in model scope or reaction scope if a reaction is edited:
-  iNA::Ast::Scope *scope = &(_editor->model());
+  iNA::Ast::Scope *scope = &_model;
   if (0 != _current_reaction) { scope = _current_reaction->getKineticLaw(); }
   return Ginac2Formula::toFormula(kinLaw, *scope, true);
 }
@@ -964,8 +1000,7 @@ void
 ReactionEditorSummaryPage::initializePage()
 {
   // Render equation
-  //MathContext ctx; ctx.setFontSize(ctx.fontSize()*0.66);
-  MathItem *reac = _layoutReactionPreview(_editor->reactants(), _editor->products(),
+  MathItem *reac = _renderReactionPreview(_editor->reactants(), _editor->products(),
                                           _editor->kineticLaw(), _editor->isReversible());
   _reaction_preview->setPixmap(reac->renderItem());
   delete reac;
@@ -1005,7 +1040,7 @@ ReactionEditorSummaryPage::initializePage()
 
 
 MathItem *
-ReactionEditorSummaryPage::_layoutReactionPreview(
+ReactionEditorSummaryPage::_renderReactionPreview(
     const StoichiometryList &reactants,  const StoichiometryList &products,
     const GiNaC::ex &kineticLaw, bool is_reversible)
 {
@@ -1058,8 +1093,7 @@ ReactionEditorSummaryPage::_layoutReactionPreview(
   formula->appendItem(new MathSpace(MathSpace::QUAD_SPACE));
   formula->appendItem(new MathText(":"));
   formula->appendItem(new MathSpace(MathSpace::MEDIUM_SPACE));
-  /// @bug Render kinetic law in context of reaction if editing one.
-  /// @bug Use a proper context to render formulas.
-  formula->appendItem(Ginac2Formula::toFormula(kineticLaw, _model));
+  ReactionEditorDisplayContext context(_editor->context());
+  formula->appendItem(Ginac2Formula::toFormula(kineticLaw, context));
   return formula;
 }

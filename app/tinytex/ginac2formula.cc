@@ -11,6 +11,15 @@ using namespace iNA;
 
 
 /* ********************************************************************************************* *
+ * Implementation of ExpressionContext
+ * ********************************************************************************************* */
+bool
+ExpressionContext::hasConcentrationUnits(const GiNaC::symbol &symbol) {
+  return false;
+}
+
+
+/* ********************************************************************************************* *
  * Implementation of ModelExpressionContext
  * ********************************************************************************************* */
 ModelExpressionContext::ModelExpressionContext(const Ast::Scope &scope)
@@ -36,7 +45,7 @@ ModelExpressionContext::identifier(GiNaC::symbol symbol) const {
 }
 
 bool
-ModelExpressionContext::hasConcentrationUnits(GiNaC::symbol symbol) {
+ModelExpressionContext::hasConcentrationUnits(const GiNaC::symbol &symbol) {
   const iNA::Ast::Model *model = dynamic_cast<const iNA::Ast::Model *>(_scope.getRootScope());
   if (0 == model) { return false; }
   if (! _scope.hasVariable(symbol)) { return false; }
@@ -48,7 +57,7 @@ ModelExpressionContext::hasConcentrationUnits(GiNaC::symbol symbol) {
 /* ********************************************************************************************* *
  * Implementation of Ginac2Formula
  * ********************************************************************************************* */
-Ginac2Formula::Ginac2Formula(ModelExpressionContext &context, bool tex_names)
+Ginac2Formula::Ginac2Formula(ExpressionContext &context, bool tex_names)
   : _context(context), _tex_names(tex_names)
 {
   // pass...
@@ -174,13 +183,19 @@ Ginac2Formula::_assembleFormula(SmartPtr<Parser::Expr::Node> node, size_t preced
   return new MathText("<Unknown Expression>");
 }
 
+
 MathItem *
-Ginac2Formula::toFormula(GiNaC::ex expression, Ast::Scope &scope, bool tex_names)
+Ginac2Formula::toFormula(GiNaC::ex expression, Ast::Scope &scope, bool tex_names) {
+  ModelExpressionContext context(scope);
+  return toFormula(expression, context, tex_names);
+}
+
+MathItem *
+Ginac2Formula::toFormula(GiNaC::ex expression, ExpressionContext &context, bool tex_names)
 {
   MathItem *formula = 0;
   try {
     // Assemble formula from GiNaC expression
-    ModelExpressionContext context(scope);
     Ginac2Formula converter(context, tex_names);
     iNA::SmartPtr<iNA::Parser::Expr::Node> ir = iNA::Parser::Expr::Node::fromExpression(expression);
     iNA::Parser::Expr::PrettySerializationTrafo::apply(ir);
@@ -201,8 +216,15 @@ Ginac2Formula::toFormula(GiNaC::ex expression, Ast::Scope &scope, bool tex_names
 QVariant
 Ginac2Formula::toPixmap(GiNaC::ex expression, Ast::Scope &scope, bool tex_names)
 {
+  ModelExpressionContext context(scope);
+  return toPixmap(expression, context, tex_names);
+}
+
+QVariant
+Ginac2Formula::toPixmap(GiNaC::ex expression, ExpressionContext &context, bool tex_names)
+{
   // Assemble formula from GiNaC expression
-  MathItem *formula = toFormula(expression, scope, tex_names);
+  MathItem *formula = toFormula(expression, context, tex_names);
   // Render formula
   QGraphicsItem *rendered_formula = formula->layout(MathContext());
   // Draw formula into pixmap:

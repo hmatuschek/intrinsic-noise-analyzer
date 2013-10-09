@@ -9,10 +9,23 @@
 #include <parser/expr/ir.hh>
 
 
+/** Basic interface for the reverse lookup of GiNaC symbols for the expression rendering.
+ * This interface is basically identical to the @c iNA::Parser::Expr::Context interface
+ * but defines an additional method to determine if a symbol has concentration units.
+ * This is used to render species X as [X] if the model is defined in species units. */
+class ExpressionContext: public iNA::Parser::Expr::Context
+{
+public:
+  /** Returns true if the given symbol refers a species that is defined in concentration units.
+   * The default implementation simply returns false. */
+  virtual bool hasConcentrationUnits(const GiNaC::symbol &symbol);
+};
+
+
 /** Simple expression context that resolves GiNaC symbols to the displayname of the associated
  * @c iNA::Ast::VariableDefinition. This class is used by the Ginac2Formula renderer to reverse
  * lookup GiNaC symbols in expressions. */
-class ModelExpressionContext : public iNA::Parser::Expr::Context
+class ModelExpressionContext : public ExpressionContext
 {
 public:
   /** Constructor. */
@@ -21,10 +34,10 @@ public:
   GiNaC::symbol resolve(const std::string &identifier);
   /** Resolves a GiNaC symbol to the name of the corresponding @c iNA::Ast::VariableDefinition.
    * If the variable has no name assigned, the identifier is returned. */
-  virtual std::string identifier(GiNaC::symbol symbol) const;
+  std::string identifier(GiNaC::symbol symbol) const;
   /** Returns true if the given symbol belongs to a species and if the model is defined in
    * substance units. Returns always false if the scope is not element of an Model. */
-  bool hasConcentrationUnits(GiNaC::symbol symbol);
+  bool hasConcentrationUnits(const GiNaC::symbol &symbol);
 
 private:
   /** Holds a weak reference to the scope context. */
@@ -45,13 +58,13 @@ private:
 class Ginac2Formula
 {
   /** A weak reference to the variable scope used to resolved GiNaC symbols. */
-  ModelExpressionContext &_context;
+  ExpressionContext &_context;
   /** Specifies if names should be rendered as TeX if enclosed in "$". */
   bool _tex_names;
 
 public:
   /** Constructor, needs the variable scope for symbol resolution. */
-  Ginac2Formula(ModelExpressionContext &context, bool tex_names=true);
+  Ginac2Formula(ExpressionContext &context, bool tex_names=true);
 
 private:
   /** Translates the expression IR into MathItem representing the expression. */
@@ -66,9 +79,16 @@ public:
    *        tex. If this option is true, this will happen. */
   static MathItem *toFormula(GiNaC::ex expression, iNA::Ast::Scope &scope, bool tex_names=true);
 
+  /** Renders an expression as a MathItem instance. */
+  static MathItem *toFormula(GiNaC::ex expression, ExpressionContext &ctx, bool tex_names=true);
+
   /** Very helpful function to render a given expression into a formula. The formula is returned
    * inside a QVariant as a pixmap or an invald QVariant if there was an error during rendering. */
   static QVariant toPixmap(GiNaC::ex expression, iNA::Ast::Scope &scope, bool tex_names=true);
+
+  /** Very helpful function to render a given expression into a formula. The formula is returned
+   * inside a QVariant as a pixmap or an invald QVariant if there was an error during rendering. */
+  static QVariant toPixmap(GiNaC::ex expression, ExpressionContext &context, bool tex_names=true);
 };
 
 #endif // GINAC2FORMULA_HH
