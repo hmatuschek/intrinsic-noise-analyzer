@@ -198,7 +198,8 @@ ReactionView::onReactionEditing()
 {
   // Show reaction editor wizard for this reaction:
   iNA::Ast::Reaction *reaction = _reaction->getReaction();
-  iNA::Ast::Model    &model    = ((ModelItem *)(_reaction->parent()->parent()))->getModel();
+  iNA::Ast::Model    &model    = dynamic_cast<ModelItem *>(
+        _reaction->getTreeParent()->getTreeParent())->getModel();
   ReactionEditor editor(model, reaction);
   if (QDialog::Rejected == editor.exec()) { return; }
 
@@ -276,8 +277,11 @@ ReactionView::onReactionEditing()
   _label->setText(tr("Reaction") + " " + _reaction->getDisplayName());
 
   // Update tree model
-  Application::getApp()->resetSelectedItem();
-  Application::getApp()->docTree()->resetCompleteTree();
+  _reaction->updateLabel();
+  Application::getApp()->docTree()->markForUpdate(_reaction);
+
+  //Application::getApp()->resetSelectedItem();
+  //Application::getApp()->docTree()->resetCompleteTree();
 }
 
 

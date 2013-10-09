@@ -22,13 +22,16 @@ protected:
 
 public:
   /** Constructor. */
-  explicit ReactionItem(iNA::Ast::Reaction *_reaction, QObject *parent=0);
+  explicit ReactionItem(iNA::Ast::Reaction *reaction, QObject *parent=0);
 
   /** Returns the display name of the reaction. */
   virtual const QString &getLabel() const;
 
   /** Returns the display name of the reaction. */
   QString getDisplayName() const;
+
+  /** Updates the display label. */
+  void updateLabel();
 
   /** Returns the reaction instance. */
   iNA::Ast::Reaction *getReaction();

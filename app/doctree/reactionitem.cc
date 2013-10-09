@@ -10,30 +10,27 @@ ReactionItem::ReactionItem(iNA::Ast::Reaction *reaction, QObject *parent)
   : QObject(parent), _reaction(reaction), _local_parameters(0), _itemLabel()
 {
   // Assemble display name
-  if (reaction->hasName()){
-    _itemLabel = reaction->getName().c_str();
-  } else {
-    _itemLabel = reaction->getIdentifier().c_str();
-  }
-
+  _itemLabel = reaction->getLabel().c_str();
   // Create list model of local parameters:
   _local_parameters = new ReactionParameterList(reaction->getKineticLaw(), this);
 }
 
 
 const QString &
-ReactionItem::getLabel() const
-{
+ReactionItem::getLabel() const {
   return this->_itemLabel;
 }
 
 
 QString
-ReactionItem::getDisplayName() const
-{
+ReactionItem::getDisplayName() const {
   return this->_itemLabel;
 }
 
+void
+ReactionItem::updateLabel() {
+  _itemLabel = _reaction->getLabel().c_str();
+}
 
 iNA::Ast::Reaction *
 ReactionItem::getReaction()

@@ -6,6 +6,7 @@
 #include <QMessageBox>
 #include "../models/application.hh"
 #include "../doctree/documenttree.hh"
+#include "../doctree/documentitem.hh"
 #include "reactioneditor.hh"
 #include <utils/logger.hh>
 #include <ast/identifier.hh>
@@ -113,8 +114,17 @@ ReactionListView::onNewReaction()
 
   // Obtain a new unique and valid ID for reaction from reaction name
   QString id_base = editor.reactionName(); id_base.replace(QRegExp("[^a-zA-Z0-9_]"), "_");
-  if (! iNA::Ast::isValidId(id_base.toStdString())) { id_base = "reaction"; }
+  if (! iNA::Ast::isValidId(id_base.toStdString())) {
+    iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::INFO);
+    message << "Reaction identifier '"
+            << id_base.toStdString() << "' derived from reaction name '"
+            << editor.reactionName().toStdString()
+            << "' is not a valid ID. Resort to 'reaction'.";
+    iNA::Utils::Logger::get().log(message);
+    id_base = "reaction";
+  }
   std::string reac_id = model.getNewIdentifier(id_base.toStdString());
+
   // create reaction
   iNA::Ast::Reaction *reaction = new iNA::Ast::Reaction(
         reac_id, editor.reactionName().toStdString(), law, editor.isReversible());
@@ -132,16 +142,14 @@ ReactionListView::onNewReaction()
     reaction->addProductStoichiometry(species, product->first);
   }
 
-  // Done. Add reaction to model:
-  model.addDefinition(reaction);
-
-  /// @todo There is no need to reset the complete tree as the reaction just gets inserted.
-  ///       Therefore only a update of the ReactionListView needs to be performed. And the index
-  ///       of the inserted item in the DocTreeModel is know.
-
   // Update document tree
-  Application::getApp()->resetSelectedItem();
-  Application::getApp()->docTree()->resetCompleteTree();
+  // this also adds the reaction to the model
+  DocumentItem *doc = dynamic_cast<DocumentItem *>(
+        _reactions_item->getTreeParent()->getTreeParent());
+  Application::getApp()->docTree()->addReaction(doc, new ReactionItem(reaction));
+
+  // Update reaction list
+  _reactions->updateTable();
 }
 
 
@@ -261,11 +269,13 @@ ReactionListView::onReactionEditing(const QModelIndex &index)
   // Set rate law (substituted)
   law->setRateLaw(editor.kineticLaw().subs(subst_table));
 
-  /// @todo There is no need to reset the complete tree as the reaction just gets updated.
-  ///       Therefore only a update of the ReactionListView needs to be performed. Also the
-  ///       label of the reaction in the document tree needs to be updated.
+  // Update reaction item in DocTree as the name may have been changed
+  ReactionItem *item = dynamic_cast<ReactionItem *>(_reactions_item->getTreeChild(index.row()));
+  item->updateLabel();
+  Application::getApp()->docTree()->markForUpdate(item);
+  // Update reaction list
+  _reactions->updateTable();
 
-  // Update document tree
-  Application::getApp()->resetSelectedItem();
-  Application::getApp()->docTree()->resetCompleteTree();
+  //Application::getApp()->resetSelectedItem();
+  //Application::getApp()->docTree()->resetCompleteTree();
 }
