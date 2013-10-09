@@ -189,7 +189,7 @@ ENDIF()
 #
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/lib/config.hh.in
                ${CMAKE_CURRENT_BINARY_DIR}/lib/config.hh)
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}/lib)
+INCLUDE_DIRECTORIES("${CMAKE_CURRENT_BINARY_DIR}/lib")
 
 #
 # Make sure unsupported module headers can be found
