@@ -360,14 +360,8 @@ Writer::processReaction(Ast::Reaction *reac, const Ast::Model &model, std::ostre
   // Assemble list of modifiers
   for (size_t i=0; i<model.numSpecies(); i++) {
     Ast::Species *species = model.getSpecies(i);
-    // If species is reactant of reaction -> skip
-    if (reac->hasReactant(species)) { continue; }
-    // If species is product of reaction -> skip
-    if (reac->hasProduct(species)) { continue; }
-    // If kinetic law depends on species -> add as modifier
-    if (reac->getKineticLaw()->getRateLaw().has(species->getSymbol())) {
-      modifiers.push_back(species->getIdentifier());
-    }
+    // Check if species is a modifier of the reaction
+    if (reac->isModifier(species)) { modifiers.push_back(species->getIdentifier()); }
   }
 
   output << std::endl << "  ";

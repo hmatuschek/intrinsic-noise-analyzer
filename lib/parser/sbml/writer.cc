@@ -370,16 +370,9 @@ Writer::getReactionModifier(Ast::Reaction *reac, Ast::Model &model, std::set<std
 {
   // Check all species defined in the model
   for (size_t i=0; i<model.numSpecies(); i++) {
-    // Get species
     Ast::Species *species = model.getSpecies(i);
-    // If species is reactant of reaction -> skip
-    if (reac->hasReactant(species)) { continue; }
-    // If species is product of reaction -> skip
-    if (reac->hasProduct(species)) { continue; }
-    // If kinetic law depends on species -> add as modifier
-    if (reac->getKineticLaw()->getRateLaw().has(species->getSymbol())) {
-      modifiers.insert(species->getIdentifier());
-    }
+    // check if species is a modifier
+    if (reac->isModifier(species)) { modifiers.insert(species->getIdentifier()); }
   }
 }
 

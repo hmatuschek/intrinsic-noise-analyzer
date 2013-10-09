@@ -253,9 +253,6 @@ protected:
   /** Holds the stoichiometric expressions for all products of the reaction. */
   std::map<Species *, GiNaC::ex> _products;
 
-  /** Holds a set of species being modifier of the reaction. */
-  std::set<Species *> _modifiers;
-
   /** Holds the kinetic law of the reaction. */
   KineticLaw *_kinetic_law;
 
