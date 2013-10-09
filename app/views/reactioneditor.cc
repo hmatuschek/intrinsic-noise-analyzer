@@ -913,6 +913,8 @@ ReactionEditorPage::validatePage()
   bool is_reversible = false;
   // Try to parse the expression
   if (! _parseReactionEquation(_equation->text(), reactants, products, is_reversible)) {
+    QMessageBox::critical(0, tr("Invalid reaction equation"),
+                          tr("The specified reaction equeation has a invalid form."));
     return false;
   }
 
@@ -935,10 +937,10 @@ ReactionEditorPage::validatePage()
       QPalette palette = _kineticLawEditor->palette();
       palette.setColor(QPalette::Base, _error_background);
       _kineticLawEditor->setPalette(palette);
-      // and send a message to the logger
-      iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::INFO);
-      message << "Invalid kinetic law expression: " << err.what();
-      iNA::Utils::Logger::get().log(message);
+      // and show a message box
+      QMessageBox::critical(0, tr("Invalid kinetic law."),
+                            tr("The specified kinetic law expression is invalid: %1").arg(
+                              err.what()));
       return false;
     }
   }

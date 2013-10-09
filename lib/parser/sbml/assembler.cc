@@ -868,8 +868,6 @@ Parser::Sbml::__process_expression(const LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode
     return GiNaC::log(__process_expression(node->getChild(0), ctx));
 
   case LIBSBML_CPP_NAMESPACE_QUALIFIER AST_FUNCTION_ABS:
-    return GiNaC::abs(__process_expression(node->getChild(0), ctx));
-
   case LIBSBML_CPP_NAMESPACE_QUALIFIER AST_FUNCTION_ARCCOS:
   case LIBSBML_CPP_NAMESPACE_QUALIFIER AST_FUNCTION_ARCCOSH:
   case LIBSBML_CPP_NAMESPACE_QUALIFIER AST_FUNCTION_ARCCOT:
