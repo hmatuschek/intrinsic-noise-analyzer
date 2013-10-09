@@ -170,13 +170,6 @@ ModelCopyTest::testReactionEqual(Ast::Reaction *A, Ast::Reaction *B, GiNaC::exma
     UT_ASSERT(prod->second == A->getProductStoichiometry(prod_sym).subs(symbol_table));
   }
 
-  // Test modifier.
-  for (Ast::Reaction::mod_iterator mod = B->modifiersBegin(); mod != B->modifiersEnd(); mod++) {
-    GiNaC::symbol mod_sym = GiNaC::ex_to<GiNaC::symbol>(symbol_table[(*mod)->getSymbol()]);
-    // Check if A has modifier:
-    UT_ASSERT(A->isModifier(mod_sym));
-  }
-
   // Test kinetic law:
   testKineticLaw(A->getKineticLaw(), B->getKineticLaw(), symbol_table);
 }

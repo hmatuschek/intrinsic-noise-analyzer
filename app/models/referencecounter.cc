@@ -94,13 +94,6 @@ ReferenceCounter::visit(const iNA::Ast::Reaction *reac)
       _references.push_back(tr("as product in reaction %1").arg(name));
     }
   }
-
-  // Check modifier:
-  for (Ast::Reaction::const_mod_iterator item=reac->modifiersBegin(); item!=reac->modifiersEnd(); item++) {
-    if ((*item)->getSymbol() == _var->getSymbol()) {
-      _references.push_back(tr("as modifier in reaction %1").arg(name));
-    }
-  }
 }
 
 

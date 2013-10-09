@@ -740,7 +740,8 @@ Assembler::processReactionDefinitions(Parser::ConcreteSyntaxTree &reac)
   /* Asseble Reaction Equation */
   processReactionEquation(reac[5], reaction);
 
-  // Handle modifier
+  // Ignore modifiers
+  /*
   std::list<Ast::Species *> modifier_list;
   if (reac[6].matched()) {
     processReactionModifierList(reac[6][0][1], modifier_list);
@@ -748,6 +749,7 @@ Assembler::processReactionDefinitions(Parser::ConcreteSyntaxTree &reac)
       reaction->addModifier(*mod);
     }
   }
+  */
 
   // Add reaction to model:
   _model.addDefinition(reaction);

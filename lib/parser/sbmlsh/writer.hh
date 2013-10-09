@@ -48,7 +48,7 @@ protected:
   /** Serializes the list of reactions. */
   static void processReactionList(Ast::Model &model, std::ostream &output);
   /** Serializes a single reaction. */
-  static void processReaction(Ast::Reaction *reac, std::ostream &output);
+  static void processReaction(Ast::Reaction *reac, const Ast::Model &model, std::ostream &output);
   /** Serializes the kinetic law of a reaction. */
   static void processKineticLaw(Ast::KineticLaw *law, std::ostream &output);
 };

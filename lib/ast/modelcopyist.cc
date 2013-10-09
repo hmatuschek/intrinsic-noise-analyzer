@@ -314,17 +314,6 @@ ModelCopyist::copyReaction(Ast::Reaction *node, GiNaC::exmap &translation_table,
     reaction->setProductStoichiometry(new_species, iter->second.subs(translation_table));
   }
 
-  // Copy reaction modifiers:
-  for (Ast::Reaction::mod_iterator iter = node->modifiersBegin(); iter != node->modifiersEnd(); iter++) {
-    // New species == old_species:
-    Ast::Species *new_species = *iter;
-    // Check if there is a replacement for species in species_table:
-    if (species_table.end() != species_table.find(*iter)) {
-      new_species = species_table[*iter];
-    }
-    reaction->addModifier(new_species);
-  }
-
   // Done
   return reaction;
 }

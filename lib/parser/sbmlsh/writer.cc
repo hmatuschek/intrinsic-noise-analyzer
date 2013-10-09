@@ -301,14 +301,14 @@ Writer::processReactionList(Ast::Model &model, std::ostream &output)
   if (0 == model.numReactions()) { return; }
   output << std::endl << "@reactions";
   for (size_t i=0; i<model.numReactions(); i++) {
-    processReaction(model.getReaction(i), output);
+    processReaction(model.getReaction(i), model, output);
     processKineticLaw(model.getReaction(i)->getKineticLaw(), output);
     output << std::endl;
   }
 }
 
 void
-Writer::processReaction(Ast::Reaction *reac, std::ostream &output)
+Writer::processReaction(Ast::Reaction *reac, const Ast::Model &model, std::ostream &output)
 {
   std::stringstream temp;
 
@@ -358,9 +358,16 @@ Writer::processReaction(Ast::Reaction *reac, std::ostream &output)
   }
 
   // Assemble list of modifiers
-  for (Ast::Reaction::mod_iterator item = reac->modifiersBegin(); item != reac->modifiersEnd(); item++)
-  {
-    modifiers.push_back((*item)->getIdentifier());
+  for (size_t i=0; i<model.numSpecies(); i++) {
+    Ast::Species *species = model.getSpecies(i);
+    // If species is reactant of reaction -> skip
+    if (reac->hasReactant(species)) { continue; }
+    // If species is product of reaction -> skip
+    if (reac->hasProduct(species)) { continue; }
+    // If kinetic law depends on species -> add as modifier
+    if (reac->getKineticLaw()->getRateLaw().has(species->getSymbol())) {
+      modifiers.push_back(species->getIdentifier());
+    }
   }
 
   output << std::endl << "  ";

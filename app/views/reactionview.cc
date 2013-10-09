@@ -241,8 +241,6 @@ ReactionView::onReactionEditing()
     iNA::Ast::Species *species = model.getSpecies(product->second.toStdString());
     reaction->addProductStoichiometry(species, product->first);
   }
-  // Clear modifiers
-  reaction->clearModifier();
   // set reversible
   reaction->setReversible(editor.isReversible());
 

@@ -607,59 +607,6 @@ public:
 };
 
 
-/** This class represents the addition of a reaction modifier.
- * @ingroup trafo */
-class AddReactionModifierItem: public ReactionReferenceItem
-{
-public:
-  /** Constructor. */
-  AddReactionModifierItem(const std::string &species, const Ast::Reaction *reaction,
-                          const Ast::Model &model);
-  /** Destructor. */
-  ~AddReactionModifierItem();
-
-  /** Checks if the modifier can be removed. */
-  virtual bool canUndo(const Ast::Model &model);
-  /** Checks if the modifier can be added. */
-  virtual bool canRedo(const Ast::Model &model);
-
-  /** Removes the modifier. */
-  virtual void undo(Ast::Model &model);
-  /** Adds the modifier. */
-  virtual void redo(Ast::Model &model);
-
-protected:
-  /** Holds the identifier of the modifier species. */
-  std::string _species;
-};
-
-
-/** This class represents the removal of a reaction modifier.
- * @ingroup trafo */
-class RemReactionModifierItem: public ReactionReferenceItem
-{
-public:
-  /** Constructor. */
-  RemReactionModifierItem(const std::string &species, const Ast::Reaction *reaction,
-                          const Ast::Model &model);
-  /** Destructor. */
-  ~RemReactionModifierItem();
-
-  /** Checks if the modifier can be removed. */
-  virtual bool canUndo(const Ast::Model &model);
-  /** Checks if the modifier can be added. */
-  virtual bool canRedo(const Ast::Model &model);
-
-  /** Removes the modifier. */
-  virtual void undo(Ast::Model &model);
-  /** Adds the modifier. */
-  virtual void redo(Ast::Model &model);
-
-protected:
-  /** Holds the identifier of the modifier species. */
-  std::string _species;
-};
-
 
 /** This class represents the modification of the rate law of a reaction. */
 class SetRatelawItem: public ReactionReferenceItem

@@ -83,13 +83,6 @@ ReferenceCounter::visit(const iNA::Ast::Reaction *reac)
       _references++;
     }
   }
-
-  // Check modifier:
-  for (Ast::Reaction::const_mod_iterator item=reac->modifiersBegin(); item!=reac->modifiersEnd(); item++) {
-    if ((*item)->getSymbol() == _var->getSymbol()) {
-      _references++;
-    }
-  }
 }
 
 

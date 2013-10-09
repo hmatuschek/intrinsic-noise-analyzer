@@ -769,10 +769,6 @@ Parser::Sbml::__process_reaction(LIBSBML_CPP_NAMESPACE_QUALIFIER Reaction *node,
     reaction->addProductStoichiometry(ctx.resolveSpecies(r->getSpecies()), expr);
   }
 
-  for (size_t i=0; i<node->getNumModifiers(); i++) {
-    reaction->addModifier(ctx.resolveSpecies(node->getModifier(i)->getSpecies()));
-  }
-
   return reaction;
 }
 

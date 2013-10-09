@@ -872,10 +872,9 @@ ReactionEditorPage::_updateCurrentReaction(
   // Update reversible reaction
   _current_reaction->setReversible(is_reversible);
 
-  // Clear reactants, products and modifiers of the reaction
+  // Clear reactants, products of the reaction
   _current_reaction->clearReactants();
   _current_reaction->clearProducts();
-  _current_reaction->clearModifier();
 
   // Create reactants:
   for (QList< QPair<int, QString> >::iterator item=reactants.begin(); item!=reactants.end(); item++) {
