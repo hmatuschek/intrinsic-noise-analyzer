@@ -7,6 +7,7 @@
 #include "../views/importmodeldialog.hh"
 #include "../views/sbmlsheditordialog.hh"
 #include "../views/newversiondialog.hh"
+#include "../views/exportmodel.hh"
 
 #include "../steadystate/steadystatetask.hh"
 #include "../steadystate/steadystatetaskwrapper.hh"
@@ -43,11 +44,8 @@
 
 using namespace iNA;
 
-/**
-* Yields the parent item
-*
-* @todo Maybe go as static method in DocumentItem.
-*/
+/** Yields the parent item
+ * @todo Maybe go as static method in DocumentItem. */
 DocumentItem * getParentDocumentItem(TreeItem * item)
 {
   if (item==0) return 0;
@@ -404,28 +402,7 @@ void Application::onExportModel()
 {
   DocumentItem *document = getParentDocumentItem(_selected_item);
   if (0 == document) { return; }
-
-  // Ask for filename and type:
-  QString selected_filter("");
-  QString filename = QFileDialog::getSaveFileName(0, tr("Export model"), "", tr("SBML (*.xml *.sbml);;SBML-sh (*.mod *.sbmlsh)"), &selected_filter);
-  if ("" == filename) { return; }
-
-  // Serialize model into file...
-  try {
-    if ("SBML (*.xml *.sbml)" == selected_filter) {
-      QFileInfo info(filename);
-      if ( ("xml" != info.suffix()) && ("sbml" != info.suffix()) ) { filename.append(".xml"); }
-      Parser::Sbml::exportModel(document->getModel(), filename.toLocal8Bit().data());
-    } else if ("SBML-sh (*.mod *.sbmlsh)" == selected_filter){
-      QFileInfo info(filename);
-      if ( ("mod" != info.suffix()) && ("sbmlsh" != info.suffix()) ) { filename.append(".sbmlsh"); }
-      Parser::Sbmlsh::exportModel(document->getModel(), filename.toLocal8Bit().data());
-    } else {
-      QMessageBox::critical(0, tr("Can not export model"), tr("Unkown file type: %1").arg(selected_filter));
-    }
-  } catch (Exception &err) {
-    QMessageBox::warning(0, "Can not export model", err.what());
-  }
+  exportModel(document->getModel());
 }
 
 
@@ -503,6 +480,9 @@ void Application::onExpandRevReactions()
           tr("Can not expand reversible reactions: %1").arg(err.what()));
   }
 
+  // Mark document as modified
+  document->setIsModified(true);
+
   // Update tree model
   docTree()->resetCompleteTree();
 }
@@ -511,17 +491,22 @@ void Application::onCombineIrrevReactions()
 {
   DocumentItem *document = 0;
   if (0 == (document = getParentDocumentItem(_selected_item))) { return; }
-  iNA::Ast::Model &model = document->getModel();
   resetSelectedItem();
 
+  iNA::Ast::Model &model = document->getModel();
   iNA::Trafo::IrreversibleReactionCollapser collector;
 
+  // Apply trafo on model
   try { collector.apply(model); }
   catch (iNA::Exception &err) {
     QMessageBox::critical(
           0, tr("Combine Reversible Reactions"),
           tr("Can not combine irreversible reactions: %1").arg(err.what()));
   }
+
+  // Mark model as modified
+  document->setIsModified(true);
+  // Update tree
   docTree()->resetCompleteTree();
 }
 

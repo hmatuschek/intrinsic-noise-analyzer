@@ -85,6 +85,9 @@ public:
   /** Returns the name of the model or an empty string if there is no name set. */
   const std::string &getName() const;
 
+  /** Returns the name of the model if set or the identifier if not. */
+  const std::string &getLabel() const;
+
   /** (Re-) Sets the name of the model. */
   void setName(const std::string &name);
 

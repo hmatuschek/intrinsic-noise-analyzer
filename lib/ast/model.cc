@@ -60,6 +60,12 @@ Model::setName(const std::string &name) {
   _name = name;
 }
 
+const std::string &
+Model::getLabel() const {
+  if (hasName()) { return getName(); }
+  return getIdentifier();
+}
+
 GiNaC::symbol
 Model::getTime() const {
   return _time_symbol;

@@ -14,8 +14,7 @@
 ParameterList::ParameterList(iNA::Ast::Model *model, QObject *parent)
   : QAbstractTableModel(parent), _model(model)
 {
-  // Install some delegates for some columns:
-
+  // pass...
 }
 
 
@@ -61,7 +60,10 @@ ParameterList::setData(const QModelIndex &index, const QVariant &value, int role
   }
 
   // Emmit data-changed on success:
-  if (success) { emit dataChanged(index, index); }
+  if (success) {
+    emit dataChanged(index, index);
+    emit modelModified();
+  }
 
   // done.
   return success;
@@ -138,6 +140,9 @@ ParameterList::addParameter() {
   _model->addDefinition(
         new iNA::Ast::Parameter(identifier, 0, iNA::Ast::Unit::dimensionless(), true));
   endInsertRows();
+
+  // Signal that the model was modified
+  emit modelModified();
 }
 
 
@@ -164,6 +169,9 @@ ParameterList::remParameter(int row)
   beginRemoveRows(QModelIndex(), row, row);
   _model->remDefinition(parameter);
   endRemoveRows();
+
+  // Signal that the model was modified
+  emit modelModified();
 }
 
 

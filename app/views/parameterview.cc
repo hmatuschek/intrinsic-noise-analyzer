@@ -1,5 +1,6 @@
 #include "parameterview.hh"
 #include "../models/application.hh"
+#include "../doctree/documentitem.hh"
 #include <QLabel>
 #include <QHeaderView>
 #include <QVBoxLayout>
@@ -16,7 +17,7 @@
  * Implementation of ParameterView (pane)
  * ********************************************************************************************* */
 ParameterView::ParameterView(ParametersItem *parameters, QWidget *parent) :
-  QWidget(parent)
+  QWidget(parent), _paramItem(parameters)
 {
   // Basic view layout
   this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
@@ -37,12 +38,13 @@ ParameterView::ParameterView(ParametersItem *parameters, QWidget *parent) :
   _remParamButton->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
   // Parameter table
-  this->_paramTable = new ParameterTable(parameters->parmeters());
+  ParameterList *paramlist = new ParameterList(&parameters->document()->getModel(), this);
+  this->_paramTable = new ParameterTable(paramlist);
   this->_paramTable->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
   // Register delegates for columns:
   _paramTable->setItemDelegateForColumn(1, new PixmapDelegate(_paramTable));
   _paramTable->setItemDelegateForColumn(
-        2, new ExpressionDelegate(parameters->parmeters()->model(), _paramTable));
+        2, new ExpressionDelegate(paramlist->model(), _paramTable));
   _paramTable->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 
   // Layout
@@ -63,6 +65,7 @@ ParameterView::ParameterView(ParametersItem *parameters, QWidget *parent) :
   QObject::connect(
         _paramTable->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
         this, SLOT(onSelectionChanged(QItemSelection,QItemSelection)));
+  QObject::connect(paramlist, SIGNAL(modelModified()), this, SLOT(onModelModified()));
 }
 
 
@@ -103,6 +106,11 @@ ParameterView::onRemParameter() {
 }
 
 
+void
+ParameterView::onModelModified() {
+  _paramItem->document()->setIsModified(true);
+}
+
 
 /* ********************************************************************************************* *
  * Implementation of ParameterTable (list view)
@@ -113,8 +121,6 @@ ParameterTable::ParameterTable(ParameterList *parameters, QWidget *parent)
   // parameters is a QAbstractTableModel
   this->setModel(parameters);
   this->verticalHeader()->hide();
-  //this->horizontalHeader()->setStretchLastSection(true);
-  //this->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 }
 
 

@@ -8,23 +8,20 @@
 
 class ReactionsItem;
 
-/**
- * Represents a @c Ast::Model and associated analysis results for the GUI. Its a containter for
+/** Represents a @c Ast::Model and associated analysis results for the GUI. Its a containter for
  * everything, that is associated with a certain SBML model.
  *
  * A SBMLModel is also a TreeItem, that allows to browse through model items and results.
- *
- * @ingroup gui
- */
+ * @ingroup gui */
 class ModelItem : public QObject, public DocumentTreeItem
 {
   Q_OBJECT
 
 public:
-  /** Constructs a model for the given SBML document. */
+  /** Constructs a model item from the given SBML document. */
   explicit ModelItem(const QString &file_path, QObject *parent = 0);
-  /** Constructs a model for the given SBML document. */
-  explicit ModelItem(iNA::Ast::Model *_model, QObject *parent = 0);
+  /** Constructs a model item for the given model. */
+  explicit ModelItem(iNA::Ast::Model *model, QObject *parent = 0);
   /** Destructor. Also frees the held SBML document. */
   ~ModelItem();
 
@@ -53,7 +50,7 @@ private:
   /** Holds the reactions item. */
   ReactionsItem *_reactions;
   /** Holds the display label for the item in the @c DocumentTree. */
-  QString itemLabel;
+  QString _itemLabel;
 };
 
 
