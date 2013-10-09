@@ -203,7 +203,7 @@ ReactionView::onReactionEditing()
   if (editor.context().compartmentIsUndefined()) {
     // Get an new unique ID for the compartment
     compartment = new iNA::Ast::Compartment(editor.context().compartmentIdentifier(), 1,
-                                            iNA::Ast::Compartment::VOLUME);
+                                            iNA::Ast::Compartment::VOLUME, true);
     subst_table[editor.context().compartmentSymbol()] = compartment->getSymbol();
     model.addDefinition(compartment);
   } else {
