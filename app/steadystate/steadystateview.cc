@@ -107,12 +107,12 @@ SteadyStateResultWidget::SteadyStateResultWidget(SteadyStateTaskWrapper *task_wr
   this->spectrum_view->setModel(this->ss_task_wrapper->getSpectrum());
 
   //this->spec_save_button = new QPushButton(tr("Save spectrum to file"));
-  QObject::connect(this->spec_plot_button, SIGNAL(clicked()), this, SLOT(plotSpectrum()));
   //QObject::connect(this->spec_save_button, SIGNAL(clicked()), this, SLOT(saveSpectrum()));
   */
   this->spec_plot_button = new QPushButton(tr("Plot steady state statistics"));
   this->data_save_button = new QPushButton(tr("Save data to file"));
   QObject::connect(this->data_save_button, SIGNAL(clicked()), this, SLOT(saveData()));
+  QObject::connect(this->spec_plot_button, SIGNAL(clicked()), this, SLOT(plotSpectrum()));
 
   QHBoxLayout *button_layout = new QHBoxLayout();
   button_layout->addWidget(this->spec_plot_button);

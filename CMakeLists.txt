@@ -62,7 +62,7 @@ ENDIF(NOT INA_ENABLE_STATIC)
 # Specify iNA version, will be used in config.hh, package name and library suffix.
 SET(INA_VERSION_MAJOR 0)
 SET(INA_VERSION_MINOR 4)
-SET(INA_VERSION_PATCH 2)
+SET(INA_VERSION_PATCH 3)
 
 # Make sure libina can be found
 LINK_DIRECTORIES(${PROJECT_BINARY_DIR}/lib)
