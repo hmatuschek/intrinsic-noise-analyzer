@@ -941,16 +941,17 @@ ReactionEditorPage::_createMASingleFactor(const QString &species, int stoichiome
 
   // Get species symbol
   GiNaC::ex species_expr = _editor->context().resolve(species.toStdString());
+  // Get compartment symbol
   GiNaC::symbol compartment = _editor->context().compartmentSymbol();
   if (_model.hasSpecies(species.toStdString())) {
-    compartment = _model.getSpecies(species.toStdString())->getSymbol();
+    compartment = _model.getSpecies(species.toStdString())->getCompartment()->getSymbol();
   }
   // If species are defined in substance units:
   if (_model.speciesHaveSubstanceUnits()) { species_expr /= compartment; }
 
   GiNaC::ex factor=species_expr;
   for (int i=1; i<stoichiometry; i++) {
-    factor *= (species_expr-i/compartment);
+    factor *= (species_expr- i/compartment);
   }
 
   return factor;
