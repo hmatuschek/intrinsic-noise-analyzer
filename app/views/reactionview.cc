@@ -27,7 +27,7 @@ ReactionView::ReactionView(ReactionItem *reaction, QWidget *parent) :
   setBackgroundRole(QPalette::Window);
 
   // Assemble label
-  _label = new QLabel(tr("Reaction") + " " + _reaction->getDisplayName());
+  _label = new QLabel(tr("Reaction") + " <i>" + _reaction->getDisplayName() + "</i>");
   _label->setFont(Application::getApp()->getH1Font());
   _label->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
 
