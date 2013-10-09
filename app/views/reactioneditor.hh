@@ -208,15 +208,6 @@ private:
   MathItem *_renderKineticLaw(bool is_reversible, QList< QPair<int, QString> > &reactants,
                               QList< QPair<int, QString> > &products);
 
-  /** Helper function to render a factor. */
-  MathItem *_renderFactor(const QString &id, int exponent);
-  /** Renders the name of the compartment of the specified species. */
-  MathItem *_renderCompartmentOf(const QString &id);
-  /** Renders the name of the compartment of the specified species. */
-  MathItem *_renderCompartment(iNA::Ast::Compartment *compartment);
-  /** Assembles the name of an identifier. */
-  MathItem *_renderName(const QString &id);
-
   /** Creates a species definition for each undefined species in the stoichiometry. */
   void _defineUnknownSpecies(const StoichiometryList &reactants,
                              const StoichiometryList &products);

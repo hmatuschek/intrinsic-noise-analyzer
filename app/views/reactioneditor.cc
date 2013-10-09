@@ -613,179 +613,12 @@ MathItem *
 ReactionEditorPage::_renderKineticLaw(bool is_reversible, QList<QPair<int, QString> > &reactants,
                                       QList<QPair<int, QString> > &products)
 {
-
-  // Collect reactants and assemble stoichiometries
-  std::map<QString,int> reactantsStoi = _collectStoichiometries(reactants);
-
-  std::set<std::string> compartments = _collectCompartments(reactants, products);
-
-  MathFormula *formula = new MathFormula();
-
-  // Handle reactants:
-  if (is_reversible) {
-    formula->appendItem(new MathSub(new MathText("k"), new MathText("fwd")));
-  } else {
-    formula->appendItem(new MathText("k"));
-  }
-
-  if (MASSACTION_SINGLE == kineticLawType()) {
-    if(_editor->model().speciesHaveSubstanceUnits())
-    {
-      // Calc exponent
-      int exponent = -1;
-      for(std::map<QString,int>::iterator it=reactantsStoi.begin(); it!=reactantsStoi.end(); it++) {
-        exponent += it->second;
-      }
-
-      switch(exponent)
-      {
-      case 0:
-        break;
-      case -1:
-        formula->appendItem(new MathText(QChar(0x00B7)));
-        formula->appendItem(_renderName(compartments.begin()->c_str()));
-        break;
-      default:
-        formula->appendItem(new MathText(QChar(0x00B7)));
-        formula->appendItem(new MathSup(_renderName(compartments.begin()->c_str()),
-                                        new MathText(QString("-%1").arg(exponent))));
-        break;
-      }
-    } else {
-      formula->appendItem(new MathText(QChar(0x00B7)));
-      formula->appendItem(_renderName(compartments.begin()->c_str()));
-    }
-  }
-
-
-  for (std::map< QString, int>::iterator item=reactantsStoi.begin(); item != reactantsStoi.end(); item++)
-  {
-    formula->appendItem(new MathText(QChar(0x00B7)));
-    formula->appendItem(_renderFactor(item->first, int(item->second)));
-  }
-
-  // If reaction is reversible, include reverse rate
-  if (is_reversible) {
-
-    // Collect products and assemble stoichiometries
-    std::map<QString,int> productsStoi = _collectStoichiometries(products);
-
-    formula->appendItem(new MathSpace(MathSpace::MEDIUM_SPACE));
-    formula->appendItem(new MathText("-"));
-    formula->appendItem(new MathSpace(MathSpace::MEDIUM_SPACE));
-
-    formula->appendItem(new MathSub(new MathText("k"), new MathText("rev")));
-
-    if (MASSACTION_SINGLE == kineticLawType()) {
-      if(_model.speciesHaveSubstanceUnits())
-      {
-        int exponent = -1;
-        for(std::map<QString,int>::iterator it=productsStoi.begin(); it!=productsStoi.end(); it++)
-          exponent += it->second;
-
-        switch(exponent)
-        {
-        case 0:
-          break;
-        case -1:
-          formula->appendItem(new MathText(QChar(0x00B7)));
-          formula->appendItem(_renderName(compartments.begin()->c_str()));
-          break;
-        default:
-          formula->appendItem(new MathText(QChar(0x00B7)));
-          formula->appendItem(new MathSup(_renderName(compartments.begin()->c_str()),
-                                          new MathText(QString("-%1").arg(exponent))));
-          break;
-        }
-      } else {
-        formula->appendItem(new MathText(QChar(0x00B7)));
-        formula->appendItem(_renderName(compartments.begin()->c_str()));
-      }
-    }
-
-    for (std::map<QString,int>::iterator item=productsStoi.begin(); item != productsStoi.end(); item++)
-    {
-      formula->appendItem(new MathText(QChar(0x00B7)));
-      formula->appendItem(_renderFactor(item->first, item->second));
-    }
-
-  }
-
-  return formula;
-}
-
-
-MathItem *
-ReactionEditorPage::_renderFactor(const QString &id, int exponent)
-{
-
-  MathFormula *name = new MathFormula();
-
-  if(!_model.speciesHaveSubstanceUnits() || MASSACTION_MULTI == kineticLawType()) name->appendItem(new MathText("["));
-  name->appendItem(_renderName(id));
-  if(!_model.speciesHaveSubstanceUnits() || MASSACTION_MULTI == kineticLawType()) name->appendItem(new MathText("]"));
-
-  MathFormula *factor = new MathFormula();
-
-  if (MASSACTION_MULTI == kineticLawType()) {
-    if (1 == exponent) {
-      factor->appendItem(name->copy());
-    } else {
-      factor->appendItem(new MathSup(name->copy(), new MathText(QString("%1").arg(exponent))));
-    }
-  } else if (MASSACTION_SINGLE == kineticLawType()) {
-    factor->appendItem(name->copy());
-    for (int i=1; i<exponent; i++) {
-      MathFormula *term = new MathFormula();
-      term->appendItem(name->copy());
-      term->appendItem(new MathText("-"));
-      if (i > 1) {
-        term->appendItem(new MathText(QString("%1").arg(i)));
-      }
-      if(!_model.speciesHaveSubstanceUnits())
-      {
-        term->appendItem(new MathText(QChar(0x00B7)));
-        term->appendItem(new MathSup(_renderCompartmentOf(id), new MathText("-1")));
-      }
-      else if(i==1)
-      {
-        term->appendItem(new MathText("1"));
-      }
-      factor->appendItem(new MathBlock(term, new MathText("("), new MathText(")")));
-    }
-  }
-
-  delete name;
-  return factor;
-}
-
-
-MathItem *
-ReactionEditorPage::_renderCompartmentOf(const QString &id)
-{
-  // If the species is not define yet, use ID of first compartment
-  // or the "dummy" ID as specified in context if there is no compartment defined at all.
-  if (! _model.hasSpecies(id.toStdString())) {
-    return _renderName(_editor->context().compartmentIdentifier().c_str());
-  }
-
-  return _renderName(
-        _model.getSpecies(id.toStdString())->getCompartment()->getIdentifier().c_str());
-}
-
-
-MathItem *
-ReactionEditorPage::_renderName(const QString &id)
-{
-  // Assemble name of the factor
-  if (_model.hasVariable(id.toStdString())) {
-    iNA::Ast::VariableDefinition *var = _model.getVariable(id.toStdString());
-    if (var->hasName()) {
-      return TinyTex::parseQuoted(var->getName());
-    }
-  }
-
-  return new MathText(id);
+  // Assemble kinetic law
+  GiNaC::ex kinLaw = _createKineticLaw(reactants, products, is_reversible);
+  // Render in model scope or reaction scope if a reaction is edited:
+  iNA::Ast::Scope *scope = &(_editor->model());
+  if (0 != _current_reaction) { scope = _current_reaction->getKineticLaw(); }
+  return Ginac2Formula::toFormula(kinLaw, *scope, true);
 }
 
 
@@ -853,7 +686,7 @@ ReactionEditorPage::_createMAKineticLaw(const StoichiometryList &reactants,
 
   // Define local parameters:
   if (! is_reversible) {
-    k_fwd = _editor->context().getOrCreateLocalParameter("k_fwd");
+    k_fwd = _editor->context().getOrCreateLocalParameter("k");
   } else {
     k_fwd = _editor->context().getOrCreateLocalParameter("k_fwd");
     k_rev = _editor->context().getOrCreateLocalParameter("k_rev");

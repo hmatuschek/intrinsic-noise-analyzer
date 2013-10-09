@@ -129,13 +129,6 @@ ReactionView::onRemParamClicked()
 void
 ReactionView::onMakeParamGlobalClicked()
 {
-  // Check if an identifier of a parameter is selected:
-//  if (! _paramTable->selectionModel()->hasSelection()) {
-//    _remParamButton->setEnabled(false);
-//    _makeGlobalButton->setEnabled(false);
-//    return;
-//  }
-
   QModelIndexList indices = _paramTable->selectionModel()->selectedIndexes();
   if (1 != indices.size()) {
     _remParamButton->setEnabled(false);
@@ -250,6 +243,8 @@ ReactionView::onReactionEditing()
   }
   // Clear modifiers
   reaction->clearModifier();
+  // set reversible
+  reaction->setReversible(editor.isReversible());
 
   // Assemble kinetic law
   iNA::Ast::KineticLaw *law = reaction->getKineticLaw();
@@ -264,10 +259,6 @@ ReactionView::onReactionEditing()
   // Set rate law (substituted)
   law->setRateLaw(editor.kineticLaw().subs(subst_table));
 
-  /// @todo There is no need to reset the complete tree as the reaction just gets updated.
-  ///       Therefore only a update of the ReactionListView needs to be performed. Also the
-  ///       label of the reaction in the document tree needs to be updated.
-
   // Update complete view (reaction equation view and paramter list):
   ReactionEquationRenderer *renderer = new ReactionEquationRenderer(reaction);
   _equation_view->setScene(renderer);
@@ -279,9 +270,6 @@ ReactionView::onReactionEditing()
   // Update tree model
   _reaction->updateLabel();
   Application::getApp()->docTree()->markForUpdate(_reaction);
-
-  //Application::getApp()->resetSelectedItem();
-  //Application::getApp()->docTree()->resetCompleteTree();
 }
 
 

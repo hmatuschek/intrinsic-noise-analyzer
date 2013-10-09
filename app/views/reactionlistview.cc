@@ -255,6 +255,8 @@ ReactionListView::onReactionEditing(const QModelIndex &index)
   }
   // Clear modifiers
   reaction->clearModifier();
+  // set reversible
+  reaction->setReversible(editor.isReversible());
 
   // Assemble kinetic law
   iNA::Ast::KineticLaw *law = reaction->getKineticLaw();
