@@ -434,7 +434,10 @@ void Application::onExportModel() {
   DocumentItem *document = getParentDocumentItem(_selected_item);
   if (0 == document) { return; }
 
-  exportModel(document->getModel(), document->filePath());
+  // If model was exported successfully -> set model as unmodified
+  if (exportModel(document->getModel(), document->filePath())) {
+    document->setIsModified(false);
+  }
 }
 
 
