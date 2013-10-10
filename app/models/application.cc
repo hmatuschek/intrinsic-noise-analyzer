@@ -37,6 +37,7 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QFileInfo>
+#include <QDebug>
 
 #include <parser/parser.hh>
 #include <parser/exception.hh>
@@ -189,29 +190,24 @@ Application::~Application()
  * ...
  * ******************************************************************************************** */
 void
-Application::setMainWindow(MainWindow *mainwindow)
-{
+Application::setMainWindow(MainWindow *mainwindow) {
   this->mainWindow = mainwindow;
 }
 
 
 void
 Application::resetSelectedItem() {
-
   _selected_item = 0;
   _exportModel->setEnabled(false);
   _editModel->setEnabled(false);
   _closeModel->setEnabled(false);
   _expandRevReaction->setEnabled(false);
   _combineIrvReaction->setEnabled(false);
-  _closeAll->setEnabled(docTree()->getTreeChildCount());
-
 }
 
 
 void
-Application::itemSelected(const QModelIndex &index)
-{
+Application::itemSelected(const QModelIndex &index) {
   TreeItem *item = static_cast<TreeItem *>(index.internalPointer());
   DocumentTreeItem *wrapper = 0;
 
@@ -261,8 +257,8 @@ Application::importModel(const QString &path, bool anonymous, ModelType type) {
 }
 
 
-void
-Application::quit() {
+bool
+Application::mayQuit() {
   bool task_running = false;
   bool unsaved_models = false;
 
@@ -279,7 +275,7 @@ Application::quit() {
                               tr("There are analysis tasks running. Quit anyway?"),
                               QMessageBox::Yes|QMessageBox::Cancel,
                               QMessageBox::Cancel);
-    if (QMessageBox::Cancel == resp) { return; }
+    if (QMessageBox::Cancel == resp) { return false; }
   }
 
   if (unsaved_models) {
@@ -288,20 +284,24 @@ Application::quit() {
                               tr("There are unsaved models. Quit anyway?"),
                               QMessageBox::Yes|QMessageBox::Cancel,
                               QMessageBox::Cancel);
-    if (QMessageBox::Cancel == resp) { return; }
+    if (QMessageBox::Cancel == resp) { return false; }
   }
 
-  QApplication::exit(0);
+  return true;
 }
 
 void
-Application::showContextMenuAt(const QModelIndex &index, const QPoint &global_pos)
-{
+Application::quit() {
+  if (mayQuit()) { QApplication::exit(0); }
+}
+
+
+void
+Application::showContextMenuAt(const QModelIndex &index, const QPoint &global_pos) {
   TreeItem *item = static_cast<TreeItem *>(index.internalPointer());
   DocumentTreeItem *wrapper = 0;
 
-  if (0 != (wrapper = dynamic_cast<DocumentTreeItem *>(item)) && wrapper->providesContextMenu())
-  {
+  if (0 != (wrapper = dynamic_cast<DocumentTreeItem *>(item)) && wrapper->providesContextMenu()) {
     wrapper->showContextMenu(global_pos);
   }
 }
@@ -345,16 +345,15 @@ QMenu   *Application::recentModelsMenu() { return _recentModelsMenu; }
 /* ******************************************************************************************** *
  * Implementation of callbacks/event handlers...
  * ******************************************************************************************** */
-void Application::onNewModel()
-{
+void Application::onNewModel() {
   iNA::Ast::Model *new_model = new iNA::Ast::Model("New_model", "New model");
   docTree()->addDocument(new DocumentItem(new_model));
-
+  // Enable "close all" if there are documents
+  _closeAll->setEnabled(docTree()->getTreeChildCount());
 }
 
 
-void Application::onImportModel()
-{
+void Application::onImportModel() {
   // Show a file-dialog for files:
   QString fileFilters = tr(
         "All Models (*.xml *.sbml *.mod *.sbmlsh);;SBML Models (*.xml *.sbml);;"
@@ -421,6 +420,8 @@ void Application::onImportModel(const QString &fileName, bool anonymous, ModelTy
 
   // Add document to doc tree:
   docTree()->addDocument(new_doc);
+  // Enable "close all" if there are documents
+  _closeAll->setEnabled(docTree()->getTreeChildCount());
   // Add document to list of recent model if not imported anonymously:
   if (! anonymous) {
     addRecentModel(fileName);
@@ -429,8 +430,7 @@ void Application::onImportModel(const QString &fileName, bool anonymous, ModelTy
 }
 
 
-void Application::onExportModel()
-{
+void Application::onExportModel() {
   DocumentItem *document = getParentDocumentItem(_selected_item);
   if (0 == document) { return; }
 
@@ -446,20 +446,19 @@ void Application::onCloseModel()
   // signal document to close
   document->closeDocument();
   resetSelectedItem();
+  // Enable "close all" if there are documents
+  _closeAll->setEnabled(docTree()->getTreeChildCount());
 }
 
 
-void Application::onCloseAll()
-{
-  DocumentItem *document = 0;
-
-  QObjectList::const_iterator it = docTree()->children().begin();
-
-  while(it!=docTree()->children().end()) {
-    document = dynamic_cast<DocumentItem *>(*it++);
-    document->closeDocument();
+void Application::onCloseAll() {
+ // Collect all documents
+  QList<DocumentItem *> documents;
+  for (int i=0; i<docTree()->getTreeChildCount(); i++) {
+    documents.append(dynamic_cast<DocumentItem *>(docTree()->getTreeChild(i)));
   }
-
+  // Close them
+  foreach (DocumentItem *document, documents) { document->closeDocument(); }
   resetSelectedItem();
 }
 

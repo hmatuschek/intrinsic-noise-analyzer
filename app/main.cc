@@ -33,8 +33,7 @@ int main(int argc, char *argv[])
         new iNA::Utils::TextMessageHandler(std::cerr, iNA::Utils::Message::DEBUG));
 
   // Instantiate a QApplication
-  //QApplication qapp(argc, argv);
-  DebugApplication qapp(argc, argv);
+  QApplication qapp(argc, argv);
 
   // Instantiate our own application model, holds all the data of the running application
   Application *app = Application::getApp();

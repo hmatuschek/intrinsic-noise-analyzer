@@ -28,6 +28,9 @@ public slots:
   /** Shows the given widget in the main-panel. */
   void showPanel(QWidget *panel);
 
+protected:
+  virtual void closeEvent(QCloseEvent *);
+
 private slots:
   /** When triggered, quits the application. */
   void quit();

@@ -180,11 +180,11 @@ DocumentItem::closeDocument() {
   if (isModified()) {
     // Ask if model should be saved
     QMessageBox::StandardButton choice =
-        QMessageBox::question(0, tr("Close modified model?"),
-                              tr("The model '%1' was modified. Click 'Yes' to close the model, "
-                                 "'Save' to export the model.").arg(getModel().getLabel().c_str()),
-                              QMessageBox::Close|QMessageBox::Save|QMessageBox::Cancel,
-                              QMessageBox::Cancel);
+        QMessageBox::question(
+          0, tr("Close modified model?"),
+          tr("The model '%1' was modified. Click 'Close' to close the model or "
+             "'Save' to export the model.").arg(getModel().getLabel().c_str()),
+          QMessageBox::Close|QMessageBox::Save|QMessageBox::Cancel, QMessageBox::Cancel);
     // On cancel
     if (QMessageBox::Cancel == choice) { return; }
     // On save and close

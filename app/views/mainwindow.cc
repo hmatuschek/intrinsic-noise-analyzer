@@ -6,6 +6,7 @@
 #include <QPalette>
 #include <QDesktopServices>
 #include <QUrl>
+#include <QCloseEvent>
 
 #include "../models/application.hh"
 #include <ina.hh>
@@ -60,6 +61,13 @@ MainWindow::showPanel(QWidget *panel) {
     currentWidget->deleteLater();
   }
   this->_mainPane->setWidget(panel);
+}
+
+
+void
+MainWindow::closeEvent(QCloseEvent *event) {
+  if (Application::getApp()->mayQuit()) { event->accept(); }
+  else { event->ignore(); }
 }
 
 

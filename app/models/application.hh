@@ -103,6 +103,10 @@ public slots:
   void importModel(const QString &path, bool anonymous=false, ModelType type=FORMAT_AUTO);
 
   /** Checks if the application can be quitted savely. */
+  bool mayQuit();
+
+  /** Checks if the application can be quitted savely by calling @c mayQuit. If it returns @c true,
+   * @c QApplication::exit is called. */
   void quit();
 
 public:
