@@ -74,6 +74,11 @@ public:
   /** Updates the document item. */
   void updateItemData();
 
+  /** Returns true if the document item has a filepath. */
+  bool hasFilePath() const;
+  /** Returns the filepath of the document or an empty string. */
+  const QString &filePath() const;
+
 public slots:
   /** Removes the document from the tree. */
   void closeDocument();

@@ -12,8 +12,10 @@ bool exportModel(iNA::Ast::Model &model, const QString &path)
 {
   // Ask for filename and type:
   QString selected_filter("");
-  QString filename = QFileDialog::getSaveFileName(
-        0, QObject::tr("Export model"), "",
+  QString filename(path);
+
+  filename = QFileDialog::getSaveFileName(
+        0, QObject::tr("Export model"), filename,
         QObject::tr("SBML (*.xml *.sbml);;SBML-sh (*.mod *.sbmlsh)"), &selected_filter);
   if ("" == filename) { return false; }
 

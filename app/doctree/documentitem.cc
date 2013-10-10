@@ -156,6 +156,15 @@ DocumentItem::updateItemData() {
   Application::getApp()->docTree()->markForUpdate(this);
 }
 
+bool
+DocumentItem::hasFilePath() const {
+  return 0 != _file_path.size();
+}
+
+const QString &
+DocumentItem::filePath() const {
+  return _file_path;
+}
 
 
 /* ******************************************************************************************** *

@@ -433,7 +433,8 @@ void Application::onExportModel()
 {
   DocumentItem *document = getParentDocumentItem(_selected_item);
   if (0 == document) { return; }
-  exportModel(document->getModel());
+
+  exportModel(document->getModel(), document->filePath());
 }
 
 
