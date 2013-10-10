@@ -89,7 +89,10 @@ SpeciesList::setData(const QModelIndex &index, const QVariant &value, int role)
   default: break;
   }
 
-  if (success) { emit dataChanged(index, index); }
+  if (success) {
+    emit dataChanged(index, index);
+    emit modelModified();
+  }
   return success;
 }
 
@@ -410,6 +413,9 @@ SpeciesList::addSpecies()
   _model->addDefinition(
         new iNA::Ast::Species(identifier, compartment, false));
   endInsertRows();
+
+  // signal model modified
+  emit modelModified();
 }
 
 
@@ -435,4 +441,7 @@ SpeciesList::remSpecies(int row)
   beginRemoveRows(QModelIndex(), row, row);
   _model->remDefinition(species);
   endRemoveRows();
+
+  // signal model modified
+  emit modelModified();
 }

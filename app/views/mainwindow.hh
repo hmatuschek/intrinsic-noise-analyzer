@@ -34,7 +34,7 @@ private slots:
   /** Shows the about dialog. */
   void about();
   /** Opens a browser and shows the online-help. */
-  void openTutorial();
+  void openHelpPage();
   /** Shows the logging window. */
   void showLogs();
   /** Toggels the "check for updates" */

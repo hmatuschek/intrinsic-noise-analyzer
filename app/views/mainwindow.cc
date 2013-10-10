@@ -97,7 +97,7 @@ MainWindow::_createActions()
   // Connect signals:
   connect(this->_quitAct, SIGNAL(triggered()), this, SLOT(quit()));
   connect(this->_aboutAct, SIGNAL(triggered()), this, SLOT(about()));
-  connect(this->_onlineHelp, SIGNAL(triggered()), this, SLOT(openTutorial()));
+  connect(this->_onlineHelp, SIGNAL(triggered()), this, SLOT(openHelpPage()));
   connect(this->_showLogsAct, SIGNAL(triggered()), this, SLOT(showLogs()));
 }
 
@@ -142,7 +142,9 @@ MainWindow::_createMenus()
 }
 
 
-void MainWindow::quit() { QApplication::exit(0); }
+void MainWindow::quit() {
+  Application::getApp()->quit();
+}
 
 void
 MainWindow::about() {
@@ -152,7 +154,7 @@ MainWindow::about() {
 }
 
 void
-MainWindow::openTutorial() {
+MainWindow::openHelpPage() {
   QDesktopServices::openUrl(QUrl("http://code.google.com/p/intrinsic-noise-analyzer/wiki/Help"));
 }
 
@@ -160,7 +162,6 @@ void MainWindow::showLogs() { this->_logWindow->setVisible(true); }
 
 
 void
-MainWindow::checkForUpdatesToggled()
-{
+MainWindow::checkForUpdatesToggled() {
   Application::getApp()->setCheckNewVersionAvailable(_checkForUpdatesAct->isChecked());
 }

@@ -8,6 +8,7 @@
 #include "../models/expressiondelegate.hh"
 #include "../models/compartmentdelegate.hh"
 #include "../models/variableruledelegate.hh"
+#include "../doctree/documentitem.hh"
 
 
 SpeciesView::SpeciesView(SpeciesItem *species ,QWidget *parent) :
@@ -63,12 +64,12 @@ SpeciesView::SpeciesView(SpeciesItem *species ,QWidget *parent) :
         _specTable->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
         this, SLOT(onSelectionChanged(QItemSelection,QItemSelection)));
   QObject::connect(_species, SIGNAL(destroyed()), this, SLOT(speciesItemDestoyed()));
+  QObject::connect(_species->species(), SIGNAL(modelModified()), this, SLOT(onModelModified()));
 }
 
 
 void
-SpeciesView::speciesItemDestoyed()
-{
+SpeciesView::speciesItemDestoyed() {
   this->deleteLater();
 }
 
@@ -80,8 +81,7 @@ SpeciesView::onAddSpecies() {
 }
 
 void
-SpeciesView::onRemSpecies()
-{
+SpeciesView::onRemSpecies() {
   // Check if an identifier of a species is selected:
   if (! _specTable->selectionModel()->hasSelection()) {
     _remSpeciesButton->setEnabled(false);
@@ -105,4 +105,9 @@ SpeciesView::onSelectionChanged(const QItemSelection &selected, const QItemSelec
   if (0 != index.column()) { _remSpeciesButton->setEnabled(false); return; }
   // ok, allow removal of species:
   _remSpeciesButton->setEnabled(true);
+}
+
+void
+SpeciesView::onModelModified() {
+  _species->document()->setIsModified(true);
 }

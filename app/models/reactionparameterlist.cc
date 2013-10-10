@@ -86,7 +86,10 @@ ReactionParameterList::setData(const QModelIndex &index, const QVariant &value, 
   }
 
   // Emit dataChanged on success
-  if (success) { emit dataChanged(index, index); }
+  if (success) {
+    emit dataChanged(index, index);
+    emit modelModified();
+  }
   return success;
 }
 
@@ -140,6 +143,9 @@ ReactionParameterList::addParameter()
   _kinetic_law->addDefinition(
         new iNA::Ast::Parameter(identifier, 0, iNA::Ast::Unit::dimensionless(), true));
   endInsertRows();
+
+  // signal model modified
+  emit modelModified();
 }
 
 
@@ -166,6 +172,9 @@ ReactionParameterList::remParameter(int row)
   beginRemoveRows(QModelIndex(), row, row);
   _kinetic_law->remDefinition(parameter);
   endRemoveRows();
+
+  // signal model modified
+  emit modelModified();
 }
 
 

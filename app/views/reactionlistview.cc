@@ -80,6 +80,8 @@ ReactionListView::onNewReaction()
                                             iNA::Ast::Compartment::VOLUME, true);
     subst_table[editor.context().compartmentSymbol()] = compartment->getSymbol();
     model.addDefinition(compartment);
+    // signal model modified
+    onModelModified();
   } else {
     // Resolve compartment to be used to define new species in
     if (! model.hasCompartment(editor.context().compartmentIdentifier())) {
@@ -148,6 +150,9 @@ ReactionListView::onNewReaction()
         _reactions_item->getTreeParent()->getTreeParent());
   Application::getApp()->docTree()->addReaction(doc, new ReactionItem(reaction));
 
+  // signal model was modified
+  onModelModified();
+
   // Update reaction list
   _reactions->updateTable();
 }
@@ -180,6 +185,11 @@ ReactionListView::onRemReaction()
 
   // Remove selected reaction
   Application::getApp()->docTree()->removeReaction(reac_item);
+
+  // signal model was modified
+  onModelModified();
+
+  // Update reaction list
   _reactions->updateTable();
 }
 
@@ -218,6 +228,7 @@ ReactionListView::onReactionEditing(const QModelIndex &index)
                                             iNA::Ast::Compartment::VOLUME, true);
     subst_table[editor.context().compartmentSymbol()] = compartment->getSymbol();
     model.addDefinition(compartment);
+    onModelModified();
   } else {
     // Resolve compartment to be used to define new species in
     if (! model.hasCompartment(editor.context().compartmentIdentifier())) {
@@ -269,13 +280,21 @@ ReactionListView::onReactionEditing(const QModelIndex &index)
   // Set rate law (substituted)
   law->setRateLaw(editor.kineticLaw().subs(subst_table));
 
+  // signal model was modified
+  onModelModified();
+
   // Update reaction item in DocTree as the name may have been changed
   ReactionItem *item = dynamic_cast<ReactionItem *>(_reactions_item->getTreeChild(index.row()));
   item->updateLabel();
+
   Application::getApp()->docTree()->markForUpdate(item);
+
   // Update reaction list
   _reactions->updateTable();
+}
 
-  //Application::getApp()->resetSelectedItem();
-  //Application::getApp()->docTree()->resetCompleteTree();
+
+void
+ReactionListView::onModelModified() {
+  _reactions_item->document()->setIsModified(true);
 }

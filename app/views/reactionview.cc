@@ -12,6 +12,7 @@
 #include "reactioneditor.hh"
 #include "../doctree/modelitem.hh"
 #include "../doctree/documenttree.hh"
+#include "../doctree/documentitem.hh"
 #include "reactionequationrenderer.hh"
 #include "../models/expressiondelegate.hh"
 #include <utils/logger.hh>
@@ -88,6 +89,8 @@ ReactionView::ReactionView(ReactionItem *reaction, QWidget *parent) :
                    this, SLOT(onParametersChanged()));
   QObject::connect(_reaction->localParameters(), SIGNAL(nameUpdated()),
                    this, SLOT(onParametersChanged()));
+  QObject::connect(_reaction->localParameters(), SIGNAL(modelModified()),
+                   this, SLOT(onModelModified()));
 }
 
 
@@ -162,6 +165,9 @@ ReactionView::onMakeParamGlobalClicked()
 
   // Tell species list model to remove species:
   _reaction->localParameters()->updateCompleteTable();
+
+  // mark model as modified
+  onModelModified();
 }
 
 
@@ -206,6 +212,8 @@ ReactionView::onReactionEditing()
                                             iNA::Ast::Compartment::VOLUME, true);
     subst_table[editor.context().compartmentSymbol()] = compartment->getSymbol();
     model.addDefinition(compartment);
+    // signal model was modified
+    onModelModified();
   } else {
     // Resolve compartment to be used to define new species in
     if (! model.hasCompartment(editor.context().compartmentIdentifier())) {
@@ -224,7 +232,6 @@ ReactionView::onReactionEditing()
     subst_table[spec->second] = species->getSymbol();
     model.addDefinition(species);
   }
-
   // Update reaction name
   reaction->setName(editor.reactionName().toStdString());
   // Update reactant stoichiometry
@@ -265,6 +272,9 @@ ReactionView::onReactionEditing()
   // Update reaction label:
   _label->setText(tr("Reaction") + " " + _reaction->getDisplayName());
 
+  // mark model as modified
+  onModelModified();
+
   // Update tree model
   _reaction->updateLabel();
   Application::getApp()->docTree()->markForUpdate(_reaction);
@@ -276,4 +286,10 @@ ReactionView::onParametersChanged() {
   // Update reation equation and kinetic law view:
   ReactionEquationRenderer *renderer = new ReactionEquationRenderer(_reaction->getReaction());
   _equation_view->setScene(renderer);
+}
+
+
+void
+ReactionView::onModelModified() {
+  _reaction->document()->setIsModified(true);
 }

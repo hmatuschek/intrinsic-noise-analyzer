@@ -37,6 +37,9 @@ public:
   /** Returns a weak reference to the Ast::Model. */
   iNA::Ast::Model &model();
 
+signals:
+  /** Gets emitted if the @c Ast::Model is modified. */
+  void modelModified();
 
 public slots:
   /** Adds a new compartment to the model. */
@@ -44,7 +47,6 @@ public slots:
 
   /** Removes the compartment from the model. */
   void remCompartment(int row);
-
 
 private:
   /** Returns the identifier. */
@@ -71,7 +73,6 @@ private:
   QVariant _getConstFlag(iNA::Ast::Compartment *compartment, int role) const;
   /** Updates the const flag of the compartment. */
   bool _updateConstFlag(iNA::Ast::Compartment *compartment, const QVariant &value);
-
 
 private:
   /** Holds a weak reference to the SBML model. */

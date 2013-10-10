@@ -26,6 +26,8 @@ private slots:
   void onRemSpecies();
   /** Callback whenever the selection changed. */
   void onSelectionChanged(const QItemSelection &selected, const QItemSelection &unselected);
+  /** Gets called if the model is modified */
+  void onModelModified();
 
 private:
   /** Holds a weak reference to the species item. */

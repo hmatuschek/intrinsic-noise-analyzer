@@ -2,6 +2,7 @@
 
 #include "../doctree/documenttree.hh"
 #include "../doctree/documenttreeitem.hh"
+#include "../doctree/analysesitem.hh"
 
 #include "../views/mainwindow.hh"
 #include "../views/importmodeldialog.hh"
@@ -249,19 +250,49 @@ Application::itemSelected(DocumentTreeItem *wrapper)
 
 
 void
-Application::checkForNewVersion()
-{
-  // Otherwise start check.
+Application::checkForNewVersion() {
   _versionCheck.startCheck();
 }
 
 
 void
-Application::importModel(const QString &path, bool anonymous, ModelType type)
-{
+Application::importModel(const QString &path, bool anonymous, ModelType type) {
   onImportModel(path, anonymous, type);
 }
 
+
+void
+Application::quit() {
+  bool task_running = false;
+  bool unsaved_models = false;
+
+  // Check if there is any task running
+  for (int i=0; i<docTree()->getTreeChildCount(); i++) {
+    DocumentItem *doc = dynamic_cast<DocumentItem *>(docTree()->getTreeChild(i));
+    if (doc->isModified()) { unsaved_models = true; }
+    if (doc->analysesItem()->tasksRunning()) { task_running = true; }
+  }
+
+  if (task_running) {
+    QMessageBox::StandardButton resp =
+        QMessageBox::question(0, tr("Analysis tasks running"),
+                              tr("There are analysis tasks running. Quit anyway?"),
+                              QMessageBox::Yes|QMessageBox::Cancel,
+                              QMessageBox::Cancel);
+    if (QMessageBox::Cancel == resp) { return; }
+  }
+
+  if (unsaved_models) {
+    QMessageBox::StandardButton resp =
+        QMessageBox::question(0, tr("Unsaved models"),
+                              tr("There are unsaved models. Quit anyway?"),
+                              QMessageBox::Yes|QMessageBox::Cancel,
+                              QMessageBox::Cancel);
+    if (QMessageBox::Cancel == resp) { return; }
+  }
+
+  QApplication::exit(0);
+}
 
 void
 Application::showContextMenuAt(const QModelIndex &index, const QPoint &global_pos)

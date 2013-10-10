@@ -28,7 +28,8 @@ private slots:
   void onSelectionChanged(const QItemSelection &selected, const QItemSelection &deseleced);
   /** Callback for double click on a reaction. */
   void onReactionEditing(const QModelIndex &index);
-
+  /** Gets called if the model was modified. */
+  void onModelModified();
 
 private:
   /** Holds a weak reference to the list of reactions. */

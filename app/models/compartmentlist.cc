@@ -81,7 +81,11 @@ CompartmentList::setData(const QModelIndex &index, const QVariant &value, int ro
   }
 
   // on success, signal view that data has changed:
-  if (success) { emit dataChanged(index, index); }
+  if (success) {
+    emit dataChanged(index, index);
+    // signal model modified
+    emit modelModified();
+  }
   return success;
 }
 
@@ -281,6 +285,9 @@ CompartmentList::addCompartment()
         new iNA::Ast::Compartment(
           identifier, iNA::Ast::Compartment::VOLUME, true));
   endInsertRows();
+
+  // signal model modified
+  emit modelModified();
 }
 
 
@@ -306,4 +313,6 @@ CompartmentList::remCompartment(int row)
   _model->remDefinition(compartment);
   endRemoveRows();
 
+  // signal model modified
+  emit modelModified();
 }

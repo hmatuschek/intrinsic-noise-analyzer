@@ -55,6 +55,8 @@ signals:
   void identifierUpdated();
   /** Will be emmitted if the display-name of a local parameter is changed. */
   void nameUpdated();
+  /** Gets emitted once the model is modified. */
+  void modelModified();
 
 private:
   /** Returns the identifier of the local paramter. */

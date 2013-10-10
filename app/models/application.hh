@@ -102,6 +102,9 @@ public slots:
   /** Opens a model specified by the given path. */
   void importModel(const QString &path, bool anonymous=false, ModelType type=FORMAT_AUTO);
 
+  /** Checks if the application can be quitted savely. */
+  void quit();
+
 public:
   /** Shuts the only running application instance down. */
   static void shutdown();
