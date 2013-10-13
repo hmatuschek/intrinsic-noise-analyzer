@@ -2,7 +2,7 @@ Format: 3.0 (quilt)
 Source: intrinsic-noise-analyzer
 Binary: intrinsic-noise-analyzer, libina, libina-dev
 Architecture: any
-Version: 0.4.2-2
+Version: 0.4.3-1
 Maintainer: Hannes Matuschek <hmatuschek@gmail.com>
 Homepage: http://code.google.com/p/intrinsic-noise-analyzer
 Standards-Version: 3.9.2
