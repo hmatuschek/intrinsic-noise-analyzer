@@ -4,7 +4,6 @@
 #include "basemodel.hh"
 #include "constcompartmentmixin.hh"
 #include "intensivespeciesmixin.hh"
-#include "reasonablemodelmixin.hh"
 #include "../trafo/assertions.hh"
 
 namespace iNA {
