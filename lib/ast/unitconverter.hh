@@ -8,7 +8,8 @@
 namespace iNA {
 namespace Ast {
 
-/** A trivial class to tranlate a value given in unit A, into the same value in unit B. */
+/** A trivial class to tranlate a value given in unit A, into the same value in unit B.
+ * @deprecated Remove, is not used yet and will never be used in future. */
 class UnitConverter
 {
 public:

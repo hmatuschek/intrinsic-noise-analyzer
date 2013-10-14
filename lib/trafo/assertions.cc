@@ -10,14 +10,12 @@ using namespace iNA::Trafo;
  * Implements no rate rule assertions:
  * ********************************************************************************************* */
 void
-NoRateRuleAssertion::visit(const Ast::VariableDefinition *var)
-{
+NoRateRuleAssertion::visit(const Ast::VariableDefinition *var) {
   apply(var);
 }
 
 void
-NoRateRuleAssertion::apply(const Ast::VariableDefinition *var) throw (SBMLFeatureNotSupported)
-{
+NoRateRuleAssertion::apply(const Ast::VariableDefinition *var) throw (SBMLFeatureNotSupported) {
   if (var->hasRule() && Ast::Node::isRateRule(var->getRule())) {
     SBMLFeatureNotSupported err;
     err << "Rate-rules for variables not supported yet: "
@@ -31,11 +29,6 @@ NoRateRuleAssertion::apply(const Ast::Model &model) {
   NoRateRuleAssertion assertion; model.accept(assertion);
 }
 
-NoRateRuleMixin::NoRateRuleMixin(const Ast::Model &model)
-{
-  NoRateRuleAssertion::apply(model);
-}
-
 
 
 /* ********************************************************************************************* *
@@ -47,8 +40,7 @@ NoConstSpeciesAssertion::visit(const Ast::Species *var) {
 }
 
 void
-NoConstSpeciesAssertion::apply(const Ast::Species *var) throw (SBMLFeatureNotSupported)
-{
+NoConstSpeciesAssertion::apply(const Ast::Species *var) throw (SBMLFeatureNotSupported) {
   if (var->isConst()) {
     SBMLFeatureNotSupported err;
     err << "This implementation can not handle constant species yet: "
@@ -58,14 +50,8 @@ NoConstSpeciesAssertion::apply(const Ast::Species *var) throw (SBMLFeatureNotSup
 }
 
 void
-NoConstSpeciesAssertion::apply(const Ast::Model &model)
-{
+NoConstSpeciesAssertion::apply(const Ast::Model &model) {
   NoConstSpeciesAssertion assertion; model.accept(assertion);
-}
-
-NoConstSpeciesMixin::NoConstSpeciesMixin(const Ast::Model &model)
-{
-  NoConstSpeciesAssertion::apply(model);
 }
 
 
@@ -74,14 +60,12 @@ NoConstSpeciesMixin::NoConstSpeciesMixin(const Ast::Model &model)
  * Implements no assignment rule assertions:
  * ********************************************************************************************* */
 void
-NoAssignmentRuleAssertion::visit(const Ast::VariableDefinition *var)
-{
+NoAssignmentRuleAssertion::visit(const Ast::VariableDefinition *var) {
   apply(var);
 }
 
 void
-NoAssignmentRuleAssertion::apply(const Ast::VariableDefinition *var)  throw (SBMLFeatureNotSupported)
-{
+NoAssignmentRuleAssertion::apply(const Ast::VariableDefinition *var) throw (SBMLFeatureNotSupported) {
   if ( var->hasRule() && Ast::Node::isAssignmentRule(var->getRule()) ) {
     SBMLFeatureNotSupported err;
     err << "Assignment rules for variables not supported yet: "
@@ -91,14 +75,8 @@ NoAssignmentRuleAssertion::apply(const Ast::VariableDefinition *var)  throw (SBM
 }
 
 void
-NoAssignmentRuleAssertion::apply(const Ast::Model &model)
-{
+NoAssignmentRuleAssertion::apply(const Ast::Model &model) {
   NoAssignmentRuleAssertion assertion; model.accept(assertion);
-}
-
-NoAssignmentRuleMixin::NoAssignmentRuleMixin(const Ast::Model &model)
-{
-  NoAssignmentRuleAssertion::apply(model);
 }
 
 
@@ -107,31 +85,23 @@ NoAssignmentRuleMixin::NoAssignmentRuleMixin(const Ast::Model &model)
  * Implements no revsersible reaction assertions:
  * ********************************************************************************************* */
 void
-NoReversibleReactionAssertion::visit(const Ast::Reaction *reac)
-{
+NoReversibleReactionAssertion::visit(const Ast::Reaction *reac) {
   apply(reac);
 }
 
 void
-NoReversibleReactionAssertion::apply(const Ast::Reaction *reac) throw (SBMLFeatureNotSupported)
-{
+NoReversibleReactionAssertion::apply(const Ast::Reaction *reac) throw (SBMLFeatureNotSupported) {
   if (reac->isReversible()) {
     SBMLFeatureNotSupported err;
-    err << "Reaction "
-        << reac->getIdentifier() << " is defined reversible and could not be converted to irreversible.";
+    err << "Reaction " << reac->getIdentifier()
+        << " is defined reversible and could not be converted to irreversible.";
     throw err;
   }
 }
 
 void
-NoReversibleReactionAssertion::apply(const Ast::Model &model)
-{
+NoReversibleReactionAssertion::apply(const Ast::Model &model) {
   NoReversibleReactionAssertion assertion; model.accept(assertion);
-}
-
-NoReversibleReactionMixin::NoReversibleReactionMixin(const Ast::Model &model)
-{
-  NoReversibleReactionAssertion::apply(model);
 }
 
 
@@ -140,17 +110,14 @@ NoReversibleReactionMixin::NoReversibleReactionMixin(const Ast::Model &model)
  * Implements constant parameter assertions:
  * ********************************************************************************************* */
 void
-ConstParameterAssertion::visit(const Ast::Parameter *param)
-{
+ConstParameterAssertion::visit(const Ast::Parameter *param) {
   apply(param);
 }
 
 void
-ConstParameterAssertion::apply(const Ast::Parameter *param) throw (SBMLFeatureNotSupported)
-{
+ConstParameterAssertion::apply(const Ast::Parameter *param) throw (SBMLFeatureNotSupported) {
   // Check if parameter is constant:
-  if (! param->isConst())
-  {
+  if (! param->isConst()) {
     SBMLFeatureNotSupported err;
     err << "This implementation can only handle constant paramters: "
         << "Parameter " << param->getIdentifier() << " is defined as non-constant.";
@@ -158,8 +125,7 @@ ConstParameterAssertion::apply(const Ast::Parameter *param) throw (SBMLFeatureNo
   }
 
   // Check if parameter has initial value:
-  if (! param->hasValue())
-  {
+  if (! param->hasValue()) {
     SBMLFeatureNotSupported err;
     err << "Parameter " << param->getIdentifier() << " has no initial value assigned!";
     throw err;
@@ -167,14 +133,8 @@ ConstParameterAssertion::apply(const Ast::Parameter *param) throw (SBMLFeatureNo
 }
 
 void
-ConstParameterAssertion::apply(const Ast::Model &model)
-{
+ConstParameterAssertion::apply(const Ast::Model &model) {
   ConstParameterAssertion assertion; model.accept(assertion);
-}
-
-ConstParamteterMixin::ConstParamteterMixin(const Ast::Model &model)
-{
-  ConstParameterAssertion::apply(model);
 }
 
 
@@ -188,10 +148,8 @@ ConstCompartmentAssertion::visit(const Ast::Compartment *comp) {
 }
 
 void
-ConstCompartmentAssertion::apply(const Ast::Compartment *comp) throw (SBMLFeatureNotSupported)
-{
-  if (! comp->isConst())
-  {
+ConstCompartmentAssertion::apply(const Ast::Compartment *comp) throw (SBMLFeatureNotSupported) {
+  if (! comp->isConst()) {
     SBMLFeatureNotSupported err;
     err << "This implementation can not handle non-constant compartments yet.";
     throw err;
@@ -199,8 +157,7 @@ ConstCompartmentAssertion::apply(const Ast::Compartment *comp) throw (SBMLFeatur
 }
 
 void
-ConstCompartmentAssertion::apply(const Ast::Model &model)
-{
+ConstCompartmentAssertion::apply(const Ast::Model &model) {
   ConstCompartmentAssertion assertion; model.accept(assertion);
 }
 
@@ -210,36 +167,39 @@ ConstCompartmentAssertion::apply(const Ast::Model &model)
  * Implements constant stoichiometry assertions:
  * ********************************************************************************************* */
 void
-ConstStoichiometryAssertion::visit(const Ast::Reaction *reac)
-{
+ConstStoichiometryAssertion::visit(const Ast::Reaction *reac) {
   apply(reac);
 }
 
 void
-ConstStoichiometryAssertion::apply(const Ast::Reaction *reac) throw (SBMLFeatureNotSupported)
-{
+ConstStoichiometryAssertion::apply(const Ast::Reaction *reac) throw (SBMLFeatureNotSupported) {
   // Check reactants:
-  for (Ast::Reaction::const_iterator item=reac->reactantsBegin(); item!=reac->reactantsEnd(); item++) {
-    SBMLFeatureNotSupported err;
-    err << "Stoichiometry expression for reactant " << item->first->getIdentifier()
-        << " in reaction " << reac->getIdentifier() << " is not a constant! "
-        << "It is: " << item->second;
-    throw err;
+  Ast::Reaction::const_iterator item=reac->reactantsBegin();
+  for (; item!=reac->reactantsEnd(); item++) {
+    if (! GiNaC::is_a<GiNaC::numeric>(item->second)) {
+      SBMLFeatureNotSupported err;
+      err << "Stoichiometry expression for reactant " << item->first->getIdentifier()
+          << " in reaction " << reac->getIdentifier() << " is not a constant! "
+          << "It is: " << item->second;
+      throw err;
+    }
   }
 
   // Check products:
-  for (Ast::Reaction::const_iterator item=reac->productsBegin(); item!=reac->productsEnd(); item++) {
-    SBMLFeatureNotSupported err;
-    err << "Stoichiometry expression for product " << item->first->getIdentifier()
-        << " in reaction " << reac->getIdentifier() << " is not a constant! "
-        << "It is: " << item->second;
-    throw err;
+  item=reac->productsBegin();
+  for (; item!=reac->productsEnd(); item++) {
+    if (! GiNaC::is_a<GiNaC::numeric>(item->second)) {
+        SBMLFeatureNotSupported err;
+        err << "Stoichiometry expression for product " << item->first->getIdentifier()
+            << " in reaction " << reac->getIdentifier() << " is not a constant! "
+            << "It is: " << item->second;
+        throw err;
+    }
   }
 }
 
 void
-ConstStoichiometryAssertion::apply(const Ast::Model &model)
-{
+ConstStoichiometryAssertion::apply(const Ast::Model &model) {
   ConstStoichiometryAssertion assertion; model.accept(assertion);
 }
 
@@ -255,8 +215,7 @@ NoExplicitTimeDependenceAssertion::NoExplicitTimeDependenceAssertion(GiNaC::symb
 }
 
 void
-NoExplicitTimeDependenceAssertion::visit(const Ast::VariableDefinition *var)
-{
+NoExplicitTimeDependenceAssertion::visit(const Ast::VariableDefinition *var) {
   // Process rule if there is one:
   if (var->hasRule()) var->getRule()->accept(*this);
 
@@ -269,8 +228,7 @@ NoExplicitTimeDependenceAssertion::visit(const Ast::VariableDefinition *var)
 }
 
 void
-NoExplicitTimeDependenceAssertion::visit(const Ast::Rule *rule)
-{
+NoExplicitTimeDependenceAssertion::visit(const Ast::Rule *rule) {
   // If the rule expression is explicitly time dependent:
   if (rule->getRule().has(_time_symbol)) {
     SBMLFeatureNotSupported err;
@@ -280,8 +238,7 @@ NoExplicitTimeDependenceAssertion::visit(const Ast::Rule *rule)
 }
 
 void
-NoExplicitTimeDependenceAssertion::visit(const Ast::KineticLaw *law)
-{
+NoExplicitTimeDependenceAssertion::visit(const Ast::KineticLaw *law) {
   // First process local paramter definitions:
   law->traverse(*this);
 
@@ -294,10 +251,47 @@ NoExplicitTimeDependenceAssertion::visit(const Ast::KineticLaw *law)
 }
 
 void
-NoExplicitTimeDependenceAssertion::apply(const Ast::Model &model)
-{
+NoExplicitTimeDependenceAssertion::apply(const Ast::Model &model) {
   NoExplicitTimeDependenceAssertion assertion(model.getTime());
   model.accept(assertion);
+}
+
+
+/* ********************************************************************************************* *
+ * Implements NonEmptyModel assertion:
+ * ********************************************************************************************* */
+void
+NonEmptyModelAssertion::apply(const Ast::Model &model)
+{
+  if (0 == model.numCompartments()) {
+    SBMLFeatureNotSupported err;
+    err << "The model '"<< model.getLabel() << "' defines no compartments.";
+    throw err;
+  }
+
+  if (0 == model.numSpecies()) {
+    SBMLFeatureNotSupported err;
+    err << "The model '"<< model.getLabel() << "' defines no species.";
+    throw err;
+  }
+
+  if (0 == model.numReactions()) {
+    SBMLFeatureNotSupported err;
+    err << "The model '"<< model.getLabel() << "' defines no reactions.";
+    throw err;
+  }
+
+  // Check every reaction if it has at least on reactant or one product
+  for (size_t i=0; i<model.numReactions(); i++) {
+    Ast::Reaction *reaction = model.getReaction(i);
+    if ((0 == reaction->numProducts()) && (0 == reaction->numReactants())) {
+      SBMLFeatureNotSupported err;
+      err << "The reaction '" << reaction->getLabel() <<
+             "' in model '"<< model.getLabel() << "' defines no reactants nor products.";
+      throw err;
+
+    }
+  }
 }
 
 
@@ -311,20 +305,20 @@ ReasonableModelAssertion::ReasonableModelAssertion(GiNaC::symbol time_symbol)
 }
 
 void
-ReasonableModelAssertion::visit(const Ast::VariableDefinition *var)
-{
+ReasonableModelAssertion::visit(const Ast::VariableDefinition *var) {
   // Apply assertions:
   NoRateRuleAssertion::apply(var);
   NoAssignmentRuleAssertion::apply(var);
   NoExplicitTimeDependenceAssertion::visit(var);
 
   // If there is a rule define -> check:
-  if (var->hasRule()) { var->getRule()->accept(*((NoExplicitTimeDependenceAssertion *)this)); }
+  if (var->hasRule()) {
+    var->getRule()->accept(*((NoExplicitTimeDependenceAssertion *)this));
+  }
 }
 
 void
-ReasonableModelAssertion::visit(const Ast::Parameter *param)
-{
+ReasonableModelAssertion::visit(const Ast::Parameter *param) {
   // Apply assertions:
   ConstParameterAssertion::apply(param);
   // Check base class:
@@ -332,22 +326,29 @@ ReasonableModelAssertion::visit(const Ast::Parameter *param)
 }
 
 void
-ReasonableModelAssertion::visit(const Ast::Rule *rule)
-{
+ReasonableModelAssertion::visit(const Ast::Rule *rule) {
   // apply assertions:
   NoExplicitTimeDependenceAssertion::visit(rule);
 }
 
 void
-ReasonableModelAssertion::visit(const Ast::KineticLaw *law)
-{
+ReasonableModelAssertion::visit(const Ast::Reaction *reaction) {
+  NoReversibleReactionAssertion::visit(reaction);
+  reaction->traverse((NoExplicitTimeDependenceAssertion &)(*this));
+}
+
+void
+ReasonableModelAssertion::visit(const Ast::KineticLaw *law) {
   // Apply assertions:
   NoExplicitTimeDependenceAssertion::visit(law);
 }
 
+
 void
-ReasonableModelAssertion::apply(const Ast::Model &model)
-{
+ReasonableModelAssertion::apply(const Ast::Model &model) {
+  // Check if model is non-empty
+  NonEmptyModelAssertion::apply(model);
+  // Check other assertions
   ReasonableModelAssertion assertion(model.getTime());
   model.accept((NoExplicitTimeDependenceAssertion &)assertion);
 }

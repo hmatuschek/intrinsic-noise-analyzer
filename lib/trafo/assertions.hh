@@ -29,16 +29,6 @@ public:
 };
 
 
-/** This class implements the @c NoRateRuleAssertion as a model mixin.
- * @ingroup trafo */
-class NoRateRuleMixin
-{
-public:
-  /** Constructor, throws a @c SBMLFeatureNotSupported exception if there is a @c RateRule. */
-  NoRateRuleMixin(const Ast::Model &model);
-};
-
-
 /** This class implements an assertion that checks if there are any species defined as constant.
  * @ingroup trafo */
 class NoConstSpeciesAssertion :
@@ -56,16 +46,6 @@ public:
 
   /** This method applies the assertion on the model. */
   static void apply(const Ast::Model &model);
-};
-
-
-/** This class implements the @c NoConstSpeciesAssertion as a model mixin.
- * @ingroup trafo */
-class NoConstSpeciesMixin
-{
-public:
-  /** Constructor, checks if there are any species defined as constant. */
-  NoConstSpeciesMixin(const Ast::Model &model);
 };
 
 
@@ -88,17 +68,6 @@ public:
 };
 
 
-/** This class implements the @c NoAssignmentRuleAssertion as a model mixin.
- * @ingroup trafo */
-class NoAssignmentRuleMixin
-{
-public:
-  /** Constructor, throws a @ SBMLFeatureNotSupported exception if there is an @c AssginmentRule
-   * defined for any variable. */
-  NoAssignmentRuleMixin(const Ast::Model &model);
-};
-
-
 /** This class checks if there are reversible reactions.
  * @ingroup trafo */
 class NoReversibleReactionAssertion :
@@ -118,17 +87,6 @@ public:
 };
 
 
-/** This class implements the @c NoReversibleReactionAssertion as a model mixin.
- * @ingroup trafo */
-class NoReversibleReactionMixin
-{
-public:
-  /** Constructor, throws a @c SBMLFeatureNotSupported exception if there is a reaction defined as
-   * reversible. */
-  NoReversibleReactionMixin(const Ast::Model &model);
-};
-
-
 /** This class checks if all paramters are defined constant.
  * @ingroup trafo */
 class ConstParameterAssertion :
@@ -145,16 +103,6 @@ public:
 
   /** Applies the constraint on the given model. */
   static void apply(const Ast::Model &model);
-};
-
-
-/** This class implements the @c ConstParameterAssertion as a model mixin.
- * @ingroup trafo */
-class ConstParamteterMixin
-{
-public:
-  /** Throws an exception if there is a paramter defined, that is not constant. */
-  ConstParamteterMixin(const Ast::Model &model);
 };
 
 
@@ -228,12 +176,23 @@ public:
 };
 
 
+/** Checks if the given model has at least on reaction, species and compartment defined.
+ * @ingroup trafo */
+class NonEmptyModelAssertion
+{
+public:
+  static void apply(const Ast::Model &model);
+};
+
+
 /** This class unifies some assertions that are required for a "reasonable" model.
  * @ingroup trafo */
-class ReasonableModelAssertion
-    : public NoExplicitTimeDependenceAssertion,
+class ReasonableModelAssertion:
+    public NoExplicitTimeDependenceAssertion,
     public ConstParameterAssertion,
-    public NoAssignmentRuleAssertion, public NoRateRuleAssertion
+    public NoAssignmentRuleAssertion,
+    public NoRateRuleAssertion,
+    public NoReversibleReactionAssertion
 {
 public:
   /** Constructor. */
@@ -250,12 +209,27 @@ public:
   /** Applies the @c NoExplicitTimeDependenceAssertion on the given rule. */
   virtual void visit(const Ast::Rule *rule);
 
+  /** This method checks if the reaction is reversible. */
+  virtual void visit(const Ast::Reaction *reac);
+
   /** Applies the @c NoExplicitTimeDependenceAssertion on the given kinetic law. */
   virtual void visit(const Ast::KineticLaw *law);
 
 public:
   /** Applies the assertions on the given model. */
   static void apply(const Ast::Model &model);
+};
+
+
+/** Implements the @c ReasonableModelAssertion class as a Mixin.
+ * @ingroup trafo */
+class ReasonableModelMixin
+{
+public:
+  /** Constructor, performs also the assertions. */
+  inline ReasonableModelMixin(const Ast::Model &model) {
+    ReasonableModelAssertion::apply(model);
+  }
 };
 
 
