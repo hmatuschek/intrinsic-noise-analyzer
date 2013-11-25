@@ -26,9 +26,9 @@ checksums       rmd160  8644a278e99c3e15ebf83f5e641758bdecad8b23 \
                 sha256  5c70c46b953b3b71ed2a2e28362b9adfacfae24b2b678d81bcc053ab779e7173
 
 depends_lib     port:gmp \
-		port:gcc47
+		port:gcc48
 
-configure.compiler	macports-gcc-4.7
+configure.compiler	macports-gcc-4.8
 
 test.run        yes
 test.target     check

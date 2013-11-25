@@ -32,9 +32,9 @@ checksums           rmd160  185beb54cdda53e5a74958c77964ea3015c7b533 \
 depends_lib         port:bzip2 \
                     port:libxml2 \
                     port:zlib \
-		    port:gcc47
+		    port:gcc48
 
-configure.compiler      macports-gcc-4.7
+configure.compiler      macports-gcc-4.8
 
 configure.args      --with-bzip2=${prefix} \
                     --with-libxml=${prefix} \
