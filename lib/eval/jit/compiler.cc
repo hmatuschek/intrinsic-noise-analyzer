@@ -44,14 +44,14 @@ CompilerCore::finalize(size_t level)
   code->getBuilder().CreateRetVoid();
 
   // First, verify module:
-  {
+  /*{
     std::string error_string;
     if(llvm::verifyModule(*(code->getModule()), llvm::ReturnStatusAction, &error_string)) {
       InternalError err;
       err << "Can not verify LLVM IR module: " << error_string;
       throw err;
     }
-  }
+  }*/
 
   // Create Execution engine:
   llvm::ExecutionEngine *engine=0;
