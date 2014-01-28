@@ -138,15 +138,36 @@ public:
             default: break;
           }
 
-          // Test for absolute and relative errors
-          if (maxNorm(state-state_old) < std::min(this->parameters.absError, maxNorm(state)*this->parameters.relError)
-              && maxNorm(this->ODEs) < std::min(this->parameters.absError, maxNorm(state)*this->parameters.relError) )
+          // Test for convergence of ODEs
+          if ( maxNorm(this->ODEs) < this->parameters.absError )
+          {
+             return Success;
+          }
+
+          // Test for convergence of update
+          double test=0,temp = 0.;
+          for(size_t i=0;i<this->dim;i++)
+          {
+              temp = (std::abs(state(i)-state_old(i)))/std::max(state(i),1.);
+              if (temp > test) test = temp;
+          }
+          if (test < this->parameters.relError)
+          {
+              //convergence of dx
               return Success;
+          }
+
+          // Maybe this condition was not the best
+          // Test for absolute and relative errors
+          //if (maxNorm(state-state_old) < std::min(this->parameters.absError, maxNorm(state)*this->parameters.relError)
+          //    && maxNorm(this->ODEs) < std::min(this->parameters.absError, maxNorm(state)*this->parameters.relError) )
+          //    return Success;
 
       } // Next newton iteration
 
       return MaxIterationsReached;
   }
+
 
   /**
    * @brief Performs a single Newton-Raphson iteration with linesearch
