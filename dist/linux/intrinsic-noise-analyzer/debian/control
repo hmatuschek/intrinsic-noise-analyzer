@@ -9,7 +9,7 @@ Homepage: http://code.google.com/p/intrinsic-noise-analyzer
 Package: intrinsic-noise-analyzer
 Section: science
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libina (= ${bianary:Version})
+Depends: ${shlibs:Depends}, ${misc:Depends}, libina (= ${binary:Version})
 Description: The Intrinsic Noise Analyzer
  iNA is a computational tool for quantitative analysis of fluctuations in biochemical reaction
  networks. Such fluctuations, also known as intrinsic noise, arise due to the stochastic nature of
@@ -37,7 +37,7 @@ Description: The Intrinsic Noise Analyzer runtime library
 Package: libina-dev
 Section: science
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libina (= ${bianary:Version})
+Depends: ${shlibs:Depends}, ${misc:Depends}, libina (= ${binary:Version})
 Description: The Intrinsic Noise Analyzer runtime library
  iNA is a computational tool for quantitative analysis of fluctuations in biochemical reaction
  networks. Such fluctuations, also known as intrinsic noise, arise due to the stochastic nature of
