@@ -85,7 +85,10 @@ typedef Eigen::Matrix< GiNaC::ex , Dynamic, 1> VectorXex;
 
 /** Simple inline evaluator */
 inline double ex2double(const GiNaC::ex &In) {
-  return GiNaC::ex_to<GiNaC::numeric>(In.evalf()).to_double();
+  if (GiNaC::is_a<GiNaC::numeric>(In.evalf())) {
+    return GiNaC::ex_to<GiNaC::numeric>(In.evalf()).to_double();
+  }
+  return std::numeric_limits<double>::quiet_NaN();
 }
 
 /** Simple inline evaluator */

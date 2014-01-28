@@ -24,20 +24,6 @@ RegressionTest::testConstSpecies()
 }
 
 
-void
-RegressionTest::testSpeciesByAssignmentRule()
-{
-  Ast::Model *sbml_model = Parser::Sbml::importModel("test/regression-tests/species_by_assignment_rule.xml");
-
-  Ast::Species *S3 = sbml_model->getSpecies("S3");
-  UT_ASSERT(S3->hasRule());
-
-  UT_ASSERT_THROW(Models::REmodel re_model(*sbml_model),
-                  iNA::SBMLFeatureNotSupported);
-
-  delete sbml_model;
-}
-
 
 void
 RegressionTest::testNonConstantParameter()
@@ -91,8 +77,6 @@ RegressionTest::suite()
 
   s->addTest(new UnitTest::TestCaller<RegressionTest>(
                "Constant species definition.", &RegressionTest::testConstSpecies));
-  s->addTest(new UnitTest::TestCaller<RegressionTest>(
-               "Species by assignment rule.", &RegressionTest::testSpeciesByAssignmentRule));
   s->addTest(new UnitTest::TestCaller<RegressionTest>(
                "Algebraic constraints.", &RegressionTest::testNoAlgebraicConstraint));
   s->addTest(new UnitTest::TestCaller<RegressionTest>(

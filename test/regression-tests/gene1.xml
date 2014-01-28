@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" version="4">
+  <model id="GeneExpression" name="Gene Expression I">
+    <listOfUnitDefinitions>
+      <unitDefinition id="substance">
+        <listOfUnits>
+          <unit kind="mole" exponent="1" scale="-6" multiplier="1"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="volume">
+        <listOfUnits>
+          <unit kind="litre" exponent="1" scale="0" multiplier="1"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="area">
+        <listOfUnits>
+          <unit kind="metre" exponent="2" scale="0" multiplier="1"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="length">
+        <listOfUnits>
+          <unit kind="metre" exponent="1" scale="0" multiplier="1"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="time">
+        <listOfUnits>
+          <unit kind="second" exponent="1" scale="0" multiplier="60"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="cell" name="$\Omega$" spatialDimensions="3" constant="true"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="Gene" name="G" compartment="cell" hasOnlySubstanceUnits="true" constant="false"/>
+      <species id="mRNA" compartment="cell" hasOnlySubstanceUnits="true" constant="false"/>
+      <species id="Protein" name="P" compartment="cell" hasOnlySubstanceUnits="true" constant="false"/>
+      <species id="Enzyme" name="E" compartment="cell" hasOnlySubstanceUnits="true" constant="false"/>
+      <species id="Complex" name="C" compartment="cell" hasOnlySubstanceUnits="true" constant="false"/>
+    </listOfSpecies>
+    <listOfParameters>
+      <parameter id="k0" name="$k_0$" constant="true"/>
+      <parameter id="ks" name="$k_s$" constant="true"/>
+      <parameter id="kdM" name="$k_dM$" constant="true"/>
+      <parameter id="k1" name="$k_1$" constant="true"/>
+      <parameter id="km1" name="$k_-1$" constant="true"/>
+      <parameter id="k2" name="$k_2$" constant="true"/>
+    </listOfParameters>
+    <listOfInitialAssignments>
+      <initialAssignment symbol="k0">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <cn> 1445.78313253012 </cn>
+        </math>
+      </initialAssignment>
+      <initialAssignment symbol="ks">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <cn> 1.5 </cn>
+        </math>
+      </initialAssignment>
+      <initialAssignment symbol="kdM">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <cn> 20 </cn>
+        </math>
+      </initialAssignment>
+      <initialAssignment symbol="k1">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <cn> 400 </cn>
+        </math>
+      </initialAssignment>
+      <initialAssignment symbol="km1">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <cn> 2 </cn>
+        </math>
+      </initialAssignment>
+      <initialAssignment symbol="k2">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <cn> 2 </cn>
+        </math>
+      </initialAssignment>
+      <initialAssignment symbol="cell">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <cn type="e-notation"> 1 <sep/> -15 </cn>
+        </math>
+      </initialAssignment>
+      <initialAssignment symbol="Gene">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <apply>
+            <times/>
+            <ci> cell </ci>
+            <cn> 0.00166 </cn>
+          </apply>
+        </math>
+      </initialAssignment>
+      <initialAssignment symbol="mRNA">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <cn> 0 </cn>
+        </math>
+      </initialAssignment>
+      <initialAssignment symbol="Protein">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <cn> 0 </cn>
+        </math>
+      </initialAssignment>
+      <initialAssignment symbol="Enzyme">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <apply>
+            <times/>
+            <ci> cell </ci>
+            <cn> 0.1 </cn>
+          </apply>
+        </math>
+      </initialAssignment>
+      <initialAssignment symbol="Complex">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <cn> 0 </cn>
+        </math>
+      </initialAssignment>
+    </listOfInitialAssignments>
+    <listOfReactions>
+      <reaction id="transcription" name="Transcription" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Gene">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Gene">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+          <speciesReference species="mRNA">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> k0 </ci>
+              <ci> Gene </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="translation" name="Translation" reversible="false">
+        <listOfReactants>
+          <speciesReference species="mRNA">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Protein">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+          <speciesReference species="mRNA">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> ks </ci>
+              <ci> mRNA </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="degrade_mRNA" name="mRNA degradation" reversible="false">
+        <listOfReactants>
+          <speciesReference species="mRNA">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfReactants>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> mRNA </ci>
+              <ci> kdM </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="binding" name="Enzyme binding" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Protein">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+          <speciesReference species="Enzyme">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Complex">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> Protein </ci>
+              <apply>
+                <power/>
+                <ci> cell </ci>
+                <cn> -1 </cn>
+              </apply>
+              <ci> k1 </ci>
+              <ci> Enzyme </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="unbinding" name="Enzyme unbinding" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Complex">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Protein">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+          <speciesReference species="Enzyme">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> km1 </ci>
+              <ci> Complex </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="protein_degradation" name="Enzymatic degradation" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Complex">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Enzyme">
+            <stoichiometryMath>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <cn> 1 </cn>
+              </math>
+            </stoichiometryMath>
+          </speciesReference>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> Complex </ci>
+              <ci> k2 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>
