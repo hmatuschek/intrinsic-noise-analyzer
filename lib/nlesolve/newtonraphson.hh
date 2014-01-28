@@ -342,58 +342,6 @@ public:
 
   }
 
-  /**
-   * Damped line search method.
-   *
-   * @ingroup nlesolve
-   * @todo this method does not work properly.
-   *
-   * This method simply halfens the step size.
-   */
-
-  LineSearchStatus
-  linesearch2(const Eigen::VectorXd &xold, Eigen::VectorXd &x, Eigen::VectorXd &dx,
-                                      const double fold, double &f, double stpmax)
-  {
-
-      // first try Newton step
-
-      int n=0;
-
-      double lambda=1;
-
-
-      double norm = dx.norm();
-      // scale if dx is too large
-      if(norm > stpmax) dx*=(stpmax/norm);
-
-      // loop over until f has sufficiently decreased
-      while(f > fold)
-      {
-
-          n++;
-
-          x = xold+lambda*dx;
-
-          this->interpreter.run(x,this->ODEs);
-
-          f = 0.5*this->ODEs.squaredNorm();
-
-          // take half step size
-          lambda *= 0.5;
-
-          if(n>32)
-          {
-              std::cerr<<"max reached"<<std::endl;
-              return LineSearchFailed;
-          }
-
-      }
-
-      return Done;
-
-  }
-
 };
 
 
