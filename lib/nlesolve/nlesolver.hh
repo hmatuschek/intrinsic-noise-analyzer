@@ -9,8 +9,7 @@ namespace NLEsolve{
 
 enum LineSearchMethod {
     NoLineSearch = 0,
-    Damped = 1,
-    Optimization = 2,
+    Optimization = 1,
 };
 
 enum Status {
