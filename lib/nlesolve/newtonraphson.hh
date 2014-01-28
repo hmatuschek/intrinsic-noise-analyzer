@@ -210,8 +210,6 @@ public:
           case Optimization:
             lcheck = this->linesearch(inState, outState, dx, fold, f, nablaf, stpmax);
             break;
-          case Damped:
-            lcheck = this->linesearch2(inState, outState, dx, fold, f, stpmax);
           default: return Done;
 
       }
