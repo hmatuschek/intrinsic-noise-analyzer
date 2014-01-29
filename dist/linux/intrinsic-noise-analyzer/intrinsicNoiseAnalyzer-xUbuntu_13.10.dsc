@@ -6,7 +6,7 @@ Version: 0.4.3-1
 Maintainer: Hannes Matuschek <hmatuschek@gmail.com>
 Homepage: http://code.google.com/p/intrinsic-noise-analyzer
 Standards-Version: 3.9.2
-Build-Depends: cdbs (>= 0.4.51), debhelper (>= 8.0.0), cmake, libsbml5-dev (>= 5.6), libqt4-dev (>= 4.5), libqtcore4 (>= 4.5), libqtgui4 (>= 4.5), libginac-dev, libeigen3-dev, llvm-3.2-runtime, llvm-3.3-dev, llvm-3.3
+Build-Depends: cdbs (>= 0.4.51), debhelper (>= 8.0.0), cmake, libsbml5-dev (>= 5.6), libqt4-dev (>= 4.5), libqtcore4 (>= 4.5), libqtgui4 (>= 4.5), libginac-dev, libeigen3-dev, llvm-3.3-runtime, llvm-3.3-dev, llvm-3.3
 Package-List:
  intrinsic-noise-analyzer deb science extra
  libina deb science extra

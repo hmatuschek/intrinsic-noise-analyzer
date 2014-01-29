@@ -1,6 +1,7 @@
 #ifndef __INA_EVAL_BCI_INTERPRETER_HH__
 #define __INA_EVAL_BCI_INTERPRETER_HH__
 
+#include <complex>
 #include <ginac/ginac.h>
 
 #include <vector>
@@ -41,11 +42,14 @@ public:
   /** Constructs a complex-valued value. */
   InterpreterValue(const double &real, const double &imag): _value(real, imag) { }
 
-  /** Returns the value as a real. */
-  inline double &asValue() { return _value.real(); }
+  /** Resets the value as a real. */
+  inline void setValue(double value) { _value = value; }
 
   /** Returns the value as a real. */
-  inline const double &asValue() const { return _value.real(); }
+  inline double asValue() const { return _value.real(); }
+
+  /** Resets the value as a complex. */
+  inline void setComplex(const std::complex<double> &value) { _value = value; }
 
   /** Returns the value as a complex. */
   inline std::complex<double> &asComplex() { return _value; }
@@ -95,7 +99,7 @@ public:
       } else {
         rhs = stack.back().asValue(); stack.pop_back();
       }
-      stack.back().asValue() += rhs;
+      stack.back().setValue(stack.back().asValue()+rhs);
       break;
 
     case Instruction::SUB:
@@ -104,7 +108,7 @@ public:
       } else {
         rhs = stack.back().asValue(); stack.pop_back();
       }
-      stack.back().asValue() -= rhs;
+      stack.back().setValue(stack.back().asValue()-rhs);
       break;
 
     case Instruction::MUL:
@@ -113,7 +117,7 @@ public:
       } else {
         rhs = stack.back().asValue(); stack.pop_back();
       }
-      stack.back().asValue() *= rhs;
+      stack.back().setValue(stack.back().asValue()*rhs);
       break;
 
     case Instruction::DIV:
@@ -122,7 +126,7 @@ public:
       } else {
         rhs = stack.back().asValue(); stack.pop_back();
       }
-      stack.back().asValue() /= rhs;
+      stack.back().setValue(stack.back().asValue()/rhs);
       break;
 
     case Instruction::POW:
@@ -131,14 +135,14 @@ public:
       } else {
         rhs = stack.back().asValue(); stack.pop_back();
       }
-      stack.back().asValue() = std::pow(stack.back().asValue(), rhs);
+      stack.back().setValue(std::pow(stack.back().asValue(), rhs));
       break;
 
     case Instruction::IPOW:
     {
       double x = stack.back().asValue();
       for (size_t i=1; i<inst.value.asIndex; i++) {
-        stack.back().asValue() *= x;
+        stack.back().setValue(stack.back().asValue()*x);
       }
     }
       break;
@@ -163,13 +167,13 @@ public:
     case Instruction::CALL:
       switch (Instruction::FunctionCode(inst.value.asIndex)) {
       case Instruction::FUNCTION_ABS:
-        stack.back().asValue() = std::abs(stack.back().asValue());
+        stack.back().setValue(std::abs(stack.back().asValue()));
         break;
       case Instruction::FUNCTION_LOG:
-        stack.back().asValue() = std::log(stack.back().asValue());
+        stack.back().setValue(std::log(stack.back().asValue()));
         break;
       case Instruction::FUNCTION_EXP:
-        stack.back().asValue() = std::exp(stack.back().asValue());
+        stack.back().setValue(std::exp(stack.back().asValue()));
         break;
       }
     }
@@ -197,8 +201,7 @@ public:
     {
     case Instruction::ADD:
       if (inst.valueImmediate) {
-        rhs.real() = inst.value.asComplex.real;
-        rhs.imag() = inst.value.asComplex.imag;
+        rhs = std::complex<double>(inst.value.asComplex.real, inst.value.asComplex.imag);
       } else {
         rhs = stack.back().asComplex(); stack.pop_back();
       }
@@ -207,8 +210,7 @@ public:
 
     case Instruction::SUB:
       if (inst.valueImmediate) {
-        rhs.real() = inst.value.asComplex.real;
-        rhs.imag() = inst.value.asComplex.imag;
+        rhs = std::complex<double>(inst.value.asComplex.real, inst.value.asComplex.imag);
       } else {
         rhs = stack.back().asComplex(); stack.pop_back();
       }
@@ -217,8 +219,7 @@ public:
 
     case Instruction::MUL:
       if (inst.valueImmediate) {
-        rhs.real() = inst.value.asComplex.real;
-        rhs.imag() = inst.value.asComplex.imag;
+        rhs = std::complex<double>(inst.value.asComplex.real, inst.value.asComplex.imag);
       } else {
         rhs = stack.back().asComplex(); stack.pop_back();
       }
@@ -227,8 +228,7 @@ public:
 
     case Instruction::DIV:
       if (inst.valueImmediate) {
-        rhs.real() = inst.value.asComplex.real;
-        rhs.imag() = inst.value.asComplex.imag;
+        rhs = std::complex<double>(inst.value.asComplex.real, inst.value.asComplex.imag);
       } else {
         rhs = stack.back().asComplex(); stack.pop_back();
       }
@@ -237,8 +237,7 @@ public:
 
     case Instruction::POW:
       if (inst.valueImmediate) {
-        rhs.real() = inst.value.asComplex.real;
-        rhs.imag() = inst.value.asComplex.imag;
+        rhs = std::complex<double>(inst.value.asComplex.real, inst.value.asComplex.imag);
       } else {
         rhs = stack.back().asComplex(); stack.pop_back();
       }
