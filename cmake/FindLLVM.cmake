@@ -1,7 +1,7 @@
 # Set default llvm-config names:
 SET(LLVM_CONFIG_EXEC_NAMES
-    "llvm-config" "llvm-config-3.2" "llvm-config-3.1" "llvm-config-3.0" "llvm-config-2.9"
-    "llvm-config-2.8")
+    "llvm-config" "llvm-config-3.3" "llvm-config-3.2" "llvm-config-3.1" "llvm-config-3.0"
+    "llvm-config-2.9" "llvm-config-2.8")
 # If the -DWITH_LLVM_CONFIG=... option is present:
 IF(WITH_LLVM_CONFIG)
   SET(LLVM_CONFIG_EXEC_NAMES ${LLVM_CONFIG_EXEC_NAMES})
