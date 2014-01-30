@@ -34,7 +34,7 @@ ModelExpressionContext::resolve(const std::string &identifier) {
 }
 
 std::string
-ModelExpressionContext::identifier(GiNaC::symbol symbol) const {
+ModelExpressionContext::identifier(GiNaC::symbol symbol) {
   if (! _scope.hasVariable(symbol)) {
     iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::DEBUG);
     message << "Can not resolve symbol '" << symbol.get_name() << "', resort to symbol name.";

@@ -17,7 +17,7 @@ public:
   virtual GiNaC::symbol resolve(const std::string &identifier) = 0;
   /** Returns the idenfitier for the given symbol. This is used for serializing expressions into
    * text. */
-  virtual std::string identifier(GiNaC::symbol symbol) const = 0;
+  virtual std::string identifier(GiNaC::symbol symbol) = 0;
 };
 
 
@@ -33,7 +33,7 @@ public:
   virtual GiNaC::symbol resolve(const std::string &name);
 
   /** Resolves the given GiNaC symbol to its identifier. */
-  virtual std::string identifier(GiNaC::symbol symbol) const;
+  virtual std::string identifier(GiNaC::symbol symbol);
 
 protected:
   /** Holds the scope of the context to be used to resolve symbols. */
@@ -61,7 +61,7 @@ public:
   /** Resolves a symbol identifier. */
   GiNaC::symbol resolve(const std::string &identifier);
   /** Resolves a symbol. */
-  std::string identifier(GiNaC::symbol symbol) const;
+  std::string identifier(GiNaC::symbol symbol);
 
 protected:
   /** Holds the identifier -> symbol table. */
@@ -80,7 +80,7 @@ GiNaC::ex parseExpression(const std::string &text, Context &scope);
 GiNaC::ex parseExpression(const std::string &text, Ast::Scope *scope);
 
 /** Serializes the given expression into the given stream using the given context. */
-void serializeExpression(GiNaC::ex expression, std::ostream &stream, const Context &ctx,
+void serializeExpression(GiNaC::ex expression, std::ostream &stream, Context &ctx,
                          SerializationType stategy=SERIALIZE_PRETTY);
 
 /** Serializes the given expression into the given stream using the given context. */

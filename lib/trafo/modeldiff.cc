@@ -1,6 +1,6 @@
 #include "modeldiff.hh"
-#include <ast/reaction.hh>
-#include <parser/expr/parser.hh>
+#include "../ast/reaction.hh"
+#include "../parser/expr/parser.hh"
 #include "referencecounter.hh"
 
 

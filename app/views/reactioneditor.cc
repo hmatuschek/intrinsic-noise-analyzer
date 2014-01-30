@@ -163,7 +163,7 @@ ReactionEditorDisplayContext::resolve(const std::string &identifier) {
 }
 
 std::string
-ReactionEditorDisplayContext::identifier(GiNaC::symbol symbol) const {
+ReactionEditorDisplayContext::identifier(GiNaC::symbol symbol) {
   std::string id;
   try { id = _context.identifier(symbol); }
   catch (iNA::Exception &err) { id = symbol.get_name(); }

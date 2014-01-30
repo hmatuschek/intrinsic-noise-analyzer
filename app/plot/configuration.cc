@@ -398,16 +398,22 @@ LineGraphConfig::LineGraphConfig(const LineGraphConfig &other, Table *data)
     _parserContext(_data), _symbolTable(), _xExpression(0), _yExpression(0),
     _linePen(other._linePen)
 {
+  GiNaC::exmap substTable;
   for (size_t i=0; i<_data->getNumColumns(); i++) {
     _symbolTable[_parserContext.getColumnSymbol(i)] = i;
+    substTable[other._parserContext.getColumnSymbol(i)] =
+        _parserContext.getColumnSymbol(i);
   }
+
   // Serialize & parse plot formulas:
-  std::stringstream buffer;
+  /*std::stringstream buffer;
   FormulaParser::serialize(other._xExpression, buffer, other._parserContext);
   _xExpression = FormulaParser::parse(buffer.str().c_str(), _parserContext);
   buffer.str("");
   FormulaParser::serialize(other._yExpression, buffer, other._parserContext);
-  _yExpression = FormulaParser::parse(buffer.str().c_str(), _parserContext);
+  _yExpression = FormulaParser::parse(buffer.str().c_str(), _parserContext); */
+  _xExpression = other._xExpression.subs(substTable);
+  _yExpression = other._yExpression.subs(substTable);
   // Compile plot formulas:
   LineGraphConfig::compileExpressions();
 }
@@ -532,9 +538,15 @@ VarianceLineGraphConfig::VarianceLineGraphConfig(Table *data, size_t colorIdx)
 VarianceLineGraphConfig::VarianceLineGraphConfig(const VarianceLineGraphConfig &other, Table *data)
   : LineGraphConfig(other, data), _varExpression(0), _fillPen(other._fillPen)
 {
-  std::stringstream buffer;
+  GiNaC::exmap substTable;
+  for (size_t i=0; i<data->getNumColumns(); i++) {
+    substTable[other._parserContext.getColumnSymbol(i)] =
+        _parserContext.getColumnSymbol(i);
+  }
+  /*std::stringstream buffer;
   FormulaParser::serialize(other._varExpression, buffer, other._parserContext);
-  _varExpression = FormulaParser::parse(buffer.str().c_str(), _parserContext);
+  _varExpression = FormulaParser::parse(buffer.str().c_str(), _parserContext); */
+  _varExpression = other._varExpression.subs(substTable);
   VarianceLineGraphConfig::compileExpressions();
 }
 

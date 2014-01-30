@@ -1,9 +1,9 @@
 #include "formulaparser.hh"
-#include <utils/logger.hh>
-#include <eval/bci/bci.hh>
-#include <parser/expr/lexer.hh>
-#include <parser/expr/productions.hh>
-#include <parser/expr/assembler.hh>
+#include "../../lib/utils/logger.hh"
+#include "../../lib/eval/bci/bci.hh"
+#include "../../lib/parser/expr/lexer.hh"
+#include "../../lib/parser/expr/productions.hh"
+#include "../../lib/parser/expr/assembler.hh"
 
 using namespace iNA;
 using namespace Plot;
@@ -67,7 +67,7 @@ FormulaParser::Context::resolve(const std::string &identifier) {
 }
 
 std::string
-FormulaParser::Context::identifier(GiNaC::symbol symbol) const {
+FormulaParser::Context::identifier(GiNaC::symbol symbol) {
   size_t column = getColumnIdx(symbol);
   std::stringstream buffer; buffer << "$" << column;
   return buffer.str();
@@ -172,6 +172,6 @@ FormulaParser::parse(const QString &formula, Context &context)
 
 
 void
-FormulaParser::serialize(GiNaC::ex formula, std::ostream &stream, const Context &context) {
+FormulaParser::serialize(GiNaC::ex formula, std::ostream &stream, Context &context) {
   iNA::Parser::Expr::serializeExpression(formula, stream, context);
 }

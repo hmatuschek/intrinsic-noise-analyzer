@@ -3,9 +3,9 @@
 
 #include <QObject>
 #include <QString>
-#include <parser/lexer.hh>
-#include <parser/parser.hh>
-#include <parser/production.hh>
+#include "../../lib/parser/lexer.hh"
+#include "../../lib/parser/parser.hh"
+#include "../../lib/parser/production.hh"
 #include "../models/timeseries.hh"
 
 namespace Plot {
@@ -26,7 +26,7 @@ public:
     /** Implements the Context interface, resolves the given identifier to a @c GiNaC::symbol */
     virtual GiNaC::symbol resolve(const std::string &identifier);
     /** Implements the Context interface, returns the identifier for the given symbol. */
-    virtual std::string identifier(GiNaC::symbol symbol) const;
+    virtual std::string identifier(GiNaC::symbol symbol);
     /** Resolves a column number to the corresponding GiNaC::symbol. */
     GiNaC::symbol getColumnSymbol(size_t column) const;
     /** Resolves the given symbol to the corresponding column index. */
@@ -50,7 +50,7 @@ public:
    * You can use the context to evaluate the constructed expression. */
   static GiNaC::ex parse(const QString &formula, Context &context);
   /** Serializes a given plot formula into its textual representation. */
-  static void serialize(GiNaC::ex formula, std::ostream &stream, const Context &context);
+  static void serialize(GiNaC::ex formula, std::ostream &stream, Context &context);
 };
 
 }

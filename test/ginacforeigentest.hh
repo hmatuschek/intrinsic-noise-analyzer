@@ -15,9 +15,7 @@ class GinacForEigenTest :
         public UnitTest::TestCase
 {
 public:
-  virtual ~GinacForEigenTest()
-  {
-
+  virtual ~GinacForEigenTest() {
   }
 
 public:

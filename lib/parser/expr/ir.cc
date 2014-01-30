@@ -156,12 +156,12 @@ std::complex<double> &Node::complexValue() { return _complex; }
 GiNaC::symbol Node::symbol() const { return _symbol; }
 
 void
-Node::serialize(std::ostream &stream, const Context &ctx) {
+Node::serialize(std::ostream &stream, Context &ctx) {
   _serialize(stream, ctx, 0);
 }
 
 void
-Node::_serialize(std::ostream &stream, const Context &ctx, size_t precedence)
+Node::_serialize(std::ostream &stream, Context &ctx, size_t precedence)
 {
   if (isAddNode()) {
     if (precedence > 1) { stream << "("; }

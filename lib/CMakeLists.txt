@@ -71,7 +71,7 @@ SET(libina_parser_SOURCES
     ${libina_sbml_parser_SOURCES}
     ${libina_expr_parser_SOURCES}
     ${libina_unit_parser_SOURCES})
-SET(libina_parser_HEADERS
+SET(libina_parser_HEADERS parser/parser.hh
     parser/automata.hh parser/lexer.hh parser/production.hh parser/exception.hh
     ${libina_sbmlsh_parser_HEADERS}
     ${libina_sbml_parser_HEADERS}
@@ -173,7 +173,7 @@ SET(libina_eval_direct_HEADERS
 SET(libina_eval_bytecode_SOURCES
     eval/bci/code.cc eval/bci/compiler.cc eval/bci/assembler.cc eval/bci/interpreter.cc
     eval/bci/dependencetree.cc eval/bci/pass.cc eval/bci/engine.cc)
-SET(libina_eval_bytecode_HEADERS
+SET(libina_eval_bytecode_HEADERS eval/bci/bci.hh
     eval/bci/code.hh eval/bci/compiler.hh eval/bci/assembler.hh eval/bci/interpreter.hh
     eval/bci/dependencetree.hh eval/bci/pass.hh eval/bci/engine.hh)
 
@@ -233,7 +233,7 @@ SET(libina_HEADERS
 #
 # Recursive copy header files to ${CMAKE_BINARY_DIR}/include/libina
 #
-COPY_HEADERS_WITH_DIRECTORY("${libina_HEADERS}" "${CMAKE_CURRENT_BINARY_DIR}/include/libina")
+COPY_HEADERS_WITH_DIRECTORY("${libina_HEADERS}" "${PROJECT_BINARY_DIR}/include/libina")
 
 #
 # Compile library

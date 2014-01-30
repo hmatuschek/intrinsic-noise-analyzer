@@ -94,7 +94,7 @@ public:
   virtual GiNaC::symbol resolve(const std::string &identifier);
 
   /** Resolves the given symbol to the identifier of the variable. */
-  virtual std::string identifier(GiNaC::symbol symbol) const;
+  virtual std::string identifier(GiNaC::symbol symbol);
 
   bool hasConcentrationUnits(const GiNaC::symbol &symbol);
 

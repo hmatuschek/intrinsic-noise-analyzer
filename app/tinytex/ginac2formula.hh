@@ -34,7 +34,7 @@ public:
   GiNaC::symbol resolve(const std::string &identifier);
   /** Resolves a GiNaC symbol to the name of the corresponding @c iNA::Ast::VariableDefinition.
    * If the variable has no name assigned, the identifier is returned. */
-  std::string identifier(GiNaC::symbol symbol) const;
+  std::string identifier(GiNaC::symbol symbol);
   /** Returns true if the given symbol belongs to a species and if the model is defined in
    * substance units. Returns always false if the scope is not element of an Model. */
   bool hasConcentrationUnits(const GiNaC::symbol &symbol);
