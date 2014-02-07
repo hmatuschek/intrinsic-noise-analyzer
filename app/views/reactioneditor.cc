@@ -59,9 +59,6 @@ ReactionEditorContext::resolve(const std::string &identifier)
   // If symbol is not defined at all, define it as a local parameter
   _param_symbols[identifier] = GiNaC::symbol(identifier);
   _param_ids[_param_symbols[identifier]] = identifier;
-  std::cerr << "Create new local parameter " << identifier
-            << "(" << _param_symbols[identifier].gethash()
-            << ") on the fly in " << this << std::endl;
   // done...
   return _param_symbols[identifier];
 }
@@ -92,14 +89,6 @@ ReactionEditorContext::getOrCreateLocalParameter(const std::string &id) {
   }
 
   GiNaC::symbol new_symbol(id);
-  std::cerr << "Create new local parameter " << id
-            << "(" << new_symbol.gethash() << ") in {";
-  std::map<std::string, GiNaC::symbol>::iterator item = _param_symbols.begin();
-  for (; item!=_param_symbols.end(); item++) {
-    std::cerr << item->first << "(" << item->second.gethash() << ") ";
-  }
-  std::cerr << "}" << std::endl;
-
   _param_symbols.insert(std::pair<std::string, GiNaC::symbol>(id,new_symbol));
   _param_ids.insert(std::pair<GiNaC::symbol, std::string>(new_symbol, id));
   return new_symbol;
@@ -154,7 +143,6 @@ ReactionEditorContext::hasConcentrationUnits() const  {
 
 void
 ReactionEditorContext::reset() {
-  std::cerr << "Reset context..." << std::endl;
   _param_ids.clear();
   _param_symbols.clear();
   _species_ids.clear();
@@ -962,7 +950,6 @@ ReactionEditorPage::validatePage()
   // Create kinetic law for that reaction and store in editor
   try {
     _editor->setKinteticLaw(_createKineticLaw(reactants, products, is_reversible));
-    std::cerr << "Store kinetic law..." << std::endl;
   } catch (iNA::Exception &err) {
     QMessageBox::critical(
           0, tr("Error in kinetic law"),

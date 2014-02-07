@@ -332,12 +332,6 @@ Scope::getVariable(const GiNaC::symbol &symbol)
       = this->_symbol_table.find(symbol);
 
   if (this->_symbol_table.end() == item) {
-    std::cerr << "Symbol " << symbol << "(" << symbol.gethash()
-              << ") not found in " << this << " Known symbols: ";
-    for (item=_symbol_table.begin(); item!=_symbol_table.end(); item++) {
-      std::cerr << item->first.get_name() << "(" << item->first.gethash() << ") ";
-    }
-    std::cerr << std::endl;
     if (isClosed() || ! hasParentScope()) {
       SymbolError err;
       err << "Symbol " << symbol << " does not name a variable.";
@@ -358,13 +352,6 @@ Scope::getVariable(const GiNaC::symbol &symbol) const
       = this->_symbol_table.find(symbol);
 
   if (this->_symbol_table.end() == item) {
-    std::cerr << "Symbol " << symbol << "(" << symbol.gethash()
-              << ") not found in " << this << " Known symbols: ";
-    for (item=_symbol_table.begin(); item!=_symbol_table.end(); item++) {
-      std::cerr << item->first.get_name() << "(" << item->first.gethash() << ") ";
-    }
-    std::cerr << std::endl;
-
     if (isClosed() || !hasParentScope()) {
       SymbolError err;
       err << "Symbol " << symbol << " does not name a variable.";

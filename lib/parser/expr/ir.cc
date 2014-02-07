@@ -64,8 +64,6 @@ public:
 
   /** Handles symbols. */
   void visit(const GiNaC::symbol &symbol) {
-    std::cerr << "create symbol node for " << symbol.get_name()
-              << "(" << symbol.gethash() << ")" << std::endl;
     _stack.push_back(Node::createSymbol(symbol));
   }
 
