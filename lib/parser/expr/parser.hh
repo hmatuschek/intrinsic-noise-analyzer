@@ -26,7 +26,7 @@ class ScopeContext : public Context
 {
 public:
   /** Constructs an expression context using the given model as the global namespace/context. */
-  ScopeContext(const Ast::Scope *model);
+  explicit ScopeContext(const Ast::Scope *model);
 
   /** Resolves the given symbol name using the current context.
    * @throws SymbolError If the name can not be resolved. */

@@ -108,11 +108,16 @@ ReactionListView::onNewReaction()
   for (; para != editor.context().undefinedParameters().end(); para++) {
     iNA::Ast::Parameter *parameter = new iNA::Ast::Parameter(
           para->first, 1, iNA::Ast::Unit::dimensionless(), true);
+    std::cerr << "Subst parameter " << para->second.get_name() << "(" << para->second.gethash()
+              << ") -> " <<  parameter->getSymbol().get_name()
+              << "(" << parameter->getSymbol().gethash() << ")" << std::endl;
     subst_table[para->second] = parameter->getSymbol();
     law->addDefinition(parameter);
   }
   // Set rate law (substituted)
-  law->setRateLaw(editor.kineticLaw().subs(subst_table));
+  GiNaC::ex rate_law = editor.kineticLaw().subs(subst_table);
+  std::cerr << "Assembles rate law: "; rate_law.print(GiNaC::print_tree()); std::cerr << std::endl;
+  law->setRateLaw(rate_law);
 
   // Obtain a new unique and valid ID for reaction from reaction name
   QString id_base = editor.reactionName(); id_base.replace(QRegExp("[^a-zA-Z0-9_]"), "_");

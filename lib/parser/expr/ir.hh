@@ -48,6 +48,9 @@ protected:
   Node(NodeType type);
 
 public:
+  /** Copy constructor. */
+  Node(const Node &other);
+
   /** Returns true if the node is an addition node. */
   bool isAddNode() const;
   /** Returns true if the node is a subtraction node. */
@@ -110,7 +113,7 @@ public:
   /** Creates a negation node. */
   static SmartPtr<Node> createNeg(SmartPtr<Node> arg);
   /** Creates a symbol node. */
-  static SmartPtr<Node> createSymbol(GiNaC::symbol symbol);
+  static SmartPtr<Node> createSymbol(const GiNaC::symbol &symbol);
   /** Creates an integer constant. */
   static SmartPtr<Node> createValue(long value);
   /** Creates a real constant. */

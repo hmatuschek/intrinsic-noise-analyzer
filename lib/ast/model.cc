@@ -761,19 +761,18 @@ Model::getReaction(const std::string &identifier)
   return static_cast<Ast::Reaction *>(def);
 }
 
-Reaction * const
+Reaction *
 Model::getReaction(const std::string &identifier) const
 {
-  Ast::Definition * const def = this->getDefinition(identifier);
+  Ast::Definition *def = this->getDefinition(identifier);
 
-  if (! Node::isReactionDefinition(def))
-  {
+  if (! Node::isReactionDefinition(def)) {
     SymbolError err;
     err << "There is no reaction with identifier " << identifier << " defined in this module.";
     throw err;
   }
 
-  return static_cast<Ast::Reaction * const>(def);
+  return (Ast::Reaction *)(def);
 }
 
 Reaction *
@@ -781,7 +780,7 @@ Model::getReaction(size_t idx) {
   return this->_reaction_vector[idx];
 }
 
-Reaction * const
+Reaction *
 Model::getReaction(size_t idx) const {
   return this->_reaction_vector[idx];
 }

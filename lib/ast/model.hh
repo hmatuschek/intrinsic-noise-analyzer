@@ -304,13 +304,13 @@ public:
   Reaction *getReaction(size_t idx);
 
   /** Returns the reaction by index. */
-  Reaction * const getReaction(size_t idx) const;
+  Reaction * getReaction(size_t idx) const;
 
   /** Returns the reaction by identifier. */
   Reaction *getReaction(const std::string &id);
 
   /** Returns the reaction by identifier. */
-  Reaction * const getReaction(const std::string &id) const;
+  Reaction * getReaction(const std::string &id) const;
 
   /** Returns the index of the given reaction, throws an exception if the reaction can not be
    * found.
