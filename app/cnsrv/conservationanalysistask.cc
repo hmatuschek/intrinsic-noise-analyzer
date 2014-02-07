@@ -1,5 +1,5 @@
 #include "conservationanalysistask.hh"
-#include "libina/trafo/constantfolder.hh"
+#include "trafo/constantfolder.hh"
 
 #include <QGraphicsView>
 #include <QGraphicsScene>
@@ -11,7 +11,7 @@
 #include <QHeaderView>
 
 #include "../tinytex/ginac2formula.hh"
-#include <libina/utils/logger.hh>
+#include "utils/logger.hh"
 #include "../views/unitrenderer.hh"
 
 

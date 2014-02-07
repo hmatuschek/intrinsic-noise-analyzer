@@ -7,7 +7,7 @@
 #include "../plot/figure.hh"
 #include "../plot/configuration.hh"
 #include <math.h>
-#include <libina/trafo/constantfolder.hh>
+#include "trafo/constantfolder.hh"
 
 
 Plot::PlotConfig *
