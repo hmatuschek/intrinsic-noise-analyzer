@@ -7,7 +7,7 @@
 #include "../tinytex/ginac2formula.hh"
 #include "../views/unitrenderer.hh"
 #include "referencecounter.hh"
-#include "libina/ast/identifier.hh"
+#include "ast/identifier.hh"
 #include <QMessageBox>
 
 
