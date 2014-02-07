@@ -86,18 +86,23 @@ ReactionEditorContext::undefinedParameters() const {
 
 GiNaC::symbol
 ReactionEditorContext::getOrCreateLocalParameter(const std::string &id) {
-  if (0 != _param_symbols.count(id)) { return _param_symbols[id]; }
+  if (_param_symbols.end() != _param_symbols.find(id)) { return _param_symbols[id]; }
   if (_scope->hasDefinition(id, true) && iNA::Ast::Node::isParameter(_scope->getDefinition(id))) {
     return _scope->getVariable(id)->getSymbol();
   }
-  _param_symbols[id] = GiNaC::symbol(id);
-  _param_ids[_param_symbols[id]] = id;
 
+  GiNaC::symbol new_symbol(id);
   std::cerr << "Create new local parameter " << id
-            << "(" << _param_symbols[id].gethash()
-            << ") in " << this << std::endl;
+            << "(" << new_symbol.gethash() << ") in {";
+  std::map<std::string, GiNaC::symbol>::iterator item = _param_symbols.begin();
+  for (; item!=_param_symbols.end(); item++) {
+    std::cerr << item->first << "(" << item->second.gethash() << ") ";
+  }
+  std::cerr << "}" << std::endl;
 
-  return _param_symbols[id];
+  _param_symbols.insert(std::pair<std::string, GiNaC::symbol>(id,new_symbol));
+  _param_ids.insert(std::pair<GiNaC::symbol, std::string>(new_symbol, id));
+  return new_symbol;
 }
 
 bool
@@ -149,6 +154,7 @@ ReactionEditorContext::hasConcentrationUnits() const  {
 
 void
 ReactionEditorContext::reset() {
+  std::cerr << "Reset context..." << std::endl;
   _param_ids.clear();
   _param_symbols.clear();
   _species_ids.clear();
@@ -414,7 +420,7 @@ ReactionEditorPage::_updateKineticLaw()
   _equation->setPalette(equation_palette);
 
   // Clear context and define new species
-  _editor->context().reset();
+  //_editor->context().reset();
   _defineUnknownSpecies(reactants, products);
 
   // Do not update anything if autoupdate is not enabled.
@@ -956,6 +962,7 @@ ReactionEditorPage::validatePage()
   // Create kinetic law for that reaction and store in editor
   try {
     _editor->setKinteticLaw(_createKineticLaw(reactants, products, is_reversible));
+    std::cerr << "Store kinetic law..." << std::endl;
   } catch (iNA::Exception &err) {
     QMessageBox::critical(
           0, tr("Error in kinetic law"),
