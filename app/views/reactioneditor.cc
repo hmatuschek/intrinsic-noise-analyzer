@@ -23,7 +23,7 @@
  * Implementation of ReactionEditorContext
  * ********************************************************************************************* */
 ReactionEditorContext::ReactionEditorContext(iNA::Ast::Model *model, iNA::Ast::Scope *root)
-  : iNA::Parser::Expr::ScopeContext(0 == root ? model : root), _model(model)
+  : iNA::Parser::Expr::ScopeContext((0 == root) ? model : root), _model(model)
 {
   // If there is no compartment defined in the model -> create a new symbol for it and
   // find an unique ID.
@@ -185,9 +185,9 @@ ReactionEditorDisplayContext::hasConcentrationUnits(const GiNaC::symbol &symbol)
  * ********************************************************************************************* */
 ReactionEditor::ReactionEditor(iNA::Ast::Model &model, iNA::Ast::Reaction *reaction, QWidget *parent)
   : QWizard(parent), _model(model), _current_reaction(reaction),
-    _context(&model, 0 == reaction ? (iNA::Ast::Scope *)&model : (iNA::Ast::Scope *)reaction->getKineticLaw())
+    _context(&model, (0 == reaction) ? (iNA::Ast::Scope *)&model : (iNA::Ast::Scope *)reaction->getKineticLaw())
 {
-  if (0 == reaction)
+  if (0 == _current_reaction)
     setWindowTitle(tr("Create new reaction"));
   else
     setWindowTitle(tr("Edit reaction"));
@@ -473,14 +473,13 @@ ReactionEditorPage::_serializeReactionEquation()
   QStringList reactants, products;
 
   // First serialize reactants:
-  for (iNA::Ast::Reaction::iterator reac=_current_reaction->reactantsBegin();
-       reac!=_current_reaction->reactantsEnd(); reac++)
-  {
+  iNA::Ast::Reaction::iterator reac=_current_reaction->reactantsBegin();
+  for (; reac!=_current_reaction->reactantsEnd(); reac++) {
     std::stringstream buffer;
     iNA::Parser::Expr::serializeExpression(reac->second, buffer, &_model);
     reactants.append(
-          reac->second!=1 ? QString("%1*%2").arg(buffer.str().c_str()).arg(reac->first->getIdentifier().c_str())
-                          : QString("%1").arg(reac->first->getIdentifier().c_str()));
+          (reac->second!=1) ? QString("%1*%2").arg(buffer.str().c_str()).arg(reac->first->getIdentifier().c_str())
+                            : QString("%1").arg(reac->first->getIdentifier().c_str()));
   }
 
   // then, serialize products:
@@ -490,8 +489,8 @@ ReactionEditorPage::_serializeReactionEquation()
     std::stringstream buffer;
     iNA::Parser::Expr::serializeExpression(prod->second, buffer, &_model);
     products.append(
-          prod->second!=1 ? QString("%1*%2").arg(buffer.str().c_str()).arg(prod->first->getIdentifier().c_str())
-                          : QString("%1").arg(prod->first->getIdentifier().c_str()));
+          (prod->second!=1) ? QString("%1*%2").arg(buffer.str().c_str()).arg(prod->first->getIdentifier().c_str())
+                            : QString("%1").arg(prod->first->getIdentifier().c_str()));
 
   }
 
