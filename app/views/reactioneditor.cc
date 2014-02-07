@@ -58,7 +58,10 @@ ReactionEditorContext::resolve(const std::string &identifier)
 
   // If symbol is not defined at all, define it as a local parameter
   _param_symbols[identifier] = GiNaC::symbol(identifier);
-
+  _param_ids[_param_symbols[identifier]] = identifier;
+  std::cerr << "Create new local parameter " << identifier
+            << "(" << _param_symbols[identifier].gethash()
+            << ") on the fly in " << this << std::endl;
   // done...
   return _param_symbols[identifier];
 }
@@ -89,6 +92,11 @@ ReactionEditorContext::getOrCreateLocalParameter(const std::string &id) {
   }
   _param_symbols[id] = GiNaC::symbol(id);
   _param_ids[_param_symbols[id]] = id;
+
+  std::cerr << "Create new local parameter " << id
+            << "(" << _param_symbols[id].gethash()
+            << ") in " << this << std::endl;
+
   return _param_symbols[id];
 }
 
@@ -721,7 +729,7 @@ ReactionEditorPage::_createMAKineticLaw(const StoichiometryList &reactants,
                                         const StoichiometryList &products,
                                         bool is_reversible)
 {
-  GiNaC::symbol k_fwd, k_rev;
+  GiNaC::ex k_fwd, k_rev;
 
   // Define local parameters:
   if (! is_reversible) {

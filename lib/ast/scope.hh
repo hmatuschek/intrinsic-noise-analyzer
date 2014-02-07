@@ -140,7 +140,7 @@ public:
   /** Returns the definition given by the name. */
   Definition *getDefinition(const std::string &name, bool local=false);
   /** Returns a const reference to the definition. */
-  Definition * const getDefinition(const std::string &name) const;
+  Definition * getDefinition(const std::string &name) const;
 
   /** Returns true, if the given identifier names a @c VariableDefinition. */
   bool hasVariable(const std::string &identifier) const;

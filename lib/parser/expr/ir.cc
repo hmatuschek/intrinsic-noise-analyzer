@@ -64,6 +64,8 @@ public:
 
   /** Handles symbols. */
   void visit(const GiNaC::symbol &symbol) {
+    std::cerr << "create symbol node for " << symbol.get_name()
+              << "(" << symbol.gethash() << ")" << std::endl;
     _stack.push_back(Node::createSymbol(symbol));
   }
 
@@ -126,9 +128,15 @@ public:
 Node::Node(NodeType type)
   : _type(type)
 {
-  // Pass...
+  // pass...
 }
 
+Node::Node(const Node &other)
+  : _type(other._type), _args(other._args), _function(other._function), _symbol(other._symbol),
+    _integer(other._integer), _real(other._real), _complex(other._complex)
+{
+  // pass...
+}
 
 bool Node::isAddNode() const { return ADDITION == _type; }
 bool Node::isSubNode() const { return SUBTRACTION == _type; }
@@ -312,7 +320,7 @@ Node::createNeg(SmartPtr<Node> op)
 }
 
 SmartPtr<Node>
-Node::createSymbol(GiNaC::symbol symbol)
+Node::createSymbol(const GiNaC::symbol &symbol)
 {
   Node *node = new Node(SYMBOL);
   node->_symbol = symbol;
