@@ -496,15 +496,15 @@ void Application::onEditModel()
 
 void Application::onExpandRevReactions()
 {
-  DocumentItem *document = 0;
+  DocumentItem *document = dynamic_cast<DocumentItem *>(getParentDocumentItem(_selected_item));
+
   // If no model is selected:
-  if (0 == (document = dynamic_cast<DocumentItem *>(getParentDocumentItem(_selected_item)))) {
-    return;
-  }
+  if (0 == document) { return; }
   resetSelectedItem();
 
   // Get model
   iNA::Ast::Model &model = document->getModel();
+
   // Expand reversible reactions
   iNA::Trafo::ReversibleReactionConverter converter;
   try { converter.apply(model); }
@@ -517,8 +517,11 @@ void Application::onExpandRevReactions()
   // Mark document as modified
   document->setIsModified(true);
 
+  // Update reaction list
+  docTree()->updateReactions(document);
+
   // Update tree model
-  docTree()->resetCompleteTree();
+  //docTree()->resetCompleteTree();
 }
 
 void Application::onCombineIrrevReactions()
@@ -540,8 +543,12 @@ void Application::onCombineIrrevReactions()
 
   // Mark model as modified
   document->setIsModified(true);
+
+  // Update reaction list
+  docTree()->updateReactions(document);
+
   // Update tree
-  docTree()->resetCompleteTree();
+  //docTree()->resetCompleteTree();
 }
 
 void

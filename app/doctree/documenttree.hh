@@ -24,6 +24,7 @@ public:
   virtual void addTask(DocumentItem *document, TaskItem *task);
   virtual void addPlot(TaskItem *task, PlotItem *plot);
   virtual void addReaction(DocumentItem *document, ReactionItem *reaction);
+  virtual void updateReactions(DocumentItem *document);
   virtual void removeTask(TaskItem *task);
   virtual void removeDocument(DocumentItem *document);
   virtual void removePlot(PlotItem *plot);
