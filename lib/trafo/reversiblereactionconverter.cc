@@ -6,7 +6,15 @@
 using namespace iNA;
 using namespace iNA::Trafo;
 
-void ReversibleReactionConverter::apply(Ast::Model &model)
+void
+ReversibleReactionConverter::apply(Ast::Model &model) {
+  std::list<std::string> modified, added;
+  apply(model, modified, added);
+}
+
+void
+ReversibleReactionConverter::apply(
+    Ast::Model &model, std::list<std::string> &modified, std::list<std::string> &added)
 {
   size_t count=0;
 
@@ -102,6 +110,8 @@ void ReversibleReactionConverter::apply(Ast::Model &model)
     // Add reverse reaction after original one
     model.addDefinition(reverseReaction, reaction);
 
+    modified.push_back(reaction->getIdentifier());
+    added.push_back(reverseReaction->getIdentifier());
     count++;
 
     // Create a log message.
@@ -122,7 +132,15 @@ void ReversibleReactionConverter::apply(Ast::Model &model)
 
 
 
-void IrreversibleReactionCollapser::apply(Ast::Model &model)
+void
+IrreversibleReactionCollapser::apply(Ast::Model &model) {
+  std::list<std::string> modified, removed;
+  apply(model, modified, removed);
+}
+
+void
+IrreversibleReactionCollapser::apply(
+    Ast::Model &model, std::list<std::string> &modified, std::list<std::string> &removed)
 {
   size_t count=0;
   // List of irreversible reactions that has been removed
@@ -159,6 +177,9 @@ void IrreversibleReactionCollapser::apply(Ast::Model &model)
         forward->setReversible(true);
         // and mark reverse reaction for deletion
         burned_reactions.insert(reverse);
+
+        modified.push_back(forward->getIdentifier());
+        removed.push_back(reverse->getIdentifier());
 
         // Create a log message.
         {
