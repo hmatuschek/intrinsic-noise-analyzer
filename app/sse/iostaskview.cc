@@ -120,16 +120,16 @@ void
 IOSResultWidget::_onSaveButtonPressed()
 {
   QString selectedFilter;
-  //QString filters = tr("Text Files (*.txt *.csv);;Matlab 5 Files (*.mat)";
-  QString filters = tr("Text Files (*.txt *.csv)");
+  QString csvFilter = tr("Text Files (*.txt *.csv)");
+  QString matFilter = tr("Matlab 5 Files (*.mat)");
+  QString filters = QString("%1;;%2").arg(csvFilter).arg(matFilter);
   QString filename = QFileDialog::getSaveFileName(
         this, tr("Save results in ..."), "", filters, &selectedFilter);
   if ("" == filename) { return; }
-  if (tr("Text Files (*.txt *.csv)") == selectedFilter) {
-    saveAsCSV(filename);
-  } else if (tr("Matlab 5 Files (*.mat)") == selectedFilter) {
-    saveAsMAT(filename);
-  } else {
+
+  if (csvFilter == selectedFilter) { saveAsCSV(filename); }
+  else if (matFilter == selectedFilter) { saveAsMAT(filename); }
+  else {
     QMessageBox::critical(0, tr("Can not save results"),
                           tr("Can not save results to file %1: Unknown format %2").arg(
                             filename, selectedFilter));

@@ -15,8 +15,12 @@ namespace Trafo {
 class ReversibleReactionConverter
 {
 public:
-  /** Performs the conversion on the given model. */
+  /** Expands reversible reactions into irreversible ones. */
   static void apply(Ast::Model &model);
+  /** Expands reversible reactions into irreversible ones and stores the IDs of the modified
+   * and new reactions. */
+  static void apply(Ast::Model &model, std::list<std::string> &modified,
+                    std::list<std::string> &added);
 };
 
 /**
@@ -27,8 +31,12 @@ public:
 class IrreversibleReactionCollapser
 {
 public:
-  /** Performs the conversion on the given model. */
+  /** Combines irreversible reactions. */
   static void apply(Ast::Model &model);
+  /** Combines irreversible reactions and stores the identifiers of the modified and removed
+   * reactions within the given lists. */
+  static void apply(Ast::Model &model, std::list<std::string> &modified,
+                    std::list<std::string> &removed);
 };
 
 }

@@ -69,6 +69,27 @@ DocumentTree::addReaction(DocumentItem *document, ReactionItem *reaction) {
 }
 
 void
+DocumentTree::updateReactions(DocumentItem *document) {
+  ReactionsItem *reac_item = document->reactionsItem();
+  QModelIndex reactions_index = getIndexOf(reac_item);
+
+  // Mark all reactions as deleted
+  size_t num_reacts = reac_item->getTreeChildCount();
+  if (num_reacts > 0) {
+    beginRemoveRows(reactions_index, 0, num_reacts-1);
+    reac_item->updateReactionList();
+    endRemoveRows();
+  }
+
+  // Now, mark all reactions as added
+  num_reacts = reac_item->getTreeChildCount();
+  if (num_reacts > 0) {
+    beginInsertRows(reactions_index, 0, num_reacts-1);
+    endInsertRows();
+  }
+}
+
+void
 DocumentTree::removeTask(TaskItem *task) {
   this->removeItem(task);
 }

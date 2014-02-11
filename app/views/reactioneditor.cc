@@ -59,9 +59,6 @@ ReactionEditorContext::resolve(const std::string &identifier)
   // If symbol is not defined at all, define it as a local parameter
   _param_symbols[identifier] = GiNaC::symbol(identifier);
   _param_ids[_param_symbols[identifier]] = identifier;
-  std::cerr << "Create new local parameter " << identifier
-            << "(" << _param_symbols[identifier].gethash()
-            << ") on the fly in " << this << std::endl;
   // done...
   return _param_symbols[identifier];
 }
@@ -86,18 +83,15 @@ ReactionEditorContext::undefinedParameters() const {
 
 GiNaC::symbol
 ReactionEditorContext::getOrCreateLocalParameter(const std::string &id) {
-  if (0 != _param_symbols.count(id)) { return _param_symbols[id]; }
+  if (_param_symbols.end() != _param_symbols.find(id)) { return _param_symbols[id]; }
   if (_scope->hasDefinition(id, true) && iNA::Ast::Node::isParameter(_scope->getDefinition(id))) {
     return _scope->getVariable(id)->getSymbol();
   }
-  _param_symbols[id] = GiNaC::symbol(id);
-  _param_ids[_param_symbols[id]] = id;
 
-  std::cerr << "Create new local parameter " << id
-            << "(" << _param_symbols[id].gethash()
-            << ") in " << this << std::endl;
-
-  return _param_symbols[id];
+  GiNaC::symbol new_symbol(id);
+  _param_symbols.insert(std::pair<std::string, GiNaC::symbol>(id,new_symbol));
+  _param_ids.insert(std::pair<GiNaC::symbol, std::string>(new_symbol, id));
+  return new_symbol;
 }
 
 bool
@@ -414,7 +408,7 @@ ReactionEditorPage::_updateKineticLaw()
   _equation->setPalette(equation_palette);
 
   // Clear context and define new species
-  _editor->context().reset();
+  //_editor->context().reset();
   _defineUnknownSpecies(reactants, products);
 
   // Do not update anything if autoupdate is not enabled.

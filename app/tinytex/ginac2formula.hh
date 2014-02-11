@@ -57,18 +57,9 @@ private:
  * arrows are allowed. */
 class Ginac2Formula
 {
-  /** A weak reference to the variable scope used to resolved GiNaC symbols. */
-  ExpressionContext &_context;
-  /** Specifies if names should be rendered as TeX if enclosed in "$". */
-  bool _tex_names;
-
 public:
   /** Constructor, needs the variable scope for symbol resolution. */
   Ginac2Formula(ExpressionContext &context, bool tex_names=true);
-
-private:
-  /** Translates the expression IR into MathItem representing the expression. */
-  MathItem *_assembleFormula(iNA::SmartPtr<iNA::Parser::Expr::Node> expression, size_t precedence);
 
 public:
   /** Renders an expression as a MathItem instance.
@@ -89,6 +80,16 @@ public:
   /** Very helpful function to render a given expression into a formula. The formula is returned
    * inside a QVariant as a pixmap or an invald QVariant if there was an error during rendering. */
   static QVariant toPixmap(GiNaC::ex expression, ExpressionContext &context, bool tex_names=true);
+
+private:
+  /** Translates the expression IR into MathItem representing the expression. */
+  MathItem *_assembleFormula(iNA::SmartPtr<iNA::Parser::Expr::Node> expression, size_t precedence);
+
+private:
+  /** A weak reference to the variable scope used to resolved GiNaC symbols. */
+  ExpressionContext &_context;
+  /** Specifies if names should be rendered as TeX if enclosed in "$". */
+  bool _tex_names;
 };
 
 #endif // GINAC2FORMULA_HH

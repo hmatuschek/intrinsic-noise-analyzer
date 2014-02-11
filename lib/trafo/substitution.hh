@@ -17,10 +17,6 @@ class Substitution:
     public Ast::Operator, public Ast::VariableDefinition::Operator, public Ast::Rule::Operator,
     public Ast::Reaction::Operator, public Ast::KineticLaw::Operator
 {
-protected:
-  /** Holds the normalized substitution table. */
-  GiNaC::exmap _substitution_table;
-
 public:
   /** Empty constructor, use @c add to add substitutions. */
   Substitution();
@@ -62,6 +58,10 @@ protected:
 
   /** Returns true, if the given expression contains any part that can be substituted. */
   bool _has_substitue(GiNaC::ex expr);
+
+protected:
+  /** Holds the normalized substitution table. */
+  GiNaC::exmap _substitution_table;
 };
 
 

@@ -35,6 +35,9 @@ public:
    * @c iNA::Ast::Model and frees the item and reaction instance. */
   virtual void removeChild(TreeItem *node);
 
+  /** Synchronizes the reaction list model with the underlaying Ast::Model. */
+  void updateReactionList();
+
 protected:
   /** Updates the reaction list (children) from model. */
   virtual void resetTree();

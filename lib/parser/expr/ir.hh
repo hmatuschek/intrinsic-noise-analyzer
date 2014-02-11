@@ -161,11 +161,8 @@ public:
 
 
 /** Applies passes on an expression IR. */
-class PassManager {
-protected:
-  /** Holds the list of passes. */
-  std::list<Pass *> _passes;
-
+class PassManager
+{
 public:
   /** Destructor, also frees the passes. */
   ~PassManager();
@@ -178,6 +175,10 @@ protected:
   /** Applies all passes on the given node unless they can not be applied anymore. If a pass
    * was applied on that node, the function returns true. */
   bool applyOnNode(SmartPtr<Node> &value);
+
+protected:
+  /** Holds the list of passes. */
+  std::list<Pass *> _passes;
 };
 
 
@@ -192,7 +193,8 @@ public:
 
 /** Remove units pass, tries to remove equivalent expressions.
  * This includes 0+a, 1*a, a/1, a^1, a^0. */
-class RemoveUnitsPass : public Pass {
+class RemoveUnitsPass : public Pass
+{
 public:
   /** Performs the transformation. */
   bool apply(SmartPtr<Node> &node);

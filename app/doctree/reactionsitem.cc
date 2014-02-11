@@ -52,8 +52,7 @@ ReactionsItem::removeChild(TreeItem *item) {
 
 
 void
-ReactionsItem::resetTree()
-{
+ReactionsItem::updateReactionList() {
   // Clear reaction list:
   for (QList<TreeItem *>::iterator item=_children.begin(); item!=_children.end(); item++) {
     delete static_cast<ReactionItem *>(*item);
@@ -69,6 +68,12 @@ ReactionsItem::resetTree()
 
   // update reaction list table model:
   _reactionList.updateTable();
+
+}
+
+void
+ReactionsItem::resetTree() {
+  updateReactionList();
 }
 
 
