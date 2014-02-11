@@ -159,17 +159,17 @@ private:
  */
 class TextMessageHandler : public MessageHandler
 {
-protected:
-  /** Level of filter. */
-  Message::Level _level;
-  /** The ostream to send text to. */
-  std::ostream &_stream;
-
 public:
   /** Constructor. */
   TextMessageHandler(std::ostream &stream, Message::Level level=Message::INFO);
   /** Handles a log message. */
   virtual void handleMessage(const Message &message);
+
+protected:
+  /** Level of filter. */
+  Message::Level _level;
+  /** The ostream to send text to. */
+  std::ostream &_stream;
 };
 
 

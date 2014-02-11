@@ -519,9 +519,6 @@ void Application::onExpandRevReactions()
 
   // Update reaction list
   docTree()->updateReactions(document);
-
-  // Update tree model
-  //docTree()->resetCompleteTree();
 }
 
 void Application::onCombineIrrevReactions()
@@ -546,9 +543,6 @@ void Application::onCombineIrrevReactions()
 
   // Update reaction list
   docTree()->updateReactions(document);
-
-  // Update tree
-  //docTree()->resetCompleteTree();
 }
 
 void
