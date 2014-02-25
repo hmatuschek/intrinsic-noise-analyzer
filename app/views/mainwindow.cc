@@ -163,7 +163,7 @@ MainWindow::about() {
 
 void
 MainWindow::openHelpPage() {
-  QDesktopServices::openUrl(QUrl("http://code.google.com/p/intrinsic-noise-analyzer/wiki/Help"));
+  QDesktopServices::openUrl(QUrl("http://www.ina.bio.ed.ac.uk/?page_id=79"));
 }
 
 void MainWindow::showLogs() { this->_logWindow->setVisible(true); }
