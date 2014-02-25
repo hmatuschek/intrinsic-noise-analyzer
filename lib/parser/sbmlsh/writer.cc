@@ -45,43 +45,43 @@ Writer::processModelHeader(Ast::Model &model, std::ostream &output)
 
 /* Translates a Ast::ScaledBaseUnit::BaseUnit into its string identifier. */
 std::string
-Writer::getBaseUnitIdentifier(Ast::ScaledBaseUnit::BaseUnit unit)
+Writer::getBaseUnitIdentifier(Ast::Unit::BaseUnit unit)
 {
   switch (unit) {
-  case Ast::ScaledBaseUnit::AMPERE: return "ampere";
-  case Ast::ScaledBaseUnit::AVOGADRO: return "avogadro";
-  case Ast::ScaledBaseUnit::BECQUEREL: return "becquerel";
-  case Ast::ScaledBaseUnit::CANDELA: return "candela";
-  case Ast::ScaledBaseUnit::CELSIUS: return "celsius";
-  case Ast::ScaledBaseUnit::COULOMB: return "coulomb";
-  case Ast::ScaledBaseUnit::DIMENSIONLESS: return "dimensionless";
-  case Ast::ScaledBaseUnit::FARAD: return "farad";
-  case Ast::ScaledBaseUnit::GRAM: return "gram";
-  case Ast::ScaledBaseUnit::GRAY: return "gray";
-  case Ast::ScaledBaseUnit::HENRY: return "henry";
-  case Ast::ScaledBaseUnit::HERTZ: return "herz";
-  case Ast::ScaledBaseUnit::ITEM: return "item";
-  case Ast::ScaledBaseUnit::JOULE: return "joule";
-  case Ast::ScaledBaseUnit::KATAL: return "katal";
-  case Ast::ScaledBaseUnit::KELVIN: return "kelvin";
-  case Ast::ScaledBaseUnit::KILOGRAM: return "kilogram";
-  case Ast::ScaledBaseUnit::LITRE: return "litre";
-  case Ast::ScaledBaseUnit::LUMEN: return "lumen";
-  case Ast::ScaledBaseUnit::LUX: return "lux";
-  case Ast::ScaledBaseUnit::METRE: return "metre";
-  case Ast::ScaledBaseUnit::MOLE: return "mole";
-  case Ast::ScaledBaseUnit::NEWTON: return "newton";
-  case Ast::ScaledBaseUnit::OHM: return "ohm";
-  case Ast::ScaledBaseUnit::PASCAL: return "pascal";
-  case Ast::ScaledBaseUnit::RADIAN: return "radian";
-  case Ast::ScaledBaseUnit::SECOND: return "second";
-  case Ast::ScaledBaseUnit::SIEMENS: return "siemens";
-  case Ast::ScaledBaseUnit::SIEVERT: return "sievert";
-  case Ast::ScaledBaseUnit::STERADIAN: return "sterdian";
-  case Ast::ScaledBaseUnit::TESLA: return "tesla";
-  case Ast::ScaledBaseUnit::VOLT: return "volt";
-  case Ast::ScaledBaseUnit::WATT: return "watt";
-  case Ast::ScaledBaseUnit::WEBER: return "weber";
+  case Ast::Unit::AMPERE: return "ampere";
+  case Ast::Unit::AVOGADRO: return "avogadro";
+  case Ast::Unit::BECQUEREL: return "becquerel";
+  case Ast::Unit::CANDELA: return "candela";
+  case Ast::Unit::CELSIUS: return "celsius";
+  case Ast::Unit::COULOMB: return "coulomb";
+  case Ast::Unit::DIMENSIONLESS: return "dimensionless";
+  case Ast::Unit::FARAD: return "farad";
+  case Ast::Unit::GRAM: return "gram";
+  case Ast::Unit::GRAY: return "gray";
+  case Ast::Unit::HENRY: return "henry";
+  case Ast::Unit::HERTZ: return "herz";
+  case Ast::Unit::ITEM: return "item";
+  case Ast::Unit::JOULE: return "joule";
+  case Ast::Unit::KATAL: return "katal";
+  case Ast::Unit::KELVIN: return "kelvin";
+  case Ast::Unit::KILOGRAM: return "kilogram";
+  case Ast::Unit::LITRE: return "litre";
+  case Ast::Unit::LUMEN: return "lumen";
+  case Ast::Unit::LUX: return "lux";
+  case Ast::Unit::METRE: return "metre";
+  case Ast::Unit::MOLE: return "mole";
+  case Ast::Unit::NEWTON: return "newton";
+  case Ast::Unit::OHM: return "ohm";
+  case Ast::Unit::PASCAL: return "pascal";
+  case Ast::Unit::RADIAN: return "radian";
+  case Ast::Unit::SECOND: return "second";
+  case Ast::Unit::SIEMENS: return "siemens";
+  case Ast::Unit::SIEVERT: return "sievert";
+  case Ast::Unit::STERADIAN: return "sterdian";
+  case Ast::Unit::TESLA: return "tesla";
+  case Ast::Unit::VOLT: return "volt";
+  case Ast::Unit::WATT: return "watt";
+  case Ast::Unit::WEBER: return "weber";
   }
 
   return "dimensionless";
@@ -96,42 +96,24 @@ Writer::processUnitDefinitions(Ast::Model &model, std::ostream &output)
   std::stringstream temp;
 
   // Process default substance unit first:
-  temp.str(""); temp << std::endl << " substance = ";
-  processScaledUnit(model.getSubstanceUnit().asScaledBaseUnit(), temp);
+  temp.str(""); processUnitDefinition("substance", model.getSubstanceUnit(), temp);
   units.push_back(temp.str());
 
   // Process default volume unit:
-  temp.str(""); temp << std::endl << " volume = ";
-  processScaledUnit(model.getVolumeUnit().asScaledBaseUnit(), temp);
+  temp.str(""); processUnitDefinition("volume", model.getVolumeUnit(), temp);
   units.push_back(temp.str());
 
   // Process default area unit:
-  temp.str(""); temp << std::endl << " area = ";
-  processScaledUnit(model.getAreaUnit().asScaledBaseUnit(), temp);
+  temp.str(""); processUnitDefinition("area", model.getAreaUnit(), temp);
   units.push_back(temp.str());
 
   // Process default length unit:
-  temp.str(""); temp << std::endl << " length = ";
-  processScaledUnit(model.getLengthUnit().asScaledBaseUnit(), temp);
+  temp.str(""); processUnitDefinition("length", model.getLengthUnit(), temp);
   units.push_back(temp.str());
 
   // Process default time unit:
-  temp.str(""); temp << std::endl << " time = ";
-  processScaledUnit(model.getTimeUnit().asScaledBaseUnit(), temp);
+  temp.str(""); processUnitDefinition("time", model.getTimeUnit(), temp);
   units.push_back(temp.str());
-
-  for(Ast::Model::iterator item = model.begin(); item != model.end(); item++) {
-    // skip non unit definitions
-    if (! Ast::Node::isUnitDefinition(*item)) { continue; }
-    // get unit-definition
-    Ast::UnitDefinition *unit = static_cast<Ast::UnitDefinition *>(*item);
-    // clear stream
-    temp.str("");
-    // process unit definition into temp stream:
-    processUnitDefinition(unit, temp);
-    // Append definition to list of unit definitions:
-    units.push_back(temp.str());
-  }
 
   // Assemble unit definition section if there are some definitions:
   if (0 < units.size()) {
@@ -144,28 +126,33 @@ Writer::processUnitDefinitions(Ast::Model &model, std::ostream &output)
 }
 
 void
-Writer::processUnitDefinition(Ast::UnitDefinition *unit_def, std::ostream &output)
+Writer::processUnitDefinition(const std::string &id, const Ast::Unit &unit, std::ostream &output)
 {
   std::list<std::string> units;
   std::stringstream temp;
 
-  const Ast::Unit &unit = unit_def->getUnit();
-  if ( (1 != unit.getMultiplier()) || (0 != unit.getScale())) {
-    processScaledUnit(Ast::ScaledBaseUnit(
-                        Ast::ScaledBaseUnit::DIMENSIONLESS, unit.getMultiplier(),
-                        unit.getScale(), 1),
-                      temp);
+  if (unit.isScaledBaseUnit()) {
+    // If the unit can be expressed in terms of a single scaled base unit -> write compact format
+    Ast::Unit::BaseUnit bunit; double multiplier=1; int scale=0, exponent=1;
+    unit.asScaledBaseUnit(bunit, multiplier, scale, exponent);
+    processScaledUnit(bunit, multiplier, scale, exponent, temp);
     units.push_back(temp.str()); temp.str("");
-  }
-
-  // process scaled base unit of unit:
-  for (Ast::Unit::iterator it=unit.begin(); it != unit.end(); it++) {
-    processScaledUnit(Ast::ScaledBaseUnit(it->first, 1, 0, it->second), temp);
-    units.push_back(temp.str()); temp.str();
+  } else {
+    // If unit is formed in terms of a product of scaled base units:
+    if ( (1 != unit.getMultiplier()) || (0 != unit.getScale())) {
+      processScaledUnit(
+            Ast::Unit::DIMENSIONLESS, unit.getMultiplier(), unit.getScale(), 1, temp);
+      units.push_back(temp.str()); temp.str("");
+    }
+    // process scaled base units of unit:
+    for (Ast::Unit::iterator it=unit.begin(); it != unit.end(); it++) {
+      processScaledUnit(it->first, 1, 0, it->second, temp);
+      units.push_back(temp.str()); temp.str();
+    }
   }
 
   // Serialize
-  output << std::endl << " " << unit_def->getIdentifier() << " = ";
+  output << std::endl << " " << id << " = ";
   std::list<std::string>::iterator item = units.begin();
   if (0 < units.size()) {
     for (size_t i=0; i<(units.size()-1); i++, item++) {
@@ -176,20 +163,14 @@ Writer::processUnitDefinition(Ast::UnitDefinition *unit_def, std::ostream &outpu
 }
 
 void
-Writer::processScaledUnit(const Ast::ScaledBaseUnit &unit, std::ostream &output)
+Writer::processScaledUnit(Ast::Unit::BaseUnit unit, double multiplier, int scale, int exponent, std::ostream &output)
 {
   std::list<std::string> modifier; std::stringstream temp;
-  if (1 != unit.getMultiplier()) {
-    temp << "m=" << unit.getMultiplier(); modifier.push_back(temp.str()); temp.str("");
-  }
-  if (0 != unit.getScale()) {
-    temp << "s=" << unit.getScale(); modifier.push_back(temp.str()); temp.str("");
-  }
-  if (1 != unit.getExponent()) {
-    temp << "e=" << unit.getExponent(); modifier.push_back(temp.str()); temp.str("");
-  }
+  if (1 != multiplier) { temp << "m=" << multiplier; modifier.push_back(temp.str()); temp.str(""); }
+  if (0 != scale) { temp << "s=" << scale; modifier.push_back(temp.str()); temp.str(""); }
+  if (1 != exponent) { temp << "e=" << exponent; modifier.push_back(temp.str()); temp.str(""); }
 
-  output << Writer::getBaseUnitIdentifier(unit.getBaseUnit());
+  output << Writer::getBaseUnitIdentifier(unit);
   if (0 < modifier.size()) {
     output << ": ";
     std::list<std::string>::iterator item = modifier.begin();
@@ -320,14 +301,14 @@ Writer::processReactionList(Ast::Model &model, std::ostream &output)
   if (0 == model.numReactions()) { return; }
   output << std::endl << "@reactions";
   for (size_t i=0; i<model.numReactions(); i++) {
-    processReaction(model.getReaction(i), output);
+    processReaction(model.getReaction(i), model, output);
     processKineticLaw(model.getReaction(i)->getKineticLaw(), output);
     output << std::endl;
   }
 }
 
 void
-Writer::processReaction(Ast::Reaction *reac, std::ostream &output)
+Writer::processReaction(Ast::Reaction *reac, const Ast::Model &model, std::ostream &output)
 {
   std::stringstream temp;
 
@@ -377,9 +358,10 @@ Writer::processReaction(Ast::Reaction *reac, std::ostream &output)
   }
 
   // Assemble list of modifiers
-  for (Ast::Reaction::mod_iterator item = reac->modifiersBegin(); item != reac->modifiersEnd(); item++)
-  {
-    modifiers.push_back((*item)->getIdentifier());
+  for (size_t i=0; i<model.numSpecies(); i++) {
+    Ast::Species *species = model.getSpecies(i);
+    // Check if species is a modifier of the reaction
+    if (reac->isModifier(species)) { modifiers.push_back(species->getIdentifier()); }
   }
 
   output << std::endl << "  ";

@@ -4,7 +4,7 @@
 #include "basemodel.hh"
 #include "constcompartmentmixin.hh"
 #include "intensivespeciesmixin.hh"
-#include "reasonablemodelmixin.hh"
+#include "../trafo/assertions.hh"
 
 namespace iNA {
 namespace Models {
@@ -29,24 +29,17 @@ namespace Models {
 class propensityExpansion :
     public IntensiveSpeciesMixin,
     public ConstCompartmentMixin,
-    public ReasonableModelMixin
+    public Trafo::ReasonableModelMixin
 {
-protected:
-  /**
-   * holds intensive vector of reaction rates  \f$ \vec{f}(\vec{n}/\Omega) \f$.
-   */
-  GiNaC::exvector rates;
-
-  /**
-   * holds first correction to vector of reaction rates  \f$ \vec{f}^{(1)}(\vec{n}/\Omega) \f$.
-   */
-  GiNaC::exvector rates1;
-
 public:
-  /**
-   * Constructor...
-   */
+  /** Constructor. */
   propensityExpansion(BaseModel &base);
+
+protected:
+  /** holds intensive vector of reaction rates  \f$ \vec{f}(\vec{n}/\Omega) \f$. */
+  GiNaC::exvector rates;
+  /** holds first correction to vector of reaction rates  \f$ \vec{f}^{(1)}(\vec{n}/\Omega) \f$. */
+  GiNaC::exvector rates1;
 };
 
 

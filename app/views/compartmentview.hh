@@ -29,6 +29,8 @@ private slots:
   void onRemCompartment();
   /** callback on selection change. */
   void onSelectionChanged(const QItemSelection &selected, const QItemSelection &unselected);
+  /** Gets called once the model is modified. */
+  void onModelModified();
 
 private:
   /** Holds a weak reference to the @c CompartmentsItem instance being displayed. */

@@ -10,40 +10,29 @@ namespace iNA {
 namespace Eval {
 namespace direct {
 
-/**
- * This little nasty hack is needed to have some destination-type dependent unpacking
+/** This little nasty hack is needed to have some destination-type dependent unpacking
  * of GiNaC values.
- *
- * @ingroup direct
- */
+ * @ingroup direct */
 template <typename Scalar>
 class GiNaCValuePacker
 {
 public:
-  /**
-   * Unpacks a ginac value.
-   */
+  /** Unpacks a ginac value. */
   static Scalar unpack(const GiNaC::ex &value);
 
   static GiNaC::ex pack(const Scalar &value);
 };
 
 
-/**
- * Specialized unpacker for real numbers.
- *
- * @ingroup direct
- */
+/** Specialized unpacker for real numbers.
+ * @ingroup direct */
 template<>
 class GiNaCValuePacker<double>
 {
 public:
-  /**
-   * Implements the upacking of @c double values.
-   */
-  static double unpack(const GiNaC::ex &value)
-  {
-    GiNaC::numeric num = GiNaC::ex_to<GiNaC::numeric>(value);
+  /** Implements the upacking of @c double values. */
+  static double unpack(const GiNaC::ex &value) {
+    GiNaC::numeric num = GiNaC::ex_to<GiNaC::numeric>(value.evalf());
     if (! num.is_real()) {
       TypeError err;
       err << "Can not convert some non-real value " << value << " to double.";
@@ -52,59 +41,39 @@ public:
     return num.to_double();
   }
 
-  static GiNaC::ex pack(const double &value)
-  {
+  static GiNaC::ex pack(const double &value) {
     return value;
   }
 };
 
 
-/**
- * Specialized unpacker for complex numbers.
- *
- * @ingroup direct
- */
+/** Specialized unpacker for complex numbers.
+ * @ingroup direct */
 template<>
 class GiNaCValuePacker< std::complex<double> >
 {
 public:
-  /**
-   * Implements the unpacking of @c complex<double> values.
-   */
-  static std::complex<double> unpack(const GiNaC::ex &value)
-  {
+  /** Implements the unpacking of @c complex<double> values. */
+  static std::complex<double> unpack(const GiNaC::ex &value) {
     GiNaC::numeric num = GiNaC::ex_to<GiNaC::numeric>(value);
     return std::complex<double>(
           GiNaC::real(num).to_double(), GiNaC::imag(num).to_double());
   }
 
-  static GiNaC::ex pack(const std::complex<double> &value)
-  {
+  static GiNaC::ex pack(const std::complex<double> &value) {
     return value.real() + GiNaC::I * value.imag();
   }
 };
 
 
 
-/**
- * Interpreter for the direct evaluation engine.
- *
- * @ingroup direct
- */
+/** Interpreter for the direct evaluation engine.
+ * @ingroup direct */
 template <class InType, class OutType=InType>
 class Interpreter
 {
-protected:
-  /**
-   * Holds the code to execute.
-   */
-  Code *code;
-
-
 public:
-  /**
-   * Constructor.
-   */
+  /** Constructor. */
   Interpreter()
     : code(0)
   {
@@ -112,34 +81,23 @@ public:
   }
 
 
-  /**
-   * Constructor.
-   *
-   * Also sets the code to execute.
-   */
+  /** Constructor.
+   * Also sets the code to execute. */
   Interpreter(Code *code)
     : code(code)
   {
     // Pass...
   }
 
-
-  /**
-   * (Re-) Sets the code.
-   */
-  void setCode(Code *code)
-  {
+  /** (Re-) Sets the code. */
+  void setCode(Code *code) {
     this->code = code;
   }
 
-
-  /**
-   * Evaluates the "code".
-   */
+  /** Evaluates the "code". */
   inline void run(const InType &input, OutType &output) {
     this->run(input.data(), output.data());
   }
-
 
   inline void run(const typename InType::Scalar *input, typename OutType::Scalar *output)
   {
@@ -184,6 +142,10 @@ public:
       output[item->second] = GiNaCValuePacker<typename OutType::Scalar>::unpack(value);
     }
   }
+
+protected:
+  /** Holds the code to execute. */
+  Code *code;
 };
 
 

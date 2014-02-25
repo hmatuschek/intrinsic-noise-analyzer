@@ -6,6 +6,7 @@
 #include <QPalette>
 #include <QDesktopServices>
 #include <QUrl>
+#include <QCloseEvent>
 
 #include "../models/application.hh"
 #include <ina.hh>
@@ -64,6 +65,13 @@ MainWindow::showPanel(QWidget *panel) {
 
 
 void
+MainWindow::closeEvent(QCloseEvent *event) {
+  if (Application::getApp()->mayQuit()) { event->accept(); }
+  else { event->ignore(); }
+}
+
+
+void
 MainWindow::_createActions()
 {
   // Define some actions for main menu:
@@ -97,7 +105,7 @@ MainWindow::_createActions()
   // Connect signals:
   connect(this->_quitAct, SIGNAL(triggered()), this, SLOT(quit()));
   connect(this->_aboutAct, SIGNAL(triggered()), this, SLOT(about()));
-  connect(this->_onlineHelp, SIGNAL(triggered()), this, SLOT(openTutorial()));
+  connect(this->_onlineHelp, SIGNAL(triggered()), this, SLOT(openHelpPage()));
   connect(this->_showLogsAct, SIGNAL(triggered()), this, SLOT(showLogs()));
 }
 
@@ -142,7 +150,9 @@ MainWindow::_createMenus()
 }
 
 
-void MainWindow::quit() { QApplication::exit(0); }
+void MainWindow::quit() {
+  Application::getApp()->quit();
+}
 
 void
 MainWindow::about() {
@@ -152,15 +162,14 @@ MainWindow::about() {
 }
 
 void
-MainWindow::openTutorial() {
-  QDesktopServices::openUrl(QUrl("http://code.google.com/p/intrinsic-noise-analyzer/wiki/Help"));
+MainWindow::openHelpPage() {
+  QDesktopServices::openUrl(QUrl("http://www.ina.bio.ed.ac.uk/?page_id=79"));
 }
 
 void MainWindow::showLogs() { this->_logWindow->setVisible(true); }
 
 
 void
-MainWindow::checkForUpdatesToggled()
-{
+MainWindow::checkForUpdatesToggled() {
   Application::getApp()->setCheckNewVersionAvailable(_checkForUpdatesAct->isChecked());
 }

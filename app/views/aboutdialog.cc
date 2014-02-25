@@ -29,8 +29,8 @@ AboutDialog::AboutDialog(QWidget *parent)
 
   QLabel *url = new QLabel();
   url->setTextFormat(Qt::RichText); url->setOpenExternalLinks(true);
-  url->setText(tr("<a href=\"http://code.google.com/p/intrinsic-noise-analyzer\">"
-                  "http://code.google.com/p/intrinsic-noise-analyzer</a>"));
+  url->setText(tr("<a href=\"http://www.ina.bio.ed.ac.uk\">"
+                  "www.ina.bio.ed.ac.uk</a>"));
   url->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
   url->setAlignment(Qt::AlignCenter);
 

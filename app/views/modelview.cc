@@ -5,7 +5,8 @@
 #include "../models/application.hh"
 #include "../doctree/documenttree.hh"
 #include "../doctree/documentitem.hh"
-#include <utils/logger.hh>
+#include "ast/identifier.hh"
+#include "utils/logger.hh"
 
 #include <QLabel>
 #include <QPalette>
@@ -97,7 +98,7 @@ ModelView::ModelView(ModelItem *model_item, QWidget *parent)
 void
 ModelView::onModelIdentifierChanged()
 {
-  if (! QRegExp("[_a-zA-Z][_a-zA-Z0-9]*").exactMatch(_model_identifier->text())) {
+  if (! iNA::Ast::isValidId(_model_identifier->text().toStdString())) {
     QMessageBox::critical(0, tr("Invalid model identifier"),
                           tr("Model identifier must constist of alpha-numeric chars and '_', "
                              "and must not start with a number."));
@@ -110,6 +111,9 @@ ModelView::onModelIdentifierChanged()
 
   // Update view:
   onUpdateModelView();
+
+  // mark model as modified
+  onModelModified();
 }
 
 void
@@ -125,6 +129,8 @@ ModelView::onModelNameChanged()
   }
   // Update view:
   onUpdateModelView();
+  // mark model as modified
+  onModelModified();
 }
 
 
@@ -133,8 +139,10 @@ ModelView::onSpeciesUnitSelected(int index)
 {
   if (0 == index) {
     _model->setSpeciesHaveSubstanceUnits(false);
+    onModelModified();
   } else {
     _model->setSpeciesHaveSubstanceUnits(true);
+    onModelModified();
   }
 }
 
@@ -142,6 +150,7 @@ void
 ModelView::onSubstanceUnitChanged() {
   try {
     _model->setSubstanceUnit(_substance_unit_editor->unit(), false);
+    onModelModified();
   } catch (iNA::Exception &err) {
     QMessageBox::critical(0, "Can not set substance unit.", err.what());
   }
@@ -151,6 +160,7 @@ void
 ModelView::onVolumeUnitChanged() {
   try {
     _model->setVolumeUnit(_volume_unit_editor->unit(), false);
+    onModelModified();
   } catch (iNA::Exception &err) {
     QMessageBox::critical(0, "Can not set volume unit.", err.what());
   }
@@ -160,6 +170,7 @@ void
 ModelView::onAreaUnitChanged() {
   try {
     _model->setAreaUnit(_area_unit_editor->unit(), false);
+    onModelModified();
   } catch (iNA::Exception &err) {
     QMessageBox::critical(0, "Can not set area unit.", err.what());
   }
@@ -169,6 +180,7 @@ void
 ModelView::onLengthUnitChanged() {
   try {
     _model->setLengthUnit(_length_unit_editor->unit(), false);
+    onModelModified();
   } catch (iNA::Exception &err) {
     QMessageBox::critical(0, "Can not set length unit.", err.what());
   }
@@ -178,6 +190,7 @@ void
 ModelView::onTimeUnitChanged() {
   try {
     _model->setTimeUnit(_time_unit_editor->unit(), false);
+    onModelModified();
   } catch (iNA::Exception &err) {
     QMessageBox::critical(0, "Can not set time unit.", err.what());
   }
@@ -196,4 +209,9 @@ ModelView::onUpdateModelView() {
   _area_unit_editor->setUnit(_model->getAreaUnit());
   _length_unit_editor->setUnit(_model->getLengthUnit());
   _time_unit_editor->setUnit(_model->getTimeUnit());
+}
+
+void
+ModelView::onModelModified() {
+  _model_item->document()->setIsModified(true);
 }

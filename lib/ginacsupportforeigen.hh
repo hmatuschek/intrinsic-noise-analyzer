@@ -1,8 +1,25 @@
 #ifndef __INA_GINACSUPPORTFOREIGEN_HH__
 #define __INA_GINACSUPPORTFOREIGEN_HH__
 
-#include <eigen3/Eigen/Eigen>
+#include <complex>
 #include <ginac/ginac.h>
+
+// Declare std::imag etc for Eigen as Eigen3 version >=3.2.0 uses std::imag, std::real & std::conj
+// for some reason. This declaration must be done before any Eigen code is included!
+namespace std {
+inline GiNaC::ex real(const GiNaC::ex &val) {
+  return val.real_part();
+}
+inline GiNaC::ex imag(const GiNaC::ex &val) {
+  return val.imag_part();
+}
+inline GiNaC::ex conj(const GiNaC::ex &val) {
+  return val.conjugate();
+}
+}
+
+// Get Eigen3
+#include <eigen3/Eigen/Eigen>
 
 
 namespace Eigen {
@@ -68,7 +85,10 @@ typedef Eigen::Matrix< GiNaC::ex , Dynamic, 1> VectorXex;
 
 /** Simple inline evaluator */
 inline double ex2double(const GiNaC::ex &In) {
-  return GiNaC::ex_to<GiNaC::numeric>(In.evalf()).to_double();
+  if (GiNaC::is_a<GiNaC::numeric>(In.evalf())) {
+    return GiNaC::ex_to<GiNaC::numeric>(In.evalf()).to_double();
+  }
+  return std::numeric_limits<double>::quiet_NaN();
 }
 
 /** Simple inline evaluator */

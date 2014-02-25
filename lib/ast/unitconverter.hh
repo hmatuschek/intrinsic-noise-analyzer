@@ -8,7 +8,8 @@
 namespace iNA {
 namespace Ast {
 
-/** A trivial class to tranlate a value given in unit A, into the same value in unit B. */
+/** A trivial class to tranlate a value given in unit A, into the same value in unit B.
+ * @deprecated Remove, is not used yet and will never be used in future. */
 class UnitConverter
 {
 public:
@@ -34,7 +35,7 @@ protected:
   /** Returns the conversion factor if a & b can reduce. */
   static Unit reduceToSI(const Unit &unit);
   /** Returns the conversion factor if a & b can reduce. */
-  static Unit reduceToSI(ScaledBaseUnit::BaseUnit base_unit, int exponent);
+  static Unit reduceToSI(Unit::BaseUnit base_unit, int exponent);
 };
 
 }

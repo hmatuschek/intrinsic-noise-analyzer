@@ -36,16 +36,35 @@ protected:
 public:
 
    struct params {
-       params(size_t dim) : linesearch(Optimization), maxIterations(100*(dim+1)), epsilon(1.e-9),
-           ALF(1.e-4), TOLX(std::numeric_limits<double>::epsilon()), TOLF(epsilon), TOLMIN(1.e-12), STPMX(100.){}
+       params(size_t dim) : linesearch(Optimization), maxIterations(100*(dim+1)),
+                            relError(1.e-9), absError(1.e-9),
+                            ALF(1.e-4), TOLX(1.e-9), TOLMIN(1.e-12), STPMX(100.){}
 
        LineSearchMethod linesearch;
 
        size_t maxIterations;   // maximum number of function evaluation
-       double epsilon;
+       /**
+        * @brief Relative error
+        */
+       double relError;
+       /**
+        * @brief Absolute error
+        */
+       double absError;
 
+       /**
+        * @brief Acceptable step length for Wolfe condition. Don't change standard value.
+        */
        double ALF;
-       double TOLX,TOLF,TOLMIN;
+
+       /**
+        * @brief Tolerances for linesearch.
+        */
+       double TOLX,TOLMIN;
+
+       /**
+        * @brief Maximum steps for linesearch. Assumes standard value.
+        */
        int STPMX;
 
    };
@@ -76,72 +95,87 @@ public:
      return this->JacobianM;
   }
 
+  /**
+   * @brief Run the Newton-Raphson solver
+   * @param state provides initial condition for the solver which is updated on exist
+   * @return Status of the solver.
+   */
   virtual Status
-  solve(Eigen::VectorXd &conc)
+  solve(Eigen::VectorXd &state)
 
   {
 
-      double test,temp;
-
-      Eigen::VectorXd conc_old;
+      Eigen::VectorXd state_old;
 
       Eigen::VectorXd nablaf;
       Eigen::VectorXd dx;
 
       // Calculate maximum step size heuristic
-      const double stpmax=this->parameters.STPMX*std::max(conc.head(this->dim).norm(),double(this->dim));
+      const double stpmax=this->parameters.STPMX*std::max(state.head(this->dim).norm(),double(this->dim));
 
       // Do Newton iteration
       for(this->iterations=1;this->iterations<parameters.maxIterations;this->iterations++)
       {
 
-          conc_old = conc;
+          state_old = state;
 
-          LineSearchStatus lcheck = newtonStep(conc_old,conc,stpmax);
+          LineSearchStatus lcheck = newtonStep(state_old,state,stpmax);
 
-          if ((conc.head(this->dim).array()<0).any())
+          // Check for negative values
+          if ((state.head(this->dim).array()<0).any())
           {
-              conc = conc_old;
+              state = state_old;
               return NegativeValues;
-          }
-
-          // Test for convergence of ODEs
-          if ( maxNorm(this->ODEs) < this->parameters.TOLF )
-          {
-             return Success;
           }
 
           // Check linesearch
           switch(lcheck)
           {
-            case Converged:
-              return Success;
             case RoundOffProblem:
             case LineSearchFailed:
-              conc = conc_old;
+              state = state_old;
               return IterationFailed;
             default: break;
           }
 
-          // Test for convergence of update vector dx
-          test = 0.;
-          for(size_t i=0;i<this->dim;i++)
+          // Test for convergence of ODEs
+          if ( maxNorm(this->ODEs) < this->parameters.absError )
           {
-              temp = (std::abs(conc(i)-conc_old(i)))/std::max(conc(i),1.);
-              if (temp > test) test = temp;
+             return Success;
           }
 
-          if (test < this->parameters.TOLX)
+          // Test for convergence of update
+          double test=0,temp = 0.;
+          for(size_t i=0;i<this->dim;i++)
+          {
+              temp = (std::abs(state(i)-state_old(i)))/std::max(state(i),1.);
+              if (temp > test) test = temp;
+          }
+          if (test < this->parameters.relError)
           {
               //convergence of dx
               return Success;
           }
 
-      } // next newton iteration
+          // Maybe this condition was not the best
+          // Test for absolute and relative errors
+          //if (maxNorm(state-state_old) < std::min(this->parameters.absError, maxNorm(state)*this->parameters.relError)
+          //    && maxNorm(this->ODEs) < std::min(this->parameters.absError, maxNorm(state)*this->parameters.relError) )
+          //    return Success;
+
+      } // Next newton iteration
 
       return MaxIterationsReached;
   }
 
+
+  /**
+   * @brief Performs a single Newton-Raphson iteration with linesearch
+   * @param inState : initial state
+   * @param outState : output state updated on exit
+   * @param stpmax : Maximum number of steps used in linesearch
+   * @return
+   */
   LineSearchStatus
   newtonStep(const Eigen::VectorXd &inState, Eigen::VectorXd &outState ,double stpmax)
 
@@ -176,8 +210,6 @@ public:
           case Optimization:
             lcheck = this->linesearch(inState, outState, dx, fold, f, nablaf, stpmax);
             break;
-          case Damped:
-            lcheck = this->linesearch2(inState, outState, dx, fold, f, stpmax);
           default: return Done;
 
       }
@@ -246,15 +278,15 @@ public:
       if(norm > stpmax) dx*=(stpmax/norm);
 
       double slope = nablaf.adjoint()*dx;
-
       if (slope >= 0.) return RoundOffProblem;
+
+      // determine minimum lambda
       test = 0.0;
       for (size_t i=0;i<this->dim;i++)
       {
           temp=std::abs(dx(i))/std::max(abs(i),1);
           if (temp > test) test = temp;
       }
-
       lambdamin = this->parameters.TOLX/test;
 
       // first do newton step
@@ -302,61 +334,9 @@ public:
           f2 = f;
           lambda = std::max(tmplambda,0.1*lambda);
 
-          if(it>100000)return LineSearchFailed;
+          if(it>100000) return LineSearchFailed;
 
       }
-
-  }
-
-  /**
-   * Damped line search method.
-   *
-   * @ingroup nlesolve
-   * @todo this method does not work properly.
-   *
-   * This method simply halfens the step size.
-   */
-
-  LineSearchStatus
-  linesearch2(const Eigen::VectorXd &xold, Eigen::VectorXd &x, Eigen::VectorXd &dx,
-                                      const double fold, double &f, double stpmax)
-  {
-
-      // first try Newton step
-
-      int n=0;
-
-      double lambda=1;
-
-
-      double norm = dx.norm();
-      // scale if dx is too large
-      if(norm > stpmax) dx*=(stpmax/norm);
-
-      // loop over until f has sufficiently decreased
-      while(f > fold)
-      {
-
-          n++;
-
-          x = xold+lambda*dx;
-
-          this->interpreter.run(x,this->ODEs);
-
-          f = 0.5*this->ODEs.squaredNorm();
-
-          // take half step size
-          lambda *= 0.5;
-
-          if(n>32)
-          {
-              std::cerr<<"max reached"<<std::endl;
-              return LineSearchFailed;
-          }
-
-      }
-
-      return Done;
 
   }
 

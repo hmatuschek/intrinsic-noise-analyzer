@@ -35,6 +35,8 @@ private slots:
   void onTimeUnitChanged();
   /** Callback to update model view. */
   void onUpdateModelView();
+  /** Callback to mark the model as modified. */
+  void onModelModified();
 
 private:
   /** Holds a weak reference to the model item. */

@@ -36,7 +36,10 @@ int main(int argc, char *argv[])
   // Assemble option-grammar:
   Utils::Opt::Parser parser;
   parser.setGrammar(
-        ( parser.zeroOrMore(parser.Option("skip")) | parser.Flag("help") ) );
+        ( parser.zeroOrMore(
+            ( parser.Option("skip")
+              | parser.Flag("log") ) )
+          | parser.Flag("help") ) );
 
   // Parse flags.
   if (! parser.parse((const char **)argv, argc)) {
@@ -51,6 +54,12 @@ int main(int argc, char *argv[])
     return 0;
   }
 
+  if (parser.has_flag("log")) {
+    // Assemble logger:
+    Utils::Logger::get().addHandler(
+          new Utils::TextMessageHandler(std::cerr, Utils::Message::INFO));
+  }
+
   // Holds the tests to be skipped:
   std::set<std::string> skipped_tests;
   // Add tests skipped by default:
@@ -63,10 +72,6 @@ int main(int argc, char *argv[])
     const std::list<std::string> &names = parser.get_option("skip");
     skipped_tests.insert(names.begin(), names.end());
   }
-
-  // Assemble logger:
-  /*Utils::Logger::get().addHandler(
-        new Utils::TextMessageHandler(std::cerr, Utils::Message::INFO));*/
 
   // Construct test-runner
   TestRunner runner(std::cout);

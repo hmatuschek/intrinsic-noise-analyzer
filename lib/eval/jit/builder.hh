@@ -10,13 +10,8 @@ namespace Eval {
 namespace jit {
 
 
-/**
- * Template interface for all internal used builders.
- *
- * @todo Implement LLVM IR builder for complex values.
- *
- * @ingroup jit
- */
+/** Template interface for all internal used builders.
+ * @todo Implement LLVM IR builder for complex values. */
 template <typename Scalar>
 class Builder
 {
@@ -31,11 +26,7 @@ public:
 };
 
 
-/**
- * Specialization for real-valued expressions.
- *
- * @ingroup jit
- */
+/** Specialization for real-valued expressions. */
 template<>
 class Builder<double>
 {

@@ -96,6 +96,7 @@ SteadyStateResultWidget::SteadyStateResultWidget(SteadyStateTaskWrapper *task_wr
   state_layout->addWidget(this->ios_cov_label);
   state_layout->addWidget(this->ios_covariance_view);
 
+  /*
   this->spec_label = new QLabel("Power spectrum (LNA)");
   this->spec_label->setFont(Application::getApp()->getH2Font());
   this->spec_label->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
@@ -105,12 +106,13 @@ SteadyStateResultWidget::SteadyStateResultWidget(SteadyStateTaskWrapper *task_wr
   this->spectrum_view->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
   this->spectrum_view->setModel(this->ss_task_wrapper->getSpectrum());
 
-  this->spec_plot_button = new QPushButton(tr("Plot steady state statistics"));
   //this->spec_save_button = new QPushButton(tr("Save spectrum to file"));
-  this->data_save_button = new QPushButton(tr("Save data to file"));
-  QObject::connect(this->spec_plot_button, SIGNAL(clicked()), this, SLOT(plotSpectrum()));
   //QObject::connect(this->spec_save_button, SIGNAL(clicked()), this, SLOT(saveSpectrum()));
+  */
+  this->spec_plot_button = new QPushButton(tr("Plot steady state statistics"));
+  this->data_save_button = new QPushButton(tr("Save data to file"));
   QObject::connect(this->data_save_button, SIGNAL(clicked()), this, SLOT(saveData()));
+  QObject::connect(this->spec_plot_button, SIGNAL(clicked()), this, SLOT(plotSpectrum()));
 
   QHBoxLayout *button_layout = new QHBoxLayout();
   button_layout->addWidget(this->spec_plot_button);
@@ -163,15 +165,11 @@ SteadyStateResultWidget::saveSpectrum()
   QString filename = QFileDialog::getSaveFileName(
         this, tr("Save as text..."), "", tr("Text Files (*.txt *.csv)"));
 
-  if ("" == filename)
-  {
-    return;
-  }
+  if ("" == filename) { return; }
 
   QFile file(filename);
 
-  if (! file.open(QIODevice::WriteOnly| QIODevice::Text))
-  {
+  if (! file.open(QIODevice::WriteOnly| QIODevice::Text)) {
     QMessageBox box;
     box.setWindowTitle(tr("Cannot open file"));
     box.setText(tr("Cannot open file %1 for writing").arg(filename));
@@ -188,17 +186,16 @@ SteadyStateResultWidget::saveData()
 {
   // First get file-name from user:
   QString selectedFilter;
-  //QString filters = tr("Text Files (*.txt *.csv);;Matlab 5 Files (*.mat)";
-  QString filters = tr("Text Files (*.txt *.csv)");
+  QString csvFilter = tr("Text Files (*.txt *.csv)");
+  QString matFilter = tr("Matlab 5 Files (*.mat)");
+  QString filters = QString("%1;;%2").arg(csvFilter).arg(matFilter);
   QString filename = QFileDialog::getSaveFileName(
         this, tr("Save results as ..."), "", filters, &selectedFilter);
   if ("" == filename) { return; }
 
-  if (tr("Text Files (*.txt *.csv)") == selectedFilter) {
-    saveAsCSV(filename);
-  } else if (tr("Matlab 5 Files (*.mat)") == selectedFilter) {
-    saveAsMAT(filename);
-  } else {
+  if (csvFilter == selectedFilter) { saveAsCSV(filename); }
+  else if (matFilter == selectedFilter) { saveAsMAT(filename); }
+  else {
     QMessageBox::critical(
           0, tr("Can not save data."),
           tr("Can not save analysis result to file %1: Unknown type selected %2").arg(

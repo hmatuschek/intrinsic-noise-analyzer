@@ -30,6 +30,11 @@ protected:
    * top-down along this scopes. */
   std::list<Ast::Scope *> _scope_stack;
 
+  /** Resolves SBMLs unit definitions to units. iNA does not store unit definitions, species and
+   * compartments have a common unit specified within the model. Only paramters may have their own
+   * unit specified with every parameter separately. */
+  std::map<std::string, Ast::Unit> _units;
+
 public:
   /** Constructs a new AST assembler for the given module. */
   ParserContext(Ast::Model &_model);
@@ -51,34 +56,50 @@ public:
   /** Tries to resolve a variable in the given scope. */
   Ast::VariableDefinition *resolveVariable(
       const std::string &id, std::list<Ast::Scope *>::reverse_iterator scope);
+
   /** Returns a weak reference to the Ast::Model instance being assembled. */
   Ast::Model &model();
+
+  /** Returns true, if the given ID refers to a unit. */
+  bool hasUnit(const std::string &id) const;
+  /** Resolves a unit. */
+  const Ast::Unit &unit(const std::string &id) const;
+  /** Defines a new unit. */
+  void defineUnit(const std::string &id, const Ast::Unit &unit);
 };
 
 
 // Forward declaration of internal used functions to traverse the SBML tree (libsbml)
 void __process_model(
     LIBSBML_CPP_NAMESPACE_QUALIFIER Model *model, ParserContext &ctx);
+
 Ast::FunctionDefinition *__process_function_definition(
     LIBSBML_CPP_NAMESPACE_QUALIFIER FunctionDefinition *funcdef, ParserContext &ctx);
+
 bool __is_default_unit_redefinition(
     LIBSBML_CPP_NAMESPACE_QUALIFIER UnitDefinition *node, ParserContext &ctx);
 void __process_default_unit_redefinition(
     LIBSBML_CPP_NAMESPACE_QUALIFIER UnitDefinition *node, ParserContext &ctx);
-Ast::UnitDefinition *__process_unit_definition(
+void __process_unit_definition(
     LIBSBML_CPP_NAMESPACE_QUALIFIER UnitDefinition *node, ParserContext &ctx);
-Ast::ScaledBaseUnit __process_unit(
+Ast::Unit __process_unit(
     LIBSBML_CPP_NAMESPACE_QUALIFIER Unit *unit, ParserContext &ctx);
+
 Ast::VariableDefinition *__process_parameter_definition(
     LIBSBML_CPP_NAMESPACE_QUALIFIER Parameter *node, ParserContext &ctx);
+
 Ast::VariableDefinition *__process_compartment_definition(
     LIBSBML_CPP_NAMESPACE_QUALIFIER Compartment *node, ParserContext &ctx, Trafo::VariableScaling &subs);
+
 Ast::VariableDefinition *__process_species_definition(
     LIBSBML_CPP_NAMESPACE_QUALIFIER Species *node, ParserContext &ctx, Trafo::VariableScaling &subs);
+
 Ast::Reaction *__process_reaction(
     LIBSBML_CPP_NAMESPACE_QUALIFIER Reaction *node, ParserContext &ctx);
+
 Ast::KineticLaw *__process_kinetic_law(
     LIBSBML_CPP_NAMESPACE_QUALIFIER KineticLaw *node, ParserContext &ctx);
+
 GiNaC::ex __process_expression(
     const LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *node, ParserContext &ctx);
 GiNaC::ex __process_const_boolean(

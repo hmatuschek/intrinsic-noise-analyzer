@@ -6,8 +6,10 @@
 #include <QMessageBox>
 #include "../models/application.hh"
 #include "../doctree/documenttree.hh"
+#include "../doctree/documentitem.hh"
 #include "reactioneditor.hh"
 #include <utils/logger.hh>
+#include <ast/identifier.hh>
 
 
 ReactionListView::ReactionListView(ReactionsItem *reactions, QWidget *parent)
@@ -67,11 +69,93 @@ ReactionListView::onNewReaction()
   ReactionEditor editor(_reactions->getModel());
   if (QDialog::Rejected == editor.exec()) { return; }
 
-  // Add reaction and new species to the model
-  editor.commitReactionScope();
+  iNA::Ast::Compartment *compartment = 0;
+  GiNaC::exmap subst_table;
+  iNA::Ast::Model &model = _reactions->getModel();
+
+  // If a compartment needs to be created
+  if (editor.context().compartmentIsUndefined()) {
+    // Get an new unique ID for the compartment
+    compartment = new iNA::Ast::Compartment(editor.context().compartmentIdentifier(), 1,
+                                            iNA::Ast::Compartment::VOLUME, true);
+    subst_table[editor.context().compartmentSymbol()] = compartment->getSymbol();
+    model.addDefinition(compartment);
+    // signal model modified
+    onModelModified();
+  } else {
+    // Resolve compartment to be used to define new species in
+    if (! model.hasCompartment(editor.context().compartmentIdentifier())) {
+      QMessageBox::critical(0, tr("Can not create reaction"),
+                            tr("Internal error: Can not resolve compartment '%1' in model.").arg(
+                              editor.context().compartmentIdentifier().c_str()));
+      return;
+    }
+    compartment = model.getCompartment(editor.context().compartmentIdentifier());
+  }
+
+  // Define undefined species
+  std::map<std::string, GiNaC::symbol>::const_iterator spec = editor.context().undefinedSpecies().begin();
+  for (; spec != editor.context().undefinedSpecies().end(); spec++) {
+    iNA::Ast::Species *species = new iNA::Ast::Species(spec->first, 0, compartment, "", false);
+    subst_table[spec->second] = species->getSymbol();
+    model.addDefinition(species);
+  }
+
+  // Assemble kinetic law
+  iNA::Ast::KineticLaw *law = new iNA::Ast::KineticLaw(0);
+  // define local parameters
+  std::map<std::string, GiNaC::symbol>::const_iterator para = editor.context().undefinedParameters().begin();
+  for (; para != editor.context().undefinedParameters().end(); para++) {
+    iNA::Ast::Parameter *parameter = new iNA::Ast::Parameter(
+          para->first, 1, iNA::Ast::Unit::dimensionless(), true);
+    subst_table[para->second] = parameter->getSymbol();
+    law->addDefinition(parameter);
+  }
+  // Set rate law (substituted)
+  GiNaC::ex rate_law = editor.kineticLaw().subs(subst_table);
+  law->setRateLaw(rate_law);
+
+  // Obtain a new unique and valid ID for reaction from reaction name
+  QString id_base = editor.reactionName(); id_base.replace(QRegExp("[^a-zA-Z0-9_]"), "_");
+  if (! iNA::Ast::isValidId(id_base.toStdString())) {
+    iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::INFO);
+    message << "Reaction identifier '"
+            << id_base.toStdString() << "' derived from reaction name '"
+            << editor.reactionName().toStdString()
+            << "' is not a valid ID. Resort to 'reaction'.";
+    iNA::Utils::Logger::get().log(message);
+    id_base = "reaction";
+  }
+  std::string reac_id = model.getNewIdentifier(id_base.toStdString());
+
+  // create reaction
+  iNA::Ast::Reaction *reaction = new iNA::Ast::Reaction(
+        reac_id, editor.reactionName().toStdString(), law, editor.isReversible());
+
+  // Populate reactants
+  StoichiometryList::const_iterator reactant = editor.reactants().begin();
+  for (; reactant != editor.reactants().end(); reactant++) {
+    iNA::Ast::Species *species = model.getSpecies(reactant->second.toStdString());
+    reaction->addReactantStoichiometry(species, reactant->first);
+  }
+  // Populate products
+  StoichiometryList::const_iterator product = editor.products().begin();
+  for (; product != editor.products().end(); product++) {
+    iNA::Ast::Species *species = model.getSpecies(product->second.toStdString());
+    reaction->addProductStoichiometry(species, product->first);
+  }
 
   // Update document tree
-  Application::getApp()->docTree()->resetCompleteTree();
+  // this also adds the reaction to the model
+  DocumentItem *doc = dynamic_cast<DocumentItem *>(
+        _reactions_item->getTreeParent()->getTreeParent());
+  Application::getApp()->docTree()->addReaction(doc, new ReactionItem(reaction));
+
+  // signal model was modified
+  onModelModified();
+
+  // Update reaction list
+  _reactions->updateTable();
 }
 
 
@@ -102,6 +186,11 @@ ReactionListView::onRemReaction()
 
   // Remove selected reaction
   Application::getApp()->docTree()->removeReaction(reac_item);
+
+  // signal model was modified
+  onModelModified();
+
+  // Update reaction list
   _reactions->updateTable();
 }
 
@@ -129,8 +218,84 @@ ReactionListView::onReactionEditing(const QModelIndex &index)
   ReactionEditor editor(_reactions->getModel(), reaction);
   if (QDialog::Rejected == editor.exec()) { return; }
 
-  // Add new reaction and new species to the model
-  editor.commitReactionScope();
-  // Update document tree
-  Application::getApp()->docTree()->resetCompleteTree();
+  iNA::Ast::Compartment *compartment = 0;
+  GiNaC::exmap subst_table;
+  iNA::Ast::Model &model = _reactions->getModel();
+
+  // If a compartment needs to be created
+  if (editor.context().compartmentIsUndefined()) {
+    // Get an new unique ID for the compartment
+    compartment = new iNA::Ast::Compartment(editor.context().compartmentIdentifier(), 1,
+                                            iNA::Ast::Compartment::VOLUME, true);
+    subst_table[editor.context().compartmentSymbol()] = compartment->getSymbol();
+    model.addDefinition(compartment);
+    onModelModified();
+  } else {
+    // Resolve compartment to be used to define new species in
+    if (! model.hasCompartment(editor.context().compartmentIdentifier())) {
+      QMessageBox::critical(0, tr("Can not create reaction"),
+                            tr("Internal error: Can not resolve compartment '%1' in model.").arg(
+                              editor.context().compartmentIdentifier().c_str()));
+      return;
+    }
+    compartment = model.getCompartment(editor.context().compartmentIdentifier());
+  }
+
+  // Define undefined species
+  std::map<std::string, GiNaC::symbol>::const_iterator spec = editor.context().undefinedSpecies().begin();
+  for (; spec != editor.context().undefinedSpecies().end(); spec++) {
+    iNA::Ast::Species *species = new iNA::Ast::Species(spec->first, 0, compartment, "", false);
+    subst_table[spec->second] = species->getSymbol();
+    model.addDefinition(species);
+  }
+
+  // Update reaction name
+  reaction->setName(editor.reactionName().toStdString());
+  // Update reactant stoichiometry
+  reaction->clearReactants();
+  StoichiometryList::const_iterator reactant = editor.reactants().begin();
+  for (; reactant != editor.reactants().end(); reactant++) {
+    iNA::Ast::Species *species = model.getSpecies(reactant->second.toStdString());
+    reaction->addReactantStoichiometry(species, reactant->first);
+  }
+  // Update product stoichiometry
+  reaction->clearProducts();
+  StoichiometryList::const_iterator product = editor.products().begin();
+  for (; product != editor.products().end(); product++) {
+    iNA::Ast::Species *species = model.getSpecies(product->second.toStdString());
+    reaction->addProductStoichiometry(species, product->first);
+  }
+  // set reversible
+  reaction->setReversible(editor.isReversible());
+
+  // Assemble kinetic law
+  iNA::Ast::KineticLaw *law = reaction->getKineticLaw();
+  // define local parameters
+  std::map<std::string, GiNaC::symbol>::const_iterator para = editor.context().undefinedParameters().begin();
+  for (; para != editor.context().undefinedParameters().end(); para++) {
+    iNA::Ast::Parameter *parameter = new iNA::Ast::Parameter(
+          para->first, 1, iNA::Ast::Unit::dimensionless(), true);
+    subst_table[para->second] = parameter->getSymbol();
+    law->addDefinition(parameter);
+  }
+  // Set rate law (substituted)
+  law->setRateLaw(editor.kineticLaw().subs(subst_table));
+
+  // signal model was modified
+  onModelModified();
+
+  // Update reaction item in DocTree as the name may have been changed
+  ReactionItem *item = dynamic_cast<ReactionItem *>(_reactions_item->getTreeChild(index.row()));
+  item->updateLabel();
+
+  Application::getApp()->docTree()->markForUpdate(item);
+
+  // Update reaction list
+  _reactions->updateTable();
+}
+
+
+void
+ReactionListView::onModelModified() {
+  _reactions_item->document()->setIsModified(true);
 }

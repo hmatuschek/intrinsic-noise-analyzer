@@ -7,6 +7,7 @@
 #include "../tinytex/ginac2formula.hh"
 #include "../tinytex/tinytex.hh"
 #include "../views/unitrenderer.hh"
+#include "ast/identifier.hh"
 #include <QMessageBox>
 
 
@@ -80,7 +81,11 @@ CompartmentList::setData(const QModelIndex &index, const QVariant &value, int ro
   }
 
   // on success, signal view that data has changed:
-  if (success) { emit dataChanged(index, index); }
+  if (success) {
+    emit dataChanged(index, index);
+    // signal model modified
+    emit modelModified();
+  }
   return success;
 }
 
@@ -139,7 +144,7 @@ CompartmentList::_updateIndentifier(iNA::Ast::Compartment *compartment, const QV
   if (id == compartment->getIdentifier()) { return true; }
 
   // Check ID format
-  if (! QRegExp("[a-zA-Z_][a-zA-Z0-9_]*").exactMatch(qid)) {
+  if (! iNA::Ast::isValidId(id)) {
     QMessageBox::warning(0, tr("Can not set identifier"),
                          tr("The identifier can not be set to \"%1\", invalid format").arg(qid));
     return false;
@@ -280,6 +285,9 @@ CompartmentList::addCompartment()
         new iNA::Ast::Compartment(
           identifier, iNA::Ast::Compartment::VOLUME, true));
   endInsertRows();
+
+  // signal model modified
+  emit modelModified();
 }
 
 
@@ -305,4 +313,6 @@ CompartmentList::remCompartment(int row)
   _model->remDefinition(compartment);
   endRemoveRows();
 
+  // signal model modified
+  emit modelModified();
 }

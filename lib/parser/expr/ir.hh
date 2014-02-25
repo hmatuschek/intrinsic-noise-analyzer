@@ -48,6 +48,9 @@ protected:
   Node(NodeType type);
 
 public:
+  /** Copy constructor. */
+  Node(const Node &other);
+
   /** Returns true if the node is an addition node. */
   bool isAddNode() const;
   /** Returns true if the node is a subtraction node. */
@@ -91,7 +94,7 @@ public:
   /** Returns the symbol instance. */
   GiNaC::symbol symbol() const;
   /** Serializes the node into the given stream. */
-  void serialize(std::ostream &stream, const Context &ctx);
+  void serialize(std::ostream &stream, Context &ctx);
 
 
 public:
@@ -110,7 +113,7 @@ public:
   /** Creates a negation node. */
   static SmartPtr<Node> createNeg(SmartPtr<Node> arg);
   /** Creates a symbol node. */
-  static SmartPtr<Node> createSymbol(GiNaC::symbol symbol);
+  static SmartPtr<Node> createSymbol(const GiNaC::symbol &symbol);
   /** Creates an integer constant. */
   static SmartPtr<Node> createValue(long value);
   /** Creates a real constant. */
@@ -125,7 +128,7 @@ public:
 
 protected:
   /** Serializes this node into the given stream. */
-  void _serialize(std::ostream &stream, const Context &ctx, size_t precedence);
+  void _serialize(std::ostream &stream, Context &ctx, size_t precedence);
 
 
 private:
@@ -158,11 +161,8 @@ public:
 
 
 /** Applies passes on an expression IR. */
-class PassManager {
-protected:
-  /** Holds the list of passes. */
-  std::list<Pass *> _passes;
-
+class PassManager
+{
 public:
   /** Destructor, also frees the passes. */
   ~PassManager();
@@ -175,6 +175,10 @@ protected:
   /** Applies all passes on the given node unless they can not be applied anymore. If a pass
    * was applied on that node, the function returns true. */
   bool applyOnNode(SmartPtr<Node> &value);
+
+protected:
+  /** Holds the list of passes. */
+  std::list<Pass *> _passes;
 };
 
 
@@ -189,7 +193,8 @@ public:
 
 /** Remove units pass, tries to remove equivalent expressions.
  * This includes 0+a, 1*a, a/1, a^1, a^0. */
-class RemoveUnitsPass : public Pass {
+class RemoveUnitsPass : public Pass
+{
 public:
   /** Performs the transformation. */
   bool apply(SmartPtr<Node> &node);

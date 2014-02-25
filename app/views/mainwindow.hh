@@ -28,13 +28,16 @@ public slots:
   /** Shows the given widget in the main-panel. */
   void showPanel(QWidget *panel);
 
+protected:
+  virtual void closeEvent(QCloseEvent *);
+
 private slots:
   /** When triggered, quits the application. */
   void quit();
   /** Shows the about dialog. */
   void about();
   /** Opens a browser and shows the online-help. */
-  void openTutorial();
+  void openHelpPage();
   /** Shows the logging window. */
   void showLogs();
   /** Toggels the "check for updates" */

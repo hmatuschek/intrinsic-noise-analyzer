@@ -15,16 +15,16 @@ class ParameterTable : public QTableView
 {
   Q_OBJECT
 
-protected:
-  /** A weak reference to the parameter list. */
-  ParameterList *_parameters;
-
 public:
   /** Constructs a view for the parameters. */
-  ParameterTable(ParameterList *_parameters, QWidget *parent=0);
+  ParameterTable(ParameterList *parameters, QWidget *parent=0);
 
   /** Returns a weak reference to the list of paramters. */
   ParameterList &parameters();
+
+protected:
+  /** A weak reference to the parameter list. */
+  ParameterList *_parameters;
 };
 
 
@@ -47,8 +47,12 @@ private slots:
   /** Will be called if the selection of the parameter list is changed.
    * Is used to enable/disable the "rem param" button. */
   void onSelectionChanged(const QItemSelection &selected,const QItemSelection &unselected);
+  /** Gets called once the model gets modified by the ParameterTable view. */
+  void onModelModified();
 
 private:
+  /** Holds a weak reference to the parameter item of the doc-tree. */
+  ParametersItem *_paramItem;
   /** Holds the paramter table view. */
   ParameterTable *_paramTable;
   /** The "add param" button. */

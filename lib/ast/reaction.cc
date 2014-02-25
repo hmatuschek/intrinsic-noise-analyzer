@@ -53,22 +53,20 @@ Reaction::hasSpecies(GiNaC::symbol id)
 
 
 bool
-Reaction::hasReactant(Species *species)
+Reaction::hasReactant(Species *species) const
 {
   return this->_reactants.end() != this->_reactants.find(species);
 }
 
 
 bool
-Reaction::hasReactant(GiNaC::symbol id)
+Reaction::hasReactant(GiNaC::symbol id) const
 {
   // Check all reactants:
-  for (std::map<Species *, GiNaC::ex>::iterator iter=this->_reactants.begin();
+  for (std::map<Species *, GiNaC::ex>::const_iterator iter=this->_reactants.begin();
        iter != this->_reactants.end(); iter++)
   {
-    if (iter->first->getSymbol() == id) {
-      return true;
-    }
+    if (iter->first->getSymbol() == id) { return true; }
   }
 
   return false;
@@ -150,17 +148,16 @@ Reaction::clearReactants() {
 
 
 bool
-Reaction::hasProduct(Species *species)
-{
+Reaction::hasProduct(Species *species) const  {
   return this->_products.end() != this->_products.find(species);
 }
 
 
 bool
-Reaction::hasProduct(GiNaC::symbol id)
+Reaction::hasProduct(GiNaC::symbol id) const
 {
   // Iterate over all products:
-  for (std::map<Species *, GiNaC::ex>::iterator iter = this->_products.begin();
+  for (std::map<Species *, GiNaC::ex>::const_iterator iter = this->_products.begin();
        iter != this->_products.end(); iter++)
   {
     if (iter->first->getSymbol() == id)
@@ -245,59 +242,29 @@ Reaction::clearProducts() {
 }
 
 
-void
-Reaction::addModifier(Species *species)
-{
-  this->_modifiers.insert(species);
-}
-
-
-void
-Reaction::remModifier(Species *species)
-{
-  _modifiers.erase(species);
-}
-
-
-bool
-Reaction::hasModifier() const
-{
-  return 0 == this->_modifiers.size();
-}
-
-
-size_t
-Reaction::numModifier() const {
-  return _modifiers.size();
-}
-
-
 bool
 Reaction::isModifier(Species *species) const
 {
-  return this->_modifiers.end() != this->_modifiers.find(species);
+  // If species is a reactant -> false
+  if (this->hasReactant(species)) { return false; }
+  // If species is a reactant -> false
+  if (this->hasProduct(species)) { return false; }
+  // If propensity depends on species  -> true
+  return this->_kinetic_law->getRateLaw().has(species->getSymbol());
 }
 
 
 bool
-Reaction::isModifier(const GiNaC::symbol &id) const
+Reaction::isModifier(const GiNaC::symbol &species) const
 {
-  // Iterate over all modifiers:
-  for (std::set<Species *>::iterator iter = this->_modifiers.begin();
-       iter != this->_modifiers.end(); iter++)
-  {
-    if ((*iter)->getSymbol() == id)
-      return true;
-  }
-
-  return false;
+  // If species is a reactant -> false
+  if (this->hasReactant(species)) { return false; }
+  // If species is a reactant -> false
+  if (this->hasProduct(species)) { return false; }
+  // If propensity depends on species  -> true
+  return this->_kinetic_law->getRateLaw().has(species);
 }
 
-
-void
-Reaction::clearModifier() {
-  _modifiers.clear();
-}
 
 KineticLaw *
 Reaction::getKineticLaw() const
@@ -378,33 +345,6 @@ Reaction::const_iterator
 Reaction::productsEnd() const
 {
   return this->_products.end();
-}
-
-
-Reaction::mod_iterator
-Reaction::modifiersBegin()
-{
-  return this->_modifiers.begin();
-}
-
-
-Reaction::mod_iterator
-Reaction::modifiersEnd()
-{
-  return this->_modifiers.end();
-}
-
-Reaction::const_mod_iterator
-Reaction::modifiersBegin() const
-{
-  return this->_modifiers.begin();
-}
-
-
-Reaction::const_mod_iterator
-Reaction::modifiersEnd() const
-{
-  return this->_modifiers.end();
 }
 
 

@@ -1,5 +1,6 @@
 #include "compartmentview.hh"
 #include "../models/application.hh"
+#include "../doctree/documentitem.hh"
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QLabel>
@@ -63,6 +64,8 @@ CompartmentView::CompartmentView(CompartmentsItem *compartments, QWidget *parent
         this, SLOT(onSelectionChanged(QItemSelection,QItemSelection)));
   QObject::connect(this->_compartments, SIGNAL(destroyed()),
                    this, SLOT(onCompartmentsDestroyed()));
+  QObject::connect(this->_compartments->compartments(), SIGNAL(modelModified()),
+                   this, SLOT(onModelModified()));
 }
 
 
@@ -108,4 +111,11 @@ CompartmentView::onSelectionChanged(const QItemSelection &selected, const QItemS
   if (0 != index.column()) { _remCompartment->setEnabled(false); return; }
   // ok, allow removal of species:
   _remCompartment->setEnabled(true);
+}
+
+
+void
+CompartmentView::onModelModified() {
+  // Get document item
+  _compartments->document()->setIsModified(true);
 }

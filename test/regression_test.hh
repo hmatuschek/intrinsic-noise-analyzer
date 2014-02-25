@@ -11,7 +11,6 @@ class RegressionTest : public UnitTest::TestCase
 {
 public:
   void testConstSpecies();
-  void testSpeciesByAssignmentRule();
   void testNonConstantParameter();
   void testNonConstantCompartment();
   void testNoAlgebraicConstraint();

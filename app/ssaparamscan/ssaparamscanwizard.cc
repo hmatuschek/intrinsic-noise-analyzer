@@ -85,19 +85,19 @@ SSAParamScanConfigPage::SSAParamScanConfigPage(GeneralTaskWizard *parent)
 
   this->t_transient = new QLineEdit(); this->t_transient->setText("1");
   this->t_transient->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
-  QIntValidator *t_transient_val = new QIntValidator(); t_transient_val->setBottom(1);
+  QIntValidator *t_transient_val = new QIntValidator(t_transient); t_transient_val->setBottom(1);
   this->t_transient->setValidator(t_transient_val);
   this->registerField("t_transient", this->t_transient);
 
   this->timestep = new QLineEdit(); this->timestep->setText("0.1");
   this->timestep->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
-  QDoubleValidator *timestep_val = new QDoubleValidator(0); timestep_val->setBottom(1);
+  QDoubleValidator *timestep_val = new QDoubleValidator(timestep); timestep_val->setBottom(1);
   this->timestep->setValidator(timestep_val);
   this->registerField("timestep", this->timestep);
 
   t_max = new QLineEdit(); t_max->setText("1e9");
   t_max->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
-  QDoubleValidator *t_max_val = new QDoubleValidator(0); t_max_val->setBottom(0);
+  QDoubleValidator *t_max_val = new QDoubleValidator(t_max); t_max_val->setBottom(0);
   t_max->setValidator(t_max_val);
 
   this->t_transient->setToolTip("Estimated simulation time to reach steady state.");
@@ -111,20 +111,20 @@ SSAParamScanConfigPage::SSAParamScanConfigPage(GeneralTaskWizard *parent)
 
   p_min = new QLineEdit("0.0");
   p_min->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
-  QDoubleValidator *p_min_val = new QDoubleValidator();
+  QDoubleValidator *p_min_val = new QDoubleValidator(p_min);
   p_min->setValidator(p_min_val);
   registerField("p_min", p_min);
 
   p_max = new QLineEdit("1.0");
   p_max->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
-  QDoubleValidator *p_max_val = new QDoubleValidator();
+  QDoubleValidator *p_max_val = new QDoubleValidator(p_max);
   p_max->setValidator(p_max_val);
   p_max->setToolTip("Maximum parameter value.");
   registerField("p_max", p_max);
 
   p_num = new QLineEdit("100");
   p_num->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
-  QIntValidator *p_num_val = new QIntValidator(); p_num_val->setBottom(1);
+  QIntValidator *p_num_val = new QIntValidator(p_num); p_num_val->setBottom(1);
   p_num->setValidator(p_num_val);
   p_num->setToolTip("Number of steps taken between minimum and maximum parameter value.");
   registerField("p_num", p_num);

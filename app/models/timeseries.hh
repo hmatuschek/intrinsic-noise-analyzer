@@ -9,41 +9,21 @@
 #include <QMutexLocker>
 #include <QFile>
 
-#include <eigen3/Eigen/Eigen>
+#include <ginacsupportforeigen.hh>
 
-/**
- * Represents a table of data (ie. a time-series) of some covariates.
- *
- * @todo Fix @c Table constructor to always take column-labels!
- * @todo Fix @c Table constructor to always take column-units!
- * @todo Drop data-consumer interface.
- *
- * @ingroup gui
- */
+/** Represents a table of data (ie. a time-series) of some covariates with column names.
+ * @ingroup gui */
 class Table : public QObject
 {
   Q_OBJECT
 
-protected:
-  /** Holds the column-names. */
-  QVector<QString> header;
-
-  /** Holds the actual data. */
-  Eigen::MatrixXd data;
-
-  /** Index of the next, empty row in the table. */
-  size_t current_insert_index;
-
-
 public:
-  /** Constructs an empty (uninitialized) data-table with given row- and column-count.
-   * @bug Clean up that shit here! */
+  /** Constructs an empty (uninitialized) data-table with given row- and column-count. */
   explicit Table(size_t columns, size_t rows, QObject *parent=0);
-  /** Constructs an empty (uninitilized) data-table with given column-labels and row-count.
-   * @bug Clean up that shit here! */
+  /** Constructs an empty (uninitilized) data-table with given column-labels and row-count. */
   explicit Table(const QVector<QString> &columns, size_t rows, QObject *parent=0);
   /** Constructs a data-table from given matrix. */
-  explicit Table(const Eigen::MatrixXd &data, QObject *parent=0);
+  explicit Table(const Eigen::MatrixXd &_data, QObject *parent=0);
   /** Copy constructor. */
   Table(const Table &other);
 
@@ -76,6 +56,15 @@ public:
   Eigen::VectorXd getRow(size_t i);
   /** Returns a certain column as a @c Eigen::VectorXd. */
   Eigen::VectorXd getColumn(size_t i);
+
+
+protected:
+  /** Holds the column-names. */
+  QVector<QString> _header;
+  /** Holds the actual data. */
+  Eigen::MatrixXd _data;
+  /** Index of the next, empty row in the table. */
+  size_t _current_insert_index;
 };
 
 

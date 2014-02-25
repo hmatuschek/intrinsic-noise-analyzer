@@ -1,3 +1,18 @@
+intrinsic-noise-analyzer (0.4.3-1) unstable; urgency=low
+
+  * Fixed several memory leaks in analyses.
+  * Fixed processing of SBML unit identifier.
+  * Fixed processing of SBML reaction modifiers.
+  * Fixed several minor bugs.
+
+ -- Hannes Matuschek <hmatuschek@gmail.com>  Sun, 13 October 2013 00:00:00 +0000
+
+intrinsic-noise-analyzer (0.4.2-2) unstable; urgency=low
+
+  * Added --with-cpp-namespace config option.
+
+ -- Hannes Matuschek <hmatuschek@gmail.com>  Tue, 25 July 2013 00:00:00 +0000
+
 intrinsic-noise-analyzer (0.4.2-1) unstable; urgency=low
 
   * Made plots editable.

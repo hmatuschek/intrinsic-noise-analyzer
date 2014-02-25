@@ -146,7 +146,7 @@ SSAConfigPage::validatePage()
   config.setEnsembleSize(this->field("size").toUInt(&valid));
   config.setFinalTime(this->field("time").toDouble(&valid));
   config.setSteps(this->field("steps").toUInt(&valid));
-  config.setNumThreads(this->field("thread_count").toInt(&valid));
+  config.setNumEvalThreads(this->field("thread_count").toInt(&valid));
 
   return valid;
 }
@@ -204,6 +204,7 @@ SSASummaryPage::initializePage()
   this->ensemble_size->setText(QString("%1").arg(config.getEnsembleSize()));
   this->final_time->setText(QString("%1").arg(config.getFinalTime()));
   this->num_samples->setText(QString("%1").arg(config.getSteps()));
+
   switch (config.getMethod()) {
   case SSATaskConfig::DIRECT_SSA:
     this->method->setText("Direct SSA");
@@ -212,9 +213,9 @@ SSASummaryPage::initializePage()
   case SSATaskConfig::OPTIMIZED_SSA:
     this->method->setText("Optimized SSA");
     break;
-
   }
-  this->thread_count->setText(QString("%1").arg(config.getNumThreads()));
+
+  this->thread_count->setText(QString("%1").arg(config.getNumEvalThreads()));
   size_t num_species = config.getModel()->numSpecies();
   int mem_usage = 8*config.getSteps()*(1 + num_species + (num_species*(1+num_species))/2);
   this->mem_usage->setText(QString("%1MB").arg(double(mem_usage)/(1024*1024)));

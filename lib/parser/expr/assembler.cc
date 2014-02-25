@@ -7,11 +7,11 @@ using namespace iNA::Parser::Expr;
 
 
 #define ASSERT_UNARY_FUNCTION(name, nargs) if (1 != nargs) { \
-  iNA::SBMLParserError err; err << name << "() takes exactly one argument, " << nargs << " given."; \
+  iNA::Parser::ParserError err; err << name << "() takes exactly one argument, " << nargs << " given."; \
   throw err; }
 
 #define ASSERT_BINARY_FUNCTION(name, nargs) if (2 != nargs) { \
-  iNA::SBMLParserError err; err << name << "() takes exactly two arguments, " << nargs << " given."; \
+  iNA::Parser::ParserError err; err << name << "() takes exactly two arguments, " << nargs << " given."; \
   throw err; }
 
 
@@ -128,7 +128,21 @@ Assembler::processFunctionCall(Parser::ConcreteSyntaxTree &expr)
   std::vector<GiNaC::ex> args; processFunctionCallArguments(expr[2], args);
 
   // Dispatch...
-  if ("abs" == name) {
+  if ("exp" == name) {
+    ASSERT_UNARY_FUNCTION("exp", args.size());
+    return GiNaC::exp(args[0]);
+  } else if ("log" == name) {
+    ASSERT_UNARY_FUNCTION("log", args.size());
+    return GiNaC::log(args[0]);
+  } else if ("power" == name) {
+    ASSERT_BINARY_FUNCTION("power", args.size());
+    return GiNaC::power(args[0], args[1]);
+  } else if ("sqrt" == name) {
+    ASSERT_UNARY_FUNCTION("sqrt", args.size());
+    return GiNaC::sqrt(args[0]);
+  }
+
+  /*if ("abs" == name) {
     ASSERT_UNARY_FUNCTION("abs", args.size());
     return GiNaC::abs(args[0]);
   } else if ("acos" == name) {
@@ -149,21 +163,9 @@ Assembler::processFunctionCall(Parser::ConcreteSyntaxTree &expr)
   } else if ("cosh" == name) {
     ASSERT_UNARY_FUNCTION("cosh", args.size());
     return GiNaC::cosh(args[0]);
-  } else if ("exp" == name) {
-    ASSERT_UNARY_FUNCTION("exp", args.size());
-    return GiNaC::exp(args[0]);
   } else if ("factorial" == name) {
     ASSERT_UNARY_FUNCTION("factorial", args.size());
     return GiNaC::factorial(args[0]);
-  } else if ("log" == name) {
-    ASSERT_UNARY_FUNCTION("log", args.size());
-    return GiNaC::log(args[0]);
-  } else if ("power" == name) {
-    ASSERT_BINARY_FUNCTION("power", args.size());
-    return GiNaC::power(args[0], args[1]);
-  } else if ("sqrt" == name) {
-    ASSERT_UNARY_FUNCTION("sqrt", args.size());
-    return GiNaC::sqrt(args[0]);
   } else if ("sin" == name) {
     ASSERT_UNARY_FUNCTION("sin", args.size());
     return GiNaC::sin(args[0]);
@@ -176,9 +178,9 @@ Assembler::processFunctionCall(Parser::ConcreteSyntaxTree &expr)
   } else if ("tanh" == name) {
     ASSERT_UNARY_FUNCTION("tanh", args.size());
     return GiNaC::tanh(args[0]);
-  }
+  }*/
 
-  SBMLParserError err;
+  ParserError err;
   err << "Unkown function: " << name;
   throw err;
 }

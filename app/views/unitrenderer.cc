@@ -27,7 +27,7 @@ UnitRenderer::setUnit(const iNA::Ast::Unit &unit)
   _formula = new MathFormula();
 
   // Catch time units first which refer explictly to minutes, hours or days
-  if (unit.isVariantOf(iNA::Ast::ScaledBaseUnit::SECOND) && unit.size()==1)
+  if (unit.isVariantOf(iNA::Ast::Unit::SECOND) && unit.size()==1)
   {
     double fac = unit.getMultiplier()*pow(10.,unit.getScale());
 
@@ -56,19 +56,19 @@ UnitRenderer::setUnit(const iNA::Ast::Unit &unit)
   for (iNA::Ast::Unit::iterator item=unit.begin(); item != unit.end(); item++) {
     if (0 < item->second) {
       if (item->second==1) {
-        QString base = iNA::Ast::ScaledBaseUnit::baseUnitRepr(item->first).c_str();
+        QString base = iNA::Ast::Unit::baseUnitRepr(item->first).c_str();
         nominator.push_back(new MathText(base));
       } else {
-        QString base = iNA::Ast::ScaledBaseUnit::baseUnitRepr(item->first).c_str();
+        QString base = iNA::Ast::Unit::baseUnitRepr(item->first).c_str();
         QString exponent = QString("%1").arg(item->second);
         nominator.push_back(new MathSup(new MathText(base),new MathText(exponent)));
       }
     } else {
       if (item->second==-1) {
-        QString base = iNA::Ast::ScaledBaseUnit::baseUnitRepr(item->first).c_str();
+        QString base = iNA::Ast::Unit::baseUnitRepr(item->first).c_str();
         denominator.push_back(new MathText(base));
       } else {
-        QString base = iNA::Ast::ScaledBaseUnit::baseUnitRepr(item->first).c_str();
+        QString base = iNA::Ast::Unit::baseUnitRepr(item->first).c_str();
         QString exponent = QString("%1").arg(std::abs(item->second));
         denominator.push_back(new MathSup(new MathText(base),new MathText(exponent)));
       }

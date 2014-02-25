@@ -41,7 +41,9 @@ DocumentTree::addTask(DocumentItem *document, TaskItem *task) {
   beginInsertRows(analyses_index, num_analyses, num_analyses);
   document->addTask(task);
   endInsertRows();
-  Application::getApp()->itemSelected(task);
+  // Signal view to make item visible and select it
+  //  this will show the item in the main panel automatically
+  emit autoView(getIndexOf(task));
 }
 
 
@@ -53,8 +55,6 @@ DocumentTree::addPlot(TaskItem *task, PlotItem *plot) {
   beginInsertRows(task_index, num_plots, num_plots);
   task->addPlot(plot);
   endInsertRows();
-  // Uncomment for auto-show...
-  //Application::getApp()->itemSelected(plot);
 }
 
 void
@@ -66,6 +66,27 @@ DocumentTree::addReaction(DocumentItem *document, ReactionItem *reaction) {
   beginInsertRows(reactions_index, num_reacts, num_reacts);
   reac_item->addReaction(reaction);
   endInsertRows();
+}
+
+void
+DocumentTree::updateReactions(DocumentItem *document) {
+  ReactionsItem *reac_item = document->reactionsItem();
+  QModelIndex reactions_index = getIndexOf(reac_item);
+
+  // Mark all reactions as deleted
+  size_t num_reacts = reac_item->getTreeChildCount();
+  if (num_reacts > 0) {
+    beginRemoveRows(reactions_index, 0, num_reacts-1);
+    reac_item->updateReactionList();
+    endRemoveRows();
+  }
+
+  // Now, mark all reactions as added
+  num_reacts = reac_item->getTreeChildCount();
+  if (num_reacts > 0) {
+    beginInsertRows(reactions_index, 0, num_reacts-1);
+    endInsertRows();
+  }
 }
 
 void

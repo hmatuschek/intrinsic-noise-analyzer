@@ -12,7 +12,6 @@ void
 ModelCopyist::copy(const Ast::Model *src, Ast::Model *dest)
 {
   GiNaC::exmap translation_table;
-
   ModelCopyist::copy(src, dest, translation_table);
 }
 
@@ -43,19 +42,13 @@ ModelCopyist::copy(const Ast::Model *src, Ast::Model *dest, GiNaC::exmap &transl
   }
 
   // Copy default units:
-  dest->setSubstanceUnit(src->getSubstanceUnit().asScaledBaseUnit(), false);
-  dest->setVolumeUnit(src->getVolumeUnit().asScaledBaseUnit(), false);
-  dest->setAreaUnit(src->getAreaUnit().asScaledBaseUnit(), false);
-  dest->setLengthUnit(src->getLengthUnit().asScaledBaseUnit(), false);
-  dest->setTimeUnit(src->getTimeUnit().asScaledBaseUnit(), false);
-
-  // Copy user defined "specialized" units:
-  for (Ast::Model::const_iterator iter = src->begin(); iter != src->end(); iter++) {
-    if (Ast::Node::isUnitDefinition(*iter)) {
-      dest->addDefinition(ModelCopyist::copyUnitDefinition(
-                            static_cast<Ast::UnitDefinition *>(*iter)));
-    }
-  }
+  dest->setSubstanceUnit(src->getSubstanceUnit(), false);
+  dest->setVolumeUnit(src->getVolumeUnit(), false);
+  dest->setAreaUnit(src->getAreaUnit(), false);
+  dest->setLengthUnit(src->getLengthUnit(), false);
+  dest->setTimeUnit(src->getTimeUnit(), false);
+  // Set model has substance or concentration units
+  dest->setSpeciesHaveSubstanceUnits(src->speciesHaveSubstanceUnits());
 
   // Copy all parameter definitions:
   for (size_t i=0; i<src->numParameters(); i++) {
@@ -167,13 +160,6 @@ ModelCopyist::copyFunctionDefinition(Ast::FunctionDefinition *node, GiNaC::exmap
   GiNaC::ex body = node->getBody().subs(translation_table);
 
   return new Ast::FunctionDefinition(node->getIdentifier(), arguments, body);
-}
-
-
-Ast::UnitDefinition *
-ModelCopyist::copyUnitDefinition(Ast::UnitDefinition *node)
-{
-  return new Ast::UnitDefinition(node->getIdentifier(), node->getUnit());
 }
 
 
@@ -328,17 +314,6 @@ ModelCopyist::copyReaction(Ast::Reaction *node, GiNaC::exmap &translation_table,
     reaction->setProductStoichiometry(new_species, iter->second.subs(translation_table));
   }
 
-  // Copy reaction modifiers:
-  for (Ast::Reaction::mod_iterator iter = node->modifiersBegin(); iter != node->modifiersEnd(); iter++) {
-    // New species == old_species:
-    Ast::Species *new_species = *iter;
-    // Check if there is a replacement for species in species_table:
-    if (species_table.end() != species_table.find(*iter)) {
-      new_species = species_table[*iter];
-    }
-    reaction->addModifier(new_species);
-  }
-
   // Done
   return reaction;
 }
@@ -369,10 +344,8 @@ ModelCopyist::copyKineticLaw(Ast::KineticLaw *node, GiNaC::exmap &translation_ta
   Ast::KineticLaw *kinetic_law = new Ast::KineticLaw(GiNaC::ex());
 
   // First, copy all local parameters:
-  for (Ast::KineticLaw::iterator iter = node->begin(); iter != node->end(); iter++)
-  {
-    if (! Ast::Node::isParameter(*iter))
-    {
+  for (Ast::KineticLaw::iterator iter = node->begin(); iter != node->end(); iter++) {
+    if (! Ast::Node::isParameter(*iter)) {
       InternalError err;
       err << "Can not copy kinetic law: Law has local non-parameter variable defined!";
       throw err;

@@ -8,7 +8,7 @@
 #include "../views/unitrenderer.hh"
 #include "../tinytex/tinytex.hh"
 #include "../tinytex/ginac2formula.hh"
-
+#include "ast/identifier.hh"
 #include <QMessageBox>
 #include <QPainter>
 #include <QDebug>
@@ -89,7 +89,10 @@ SpeciesList::setData(const QModelIndex &index, const QVariant &value, int role)
   default: break;
   }
 
-  if (success) { emit dataChanged(index, index); }
+  if (success) {
+    emit dataChanged(index, index);
+    emit modelModified();
+  }
   return success;
 }
 
@@ -139,7 +142,7 @@ SpeciesList::_updateIdentifier(iNA::Ast::Species *species, const QVariant &value
   if (id == species->getIdentifier()) { return true; }
 
   // Check ID format
-  if (! QRegExp("[a-zA-Z_][a-zA-Z0-9_]*").exactMatch(qid)) {
+  if (! iNA::Ast::isValidId(id)) {
     QMessageBox::warning(0, tr("Can not set identifier"),
                          tr("Identifier \"%1\" has invalid format.").arg(qid));
     return false;
@@ -410,6 +413,9 @@ SpeciesList::addSpecies()
   _model->addDefinition(
         new iNA::Ast::Species(identifier, compartment, false));
   endInsertRows();
+
+  // signal model modified
+  emit modelModified();
 }
 
 
@@ -435,4 +441,7 @@ SpeciesList::remSpecies(int row)
   beginRemoveRows(QModelIndex(), row, row);
   _model->remDefinition(species);
   endRemoveRows();
+
+  // signal model modified
+  emit modelModified();
 }

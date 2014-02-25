@@ -7,6 +7,7 @@
 #include "../tinytex/tinytex.hh"
 #include "../tinytex/ginac2formula.hh"
 #include "../views/unitrenderer.hh"
+#include "ast/identifier.hh"
 #include <QMessageBox>
 
 
@@ -85,7 +86,10 @@ ReactionParameterList::setData(const QModelIndex &index, const QVariant &value, 
   }
 
   // Emit dataChanged on success
-  if (success) { emit dataChanged(index, index); }
+  if (success) {
+    emit dataChanged(index, index);
+    emit modelModified();
+  }
   return success;
 }
 
@@ -139,6 +143,9 @@ ReactionParameterList::addParameter()
   _kinetic_law->addDefinition(
         new iNA::Ast::Parameter(identifier, 0, iNA::Ast::Unit::dimensionless(), true));
   endInsertRows();
+
+  // signal model modified
+  emit modelModified();
 }
 
 
@@ -165,6 +172,9 @@ ReactionParameterList::remParameter(int row)
   beginRemoveRows(QModelIndex(), row, row);
   _kinetic_law->remDefinition(parameter);
   endRemoveRows();
+
+  // signal model modified
+  emit modelModified();
 }
 
 
@@ -192,7 +202,7 @@ ReactionParameterList::_updateIdentifier(iNA::Ast::Parameter *param, const QVari
   if (id == param->getIdentifier()) { return true; }
 
   // Check ID format
-  if (! QRegExp("[a-zA-Z_][a-zA-Z0-9_]*").exactMatch(qid)) {
+  if (! iNA::Ast::isValidId(id)) {
     QMessageBox::warning(0, tr("Can not set identifier"),
                          tr("Identifier \"%1\" has invalid format.").arg(qid));
     return false;

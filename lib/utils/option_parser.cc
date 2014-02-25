@@ -70,8 +70,7 @@ OptionRule::operator()(const char *argv[], int argc, size_t &idx, Parser &parser
     if(2 != str.size())
       return false;
 
-    if(not this->is_flag)
-    {
+    if(! this->is_flag) {
       // consume option:
       idx++;
 
@@ -82,9 +81,8 @@ OptionRule::operator()(const char *argv[], int argc, size_t &idx, Parser &parser
 
       this->value = argv[idx]; idx++;
       parser.set_option(this->long_name, this->value);
-    }
-    else
-    {
+    } else {
+      idx++;
       parser.set_flag(this->long_name);
     }
 
@@ -180,16 +178,14 @@ OneOfRule::~OneOfRule()
 bool
 OneOfRule::operator()(const char *argv[], int argc, size_t &idx, Parser &parser)
 {
-  for(list<RuleInterface *>::iterator it = this->options.begin();
-      it != this->options.end(); it++)
-    {
-      size_t tmp_idx = idx;
-      if((**it)(argv, argc, tmp_idx, parser))
-  {
-    idx = tmp_idx;
-    return true;
-  }
+  list<RuleInterface *>::iterator it = this->options.begin();
+  for(; it != this->options.end(); it++) {
+    size_t tmp_idx = idx;
+    if((**it)(argv, argc, tmp_idx, parser)) {
+      idx = tmp_idx;
+      return true;
     }
+  }
 
   return false;
 }
@@ -272,16 +268,16 @@ ListRule::~ListRule() {
 bool
 ListRule::operator()(const char *argv[], int argc, size_t &idx, Parser &parser)
 {
-  if(idx == (size_t)argc)
-    return false;
+  if(idx == (size_t)argc) { return false; }
 
-  for(list<RuleInterface *>::iterator it=this->options.begin();
-      it != this->options.end(); it++)
-    {
-      if(not (**it)(argv, argc, idx, parser))
-  return false;
+  size_t tmp_idx = idx;
+  list<RuleInterface *>::iterator it=this->options.begin();
+  for(; it != this->options.end(); it++) {
+    if(! (**it)(argv, argc, tmp_idx, parser)) {
+      return false;
     }
-
+  }
+  idx = tmp_idx;
   return true;
 }
 
@@ -325,10 +321,9 @@ OptionalRule::operator()(const char *argv[], int argc, size_t &idx, Parser &pars
     return true;
 
   size_t tmp_idx = idx;
-  if((*(this->rule))(argv, argc, tmp_idx, parser))
-    {
-      idx = tmp_idx;
-    }
+  if((*(this->rule))(argv, argc, tmp_idx, parser)) {
+    idx = tmp_idx;
+  }
 
   return true;
 }
@@ -378,7 +373,7 @@ Parser::parse(const char *argv[], int argc)
 {
   size_t idx = 1;
 
-  if(not (*(this->_rule))(argv, argc, idx, *this)) {
+  if(! (*(this->_rule))(argv, argc, idx, *this)) {
     return false;
   }
 
@@ -462,10 +457,9 @@ ZeroOrMoreRule::operator()(const char *argv[], int argc, size_t &idx, Parser &pa
     return true;
 
   size_t tmp_idx = idx;
-  while((*(this->rule))(argv, argc, tmp_idx, parser))
-    {
-      idx = tmp_idx;
-    }
+  while ((*(this->rule))(argv, argc, tmp_idx, parser)) {
+    idx = tmp_idx;
+  }
 
   return true;
 }

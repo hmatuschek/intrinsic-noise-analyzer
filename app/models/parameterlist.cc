@@ -7,14 +7,14 @@
 #include "../tinytex/ginac2formula.hh"
 #include "../views/unitrenderer.hh"
 #include "referencecounter.hh"
+#include "ast/identifier.hh"
 #include <QMessageBox>
 
 
 ParameterList::ParameterList(iNA::Ast::Model *model, QObject *parent)
   : QAbstractTableModel(parent), _model(model)
 {
-  // Install some delegates for some columns:
-
+  // pass...
 }
 
 
@@ -60,7 +60,10 @@ ParameterList::setData(const QModelIndex &index, const QVariant &value, int role
   }
 
   // Emmit data-changed on success:
-  if (success) { emit dataChanged(index, index); }
+  if (success) {
+    emit dataChanged(index, index);
+    emit modelModified();
+  }
 
   // done.
   return success;
@@ -137,6 +140,9 @@ ParameterList::addParameter() {
   _model->addDefinition(
         new iNA::Ast::Parameter(identifier, 0, iNA::Ast::Unit::dimensionless(), true));
   endInsertRows();
+
+  // Signal that the model was modified
+  emit modelModified();
 }
 
 
@@ -163,6 +169,9 @@ ParameterList::remParameter(int row)
   beginRemoveRows(QModelIndex(), row, row);
   _model->remDefinition(parameter);
   endRemoveRows();
+
+  // Signal that the model was modified
+  emit modelModified();
 }
 
 
@@ -185,7 +194,7 @@ ParameterList::_updateIdentifier(iNA::Ast::Parameter *param, const QVariant &val
   if (id == param->getIdentifier()) { return true; }
 
   // Check ID format
-  if (! QRegExp("[a-zA-Z_][a-zA-Z0-9_]*").exactMatch(qid)) {
+  if (! iNA::Ast::isValidId(id)) {
     QMessageBox::warning(0, tr("Can not set identifier"),
                          tr("Identifier \"%1\" has invalid format.").arg(qid));
     return false;

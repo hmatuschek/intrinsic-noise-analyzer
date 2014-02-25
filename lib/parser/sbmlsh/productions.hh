@@ -160,11 +160,6 @@ public:
   /** Factory method. */
   static iNA::Parser::Production *get();
 
-protected:
-  /** Holds all valid unit identifiers.
-   * \todo Try to make this set static. */
-  std::set<std::string> valid_units;
-
 private:
   /** Singleton instance. */
   static ScaledUnitIdentifierProduction *instance;

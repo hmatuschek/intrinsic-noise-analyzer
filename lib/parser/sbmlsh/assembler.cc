@@ -12,38 +12,38 @@ Assembler::Assembler(Ast::Model &model, Parser::Lexer &lexer)
   : _lexer(lexer), _model(model)
 {
   // Assemble base unit map;
-  _base_unit_map["ampere"] = Ast::ScaledBaseUnit::AMPERE;
-  _base_unit_map["becquerel"] = Ast::ScaledBaseUnit::BECQUEREL;
-  _base_unit_map["candela"] = Ast::ScaledBaseUnit::CANDELA;
-  _base_unit_map["coulomb"] = Ast::ScaledBaseUnit::COULOMB;
-  _base_unit_map["dimensionless"] = Ast::ScaledBaseUnit::DIMENSIONLESS;
-  _base_unit_map["farad"] = Ast::ScaledBaseUnit::FARAD;
-  _base_unit_map["gram"] = Ast::ScaledBaseUnit::GRAM;
-  _base_unit_map["katal"] = Ast::ScaledBaseUnit::KATAL;
-  _base_unit_map["gray"] = Ast::ScaledBaseUnit::GRAY;
-  _base_unit_map["kelvin"] = Ast::ScaledBaseUnit::KELVIN;
-  _base_unit_map["henry"] = Ast::ScaledBaseUnit::HENRY;
-  _base_unit_map["kilogram"] = Ast::ScaledBaseUnit::KILOGRAM;
-  _base_unit_map["hertz"] = Ast::ScaledBaseUnit::HERTZ;
-  _base_unit_map["litre"] = Ast::ScaledBaseUnit::LITRE;
-  _base_unit_map["item"] = Ast::ScaledBaseUnit::ITEM;
-  _base_unit_map["lumen"] = Ast::ScaledBaseUnit::LUMEN;
-  _base_unit_map["joule"] = Ast::ScaledBaseUnit::JOULE;
-  _base_unit_map["lux"] = Ast::ScaledBaseUnit::LUX;
-  _base_unit_map["metre"] = Ast::ScaledBaseUnit::METRE;
-  _base_unit_map["mole"] = Ast::ScaledBaseUnit::MOLE;
-  _base_unit_map["newton"] = Ast::ScaledBaseUnit::NEWTON;
-  _base_unit_map["ohm"] = Ast::ScaledBaseUnit::OHM;
-  _base_unit_map["pascal"] = Ast::ScaledBaseUnit::PASCAL;
-  _base_unit_map["radian"] = Ast::ScaledBaseUnit::RADIAN;
-  _base_unit_map["second"] = Ast::ScaledBaseUnit::SECOND;
-  _base_unit_map["watt"] = Ast::ScaledBaseUnit::WATT;
-  _base_unit_map["siemens"] = Ast::ScaledBaseUnit::SIEMENS;
-  _base_unit_map["weber"] = Ast::ScaledBaseUnit::WEBER;
-  _base_unit_map["sievert"] = Ast::ScaledBaseUnit::SIEVERT;
-  _base_unit_map["steradian"] = Ast::ScaledBaseUnit::STERADIAN;
-  _base_unit_map["tesla"] = Ast::ScaledBaseUnit::TESLA;
-  _base_unit_map["volt"] = Ast::ScaledBaseUnit::VOLT;
+  _base_unit_map["ampere"] = Ast::Unit::AMPERE;
+  _base_unit_map["becquerel"] = Ast::Unit::BECQUEREL;
+  _base_unit_map["candela"] = Ast::Unit::CANDELA;
+  _base_unit_map["coulomb"] = Ast::Unit::COULOMB;
+  _base_unit_map["dimensionless"] = Ast::Unit::DIMENSIONLESS;
+  _base_unit_map["farad"] = Ast::Unit::FARAD;
+  _base_unit_map["gram"] = Ast::Unit::GRAM;
+  _base_unit_map["katal"] = Ast::Unit::KATAL;
+  _base_unit_map["gray"] = Ast::Unit::GRAY;
+  _base_unit_map["kelvin"] = Ast::Unit::KELVIN;
+  _base_unit_map["henry"] = Ast::Unit::HENRY;
+  _base_unit_map["kilogram"] = Ast::Unit::KILOGRAM;
+  _base_unit_map["hertz"] = Ast::Unit::HERTZ;
+  _base_unit_map["litre"] = Ast::Unit::LITRE;
+  _base_unit_map["item"] = Ast::Unit::ITEM;
+  _base_unit_map["lumen"] = Ast::Unit::LUMEN;
+  _base_unit_map["joule"] = Ast::Unit::JOULE;
+  _base_unit_map["lux"] = Ast::Unit::LUX;
+  _base_unit_map["metre"] = Ast::Unit::METRE;
+  _base_unit_map["mole"] = Ast::Unit::MOLE;
+  _base_unit_map["newton"] = Ast::Unit::NEWTON;
+  _base_unit_map["ohm"] = Ast::Unit::OHM;
+  _base_unit_map["pascal"] = Ast::Unit::PASCAL;
+  _base_unit_map["radian"] = Ast::Unit::RADIAN;
+  _base_unit_map["second"] = Ast::Unit::SECOND;
+  _base_unit_map["watt"] = Ast::Unit::WATT;
+  _base_unit_map["siemens"] = Ast::Unit::SIEMENS;
+  _base_unit_map["weber"] = Ast::Unit::WEBER;
+  _base_unit_map["sievert"] = Ast::Unit::SIEVERT;
+  _base_unit_map["steradian"] = Ast::Unit::STERADIAN;
+  _base_unit_map["tesla"] = Ast::Unit::TESLA;
+  _base_unit_map["volt"] = Ast::Unit::VOLT;
 }
 
 
@@ -223,13 +223,13 @@ Assembler::processDefaultUnitDefinitions(Parser::ConcreteSyntaxTree &def_units)
   std::string unit_id     = _lexer[def_units[0][2].getTokenIdx()].getValue();
 
   // Get unit from identifier def_units[0][2]
-  std::map<std::string, Ast::ScaledBaseUnit::BaseUnit>::iterator item = _base_unit_map.find(unit_id);
+  std::map<std::string, Ast::Unit::BaseUnit>::iterator item = _base_unit_map.find(unit_id);
   if (_base_unit_map.end() == item) {
     SBMLParserError err;
     err << "Cannot parse SBML-SH: Unknown unit name: " << unit_id;
     throw err;
   }
-  Ast::ScaledBaseUnit base_unit(item->second, 1,0,1);
+  Ast::Unit base_unit(item->second, 1,0,1);
 
   // Dispatch by flag...
   if (def_unit_id == "s") {
@@ -256,7 +256,7 @@ Assembler::processDefaultUnitDefinitions(Parser::ConcreteSyntaxTree &def_units)
 
 
 void
-Assembler::processUnitDefinition(Parser::ConcreteSyntaxTree &unit)
+Assembler::processUnitDefinition(Parser::ConcreteSyntaxTree &unit_prod)
 {
   // UnitDefinitionList =          : unit
   //   Identifier                    :unit[0]  (Token)
@@ -266,42 +266,34 @@ Assembler::processUnitDefinition(Parser::ConcreteSyntaxTree &unit)
   //   [EOL UnitDefinitionList]      :unit[4]; 4.0.1
 
   // Collect scaled base units for this unit:
-  std::list<Ast::ScaledBaseUnit> units;
-  processScaledUnitList(unit[2], units);
+  Ast::Unit unit;
+  processScaledUnitList(unit_prod[2], unit);
 
-  std::string identifier = _lexer[unit[0].getTokenIdx()].getValue();
-  Ast::UnitDefinition *def = new Ast::UnitDefinition(identifier, units);
-
-  if (unit[3].matched()) {
-    std::string name = _lexer[unit[3][0].getTokenIdx()].getValue();
-    unquote(name); def->setName(name);
-  }
+  std::string identifier = _lexer[unit_prod[0].getTokenIdx()].getValue();
 
   if ("substance" == identifier) {
-    _model.setSubstanceUnit(def->getUnit().asScaledBaseUnit(), false); delete def;
+    _model.setSubstanceUnit(unit, false);
   } else if ("volume" == identifier) {
-    _model.setVolumeUnit(def->getUnit().asScaledBaseUnit(), false); delete def;
+    _model.setVolumeUnit(unit, false);
   } else if ("area" == identifier) {
-    _model.setAreaUnit(def->getUnit().asScaledBaseUnit(), false); delete def;
+    _model.setAreaUnit(unit, false);
   } else if ("length" == identifier) {
-    _model.setLengthUnit(def->getUnit().asScaledBaseUnit(), false); delete def;
+    _model.setLengthUnit(unit, false);
   } else if ("time" == identifier) {
-    _model.setTimeUnit(def->getUnit().asScaledBaseUnit(), false); delete def;
+    _model.setTimeUnit(unit, false);
   } else {
-    // Add unit definition to model:
-    _model.addDefinition(def);
+    defineUnit(identifier, unit);
   }
 
   // If there are some unit definitions left
-  if (unit[4].matched()) {
-    processUnitDefinition(unit[4][0][1]);
+  if (unit_prod[4].matched()) {
+    processUnitDefinition(unit_prod[4][0][1]);
   }
 }
 
 
 void
-Assembler::processScaledUnitList(Parser::ConcreteSyntaxTree &unit,
-                                 std::list<Ast::ScaledBaseUnit> &unit_list)
+Assembler::processScaledUnitList(Parser::ConcreteSyntaxTree &unit_prod, Ast::Unit &unit)
 {
   // ScaledUnitList =                      : units
   //   ScaledUnitIdentifier                  : units[0] (Token)
@@ -311,9 +303,9 @@ Assembler::processScaledUnitList(Parser::ConcreteSyntaxTree &unit,
   //   [";" ScaledUnitList];                   : units[2] 2,0,1
 
   /* Dispatch by base unit name. */
-  const Parser::Token &uid_token = _lexer[unit[0].getTokenIdx()];
+  const Parser::Token &uid_token = _lexer[unit_prod[0].getTokenIdx()];
   std::string base_unit_id = uid_token.getValue();
-  std::map<std::string, Ast::ScaledBaseUnit::BaseUnit>::iterator item
+  std::map<std::string, Ast::Unit::BaseUnit>::iterator item
       = _base_unit_map.find(base_unit_id);
 
   if (_base_unit_map.end() == item) {
@@ -322,20 +314,20 @@ Assembler::processScaledUnitList(Parser::ConcreteSyntaxTree &unit,
         << uid_token.getLine() << ": Unknown unit: " << base_unit_id;
     throw err;
   }
-  Ast::ScaledBaseUnit::BaseUnit base_unit = item->second;
+  Ast::Unit::BaseUnit base_unit = item->second;
 
   /* Handle unit modifiers. */
   double multiplier = 1; int scale = 0; int exponent = 1;
-  if (unit[1].matched()) {
-    processScaledUnitModifierList(unit[1][0][1], multiplier, scale, exponent);
+  if (unit_prod[1].matched()) {
+    processScaledUnitModifierList(unit_prod[1][0][1], multiplier, scale, exponent);
   }
 
   // Assemble scaled base unit:
-  unit_list.push_back(Ast::ScaledBaseUnit(base_unit, multiplier, scale, exponent));
+  unit = unit*Ast::Unit(base_unit, multiplier, scale, exponent);
 
   // If there are scaled units left:
-  if (unit[2].matched()) {
-    processScaledUnitList(unit[2][0][1], unit_list);
+  if (unit_prod[2].matched()) {
+    processScaledUnitList(unit_prod[2][0][1], unit);
   }
 }
 
@@ -748,7 +740,8 @@ Assembler::processReactionDefinitions(Parser::ConcreteSyntaxTree &reac)
   /* Asseble Reaction Equation */
   processReactionEquation(reac[5], reaction);
 
-  // Handle modifier
+  // Ignore modifiers
+  /*
   std::list<Ast::Species *> modifier_list;
   if (reac[6].matched()) {
     processReactionModifierList(reac[6][0][1], modifier_list);
@@ -756,6 +749,7 @@ Assembler::processReactionDefinitions(Parser::ConcreteSyntaxTree &reac)
       reaction->addModifier(*mod);
     }
   }
+  */
 
   // Add reaction to model:
   _model.addDefinition(reaction);
@@ -954,7 +948,16 @@ Assembler::processProducts(Parser::ConcreteSyntaxTree &sum, Ast::Reaction *react
 
 
 void
-Assembler::unquote(std::string &name)
-{
+Assembler::unquote(std::string &name) {
   name = name.substr(1, name.size()-2);
+}
+
+
+void
+Assembler::defineUnit(const std::string &id, const Ast::Unit &unit) {
+  if (0 != _units.count(id)) {
+    SymbolError err; err << "Can not redefine unit '" << id << "'!";
+    throw err;
+  }
+  _units[id] = unit;
 }

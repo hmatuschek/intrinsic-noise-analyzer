@@ -1,6 +1,7 @@
 #ifndef __INA_EVAL_BCI_COMPILER_HH__
 #define __INA_EVAL_BCI_COMPILER_HH__
 
+#include <complex>
 #include "code.hh"
 #include <map>
 #include <ginac/ginac.h>

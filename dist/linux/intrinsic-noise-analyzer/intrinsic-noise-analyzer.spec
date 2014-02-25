@@ -1,6 +1,6 @@
 Summary: An analysis tool for biochemical reaction networks
 
-%define version 0.4.2
+%define version 0.4.3
 
 License: GPL-2.0+
 Group: Productivity/Scientific/Chemistry
@@ -12,13 +12,13 @@ URL: https://googlecode.com/p/intrinsic-noise-analyzer
 Version: %{version}
 Buildroot: /tmp/intrinsicnoiseanalyzerrpm
 BuildRequires: gcc-c++, cmake, libsbml-devel >= 5.0
-Requires: libsbml >= 5.0, libina0_4_2 = %{version}-%{release}
+Requires: libsbml >= 5.0, libina0_4_3 = %{version}-%{release}
 %if 0%{?suse_version}
 BuildRequires: libqt4-devel >= 4.5, libginac-devel, llvm-devel >= 2.9, libeigen3-devel >= 3.0
 Requires: libqt4 >= 4.5, libginac2, llvm >= 2.9
 %endif
 %if 0%{?fedora}
-BuildRequires: qt4-devel >= 4.5, ginac-devel, llvm-devel >= 2.9, eigen3 >= 3.0
+BuildRequires: qt4-devel >= 4.5, ginac-devel, llvm-devel >= 2.9, llvm-static >= 2.9, eigen3 >= 3.0
 Requires: qt4 >= 4.5, ginac, llvm >= 2.9
 %endif
 
@@ -33,7 +33,7 @@ Approximation. The results of the analysis can be tested against the computation
 expensive stochastic simulation algorithm.
 
 
-%package -n libina0_4_2
+%package -n libina0_4_3
 Summary: Runtime library for the intrinsic Noise Analyzer
 Group: Development/Libraries/C and C++
 BuildRequires: gcc-c++, cmake, libsbml-devel >= 5.0
@@ -47,13 +47,13 @@ BuildRequires: ginac-devel, eigen3 >= 3.0
 BuildRequires: ginac
 %endif
 
-%description -n libina0_4_2
+%description -n libina0_4_3
 Provides the runtime library for the intrinsic Noise Analyzer.
 
-%post -n libina0_4_2
+%post -n libina0_4_3
 /sbin/ldconfig
 
-%postun -n libina0_4_2
+%postun -n libina0_4_3
 /sbin/ldconfig
 
 
@@ -61,7 +61,7 @@ Provides the runtime library for the intrinsic Noise Analyzer.
 Summary: Runtime library for the intrinsic Noise Analyzer
 Group: Development/Libraries/C and C++
 BuildRequires: gcc-c++, cmake, libsbml-devel >= 5.0
-Requires: libsbml >= 5.0, libina0_4_2 = %{version}-%{release}
+Requires: libsbml >= 5.0, libina0_4_3 = %{version}-%{release}
 %if 0%{?suse_version}
 BuildRequires: libginac-devel, libeigen3-devel >= 3.0
 Requires: libginac2
@@ -100,7 +100,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_prefix}/share/applications/IntrinsicNoiseAnalyzer.desktop
 %{_prefix}/share/icons/IntrinsicNoiseAnalyzer.png
 
-%files -n libina0_4_2
+%files -n libina0_4_3
 %defattr(-, root, root, -)
 %{_libdir}/libina.so.*
 

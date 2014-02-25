@@ -22,13 +22,13 @@ protected:
   /** Assembles the model header. */
   static void processModelHeader(Ast::Model &model, std::ostream &ouput);
   /** Translates the base unit identifier. */
-  static std::string getBaseUnitIdentifier(Ast::ScaledBaseUnit::BaseUnit);
+  static std::string getBaseUnitIdentifier(Ast::Unit::BaseUnit);
   /** Serializes the list of unit definitions. */
   static void processUnitDefinitions(Ast::Model &model, std::ostream &output);
   /** Serializes a unit definition. */
-  static void processUnitDefinition(Ast::UnitDefinition *unit, std::ostream &output);
+  static void processUnitDefinition(const std::string &id, const Ast::Unit &unit, std::ostream &output);
   /** Serializes a single scaled base unit. */
-  static void processScaledUnit(const Ast::ScaledBaseUnit &unit, std::ostream &output);
+  static void processScaledUnit(Ast::Unit::BaseUnit unit, double multiplier, int scale, int exponent, std::ostream &output);
   /** Serializes the list of compartments. */
   static void processCompartments(Ast::Model &model, std::ostream &output);
   /** Serializes a single compartement. */
@@ -48,7 +48,7 @@ protected:
   /** Serializes the list of reactions. */
   static void processReactionList(Ast::Model &model, std::ostream &output);
   /** Serializes a single reaction. */
-  static void processReaction(Ast::Reaction *reac, std::ostream &output);
+  static void processReaction(Ast::Reaction *reac, const Ast::Model &model, std::ostream &output);
   /** Serializes the kinetic law of a reaction. */
   static void processKineticLaw(Ast::KineticLaw *law, std::ostream &output);
 };

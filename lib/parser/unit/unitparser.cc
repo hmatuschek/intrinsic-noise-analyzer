@@ -117,8 +117,8 @@ UnitParser::write(const Ast::Unit &unit, std::ostream &output)
   }
 
   for (Ast::Unit::iterator iter=unit.begin(); iter!=unit.end(); iter++) {
-    Ast::ScaledBaseUnit::BaseUnit bunit = iter->first; int exp = iter->second;
-    buffer.str(""); buffer << Ast::ScaledBaseUnit::baseUnitName(bunit);
+    Ast::Unit::BaseUnit bunit = iter->first; int exp = iter->second;
+    buffer.str(""); buffer << Ast::Unit::baseUnitName(bunit);
     if (1 != exp) { buffer << "^" << exp; }
     factors.push_back(buffer.str());
   }
@@ -165,8 +165,8 @@ UnitParser::processBaseUnit(iNA::Parser::ConcreteSyntaxTree &node, Parser::Lexer
   // BaseUnit := (INT | FLOAT | Pow | "(" Unit ")")
   if (0 == node.getAltIdx()) {
     std::string value = lexer[node[0].getTokenIdx()].getValue();
-    return iNA::Ast::ScaledBaseUnit(
-          iNA::Ast::ScaledBaseUnit::DIMENSIONLESS, UnitParser::asValue<double>(value), 0, 1);
+    return iNA::Ast::Unit(
+          iNA::Ast::Unit::DIMENSIONLESS, UnitParser::asValue<double>(value), 0, 1);
   } else if (1 == node.getAltIdx()) {
     std::string value = lexer[node[0].getTokenIdx()].getValue();
     size_t split_idx = value.find_first_of("eE");
@@ -179,8 +179,8 @@ UnitParser::processBaseUnit(iNA::Parser::ConcreteSyntaxTree &node, Parser::Lexer
       mult = UnitParser::asValue<double>(value);
     }
 
-    return iNA::Ast::ScaledBaseUnit(
-          iNA::Ast::ScaledBaseUnit::DIMENSIONLESS, mult, scale, 1);
+    return iNA::Ast::Unit(
+          iNA::Ast::Unit::DIMENSIONLESS, mult, scale, 1);
   } else if (2 == node.getAltIdx()) {
     return processPow(node[0], lexer);
   } else if (3 == node.getAltIdx()) {
@@ -198,20 +198,20 @@ UnitParser::processPow(iNA::Parser::ConcreteSyntaxTree &node, iNA::Parser::Lexer
 
   // Get unit ide and try to resolve it to a scaled base unit:
   std::string baseunit = lexer[node[0].getTokenIdx()].getValue();
-  if (! Ast::ScaledBaseUnit::isBaseUnitName(baseunit)) {
+  if (! Ast::Unit::isBaseUnitName(baseunit)) {
     Parser::ParserError err(lexer[node[0].getTokenIdx()].getLine());
     err << "Can not resolve unit name " << baseunit;
     throw err;
   }
 
-  Ast::ScaledBaseUnit unit =
-      Ast::ScaledBaseUnit(Ast::ScaledBaseUnit::baseUnitByName(baseunit));
+  Ast::Unit::BaseUnit bunit = Ast::Unit::baseUnitByName(baseunit);
+  Ast::Unit unit(bunit);
 
   if (node[1].matched()) {
     // Parse exponent:
     int exponent = UnitParser::asValue<int>(lexer[node[1][0][1].getTokenIdx()].getValue());
     // Modify unit, note that this only works since multiplier is 1 and scale 0!!!
-    unit = Ast::ScaledBaseUnit(unit.getBaseUnit(), unit.getMultiplier(), unit.getScale(), exponent);
+    unit = Ast::Unit(bunit, unit.getMultiplier(), unit.getScale(), exponent);
   }
 
   return unit;

@@ -7,6 +7,24 @@
 
 using namespace std;
 
+class DebugApplication: public QApplication
+{
+public:
+  DebugApplication(int &argc, char **argv)
+    : QApplication(argc, argv) { }
+
+  virtual bool notify(QObject *obj, QEvent *evt) {
+    try {
+      return QApplication::notify(obj, evt);
+    } catch (std::exception &err) {
+      std::cerr << "Caught exception: " << err.what()
+                << ". Exit..." << std::endl;
+      this->exit(-1);
+    }
+    return false;
+  }
+};
+
 
 int main(int argc, char *argv[])
 {

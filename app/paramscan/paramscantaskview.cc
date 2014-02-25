@@ -159,17 +159,16 @@ void
 ParamScanResultWidget::saveButtonPressed()
 {
   QString selectedFilter;
-  //QString filters = tr("Text Files (*.txt *.csv);;Matlab 5 Files (*.mat)";
-  QString filters = tr("Text Files (*.txt *.csv)");
+  QString csvFilter = tr("Text Files (*.txt *.csv)");
+  QString matFilter = tr("Matlab 5 Files (*.mat)");
+  QString filters = QString("%1;;%2").arg(csvFilter).arg(matFilter);
   QString filename = QFileDialog::getSaveFileName(
         this, tr("Save as text..."), "", filters, &selectedFilter);
   if ("" == filename) { return; }
 
-  if (tr("Text Files (*.txt *.csv)") == selectedFilter) {
-    saveAsCSV(filename);
-  } else if (tr("Matlab 5 Files (*.mat)") == selectedFilter) {
-    saveAsMAT(filename);
-  } else {
+  if (csvFilter == selectedFilter) { saveAsCSV(filename); }
+  else if (tr("Matlab 5 Files (*.mat)") == selectedFilter) { saveAsMAT(filename); }
+  else {
     QMessageBox::critical(0, tr("Can not save results to file"),
                           tr("Can not save results to file %1: Unknown format %2").arg(
                             filename, selectedFilter));
@@ -202,7 +201,7 @@ ParamScanResultWidget::saveAsMAT(const QString &filename) {
   }
 
   iNA::Utils::MatFile mat_file;
-  mat_file.add("ParamScan_result", paramscan_task_wrapper->getParamScanTask()->getParameterScan().matrix());
+  mat_file.add("ParamScan", paramscan_task_wrapper->getParamScanTask()->getParameterScan().matrix());
   mat_file.serialize(file);
   file.close();
 }

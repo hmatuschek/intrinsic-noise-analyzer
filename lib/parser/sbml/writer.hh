@@ -23,17 +23,21 @@ protected:
   static void processUnitDefinitions(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model);
   /** Translates a single unit definition. */
   static void processUnitDefinition(const Ast::Unit &unit, LIBSBML_CPP_NAMESPACE_QUALIFIER UnitDefinition *sbml_unit_def);
-  /** Translates a ScaledBaseUnit. */
-  static void processUnit(const Ast::ScaledBaseUnit &unit, LIBSBML_CPP_NAMESPACE_QUALIFIER UnitDefinition *sbml_unit_def);
+  /** Translates a scaled BaseUnit. */
+  static void processUnit(Ast::Unit::BaseUnit unit, double multiplier, int scale, int exponent,
+                          LIBSBML_CPP_NAMESPACE_QUALIFIER UnitDefinition *sbml_unit_def);
   /** Translates the list of function definitions. */
   static void processFunctionDefinitions(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model);
   /** Translates a single function definition. */
   static void processFunctionDefinition(
     Ast::FunctionDefinition *func, LIBSBML_CPP_NAMESPACE_QUALIFIER FunctionDefinition *sbml_func, Ast::Model &model);
   /** Translates the list of parameters. */
-  static void processParameters(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model);
+  static void processParameters(Ast::Model &model, std::map<Ast::Unit, std::string> &units,
+                                LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model);
   /** Translates a single parameter definition. */
-  static void processParameter(Ast::Parameter *param, LIBSBML_CPP_NAMESPACE_QUALIFIER Parameter *sbml_param);
+  static void processParameter(Ast::Parameter *param, std::map<Ast::Unit, std::string> &units,
+                               LIBSBML_CPP_NAMESPACE_QUALIFIER Parameter *sbml_param,
+                               LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model);
   /** Translates the list of compartment definitions. */
   static void processCompartments(Ast::Model &mode, LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model);
   /** Translates a single compartment definition. */
@@ -43,19 +47,28 @@ protected:
   /** Translates a single species definition. */
   static void processSpecies(Ast::Species *species, LIBSBML_CPP_NAMESPACE_QUALIFIER Species *sbml_species);
   /** Translates the list of reactions. */
-  static void processReactions(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model);
+  static void processReactions(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model,
+                               std::map<Ast::Unit, std::string> &units);
   /** Translates a single reaction. */
-  static void processReaction(Ast::Reaction *reac, LIBSBML_CPP_NAMESPACE_QUALIFIER Reaction *sbml_reac, Ast::Model &model);
+  static void processReaction(Ast::Reaction *reac, LIBSBML_CPP_NAMESPACE_QUALIFIER Reaction *sbml_reac,
+                              Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model,
+                              std::map<Ast::Unit, std::string> &units);
+
+  static void getReactionModifier(Ast::Reaction *reac, Ast::Model &model, std::set<std::string> &modifiers);
+
   /** Translates a kinetic law. */
-  static void processKineticLaw(Ast::KineticLaw *law, LIBSBML_CPP_NAMESPACE_QUALIFIER KineticLaw *sbml_law, Ast::Model &model);
+  static void processKineticLaw(Ast::KineticLaw *law, LIBSBML_CPP_NAMESPACE_QUALIFIER KineticLaw *sbml_law,
+                                LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model,
+                                std::map<Ast::Unit, std::string> &units, Ast::Model &model);
   /** Creates a initial value definition for a variable. */
   static void processInitialValue(Ast::VariableDefinition *var, LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model, Ast::Model &model);
   /** Creates a rule for a variable. */
   static void processRule(Ast::VariableDefinition *var, LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model, Ast::Model &model);
   /** Helper function to test if a variable has its default unit. */
-  static bool hasDefaultUnit(Ast::Parameter *var, Ast::Model &model);
+  static bool hasDefaultUnit(Ast::Parameter *var);
   /** Returns the identifier of the unit definition of a variable. */
-  static std::string getUnitIdentifier(Ast::Parameter *var, Ast::Model &model);
+  static std::string getUnitIdentifier(Ast::Parameter *var, std::map<Ast::Unit, std::string> units,
+                                       LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model);
   /** Translates a GiNaC expression. */
   static LIBSBML_CPP_NAMESPACE_QUALIFIER ASTNode *processExpression(GiNaC::ex, Ast::Model &model, Ast::Scope &scope);
 };

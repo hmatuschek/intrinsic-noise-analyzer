@@ -93,6 +93,8 @@ public:
  */
 class MessageHandler {
 public:
+  virtual ~MessageHandler() { }
+
   /** Needs to be implemented by actual message handlers to process a message. */
   virtual void handleMessage(const Message &message) = 0;
 };
@@ -114,7 +116,7 @@ public:
 
 public:
   /** Destructor. Also frees all message handlers. */
-  ~Logger();
+  virtual ~Logger();
   /** Returns the global logger instance. */
   static Logger &get();
   /** Destroys the global logger instance. */
@@ -157,17 +159,17 @@ private:
  */
 class TextMessageHandler : public MessageHandler
 {
-protected:
-  /** Level of filter. */
-  Message::Level _level;
-  /** The ostream to send text to. */
-  std::ostream &_stream;
-
 public:
   /** Constructor. */
   TextMessageHandler(std::ostream &stream, Message::Level level=Message::INFO);
   /** Handles a log message. */
   virtual void handleMessage(const Message &message);
+
+protected:
+  /** Level of filter. */
+  Message::Level _level;
+  /** The ostream to send text to. */
+  std::ostream &_stream;
 };
 
 

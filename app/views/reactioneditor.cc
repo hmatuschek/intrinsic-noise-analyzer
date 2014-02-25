@@ -3,13 +3,17 @@
 #include <QHBoxLayout>
 #include <QCompleter>
 #include <QGroupBox>
+#include <QMessageBox>
+#include <QDebug>
 
 #include "reactionequationrenderer.hh"
 #include "../tinytex/tinytex.hh"
+#include "../tinytex/ginac2formula.hh"
 #include "../models/scopeitemmodel.hh"
 #include "expressioneditor.hh"
 
 #include <ast/unitconverter.hh>
+#include <ast/identifier.hh>
 #include <parser/exception.hh>
 #include <utils/logger.hh>
 
@@ -18,39 +22,162 @@
 /* ********************************************************************************************* *
  * Implementation of ReactionEditorContext
  * ********************************************************************************************* */
-ReactionEditorContext::ReactionEditorContext(iNA::Ast::Scope *root)
-  : iNA::Parser::Expr::ScopeContext(root)
+ReactionEditorContext::ReactionEditorContext(iNA::Ast::Model *model, iNA::Ast::Scope *root)
+  : iNA::Parser::Expr::ScopeContext((0 == root) ? model : root), _model(model)
 {
-  // Pass...
+  // If there is no compartment defined in the model -> create a new symbol for it and
+  // find an unique ID.
+  if (0 == _model->numCompartments()) {
+    _compartment_id = _model->getNewIdentifier("compartment");
+    _compartment_symbol = GiNaC::symbol(_compartment_id);
+    _compartment_undefined = true;
+  } else {
+    _compartment_id = _model->getCompartment(0)->getIdentifier();
+    _compartment_symbol = _model->getCompartment(0)->getSymbol();
+    _compartment_undefined = false;
+  }
 }
 
 
 GiNaC::symbol
 ReactionEditorContext::resolve(const std::string &identifier)
 {
+  // First, try to resolve id in local parameters
+  if (0 != _param_symbols.count(identifier)) { return _param_symbols[identifier]; }
+  // then in species ...
+  if (0 != _species_symbols.count(identifier)) { return _species_symbols[identifier]; }
+  // then in compartment ...
+  if (_compartment_id == identifier) { return _compartment_symbol; }
+
+  // Then, try to resolve symbol in parent scope
   try {
     return iNA::Parser::Expr::ScopeContext::resolve(identifier);
   } catch (iNA::Exception &err) {
     // pass...
   }
 
-  _undefined_symbols[identifier] = GiNaC::symbol(identifier);
-  return _undefined_symbols[identifier];
+  // If symbol is not defined at all, define it as a local parameter
+  _param_symbols[identifier] = GiNaC::symbol(identifier);
+  _param_ids[_param_symbols[identifier]] = identifier;
+  // done...
+  return _param_symbols[identifier];
 }
 
 
 std::string
 ReactionEditorContext::identifier(GiNaC::symbol symbol)
 {
-  iNA::InternalError err;
-  err << "Can not resolve symbol " << symbol
-      << ": Symbol resolution is not implemented.";
-  throw err;
+  // First, try to resolve symbol in local parameters
+  if (0 != _param_ids.count(symbol)) { return _param_ids[symbol]; }
+  if (0 != _species_ids.count(symbol)) { return _species_ids[symbol]; }
+  if (_compartment_symbol == symbol) { return _compartment_id; }
+
+  // If symbol is not a local parameter, try to resolve it in parent scope
+  return iNA::Parser::Expr::ScopeContext::identifier(symbol);
 }
 
 const std::map<std::string, GiNaC::symbol> &
-ReactionEditorContext::undefinedSymbols() const {
-  return _undefined_symbols;
+ReactionEditorContext::undefinedParameters() const {
+  return _param_symbols;
+}
+
+GiNaC::symbol
+ReactionEditorContext::getOrCreateLocalParameter(const std::string &id) {
+  if (_param_symbols.end() != _param_symbols.find(id)) { return _param_symbols[id]; }
+  if (_scope->hasDefinition(id, true) && iNA::Ast::Node::isParameter(_scope->getDefinition(id))) {
+    return _scope->getVariable(id)->getSymbol();
+  }
+
+  GiNaC::symbol new_symbol(id);
+  _param_symbols.insert(std::pair<std::string, GiNaC::symbol>(id,new_symbol));
+  _param_ids.insert(std::pair<GiNaC::symbol, std::string>(new_symbol, id));
+  return new_symbol;
+}
+
+bool
+ReactionEditorContext::hasIdentifier(const std::string &id) const {
+  if (0 != _param_symbols.count(id)) { return true; }
+  if (0 != _species_symbols.count(id)) { return true; }
+  if (_compartment_id == id) { return true; }
+  return _scope->hasDefinition(id);
+}
+
+const std::map<std::string, GiNaC::symbol> &
+ReactionEditorContext::undefinedSpecies() const {
+  return _species_symbols;
+}
+
+bool
+ReactionEditorContext::hasSpecies(const std::string &id) const {
+  return 0 != _species_symbols.count(id);
+}
+
+GiNaC::symbol
+ReactionEditorContext::getOrCreateSpecies(const std::string &id) {
+  if (hasSpecies(id)) { return _species_symbols[id]; }
+  if (_model->hasSpecies(id)) { return _model->getSpecies(id)->getSymbol(); }
+  _species_symbols[id] = GiNaC::symbol(id);
+  _species_ids[_species_symbols[id]] = id;
+  return _species_symbols[id];
+}
+
+const GiNaC::symbol &
+ReactionEditorContext::compartmentSymbol() const{
+  return _compartment_symbol;
+}
+
+const std::string &
+ReactionEditorContext::compartmentIdentifier() const {
+  return _compartment_id;
+}
+
+bool
+ReactionEditorContext::compartmentIsUndefined() const {
+  return _compartment_undefined;
+}
+
+bool
+ReactionEditorContext::hasConcentrationUnits() const  {
+  return !(_model->speciesHaveSubstanceUnits());
+}
+
+void
+ReactionEditorContext::reset() {
+  _param_ids.clear();
+  _param_symbols.clear();
+  _species_ids.clear();
+  _species_symbols.clear();
+}
+
+
+/* ********************************************************************************************* *
+ * Implementation of ReactionEditorDisplayContext
+ * ********************************************************************************************* */
+ReactionEditorDisplayContext::ReactionEditorDisplayContext(ReactionEditorContext &context)
+  : _context(context)
+{
+  // pass...
+}
+
+GiNaC::symbol
+ReactionEditorDisplayContext::resolve(const std::string &identifier) {
+  return _context.resolve(identifier);
+}
+
+std::string
+ReactionEditorDisplayContext::identifier(GiNaC::symbol symbol) {
+  std::string id;
+  try { id = _context.identifier(symbol); }
+  catch (iNA::Exception &err) { id = symbol.get_name(); }
+  return id;
+}
+
+bool
+ReactionEditorDisplayContext::hasConcentrationUnits(const GiNaC::symbol &symbol) {
+  std::string id;
+  try { id = _context.identifier(symbol); }
+  catch (iNA::Exception &err) { id = symbol.get_name(); }
+  return _context.hasConcentrationUnits() && _context.hasSpecies(id);
 }
 
 
@@ -59,9 +186,10 @@ ReactionEditorContext::undefinedSymbols() const {
  * Implementation of ReactionEditor
  * ********************************************************************************************* */
 ReactionEditor::ReactionEditor(iNA::Ast::Model &model, iNA::Ast::Reaction *reaction, QWidget *parent)
-  : QWizard(parent), _model(model), _current_reaction_scope(0), _current_reaction(reaction)
+  : QWizard(parent), _model(model), _current_reaction(reaction),
+    _context(&model, (0 == reaction) ? (iNA::Ast::Scope *)&model : (iNA::Ast::Scope *)reaction->getKineticLaw())
 {
-  if (0 == reaction)
+  if (0 == _current_reaction)
     setWindowTitle(tr("Create new reaction"));
   else
     setWindowTitle(tr("Edit reaction"));
@@ -78,64 +206,79 @@ ReactionEditor::model()
   return _model;
 }
 
+ReactionEditorContext &
+ReactionEditor::context() {
+  return _context;
+}
+
+const StoichiometryList &
+ReactionEditor::reactants() const {
+  return _reactants;
+}
+
+StoichiometryList &
+ReactionEditor::reactants() {
+  return _reactants;
+}
+
+void
+ReactionEditor::setReactants(const StoichiometryList &list) {
+  _reactants = list;
+}
+
+const StoichiometryList &
+ReactionEditor::products() const {
+  return _products;
+}
+
+StoichiometryList &
+ReactionEditor::products() {
+  return _products;
+}
+
+void
+ReactionEditor::setProducts(const StoichiometryList &list) {
+  _products = list;
+}
+
+const GiNaC::ex &
+ReactionEditor::kineticLaw() const {
+  return _kineticLaw;
+}
+
+GiNaC::ex &
+ReactionEditor::kineticLaw() {
+  return _kineticLaw;
+}
+
+void
+ReactionEditor::setKinteticLaw(const GiNaC::ex &expr) {
+  _kineticLaw = expr;
+}
+
+bool
+ReactionEditor::isReversible() const {
+  return _is_reversible;
+}
+
+void
+ReactionEditor::setReversible(bool rev) {
+  _is_reversible = rev;
+}
+
+const QString &
+ReactionEditor::reactionName() const {
+  return _reactionName;
+}
+
+void
+ReactionEditor::setReactionName(const QString &name) {
+  _reactionName = name;
+}
 
 iNA::Ast::Reaction *
-ReactionEditor::reaction()
-{
-  // If we edit an existing reaction -> return this reaction
-  if (0 != _current_reaction) { return _current_reaction; }
-
-  // Otherwise get reaction from reaction scope:
-  if (0 == _current_reaction_scope) { return 0; }
-  for (iNA::Ast::Scope::iterator item = _current_reaction_scope->begin();
-       item != _current_reaction_scope->end(); item++)
-  {
-    if (iNA::Ast::Node::isReactionDefinition(*item)) {
-      return static_cast<iNA::Ast::Reaction *>(*item);
-    }
-  }
-
-  return 0;
-}
-
-
-iNA::Ast::Scope *
-ReactionEditor::reactionScope() {
-  return _current_reaction_scope;
-}
-
-
-void
-ReactionEditor::setReactionScope(iNA::Ast::Scope *reaction_scope)
-{
-  if (0 != _current_reaction_scope) {
-    delete _current_reaction_scope;
-  }
-
-  _current_reaction_scope = reaction_scope;
-}
-
-
-void
-ReactionEditor::commitReactionScope()
-{
-  std::list<iNA::Ast::Definition *> definitions;
-  // Add all definitions in the current reaction scope to the model:
-  for (iNA::Ast::Scope::iterator item=_current_reaction_scope->begin();
-       item!=_current_reaction_scope->end(); item++) {
-    _model.addDefinition(*item);
-    definitions.push_back(*item);
-  }
-
-  // clear current reaction scope:
-  for (std::list<iNA::Ast::Definition *>::iterator item = definitions.begin();
-       item != definitions.end(); item++) {
-    _current_reaction_scope->remDefinition(*item);
-  }
-
-  // Delete scope:
-  delete _current_reaction_scope;
-  _current_reaction_scope = 0;
+ReactionEditor::reaction() {
+  return _current_reaction;
 }
 
 
@@ -144,7 +287,8 @@ ReactionEditor::commitReactionScope()
  * Implementation of ReactionEditorPage
  * ********************************************************************************************* */
 ReactionEditorPage::ReactionEditorPage(iNA::Ast::Reaction *reaction, ReactionEditor *editor)
-  : QWizardPage(editor), _model(editor->model()), _current_reaction(reaction)
+  : QWizardPage(editor), _model(editor->model()), _current_reaction(reaction),
+    _editor(editor)
 {
   setTitle(tr("Specify chemical equation and propensity"));
 
@@ -225,7 +369,7 @@ ReactionEditorPage::setKineticLawType(KineticLawType type)
   QList< QPair<int, QString> > reactants, products;
   bool is_reversible=false, is_valid=false, is_multicompartment=false;
 
-  is_valid = _parseEquation(_equation->text(), reactants, products, is_reversible);
+  is_valid = _parseReactionEquation(_equation->text(), reactants, products, is_reversible);
   is_multicompartment = (1 != _collectCompartments(reactants, products).size());
 
   // If mass action single compartment is selected, but reaction is multicompartment:
@@ -251,7 +395,7 @@ ReactionEditorPage::_updateKineticLaw()
   bool is_reversible = false;
 
   // Try to parse the expression
-  if (! _parseEquation(_equation->text(), reactants, products, is_reversible)) {
+  if (! _parseReactionEquation(_equation->text(), reactants, products, is_reversible)) {
     QPalette equation_palette = _equation->palette();
     equation_palette.setColor(QPalette::Base, _error_background);
     _equation->setPalette(equation_palette);
@@ -263,6 +407,9 @@ ReactionEditorPage::_updateKineticLaw()
   equation_palette.setColor(QPalette::Base, _default_background);
   _equation->setPalette(equation_palette);
 
+  // Clear context and define new species
+  //_editor->context().reset();
+  _defineUnknownSpecies(reactants, products);
 
   // Do not update anything if autoupdate is not enabled.
   if (USER_DEFINED == kineticLawType()) { return; }
@@ -303,7 +450,7 @@ ReactionEditorPage::_onKineticLawExpressionChanged()
   // Try to parse the expression:
   if (USER_DEFINED == kineticLawType())
   {
-    ReactionEditorContext ctx(&_model);
+    ReactionEditorContext ctx(&_model, &_model);
     try {
       // Try to parse the expression
       iNA::Parser::Expr::parseExpression(_kineticLawEditor->text().toStdString(), ctx);
@@ -328,14 +475,13 @@ ReactionEditorPage::_serializeReactionEquation()
   QStringList reactants, products;
 
   // First serialize reactants:
-  for (iNA::Ast::Reaction::iterator reac=_current_reaction->reactantsBegin();
-       reac!=_current_reaction->reactantsEnd(); reac++)
-  {
+  iNA::Ast::Reaction::iterator reac=_current_reaction->reactantsBegin();
+  for (; reac!=_current_reaction->reactantsEnd(); reac++) {
     std::stringstream buffer;
     iNA::Parser::Expr::serializeExpression(reac->second, buffer, &_model);
     reactants.append(
-          reac->second!=1 ? QString("%1*%2").arg(buffer.str().c_str()).arg(reac->first->getIdentifier().c_str())
-                          : QString("%1").arg(reac->first->getIdentifier().c_str()));
+          (reac->second!=1) ? QString("%1*%2").arg(buffer.str().c_str()).arg(reac->first->getIdentifier().c_str())
+                            : QString("%1").arg(reac->first->getIdentifier().c_str()));
   }
 
   // then, serialize products:
@@ -345,8 +491,8 @@ ReactionEditorPage::_serializeReactionEquation()
     std::stringstream buffer;
     iNA::Parser::Expr::serializeExpression(prod->second, buffer, &_model);
     products.append(
-          prod->second!=1 ? QString("%1*%2").arg(buffer.str().c_str()).arg(prod->first->getIdentifier().c_str())
-                          : QString("%1").arg(prod->first->getIdentifier().c_str()));
+          (prod->second!=1) ? QString("%1*%2").arg(buffer.str().c_str()).arg(prod->first->getIdentifier().c_str())
+                            : QString("%1").arg(prod->first->getIdentifier().c_str()));
 
   }
 
@@ -370,7 +516,7 @@ ReactionEditorPage::_serializePropensity()
 
 
 bool
-ReactionEditorPage::_parseEquation(
+ReactionEditorPage::_parseReactionEquation(
   const QString &text, QList< QPair<int, QString> > &reactants,
   QList< QPair<int, QString> > &products, bool &reversible)
 {
@@ -449,31 +595,37 @@ ReactionEditorPage::_parseIdentifier(QString &text)
 }
 
 
-std::set<iNA::Ast::Compartment *>
+std::set<std::string>
 ReactionEditorPage::_collectCompartments(QList<QPair<int, QString> > &reactants,
                                          QList<QPair<int, QString> > &products)
 {
-  std::set<iNA::Ast::Compartment *> compartments;
+  std::set<std::string> compartments;
 
-  iNA::Ast::Compartment * def_compartment =
-          (_model.numCompartments() ? _model.getCompartment(0) : new iNA::Ast::Compartment("compartment",iNA::Ast::Compartment::VOLUME,true) );
+  // The compartment ID, new species are created in.
+  std::string def_compartment = _editor->context().compartmentIdentifier();
 
   // Handle list of reactants:
   for (QList< QPair<int, QString> >::iterator item=reactants.begin(); item!=reactants.end(); item++)
   {
+    // If species is not defined yet, use default compartment
     if (! _model.hasSpecies(item->second.toStdString())) {
       compartments.insert(def_compartment);
     } else {
-      compartments.insert(_model.getSpecies(item->second.toStdString())->getCompartment());
+      // otherwise use compartment of species
+      compartments.insert(
+            _model.getSpecies(item->second.toStdString())->getCompartment()->getIdentifier());
     }
   }
   // Handle list of products
   for (QList< QPair<int, QString> >::iterator item=products.begin(); item!=products.end(); item++)
   {
+    // If species is not defined yet, use default compartment
     if (! _model.hasSpecies(item->second.toStdString())) {
       compartments.insert(def_compartment);
     } else {
-      compartments.insert(_model.getSpecies(item->second.toStdString())->getCompartment());
+      // otherwise use compartment of species
+      compartments.insert(
+            _model.getSpecies(item->second.toStdString())->getCompartment()->getIdentifier());
     }
   }
 
@@ -483,405 +635,154 @@ ReactionEditorPage::_collectCompartments(QList<QPair<int, QString> > &reactants,
 std::map<QString,int>
 ReactionEditorPage::_collectStoichiometries(QList<QPair<int, QString> > &reactants)
 {
-    // Collect reactants and assemble stoichiometries
-    std::map<QString,int> stoichiometries;
-    for (QList< QPair<int, QString> >::iterator item=reactants.begin(); item != reactants.end(); item++)
-    {
-       std::map< QString, int >::iterator it= stoichiometries.find(item->second) ;
-       if( it!=stoichiometries.end())
-       {
-            it->second+=item->first;
-       }
-       else
-       {
-           stoichiometries.insert(std::pair<QString,int>(item->second,item->first));
-       }
-    }
-
-    return stoichiometries;
-
-}
-
-
-MathItem *
-ReactionEditorPage::_renderKineticLaw(bool is_reversible, QList<QPair<int, QString> > &reactants,
-                                      QList<QPair<int, QString> > &products)
-{
-
   // Collect reactants and assemble stoichiometries
-  std::map<QString,int> reactantsStoi = _collectStoichiometries(reactants);
-
-  std::set<iNA::Ast::Compartment *> compartments = _collectCompartments(reactants, products);
-
-  MathFormula *formula = new MathFormula();
-
-      // Handle reactants:
-      if (is_reversible) {
-        formula->appendItem(new MathSub(new MathText("k"), new MathText("fwd")));
-      } else {
-        formula->appendItem(new MathText("k"));
-      }
-
-      if (MASSACTION_SINGLE == kineticLawType()) {
-        if(_model.speciesHaveSubstanceUnits())
-        {
-            int exponent = -1;
-            for(std::map<QString,int>::iterator it=reactantsStoi.begin(); it!=reactantsStoi.end(); it++)
-                exponent += it->second;
-            switch(exponent)
-            {
-               case 0:
-                break;
-               case -1:
-                formula->appendItem(new MathText(QChar(0x00B7)));
-                formula->appendItem(_renderCompartment(*(compartments.begin())));
-                break;
-               default:
-                formula->appendItem(new MathText(QChar(0x00B7)));
-                formula->appendItem(new MathSup(_renderCompartment(*(compartments.begin())), new MathText(QString("-%1").arg(exponent))));
-                break;
-            }
-        }
-        else
-        {
-            formula->appendItem(new MathText(QChar(0x00B7)));
-            formula->appendItem(_renderCompartment(*(compartments.begin())));
-        }
-      }
-
-
-      for (std::map< QString, int>::iterator item=reactantsStoi.begin(); item != reactantsStoi.end(); item++)
-      {
-        formula->appendItem(new MathText(QChar(0x00B7)));
-        formula->appendItem(_renderFactor(item->first, int(item->second)));
-      }
-
-      // If reaction is reversible, include reverse rate
-      if (is_reversible) {
-
-        // Collect products and assemble stoichiometries
-        std::map<QString,int> productsStoi = _collectStoichiometries(products);
-
-        formula->appendItem(new MathSpace(MathSpace::MEDIUM_SPACE));
-        formula->appendItem(new MathText("-"));
-        formula->appendItem(new MathSpace(MathSpace::MEDIUM_SPACE));
-
-        formula->appendItem(new MathSub(new MathText("k"), new MathText("rev")));
-
-        if (MASSACTION_SINGLE == kineticLawType()) {
-            if(_model.speciesHaveSubstanceUnits())
-            {
-                int exponent = -1;
-                for(std::map<QString,int>::iterator it=productsStoi.begin(); it!=productsStoi.end(); it++)
-                    exponent += it->second;
-                switch(exponent)
-                {
-                   case 0:
-                    break;
-                   case -1:
-                    formula->appendItem(new MathText(QChar(0x00B7)));
-                    formula->appendItem(_renderCompartment(*(compartments.begin())));
-                    break;
-                   default:
-                    formula->appendItem(new MathText(QChar(0x00B7)));
-                    formula->appendItem(new MathSup(_renderCompartment(*(compartments.begin())), new MathText(QString("-%1").arg(exponent))));
-                    break;
-                }
-            }
-            else
-            {
-                formula->appendItem(new MathText(QChar(0x00B7)));
-                formula->appendItem(_renderCompartment(*(compartments.begin())));
-            }
-        }
-
-        for (std::map<QString,int>::iterator item=productsStoi.begin(); item != productsStoi.end(); item++)
-        {
-          formula->appendItem(new MathText(QChar(0x00B7)));
-          formula->appendItem(_renderFactor(item->first, item->second));
-        }
-
-      }
-
-  return formula;
-}
-
-
-MathItem *
-ReactionEditorPage::_renderFactor(const QString &id, int exponent)
-{
-
-      MathFormula *name = new MathFormula();
-
-      if(!_model.speciesHaveSubstanceUnits() || MASSACTION_MULTI == kineticLawType()) name->appendItem(new MathText("["));
-      name->appendItem(_renderName(id));
-      if(!_model.speciesHaveSubstanceUnits() || MASSACTION_MULTI == kineticLawType()) name->appendItem(new MathText("]"));
-
-      MathFormula *factor = new MathFormula();
-
-      if (MASSACTION_MULTI == kineticLawType()) {
-        if (1 == exponent) {
-          factor->appendItem(name->copy());
-        } else {
-          factor->appendItem(new MathSup(name->copy(), new MathText(QString("%1").arg(exponent))));
-        }
-      } else if (MASSACTION_SINGLE == kineticLawType()) {
-        factor->appendItem(name->copy());
-        for (int i=1; i<exponent; i++) {
-          MathFormula *term = new MathFormula();
-          term->appendItem(name->copy());
-          term->appendItem(new MathText("-"));
-          if (i > 1) {
-            term->appendItem(new MathText(QString("%1").arg(i)));
-          }
-          if(!_model.speciesHaveSubstanceUnits())
-          {
-               term->appendItem(new MathText(QChar(0x00B7)));
-              term->appendItem(new MathSup(_renderCompartmentOf(id), new MathText("-1")));
-          }
-          else if(i==1)
-          {
-              term->appendItem(new MathText("1"));
-          }
-          factor->appendItem(new MathBlock(term, new MathText("("), new MathText(")")));
-        }
-      }
-
-  delete name;
-  return factor;
-}
-
-
-MathItem *
-ReactionEditorPage::_renderCompartmentOf(const QString &id)
-{
-  // if there is no compartment defined use \Omega
-  if (0 == _model.numCompartments()) {
-    return new MathText(QChar(0x03A9));
-  }
-
-  if (! _model.hasSpecies(id.toStdString())) {
-    return _renderCompartment(_model.getCompartment(0));
-  }
-
-  return _renderCompartment(_model.getSpecies(id.toStdString())->getCompartment());
-}
-
-
-MathItem *
-ReactionEditorPage::_renderCompartment(iNA::Ast::Compartment *compartment)
-{
-  // If compartment has no name -> use identifier
-  if (compartment->hasName()) { return TinyTex::parseQuoted(compartment->getName().c_str()); }
-  return new MathText(compartment->getIdentifier().c_str());
-}
-
-
-MathItem *
-ReactionEditorPage::_renderName(const QString &id)
-{
-  // Assemble name of the factor
-  if (_model.hasVariable(id.toStdString())) {
-    iNA::Ast::VariableDefinition *var = _model.getVariable(id.toStdString());
-    if (iNA::Ast::Node::isSpecies(var) && var->hasName()) {
-      return TinyTex::parseQuoted(var->getName());
+  std::map<QString,int> stoichiometries;
+  for (QList< QPair<int, QString> >::iterator item=reactants.begin(); item != reactants.end(); item++)
+  {
+    std::map< QString, int >::iterator it= stoichiometries.find(item->second) ;
+    if( it!=stoichiometries.end()) {
+      it->second+=item->first;
+    } else {
+      stoichiometries.insert(std::pair<QString,int>(item->second,item->first));
     }
   }
 
-  return new MathText(id);
+  return stoichiometries;
+}
+
+
+MathItem *
+ReactionEditorPage::_renderKineticLaw(bool is_reversible, StoichiometryList &reactants,
+                                      StoichiometryList &products)
+{
+  // Assemble kinetic law
+  GiNaC::ex kinLaw = _createKineticLaw(reactants, products, is_reversible);
+  iNA::Ast::Scope *scope = &_model;
+  if (0 != _current_reaction) { scope = _current_reaction->getKineticLaw(); }
+  return Ginac2Formula::toFormula(kinLaw, *scope, true);
 }
 
 
 void
-ReactionEditorPage::_defineUnknownSpecies(QList<QPair<int, QString> > &reactants,
-                                          QList<QPair<int, QString> > &products,
-                                          iNA::Ast::Scope *scope)
+ReactionEditorPage::_defineUnknownSpecies(const StoichiometryList &reactants,
+                                          const StoichiometryList &products)
 {
   // Process reactants...
-  for (QList< QPair<int, QString> >::iterator item = reactants.begin(); item!=reactants.end(); item++) {
+  for (StoichiometryList::const_iterator item = reactants.begin(); item!=reactants.end(); item++) {
     // If identifier names a species -> skip
-    if (scope->hasVariable(item->second.toStdString()) &&
-        iNA::Ast::Node::isSpecies(scope->getVariable(item->second.toStdString()))) {
-      continue;
-    }
+    if (_editor->model().hasSpecies(item->second.toStdString())) { continue; }
+    if (_editor->context().hasSpecies(item->second.toStdString())) { continue; }
 
     // if identifier names any other definition -> error.
-    if (scope->hasDefinition(item->second.toStdString())) {
+    if (_model.hasDefinition(item->second.toStdString())) {
       iNA::SymbolError err;
       err << "Can not define identifier " << item->second.toStdString() << " as a species, "
           << " identifier already used by an other definition.";
       throw err;
     }
-
-    // Create a compartment if there is none.
-    if (0 == _model.numCompartments()) {
-      iNA::Ast::Compartment * new_compartment = new iNA::Ast::Compartment("compartment", 1, iNA::Ast::Compartment::VOLUME, true);
-      _model.addDefinition(new_compartment);
-    }
-
-    // identifier not in use -> define species with this identifier.
-    iNA::Ast::Species *new_species = new iNA::Ast::Species(
-          item->second.toStdString(),_model.getCompartment(0), false);
-    new_species->setValue(0);
-    scope->addDefinition(new_species);
+    // (pre) define species in context
+    _editor->context().getOrCreateSpecies(item->second.toStdString());
   }
 
   // Process products...
-  for (QList< QPair<int, QString> >::iterator item = products.begin(); item!=products.end(); item++) {
+  for (StoichiometryList::const_iterator item = products.begin(); item!=products.end(); item++) {
     // If identifier names a species -> skip
-    if (scope->hasVariable(item->second.toStdString()) &&
-        iNA::Ast::Node::isSpecies(scope->getVariable(item->second.toStdString()))) {
-      continue;
-    }
+    if (_editor->model().hasSpecies(item->second.toStdString())) { continue; }
+    if (_editor->context().hasSpecies(item->second.toStdString())) { continue; }
 
     // if identifier names any other definition -> error.
-    if (scope->hasDefinition(item->second.toStdString())) {
+    if (_model.hasDefinition(item->second.toStdString())) {
       iNA::SymbolError err;
       err << "Can not define identifier " << item->second.toStdString() << " as a species, "
           << " identifier already used by an other definition.";
       throw err;
     }
-
-    // Create a compartment if there is none.
-    if (0 == _model.numCompartments()) {
-      iNA::Ast::Compartment * new_compartment = new iNA::Ast::Compartment("compartment", 1, iNA::Ast::Compartment::VOLUME, true);
-      _model.addDefinition(new_compartment);
-    }
-
-    // identifier not in use -> define species with this identifier.
-    iNA::Ast::Species *new_species = new iNA::Ast::Species(
-          item->second.toStdString(), _model.getCompartment(0), false);
-    new_species->setValue(0);
-    scope->addDefinition(new_species);
+    // (pre) define species in context
+    _editor->context().getOrCreateSpecies(item->second.toStdString());
   }
 }
 
 
-iNA::Ast::Reaction *
-ReactionEditorPage::_createReaction(const QString &name, QList<QPair<int, QString> > &reactants,
-                                    QList<QPair<int, QString> > &products, bool is_reversible,
-                                    iNA::Ast::Scope *scope)
-{
-  // Create unique identifier for reaction:
-  // And remove all white spaces
-  std::string identifier = name.simplified().replace(" ","").toStdString();
-
-  if (0 == identifier.length()) { identifier = "reaction"; }
-  identifier = scope->getRootScope()->getNewIdentifier(identifier);
-
-  // Create reaction and add to scope:
-  iNA::Ast::Reaction *new_reaction = new iNA::Ast::Reaction(
-              identifier, name.toStdString(), new iNA::Ast::KineticLaw(0), is_reversible);
-  scope->addDefinition(new_reaction);
-
-  // Create reactants:
-  for (QList< QPair<int, QString> >::iterator item=reactants.begin(); item!=reactants.end(); item++) {
-    iNA::Ast::Definition *def = scope->getDefinition(item->second.toStdString());
-    if (! iNA::Ast::Node::isSpecies(def)) {
-      iNA::InternalError err;
-      err << "Identifier " << item->second.toStdString()
-          << " in reactants list does not name a species.";
-      throw err;
-    }
-
-    new_reaction->addReactantStoichiometry(static_cast<iNA::Ast::Species *>(def), item->first);
-  }
-
-  // Create products:
-  for (QList< QPair<int, QString> >::iterator item=products.begin(); item!=products.end(); item++) {
-    iNA::Ast::Definition *def = scope->getDefinition(item->second.toStdString());
-    if (! iNA::Ast::Node::isSpecies(def)) {
-      iNA::InternalError err;
-      err << "Identifier " << item->second.toStdString()
-          << " in products list does not name a species.";
-      throw err;
-    }
-
-    new_reaction->addProductStoichiometry(static_cast<iNA::Ast::Species *>(def), item->first);
-  }
-
-  return new_reaction;
-}
-
-
-void
-ReactionEditorPage::_createKineticLaw(iNA::Ast::Reaction *reaction)
+GiNaC::ex
+ReactionEditorPage::_createKineticLaw(const StoichiometryList &reactants,
+                                      const StoichiometryList &products,
+                                      bool is_reversible)
 {
   switch (kineticLawType()) {
   case MASSACTION_SINGLE:
   case MASSACTION_MULTI:
-    _createMAKineticLaw(reaction);
-    break;
-
-  case USER_DEFINED:
-    _parseAndCreateKineticLaw(reaction);
-    break;
+    return _createMAKineticLaw(reactants, products, is_reversible);
+  case USER_DEFINED: break;
   }
+  return _parseAndCreateKineticLaw();
 }
 
 
-void
-ReactionEditorPage::_createMAKineticLaw(iNA::Ast::Reaction *reaction)
+GiNaC::ex
+ReactionEditorPage::_createMAKineticLaw(const StoichiometryList &reactants,
+                                        const StoichiometryList &products,
+                                        bool is_reversible)
 {
-  iNA::Ast::Parameter *k_fwd=0, *k_rev=0;
-  iNA::Ast::KineticLaw *law = reaction->getKineticLaw();
+  GiNaC::ex k_fwd, k_rev;
 
   // Define local parameters:
-  if (!reaction->isReversible()) {
-    k_fwd = new iNA::Ast::Parameter(law->getNewIdentifier("k"), iNA::Ast::Unit::dimensionless(), true);
-    k_fwd->setName("k"); k_fwd->setValue(0);
-    law->addDefinition(k_fwd);
+  if (! is_reversible) {
+    k_fwd = _editor->context().getOrCreateLocalParameter("k");
   } else {
-    k_fwd = new iNA::Ast::Parameter(law->getNewIdentifier("k_fwd"), iNA::Ast::Unit::dimensionless(), true);
-    k_fwd->setName("$k_fwd$"); k_fwd->setValue(0);
-    law->addDefinition(k_fwd);
-    k_rev = new iNA::Ast::Parameter(law->getNewIdentifier("k_rev"), iNA::Ast::Unit::dimensionless(), true);
-    k_rev->setName("$k_rev$"); k_rev->setValue(0);
-    law->addDefinition(k_rev);
+    k_fwd = _editor->context().getOrCreateLocalParameter("k_fwd");
+    k_rev = _editor->context().getOrCreateLocalParameter("k_rev");
   }
 
   GiNaC::ex factor_fwd = 0;
   GiNaC::ex factor_rev = 0;
 
-  factor_fwd = k_fwd->getSymbol();
-  if (reaction->isReversible()) {
-    factor_rev = k_rev->getSymbol();
-  }
+  factor_fwd = k_fwd;
+  if (is_reversible) { factor_rev = k_rev; }
 
   if (MASSACTION_SINGLE == kineticLawType()) {
-    iNA::Ast::Compartment *compartment=0;
+    GiNaC::symbol compartment;
     // Obtain compartment of reaction:
-    for (iNA::Ast::Reaction::iterator reac=reaction->reactantsBegin(); reac != reaction->reactantsEnd(); reac++) {
-      compartment = reac->first->getCompartment(); break;
+    for (StoichiometryList::const_iterator reac=reactants.begin(); reac != reactants.end(); reac++) {
+      if (_model.hasSpecies(reac->second.toStdString())) {
+        compartment = _model.getSpecies(reac->second.toStdString())->getCompartment()->getSymbol();
+      } else {
+        compartment = _editor->context().compartmentSymbol();
+      }
+      break;
     }
-    for (iNA::Ast::Reaction::iterator prod=reaction->productsBegin(); prod != reaction->productsEnd(); prod++) {
-      compartment = prod->first->getCompartment(); break;
+    for (StoichiometryList::const_iterator prod=products.begin(); prod != products.end(); prod++) {
+      if (_model.hasSpecies(prod->second.toStdString())) {
+        compartment = _model.getSpecies(prod->second.toStdString())->getCompartment()->getSymbol();
+      } else {
+        compartment = _editor->context().compartmentSymbol();
+      }
+      break;
     }
 
-    factor_fwd *= compartment->getSymbol();
-    factor_rev *= compartment->getSymbol();
+    factor_fwd *= compartment;
+    factor_rev *= compartment;
   }
 
   // Iterate over reactants:
-  for (iNA::Ast::Reaction::iterator reac=reaction->reactantsBegin(); reac!=reaction->reactantsEnd(); reac++) {
-    factor_fwd *= _createMAFactor(reac->first, reac->second);
+  for (StoichiometryList::const_iterator reac=reactants.begin(); reac!=reactants.end(); reac++) {
+    factor_fwd *= _createMAFactor(reac->second, reac->first);
   }
 
   // Iterate over products if reaction is reversible:
-  if (reaction->isReversible()) {
+  if (is_reversible) {
     // Iterate over reactants:
-    for (iNA::Ast::Reaction::iterator prod=reaction->productsBegin(); prod!=reaction->productsEnd(); prod++) {
-      factor_rev *= _createMAFactor(prod->first, prod->second);
+    for (StoichiometryList::const_iterator reac=reactants.begin(); reac!=reactants.end(); reac++) {
+      factor_fwd *= _createMAFactor(reac->second, reac->first);
     }
   }
 
   // Assemble and assign kinetic law:
-  law->setRateLaw(factor_fwd - factor_rev);
+  return factor_fwd - factor_rev;
 }
 
 
 GiNaC::ex
-ReactionEditorPage::_createMAFactor(iNA::Ast::Species *species, GiNaC::ex stoichiometry)
+ReactionEditorPage::_createMAFactor(const QString &species, GiNaC::ex stoichiometry)
 {
   // Check type of stoichiometry
   if (! GiNaC::is_a<GiNaC::numeric>(stoichiometry)) {
@@ -908,27 +809,23 @@ ReactionEditorPage::_createMAFactor(iNA::Ast::Species *species, GiNaC::ex stoich
 
 
 GiNaC::ex
-ReactionEditorPage::_createMASingleFactor(iNA::Ast::Species *species, int stoichiometry)
+ReactionEditorPage::_createMASingleFactor(const QString &species, int stoichiometry)
 {
   if (0 >= stoichiometry) { return 1; }
 
-  // Get species "symbol"
-  GiNaC::ex species_expr = species->getSymbol();
-  // If species are defined in substance units:
-  if (_model.speciesHaveSubstanceUnits()) {
-    species_expr /= species->getCompartment()->getSymbol();
+  // Get species symbol
+  GiNaC::ex species_expr = _editor->context().resolve(species.toStdString());
+  // Get compartment symbol
+  GiNaC::symbol compartment = _editor->context().compartmentSymbol();
+  if (_model.hasSpecies(species.toStdString())) {
+    compartment = _model.getSpecies(species.toStdString())->getCompartment()->getSymbol();
   }
-
-  // Philipp: iNA's convention is to infer the unit of the propensity from the units of the model
-  //
-  // If substance units are not item
-  //species_expr *= iNA::Ast::UnitConverter::conversionFactor(
-  //      iNA::Ast::ScaledBaseUnit(iNA::Ast::ScaledBaseUnit::ITEM, 1, 0, 1),
-  //      _model.getSubstanceUnit());
+  // If species are defined in substance units:
+  if (_model.speciesHaveSubstanceUnits()) { species_expr /= compartment; }
 
   GiNaC::ex factor=species_expr;
   for (int i=1; i<stoichiometry; i++) {
-    factor *= (species_expr-i/species->getCompartment()->getSymbol());
+    factor *= (species_expr- i/compartment);
   }
 
   return factor;
@@ -936,45 +833,32 @@ ReactionEditorPage::_createMASingleFactor(iNA::Ast::Species *species, int stoich
 
 
 GiNaC::ex
-ReactionEditorPage::_createMAMultiFactor(iNA::Ast::Species *species, int stoichiometry)
+ReactionEditorPage::_createMAMultiFactor(const QString &species, int stoichiometry)
 {
   if (0 >= stoichiometry) { return 1; }
 
-  // Get species "symbol"
-  GiNaC::ex species_expr = species->getSymbol();
+  // Get species symbol
+  GiNaC::ex species_expr = _editor->context().resolve(species.toStdString());
+  // get species compartment
+  GiNaC::symbol compartment = _editor->context().compartmentSymbol();
+  if (_model.hasSpecies(species.toStdString())) {
+    compartment = _model.getSpecies(species.toStdString())->getSymbol();
+  }
+
   // If species are defined in substance units:
   if (_model.speciesHaveSubstanceUnits()) {
-    species_expr /= species->getCompartment()->getSymbol();
+    species_expr /= compartment;
   }
 
   return GiNaC::pow(species_expr, stoichiometry);
 }
 
 
-void
-ReactionEditorPage::_parseAndCreateKineticLaw(iNA::Ast::Reaction *reaction)
+GiNaC::ex
+ReactionEditorPage::_parseAndCreateKineticLaw()
 {
   // Parse kinetic law expression:
-  iNA::Ast::KineticLaw *law = reaction->getKineticLaw();
-  ReactionEditorContext ctx(law);
-  GiNaC::ex rate_law = iNA::Parser::Expr::parseExpression(
-        _kineticLawEditor->text().toStdString(), ctx);
-
-  // get symbols of unresolved variables (parameters):
-  GiNaC::exmap substitution;
-  std::map<std::string, GiNaC::symbol> unresolved_symbols = ctx.undefinedSymbols();
-  for (std::map<std::string, GiNaC::symbol>::iterator item=unresolved_symbols.begin();
-       item != unresolved_symbols.end(); item++)
-  {
-    // Define a parameter for the unresolved symbol:
-    iNA::Ast::Parameter *param = new iNA::Ast::Parameter(item->first, iNA::Ast::Unit::dimensionless(), true);
-    law->addDefinition(param);
-    // Add subst:
-    substitution[item->second] = param->getSymbol();
-  }
-
-  // Perform parameter substitution and define kinetic law:
-  law->setRateLaw(rate_law.subs(substitution));
+  return iNA::Parser::Expr::parseExpression( _kineticLawEditor->text().toStdString(), _editor->context());
 }
 
 
@@ -989,10 +873,9 @@ ReactionEditorPage::_updateCurrentReaction(
   // Update reversible reaction
   _current_reaction->setReversible(is_reversible);
 
-  // Clear reactants, products and modifiers of the reaction
+  // Clear reactants, products of the reaction
   _current_reaction->clearReactants();
   _current_reaction->clearProducts();
-  _current_reaction->clearModifier();
 
   // Create reactants:
   for (QList< QPair<int, QString> >::iterator item=reactants.begin(); item!=reactants.end(); item++) {
@@ -1030,57 +913,59 @@ ReactionEditorPage::validatePage()
   QList< QPair<int, QString> > reactants, products;
   bool is_reversible = false;
   // Try to parse the expression
-  if (! _parseEquation(_equation->text(), reactants, products, is_reversible)) {
+  if (! _parseReactionEquation(_equation->text(), reactants, products, is_reversible)) {
+    QMessageBox::critical(0, tr("Invalid reaction equation"),
+                          tr("The specified reaction equeation has a invalid form."));
     return false;
   }
 
+  // Clear context, all pre-defined species etc are removed.
+  _editor->context().reset();
+  // Update reaction editor context
+  _defineUnknownSpecies(reactants, products);
+
   // Check kinetic law (if defined by user):
   if (USER_DEFINED == kineticLawType()) {
-    ReactionEditorContext ctx(&_model);
     try {
       // Try to parse the expression
-      /// @bug Does not allow for a reference of new species and compartments
-      iNA::Parser::Expr::parseExpression(_kineticLawEditor->text().toStdString(), ctx);
+      iNA::Parser::Expr::parseExpression(_kineticLawEditor->text().toStdString(), _editor->context());
       // On success, reset formula background color
       QPalette palette = _kineticLawEditor->palette();
       palette.setColor(QPalette::Base, _default_background);
       _kineticLawEditor->setPalette(palette);
     } catch (iNA::Exception &err) {
-      // On on, set formula background color to red
+      // On error, set formula background color to red
       QPalette palette = _kineticLawEditor->palette();
       palette.setColor(QPalette::Base, _error_background);
       _kineticLawEditor->setPalette(palette);
-      // and send a message to the logger
-      iNA::Utils::Message message = LOG_MESSAGE(iNA::Utils::Message::INFO);
-      message << "Invalid kinetic law expression: " << err.what();
-      iNA::Utils::Logger::get().log(message);
+      // and show a message box
+      QMessageBox::critical(0, tr("Invalid kinetic law."),
+                            tr("The specified kinetic law expression is invalid: %1").arg(
+                              err.what()));
       return false;
     }
   }
 
-  // Construct new scope, holding all undefined variables:
-  iNA::Ast::Scope *reaction_scope = new iNA::Ast::Scope(&_model);
-  iNA::Ast::Reaction *new_reaction = 0;
-  _defineUnknownSpecies(reactants, products, reaction_scope);
-
-
-  if (0 == _current_reaction) {
-    // Create reaction with empty kinetic law:
-    new_reaction = _createReaction(_name->text(), reactants, products, is_reversible, reaction_scope);
-    // Create kinetic law for that reaction
-    _createKineticLaw(new_reaction);
-  } else {
-    // Update current reaction and its kinetic law:
-    // Remove current reaction from _model:
-    _model.remDefinition(_current_reaction); reaction_scope->addDefinition(_current_reaction);
-    _updateCurrentReaction(_name->text(), reactants, products, is_reversible, reaction_scope);
-    _createKineticLaw(_current_reaction);
-    reaction_scope->remDefinition(_current_reaction); _model.addDefinition(_current_reaction);
+  // Create kinetic law for that reaction and store in editor
+  try {
+    _editor->setKinteticLaw(_createKineticLaw(reactants, products, is_reversible));
+  } catch (iNA::Exception &err) {
+    QMessageBox::critical(
+          0, tr("Error in kinetic law"),
+          tr("Error in assembling kinetic law expression: %1").arg(err.what()));
+    return false;
   }
 
-  // Store reaction equation:
-  ReactionEditor *editor = static_cast<ReactionEditor *>(wizard());
-  editor->setReactionScope(reaction_scope);
+  // Update reactants and product stoichiometry
+  _editor->setReactants(reactants);
+  _editor->setProducts(products);
+  // Update reverisble flag in editor.
+  _editor->setReversible(is_reversible);
+
+  // Strip whitespaces from string (also replace multiple WS by one)
+  _editor->setReactionName(_name->text().simplified());
+
+  // done...
   return true;
 }
 
@@ -1090,7 +975,7 @@ ReactionEditorPage::validatePage()
  * Implementation of ReactionEditorSummaryPage
  * ********************************************************************************************* */
 ReactionEditorSummaryPage::ReactionEditorSummaryPage(ReactionEditor *wizard)
-  : QWizardPage(wizard), _model(wizard->model())
+  : QWizardPage(wizard), _model(wizard->model()), _editor(wizard)
 {
   setTitle(tr("Summary"));
 
@@ -1104,6 +989,10 @@ ReactionEditorSummaryPage::ReactionEditorSummaryPage(ReactionEditor *wizard)
   QFormLayout *species_layout = new QFormLayout();
   _created_species = new QLabel();
   species_layout->addRow(tr("Created species"), _created_species);
+  _created_compartments = new QLabel();
+  species_layout->addRow(tr("Created compartments"), _created_compartments);
+  _created_parameters = new QLabel();
+  species_layout->addRow(tr("Created parameters"), _created_parameters);
 
   // Assemble layout
   QVBoxLayout *layout = new QVBoxLayout();
@@ -1116,23 +1005,101 @@ ReactionEditorSummaryPage::ReactionEditorSummaryPage(ReactionEditor *wizard)
 void
 ReactionEditorSummaryPage::initializePage()
 {
-  ReactionEditor *editor = static_cast<ReactionEditor *>(wizard());
-
   // Render equation
-  MathContext ctx; ctx.setFontSize(ctx.fontSize()*0.66);
-  _reaction_preview->setPixmap(ReactionEquationRenderer::renderReaction(editor->reaction()));
+  MathItem *reac = _renderReactionPreview(_editor->reactants(), _editor->products(),
+                                          _editor->kineticLaw(), _editor->isReversible());
+  _reaction_preview->setPixmap(reac->renderItem());
+  delete reac;
 
   // Assemble list of created species:
   QStringList created_species;
-  iNA::Ast::Scope *scope = editor->reactionScope();
-  for (iNA::Ast::Scope::iterator item=scope->begin(); item!=scope->end(); item++) {
-    if (! iNA::Ast::Node::isSpecies(*item)) { continue; }
-    created_species.append((*item)->getIdentifier().c_str());
+  std::map<std::string, GiNaC::symbol>::const_iterator item =
+      _editor->context().undefinedSpecies().begin();
+  for (; item!=_editor->context().undefinedSpecies().end(); item++) {
+    created_species.append(item->first.c_str());
   }
-
   if (0 == created_species.size()) {
     _created_species->setText(tr("<none>"));
   } else {
     _created_species->setText(created_species.join(", "));
   }
+
+  // Assemble list of created compartments:
+  if (_editor->context().compartmentIsUndefined()) {
+    _created_compartments->setText(_editor->context().compartmentIdentifier().c_str());
+  } else {
+    _created_compartments->setText(tr("<none>"));
+  }
+
+  // Assemble list of created parameters:
+  QStringList created_parameters;
+  item = _editor->context().undefinedParameters().begin();
+  for (; item!=_editor->context().undefinedParameters().end(); item++) {
+    created_parameters.append(item->first.c_str());
+  }
+  if (0 == created_parameters.size()) {
+    _created_parameters->setText(tr("<none>"));
+  } else {
+    _created_parameters->setText(created_parameters.join(", "));
+  }
+}
+
+
+MathItem *
+ReactionEditorSummaryPage::_renderReactionPreview(
+    const StoichiometryList &reactants,  const StoichiometryList &products,
+    const GiNaC::ex &kineticLaw, bool is_reversible)
+{
+  MathFormula *formula = new MathFormula();
+  QList<QPair<int, QString> >::const_iterator item = reactants.begin();
+  for(int idx=0; item != reactants.end(); item++, idx++) {
+    int sto        = item->first;
+    std::string id = item->second.toStdString();
+    if (0 != idx) {
+      formula->appendItem(new MathSpace(MathSpace::MEDIUM_SPACE));
+      formula->appendItem(new MathText(" + "));
+      formula->appendItem(new MathSpace(MathSpace::MEDIUM_SPACE));
+    }
+    if (1 != sto) {
+      formula->appendItem(new MathText(QString("%1").arg(sto)));
+      formula->appendItem(new MathSpace(MathSpace::THIN_SPACE));
+    }
+    if (_model.hasSpecies(id)) {
+      formula->appendItem(TinyTex::parseQuoted(_model.getSpecies(id)->getLabel()));
+    } else {
+      formula->appendItem(new MathText(id.c_str()));
+    }
+  }
+
+  formula->appendItem(new MathSpace(MathSpace::THICK_SPACE));
+  if (is_reversible) { formula->appendItem(new MathText(QChar(0x21CC))); }
+  else { formula->appendItem(new MathText(QChar(0x2192))); }
+  formula->appendItem(new MathSpace(MathSpace::THICK_SPACE));
+
+  item = products.begin();
+  for(int idx=0; item != products.end(); item++, idx++) {
+    int sto        = item->first;
+    std::string id = item->second.toStdString();
+    if (0 != idx) {
+      formula->appendItem(new MathSpace(MathSpace::MEDIUM_SPACE));
+      formula->appendItem(new MathText(" + "));
+      formula->appendItem(new MathSpace(MathSpace::MEDIUM_SPACE));
+    }
+    if (1 != sto) {
+      formula->appendItem(new MathText(QString("%1").arg(sto)));
+      formula->appendItem(new MathSpace(MathSpace::THIN_SPACE));
+    }
+    if (_model.hasSpecies(id)) {
+      formula->appendItem(TinyTex::parseQuoted(_model.getSpecies(id)->getLabel()));
+    } else {
+      formula->appendItem(new MathText(id.c_str()));
+    }
+  }
+
+  formula->appendItem(new MathSpace(MathSpace::QUAD_SPACE));
+  formula->appendItem(new MathText(":"));
+  formula->appendItem(new MathSpace(MathSpace::MEDIUM_SPACE));
+  ReactionEditorDisplayContext context(_editor->context());
+  formula->appendItem(Ginac2Formula::toFormula(kineticLaw, context));
+  return formula;
 }

@@ -58,8 +58,8 @@ public:
     /* @todo use to define staged errors using the system size */
     for (size_t i = 1; i <= getDimension(); ++i)
     {
-        rtolwork[i] = this->parameters.epsilon;
-        atolwork[i] = this->parameters.epsilon;
+        rtolwork[i] = this->parameters.relError;
+        atolwork[i] = this->parameters.relError;
     }
 
  }

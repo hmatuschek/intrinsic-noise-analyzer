@@ -1,7 +1,7 @@
 # Set default llvm-config names:
 SET(LLVM_CONFIG_EXEC_NAMES
-    "llvm-config" "llvm-config-3.2" "llvm-config-3.1" "llvm-config-3.0" "llvm-config-2.9"
-    "llvm-config-2.8")
+    "llvm-config" "llvm-config-3.3" "llvm-config-3.2" "llvm-config-3.1" "llvm-config-3.0"
+    "llvm-config-2.9" "llvm-config-2.8")
 # If the -DWITH_LLVM_CONFIG=... option is present:
 IF(WITH_LLVM_CONFIG)
   SET(LLVM_CONFIG_EXEC_NAMES ${LLVM_CONFIG_EXEC_NAMES})
@@ -78,20 +78,27 @@ IF(LLVM_CONFIG_FOUND)
 ENDIF(LLVM_CONFIG_FOUND)
 
 
+#IF(STRING(REGEX MATCH "^([0-9]+).([0-9]+)"))
+#  SET(LLVM_VERSION_NUMBER ${CMAKE_MATCH_0}*10+${CMAKE_MATCH_1})
+#ENDIF(STRING(REGEX MATCH "^([0-9]+).([0-9]+)"))
 
 INCLUDE(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(LLVM DEFAULT_MSG
-                                  LLVM_VERSION LLVM_INCLUDE_DIR LLVM_CXX_FLAGS LLVM_LIBRARY LLVM_LD_FLAGS)
+                                  LLVM_VERSION LLVM_INCLUDE_DIR LLVM_LIB_DIR LLVM_CXX_FLAGS
+                                  LLVM_LIBRARY LLVM_LD_FLAGS)
+
+# Parse version string to get numeric rep.
+
 
 SET(LLVM_INCLUDE_DIRS ${LLVM_INCLUDE_DIR})
 if(SYSTEM_NAME MATCHES "FreeBSD")
-SET(LLVM_LIBRARIES ${LLVM_LIBRARY} m ffi)
+  SET(LLVM_LIBRARIES ${LLVM_LIBRARY} m ffi)
 else()
-SET(LLVM_LIBRARIES ${LLVM_LIBRARY} m ffi dl)
+  SET(LLVM_LIBRARIES ${LLVM_LIBRARY} m ffi dl)
 endif(SYSTEM_NAME MATCHES "FreeBSD")
 
 IF(WIN32)
-    SET(LLVM_LIBRARIES ${LLVM_LIBRARIES} imagehlp psapi)
+  SET(LLVM_LIBRARIES ${LLVM_LIBRARIES} imagehlp psapi)
 ENDIF(WIN32)
 
-mark_as_advanced(LLVM_VERSION LLVM_LIBRARY LLVM_INCLUDE_DIR LLVM_CXX_FLAGS LLVM_LD_FLAGS)
+mark_as_advanced(LLVM_VERSION LLVM_LIBRARY LLVM_INCLUDE_DIR LLVM_LIB_DIR LLVM_CXX_FLAGS LLVM_LD_FLAGS)

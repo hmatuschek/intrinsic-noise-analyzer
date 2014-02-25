@@ -2,11 +2,13 @@
 
 #include "../doctree/documenttree.hh"
 #include "../doctree/documenttreeitem.hh"
+#include "../doctree/analysesitem.hh"
 
 #include "../views/mainwindow.hh"
 #include "../views/importmodeldialog.hh"
 #include "../views/sbmlsheditordialog.hh"
 #include "../views/newversiondialog.hh"
+#include "../views/exportmodel.hh"
 
 #include "../steadystate/steadystatetask.hh"
 #include "../steadystate/steadystatetaskwrapper.hh"
@@ -35,6 +37,7 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QFileInfo>
+#include <QDebug>
 
 #include <parser/parser.hh>
 #include <parser/exception.hh>
@@ -43,18 +46,15 @@
 
 using namespace iNA;
 
-/**
-* Yields the parent item
-*
-* @todo Maybe go as static method in DocumentItem.
-*/
+/** Yields the parent item
+ * @todo Maybe go as static method in DocumentItem. */
 DocumentItem * getParentDocumentItem(TreeItem * item)
 {
   if (item==0) return 0;
 
-  return (0 != dynamic_cast<DocumentItem *>(item)
-      ? dynamic_cast<DocumentItem *>(item)
-      : getParentDocumentItem(item->getTreeParent()));
+  DocumentItem *ditem = dynamic_cast<DocumentItem *>(item);
+  if (0 == ditem) { return getParentDocumentItem(item->getTreeParent()); }
+  return ditem;
 }
 
 
@@ -190,8 +190,7 @@ Application::~Application()
  * ...
  * ******************************************************************************************** */
 void
-Application::setMainWindow(MainWindow *mainwindow)
-{
+Application::setMainWindow(MainWindow *mainwindow) {
   this->mainWindow = mainwindow;
 }
 
@@ -204,18 +203,15 @@ Application::resetSelectedItem() {
   _closeModel->setEnabled(false);
   _expandRevReaction->setEnabled(false);
   _combineIrvReaction->setEnabled(false);
-  _closeAll->setEnabled(docTree()->getTreeChildCount());
-
 }
 
 
 void
-Application::itemSelected(const QModelIndex &index)
-{
+Application::itemSelected(const QModelIndex &index) {
   TreeItem *item = static_cast<TreeItem *>(index.internalPointer());
   DocumentTreeItem *wrapper = 0;
 
-  // This should no happen, anyway...
+  // This should not happen, anyway...
   if (0 == (wrapper = dynamic_cast<DocumentTreeItem *>(item))) { return; }
   itemSelected(wrapper);
 }
@@ -250,28 +246,62 @@ Application::itemSelected(DocumentTreeItem *wrapper)
 
 
 void
-Application::checkForNewVersion()
-{
-  // Otherwise start check.
+Application::checkForNewVersion() {
   _versionCheck.startCheck();
 }
 
 
 void
-Application::importModel(const QString &path, bool anonymous, ModelType type)
-{
+Application::importModel(const QString &path, bool anonymous, ModelType type) {
   onImportModel(path, anonymous, type);
 }
 
 
+bool
+Application::mayQuit() {
+  bool task_running = false;
+  bool unsaved_models = false;
+
+  // Check if there is any task running
+  for (int i=0; i<docTree()->getTreeChildCount(); i++) {
+    DocumentItem *doc = dynamic_cast<DocumentItem *>(docTree()->getTreeChild(i));
+    if (doc->isModified()) { unsaved_models = true; }
+    if (doc->analysesItem()->tasksRunning()) { task_running = true; }
+  }
+
+  if (task_running) {
+    QMessageBox::StandardButton resp =
+        QMessageBox::question(0, tr("Analysis tasks running"),
+                              tr("There are analysis tasks running. Quit anyway?"),
+                              QMessageBox::Yes|QMessageBox::Cancel,
+                              QMessageBox::Cancel);
+    if (QMessageBox::Cancel == resp) { return false; }
+  }
+
+  if (unsaved_models) {
+    QMessageBox::StandardButton resp =
+        QMessageBox::question(0, tr("Unsaved models"),
+                              tr("There are unsaved models. Quit anyway?"),
+                              QMessageBox::Yes|QMessageBox::Cancel,
+                              QMessageBox::Cancel);
+    if (QMessageBox::Cancel == resp) { return false; }
+  }
+
+  return true;
+}
+
 void
-Application::showContextMenuAt(const QModelIndex &index, const QPoint &global_pos)
-{
+Application::quit() {
+  if (mayQuit()) { QApplication::exit(0); }
+}
+
+
+void
+Application::showContextMenuAt(const QModelIndex &index, const QPoint &global_pos) {
   TreeItem *item = static_cast<TreeItem *>(index.internalPointer());
   DocumentTreeItem *wrapper = 0;
 
-  if (0 != (wrapper = dynamic_cast<DocumentTreeItem *>(item)) && wrapper->providesContextMenu())
-  {
+  if (0 != (wrapper = dynamic_cast<DocumentTreeItem *>(item)) && wrapper->providesContextMenu()) {
     wrapper->showContextMenu(global_pos);
   }
 }
@@ -281,11 +311,13 @@ DocumentTree * Application::docTree() { return this->document_tree; }
 
 bool
 Application::hasADocumentSelected() const {
-  return 0 != dynamic_cast<DocumentItem *>(getParentDocumentItem(_selected_item));
+  if (0 == _selected_item) { return false; }
+  return 0 != getParentDocumentItem(_selected_item);
 }
 
 DocumentItem *
 Application::selectedDocument() {
+  if (0 == _selected_item) { return 0; }
   return getParentDocumentItem(_selected_item);
 }
 
@@ -313,16 +345,15 @@ QMenu   *Application::recentModelsMenu() { return _recentModelsMenu; }
 /* ******************************************************************************************** *
  * Implementation of callbacks/event handlers...
  * ******************************************************************************************** */
-void Application::onNewModel()
-{
+void Application::onNewModel() {
   iNA::Ast::Model *new_model = new iNA::Ast::Model("New_model", "New model");
   docTree()->addDocument(new DocumentItem(new_model));
-
+  // Enable "close all" if there are documents
+  _closeAll->setEnabled(docTree()->getTreeChildCount());
 }
 
 
-void Application::onImportModel()
-{
+void Application::onImportModel() {
   // Show a file-dialog for files:
   QString fileFilters = tr(
         "All Models (*.xml *.sbml *.mod *.sbmlsh);;SBML Models (*.xml *.sbml);;"
@@ -389,6 +420,8 @@ void Application::onImportModel(const QString &fileName, bool anonymous, ModelTy
 
   // Add document to doc tree:
   docTree()->addDocument(new_doc);
+  // Enable "close all" if there are documents
+  _closeAll->setEnabled(docTree()->getTreeChildCount());
   // Add document to list of recent model if not imported anonymously:
   if (! anonymous) {
     addRecentModel(fileName);
@@ -397,31 +430,13 @@ void Application::onImportModel(const QString &fileName, bool anonymous, ModelTy
 }
 
 
-void Application::onExportModel()
-{
-  DocumentItem *document = dynamic_cast<DocumentItem *>(getParentDocumentItem(_selected_item));
+void Application::onExportModel() {
+  DocumentItem *document = getParentDocumentItem(_selected_item);
   if (0 == document) { return; }
 
-  // Ask for filename and type:
-  QString selected_filter("");
-  QString filename = QFileDialog::getSaveFileName(0, tr("Export model"), "", tr("SBML (*.xml *.sbml);;SBML-sh (*.mod *.sbmlsh)"), &selected_filter);
-  if ("" == filename) { return; }
-
-  // Serialize model into file...
-  try {
-    if ("SBML (*.xml *.sbml)" == selected_filter) {
-      QFileInfo info(filename);
-      if ( ("xml" != info.suffix()) && ("sbml" != info.suffix()) ) { filename.append(".xml"); }
-      Parser::Sbml::exportModel(document->getModel(), filename.toLocal8Bit().data());
-    } else if ("SBML-sh (*.mod *.sbmlsh)" == selected_filter){
-      QFileInfo info(filename);
-      if ( ("mod" != info.suffix()) && ("sbmlsh" != info.suffix()) ) { filename.append(".sbmlsh"); }
-      Parser::Sbmlsh::exportModel(document->getModel(), filename.toLocal8Bit().data());
-    } else {
-      QMessageBox::critical(0, tr("Can not export model"), tr("Unkown file type: %1").arg(selected_filter));
-    }
-  } catch (Exception &err) {
-    QMessageBox::warning(0, "Can not export model", err.what());
+  // If model was exported successfully -> set model as unmodified
+  if (exportModel(document->getModel(), document->filePath())) {
+    document->setIsModified(false);
   }
 }
 
@@ -430,26 +445,23 @@ void Application::onCloseModel()
 {
   DocumentItem *document = 0;
 
-// redundant:  if (0 == _selected_item) { return; }
-  if (0 == (document = dynamic_cast<DocumentItem *>(getParentDocumentItem(_selected_item)))) { return; }
+  if (0 == (document = getParentDocumentItem(_selected_item))) { return; }
   // signal document to close
   document->closeDocument();
   resetSelectedItem();
+  // Enable "close all" if there are documents
+  _closeAll->setEnabled(docTree()->getTreeChildCount());
 }
 
 
-void Application::onCloseAll()
-{
-  DocumentItem *document = 0;
-
-  QObjectList::const_iterator it = docTree()->children().begin();
-
-  while(it!=docTree()->children().end())
-  {
-    document = dynamic_cast<DocumentItem *>(*it++);
-    document->closeDocument();
+void Application::onCloseAll() {
+ // Collect all documents
+  QList<DocumentItem *> documents;
+  for (int i=0; i<docTree()->getTreeChildCount(); i++) {
+    documents.append(dynamic_cast<DocumentItem *>(docTree()->getTreeChild(i)));
   }
-
+  // Close them
+  foreach (DocumentItem *document, documents) { document->closeDocument(); }
   resetSelectedItem();
 }
 
@@ -484,31 +496,53 @@ void Application::onEditModel()
 
 void Application::onExpandRevReactions()
 {
-  DocumentItem *document = 0;
+  DocumentItem *document = dynamic_cast<DocumentItem *>(getParentDocumentItem(_selected_item));
+
   // If no model is selected:
-  if (0 == (document = dynamic_cast<DocumentItem *>(getParentDocumentItem(_selected_item)))) {
-    return;
-  }
+  if (0 == document) { return; }
+  resetSelectedItem();
+
   // Get model
   iNA::Ast::Model &model = document->getModel();
+
   // Expand reversible reactions
-  iNA::Trafo::ReversibleReactionConverter converter; converter.apply(model);
-  // Update tree model
-  docTree()->resetCompleteTree();
+  iNA::Trafo::ReversibleReactionConverter converter;
+  try { converter.apply(model); }
+  catch (iNA::Exception &err) {
+    QMessageBox::critical(
+          0, tr("Expand Reversible Reactions"),
+          tr("Can not expand reversible reactions: %1").arg(err.what()));
+  }
+
+  // Mark document as modified
+  document->setIsModified(true);
+
+  // Update reaction list
+  docTree()->updateReactions(document);
 }
 
 void Application::onCombineIrrevReactions()
 {
   DocumentItem *document = 0;
+  if (0 == (document = getParentDocumentItem(_selected_item))) { return; }
+  resetSelectedItem();
 
-// redundant:  if (0 == _selected_item) { return; }
-  if (0 == (document = dynamic_cast<DocumentItem *>(getParentDocumentItem(_selected_item)))) { return; }
   iNA::Ast::Model &model = document->getModel();
+  iNA::Trafo::IrreversibleReactionCollapser collector;
 
-  iNA::Trafo::IrreversibleReactionCollapser collector; collector.apply(model);
+  // Apply trafo on model
+  try { collector.apply(model); }
+  catch (iNA::Exception &err) {
+    QMessageBox::critical(
+          0, tr("Combine Reversible Reactions"),
+          tr("Can not combine irreversible reactions: %1").arg(err.what()));
+  }
 
-  docTree()->resetCompleteTree();
+  // Mark model as modified
+  document->setIsModified(true);
 
+  // Update reaction list
+  docTree()->updateReactions(document);
 }
 
 void

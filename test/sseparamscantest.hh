@@ -11,6 +11,7 @@ public:
   virtual ~SSEParamScanTest();
 
   void testEnzymeKinetics();
+  void testGene1();
 
 public:
   static UnitTest::TestSuite *suite();

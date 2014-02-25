@@ -7,7 +7,7 @@
 #include "../plot/figure.hh"
 #include "../plot/configuration.hh"
 #include <math.h>
-#include <libina/trafo/constantfolder.hh>
+#include "trafo/constantfolder.hh"
 
 
 Plot::PlotConfig *
@@ -57,7 +57,8 @@ createSSAParameterScanPlotConfig(const QStringList &selected_species, SSAParamSc
 Plot::Figure *
 createSSAParameterScanPlot(const QStringList &selected_species, SSAParamScanTask *task) {
   Plot::PlotConfig *config = createSSAParameterScanPlotConfig(selected_species, task);
-  return config->createFigure();
+  Plot::Figure *figure = config->createFigure(); delete config;
+  return figure;
 }
 
 
@@ -104,7 +105,8 @@ createSSAParameterScanCVPlotConfig(const QStringList &selected_species, SSAParam
 Plot::Figure *
 createSSAParameterScanCVPlot(const QStringList &selected_species, SSAParamScanTask *task) {
   Plot::PlotConfig *config = createSSAParameterScanCVPlotConfig(selected_species, task);
-  return config->createFigure();
+  Plot::Figure *figure = config->createFigure(); delete config;
+  return figure;
 }
 
 
@@ -148,7 +150,7 @@ createSSAParameterScanFanoPlotConfig(const QStringList &selected_species, SSAPar
     GiNaC::ex multiplier = compVol;
     multiplier *= model->getSpeciesUnit().getMultiplier()*std::pow(10.,model->getSpeciesUnit().getScale());
     // Multiply by Avogadro's number if defined in mole
-    if (model->getSubstanceUnit().isVariantOf(iNA::Ast::ScaledBaseUnit::MOLE)) {
+    if (model->getSubstanceUnit().isVariantOf(iNA::Ast::Unit::MOLE)) {
       multiplier *= iNA::constants::AVOGADRO;
     }
     // Assemble formula for Fano factor.
@@ -182,5 +184,6 @@ createSSAParameterScanFanoPlotConfig(const QStringList &selected_species, SSAPar
 Plot::Figure *
 createSSAParameterScanFanoPlot(const QStringList &selected_species, SSAParamScanTask *task) {
   Plot::PlotConfig *config = createSSAParameterScanFanoPlotConfig(selected_species, task);
-  return config->createFigure();
+  Plot::Figure *figure = config->createFigure(); delete config;
+  return figure;
 }

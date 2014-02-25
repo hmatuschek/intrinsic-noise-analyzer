@@ -4,11 +4,11 @@
 #include "../mersennetwister.hh"
 
 #include "../ast/ast.hh"
+#include "../trafo/assertions.hh"
 #include <ginac/ginac.h>
 
 #include "basemodel.hh"
 #include "particlenumbersmixin.hh"
-#include "reasonablemodelmixin.hh"
 #include "histogram.hh"
 #include "../openmp.hh"
 
@@ -24,46 +24,31 @@ namespace Models {
 class StochasticSimulator :
     public BaseModel,
     public ParticleNumbersMixin,
-    public ReasonableModelMixin
+    public Trafo::ReasonableModelMixin
 {
-
   using BaseModel::getConcentrationUnit;
 
 private:
-  /**
-   * Number of OpenMP threads to be used.
-   */
+  /** Number of OpenMP threads to be used. */
   size_t num_threads;
 
 protected:
-  /**
-   * A vector of thread-private RNGs.
-   */
+  /** A vector of thread-private RNGs. */
   std::vector<MersenneTwister> rand;
 
-  /**
-  * index map for bytecode interpreter
-  **/
+  /** index map for bytecode interpreter */
   std::map<GiNaC::symbol, size_t, GiNaC::ex_is_less> stateIndex;
 
-  /**
-  * data matrix storing each individual observation
-  **/
+  /** data matrix storing each individual observation */
   Eigen::MatrixXd observationMatrix;
 
-  /**
-  * Stores the initial conditions of a simulator.
-  **/
+  /** Stores the initial conditions of a simulator. */
   Eigen::VectorXd ics;
 
-  /**
-  * Vector containing the values of the compartment volumes for each reactant
-  **/
+  /** Vector containing the values of the compartment volumes for each reactant */
   Eigen::VectorXd Omega;
 
-  /**
-   * Internal storage of ensemble size.
-   **/
+  /** Internal storage of ensemble size. */
   int ensembleSize;
 
   /**

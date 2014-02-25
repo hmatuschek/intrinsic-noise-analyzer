@@ -1,0 +1,4 @@
+#! /usr/bin/dh-exec
+usr/bin/ina
+usr/share/applications/*
+usr/share/icons/*

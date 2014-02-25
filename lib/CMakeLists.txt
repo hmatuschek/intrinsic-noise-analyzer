@@ -20,22 +20,24 @@ SET(libina_ast_SOURCES
     ast/definition.cc ast/functiondefinition.cc ast/node.cc ast/rule.cc
     ast/reaction.cc ast/scope.cc ast/variabledefinition.cc ast/constraint.cc
     ast/unitdefinition.cc ast/species.cc ast/compartment.cc ast/parameter.cc
-    ast/model.cc ast/visitor.cc ast/unitconverter.cc ast/modelcopyist.cc)
+    ast/model.cc ast/visitor.cc ast/unitconverter.cc ast/modelcopyist.cc
+    ast/identifier.cc)
 SET(libina_ast_HEADERS
     ast/ast.hh
     ast/definition.hh ast/functiondefinition.hh ast/node.hh ast/rule.hh
     ast/reaction.hh ast/scope.hh ast/variabledefinition.hh ast/constraint.hh
     ast/unitdefinition.hh ast/species.hh ast/compartment.hh ast/parameter.hh
-    ast/model.hh ast/visitor.hh ast/unitconverter.hh ast/modelcopyist.hh)
+    ast/model.hh ast/visitor.hh ast/unitconverter.hh ast/modelcopyist.hh
+    ast/identifier.hh)
 
 SET(libina_trafo_SOURCES
     trafo/assertions.cc trafo/substitution.cc trafo/constantfolder.cc
-    trafo/assignmentruleinliner.cc
+    trafo/assignmentruleinliner.cc trafo/exprverification.cc
     trafo/reversiblereactionconverter.cc trafo/variablescaling.cc
     trafo/consistencycheck.cc trafo/modeldiff.cc trafo/referencecounter.cc trafo/makeparamglobal.cc)
 SET(libina_trafo_HEADERS trafo/trafo.hh trafo/filterflags.hh
     trafo/assertions.hh trafo/substitution.hh trafo/constantfolder.hh
-    trafo/assignmentruleinliner.hh
+    trafo/assignmentruleinliner.hh trafo/exprverification.hh
     trafo/reversiblereactionconverter.hh trafo/variablescaling.hh
     trafo/consistencycheck.hh trafo/modeldiff.hh trafo/referencecounter.hh trafo/makeparamglobal.hh)
 
@@ -64,13 +66,13 @@ SET(libina_unit_parser_HEADERS
     parser/unit/unitparser.hh)
 
 SET(libina_parser_SOURCES
-    parser/automata.cc parser/lexer.cc parser/production.cc parser/exception.cc parser/ll1.cc
+    parser/automata.cc parser/lexer.cc parser/production.cc parser/exception.cc
     ${libina_sbmlsh_parser_SOURCES}
     ${libina_sbml_parser_SOURCES}
     ${libina_expr_parser_SOURCES}
     ${libina_unit_parser_SOURCES})
-SET(libina_parser_HEADERS
-    parser/automata.hh parser/lexer.hh parser/production.hh parser/exception.hh  parser/ll1.hh
+SET(libina_parser_HEADERS parser/parser.hh
+    parser/automata.hh parser/lexer.hh parser/production.hh parser/exception.hh
     ${libina_sbmlsh_parser_HEADERS}
     ${libina_sbml_parser_HEADERS}
     ${libina_expr_parser_HEADERS}
@@ -99,11 +101,6 @@ SET(libina_models_SOURCES
     models/histogram.cc
     models/gillespieSSA.cc
     models/optimizedSSA.cc
-    models/assertnoconstantspeciesmixin.cc
-    models/assertconstantparametermixin.cc
-    models/assertnoassignmentrule.cc models/assertnoraterule.cc
-    models/assertirreversiblereactions.cc models/assertnonempty.cc
-    models/reasonablemodelmixin.cc
     models/baseunitmixin.cc
     models/particlenumbersmixin.cc
     models/sseinterpreter.cc
@@ -128,11 +125,6 @@ SET(libina_models_HEADERS models/models.hh
     models/histogram.hh
     models/gillespieSSA.hh
     models/optimizedSSA.hh
-    models/assertnoconstantspeciesmixin.hh
-    models/assertconstantparametermixin.hh
-    models/assertnoassignmentrule.hh models/assertnoraterule.hh
-    models/assertirreversiblereactions.hh models/assertnonempty.hh
-    models/reasonablemodelmixin.hh
     models/baseunitmixin.hh
     models/particlenumbersmixin.hh
     models/sseinterpreter.hh
@@ -181,7 +173,7 @@ SET(libina_eval_direct_HEADERS
 SET(libina_eval_bytecode_SOURCES
     eval/bci/code.cc eval/bci/compiler.cc eval/bci/assembler.cc eval/bci/interpreter.cc
     eval/bci/dependencetree.cc eval/bci/pass.cc eval/bci/engine.cc)
-SET(libina_eval_bytecode_HEADERS
+SET(libina_eval_bytecode_HEADERS eval/bci/bci.hh
     eval/bci/code.hh eval/bci/compiler.hh eval/bci/assembler.hh eval/bci/interpreter.hh
     eval/bci/dependencetree.hh eval/bci/pass.hh eval/bci/engine.hh)
 
@@ -241,7 +233,7 @@ SET(libina_HEADERS
 #
 # Recursive copy header files to ${CMAKE_BINARY_DIR}/include/libina
 #
-COPY_HEADERS_WITH_DIRECTORY("${libina_HEADERS}" "${CMAKE_CURRENT_BINARY_DIR}/include/libina")
+COPY_HEADERS_WITH_DIRECTORY("${libina_HEADERS}" "${PROJECT_BINARY_DIR}/include/libina")
 
 #
 # Compile library

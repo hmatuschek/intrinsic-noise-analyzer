@@ -59,6 +59,8 @@ private slots:
   void onReactionEditing();
   /** Callback for parameter list changes. */
   void onParametersChanged();
+  /** Callback for model changes. */
+  void onModelModified();
 
 private:
   /** Holds a weak reference to the reaction item being shown. */

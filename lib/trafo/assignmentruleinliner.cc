@@ -45,32 +45,8 @@ AssignmentRuleInliner::AssignmentRuleInliner(Ast::Model &model, unsigned flags)
 
 
 void
-AssignmentRuleInliner::act(Ast::Reaction *reac)
-{
-  // First, process stoichiometry and kinetic law:
+AssignmentRuleInliner::act(Ast::Reaction *reac) {
   Substitution::act(reac);
-
-  std::list<Ast::Species *> _remove_species;
-  std::list<Ast::Species *> _add_species;
-
-  // Check if a modifier is substituted:
-  for (Ast::Reaction::mod_iterator item=reac->modifiersBegin(); item!=reac->modifiersEnd(); item++) {
-    if (_substitution_table.end() != _substitution_table.find((*item)->getSymbol())) {
-      _remove_species.push_back(*item);
-      _get_referred_species(_substitution_table[(*item)->getSymbol()], _add_species);
-    }
-  }
-
-  // Remove species from set of modifiers:
-  for (std::list<Ast::Species *>::iterator item = _remove_species.begin();
-       item != _remove_species.end(); item++) {
-    reac->remModifier(*item);
-  }
-  // Add replacements for modifier:
-  for (std::list<Ast::Species *>::iterator item = _add_species.begin();
-       item != _add_species.end(); item++) {
-    reac->addModifier(*item);
-  }
 }
 
 

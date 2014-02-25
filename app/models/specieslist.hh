@@ -35,6 +35,10 @@ public:
   /** Returns the underlying @c Ast::Model */
   iNA::Ast::Model &model();
 
+signals:
+  /** Gets emitted once the model is modified. */
+  void modelModified();
+
 public slots:
   /** Adds a dummy species to the model. */
   void addSpecies();

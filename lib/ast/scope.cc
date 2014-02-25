@@ -260,7 +260,7 @@ Scope::getDefinition(const std::string &name, bool local)
 }
 
 
-Definition * const
+Definition *
 Scope::getDefinition(const std::string &name) const
 {
   // Search in this scope:
@@ -358,7 +358,7 @@ Scope::getVariable(const GiNaC::symbol &symbol) const
       throw err;
     }
 
-    return _parent_scope->getVariable(symbol);
+    return this->_parent_scope->getVariable(symbol);
   }
 
   return item->second;

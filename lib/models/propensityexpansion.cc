@@ -4,7 +4,7 @@ using namespace iNA;
 using namespace iNA::Models;
 
 propensityExpansion::propensityExpansion(BaseModel &base):
-  IntensiveSpeciesMixin(base), ConstCompartmentMixin(base), ReasonableModelMixin(base),
+  IntensiveSpeciesMixin(base), ConstCompartmentMixin(base), Trafo::ReasonableModelMixin(base),
   rates(base.numReactions()),rates1(base.numReactions())
 {
 

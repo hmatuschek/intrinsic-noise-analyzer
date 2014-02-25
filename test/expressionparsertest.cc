@@ -1,5 +1,5 @@
 #include "expressionparsertest.hh"
-#include <parser/expr/parser.hh>
+#include "../lib/parser/expr/parser.hh"
 
 using namespace iNA;
 

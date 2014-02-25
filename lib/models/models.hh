@@ -22,10 +22,6 @@
 #include "extensivespeciesmixin.hh"
 #include "conservationanalysismixin.hh"
 
-#include "assertnoconstantspeciesmixin.hh"
-#include "assertconstantparametermixin.hh"
-#include "reasonablemodelmixin.hh"
-
 #include "REmodel.hh"
 #include "LNAmodel.hh"
 #include "IOSmodel.hh"

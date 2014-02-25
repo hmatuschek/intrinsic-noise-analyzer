@@ -9,6 +9,8 @@
 #cmakedefine INA_LLVM_VERSION_IS_2X 1
 // If LLVM version is  >= 3.0:
 #cmakedefine INA_LLVM_VERSION_IS_3X 1
+// If LLVM version is >= 3.1
+#cmakedefine INA_LLVM_VERSION_IS_31 1
 // If LLVM version is >= 3.2
 #cmakedefine INA_LLVM_VERSION_IS_32 1
 // If LLVM version is >= 3.3

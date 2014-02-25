@@ -16,7 +16,7 @@ using namespace iNA;
  * Implementation of SBML Model...
  * ********************************************************************************************* */
 ModelItem::ModelItem(const QString &file_path, QObject *parent) :
-  QObject(parent), _model(0), itemLabel("Model")
+  QObject(parent), _model(0), _itemLabel("Model")
 {
   // Now, assemble a base model from SBML:
   _model = new Ast::Model();
@@ -43,7 +43,7 @@ ModelItem::ModelItem(const QString &file_path, QObject *parent) :
 
 
 ModelItem::ModelItem(iNA::Ast::Model *model, QObject *parent) :
-  QObject(parent), _model(model), itemLabel("Model")
+  QObject(parent), _model(model), _itemLabel("Model")
 {
   // Assemble child-items:
   addChild(new CompartmentsItem(this->_model, this));
@@ -60,7 +60,7 @@ ModelItem::~ModelItem() {
 
 const QString &
 ModelItem::getLabel() const {
-  return itemLabel;
+  return _itemLabel;
 }
 
 iNA::Ast::Model &

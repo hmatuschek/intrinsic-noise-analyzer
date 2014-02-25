@@ -68,6 +68,7 @@ public:
         opt_level(opt_level),
         offset(model.numIndSpecies()), lnaLength(model.lnaLength()),
         iosLength(model.iosLength()), sseLength(model.getUpdateVector().size()-offset),
+        codeODE(), codeJac(), LNAcodeA(), LNAcodeB(), IOScodeA(), IOScodeB(),
         A(lnaLength), B(lnaLength,lnaLength),
         Aios(iosLength), Bios(iosLength,iosLength)
 
@@ -130,11 +131,10 @@ public:
         Eigen::VectorXd init(sseLength+offset);
         this->sseModel.getInitialState(init);
 
-        x.head(offset+sseLength).noalias()=init;
-
         // Iterate over all parameter sets
         for(size_t j = 0; j < parameterSets.size(); j++)
         {
+            x.head(offset+sseLength).noalias()=init;
 
             Utils::Message message(LOG_MESSAGE(Utils::Message::INFO));
             message << "Parameter Scan (" << j+1 << "/" << parameterSets.size() << ")";
@@ -158,28 +158,38 @@ public:
             }
 
             // Setup solver and solve for RE concentrations
-            try
-            {
-
+            try {
                 // Solve the deterministic equations
                 NLEsolve::Status status = this->solver.solve(x, this->max_time, this->min_time_step, parameterSets[j]);
 
-                if(!status) throw(iNA::NumericError());
-
-                // Now calculate LNA
-                calcLNA(this->sseModel,x);
-
-                // Next calculate IOS
-                calcIOS(this->sseModel,x);
-
-                // Store result
-                resultSet[j] = x.head(offset+sseLength);
-
-            }
-            catch (iNA::NumericError &err)
-            {
-                // Generate a vector of nans the easy way
-                resultSet[j] = Eigen::VectorXd::Zero(this->sseModel.getDimension())/0.;
+                // Handle error during root finding...
+                if (NLEsolve::Success != status) {
+                  Utils::Message msg = LOG_MESSAGE(Utils::Message::ERROR);
+                  msg << "Error in steady state solver: ";
+                  switch (status) {
+                  case NLEsolve::MaxIterationsReached:
+                    msg << "Maximum integration time reached."; break;
+                  default:
+                    msg << "Unknown problem."; break;
+                  }
+                  Utils::Logger::get().log(msg);
+                  // Generate a vector of nans the easy way
+                  resultSet[j] = Eigen::VectorXd::Zero(this->sseModel.getDimension())/0.;
+                } else {
+                  // If a proper solution was found:
+                  // Now calculate LNA
+                  calcLNA(this->sseModel,x);
+                  // Next calculate IOS
+                  calcIOS(this->sseModel,x);
+                  // Store result
+                  resultSet[j] = x.head(offset+sseLength);
+                }
+            } catch (iNA::NumericError &err) {
+              Utils::Message msg = LOG_MESSAGE(Utils::Message::ERROR);
+              msg << "Numeric error during parameter scan: " << err.what();
+              Utils::Logger::get().log(msg);
+              // Generate a vector of nans the easy way
+              resultSet[j] = Eigen::VectorXd::Zero(this->sseModel.getDimension())/0.;
             }
 
         }
@@ -244,13 +254,13 @@ protected:
         typename VectorEngine::Compiler compilerA(indexTable);
         compilerA.setCode(&codeODE);
         compilerA.compileVector( model.getUpdateVector().head(model.numIndSpecies()) );
-        compilerA.finalize(0);
+        compilerA.finalize(opt_level);
 
         // Compile Jacobian
         typename MatrixEngine::Compiler compilerB(indexTable);
         compilerB.setCode(&codeJac);
         compilerB.compileMatrix(model.getJacobian());
-        compilerB.finalize(0);
+        compilerB.finalize(opt_level);
 
     }
 

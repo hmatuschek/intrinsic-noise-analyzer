@@ -5,10 +5,9 @@
 #include "ast/model.hh"
 
 
-/**
- * This class implements the @c QAbstractTableModel, providing an model for a @c QTableView
- * widget. The table model lists all paramters of a @c Ast::Model.
- */
+/** This class implements the @c QAbstractTableModel, providing an model for a @c QTableView
+ * widget. The table model lists all paramters of a @c Ast::Model and allows to edit them as
+ * well as adding and removing parameters. */
 class ParameterList : public QAbstractTableModel
 {
   Q_OBJECT
@@ -40,8 +39,13 @@ public:
 
   /** Adds a new paramter to the list of paramters. */
   void addParameter();
+
   /** Removes a parameter if it is not in use. */
   void remParameter(int row);
+
+signals:
+  /** Gets emitted once the model gets modified. */
+  void modelModified();
 
 private:
   /** Retunrs the identifier of the parameter. */
@@ -64,7 +68,6 @@ private:
   QVariant _getConstFlag(iNA::Ast::Parameter *param, int role) const;
   /** Updates the const flag. */
   bool _updateConstFlag(iNA::Ast::Parameter *param, const QVariant &value);
-
 
 private:
   /** Holds a weak reference to the SBML model. */

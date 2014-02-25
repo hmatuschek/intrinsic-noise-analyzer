@@ -86,7 +86,7 @@ SET(ina_app_models_HEADERS
     models/pixmapdelegate.hh models/versioncheck.hh models/task.hh models/speciesselectionmodel.hh
     models/timeseries.hh models/application.hh models/logmessagemodel.hh)
 
-SET(ina_app_views_SOURCES
+SET(ina_app_views_SOURCES  views/exportmodel.cc
     views/documentsview.cc views/parameterview.cc views/reactionview.cc
     views/reactionequationrenderer.cc views/compartmentview.cc views/speciesview.cc
     views/plotview.cc views/taskerrorwidget.cc views/aboutdialog.cc

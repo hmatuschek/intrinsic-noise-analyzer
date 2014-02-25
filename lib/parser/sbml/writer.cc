@@ -9,17 +9,19 @@ using namespace iNA::Parser::Sbml;
 LIBSBML_CPP_NAMESPACE_QUALIFIER Model *
 Writer::processModel(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIER SBMLDocument *sbml_doc)
 {
+  // This table will holds the mapping from Ast::Unit to the identifier of the SBML unit definition
+  std::map<Ast::Unit, std::string> units;
   LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model = sbml_doc->createModel();
   // First, serialize unit definitions:
   processUnitDefinitions(model, sbml_model);
   // then, serialize parameter definitions:
-  processParameters(model, sbml_model);
+  processParameters(model, units, sbml_model);
   // them serialize compartments
   processCompartments(model, sbml_model);
   // then serialise species:
   processSpeciesList(model, sbml_model);
   // then serialise reactions
-  processReactions(model, sbml_model);
+  processReactions(model, sbml_model, units);
 
   // Set model id
   sbml_model->setId(model.getIdentifier());
@@ -37,32 +39,28 @@ Writer::processUnitDefinitions(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIE
 {
   // Redefine default units:
   LIBSBML_CPP_NAMESPACE_QUALIFIER UnitDefinition *sbml_unit;
-  sbml_unit = sbml_model->createUnitDefinition(); sbml_unit->setId("substance");
-  processUnit(model.getSubstanceUnit().asScaledBaseUnit(), sbml_unit);
 
+  // Set default substance unit
+  sbml_unit = sbml_model->createUnitDefinition(); sbml_unit->setId("substance");
+  Ast::Unit::BaseUnit unit; double multiplier; int scale; int exponent;
+  model.getSubstanceUnit().asScaledBaseUnit(unit, multiplier, scale, exponent);
+  processUnit(unit, multiplier, scale, exponent, sbml_unit);
+  // and default volume unit
   sbml_unit = sbml_model->createUnitDefinition(); sbml_unit->setId("volume");
-  processUnit(model.getVolumeUnit().asScaledBaseUnit(), sbml_unit);
+  model.getVolumeUnit().asScaledBaseUnit(unit, multiplier, scale, exponent);
+  processUnit(unit, multiplier, scale, exponent, sbml_unit);
 
   sbml_unit = sbml_model->createUnitDefinition(); sbml_unit->setId("area");
-  processUnit(model.getAreaUnit().asScaledBaseUnit(), sbml_unit);
+  model.getAreaUnit().asScaledBaseUnit(unit, multiplier, scale, exponent);
+  processUnit(unit, multiplier, scale, exponent, sbml_unit);
 
   sbml_unit = sbml_model->createUnitDefinition(); sbml_unit->setId("length");
-  processUnit(model.getLengthUnit().asScaledBaseUnit(), sbml_unit);
+  model.getLengthUnit().asScaledBaseUnit(unit, multiplier, scale, exponent);
+  processUnit(unit, multiplier, scale, exponent, sbml_unit);
 
   sbml_unit = sbml_model->createUnitDefinition(); sbml_unit->setId("time");
-  processUnit(model.getTimeUnit().asScaledBaseUnit(), sbml_unit);
-
-
-  for (Ast::Model::iterator item=model.begin(); item!=model.end(); item++) {
-    // Skip non unit definitions:
-    if (! Ast::Node::isUnitDefinition(*item)) { continue; }
-
-    Ast::UnitDefinition *unit_def = static_cast<Ast::UnitDefinition *>(*item);
-    LIBSBML_CPP_NAMESPACE_QUALIFIER UnitDefinition *sbml_unit = sbml_model->createUnitDefinition();
-    sbml_unit->setId(unit_def->getIdentifier());
-    if (unit_def->hasName()) { sbml_unit->setName(unit_def->getName()); }
-    processUnitDefinition(unit_def->getUnit(), sbml_unit);
-  }
+  model.getTimeUnit().asScaledBaseUnit(unit, multiplier, scale, exponent);
+  processUnit(unit, multiplier, scale, exponent, sbml_unit);
 }
 
 
@@ -71,130 +69,129 @@ Writer::processUnitDefinition(const Ast::Unit &unit, LIBSBML_CPP_NAMESPACE_QUALI
 {
   if ( (1 != unit.getMultiplier()) || (0 != unit.getScale()) ) {
     processUnit(
-          Ast::ScaledBaseUnit(
-            Ast::ScaledBaseUnit::DIMENSIONLESS, unit.getMultiplier(), unit.getScale(), 1),
-          sbml_unit_def);
+          Ast::Unit::DIMENSIONLESS, unit.getMultiplier(), unit.getScale(), 1, sbml_unit_def);
   }
 
   for (Ast::Unit::iterator item=unit.begin(); item!=unit.end(); item++) {
-    processUnit(Ast::ScaledBaseUnit(item->first, 1, 0, item->second), sbml_unit_def);
+    processUnit(item->first, 1, 0, item->second, sbml_unit_def);
   }
 }
 
 
 void
-Writer::processUnit(const Ast::ScaledBaseUnit &unit, LIBSBML_CPP_NAMESPACE_QUALIFIER UnitDefinition *sbml_unit_def)
+Writer::processUnit(Ast::Unit::BaseUnit unit, double multiplier, int scale, int exponent,
+                    LIBSBML_CPP_NAMESPACE_QUALIFIER UnitDefinition *sbml_unit_def)
 {
   LIBSBML_CPP_NAMESPACE_QUALIFIER Unit *sbml_unit = sbml_unit_def->createUnit();
 
-  switch(unit.getBaseUnit()) {
-  case Ast::ScaledBaseUnit::AMPERE:
+  switch(unit) {
+  case Ast::Unit::AMPERE:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_AMPERE);
     break;
-  case Ast::ScaledBaseUnit::AVOGADRO:
+  case Ast::Unit::AVOGADRO:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_AVOGADRO);
     break;
-  case Ast::ScaledBaseUnit::BECQUEREL:
+  case Ast::Unit::BECQUEREL:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_BECQUEREL);
     break;
-  case Ast::ScaledBaseUnit::CANDELA:
+  case Ast::Unit::CANDELA:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_CANDELA);
     break;
-  case Ast::ScaledBaseUnit::CELSIUS:
+  case Ast::Unit::CELSIUS:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_CELSIUS);
     break;
-  case Ast::ScaledBaseUnit::COULOMB:
+  case Ast::Unit::COULOMB:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_COULOMB);
     break;
-  case Ast::ScaledBaseUnit::DIMENSIONLESS:
+  case Ast::Unit::DIMENSIONLESS:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_DIMENSIONLESS);
     break;
-  case Ast::ScaledBaseUnit::FARAD:
+  case Ast::Unit::FARAD:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_FARAD);
     break;
-  case Ast::ScaledBaseUnit::GRAM:
+  case Ast::Unit::GRAM:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_GRAM);
     break;
-  case Ast::ScaledBaseUnit::GRAY:
+  case Ast::Unit::GRAY:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_GRAY);
     break;
-  case Ast::ScaledBaseUnit::HENRY:
+  case Ast::Unit::HENRY:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_HENRY);
     break;
-  case Ast::ScaledBaseUnit::HERTZ:
+  case Ast::Unit::HERTZ:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_HERTZ);
     break;
-  case Ast::ScaledBaseUnit::ITEM:
+  case Ast::Unit::ITEM:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_ITEM);
     break;
-  case Ast::ScaledBaseUnit::JOULE:
+  case Ast::Unit::JOULE:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_JOULE);
     break;
-  case Ast::ScaledBaseUnit::KATAL:
+  case Ast::Unit::KATAL:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_KATAL);
     break;
-  case Ast::ScaledBaseUnit::KELVIN:
+  case Ast::Unit::KELVIN:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_KELVIN);
     break;
-  case Ast::ScaledBaseUnit::KILOGRAM:
+  case Ast::Unit::KILOGRAM:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_KILOGRAM);
     break;
-  case Ast::ScaledBaseUnit::LITRE:
+  case Ast::Unit::LITRE:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_LITRE);
     break;
-  case Ast::ScaledBaseUnit::LUMEN:
+  case Ast::Unit::LUMEN:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_LUMEN);
     break;
-  case Ast::ScaledBaseUnit::LUX:
+  case Ast::Unit::LUX:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_LUX);
     break;
-  case Ast::ScaledBaseUnit::METRE:
+  case Ast::Unit::METRE:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_METRE);
     break;
-  case Ast::ScaledBaseUnit::MOLE:
+  case Ast::Unit::MOLE:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_MOLE);
     break;
-  case Ast::ScaledBaseUnit::NEWTON:
+  case Ast::Unit::NEWTON:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_NEWTON);
     break;
-  case Ast::ScaledBaseUnit::OHM:
+  case Ast::Unit::OHM:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_OHM);
     break;
-  case Ast::ScaledBaseUnit::PASCAL:
+  case Ast::Unit::PASCAL:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_PASCAL);
     break;
-  case Ast::ScaledBaseUnit::RADIAN:
+  case Ast::Unit::RADIAN:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_RADIAN);
     break;
-  case Ast::ScaledBaseUnit::SECOND:
+  case Ast::Unit::SECOND:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_SECOND);
     break;
-  case Ast::ScaledBaseUnit::SIEMENS:
+  case Ast::Unit::SIEMENS:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_SIEMENS);
     break;
-  case Ast::ScaledBaseUnit::SIEVERT:
+  case Ast::Unit::SIEVERT:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_SIEVERT);
     break;
-  case Ast::ScaledBaseUnit::STERADIAN:
+  case Ast::Unit::STERADIAN:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_STERADIAN);
     break;
-  case Ast::ScaledBaseUnit::TESLA:
+  case Ast::Unit::TESLA:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_TESLA);
     break;
-  case Ast::ScaledBaseUnit::VOLT:
+  case Ast::Unit::VOLT:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_VOLT);
     break;
-  case Ast::ScaledBaseUnit::WATT:
+  case Ast::Unit::WATT:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_WATT);
     break;
-  case Ast::ScaledBaseUnit::WEBER:
+  case Ast::Unit::WEBER:
     sbml_unit->setKind(LIBSBML_CPP_NAMESPACE_QUALIFIER UNIT_KIND_WEBER);
     break;
   }
 
-  sbml_unit->setMultiplier(unit.getMultiplier());
-  sbml_unit->setScale(unit.getScale());
-  sbml_unit->setExponent(unit.getExponent());
+  sbml_unit->setMultiplier(multiplier);
+  sbml_unit->setScale(scale);
+  sbml_unit->setExponent(exponent);
 }
 
 
@@ -230,12 +227,13 @@ Writer::processFunctionDefinition(
 
 
 void
-Writer::processParameters(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model)
+Writer::processParameters(Ast::Model &model, std::map<Ast::Unit, std::string> &units,
+                          LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model)
 {
   for (size_t i=0; i<model.numParameters(); i++) {
     Ast::Parameter *param = model.getParameter(i);
     LIBSBML_CPP_NAMESPACE_QUALIFIER Parameter *sbml_param = sbml_model->createParameter();
-    processParameter(param, sbml_param);
+    processParameter(param, units, sbml_param, sbml_model);
     if (param->hasValue()) { processInitialValue(param, sbml_model, model); }
     if (param->hasRule()) { processRule(param, sbml_model, model); }
   }
@@ -243,11 +241,17 @@ Writer::processParameters(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIER Mod
 
 
 void
-Writer::processParameter(Ast::Parameter *param, LIBSBML_CPP_NAMESPACE_QUALIFIER Parameter *sbml_param)
+Writer::processParameter(Ast::Parameter *param,
+                         std::map<Ast::Unit, std::string> &units,
+                         LIBSBML_CPP_NAMESPACE_QUALIFIER Parameter *sbml_param,
+                         LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model)
 {
   sbml_param->setId(param->getIdentifier());
   if (param->hasName()) { sbml_param->setName(param->getName()); }
   sbml_param->setConstant(param->isConst());
+  if (! hasDefaultUnit(param)) {
+    sbml_param->setUnits(getUnitIdentifier(param, units, sbml_model));
+  }
 }
 
 
@@ -309,17 +313,20 @@ Writer::processSpecies(Ast::Species *species, LIBSBML_CPP_NAMESPACE_QUALIFIER Sp
 
 
 void
-Writer::processReactions(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model)
+Writer::processReactions(Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model,
+                         std::map<Ast::Unit, std::string> &units)
 {
   for (size_t i=0; i<model.numReactions(); i++) {
     Ast::Reaction *reac = model.getReaction(i);
     LIBSBML_CPP_NAMESPACE_QUALIFIER Reaction *sbml_reac = sbml_model->createReaction();
-    processReaction(reac, sbml_reac, model);
+    processReaction(reac, sbml_reac, model, sbml_model, units);
   }
 }
 
 void
-Writer::processReaction(Ast::Reaction *reac, LIBSBML_CPP_NAMESPACE_QUALIFIER Reaction *sbml_reac, Ast::Model &model)
+Writer::processReaction(Ast::Reaction *reac, LIBSBML_CPP_NAMESPACE_QUALIFIER Reaction *sbml_reac,
+                        Ast::Model &model, LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model,
+                        std::map<Ast::Unit, std::string> &units)
 {
   // Handle name and id of reactions:
   sbml_reac->setId(reac->getIdentifier());
@@ -345,18 +352,34 @@ Writer::processReaction(Ast::Reaction *reac, LIBSBML_CPP_NAMESPACE_QUALIFIER Rea
   }
 
   // Process modifiers:
-  for (Ast::Reaction::mod_iterator item = reac->modifiersBegin(); item != reac->modifiersEnd(); item++) {
+  std::set<std::string> modifiers; getReactionModifier(reac, model, modifiers);
+  std::set<std::string>::iterator modifier = modifiers.begin();
+  for (; modifier != modifiers.end(); modifier++) {
     LIBSBML_CPP_NAMESPACE_QUALIFIER ModifierSpeciesReference *sbml_r = sbml_reac->createModifier();
-    sbml_r->setSpecies((*item)->getIdentifier());
+    sbml_r->setSpecies(*modifier);
   }
 
   // process kinetic law:
   LIBSBML_CPP_NAMESPACE_QUALIFIER KineticLaw *sbml_law = sbml_reac->createKineticLaw();
-  processKineticLaw(reac->getKineticLaw(), sbml_law, model);
+  processKineticLaw(reac->getKineticLaw(), sbml_law, sbml_model, units, model);
+}
+
+
+void
+Writer::getReactionModifier(Ast::Reaction *reac, Ast::Model &model, std::set<std::string> &modifiers)
+{
+  // Check all species defined in the model
+  for (size_t i=0; i<model.numSpecies(); i++) {
+    Ast::Species *species = model.getSpecies(i);
+    // check if species is a modifier
+    if (reac->isModifier(species)) { modifiers.insert(species->getIdentifier()); }
+  }
 }
 
 void
-Writer::processKineticLaw(Ast::KineticLaw *law, LIBSBML_CPP_NAMESPACE_QUALIFIER KineticLaw *sbml_law, Ast::Model &model)
+Writer::processKineticLaw(Ast::KineticLaw *law, LIBSBML_CPP_NAMESPACE_QUALIFIER KineticLaw *sbml_law,
+                          LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model,
+                          std::map<Ast::Unit, std::string> &units, Ast::Model &model)
 {
   // Handle local paramerers:
   for (Ast::KineticLaw::iterator item=law->begin(); item != law->end(); item++) {
@@ -371,8 +394,8 @@ Writer::processKineticLaw(Ast::KineticLaw *law, LIBSBML_CPP_NAMESPACE_QUALIFIER 
     LIBSBML_CPP_NAMESPACE_QUALIFIER Parameter *sbml_param = sbml_law->createParameter();
     sbml_param->setId(param->getIdentifier());
     if (param->hasName()) {sbml_param->setName(param->getName()); }
-    if (! hasDefaultUnit(param, model)) {
-      sbml_param->setUnits(getUnitIdentifier(param, model));
+    if (! hasDefaultUnit(param)) {
+      sbml_param->setUnits(getUnitIdentifier(param, units, sbml_model));
     }
     if (param->hasValue()) {
       if (! GiNaC::is_a<GiNaC::numeric>(param->getValue()) ) {
@@ -430,20 +453,25 @@ Writer::processRule(Ast::VariableDefinition *var, LIBSBML_CPP_NAMESPACE_QUALIFIE
 
 
 bool
-Writer::hasDefaultUnit(Ast::Parameter *var, Ast::Model &model)
-{
+Writer::hasDefaultUnit(Ast::Parameter *var) {
   return var->getUnit().isExactlyDimensionless();
 }
 
 
 std::string
-Writer::getUnitIdentifier(Ast::Parameter *var, Ast::Model &model)
+Writer::getUnitIdentifier(Ast::Parameter *var, std::map<Ast::Unit, std::string> units,
+                          LIBSBML_CPP_NAMESPACE_QUALIFIER Model *sbml_model)
 {
+  // Check if unit is dimension less -> default
   if (! var->getUnit().isExactlyDimensionless()) {
     return "dimensionless";
   }
-
-  return model.getUnitDefinition(var->getUnit())->getIdentifier();
+  // Check if unit was defined earlier:
+  if (0 != units.count(var->getUnit())) { return units[var->getUnit()]; }
+  // Otherwise define unit in SBML model and return identifier:
+  LIBSBML_CPP_NAMESPACE_QUALIFIER UnitDefinition *unit_def = sbml_model->createUnitDefinition();
+  processUnitDefinition(var->getUnit(), unit_def);
+  return unit_def->getId();
 }
 
 

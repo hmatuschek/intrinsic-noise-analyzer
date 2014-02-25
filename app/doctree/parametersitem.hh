@@ -10,54 +10,29 @@
 class Application;
 
 
-/**
- * Represents the list of model parameters at the same time it implements the TreeItem interface
+/** Represents the list of model parameters at the same time it implements the TreeItem interface
  * to act as a leaf of the model tree.
- *
- * @ingroup gui
- */
+ * @ingroup gui */
 class ParametersItem : public QObject, public DocumentTreeItem
 {
   Q_OBJECT
 
-
-protected:
-  /**
-   * Holds the ParameterList instance.
-   */
-  ParameterList *_parameters;
-
-  /**
-   * Holds the display label of this item in the @c DocumentTree.
-   */
-  QString itemLabel;
-
-
 public:
-  /**
-   * Constructs a new parameter list item for the given model.
-   */
+  /** Constructs a new parameter list item for the given model. */
   ParametersItem(iNA::Ast::Model *model, QObject *parent=0);
 
-  /**
-   * Retunrs the list of paramters.
-   */
-  ParameterList *parmeters();
-
-  /**
-   * Implementation of the @c Wrapper interface.
-   */
+  /** Implementation of the @c TreeItem interface. */
   virtual const QString &getLabel() const;
 
-  /**
-   * Returns true.
-   */
+  /** Returns true. */
   virtual bool providesView() const;
 
-  /**
-   * Returns an instance of @c ParameterView showing the list of parameters.
-   */
+  /** Returns an instance of @c ParameterView showing the list of parameters. */
   virtual QWidget *createView();
+
+protected:
+  /** Holds the display label of this item in the @c DocumentTree. */
+  QString _itemLabel;
 };
 
 

@@ -59,13 +59,9 @@ public:
    */
   static void mergeReversibleKineticLaw(Ast::KineticLaw *forward, const Ast::KineticLaw *reverse);
 
-//protected:
   /** Helper function to copy function definitions. */
   static Ast::FunctionDefinition *copyFunctionDefinition(Ast::FunctionDefinition *node,
                                                          GiNaC::exmap &translation_table);
-
-  /** Helper function to copy unit-definitions. */
-  static Ast::UnitDefinition *copyUnitDefinition(Ast::UnitDefinition *node);
 
   /** Helper function to copy parameter definitions. */
   static Ast::Parameter *copyParameterDefinition(

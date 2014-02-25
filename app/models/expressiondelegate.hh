@@ -16,9 +16,7 @@ public:
 
   /** Creates the editor widget. */
   QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const;
-  /** Updates the combobox with the currently selected compartment. */
   void setEditorData(QWidget *editor, const QModelIndex &index) const;
-  /** Updates the species with the chosen compartment. */
   void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const;
   /** Resize. */
   void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const;

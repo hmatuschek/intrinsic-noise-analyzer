@@ -140,17 +140,16 @@ void
 SSAParamScanResultWidget::saveButtonPressed()
 {
   QString selectedFilter;
-  //QString filters = tr("Text Files (*.txt *.csv);;Matlab 5 Files (*.mat)";
-  QString filters = tr("Text Files (*.txt *.csv)");
+  QString csvFilter = tr("Text Files (*.txt *.csv)");
+  QString matFilter = tr("Matlab 5 Files (*.mat)");
+  QString filters = QString("%1;;%2").arg(csvFilter).arg(matFilter);
   QString filename = QFileDialog::getSaveFileName(
         this, tr("Save results in ..."), "", filters, &selectedFilter);
   if ("" == filename) { return; }
 
-  if (tr("Text Files (*.txt *.csv)") == selectedFilter) {
-    saveAsCSV(filename);
-  } else if (tr("Matlab 5 Files (*.mat)") == selectedFilter) {
-    saveAsMAT(filename);
-  } else {
+  if (csvFilter == selectedFilter) { saveAsCSV(filename); }
+  else if (matFilter == selectedFilter) { saveAsMAT(filename); }
+  else {
     QMessageBox::critical(0, tr("Can not save results to file."),
                           tr("Can not save results to file %1: Unknown format %2").arg(
                             filename, selectedFilter));
@@ -205,7 +204,7 @@ SSAParamScanPreviewWidget::SSAParamScanPreviewWidget(SSAParamScanTaskWrapper *ta
   _plot_canvas->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
   // Button to select plot
   QPushButton *plot_type_button = new QPushButton(tr("Select plot type"));
-  QMenu *plot_menu = new QMenu();
+  QMenu *plot_menu = new QMenu(plot_type_button);
   plot_menu->addAction(tr("Concentrations"), this, SLOT(onConcentrationPlotSelected()));
   plot_menu->addAction(tr("Coefficient of variation"), this, SLOT(onCOVPlotSelected()));
   plot_menu->addAction(tr("Fano factor"), this, SLOT(onFanoPlotSelected()));

@@ -1,6 +1,6 @@
 #include "modeldiff.hh"
-#include <ast/reaction.hh>
-#include <parser/expr/parser.hh>
+#include "../ast/reaction.hh"
+#include "../parser/expr/parser.hh"
 #include "referencecounter.hh"
 
 
@@ -1429,107 +1429,6 @@ SetProductItem::redo(Ast::Model &model)
 
 
 
-
-/* ********************************************************************************************* *
- * Implementation add reaction modifier item
- * ********************************************************************************************* */
-AddReactionModifierItem::AddReactionModifierItem(
-    const std::string &species, const Ast::Reaction *reaction, const Ast::Model &model)
-  : ReactionReferenceItem(reaction->getIdentifier()), _species(species)
-{
-  // Pass...
-}
-
-AddReactionModifierItem::~AddReactionModifierItem()
-{
-  // Pass...
-}
-
-
-bool
-AddReactionModifierItem::canUndo(const Ast::Model &model)
-{
-  if (!model.hasReaction(_identifier)) { return false; }
-  return model.hasSpecies(_species);
-}
-
-bool
-AddReactionModifierItem::canRedo(const Ast::Model &model)
-{
-  if (!model.hasReaction(_identifier)) { return false; }
-  return model.hasSpecies(_species);
-}
-
-
-void
-AddReactionModifierItem::undo(Ast::Model &model)
-{
-  Ast::Reaction *reaction = model.getReaction(_identifier);
-  Ast::Species *species = model.getSpecies(_species);
-  if (reaction->hasModifier())
-    reaction->remModifier(species);
-}
-
-void
-AddReactionModifierItem::redo(Ast::Model &model)
-{
-  Ast::Reaction *reaction = model.getReaction(_identifier);
-  Ast::Species *species = model.getSpecies(_species);
-  reaction->addModifier(species);
-}
-
-
-
-/* ********************************************************************************************* *
- * Implementation rem reaction modifier item
- * ********************************************************************************************* */
-RemReactionModifierItem::RemReactionModifierItem(
-    const std::string &species, const Ast::Reaction *reaction, const Ast::Model &model)
-  : ReactionReferenceItem(reaction->getIdentifier()), _species(species)
-{
-  // Pass...
-}
-
-RemReactionModifierItem::~RemReactionModifierItem()
-{
-  // Pass...
-}
-
-
-bool
-RemReactionModifierItem::canUndo(const Ast::Model &model)
-{
-  if (!model.hasReaction(_identifier)) { return false; }
-  return model.hasSpecies(_species);
-}
-
-bool
-RemReactionModifierItem::canRedo(const Ast::Model &model)
-{
-  if (!model.hasReaction(_identifier)) { return false; }
-  return model.hasSpecies(_species);
-}
-
-
-void
-RemReactionModifierItem::redo(Ast::Model &model)
-{
-  Ast::Reaction *reaction = model.getReaction(_identifier);
-  Ast::Species *species = model.getSpecies(_species);
-  if (reaction->hasModifier())
-    reaction->remModifier(species);
-}
-
-void
-RemReactionModifierItem::undo(Ast::Model &model)
-{
-  Ast::Reaction *reaction = model.getReaction(_identifier);
-  Ast::Species *species = model.getSpecies(_species);
-  reaction->addModifier(species);
-}
-
-
-
 /* ********************************************************************************************* *
  * Implementation set ratelaw item
  * ********************************************************************************************* */
@@ -1603,13 +1502,6 @@ RemReactionItem::RemReactionItem(const Ast::Reaction *reaction, const Ast::Model
   for (size_t i=0; i<kinetic_law->numParameters(); i++) {
     Ast::Parameter *param = kinetic_law->getParameter(i);
     addModification(new RemParameterItem(param, reaction));
-  }
-
-  // Remove all modifiers from reaction
-  for (Ast::Reaction::const_mod_iterator item=reaction->modifiersBegin();
-       item != reaction->modifiersEnd(); item++)
-  {
-    addModification(new RemReactionModifierItem((*item)->getIdentifier(), reaction, model));
   }
 
   // Remove all poducts from reaction

@@ -6,7 +6,15 @@
 using namespace iNA;
 using namespace iNA::Trafo;
 
-void ReversibleReactionConverter::apply(Ast::Model &model)
+void
+ReversibleReactionConverter::apply(Ast::Model &model) {
+  std::list<std::string> modified, added;
+  apply(model, modified, added);
+}
+
+void
+ReversibleReactionConverter::apply(
+    Ast::Model &model, std::list<std::string> &modified, std::list<std::string> &added)
 {
   size_t count=0;
 
@@ -102,6 +110,8 @@ void ReversibleReactionConverter::apply(Ast::Model &model)
     // Add reverse reaction after original one
     model.addDefinition(reverseReaction, reaction);
 
+    modified.push_back(reaction->getIdentifier());
+    added.push_back(reverseReaction->getIdentifier());
     count++;
 
     // Create a log message.
@@ -122,9 +132,18 @@ void ReversibleReactionConverter::apply(Ast::Model &model)
 
 
 
-void IrreversibleReactionCollapser::apply(Ast::Model &model)
+void
+IrreversibleReactionCollapser::apply(Ast::Model &model) {
+  std::list<std::string> modified, removed;
+  apply(model, modified, removed);
+}
+
+void
+IrreversibleReactionCollapser::apply(
+    Ast::Model &model, std::list<std::string> &modified, std::list<std::string> &removed)
 {
   size_t count=0;
+  // List of irreversible reactions that has been removed
   std::set<Ast::Reaction *>  burned_reactions;
 
   // Iterate over all reactions:
@@ -144,11 +163,23 @@ void IrreversibleReactionCollapser::apply(Ast::Model &model)
       if(forward->isReverseOf(reverse) && (0 == burned_reactions.count(reverse)))
       {
         // Make reversible
-        forward->setReversible(true);
-        Ast::ModelCopyist::mergeReversibleKineticLaw(forward->getKineticLaw(),reverse->getKineticLaw());
+        try {
+          Ast::ModelCopyist::mergeReversibleKineticLaw(forward->getKineticLaw(),reverse->getKineticLaw());
+        } catch (iNA::Exception &err) {
+          Utils::Message message = LOG_MESSAGE(Utils::Message::INFO);
+          message << "Can not collapse reaction " << forward->getName()
+                  << " with " << reverse->getName() << ": " << err.what();
+          Utils::Logger::get().log(message);
+          continue; // Continue search for reverse direction
+        }
 
-        // and remove reverse reaction
+        // Make forward reaction reversible
+        forward->setReversible(true);
+        // and mark reverse reaction for deletion
         burned_reactions.insert(reverse);
+
+        modified.push_back(forward->getIdentifier());
+        removed.push_back(reverse->getIdentifier());
 
         // Create a log message.
         {

@@ -60,7 +60,7 @@ VersionCheck::startCheck()
   QString user_agent = QString("iNA/%1 (%2)").arg(version).arg(system);
 
   // Assemble and send request:
-  QNetworkRequest request(QUrl("http://intrinsic-noise-analyzer.googlecode.com/files/currentVersion.txt"));
+  QNetworkRequest request(QUrl("http://www.ina.bio.ed.ac.uk/downloads/latestVersion.txt"));
   request.setRawHeader("User-Agent", user_agent.toAscii());
   _access->get(request);
 }
