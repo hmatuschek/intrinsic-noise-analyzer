@@ -4,12 +4,14 @@
 #include "ginac/ginac.h"
 #include "models/basemodel.hh"
 #include "models/conservationanalysismixin.hh"
+#include "trafo/assertions.hh"
 
 namespace iNA {
 namespace Models {
 
 class ConservedQuantities:
     public BaseModel,
+    public Trafo::ReasonableModelMixin,
     public ConservationAnalysisMixin
 {
 protected:
@@ -33,11 +35,12 @@ public:
      */
     ConservedQuantities(const Ast::Model &model)
       : BaseModel(model),
+        Trafo::ReasonableModelMixin((BaseModel &)(*this)),
         ConservationAnalysisMixin((BaseModel &)(*this)),
         Omega(numSpecies())
 
   {
-      for(size_t i=0; i<numSpecies(); i++)
+      for(size_t i=0; i<this->numSpecies(); i++)
         Omega(i) = this->getSpecies(i)->getCompartment()->getSymbol();
 
       // get Omega vectors for dependent and independent species
@@ -50,6 +53,9 @@ public:
     /** Yields the values of conserved cycles as as functions of the initial conditions. */
     Eigen::VectorXex getConservedCycles(const Eigen::VectorXex &ICs)
     {
+
+      if(!this->numDepSpecies())  return Eigen::VectorXex();
+
       if(!this->speciesHaveSubstanceUnits())
       {
         return ( this->Omega_dep.asDiagonal().inverse()
