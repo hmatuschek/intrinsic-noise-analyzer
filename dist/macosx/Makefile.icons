@@ -1,0 +1,2 @@
+all:
+	iconutil -c icns -o ina.icns ina.iconset
