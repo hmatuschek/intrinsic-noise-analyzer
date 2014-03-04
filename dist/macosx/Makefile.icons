@@ -1,2 +1,3 @@
 all:
 	iconutil -c icns -o ina.icns ina.iconset
+	cp ina.icns IntrinsicNoiseAnalyzer.app/Contents/Resources
