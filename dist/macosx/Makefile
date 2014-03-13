@@ -7,7 +7,7 @@ QTSVG_FRAMEWORK = /opt/local/Library/Frameworks/QtSvg.framework/Versions/4/QtSvg
 QTNET_FRAMEWORK = /opt/local/Library/Frameworks/QtNetwork.framework/Versions/4/QtNetwork
 APP_LIBRARY_DIR = IntrinsicNoiseAnalyzer.app/Contents/Frameworks
 APP_BINARY_DIR  = IntrinsicNoiseAnalyzer.app/Contents/MacOS
-VERSION = 0.4.2
+VERSION = 0.4.3
 
 app: dmg
 
@@ -49,12 +49,12 @@ libina: libginac libcln libsbml
 	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libsbml.5.dylib @executable_path/../Frameworks/libsbml.5.dylib ${APP_LIBRARY_DIR}/libina.${VERSION}.dylib
 	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libffi.6.dylib @executable_path/../Frameworks/libffi.6.dylib ${APP_LIBRARY_DIR}/libina.${VERSION}.dylib 
 	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/gcc47/libffi.4.dylib @executable_path/../Frameworks/gcc47/libffi.4.dylib ${APP_LIBRARY_DIR}/libina.${VERSION}.dylib 
-	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/gcc47/libgomp.1.dylib @executable_path/../Frameworks/gcc47/libgomp.1.dylib ${APP_LIBRARY_DIR}/libina.0.4.2.dylib 
-	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/gcc47/libgcc_s.1.dylib @executable_path/../Frameworks/gcc47/libgcc_s.1.dylib ${APP_LIBRARY_DIR}/libina.0.4.2.dylib 
-	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libgcc/libffi.4.dylib @executable_path/../Frameworks/gcc47/libffi.4.dylib ${APP_LIBRARY_DIR}/libina.0.4.2.dylib 
-	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libgcc/libgomp.1.dylib @executable_path/../Frameworks/gcc47/libgomp.1.dylib ${APP_LIBRARY_DIR}/libina.0.4.2.dylib 
-	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libstdc++.6.dylib @executable_path/../Frameworks/libstdc++.6.dylib ${APP_LIBRARY_DIR}/libina.0.4.2.dylib 
-	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libgcc/libstdc++.6.dylib @executable_path/../Frameworks/libstdc++.6.dylib ${APP_LIBRARY_DIR}/libina.0.4.2.dylib 
+	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/gcc47/libgomp.1.dylib @executable_path/../Frameworks/gcc47/libgomp.1.dylib ${APP_LIBRARY_DIR}/libina.${VERSION}.dylib 
+	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/gcc47/libgcc_s.1.dylib @executable_path/../Frameworks/gcc47/libgcc_s.1.dylib ${APP_LIBRARY_DIR}/libina.${VERSION}.dylib 
+	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libgcc/libffi.4.dylib @executable_path/../Frameworks/gcc47/libffi.4.dylib ${APP_LIBRARY_DIR}/libina.${VERSION}.dylib 
+	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libgcc/libgomp.1.dylib @executable_path/../Frameworks/gcc47/libgomp.1.dylib ${APP_LIBRARY_DIR}/libina.${VERSION}.dylib 
+	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libstdc++.6.dylib @executable_path/../Frameworks/libstdc++.6.dylib ${APP_LIBRARY_DIR}/libina.${VERSION}.dylib 
+	install_name_tool -change ${SYSTEM_LIBRARY_DIR}/libgcc/libstdc++.6.dylib @executable_path/../Frameworks/libstdc++.6.dylib ${APP_LIBRARY_DIR}/libina.${VERSION}.dylib 
 
 QtGui: QtCore libz libpng
 	cp ${QTGUI_FRAMEWORK} ${APP_LIBRARY_DIR}
