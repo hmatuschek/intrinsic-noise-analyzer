@@ -771,8 +771,8 @@ ReactionEditorPage::_createMAKineticLaw(const StoichiometryList &reactants,
   // Iterate over products if reaction is reversible:
   if (is_reversible) {
     // Iterate over reactants:
-    for (StoichiometryList::const_iterator reac=reactants.begin(); reac!=reactants.end(); reac++) {
-      factor_fwd *= _createMAFactor(reac->second, reac->first);
+    for (StoichiometryList::const_iterator reac=products.begin(); reac!=products.end(); reac++) {
+      factor_rev *= _createMAFactor(reac->second, reac->first);
     }
   }
 
